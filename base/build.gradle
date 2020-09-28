@@ -8,17 +8,7 @@ apply plugin: 'com.google.firebase.firebase-perf'
 
 apply plugin: 'com.google.firebase.crashlytics'
 
-apply from: 'cred.gradle'
-
 android {
-    signingConfigs {
-        release {
-            storeFile file('../keystore.jks')
-            storePassword project.keystoreReleasePassword
-            keyAlias project.keystoreKeyAlias
-            keyPassword project.keystoreKeyPassword
-        }
-    }
     compileSdkVersion 30
     buildToolsVersion "30.0.2"
     ndkVersion "21.3.6528147"
@@ -30,7 +20,6 @@ android {
         versionName "Shunt-pre8"
         // testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         setProperty("archivesBaseName", "EscalarAlcoiaIComtat-$versionCode-$versionName")
-        signingConfig signingConfigs.release
     }
     buildTypes {
         release {
