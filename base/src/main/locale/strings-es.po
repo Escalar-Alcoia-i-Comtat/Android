@@ -1,0 +1,1390 @@
+# Arnau Mora <arnyminer.z@gmail.com>, 2020. #zanata
+# Dónovan <al037095@iesparevitoria.com>, 2020. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2020-04-17 13:15+0200\n"
+"PO-Revision-Date: 2020-04-13 06:56-0400\n"
+"Last-Translator: Arnau Mora <arnyminer.z@gmail.com>\n"
+"Language: es\n"
+"Language-Team: Spanish\n"
+"Plural-Forms: nplurals=2; plural=(((n == 1)) ? 0 : 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+
+msgctxt "app_name"
+msgid "Escalar Alcoia i Comtat"
+msgstr "Escalar Alcoià i Comtat"
+
+msgctxt "section_downloads"
+msgid "Downloads"
+msgstr "Descargas"
+
+msgctxt "section_settings"
+msgid "Settings"
+msgstr "Configuración"
+
+msgctxt "extended_fab_download_desc"
+msgid "Download"
+msgstr "Descargar"
+
+msgctxt "extended_fab_download_label"
+msgid "Download"
+msgstr "Descargar"
+
+msgctxt "extended_fab_download_tooltip"
+msgid "Click to Download"
+msgstr "Pulsa para descargar"
+
+msgctxt "mbm_home"
+msgid "Home"
+msgstr "Inicio"
+
+msgctxt "mbm_downloads"
+msgid "Downloads"
+msgstr "Descargas"
+
+msgctxt "mbm_settings"
+msgid "Settings"
+msgstr "Ajustes"
+
+msgctxt "sector_sun_morning"
+msgid "Morning Sun"
+msgstr "Sol mañana"
+
+msgctxt "sector_sun_afternoon"
+msgid "Afternoon Sun"
+msgstr "Sol tarde"
+
+msgctxt "sector_sun_day"
+msgid "All-day Sun"
+msgstr "Sol todo el día"
+
+msgctxt "sector_sun_no"
+msgid "No Sun"
+msgstr "Sin Sol"
+
+#, c-format
+msgctxt "zone_distance"
+msgid "%s m"
+msgstr "%s m"
+
+#, c-format
+msgctxt "sector_walking_time"
+msgid "%1$smin"
+msgstr "%1$smin"
+
+#, c-format
+msgctxt "sector_height"
+msgid "%1$sm"
+msgstr "%1$sm"
+
+msgctxt "sector_kids_apt"
+msgid "Kids Apt"
+msgstr "Apto niños"
+
+msgctxt "sector_info_dialog_sun_morning_title"
+msgid "Morning Sun"
+msgstr "Sol por la mañana"
+
+msgctxt "sector_info_dialog_sun_morning_msg"
+msgid ""
+"This sector gets shiny on the mornings. Cold walls on the morning, warm "
+"on the evening, you choose."
+msgstr ""
+"Al sector le da el sol por la mañana. Paredes frías por la mañana, "
+"cálidas por la tarde, tu escoges."
+
+msgctxt "sector_info_dialog_sun_afternoon_title"
+msgid "Afternoon Sun"
+msgstr "Sol por la tarde"
+
+msgctxt "sector_info_dialog_sun_afternoon_msg"
+msgid ""
+"This sector gets shiny on the afternoons. In the morning this may get "
+"quite cold…"
+msgstr ""
+"En este sector hace sol por la tarde.Por la mañana puede hacer bastante "
+"frío "
+
+msgctxt "sector_info_dialog_sun_all_title"
+msgid "All-day Sun"
+msgstr "Sol durante todo el día"
+
+msgctxt "sector_info_dialog_sun_all_msg"
+msgid ""
+"This sector is shiny all the day! This may get hot on summer. Please, "
+"take care."
+msgstr ""
+"¡A este sector le pega el sol durante todo el día! En verano puede hacer "
+"bastante calor.Ten cuidado,por favor"
+
+msgctxt "sector_info_dialog_sun_no_title"
+msgid "No Sun"
+msgstr "Sin Sol"
+
+msgctxt "sector_info_dialog_sun_no_msg"
+msgid "This sector doesn't receive run in the whole day! Bring a jacket."
+msgstr "A este sector no le pega nunca el sol. Lleva alguna chaqueta!"
+
+msgctxt "sector_info_dialog_kids_title"
+msgid "Kids Apt"
+msgstr "Apto para niños"
+
+msgctxt "sector_info_dialog_kids_msg"
+msgid ""
+"This sector has good places to sit nearby. Bringing young children may "
+"not be that bad, but please, have caution."
+msgstr ""
+"Este sector tiene cerca buenos sitios donde sentarse.Puedes traer a niños"
+" pequeños,pero ves con cuidado,por favor  "
+
+msgctxt "sector_info_dialog_error_title"
+msgid "Error"
+msgstr "Error"
+
+msgctxt "sector_info_dialog_error_msg"
+msgid ""
+"Well, this is embarrassing, sorry for the issue. Please contact an "
+"administrator."
+msgstr "Oh vaya, ha habido un error. Contacta con un administrador por favor."
+
+#, c-format
+msgctxt "safe_strings"
+msgid "%1$s Strings"
+msgstr "%1$s Express"
+
+#, c-format
+msgctxt "safe_parabolt"
+msgid "%1$s Parabolts"
+msgstr "%1$s Parabolts"
+
+#, c-format
+msgctxt "safe_spit"
+msgid "%1$s Spits"
+msgstr "%1$s Spits"
+
+#, c-format
+msgctxt "safe_tensor"
+msgid "%1$s Tensors"
+msgstr "%1$s Tensores"
+
+#, c-format
+msgctxt "safe_piton"
+msgid "%1$s Pitons"
+msgstr "%1$s Clavo"
+
+#, c-format
+msgctxt "safe_buril"
+msgid "%1$s Burils"
+msgstr "%1$s Burils"
+
+msgctxt "safe_plate"
+msgid "Plate"
+msgstr "Placa"
+
+msgctxt "safe_plate_ring"
+msgid "Plate Ring"
+msgstr "Placa con argolla"
+
+msgctxt "safe_lanyard"
+msgid "Lanyard"
+msgstr "Cordino"
+
+msgctxt "safe_cracker"
+msgid "Cracker"
+msgstr "Empotrador"
+
+msgctxt "safe_friend"
+msgid "Friend"
+msgstr "Friend"
+
+msgctxt "safe_strips"
+msgid "Strips"
+msgstr "Strips"
+
+msgctxt "safe_nail"
+msgid "Nails"
+msgstr "Uñas"
+
+#. NC is for No Count
+msgctxt "safe_parabolt_nc"
+msgid "Parabolts"
+msgstr "Parabolts"
+
+msgctxt "safe_spit_nc"
+msgid "Spit"
+msgstr "Spit"
+
+msgctxt "safe_tensor_nc"
+msgid "Tensor"
+msgstr "Tensor"
+
+msgctxt "safe_piton_nc"
+msgid "Piton"
+msgstr "Clavo"
+
+msgctxt "safe_buril_nc"
+msgid "Buril"
+msgstr "Buril"
+
+msgctxt "safe_strings_plural"
+msgid "Strings"
+msgstr "Express"
+
+msgctxt "mbm_login_click"
+msgid "Tap to login"
+msgstr "Toca para iniciar sesión "
+
+msgctxt "login_title"
+msgid "Login"
+msgstr "Iniciar sesión"
+
+msgctxt "login_email"
+msgid "Email"
+msgstr "Email / Correo electrónico"
+
+msgctxt "login_password"
+msgid "Password"
+msgstr "Contraseña"
+
+msgctxt "login_toast_error"
+msgid "Authentication failed"
+msgstr "Autenticación fallida"
+
+msgctxt "login_error_password"
+msgid "Wrong password"
+msgstr "Contraseña incorrecta"
+
+msgctxt "login_error_email"
+msgid "Email is not registered"
+msgstr "Email no registrado "
+
+msgctxt "login_error_no_password"
+msgid "Please, enter password"
+msgstr "Introduce la contraseña "
+
+msgctxt "login_error_no_email"
+msgid "Please, enter email"
+msgstr "Introduce tu email"
+
+msgctxt "action_signup"
+msgid "Sign Up"
+msgstr "Registrarse"
+
+msgctxt "action_login"
+msgid "Login"
+msgstr "Iniciar sesión "
+
+msgctxt "action_lostPassword"
+msgid "Lost Password"
+msgstr "Contraseña olvidada"
+
+msgctxt "action_revise"
+msgid "Revise"
+msgstr "Revisar"
+
+msgctxt "action_add"
+msgid "Add"
+msgstr "Añadir"
+
+msgctxt "action_close"
+msgid "Close"
+msgstr "Cerrar"
+
+msgctxt "action_previous"
+msgid "Previous"
+msgstr "Anterior"
+
+msgctxt "action_next"
+msgid "Next"
+msgstr "Siguiente"
+
+msgctxt "action_download"
+msgid "Download"
+msgstr "Descargar"
+
+msgctxt "action_logout"
+msgid "Log Out"
+msgstr "Cerrar sesión"
+
+msgctxt "action_cancel"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgctxt "action_try_again"
+msgid "Try Again"
+msgstr "Volver a intentar "
+
+msgctxt "action_downloads"
+msgid "See Downloads"
+msgstr "Ver descargas"
+
+msgctxt "action_delete"
+msgid "Delete"
+msgstr "Eliminar "
+
+msgctxt "action_ok"
+msgid "OK"
+msgstr "Ok"
+
+msgctxt "action_check_update"
+msgid "Check for Updates"
+msgstr "Buscar actualizaciones "
+
+msgctxt "action_update"
+msgid "Update"
+msgstr "Actualizar"
+
+msgctxt "action_refresh"
+msgid "Refresh"
+msgstr "Recargar "
+
+msgctxt "action_share"
+msgid "Share"
+msgstr "Compartir"
+
+msgctxt "action_share_using"
+msgid "Share Using"
+msgstr "Compartir usando "
+
+msgctxt "action_website"
+msgid "Website"
+msgstr "Página web "
+
+msgctxt "action_donate"
+msgid "Donate"
+msgstr "Donar"
+
+msgctxt "action_grant"
+msgid "Grant"
+msgstr "Permitir"
+
+msgctxt "action_back"
+msgid "Go Back"
+msgstr "Volver "
+
+msgctxt "action_mark_completed"
+msgid "Mark Completed"
+msgstr "Marcar Completada"
+
+msgctxt "action_store"
+msgid "Store to device"
+msgstr "Guardar al dispositivo"
+
+msgctxt "action_disable"
+msgid "Disable"
+msgstr "Deshabilitar"
+
+msgctxt "action_add_friend"
+msgid "Add Friend"
+msgstr "Añadir amigo"
+
+msgctxt "action_change"
+msgid "Change"
+msgstr "Cambiar"
+
+msgctxt "action_search"
+msgid "Search…"
+msgstr "Buscar…"
+
+msgctxt "action_open_maps"
+msgid "Open Google Maps"
+msgstr "Abrir Google Maps"
+
+msgctxt "action_clear_cache"
+msgid "Clear Cache"
+msgstr ""
+
+msgctxt "action_clear_storage"
+msgid "Clear Storage"
+msgstr ""
+
+msgctxt "action_clear_downloads"
+msgid "Clear Downloads"
+msgstr ""
+
+msgctxt "action_launch_app"
+msgid "Launch App"
+msgstr ""
+
+msgctxt "status_checking_updates"
+msgid "Checking…"
+msgstr "Comprobando..."
+
+msgctxt "status_updating"
+msgid "Updating…"
+msgstr "Actualizando..."
+
+msgctxt "status_downloaded"
+msgid "Downloaded"
+msgstr "Descargado"
+
+msgctxt "status_loading"
+msgid "Loading…"
+msgstr "Cargando..."
+
+msgctxt "status_friend"
+msgid "Friend"
+msgstr "Amic"
+
+msgctxt "status_not_downloaded"
+msgid "Not downloaded"
+msgstr ""
+
+msgctxt "dialog_logout_title"
+msgid "Log out"
+msgstr "Cerrar sesión"
+
+msgctxt "dialog_logout_message"
+msgid "Are you sure that you want to log out?"
+msgstr "¿Seguro que quieres cerrar sesión?"
+
+msgctxt "dialog_permission_title"
+msgid "Permission Required!"
+msgstr "Permiso necesario!"
+
+#, c-format
+msgctxt "dialog_permission_message"
+msgid ""
+"The functionality you are trying to use requires the %s permission. "
+"Please grant it, or refuse to use that."
+msgstr ""
+"La función que estás intentando usar requiere %s permiso. Por favor, "
+"permítelo o no podrás usarla."
+
+msgctxt "dialog_permission_my_location_message"
+msgid ""
+"For showing your current position, the app must have access to the "
+"location of your device. Please, grant it, or refuse to use this "
+"functionality."
+msgstr ""
+"Para mostrar tu posición actual la aplicación debe tener acceso a la "
+"localización de tu dispositivo. Permítelo o no podrás usar esta función"
+
+msgctxt "dialog_downloads_size_info_title"
+msgid "Downloads Size"
+msgstr "Tamaño de descargas"
+
+msgctxt "dialog_downloads_size_info_msg"
+msgid ""
+"This shows the amount of storage used by the downloads of the app. This "
+"also shows the cached data, so it may not be 0MB even if you have no "
+"downloaded data."
+msgstr ""
+"Aquí se muestra la cantidad de espacio ocupado por las decargas. También "
+"incluye los datos de caché, por lo que es posible que se muestren 0MB, "
+"incluso si no has descargado nada."
+
+msgctxt "dialog_downloaded_area_title"
+msgid "Downloaded Area"
+msgstr "Área descargada"
+
+msgctxt "dialog_downloaded_zone_title"
+msgid "Downloaded Zone"
+msgstr "Zona descargada"
+
+msgctxt "dialog_downloaded_sector_title"
+msgid "Downloaded Sector"
+msgstr "Sector descargado"
+
+msgctxt "dialog_downloaded_unknown_title"
+msgid "Downloaded Content"
+msgstr "Contenido descargado "
+
+#, c-format
+msgctxt "dialog_downloaded_msg"
+msgid "Downloaded on: %s"
+msgstr "Descargado el: %s"
+
+msgctxt "dialog_update_title"
+msgid "New Update Available"
+msgstr "Nueva actualización disponible "
+
+msgctxt "dialog_update_message"
+msgid ""
+"Press UPDATE to start the update. Please, check your WiFi network. Mobile"
+" Data usage may be high."
+msgstr ""
+"Pulsa ACTUALIZAR para empezar la actualización.Por favor,comprueba tu "
+"conexión a una red WiFi.El uso de datos móviles puede ser elevado"
+
+msgctxt "dialog_no_update_title"
+msgid "No New Updates"
+msgstr "No hay nuevas actualizaciones"
+
+msgctxt "dialog_no_update_message"
+msgid "There are no new updates to download"
+msgstr "No hay actualizaciones para descargar "
+
+msgctxt "dialog_sectors_title"
+msgid "Sectors List"
+msgstr "Lista de sectores"
+
+msgctxt "dialog_download_corrupt_title"
+msgid "Download Corrupt"
+msgstr "Descarga corrupta"
+
+msgctxt "dialog_download_corrupt_message"
+msgid ""
+"The download is corrupt and unusable while offline, do you want to "
+"download it again? You must have Internet connection."
+msgstr ""
+"La descarga está corrupta y es inutilizable sin conexión, ¿quieres "
+"volverla a descargarla? Debes tener conexión a Internet"
+
+msgctxt "dialog_download_gpx_title"
+msgid "Store GPX"
+msgstr "Guardar GPX"
+
+msgctxt "dialog_download_gpx_message"
+msgid "Do you want to store the track in GPX?"
+msgstr "Quieres guardar este track en GPX?"
+
+msgctxt "dialog_mark_completed_title"
+msgid "Mark Path Completed"
+msgstr "Marcar vía como Completada"
+
+msgctxt "dialog_disable_ads_title"
+msgid "Disabling Ads"
+msgstr "Deshabilitar anuncios"
+
+msgctxt "dialog_disable_ads_message"
+msgid ""
+"Hi, I am Arnau, the developer of this app. I allow you to disable ads "
+"completely free I don't want to be intrusive, but this app has taken lots"
+" of months of work from a single developer, and having the tiny income "
+"that ads make is a huge difference. So, even if you choose to show nor "
+"hide them, I'd ask you to think about donating, for keeping up the "
+"development of this app, and increasing its services."
+msgstr ""
+"Hola, soy Arnau, el desarrollador de esta aplicación. Te permito "
+"deshabilitar los anuncios de forma completamente gratuita ya que quiero "
+"que esta aplicación sea accesible para todo el mundo, y sea lo más limpia"
+" y cómoda posible. Pero han sido duros meses de trabajo, y los anuncios, "
+"aunque suponen un ingreso mínimo, animan a seguir con el desarrollo. "
+"Dicho esto, es decisión tuya. Aunque elijas lo que elijas, agradecería "
+"que hicieses una pequeña donación, que siempre es motivo de ánimo para "
+"seguir añadiendo nuevas funciones cada vez más avanzadas."
+
+msgctxt "dialog_change_name_title"
+msgid "Change Display Name"
+msgstr "Cambiar Álias"
+
+msgctxt "dialog_change_name_hint_name"
+msgid "New Name:"
+msgstr "Nombre Nuevo:"
+
+msgctxt "dialog_add_friend_title"
+msgid "Add Friend"
+msgstr "Añadir Amigo"
+
+#, c-format
+msgctxt "dialog_add_friend_message"
+msgid "Are you sure you want to add %s as a friend?"
+msgstr "Estàs segur que vols afegir %s com a amic?"
+
+msgctxt "completed_type_first"
+msgid "First"
+msgstr "Primero"
+
+msgctxt "completed_type_top_rope"
+msgid "Top Rope"
+msgstr "Top Rope"
+
+msgctxt "completed_type_lead"
+msgid "Lead"
+msgstr "Delante"
+
+msgctxt "completed_type_label"
+msgid "Completed as"
+msgstr "Completada como"
+
+#, c-format
+msgctxt "completed_attemps_label"
+msgid "Attempts (%s)"
+msgstr "Intentos (%s)"
+
+#, c-format
+msgctxt "completed_hangs_label"
+msgid "Hangs (%s)"
+msgstr "Colgadas (%s)"
+
+msgctxt "register_email"
+msgid "Email"
+msgstr "Correo electrónico"
+
+msgctxt "register_pass"
+msgid "Password"
+msgstr "Contraseña "
+
+msgctxt "register_pass_conf"
+msgid "Confirm Password"
+msgstr "Confirma la contraseña "
+
+msgctxt "register_nick"
+msgid "Nickname"
+msgstr "Apodo"
+
+#, c-format
+msgctxt "register_error_nick_short"
+msgid "The nickname must have at least %s characters"
+msgstr "El nickname debe tener almenos %s carácteres"
+
+#, c-format
+msgctxt "register_error_pass_short"
+msgid "The password must have at least %s characters"
+msgstr "La contraseña debe tener como mínimo %s carácteres"
+
+msgctxt "register_error_pass_not_strong"
+msgid "The password is not strong enough"
+msgstr "La contraseña no es suficientemente segura "
+
+msgctxt "register_error_pass_no_match"
+msgid "Passwords don't match"
+msgstr "Las contraseñas no coinciden "
+
+msgctxt "register_error_invalid_email"
+msgid "Invalid email"
+msgstr "Correo no válido"
+
+msgctxt "register_error_email_exists"
+msgid "Email already registered"
+msgstr "Correo ya registrado"
+
+msgctxt "add_path_title"
+msgid "Add Path"
+msgstr "Añadir ruta"
+
+msgctxt "add_path_sketch_id"
+msgid "Sketch Id"
+msgstr "Id del croquis"
+
+msgctxt "add_path_display_name"
+msgid "Display Name"
+msgstr "Nombre de usuario"
+
+msgctxt "add_path_height"
+msgid "Height"
+msgstr "Altura"
+
+msgctxt "add_path_dialog_title"
+msgid "Add path"
+msgstr "Añadir ruta"
+
+msgctxt "add_path_dialog_message"
+msgid ""
+"Adding this path will have immediate effect, are you sure that you want "
+"to add it now?"
+msgstr ""
+"Añadir esta ruta tendrá un efecto inmediato, estás seguro de que quieres "
+"añadirla?"
+
+msgctxt "path_ending_plate"
+msgid "Plate"
+msgstr "Placa"
+
+msgctxt "path_ending_plate_ring"
+msgid "Plate Ring"
+msgstr "Placa con argolla"
+
+msgctxt "path_ending_plate_lanyard"
+msgid "Plate Lanyard"
+msgstr "Placa y Cordino"
+
+msgctxt "path_ending_chain_ring"
+msgid "Chain Ring"
+msgstr "Cadena y argolla"
+
+msgctxt "path_ending_chain_carabiner"
+msgid "Chain Carabiner"
+msgstr "Cadena y Mosquetón"
+
+msgctxt "path_ending_piton"
+msgid "Piton"
+msgstr "Clavo"
+
+msgctxt "path_ending_walking"
+msgid "Walking Descent"
+msgstr "Bajada andando"
+
+msgctxt "path_ending_rappel"
+msgid "Rappel Descent"
+msgstr "Bajada con Rappel"
+
+msgctxt "path_ending_lanyard"
+msgid "Lanyard (Rock Bridge)"
+msgstr "Cordino (Puente de Roca)"
+
+msgctxt "path_ending_none"
+msgid "No ending"
+msgstr "Sin reunión"
+
+msgctxt "path_ending_unknown"
+msgid "Unknown Ending"
+msgstr "Reunión desconocida"
+
+msgctxt "path_ending_multiple"
+msgid "Endings"
+msgstr "Reuniones"
+
+msgctxt "path_ending_artifo_walking"
+msgid "Walking Descent"
+msgstr "Bajada andando"
+
+msgctxt "pref_main_title"
+msgid "General"
+msgstr "General"
+
+msgctxt "pref_main_sum"
+msgid "General settings of the app"
+msgstr "Ajustes generales de la aplicación"
+
+msgctxt "pref_noti_title"
+msgid "Notifications"
+msgstr "Notificaciones"
+
+msgctxt "pref_noti_sum"
+msgid "Notifications settings, and which show or not"
+msgstr "Ajustes de notificaciones, y cuales mostrar y cuales no"
+
+msgctxt "pref_info_title"
+msgid "Info"
+msgstr "Información"
+
+msgctxt "pref_info_sum"
+msgid "Version, Build Number, Libraries…"
+msgstr "Versión, Número de Compilación, Librerías…"
+
+msgctxt "pref_noti_alert_title"
+msgid "General Alerts"
+msgstr "Alertas generales"
+
+msgctxt "pref_noti_alert_sum"
+msgid "This will enable or disable local alerts"
+msgstr "Esto activará/desactivará las alertas locales"
+
+msgctxt "pref_noti_device_title"
+msgid "Notification Settings"
+msgstr "Ajustes de notificaciones"
+
+msgctxt "pref_noti_device_sum"
+msgid "Show the system notification settings"
+msgstr "Muestra los ajustes de notificaciones del sistema"
+
+msgctxt "pref_gene_gesture_sens_title"
+msgid "Swipe Gesture Sensibility"
+msgstr "Cambia la sensibilidad de gestos"
+
+msgctxt "pref_gene_gesture_sens_sum"
+msgid ""
+"The sensibility for gestures such as the swipe to the sides from the "
+"Sector View."
+msgstr ""
+"Sensibilidad de los gestos como deslizar hacia los lados desde la vista "
+"del sector"
+
+msgctxt "pref_gene_gesture_sens_msg"
+msgid "Sensibility"
+msgstr "Sensibilidad"
+
+msgctxt "pref_gene_language_title"
+msgid "Language"
+msgstr "Idioma "
+
+msgctxt "pref_gene_language_sum"
+msgid "The language to use in the app"
+msgstr "Idioma para usar en la aplicación "
+
+msgctxt "pref_gene_nearby_title"
+msgid "Enable Nearby Zones View"
+msgstr "Habilitar la vista de zonas cercanas "
+
+msgctxt "pref_gene_nearby_sum"
+msgid "Whether or not to enable nearby zones view"
+msgstr "Habilitar/Deshabilitar la vista de zonas cercanas"
+
+msgctxt "pref_gene_ads_title"
+msgid "Show Ads"
+msgstr "Mostrar Anuncios"
+
+msgctxt "pref_gene_ads_sum"
+msgid "Whether or not to show ads in the app"
+msgstr "Mostrar o no anuncios en la app"
+
+msgctxt "pref_gene_nearby_distance_title"
+msgid "Nearby Distance"
+msgstr "Distancia Cercana"
+
+msgctxt "pref_gene_nearby_distance_sum"
+msgid "At what distance will a zone be considered as nearby"
+msgstr "Qué distancia será considerada como cercana"
+
+msgctxt "pref_gene_nearby_distance_dialog_title"
+msgid "Nearby Zones Distance (m)"
+msgstr "Distancia a Zonas Cercanas (m)"
+
+msgctxt "pref_gene_nearby_distance_dialog_message"
+msgid "Enter the maximum distance to consider as nearby zone in meters."
+msgstr ""
+"Introduce la distancia máxima que será usada para considerar una zona "
+"como cercana"
+
+msgctxt "pref_gene_map_icon_scale_title"
+msgid "Marker Scale"
+msgstr ""
+
+msgctxt "pref_gene_map_icon_scale_sum"
+msgid "The scale of the icons in the map"
+msgstr ""
+
+msgctxt "pref_gene_section_nearby"
+msgid "Nearby Zones"
+msgstr "Zonas Cercanas"
+
+msgctxt "pref_gene_section_map"
+msgid "Map"
+msgstr ""
+
+msgctxt "pref_info_version_title"
+msgid "Version"
+msgstr "Versión"
+
+msgctxt "pref_info_build_title"
+msgid "Build Number"
+msgstr "Número de compilación"
+
+msgctxt "notification_channel_downloads_group_name"
+msgid "Downloads"
+msgstr "Descargas"
+
+msgctxt "notification_channel_download_progress_name"
+msgid "Download Progress"
+msgstr "Progreso de descarga"
+
+msgctxt "notification_channel_download_progress_desc"
+msgid "When you are downloading something, this will be shown"
+msgstr "Cuando estés descargando algo aparecerá esto "
+
+msgctxt "notification_channel_download_complete_name"
+msgid "Download Complete"
+msgstr "Descarga finalizada"
+
+msgctxt "notification_channel_download_complete_desc"
+msgid "When something downloading has finished, this will be shown"
+msgstr "Cuando una descarga haya finalizado aparecerá esto"
+
+msgctxt "notification_channel_alert_name"
+msgid "Alerts"
+msgstr "Alertas"
+
+msgctxt "notification_channel_alert_desc"
+msgid ""
+"This will warn you about incidences that were detected in climbing paths,"
+" sectors or others. This also includes paths re-equipment or repairing "
+"processes."
+msgstr ""
+"Esto te alertará sobre incidencias en las rutas de escalada, sectores o "
+"demás. También se incluyen rutas que estén siendo reequipadas o "
+"reparadas."
+
+msgctxt "notification_channel_people_group_name"
+msgid "People"
+msgstr "Gente"
+
+msgctxt "notification_channel_friend_request_name"
+msgid "New Friend Request"
+msgstr "Nueva Petición de Amistad"
+
+msgctxt "notification_channel_friend_request_desc"
+msgid "This will warn you when anyone asks you about being a friend."
+msgstr "Esto te avisará cuando alguien quiera ser tu amigo"
+
+msgctxt "notification_channel_friend_accepted_name"
+msgid "Friend Request Accepted"
+msgstr "Petición de amistad aceptada"
+
+msgctxt "notification_channel_friend_accepted_desc"
+msgid "This will warn you when a request you made was accepted."
+msgstr "Esto te avisará cuando una petición pendiente haya sido aceptada"
+
+msgctxt "notification_download_starting_title"
+msgid "Download starting…"
+msgstr "Iniciando descarga..."
+
+msgctxt "notification_download_starting_msg"
+msgid "The download is getting started, please, wait."
+msgstr "Se está iniciando la descargar,espera,por favor"
+
+msgctxt "notification_download_progress_title"
+msgid "Downloading"
+msgstr "Descargando"
+
+#, c-format
+msgctxt "notification_download_progress_msg"
+msgid "Downloading %s / %s"
+msgstr "Descargando %s / %s"
+
+msgctxt "notification_download_complete_title"
+msgid "Downloaded Correctly"
+msgstr "Descargado correctamente"
+
+#, c-format
+msgctxt "notification_download_complete_msg"
+msgid "Downloaded %s / %s"
+msgstr "Descargado %s / %s"
+
+msgctxt "notification_friend_request_title"
+msgid "New Friend Request"
+msgstr "Nueva petición de amistad"
+
+#, c-format
+msgctxt "notification_friend_request_message"
+msgid "%s has asked you to be your friend."
+msgstr "%s quiere ser tu amigo."
+
+msgctxt "notification_friend_request_accepted_title"
+msgid "Friend Request Accepted"
+msgstr "Petición de amistad aceptada"
+
+#, c-format
+msgctxt "notification_friend_request_accepted_message"
+msgid "Now %s is your friend!"
+msgstr "Ahora %s es tu amigo!"
+
+msgctxt "no_internet_title"
+msgid "You have no Internet access"
+msgstr "Sin acceso a Internet"
+
+msgctxt "no_internet_message"
+msgid "You can access the downloaded content, or try again."
+msgstr "Puedes acceder al contenido descargado o volverlo a intentar"
+
+msgctxt "downloads_size"
+msgid "Downloads Size:"
+msgstr "Tamaño de las descargas:"
+
+#, c-format
+msgctxt "downloads_size_value"
+msgid "%sMB"
+msgstr "%sMB"
+
+msgctxt "downloads_areas"
+msgid "Downloaded Areas:"
+msgstr "Áreas descargadas:"
+
+msgctxt "downloads_zones"
+msgid "Downloaded Zones:"
+msgstr "Zonas descargadas:"
+
+msgctxt "downloads_sectors"
+msgid "Downloaded Sectors:"
+msgstr "Sectores descargados:"
+
+msgctxt "downloads_delete_dialog_title"
+msgid "Are you sure?"
+msgstr "¿Estás seguro?"
+
+#, c-format
+msgctxt "downloads_delete_dialog_msg"
+msgid ""
+"This will delete %s from your device FOREVER. You will have to download "
+"it again."
+msgstr ""
+"Esto borrará %s de tu dispositivo PARA SIEMPRE. Tendrás que volver a "
+"descargarlo."
+
+msgctxt "error_server"
+msgid ""
+"Could not connect to the server. It may be under maintenance. Please, "
+"check your Internet connection and try again later."
+msgstr ""
+"Imposible conectarse al servidor. Tal vez esté bajo mantenimiento.Por "
+"favor, comprueba tu conexión a Internet y vuelve a probar más tarde."
+
+msgctxt "error_data"
+msgid "Downloaded data is corrupt. Deleting…"
+msgstr "Los datos descargados están corrompidos. Eliminando…"
+
+msgctxt "error_chart_no_data"
+msgid "No Data"
+msgstr "Sin datos"
+
+msgctxt "toast_error_internal"
+msgid "An internal error occurred"
+msgstr "Ha ocurrido un error interno"
+
+msgctxt "toast_error_no_sectors"
+msgid "Zone doesn't have any sectors"
+msgstr "La zona no tiene ningún sector"
+
+msgctxt "toast_error_no_internet"
+msgid "No Internet Access detected"
+msgstr "Acceso a Internet no detectado "
+
+msgctxt "toast_checking_missing_data"
+msgid "Checking for missing data"
+msgstr "Buscar datos que falten"
+
+msgctxt "toast_error_github"
+msgid "Could not get Github data"
+msgstr "No se han podido obtener los datos de Github"
+
+msgctxt "toast_map_not_available"
+msgid "Map not Available"
+msgstr "Mapa no disponible"
+
+msgctxt "toast_location_not_shown"
+msgid "Current location won't be shown"
+msgstr "No se mostrará la posición actual"
+
+msgctxt "toast_error_download"
+msgid "Download failed!"
+msgstr "Descarga fallida!"
+
+msgctxt "toast_error_image"
+msgid "Could not load image!"
+msgstr "No se ha podido cargar la imagen"
+
+msgctxt "toast_error_change_name"
+msgid "Could not change name"
+msgstr "No se pudo cambiar el nombre"
+
+msgctxt "toast_download_complete"
+msgid "Download Complete!"
+msgstr "Descarga Completa!"
+
+msgctxt "toast_storing_gpx"
+msgid "Storing GPX…"
+msgstr "Guardando GPX…"
+
+msgctxt "toast_stored_gpx"
+msgid "GPX stored!"
+msgstr "GPX guardado"
+
+msgctxt "toast_stored_kmz"
+msgid "KMZ stored!"
+msgstr "KMZ guardado!"
+
+msgctxt "toast_downloading"
+msgid "Downloading…"
+msgstr "Descargando…"
+
+msgctxt "toast_restore_email_sent"
+msgid "If your account exists, you will receive a recover account email"
+msgstr "Si tu cuenta existe, recibirás un correo de recuperación pronto"
+
+msgctxt "toast_changed_name"
+msgid "Name changed!"
+msgstr "Nombre cambiado!"
+
+msgctxt "toast_friend_added"
+msgid "Friend added!"
+msgstr "Amigo añadido"
+
+msgctxt "toast_friend_request_sent"
+msgid "Request sent!"
+msgstr "Petición enviada!"
+
+msgctxt "toast_clear_ok"
+msgid "Cleared correctly"
+msgstr ""
+
+msgctxt "path_warning_dry"
+msgid ""
+"This path has some safes getting dry. This may be because some kind of "
+"chemical safe has been using for the safes. This should be active for 2 "
+"days more or less."
+msgstr ""
+"En esta ruta hay algunos seguros secándose, posiblemente porque se ha "
+"utilizado algún tipo de producto químico para asegurarlos. Debería volver"
+" a estar activa en aproximadamente dos días"
+
+msgctxt "path_warning_build"
+msgid ""
+"This path is under construction or revision. This may take from days to "
+"weeks. Please, be patient. You can enable alert notifications on "
+"settings, and we will alert you when this is ready."
+msgstr ""
+"Esta ruta está bajo revisión.Esto puede llevar de dos días hasta una "
+"semana, por favor, sé paciente. Puedes habilitar la notificación de "
+"alertas en los ajustes y te avisaremos cuando esté lista"
+
+msgctxt "path_warning_bird"
+msgid ""
+"This path has a nest on its way, so it is forbidden to climb. This may "
+"take the whole nesting season, so it may take weeks to be available "
+"again. You can enable alert notifications on settings, and we will alert "
+"you when this is ready."
+msgstr ""
+"En esta ruta hay un nido, y por tanto está prohibido escalar.\n"
+"Seguramente duré toda la época de anidación, así que no volverá a estar "
+"disponible hasta dentro de unas semanas. Puedes activar las "
+"notificaciones de alertas locales en los ajustes y te avisaremos cuando "
+"esté disponible"
+
+msgctxt "path_warning_old"
+msgid ""
+"This path is old which means it has old safes, and might not be safe. "
+"Climb under your own criteria. We are not responsible of any accident."
+msgstr ""
+"Esta vía es vieja, así que los seguros equipados son viejos, y puede no "
+"ser segura. Escala bajo tu propio criterio. No nos hacemos responsables "
+"de ningún accidente."
+
+msgctxt "path_warning_rocks"
+msgid ""
+"This path has loose rocks, which may fall while climbing. Please, have "
+"caution, both the climber and the people under him."
+msgstr ""
+"Esta vía tiene piedras sueltas, que pueden caer durante la escalada. Por "
+"favor, tened cuidado tanto el escalador como la gente de abajo."
+
+msgctxt "path_warning_plants"
+msgid ""
+"This path hasn't been used in a long time, and it has plants in its way. "
+"It may be climbable, but you might have difficulties."
+msgstr ""
+"Esta vía no se ha usado desde hace mucho tiempo, y tiene plantas durante "
+"el trayecto. Puede ser que se pueda escalar, pero tendrán dificultades."
+
+msgctxt "path_chip_safe"
+msgid "Safes amount and type"
+msgstr "Número de seguros y tipo"
+
+msgctxt "path_chip_ending"
+msgid "Ending type for choosing the descent maneuver to use or top-rope."
+msgstr "Tipo de reunión para escoger la maniobra de descenso o top-rope."
+
+msgctxt "path_chip_required"
+msgid "The shown component is required"
+msgstr "Se requiere el componente que se muestra"
+
+msgctxt "path_stats_chart_title"
+msgid "Grades"
+msgstr "Grados"
+
+#, c-format, fuzzy
+msgctxt "path_ending_pitch"
+msgid "%s %s"
+msgstr "Reunión %s %s"
+
+msgctxt "path_ending_pitch_vertical"
+msgid "Vertical"
+msgstr "Vertical"
+
+msgctxt "path_ending_pitch_shelf"
+msgid "Shelf"
+msgstr "Placa"
+
+msgctxt "path_ending_pitch_inclined"
+msgid "Inclined"
+msgstr "Inclinado"
+
+msgctxt "path_ending_pitch_rappeleable"
+msgid "Rappelable"
+msgstr "Rapelable"
+
+msgctxt "path_ending_pitch_walking"
+msgid "Walking"
+msgstr "Andando"
+
+#, fuzzy
+msgctxt "path_ending_pitch_clean"
+msgid "no equipment"
+msgstr ", sin equipamiento"
+
+msgctxt "path_fixed_equipment"
+msgid "Path fixed equipment"
+msgstr "Equipamiento fijo en la vía"
+
+msgctxt "path_required_equipment"
+msgid "Required equipment"
+msgstr "Equipamiento necesario"
+
+#, c-format
+msgctxt "path_pitch_id"
+msgid "R%s:"
+msgstr "R%s:"
+
+msgctxt "message_nearby_zones"
+msgid "Nearby zones"
+msgstr "Zonas cercanas"
+
+msgctxt "message_nearby_zones_no_perm"
+msgid ""
+"You have not granted access to the location of the device, so this "
+"functionality is not usable. Press once to ask for permission, or press "
+"and hold to disable."
+msgstr ""
+"No has concedido permiso a la localización del dispositivo, así que esta "
+"función no está disponible. Pulsa para conceder permiso o pulsa y mantén "
+"para deshabilitarlo."
+
+msgctxt "message_already_downloading"
+msgid "Content already downloading"
+msgstr "El contenido ya está siendo guardado"
+
+msgctxt "fab_desc_back"
+msgid "Go Back"
+msgstr "Vovler"
+
+msgctxt "fab_desc_position"
+msgid "Current Location"
+msgstr "Ubicación Actual"
+
+msgctxt "fab_desc_download"
+msgid "Download"
+msgstr "Descargar"
+
+msgctxt "fab_desc_map"
+msgid "Open Google Maps"
+msgstr "Abrir Google Maps"
+
+msgctxt "fab_desc_next"
+msgid "Next"
+msgstr ""
+
+msgctxt "fab_desc_zone"
+msgid "Zone"
+msgstr ""
+
+msgctxt "fab_desc_date"
+msgid "Date"
+msgstr ""
+
+msgctxt "image_desc_downloaded"
+msgid "Downloaded"
+msgstr "Descargado"
+
+msgctxt "image_desc_no_internet"
+msgid "No Internet"
+msgstr ""
+
+msgctxt "image_desc_marker"
+msgid "Marker"
+msgstr ""
+
+msgctxt "image_desc_qr"
+msgid "App Download QR"
+msgstr ""
+
+msgctxt "image_desc_profile"
+msgid "Profile Image"
+msgstr ""
+
+msgctxt "image_desc_zone_image"
+msgid "Zone image"
+msgstr ""
+
+msgctxt "image_desc_area_image"
+msgid "Area image"
+msgstr ""
+
+msgctxt "image_desc_fixed_equipment"
+msgid "Fixed Equipment"
+msgstr ""
+
+msgctxt "image_desc_download"
+msgid "Download"
+msgstr ""
+
+msgctxt "button_desc_view_download"
+msgid "View Download"
+msgstr ""
+
+msgctxt "button_desc_download"
+msgid "Download"
+msgstr ""
+
+msgctxt "button_desc_toggle"
+msgid "Toggle"
+msgstr ""
+
+msgctxt "button_desc_delete"
+msgid "Delete"
+msgstr ""
+
+msgctxt "placeholder"
+msgid "Placeholder"
+msgstr "Marcador"
+
+msgctxt "title_activity_maps"
+msgid "Map"
+msgstr "Mapa"
+
+msgctxt "title_used_libraries"
+msgid "Used Libraries"
+msgstr "Librerias usadas"
+
+#, c-format
+msgctxt "share_app"
+msgid ""
+"Hey! check out %s on Play Store: "
+"https://play.google.com/store/apps/details?id=%s"
+msgstr ""
+"¡Ey! mira %s en Play Store: "
+"https://play.google.com/store/apps/details?id=%s"
+
+#, fuzzy
+msgctxt "credits_made"
+msgid ""
+"Made with 💛 by <a href=\"https://twitter.com/ArnyminerZ\">ArnyminerZ</a>,"
+" from the Catalan Countries."
+msgstr ""
+"Hecho con <3 por <a "
+"href=\"https://twitter.com/ArnyminerZ\">ArnyminerZ</a>, des de los Paises"
+" Catalanes"
+
+#, c-format
+msgctxt "intro_main_title"
+msgid "Welcome to %s"
+msgstr "Bienvenido a %s"
+
+msgctxt "intro_main_msg"
+msgid ""
+"Thank you for being a BETA tester. We are very pleased to have your help."
+" As a BETA tester, you will have to complete a configuration process, but"
+" don't worry, it's quick and we will be helping you the whole time."
+msgstr ""
+"Gracias por ser un usuario BETA. Estamos muy contento de recibir tu "
+"ayuda. Como usuario BETA tendrás que completar un proceso de "
+"configuración, pero no te preocupes, es rápido y te estaremos ayudando en"
+" todo momento\n"
+":)"
+
+msgctxt "intro_main_message"
+msgid ""
+"We are going to walk you through a tiny configuration process. Don't "
+"worry it's fast and easy."
+msgstr ""
+"Te vamos a guiar por un proceso de configuración breve. No te preocupes, "
+"es rápido y sencillo."
+
+msgctxt "intro_ads_title"
+msgid "InApp Advertisements"
+msgstr "Anuncios en la App"
+
+msgctxt "intro_ads_message"
+msgid "Please, choose whether or not to show ads"
+msgstr "Por favor, escoje si mostrar anuncios o no"
+
+msgctxt "intro_ads_switch"
+msgid "Show Ads"
+msgstr "Mostrar Anuncios"
+
+msgctxt "date_format"
+msgid "yyyy-MM-dd hh:mm:ss a"
+msgstr "dd-MM-yyyy kk:mm:ss"
+
+msgctxt "short_date_format"
+msgid "yyyy-MM-dd"
+msgstr "dd-MM-yyyy"
+
+msgctxt "title_instant"
+msgid "Escalar Alcoia i Comtat"
+msgstr "Escalar Alcoià i Comtat"
+

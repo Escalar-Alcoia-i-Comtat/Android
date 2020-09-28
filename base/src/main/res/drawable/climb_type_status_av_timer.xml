@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/bg_color" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+    <item
+        android:id="@+id/av_timer_drawable"
+        android:drawable="@drawable/round_timer_24" />
+</layer-list>

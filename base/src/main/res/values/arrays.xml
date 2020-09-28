@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="path_warnings" translatable="false">
+        <item>@string/path_warning_dry</item>
+        <item>@string/path_warning_build</item>
+        <item>@string/path_warning_bird</item>
+        <item>@string/path_warning_old</item>
+        <item>@string/path_warning_rocks</item>
+        <item>@string/path_warning_plants</item>
+        <item>@string/path_warning_rope_length</item>
+    </string-array>
+    <string-array name="path_endings" translatable="false">
+        <item>@string/path_ending_plate</item>
+        <item>@string/path_ending_plate_ring</item>
+        <item>@string/path_ending_plate_lanyard</item>
+        <item>@string/path_ending_plate_ring</item>
+        <item>@string/path_ending_chain_carabiner</item>
+        <item>@string/path_ending_none</item>
+        <item>@string/path_ending_piton</item>
+        <item>@string/path_ending_walking</item>
+        <item>@string/path_ending_rappel</item>
+        <item>@string/path_ending_lanyard</item>
+    </string-array>
+    <string-array name="app_languages" translatable="false">
+        <item>English</item>
+        <item>Català</item>
+        <item>Castellano</item>
+    </string-array>
+    <string-array name="app_languages_values" translatable="false">
+        <item>en</item>
+        <item>ca</item>
+        <item>es</item>
+    </string-array>
+
+    <string-array name="suns" translatable="false">
+        <item>@string/sector_sun_day</item>
+        <item>@string/sector_sun_morning</item>
+        <item>@string/sector_sun_afternoon</item>
+        <item>@string/sector_sun_no</item>
+    </string-array>
+    <string-array name="suns_dialog_title" translatable="false">
+        <item>@string/sector_info_dialog_sun_all_title</item>
+        <item>@string/sector_info_dialog_sun_morning_title</item>
+        <item>@string/sector_info_dialog_sun_afternoon_title</item>
+        <item>@string/sector_info_dialog_sun_no_title</item>
+    </string-array>
+    <string-array name="suns_dialog_msg" translatable="false">
+        <item>@string/sector_info_dialog_sun_all_msg</item>
+        <item>@string/sector_info_dialog_sun_morning_msg</item>
+        <item>@string/sector_info_dialog_sun_afternoon_msg</item>
+        <item>@string/sector_info_dialog_sun_no_msg</item>
+    </string-array>
+</resources>

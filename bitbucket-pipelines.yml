@@ -1,0 +1,63 @@
+# This is a sample build configuration for Java (Gradle).
+# Check our guides at https://confluence.atlassian.com/x/zd-5Mw for more examples.
+# Only use spaces to indent your .yml configuration.
+# -----
+# You can specify a custom docker image from Docker Hub as your build environment.
+image: java:8
+
+pipelines:
+  default:
+    - step:
+        deployment: Android Build
+        caches:
+          - gradle
+          - android-sdk
+
+        script:
+          # Set Up cred.gradle Credentials
+          - touch base/cred.gradle
+          - echo "project.ext.keystoreReleasePassword = '$KEYSTORE_RELEASE_PASSWORD'" >> base/cred.gradle
+          - echo "project.ext.keystoreKeyAlias = '$KEYSTORE_KEY_ALIAS'" >> base/cred.gradle
+          - echo "project.ext.keystoreKeyPassword = '$KEYSTORE_KEY_PASSWORD'" >> base/cred.gradle
+
+          # Set Up FTPConsts.kt Credentials
+          - touch base/src/main/java/com/arnyminerz/escalaralcoiaicomtat/connection/ftp/FTPConsts.kt
+          - echo "package com.arnyminerz.escalaralcoiaicomtat.connection.ftp" >> base/src/main/java/com/arnyminerz/escalaralcoiaicomtat/connection/ftp/FTPConsts.kt
+          - echo "const val FTP_SERVER = \"$FTP_SERVER\"" >> base/src/main/java/com/arnyminerz/escalaralcoiaicomtat/connection/ftp/FTPConsts.kt
+          - echo "const val FTP_USER = \"$FTP_USER\"" >> base/src/main/java/com/arnyminerz/escalaralcoiaicomtat/connection/ftp/FTPConsts.kt
+          - echo "const val FTP_PASSWORD = \"$FTP_PASSWORD\"" >> base/src/main/java/com/arnyminerz/escalaralcoiaicomtat/connection/ftp/FTPConsts.kt
+
+          # Set Up Google Services File
+          - touch base/google-services.json
+          - echo "$GOOGLE_SERVICES" >> base/google-services.json
+
+          # Download and unzip android sdk
+          - wget --quiet --output-document=android-sdk.zip https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip
+          - unzip -o -qq android-sdk.zip -d android-sdk
+
+          # Define Android Home and add PATHs
+          - export ANDROID_HOME="/opt/atlassian/pipelines/agent/build/android-sdk"
+          - export PATH="$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools:$PATH"
+
+          # Download packages.
+          - yes | sdkmanager "platform-tools"
+          - yes | sdkmanager "platforms;android-30"
+          - yes | sdkmanager "build-tools;30.0.0"
+          - yes | sdkmanager "extras;android;m2repository"
+          - yes | sdkmanager "extras;google;m2repository"
+          - yes | sdkmanager "extras;google;instantapps"
+          - yes | sdkmanager --licenses
+
+          # Build apk
+          - chmod a+x ./gradlew
+          - ./gradlew assembleDebug
+          # Deploy apk
+          - pipe: atlassian/bitbucket-upload-file:0.1.7
+            variables:
+              BITBUCKET_USERNAME: $BITBUCKET_USERNAME
+              BITBUCKET_APP_PASSWORD: $BITBUCKET_PASSWORD
+              FILENAME: "base/build/outputs/apk/debug/EscalarAlcoiaIComtat-59-Grigri-2-pre6-debug.apk"
+
+definitions:
+  caches:
+    android-sdk: /opt/atlassian/pipelines/agent/build/android-sdk

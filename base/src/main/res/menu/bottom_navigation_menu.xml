@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/item_explore"
+        android:title="@string/item_explore"
+        android:icon="@drawable/item_explore"/>
+
+    <item android:id="@+id/item_map"
+        android:title="@string/item_map"
+        android:icon="@drawable/item_map" />
+
+    <!-- TODO: Implement this: https://stackoverflow.com/a/53258463/5717211 -->
+    <item android:id="@+id/item_profile"
+        android:title="@string/item_profile"
+        android:icon="@drawable/item_account" />
+
+    <item android:id="@+id/item_downloads"
+        android:title="@string/item_downloads"
+        android:icon="@drawable/item_downloads" />
+
+    <item android:id="@+id/item_settings"
+        android:title="@string/item_settings"
+        android:icon="@drawable/item_settings"/>
+</menu>

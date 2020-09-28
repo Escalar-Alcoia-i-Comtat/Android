@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        app:key="pref_account"
+        app:icon="@mipmap/ic_launcher"
+        app:title="@string/pref_account_title"
+        app:summary="@string/pref_account_sum" />
+
+    <Preference
+        app:key="pref_general"
+        app:icon="@drawable/round_grade_24"
+        app:title="@string/pref_main_title"
+        app:summary="@string/pref_main_sum" />
+
+    <Preference
+        app:key="pref_notifications"
+        app:icon="@drawable/round_notifications_24"
+        app:title="@string/pref_noti_title"
+        app:summary="@string/pref_noti_sum"/>
+
+    <Preference
+        app:key="pref_downloads"
+        app:icon="@drawable/ic_round_storage_24"
+        app:title="@string/pref_down_title"
+        app:summary="@string/pref_down_sum"/>
+
+    <Preference
+        app:key="pref_info"
+        app:icon="@drawable/round_info_24"
+        app:title="@string/pref_info_title"
+        app:summary="@string/pref_info_sum"/>
+
+</PreferenceScreen>

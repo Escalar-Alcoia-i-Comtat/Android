@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Escalar Alcoia i Comtat</string>
+    <string name="train_label">Climbing Training Helper</string>
+
+    <string name="sector_sun_morning">Morning Sun</string>
+    <string name="sector_sun_afternoon">Afternoon Sun</string>
+    <string name="sector_sun_day">All-day Sun</string>
+    <string name="sector_sun_no">No Sun</string>
+    <string name="sector_walking_time">%1$smin</string>
+    <string name="sector_height">%1$sm</string>
+    <string name="sector_kids_apt">Kids Apt</string>
+    <string name="sector_info_dialog_sun_morning_title">Morning Sun</string>
+    <string name="sector_info_dialog_sun_morning_msg">This sector gets shiny on the mornings. Cold walls on the morning, warm on the evening, you choose.</string>
+    <string name="sector_info_dialog_sun_afternoon_title">Afternoon Sun</string>
+    <string name="sector_info_dialog_sun_afternoon_msg">This sector gets shiny on the afternoons. In the morning this may get quite cold…</string>
+    <string name="sector_info_dialog_sun_all_title">All-day Sun</string>
+    <string name="sector_info_dialog_sun_all_msg">This sector is shiny all the day! This may get hot on summer. Please, take care.</string>
+    <string name="sector_info_dialog_sun_no_title">No Sun</string>
+    <string name="sector_info_dialog_sun_no_msg">This sector doesn\'t receive run in the whole day! Bring a jacket.</string>
+    <string name="sector_info_dialog_kids_title">Kids Apt</string>
+    <string name="sector_info_dialog_kids_msg">This sector has good places to sit nearby. Bringing young children may not be that bad, but please, have caution.</string>
+    <string name="safe_strings">%1$s Strings</string>
+    <string name="safe_parabolt">%1$s Parabolts</string>
+    <string name="safe_spit">%1$s Spits</string>
+    <string name="safe_tensor">%1$s Tensors</string>
+    <string name="safe_piton">%1$s Pitons</string>
+    <string name="safe_buril">%1$s Burils</string>
+    <string name="safe_lanyard">Lanyard</string>
+    <string name="safe_cracker">Cracker</string>
+    <string name="safe_friend">Friend</string>
+    <string name="safe_strips">Strips</string>
+    <string name="safe_nail">Nails</string>
+
+    <!-- NC is for No Count -->
+    <string name="safe_strings_plural">Strings</string>
+
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_info_register">If you don\'t have an account, we will help you out once you click the login button.</string>
+    <string name="login_info_terms">When logging in, you are accepting our <a href="https://escalaralcoiaicomtat.centrexcursionistalcoi.org/terms/">Terms and Conditions of Use</a></string>
+
+    <string name="action_login">Login</string>
+    <string name="action_add">Add</string>
+    <string name="action_close">Close</string>
+    <string name="action_close_app">Close App</string>
+    <string name="action_download">Download</string>
+    <string name="action_logout">Log Out</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_ok">OK</string>
+    <string name="action_check_update">Check for Updates</string>
+    <string name="action_update">Update</string>
+    <string name="action_donate">Donate</string>
+    <string name="action_grant">Grant</string>
+    <string name="action_grant_permission">Grant Permission</string>
+    <string name="action_back">Go Back</string>
+    <string name="action_mark_completed">Mark Completed</string>
+    <string name="action_store">Store to device</string>
+    <string name="action_disable">Disable</string>
+    <string name="action_add_friend">Add Friend</string>
+    <string name="action_change">Change</string>
+    <string name="action_search">Search…</string>
+    <string name="action_open_maps">Open Google Maps</string>
+    <string name="action_clear_cache">Clear Cache</string>
+    <string name="action_clear_storage">Clear Storage</string>
+    <string name="action_clear_downloads">Clear Downloads</string>
+    <string name="action_clear_settings">Clear Settings</string>
+    <string name="action_launch_app">Launch App</string>
+    <string name="action_view_more">View More</string>
+    <string name="action_remove">Remove</string>
+    <string name="action_delete_old">Delete old data</string>
+    <string name="action_try_again">Try Again</string>
+    <string name="action_share_with">Share with</string>
+    <string name="action_start">Start</string>
+    <string name="action_google_auth">Auth with Google</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_share">Share</string>
+
+    <string name="status_checking_updates">Checking…</string>
+    <string name="status_fixing">Fixing…</string>
+    <string name="status_updating">Updating…</string>
+    <string name="status_loading">Loading…</string>
+    <string name="status_null" translatable="false">-</string>
+    <string name="status_null_double" translatable="false">--</string>
+    <string name="status_friend">Friend</string>
+    <string name="status_requested">Requested</string>
+    <string name="status_sent">Sent</string>
+    <string name="status_not_downloaded">Not downloaded</string>
+    <string name="status_permission_granted">Permission Granted</string>
+    <string name="status_no_completed_paths">No Completed Paths</string>
+    <string name="status_no_search">No search query</string>
+    <string name="status_server_down">Could not reach server</string>
+    <string name="status_server_down_long">You have Internet connection, but we can\'t reach the server. It may be under maintenance, or broken. Wait a bit, a notification may pop up notifying you about any issue.</string>
+
+    <string name="dialog_permission_title">Permission Required!</string>
+    <string name="dialog_permission_message">The functionality you are trying to use requires the %s permission. Please grant it, or refuse to use that.</string>
+    <string name="dialog_permission_my_location_message">For showing your current position, the app must have access to the location of your device. Please, grant it, or refuse to use this functionality.</string>
+    <string name="dialog_downloaded_msg">Downloaded on: %s</string>
+    <string name="dialog_uses_storage_msg">Uses: %s</string>
+    <string name="dialog_update_title">New Update Available</string>
+    <string name="dialog_update_message">Press UPDATE to start the update. Please, check your WiFi network. Mobile Data usage may be high.</string>
+    <string name="dialog_no_update_title">No New Updates</string>
+    <string name="dialog_no_update_message">There are no new updates to download</string>
+    <string name="dialog_mark_completed_title">Mark Path Completed</string>
+    <string name="dialog_disable_ads_title">Disabling Ads</string>
+    <string name="dialog_disable_ads_message">Hi, I am Arnau, the developer of this app. I allow you to disable ads completely free I don\'t want to be intrusive, but this app has taken lots of months of work from a single developer, and having the tiny income that ads make is a huge difference. So, even if you choose to show nor hide them, I\'d ask you to think about donating, for keeping up the development of this app, and increasing its services.</string>
+    <string name="dialog_change_name_title">Change Display Name</string>
+    <string name="dialog_change_name_hint_name">New Name:</string>
+    <string name="dialog_add_friend_title">Add Friend</string>
+    <string name="dialog_completed_paths_title">Completed Paths</string>
+    <string name="dialog_remove_friend_title">Remove Friend</string>
+    <string name="dialog_remove_friend_message">Are you sure you want to remove %s as a friend?</string>
+    <string name="dialog_description_description_title">Description</string>
+    <string name="dialog_description_builder_title">Built By</string>
+    <string name="dialog_description_rebuilder_title">Rebuilt By</string>
+    <string name="dialog_data_corrupt_title">Invalid Downloaded Data</string>
+    <string name="dialog_data_corrupt_message">You have downloaded some data into the device for using it offline. But our data models have changed, and this data is now invalid. We can migrate all the old data automatically, but we have realized that you are not connected to a WiFi network, and this might use a lot of mobile data. What do you prefer to do?</string>
+    <string name="dialog_steps_title">Steps</string>
+    <string name="dialog_steps_message">Select the amount the steps you want to make</string>
+    <string name="dialog_time_title">Time</string>
+    <string name="dialog_time_message">Select the amount of time you want to spend in this exercise. This matches the format minutes:seconds</string>
+    <string name="dialog_high_data_usage_title">High data usage Alert</string>
+    <string name="dialog_high_data_usage_message">You are about to do something that usually requires a high amount of Internet communication, and we have detected that you don\'t have a WiFi connection, are you sure that you want to continue?</string>
+
+    <string name="completed_type_first">First</string>
+    <string name="completed_type_top_rope">Top Rope</string>
+    <string name="completed_type_lead">Lead</string>
+    <string name="completed_attemps_label">Attempts (%s)</string>
+    <string name="completed_hangs_label">Hangs (%s)</string>
+
+    <string name="search_user_hint">User search</string>
+
+    <string name="path_ending_plate">Plate</string>
+    <string name="path_ending_plate_ring">Plate Ring</string>
+    <string name="path_ending_plate_lanyard">Plate Lanyard</string>
+    <string name="path_ending_chain_ring">Chain Ring</string>
+    <string name="path_ending_chain_carabiner">Chain Carabiner</string>
+    <string name="path_ending_piton">Piton</string>
+    <string name="path_ending_walking">Walking Descent</string>
+    <string name="path_ending_rappel">Rappel Descent</string>
+    <string name="path_ending_lanyard">Lanyard (Rock Bridge)</string>
+    <string name="path_ending_none">No ending</string>
+    <string name="path_ending_unknown">Unknown Ending</string>
+    <string name="path_ending_multiple">Endings</string>
+
+    <string name="pref_main_title">General</string>
+    <string name="pref_main_sum">General settings of the app</string>
+    <string name="pref_noti_title">Notifications</string>
+    <string name="pref_noti_sum">Notifications settings, and which show or not</string>
+    <string name="pref_down_title">Storage</string>
+    <string name="pref_down_sum">Storage settings, including app data and downloads</string>
+    <string name="pref_info_title">Info</string>
+    <string name="pref_info_sum">Version, Build Number, Libraries…</string>
+    <string name="pref_account_title">Account</string>
+    <string name="pref_account_sum">Configure your account preferences</string>
+
+    <string name="pref_noti_alert_title">General Alerts</string>
+    <string name="pref_noti_alert_sum">This will enable or disable local alerts</string>
+    <string name="pref_noti_device_title">Notification Settings</string>
+    <string name="pref_noti_device_sum">Show the system notification settings</string>
+
+    <string name="pref_gene_gesture_sens_title">Swipe Gesture Sensibility</string>
+    <string name="pref_gene_gesture_sens_sum">The sensibility for gestures such as the swipe to the sides from the Sector View.</string>
+    <string name="pref_gene_gesture_sens_msg">Sensibility</string>
+    <string name="pref_gene_language_title">Language</string>
+    <string name="pref_gene_language_sum">The language to use in the app</string>
+    <string name="pref_gene_nearby_title">Enable Nearby Zones View</string>
+    <string name="pref_gene_nearby_sum">Whether or not to enable nearby zones view</string>
+    <string name="pref_gene_ads_title">Show Ads</string>
+    <string name="pref_gene_ads_sum">Whether or not to show ads in the app</string>
+    <string name="pref_gene_nearby_distance_title">Nearby Distance</string>
+    <string name="pref_gene_nearby_distance_sum">At what distance will a zone be considered as nearby</string>
+    <string name="pref_gene_nearby_distance_dialog_title">Nearby Zones Distance (m)</string>
+    <string name="pref_gene_nearby_distance_dialog_message">Enter the maximum distance to consider as nearby zone in meters.</string>
+    <string name="pref_gene_map_icon_scale_title">Marker Scale</string>
+    <string name="pref_gene_map_icon_scale_sum">The scale of the icons in the map</string>
+    <string name="pref_gene_preview_scale_title">Image Preview Scale</string>
+    <string name="pref_gene_preview_scale_sum">The scale of the images when previewing</string>
+    <string name="pref_gene_map_move_marker_title">Center marker on click</string>
+    <string name="pref_gene_map_move_marker_sum">If a marker should me centered in the screen when clicked on it</string>
+    <string name="pref_gene_map_small_map_enable_title">Small Map</string>
+    <string name="pref_gene_map_small_map_enable_sum">If a small map should be shown when entering an Area or Zone.</string>
+    <string name="pref_gene_section_nearby">Nearby Zones</string>
+    <string name="pref_gene_section_map">Map</string>
+    <string name="pref_gene_section_advanced">Advanced</string>
+
+    <string name="pref_down_cat_downloads">Downloads</string>
+    <string name="pref_down_cat_data">Climbing Data</string>
+    <string name="pref_down_mobile_title">Mobile Data</string>
+    <string name="pref_down_mobile_sum">Use mobile data for downloads</string>
+    <string name="pref_down_roaming_title">Roaming</string>
+    <string name="pref_down_roaming_sum">Use roaming for downloads</string>
+    <string name="pref_down_automatic_updates_title">Automatic Downloads Update</string>
+    <string name="pref_down_automatic_updates_sum">Install updates to the downloads automatically.</string>
+    <string name="pref_down_data_update_title">Update Data</string>
+    <string name="pref_down_data_update_sum">Re-download the stored climbing data.</string>
+    <string name="pref_down_downloads_update_title">Update Downloads</string>
+    <string name="pref_down_downloads_update_sum">Re-download all the stored downloads completely. Warning: High data usage!</string>
+    <string name="pref_down_automatic_data_updates_title">Automatic Data Update</string>
+    <string name="pref_down_automatic_data_updates_sum">Install updates to the stored climbing data automatically.</string>
+
+    <string name="pref_info_cat_app">Application</string>
+    <string name="pref_info_cat_services">Services</string>
+    <string name="pref_info_version_title">Version</string>
+    <string name="pref_info_build_title">Build Number</string>
+    <string name="pref_info_messaging_token_title">Messaging Token</string>
+    <string name="pref_info_messaging_topic_title">Messaging Topic</string>
+    <string name="pref_info_messaging_token_sum">Press to view</string>
+    <string name="pref_info_check_updates_title">Check for updates</string>
+    <string name="pref_info_check_updates_sum">Press here to check for updates</string>
+
+    <string name="pref_acc_cat_visual">Visual</string>
+    <string name="pref_acc_cat_completed">Completed Paths</string>
+    <string name="pref_acc_cat_social">Social</string>
+    <string name="pref_acc_show_image_title">Profile Image Public</string>
+    <string name="pref_acc_show_image_sum">If this is enabled, your profile image will be shown to anyone that searches for your profile. Your friends will always be able to see it.</string>
+    <string name="pref_acc_completed_paths_title">Completed Paths Public</string>
+    <string name="pref_acc_completed_paths_sum">If this is enabled, the paths you mark as completed will be shown to anyone that searches for your profile. Your friends will always be able to see them.</string>
+    <string name="pref_acc_show_friends_title">Friends Public</string>
+    <string name="pref_acc_show_friends_sum">If this is enabled, your friends will be shown to anyone that searches for your profile. Your friends will always be able to see it.</string>
+
+    <string name="notification_channel_downloads_group_name">Downloads</string>
+    <string name="notification_channel_download_progress_name">Download Progress</string>
+    <string name="notification_channel_download_progress_desc">When you are downloading something, this will be shown</string>
+    <string name="notification_channel_download_complete_name">Download Complete</string>
+    <string name="notification_channel_download_complete_desc">When something downloading has finished, this will be shown</string>
+    <string name="notification_channel_alert_name">Alerts</string>
+    <string name="notification_channel_alert_desc">This will warn you about incidences that were detected in climbing paths, sectors or others. This also includes paths re-equipment or repairing processes.</string>
+    <string name="notification_channel_people_group_name">People</string>
+    <string name="notification_channel_friend_request_name">New Friend Request</string>
+    <string name="notification_channel_friend_request_desc">This will warn you when anyone asks you about being a friend.</string>
+    <string name="notification_channel_friend_accepted_name">Friend Request Accepted</string>
+    <string name="notification_channel_friend_removed_name">Friend relationship removed</string>
+    <string name="notification_channel_friend_removed_desc">This will warn you if someone you are friend with removes you from his/her friend list.</string>
+    <string name="notification_channel_friend_accepted_desc">This will warn you when a request you made was accepted.</string>
+    <string name="notification_channel_task_completed_name">Task completed</string>
+    <string name="notification_channel_task_completed_desc">This will notify you whenever a task in background has been completed.</string>
+    <string name="notification_channel_beta_update_available_name">Beta Update Available</string>
+    <string name="notification_channel_beta_update_available_desc">When a new beta version is available</string>
+    <string name="notification_channel_user_interacted_name">New user interaction</string>
+    <string name="notification_channel_user_interacted_desc">This will tell you when a user comments about you, or likes something related to you.</string>
+    <string name="notification_channel_new_update_name">New update available</string>
+    <string name="notification_channel_new_update_desc">This will tell you when a new update is available, and will help you downloading it.</string>
+
+    <string name="notification_download_progress_title">Downloading…</string>
+    <string name="notification_download_progress_msg">Downloading %s…</string>
+    <string name="notification_download_failed_title">Download failed!</string>
+    <string name="notification_download_failed_message">There was an error while downloading. Slide down to know more.</string>
+    <string name="notification_friend_request_title">New Friend Request</string>
+    <string name="notification_friend_request_message">%s has asked you to be your friend.</string>
+    <string name="notification_friend_request_accepted_title">Friend Request Accepted</string>
+    <string name="notification_friend_request_accepted_message">Now %s is your friend!</string>
+    <string name="notification_friend_removed_title">Friend Relation Removed</string>
+    <string name="notification_friend_removed_message">%s has removed you as a friend. You are no longer friends.</string>
+    <string name="notification_new_update_title">New update available!</string>
+    <string name="notification_new_update_beta_message">There\'s a new update available at the beta channel, go download it!</string>
+    <string name="notification_task_completed_title">Task Completed</string>
+    <string name="notification_task_completed_mark_completed_message">Successfully marked %s as completed!</string>
+    <string name="notification_user_liked_title">You have a new like!</string>
+    <string name="notification_user_liked_message">%s has liked your completion of %s!</string>
+    <string name="notification_update_available_title">New Update Available</string>
+    <string name="notification_update_available_message">There\'s a new update available. Press here for downloading it now!</string>
+    <string name="notification_updating_title">Updating content…</string>
+    <string name="notification_updating_message">Some content is getting updated, please, wait.</string>
+
+    <string name="notification_new">New notification</string>
+
+    <string name="notification_updated_area_title">Area updated</string>
+    <string name="notification_updated_zone_title">Zone updated</string>
+    <string name="notification_updated_sector_title">Sector updated</string>
+    <string name="notification_updated_path_title">Path updated</string>
+    <string name="notification_updated_message">%s has been updated. Press to know more.</string>
+
+    <string name="no_internet_title">You have no Internet access</string>
+    <string name="no_internet_message">You can access the downloaded content, or try again.</string>
+
+    <string name="downloads_size">Downloads Size:</string>
+    <string name="downloads_size_value">%sMB</string>
+    <string name="downloads_delete_dialog_title">Are you sure?</string>
+    <string name="downloads_delete_dialog_msg">This will delete %s from your device FOREVER. You will have to download it again.</string>
+
+    <string name="error_chart_no_data">No Data</string>
+
+    <string name="toast_error_internal">An internal error occurred</string>
+    <string name="toast_error_no_internet">No Internet Access detected</string>
+    <string name="toast_location_not_shown">Current location won\'t be shown</string>
+    <string name="toast_error_image">Could not load image!</string>
+    <string name="toast_error_change_name">Could not change name</string>
+    <string name="toast_download_complete">Download Complete!</string>
+    <string name="toast_storing_gpx">Storing GPX…</string>
+    <string name="toast_stored_gpx">GPX stored!</string>
+    <string name="toast_stored_kmz">KMZ stored!</string>
+    <string name="toast_downloading">Downloading…</string>
+    <string name="toast_changed_name">Name changed!</string>
+    <string name="toast_friend_request_sent">Request sent!</string>
+    <string name="toast_clear_ok">Cleared correctly</string>
+    <string name="toast_permission_required">This permission is required</string>
+    <string name="toast_login_confirm_password">Please, confirm your password</string>
+    <string name="toast_login_password_match">Passwords don\'t match</string>
+    <string name="toast_login_password_wrong">Wrong Password</string>
+    <string name="toast_login_server_error">The server is not working well right now, try again later. Sorry for the inconvenience</string>
+    <string name="toast_login_error">Could not login</string>
+    <string name="toast_mark_completed_fill_all">Please, fill all gaps: %s</string>
+    <string name="toast_marking">Marking as completed</string>
+    <string name="toast_error_request">Could not send request</string>
+    <string name="toast_error_user_not_found">User not found</string>
+    <string name="toast_error_load_user">Could not load user data</string>
+    <string name="toast_error_not_logged_in">Not logged in</string>
+    <string name="toast_error_no_downloads">Anything Downloaded</string>
+    <string name="toast_error_liked_check">Could not check if liked</string>
+    <string name="toast_error_like">Could not like</string>
+    <string name="toast_error_areas_download_error">Could not download!</string>
+    <string name="toast_error_gmaps_not_installed">Google Maps not installed!</string>
+    <string name="toast_error_already_downloaded">Already downloaded!</string>
+    <string name="toast_error_tts_init_failed">Could not initialize TTS</string>
+    <string name="toast_error_tts_language_unsupported">Language not supported</string>
+    <string name="toast_copied">Copied!</string>
+
+    <string name="path_warning_dry">This path has some safes getting dry. This may be because some kind of chemical safe has been using for the safes. This should be active for 2 days more or less.</string>
+    <string name="path_warning_build">This path is under construction or revision. This may take from days to weeks. Please, be patient. You can enable alert notifications on settings, and we will alert you when this is ready.</string>
+    <string name="path_warning_bird">This path has a nest on its way, so it is forbidden to climb. This may take the whole nesting season, so it may take weeks to be available again. You can enable alert notifications on settings, and we will alert you when this is ready.</string>
+    <string name="path_warning_old">This path is old which means it has old safes, and might not be safe. Climb under your own criteria. We are not responsible of any accident.</string>
+    <string name="path_warning_rocks">This path has loose rocks, which may fall while climbing. Please, have caution, both the climber and the people under him.</string>
+    <string name="path_warning_plants">This path hasn\'t been used in a long time, and it has plants in its way. It may be climbable, but you might have difficulties.</string>
+    <string name="path_warning_rope_length">This path is quite long, so be careful with the rope you take with you.</string>
+    <string name="path_chip_safe">Safes amount and type</string>
+    <string name="path_chip_ending">Ending type for choosing the descent maneuver to use or top-rope.</string>
+    <string name="path_chip_required">The shown component is required</string>
+    <string name="path_stats_chart_title">Grades</string>
+    <string name="path_ending_pitch">%s %s</string>
+    <string name="path_ending_pitch_vertical">Vertical</string>
+    <string name="path_ending_pitch_shelf">Shelf</string>
+    <string name="path_ending_pitch_inclined">Inclined</string>
+    <string name="path_ending_pitch_rappeleable">Rappelable</string>
+    <string name="path_ending_pitch_clean">no equipment</string>
+    <string name="path_fixed_equipment">Path fixed equipment</string>
+    <string name="path_required_equipment">Required equipment</string>
+    <string name="path_pitch_id">R%s: </string>
+
+    <string name="completed_path_activity_info_times_tried">Times tried: %d</string>
+    <string name="completed_path_activity_info_difficulty">Difficulty: </string>
+    <string name="completed_path_activity_info_evolution">Evolution: </string>
+    <string name="completed_path_activity_info_graph_attempts">Attempts</string>
+    <string name="completed_path_activity_info_graph_hangs">Hangs</string>
+
+    <string name="sector_info_title">Sector Information</string>
+
+    <string name="item_explore">Explore</string>
+    <string name="item_map">Map</string>
+    <string name="item_downloads">Downloads</string>
+    <string name="item_profile">Profile</string>
+    <string name="item_settings">Settings</string>
+    <string name="item_donate">Donate</string>
+    <string name="item_share">Share</string>
+
+    <string name="tooltip_google_auth">Auth with Google</string>
+    <string name="tooltip_attempts">Attempts</string>
+    <string name="tooltip_hangs">Hangs</string>
+    <string name="tooltip_profile_qr">Profile QR</string>
+    <string name="tooltip_no_internet">No Internet</string>
+    <string name="tooltip_like">Like</string>
+    <string name="tooltip_unlike">Unlike</string>
+    <string name="tooltip_account">Account</string>
+
+    <string name="profile_friends">Friends:</string>
+    <string name="profile_friend_requests">Friend Requests:</string>
+    <string name="profile_completed_paths">Last Completed Paths:</string>
+
+    <string name="message_nearby_zones">Nearby zones</string>
+    <string name="message_nearby_zones_no_perm">You have not granted access to the location of the device, so this functionality is not usable. Press once to ask for permission, or press and hold to disable.</string>
+    <string name="message_already_downloading">Content already downloading</string>
+    <string name="message_share_completed_path">Hey! %s has completed %s with %d attempts and %d hangs! Take a look at Escalar Alcoià i Comtat (https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app/)</string>
+
+    <string name="fab_desc_back">Go Back</string>
+    <string name="fab_desc_position">Current Location</string>
+    <string name="fab_desc_download">Download</string>
+    <string name="fab_desc_map">Open Google Maps</string>
+    <string name="fab_desc_next">Next</string>
+    <string name="fab_desc_zone">Zone</string>
+    <string name="fab_desc_date">Date</string>
+
+    <string name="image_desc_downloaded">Downloaded</string>
+    <string name="image_desc_no_internet">No Internet</string>
+    <string name="image_desc_server_down">Server Down</string>
+    <string name="image_desc_app_icon">@string/app_name</string>
+    <string name="image_desc_profile">Profile Image</string>
+    <string name="image_desc_zone_image">Zone image</string>
+    <string name="image_desc_area_image">Area image</string>
+    <string name="image_desc_fixed_equipment">Fixed Equipment</string>
+    <string name="image_desc_download">Download</string>
+    <string name="image_desc_share">Share</string>
+    <string name="image_desc_view_path">View Path</string>
+    <string name="image_desc_friend_request_accept">Accept Friend Request</string>
+    <string name="image_desc_friend_request_deny">Deny Friend Request</string>
+    <string name="image_desc_scan_qr">Scan QR</string>
+    <string name="image_desc_profile_qr">Profile QR Code</string>
+    <string name="image_desc_go_back">Go Back</string>
+    <string name="image_desc_nearby_zones">Nearby Zones</string>
+    <string name="image_desc_like">Like</string>
+    <string name="image_desc_account">Account</string>
+    <string name="image_desc_warning">Warning</string>
+    <string name="image_desc_view_more">View More</string>
+    <string name="image_desc_path_info">Path Info</string>
+    <string name="image_desc_path_completed">Path Completed</string>
+    <string name="image_desc_start_record">Start Activity Recording</string>
+    <string name="image_desc_help">Help</string>
+    <string name="image_desc_start_left_indicator">Start Left Indicator</string>
+    <string name="image_desc_start_right_indicator">Start Right Indicator</string>
+    <string name="image_desc_end_indicator">Ending Indicator</string>
+    <string name="image_desc_timer">Timer</string>
+    <string name="image_desc_move_up">Move Up</string>
+    <string name="image_desc_move_down">Move Down</string>
+    <string name="image_desc_maximize_minimize_img">Maximize or minimize image</string>
+
+    <string name="button_desc_view_download">View Download</string>
+    <string name="button_desc_download">Download</string>
+    <string name="button_desc_toggle">Toggle</string>
+    <string name="button_desc_delete">Delete</string>
+
+    <string name="placeholder">Placeholder</string>
+    <string name="placeholder_numeric" translatable="false">0.00</string>
+    <string name="placeholder_grade" translatable="false">##+</string>
+    <string name="placeholder_evolution" translatable="false">±##</string>
+    <string name="placeholder_time" translatable="false">##s</string>
+    <string name="placeholder_timer" translatable="false">00:00</string>
+    <string name="r_placeholder" translatable="false">R#:</string>
+    <string name="placeholder_time_spacer" translatable="false">:</string>
+
+    <string name="intro_main_title">Welcome to %s</string>
+    <string name="intro_main_message">We are going to walk you through a tiny configuration process. Don\'t worry it\'s fast and easy.</string>
+    <string name="intro_beta_title">Beta Testing</string>
+    <string name="intro_beta_message">Hi user! You have chosen to download a testing version, and this is great! Thank you very much! But, all has to be said, this version may be buggy, since it\'s still in development, and some things may not be finished, and it\'s possible that you suffer some unexpected app crashes. We are really sorry about this, but we are working to fix this on the final release ;)</string>
+    <string name="intro_ads_title">InApp Advertisements</string>
+    <string name="intro_ads_message">Please, choose whether or not to show ads</string>
+    <string name="intro_ads_switch">Show Ads</string>
+    <string name="intro_storage_title">Storage Permission</string>
+    <string name="intro_storage_message">For making downloads possible we need to access your storage</string>
+    <string name="intro_download_title">Downloading…</string>
+    <string name="intro_download_message">Downloading the required data</string>
+
+    <string name="date_format">yyyy-MM-dd hh:mm:ss a</string>
+    <string name="short_date_format">yyyy-MM-dd</string>
+
+    <string name="MAP_COPYRIGHTS_GOOGLE_ONLY" translatable="false">© %1$d Google</string>
+    <string name="MAP_COPYRIGHTS_FULL" translatable="false">© %1$d Google – Pictures © %2$d %3$s, Map Data © %4$d %5$s</string>
+    <string name="MAP_COPYRIGHTS_IMAGERY_ONLY" translatable="false">© %1$d Google – Pictures © %2$d %3$s</string>
+    <string name="MAP_COPYRIGHTS_MAP_DATA_ONLY" translatable="false">© %1$d Google – Map Data © %2$d %3$s</string>
+
+    <string name="share_text">Hey! Would you try Escalar Alcoià i Comtat? It\'s free! https://play.google.com/store/apps/details?id=com.arnyminerz.escalaralcoiaicomtat</string>
+
+    <string name="train_type_climbing_gym">Climbing Gym</string>
+    <string name="train_type_gym">Gym</string>
+    <string name="train_type_outside">Outside</string>
+
+    <string name="train_record_type_timer">Timer</string>
+    <string name="train_record_type_period">Periods</string>
+    <string name="train_record_type_steps">Steps</string>
+    <string name="train_record_type_mixed">Mixed</string>
+
+    <string name="train_element_rest">Rest</string>
+    <string name="train_element_climb">Climb</string>
+    <string name="train_element_timer">Timer</string>
+
+    <string name="train_program_start">Training Start</string>
+    <string name="train_program_end">Training End</string>
+
+    <string name="template_train_steps">%d Steps</string>
+    <string name="template_train_time" translatable="false">%s:%s</string>
+
+    <string name="update_progress_internet_waiting">Waiting for Internet connection…</string>
+    <string name="update_progress_deleting_old_cache">Deleting old data…</string>
+    <string name="update_progress_downloading_new_cache">Downloading new data…</string>
+    <string name="update_progress_error">Error!</string>
+    <string name="update_progress_error_data_dir_creation">Could not create data dir!</string>
+
+    <string name="main_dropdown_account">Account</string>
+    <string name="main_dropdown_share">Share</string>
+    <string name="main_dropdown_donate">Donate</string>
+    <string name="main_dropdown_settings">Settings</string>
+    <string-array name="main_dropdown">
+        <item>@string/main_dropdown_account</item>
+        <item>@string/main_dropdown_share</item>
+        <item>@string/main_dropdown_donate</item>
+        <item>@string/main_dropdown_settings</item>
+    </string-array>
+</resources>

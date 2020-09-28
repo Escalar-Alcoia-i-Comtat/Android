@@ -1,0 +1,1317 @@
+# Translations template for PROJECT.
+# Copyright (C) 2020 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2020-04-17 13:15+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+
+msgctxt "app_name"
+msgid "Escalar Alcoia i Comtat"
+msgstr ""
+
+msgctxt "section_downloads"
+msgid "Downloads"
+msgstr ""
+
+msgctxt "section_settings"
+msgid "Settings"
+msgstr ""
+
+msgctxt "extended_fab_download_desc"
+msgid "Download"
+msgstr ""
+
+msgctxt "extended_fab_download_label"
+msgid "Download"
+msgstr ""
+
+msgctxt "extended_fab_download_tooltip"
+msgid "Click to Download"
+msgstr ""
+
+msgctxt "mbm_home"
+msgid "Home"
+msgstr ""
+
+msgctxt "mbm_downloads"
+msgid "Downloads"
+msgstr ""
+
+msgctxt "mbm_settings"
+msgid "Settings"
+msgstr ""
+
+msgctxt "sector_sun_morning"
+msgid "Morning Sun"
+msgstr ""
+
+msgctxt "sector_sun_afternoon"
+msgid "Afternoon Sun"
+msgstr ""
+
+msgctxt "sector_sun_day"
+msgid "All-day Sun"
+msgstr ""
+
+msgctxt "sector_sun_no"
+msgid "No Sun"
+msgstr ""
+
+#, c-format
+msgctxt "zone_distance"
+msgid "%s m"
+msgstr ""
+
+#, c-format
+msgctxt "sector_walking_time"
+msgid "%1$smin"
+msgstr ""
+
+#, c-format
+msgctxt "sector_height"
+msgid "%1$sm"
+msgstr ""
+
+msgctxt "sector_kids_apt"
+msgid "Kids Apt"
+msgstr ""
+
+msgctxt "sector_info_dialog_sun_morning_title"
+msgid "Morning Sun"
+msgstr ""
+
+msgctxt "sector_info_dialog_sun_morning_msg"
+msgid ""
+"This sector gets shiny on the mornings. Cold walls on the morning, warm "
+"on the evening, you choose."
+msgstr ""
+
+msgctxt "sector_info_dialog_sun_afternoon_title"
+msgid "Afternoon Sun"
+msgstr ""
+
+msgctxt "sector_info_dialog_sun_afternoon_msg"
+msgid ""
+"This sector gets shiny on the afternoons. In the morning this may get "
+"quite cold…"
+msgstr ""
+
+msgctxt "sector_info_dialog_sun_all_title"
+msgid "All-day Sun"
+msgstr ""
+
+msgctxt "sector_info_dialog_sun_all_msg"
+msgid ""
+"This sector is shiny all the day! This may get hot on summer. Please, "
+"take care."
+msgstr ""
+
+msgctxt "sector_info_dialog_sun_no_title"
+msgid "No Sun"
+msgstr ""
+
+msgctxt "sector_info_dialog_sun_no_msg"
+msgid "This sector doesn't receive run in the whole day! Bring a jacket."
+msgstr ""
+
+msgctxt "sector_info_dialog_kids_title"
+msgid "Kids Apt"
+msgstr ""
+
+msgctxt "sector_info_dialog_kids_msg"
+msgid ""
+"This sector has good places to sit nearby. Bringing young children may "
+"not be that bad, but please, have caution."
+msgstr ""
+
+msgctxt "sector_info_dialog_error_title"
+msgid "Error"
+msgstr ""
+
+msgctxt "sector_info_dialog_error_msg"
+msgid ""
+"Well, this is embarrassing, sorry for the issue. Please contact an "
+"administrator."
+msgstr ""
+
+#, c-format
+msgctxt "safe_strings"
+msgid "%1$s Strings"
+msgstr ""
+
+#, c-format
+msgctxt "safe_parabolt"
+msgid "%1$s Parabolts"
+msgstr ""
+
+#, c-format
+msgctxt "safe_spit"
+msgid "%1$s Spits"
+msgstr ""
+
+#, c-format
+msgctxt "safe_tensor"
+msgid "%1$s Tensors"
+msgstr ""
+
+#, c-format
+msgctxt "safe_piton"
+msgid "%1$s Pitons"
+msgstr ""
+
+#, c-format
+msgctxt "safe_buril"
+msgid "%1$s Burils"
+msgstr ""
+
+msgctxt "safe_plate"
+msgid "Plate"
+msgstr ""
+
+msgctxt "safe_plate_ring"
+msgid "Plate Ring"
+msgstr ""
+
+msgctxt "safe_lanyard"
+msgid "Lanyard"
+msgstr ""
+
+msgctxt "safe_cracker"
+msgid "Cracker"
+msgstr ""
+
+msgctxt "safe_friend"
+msgid "Friend"
+msgstr ""
+
+msgctxt "safe_strips"
+msgid "Strips"
+msgstr ""
+
+msgctxt "safe_nail"
+msgid "Nails"
+msgstr ""
+
+#. NC is for No Count
+msgctxt "safe_parabolt_nc"
+msgid "Parabolts"
+msgstr ""
+
+msgctxt "safe_spit_nc"
+msgid "Spit"
+msgstr ""
+
+msgctxt "safe_tensor_nc"
+msgid "Tensor"
+msgstr ""
+
+msgctxt "safe_piton_nc"
+msgid "Piton"
+msgstr ""
+
+msgctxt "safe_buril_nc"
+msgid "Buril"
+msgstr ""
+
+msgctxt "safe_strings_plural"
+msgid "Strings"
+msgstr ""
+
+msgctxt "mbm_login_click"
+msgid "Tap to login"
+msgstr ""
+
+msgctxt "login_title"
+msgid "Login"
+msgstr ""
+
+msgctxt "login_email"
+msgid "Email"
+msgstr ""
+
+msgctxt "login_password"
+msgid "Password"
+msgstr ""
+
+msgctxt "login_toast_error"
+msgid "Authentication failed"
+msgstr ""
+
+msgctxt "login_error_password"
+msgid "Wrong password"
+msgstr ""
+
+msgctxt "login_error_email"
+msgid "Email is not registered"
+msgstr ""
+
+msgctxt "login_error_no_password"
+msgid "Please, enter password"
+msgstr ""
+
+msgctxt "login_error_no_email"
+msgid "Please, enter email"
+msgstr ""
+
+msgctxt "action_signup"
+msgid "Sign Up"
+msgstr ""
+
+msgctxt "action_login"
+msgid "Login"
+msgstr ""
+
+msgctxt "action_lostPassword"
+msgid "Lost Password"
+msgstr ""
+
+msgctxt "action_revise"
+msgid "Revise"
+msgstr ""
+
+msgctxt "action_add"
+msgid "Add"
+msgstr ""
+
+msgctxt "action_close"
+msgid "Close"
+msgstr ""
+
+msgctxt "action_previous"
+msgid "Previous"
+msgstr ""
+
+msgctxt "action_next"
+msgid "Next"
+msgstr ""
+
+msgctxt "action_download"
+msgid "Download"
+msgstr ""
+
+msgctxt "action_logout"
+msgid "Log Out"
+msgstr ""
+
+msgctxt "action_cancel"
+msgid "Cancel"
+msgstr ""
+
+msgctxt "action_try_again"
+msgid "Try Again"
+msgstr ""
+
+msgctxt "action_downloads"
+msgid "See Downloads"
+msgstr ""
+
+msgctxt "action_delete"
+msgid "Delete"
+msgstr ""
+
+msgctxt "action_ok"
+msgid "OK"
+msgstr ""
+
+msgctxt "action_check_update"
+msgid "Check for Updates"
+msgstr ""
+
+msgctxt "action_update"
+msgid "Update"
+msgstr ""
+
+msgctxt "action_refresh"
+msgid "Refresh"
+msgstr ""
+
+msgctxt "action_share"
+msgid "Share"
+msgstr ""
+
+msgctxt "action_share_using"
+msgid "Share Using"
+msgstr ""
+
+msgctxt "action_website"
+msgid "Website"
+msgstr ""
+
+msgctxt "action_donate"
+msgid "Donate"
+msgstr ""
+
+msgctxt "action_grant"
+msgid "Grant"
+msgstr ""
+
+msgctxt "action_back"
+msgid "Go Back"
+msgstr ""
+
+msgctxt "action_mark_completed"
+msgid "Mark Completed"
+msgstr ""
+
+msgctxt "action_store"
+msgid "Store to device"
+msgstr ""
+
+msgctxt "action_disable"
+msgid "Disable"
+msgstr ""
+
+msgctxt "action_add_friend"
+msgid "Add Friend"
+msgstr ""
+
+msgctxt "action_change"
+msgid "Change"
+msgstr ""
+
+msgctxt "action_search"
+msgid "Search…"
+msgstr ""
+
+msgctxt "action_open_maps"
+msgid "Open Google Maps"
+msgstr ""
+
+msgctxt "action_clear_cache"
+msgid "Clear Cache"
+msgstr ""
+
+msgctxt "action_clear_storage"
+msgid "Clear Storage"
+msgstr ""
+
+msgctxt "action_clear_downloads"
+msgid "Clear Downloads"
+msgstr ""
+
+msgctxt "action_launch_app"
+msgid "Launch App"
+msgstr ""
+
+msgctxt "status_checking_updates"
+msgid "Checking…"
+msgstr ""
+
+msgctxt "status_updating"
+msgid "Updating…"
+msgstr ""
+
+msgctxt "status_downloaded"
+msgid "Downloaded"
+msgstr ""
+
+msgctxt "status_loading"
+msgid "Loading…"
+msgstr ""
+
+msgctxt "status_friend"
+msgid "Friend"
+msgstr ""
+
+msgctxt "status_not_downloaded"
+msgid "Not downloaded"
+msgstr ""
+
+msgctxt "dialog_logout_title"
+msgid "Log out"
+msgstr ""
+
+msgctxt "dialog_logout_message"
+msgid "Are you sure that you want to log out?"
+msgstr ""
+
+msgctxt "dialog_permission_title"
+msgid "Permission Required!"
+msgstr ""
+
+#, c-format
+msgctxt "dialog_permission_message"
+msgid ""
+"The functionality you are trying to use requires the %s permission. "
+"Please grant it, or refuse to use that."
+msgstr ""
+
+msgctxt "dialog_permission_my_location_message"
+msgid ""
+"For showing your current position, the app must have access to the "
+"location of your device. Please, grant it, or refuse to use this "
+"functionality."
+msgstr ""
+
+msgctxt "dialog_downloads_size_info_title"
+msgid "Downloads Size"
+msgstr ""
+
+msgctxt "dialog_downloads_size_info_msg"
+msgid ""
+"This shows the amount of storage used by the downloads of the app. This "
+"also shows the cached data, so it may not be 0MB even if you have no "
+"downloaded data."
+msgstr ""
+
+msgctxt "dialog_downloaded_area_title"
+msgid "Downloaded Area"
+msgstr ""
+
+msgctxt "dialog_downloaded_zone_title"
+msgid "Downloaded Zone"
+msgstr ""
+
+msgctxt "dialog_downloaded_sector_title"
+msgid "Downloaded Sector"
+msgstr ""
+
+msgctxt "dialog_downloaded_unknown_title"
+msgid "Downloaded Content"
+msgstr ""
+
+#, c-format
+msgctxt "dialog_downloaded_msg"
+msgid "Downloaded on: %s"
+msgstr ""
+
+msgctxt "dialog_update_title"
+msgid "New Update Available"
+msgstr ""
+
+msgctxt "dialog_update_message"
+msgid ""
+"Press UPDATE to start the update. Please, check your WiFi network. Mobile"
+" Data usage may be high."
+msgstr ""
+
+msgctxt "dialog_no_update_title"
+msgid "No New Updates"
+msgstr ""
+
+msgctxt "dialog_no_update_message"
+msgid "There are no new updates to download"
+msgstr ""
+
+msgctxt "dialog_sectors_title"
+msgid "Sectors List"
+msgstr ""
+
+msgctxt "dialog_download_corrupt_title"
+msgid "Download Corrupt"
+msgstr ""
+
+msgctxt "dialog_download_corrupt_message"
+msgid ""
+"The download is corrupt and unusable while offline, do you want to "
+"download it again? You must have Internet connection."
+msgstr ""
+
+msgctxt "dialog_download_gpx_title"
+msgid "Store GPX"
+msgstr ""
+
+msgctxt "dialog_download_gpx_message"
+msgid "Do you want to store the track in GPX?"
+msgstr ""
+
+msgctxt "dialog_mark_completed_title"
+msgid "Mark Path Completed"
+msgstr ""
+
+msgctxt "dialog_disable_ads_title"
+msgid "Disabling Ads"
+msgstr ""
+
+msgctxt "dialog_disable_ads_message"
+msgid ""
+"Hi, I am Arnau, the developer of this app. I allow you to disable ads "
+"completely free I don't want to be intrusive, but this app has taken lots"
+" of months of work from a single developer, and having the tiny income "
+"that ads make is a huge difference. So, even if you choose to show nor "
+"hide them, I'd ask you to think about donating, for keeping up the "
+"development of this app, and increasing its services."
+msgstr ""
+
+msgctxt "dialog_change_name_title"
+msgid "Change Display Name"
+msgstr ""
+
+msgctxt "dialog_change_name_hint_name"
+msgid "New Name:"
+msgstr ""
+
+msgctxt "dialog_add_friend_title"
+msgid "Add Friend"
+msgstr ""
+
+#, c-format
+msgctxt "dialog_add_friend_message"
+msgid "Are you sure you want to add %s as a friend?"
+msgstr ""
+
+msgctxt "completed_type_first"
+msgid "First"
+msgstr ""
+
+msgctxt "completed_type_top_rope"
+msgid "Top Rope"
+msgstr ""
+
+msgctxt "completed_type_lead"
+msgid "Lead"
+msgstr ""
+
+msgctxt "completed_type_label"
+msgid "Completed as"
+msgstr ""
+
+#, c-format
+msgctxt "completed_attemps_label"
+msgid "Attempts (%s)"
+msgstr ""
+
+#, c-format
+msgctxt "completed_hangs_label"
+msgid "Hangs (%s)"
+msgstr ""
+
+msgctxt "register_email"
+msgid "Email"
+msgstr ""
+
+msgctxt "register_pass"
+msgid "Password"
+msgstr ""
+
+msgctxt "register_pass_conf"
+msgid "Confirm Password"
+msgstr ""
+
+msgctxt "register_nick"
+msgid "Nickname"
+msgstr ""
+
+#, c-format
+msgctxt "register_error_nick_short"
+msgid "The nickname must have at least %s characters"
+msgstr ""
+
+#, c-format
+msgctxt "register_error_pass_short"
+msgid "The password must have at least %s characters"
+msgstr ""
+
+msgctxt "register_error_pass_not_strong"
+msgid "The password is not strong enough"
+msgstr ""
+
+msgctxt "register_error_pass_no_match"
+msgid "Passwords don't match"
+msgstr ""
+
+msgctxt "register_error_invalid_email"
+msgid "Invalid email"
+msgstr ""
+
+msgctxt "register_error_email_exists"
+msgid "Email already registered"
+msgstr ""
+
+msgctxt "add_path_title"
+msgid "Add Path"
+msgstr ""
+
+msgctxt "add_path_sketch_id"
+msgid "Sketch Id"
+msgstr ""
+
+msgctxt "add_path_display_name"
+msgid "Display Name"
+msgstr ""
+
+msgctxt "add_path_height"
+msgid "Height"
+msgstr ""
+
+msgctxt "add_path_dialog_title"
+msgid "Add path"
+msgstr ""
+
+msgctxt "add_path_dialog_message"
+msgid ""
+"Adding this path will have immediate effect, are you sure that you want "
+"to add it now?"
+msgstr ""
+
+msgctxt "path_ending_plate"
+msgid "Plate"
+msgstr ""
+
+msgctxt "path_ending_plate_ring"
+msgid "Plate Ring"
+msgstr ""
+
+msgctxt "path_ending_plate_lanyard"
+msgid "Plate Lanyard"
+msgstr ""
+
+msgctxt "path_ending_chain_ring"
+msgid "Chain Ring"
+msgstr ""
+
+msgctxt "path_ending_chain_carabiner"
+msgid "Chain Carabiner"
+msgstr ""
+
+msgctxt "path_ending_piton"
+msgid "Piton"
+msgstr ""
+
+msgctxt "path_ending_walking"
+msgid "Walking Descent"
+msgstr ""
+
+msgctxt "path_ending_rappel"
+msgid "Rappel Descent"
+msgstr ""
+
+msgctxt "path_ending_lanyard"
+msgid "Lanyard (Rock Bridge)"
+msgstr ""
+
+msgctxt "path_ending_none"
+msgid "No ending"
+msgstr ""
+
+msgctxt "path_ending_unknown"
+msgid "Unknown Ending"
+msgstr ""
+
+msgctxt "path_ending_multiple"
+msgid "Endings"
+msgstr ""
+
+msgctxt "path_ending_artifo_walking"
+msgid "Walking Descent"
+msgstr ""
+
+msgctxt "pref_main_title"
+msgid "General"
+msgstr ""
+
+msgctxt "pref_main_sum"
+msgid "General settings of the app"
+msgstr ""
+
+msgctxt "pref_noti_title"
+msgid "Notifications"
+msgstr ""
+
+msgctxt "pref_noti_sum"
+msgid "Notifications settings, and which show or not"
+msgstr ""
+
+msgctxt "pref_info_title"
+msgid "Info"
+msgstr ""
+
+msgctxt "pref_info_sum"
+msgid "Version, Build Number, Libraries…"
+msgstr ""
+
+msgctxt "pref_noti_alert_title"
+msgid "General Alerts"
+msgstr ""
+
+msgctxt "pref_noti_alert_sum"
+msgid "This will enable or disable local alerts"
+msgstr ""
+
+msgctxt "pref_noti_device_title"
+msgid "Notification Settings"
+msgstr ""
+
+msgctxt "pref_noti_device_sum"
+msgid "Show the system notification settings"
+msgstr ""
+
+msgctxt "pref_gene_gesture_sens_title"
+msgid "Swipe Gesture Sensibility"
+msgstr ""
+
+msgctxt "pref_gene_gesture_sens_sum"
+msgid ""
+"The sensibility for gestures such as the swipe to the sides from the "
+"Sector View."
+msgstr ""
+
+msgctxt "pref_gene_gesture_sens_msg"
+msgid "Sensibility"
+msgstr ""
+
+msgctxt "pref_gene_language_title"
+msgid "Language"
+msgstr ""
+
+msgctxt "pref_gene_language_sum"
+msgid "The language to use in the app"
+msgstr ""
+
+msgctxt "pref_gene_nearby_title"
+msgid "Enable Nearby Zones View"
+msgstr ""
+
+msgctxt "pref_gene_nearby_sum"
+msgid "Whether or not to enable nearby zones view"
+msgstr ""
+
+msgctxt "pref_gene_ads_title"
+msgid "Show Ads"
+msgstr ""
+
+msgctxt "pref_gene_ads_sum"
+msgid "Whether or not to show ads in the app"
+msgstr ""
+
+msgctxt "pref_gene_nearby_distance_title"
+msgid "Nearby Distance"
+msgstr ""
+
+msgctxt "pref_gene_nearby_distance_sum"
+msgid "At what distance will a zone be considered as nearby"
+msgstr ""
+
+msgctxt "pref_gene_nearby_distance_dialog_title"
+msgid "Nearby Zones Distance (m)"
+msgstr ""
+
+msgctxt "pref_gene_nearby_distance_dialog_message"
+msgid "Enter the maximum distance to consider as nearby zone in meters."
+msgstr ""
+
+msgctxt "pref_gene_map_icon_scale_title"
+msgid "Marker Scale"
+msgstr ""
+
+msgctxt "pref_gene_map_icon_scale_sum"
+msgid "The scale of the icons in the map"
+msgstr ""
+
+msgctxt "pref_gene_section_nearby"
+msgid "Nearby Zones"
+msgstr ""
+
+msgctxt "pref_gene_section_map"
+msgid "Map"
+msgstr ""
+
+msgctxt "pref_info_version_title"
+msgid "Version"
+msgstr ""
+
+msgctxt "pref_info_build_title"
+msgid "Build Number"
+msgstr ""
+
+msgctxt "notification_channel_downloads_group_name"
+msgid "Downloads"
+msgstr ""
+
+msgctxt "notification_channel_download_progress_name"
+msgid "Download Progress"
+msgstr ""
+
+msgctxt "notification_channel_download_progress_desc"
+msgid "When you are downloading something, this will be shown"
+msgstr ""
+
+msgctxt "notification_channel_download_complete_name"
+msgid "Download Complete"
+msgstr ""
+
+msgctxt "notification_channel_download_complete_desc"
+msgid "When something downloading has finished, this will be shown"
+msgstr ""
+
+msgctxt "notification_channel_alert_name"
+msgid "Alerts"
+msgstr ""
+
+msgctxt "notification_channel_alert_desc"
+msgid ""
+"This will warn you about incidences that were detected in climbing paths,"
+" sectors or others. This also includes paths re-equipment or repairing "
+"processes."
+msgstr ""
+
+msgctxt "notification_channel_people_group_name"
+msgid "People"
+msgstr ""
+
+msgctxt "notification_channel_friend_request_name"
+msgid "New Friend Request"
+msgstr ""
+
+msgctxt "notification_channel_friend_request_desc"
+msgid "This will warn you when anyone asks you about being a friend."
+msgstr ""
+
+msgctxt "notification_channel_friend_accepted_name"
+msgid "Friend Request Accepted"
+msgstr ""
+
+msgctxt "notification_channel_friend_accepted_desc"
+msgid "This will warn you when a request you made was accepted."
+msgstr ""
+
+msgctxt "notification_download_starting_title"
+msgid "Download starting…"
+msgstr ""
+
+msgctxt "notification_download_starting_msg"
+msgid "The download is getting started, please, wait."
+msgstr ""
+
+msgctxt "notification_download_progress_title"
+msgid "Downloading"
+msgstr ""
+
+#, c-format
+msgctxt "notification_download_progress_msg"
+msgid "Downloading %s / %s"
+msgstr ""
+
+msgctxt "notification_download_complete_title"
+msgid "Downloaded Correctly"
+msgstr ""
+
+#, c-format
+msgctxt "notification_download_complete_msg"
+msgid "Downloaded %s / %s"
+msgstr ""
+
+msgctxt "notification_friend_request_title"
+msgid "New Friend Request"
+msgstr ""
+
+#, c-format
+msgctxt "notification_friend_request_message"
+msgid "%s has asked you to be your friend."
+msgstr ""
+
+msgctxt "notification_friend_request_accepted_title"
+msgid "Friend Request Accepted"
+msgstr ""
+
+#, c-format
+msgctxt "notification_friend_request_accepted_message"
+msgid "Now %s is your friend!"
+msgstr ""
+
+msgctxt "no_internet_title"
+msgid "You have no Internet access"
+msgstr ""
+
+msgctxt "no_internet_message"
+msgid "You can access the downloaded content, or try again."
+msgstr ""
+
+msgctxt "downloads_size"
+msgid "Downloads Size:"
+msgstr ""
+
+#, c-format
+msgctxt "downloads_size_value"
+msgid "%sMB"
+msgstr ""
+
+msgctxt "downloads_areas"
+msgid "Downloaded Areas:"
+msgstr ""
+
+msgctxt "downloads_zones"
+msgid "Downloaded Zones:"
+msgstr ""
+
+msgctxt "downloads_sectors"
+msgid "Downloaded Sectors:"
+msgstr ""
+
+msgctxt "downloads_delete_dialog_title"
+msgid "Are you sure?"
+msgstr ""
+
+#, c-format
+msgctxt "downloads_delete_dialog_msg"
+msgid ""
+"This will delete %s from your device FOREVER. You will have to download "
+"it again."
+msgstr ""
+
+msgctxt "error_server"
+msgid ""
+"Could not connect to the server. It may be under maintenance. Please, "
+"check your Internet connection and try again later."
+msgstr ""
+
+msgctxt "error_data"
+msgid "Downloaded data is corrupt. Deleting…"
+msgstr ""
+
+msgctxt "error_chart_no_data"
+msgid "No Data"
+msgstr ""
+
+msgctxt "toast_error_internal"
+msgid "An internal error occurred"
+msgstr ""
+
+msgctxt "toast_error_no_sectors"
+msgid "Zone doesn't have any sectors"
+msgstr ""
+
+msgctxt "toast_error_no_internet"
+msgid "No Internet Access detected"
+msgstr ""
+
+msgctxt "toast_checking_missing_data"
+msgid "Checking for missing data"
+msgstr ""
+
+msgctxt "toast_error_github"
+msgid "Could not get Github data"
+msgstr ""
+
+msgctxt "toast_map_not_available"
+msgid "Map not Available"
+msgstr ""
+
+msgctxt "toast_location_not_shown"
+msgid "Current location won't be shown"
+msgstr ""
+
+msgctxt "toast_error_download"
+msgid "Download failed!"
+msgstr ""
+
+msgctxt "toast_error_image"
+msgid "Could not load image!"
+msgstr ""
+
+msgctxt "toast_error_change_name"
+msgid "Could not change name"
+msgstr ""
+
+msgctxt "toast_download_complete"
+msgid "Download Complete!"
+msgstr ""
+
+msgctxt "toast_storing_gpx"
+msgid "Storing GPX…"
+msgstr ""
+
+msgctxt "toast_stored_gpx"
+msgid "GPX stored!"
+msgstr ""
+
+msgctxt "toast_stored_kmz"
+msgid "KMZ stored!"
+msgstr ""
+
+msgctxt "toast_downloading"
+msgid "Downloading…"
+msgstr ""
+
+msgctxt "toast_restore_email_sent"
+msgid "If your account exists, you will receive a recover account email"
+msgstr ""
+
+msgctxt "toast_changed_name"
+msgid "Name changed!"
+msgstr ""
+
+msgctxt "toast_friend_added"
+msgid "Friend added!"
+msgstr ""
+
+msgctxt "toast_friend_request_sent"
+msgid "Request sent!"
+msgstr ""
+
+msgctxt "toast_clear_ok"
+msgid "Cleared correctly"
+msgstr ""
+
+msgctxt "path_warning_dry"
+msgid ""
+"This path has some safes getting dry. This may be because some kind of "
+"chemical safe has been using for the safes. This should be active for 2 "
+"days more or less."
+msgstr ""
+
+msgctxt "path_warning_build"
+msgid ""
+"This path is under construction or revision. This may take from days to "
+"weeks. Please, be patient. You can enable alert notifications on "
+"settings, and we will alert you when this is ready."
+msgstr ""
+
+msgctxt "path_warning_bird"
+msgid ""
+"This path has a nest on its way, so it is forbidden to climb. This may "
+"take the whole nesting season, so it may take weeks to be available "
+"again. You can enable alert notifications on settings, and we will alert "
+"you when this is ready."
+msgstr ""
+
+msgctxt "path_warning_old"
+msgid ""
+"This path is old which means it has old safes, and might not be safe. "
+"Climb under your own criteria. We are not responsible of any accident."
+msgstr ""
+
+msgctxt "path_warning_rocks"
+msgid ""
+"This path has loose rocks, which may fall while climbing. Please, have "
+"caution, both the climber and the people under him."
+msgstr ""
+
+msgctxt "path_warning_plants"
+msgid ""
+"This path hasn't been used in a long time, and it has plants in its way. "
+"It may be climbable, but you might have difficulties."
+msgstr ""
+
+msgctxt "path_chip_safe"
+msgid "Safes amount and type"
+msgstr ""
+
+msgctxt "path_chip_ending"
+msgid "Ending type for choosing the descent maneuver to use or top-rope."
+msgstr ""
+
+msgctxt "path_chip_required"
+msgid "The shown component is required"
+msgstr ""
+
+msgctxt "path_stats_chart_title"
+msgid "Grades"
+msgstr ""
+
+#, c-format
+msgctxt "path_ending_pitch"
+msgid "%s %s"
+msgstr ""
+
+msgctxt "path_ending_pitch_vertical"
+msgid "Vertical"
+msgstr ""
+
+msgctxt "path_ending_pitch_shelf"
+msgid "Shelf"
+msgstr ""
+
+msgctxt "path_ending_pitch_inclined"
+msgid "Inclined"
+msgstr ""
+
+msgctxt "path_ending_pitch_rappeleable"
+msgid "Rappelable"
+msgstr ""
+
+msgctxt "path_ending_pitch_walking"
+msgid "Walking"
+msgstr ""
+
+msgctxt "path_ending_pitch_clean"
+msgid "no equipment"
+msgstr ""
+
+msgctxt "path_fixed_equipment"
+msgid "Path fixed equipment"
+msgstr ""
+
+msgctxt "path_required_equipment"
+msgid "Required equipment"
+msgstr ""
+
+#, c-format
+msgctxt "path_pitch_id"
+msgid "R%s:"
+msgstr ""
+
+msgctxt "message_nearby_zones"
+msgid "Nearby zones"
+msgstr ""
+
+msgctxt "message_nearby_zones_no_perm"
+msgid ""
+"You have not granted access to the location of the device, so this "
+"functionality is not usable. Press once to ask for permission, or press "
+"and hold to disable."
+msgstr ""
+
+msgctxt "message_already_downloading"
+msgid "Content already downloading"
+msgstr ""
+
+msgctxt "fab_desc_back"
+msgid "Go Back"
+msgstr ""
+
+msgctxt "fab_desc_position"
+msgid "Current Location"
+msgstr ""
+
+msgctxt "fab_desc_download"
+msgid "Download"
+msgstr ""
+
+msgctxt "fab_desc_map"
+msgid "Open Google Maps"
+msgstr ""
+
+msgctxt "fab_desc_next"
+msgid "Next"
+msgstr ""
+
+msgctxt "fab_desc_zone"
+msgid "Zone"
+msgstr ""
+
+msgctxt "fab_desc_date"
+msgid "Date"
+msgstr ""
+
+msgctxt "image_desc_downloaded"
+msgid "Downloaded"
+msgstr ""
+
+msgctxt "image_desc_no_internet"
+msgid "No Internet"
+msgstr ""
+
+msgctxt "image_desc_marker"
+msgid "Marker"
+msgstr ""
+
+msgctxt "image_desc_qr"
+msgid "App Download QR"
+msgstr ""
+
+msgctxt "image_desc_profile"
+msgid "Profile Image"
+msgstr ""
+
+msgctxt "image_desc_zone_image"
+msgid "Zone image"
+msgstr ""
+
+msgctxt "image_desc_area_image"
+msgid "Area image"
+msgstr ""
+
+msgctxt "image_desc_fixed_equipment"
+msgid "Fixed Equipment"
+msgstr ""
+
+msgctxt "image_desc_download"
+msgid "Download"
+msgstr ""
+
+msgctxt "button_desc_view_download"
+msgid "View Download"
+msgstr ""
+
+msgctxt "button_desc_download"
+msgid "Download"
+msgstr ""
+
+msgctxt "button_desc_toggle"
+msgid "Toggle"
+msgstr ""
+
+msgctxt "button_desc_delete"
+msgid "Delete"
+msgstr ""
+
+msgctxt "placeholder"
+msgid "Placeholder"
+msgstr ""
+
+msgctxt "title_activity_maps"
+msgid "Map"
+msgstr ""
+
+msgctxt "title_used_libraries"
+msgid "Used Libraries"
+msgstr ""
+
+#, c-format
+msgctxt "share_app"
+msgid ""
+"Hey! check out %s on Play Store: "
+"https://play.google.com/store/apps/details?id=%s"
+msgstr ""
+
+msgctxt "credits_made"
+msgid ""
+"Made with <3 by <a href=\"https://twitter.com/ArnyminerZ\">ArnyminerZ</a>,"
+" from the Catalan Countries."
+msgstr ""
+
+#, c-format
+msgctxt "intro_main_title"
+msgid "Welcome to %s"
+msgstr ""
+
+msgctxt "intro_main_msg"
+msgid ""
+"Thank you for being a BETA tester. We are very pleased to have your help."
+" As a BETA tester, you will have to complete a configuration process, but"
+" don't worry, it's quick and we will be helping you the whole time."
+msgstr ""
+
+msgctxt "intro_main_message"
+msgid ""
+"We are going to walk you through a tiny configuration process. Don't "
+"worry it's fast and easy."
+msgstr ""
+
+msgctxt "intro_ads_title"
+msgid "InApp Advertisements"
+msgstr ""
+
+msgctxt "intro_ads_message"
+msgid "Please, choose whether or not to show ads"
+msgstr ""
+
+msgctxt "intro_ads_switch"
+msgid "Show Ads"
+msgstr ""
+
+msgctxt "date_format"
+msgid "yyyy-MM-dd hh:mm:ss a"
+msgstr ""
+
+msgctxt "short_date_format"
+msgid "yyyy-MM-dd"
+msgstr ""
+
+msgctxt "title_instant"
+msgid "Escalar Alcoia i Comtat"
+msgstr ""
+

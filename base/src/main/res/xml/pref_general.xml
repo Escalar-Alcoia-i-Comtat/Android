@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <SeekBarPreference
+        android:defaultValue="3"
+        android:dialogMessage="@string/pref_gene_gesture_sens_msg"
+        android:key="pref_swipe_sensibility"
+        android:max="6"
+        android:summary="@string/pref_gene_gesture_sens_sum"
+        android:text=""
+        android:title="@string/pref_gene_gesture_sens_title" />
+
+    <ListPreference
+        android:entries="@array/app_languages"
+        android:entryValues="@array/app_languages_values"
+        android:key="pref_language"
+        android:summary="@string/pref_gene_language_sum"
+        android:title="@string/pref_gene_language_title" />
+
+    <PreferenceCategory android:title="@string/pref_gene_section_nearby">
+        <SwitchPreference
+            android:key="pref_enable_nearby"
+            android:summary="@string/pref_gene_nearby_sum"
+            android:title="@string/pref_gene_nearby_title" />
+
+        <EditTextPreference
+            android:dependency="pref_enable_nearby"
+            android:dialogMessage="@string/pref_gene_nearby_distance_dialog_message"
+            android:dialogTitle="@string/pref_gene_nearby_distance_dialog_title"
+            android:digits="0123456789"
+            android:inputType="numberDecimal"
+            android:key="pref_nearby_distance"
+            android:summary="@string/pref_gene_nearby_distance_sum"
+            android:title="@string/pref_gene_nearby_distance_title" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_gene_section_map">
+        <SeekBarPreference
+            android:key="pref_marker_size"
+            android:defaultValue="3"
+            app:min="1"
+            android:max="5"
+            android:title="@string/pref_gene_map_icon_scale_title"
+            android:summary="@string/pref_gene_map_icon_scale_sum" />
+
+        <SwitchPreference
+            android:key="pref_move_marker"
+            android:title="@string/pref_gene_map_move_marker_title"
+            android:summary="@string/pref_gene_map_move_marker_sum" />
+
+        <SwitchPreference
+            android:key="pref_small_map_enable"
+            android:title="@string/pref_gene_map_small_map_enable_title"
+            android:summary="@string/pref_gene_map_small_map_enable_sum" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_gene_section_advanced">
+        <SeekBarPreference
+            android:key="pref_preview_scale"
+            app:seekBarIncrement="1"
+            app:showSeekBarValue="true"
+            app:min="1"
+            android:max="10"
+            android:title="@string/pref_gene_preview_scale_title"
+            android:summary="@string/pref_gene_preview_scale_sum" />
+    </PreferenceCategory>
+</PreferenceScreen>
