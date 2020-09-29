@@ -1,3 +1,5 @@
 build
 .idea
 local.properties
+google-services.json
+base/cred.gradle
