@@ -7,14 +7,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.FriendSearchActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.ProfileActivity.Companion.BUNDLE_EXTRA_USER_UID
-import com.arnyminerz.escalaralcoiaicomtat.connection.ftp.FTP_PASSWORD
-import com.arnyminerz.escalaralcoiaicomtat.connection.ftp.FTP_SERVER
-import com.arnyminerz.escalaralcoiaicomtat.connection.ftp.FTP_USER
 import com.arnyminerz.escalaralcoiaicomtat.connection.ftp.ftpConnect
 import com.arnyminerz.escalaralcoiaicomtat.data.user.CompletedPathSortOrder
 import com.arnyminerz.escalaralcoiaicomtat.data.user.FriendRequest
@@ -276,7 +275,10 @@ class ProfileFragment : NetworkChangeListenerFragment() {
                 user_name_textView.setCompoundDrawablesWithIntrinsicBounds(
                     null,
                     null,
-                    if (isSelf) requireContext().getDrawable(R.drawable.pencil) else null,
+                    if (isSelf) ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.pencil
+                    ) else null,
                     null
                 )
                 user_name_textView.text = user!!.username
@@ -365,7 +367,8 @@ class ProfileFragment : NetworkChangeListenerFragment() {
                             )
                         }"
                     Timber.v("File Upload Path: $uploadPath")
-                    val ftp = ftpConnect(FTP_SERVER, FTP_USER, FTP_PASSWORD)
+                    val ftp =
+                        ftpConnect(BuildConfig.FTP_HOST, BuildConfig.FTP_USER, BuildConfig.FTP_PASS)
 
                     val fileInputStream = stream as FileInputStream
                     val uploaded = ftp.uploadImage(fileInputStream, uploadPath)

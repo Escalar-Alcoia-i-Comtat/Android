@@ -5,11 +5,11 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.preference.Preference
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.data.preference.PreferenceData
 import com.arnyminerz.escalaralcoiaicomtat.data.user.UserData
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.*
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerPreferenceFragment
-import com.arnyminerz.escalaralcoiaicomtat.generic.PreferenceData
 import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import kotlinx.coroutines.GlobalScope

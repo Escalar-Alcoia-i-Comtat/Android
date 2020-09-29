@@ -9,9 +9,9 @@ import androidx.core.content.ContextCompat
 import androidx.preference.*
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.sharedPreferences
+import com.arnyminerz.escalaralcoiaicomtat.data.preference.store
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.generic.loadLocale
-import com.arnyminerz.escalaralcoiaicomtat.generic.store
 import org.jetbrains.anko.toast
 import timber.log.Timber
 
