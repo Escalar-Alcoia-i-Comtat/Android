@@ -27,7 +27,7 @@ android {
         buildTypes.each {
             it.buildConfigField 'String', 'FTP_HOST', project.FTP_SERVER
             it.buildConfigField 'String', 'FTP_USER', project.FTP_USER
-            it.buildConfigField 'String', 'FTP_PASS', project.FTP_PASSWORD
+            it.buildConfigField 'String', 'FTP_PASS', project.FTP_PASS
         }
         release {
             minifyEnabled true
@@ -49,14 +49,14 @@ android {
 
             resValue "string", "ftp_host", project.FTP_SERVER
             resValue "string", "ftp_user", project.FTP_USER
-            resValue "string", "ftp_pass", project.FTP_PASSWORD
+            resValue "string", "ftp_pass", project.FTP_PASS
         }
         debug {
             versionNameSuffix "-debug-build" + getDate()
 
             resValue "string", "ftp_host", project.FTP_SERVER
             resValue "string", "ftp_user", project.FTP_USER
-            resValue "string", "ftp_pass", project.FTP_PASSWORD
+            resValue "string", "ftp_pass", project.FTP_PASS
         }
     }
     kotlinOptions {
