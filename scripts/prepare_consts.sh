@@ -39,7 +39,7 @@ rm -rf base/cred.gradle
 
 echo "✏ Writing preferences to cred.gradle..."
 {
-  echo "project.ext.FTP_SERVER=\"$FTP_SERVER\""
-  echo "project.ext.FTP_USER=\"$FTP_USER\""
-  echo "project.ext.FTP_PASS=\"$FTP_PASS\""
-} >>base/cred.gradle
+  echo "project.ext.FTP_SERVER=\"\\\"$FTP_SERVER\\\"\""
+  echo "project.ext.FTP_USER=\"\\\"$FTP_USER\\\"\""
+  echo "project.ext.FTP_PASS=\"\\\"$FTP_PASS\\\"\""
+} >> base/cred.gradle
