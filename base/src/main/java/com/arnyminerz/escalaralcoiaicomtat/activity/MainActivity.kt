@@ -15,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
+import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.fragment.AuthFragment
@@ -319,12 +320,12 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
         if (state.hasInternet && !serverAvailable) {
             doAsync {
-                val canReachServer = URL("https://arnyminerz.com:3001").ping()
+                val canReachServer = URL(EXTENDED_API_URL).ping()
                 if (canReachServer) {
                     Timber.v("Reached arnyminerz.com")
                     serverAvailable = true
                 } else {
-                    Timber.e("Could not ping arnyminerz.com:3001")
+                    Timber.e("Could not ping $EXTENDED_API_URL")
                     startActivity(Intent(this@MainActivity, ServerDownActivity::class.java))
                 }
             }
