@@ -2,8 +2,10 @@ package com.arnyminerz.escalaralcoiaicomtat.generic
 
 import android.app.Activity
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.LocaleList
 import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_LANGUAGE_PREF
@@ -38,3 +40,6 @@ fun Activity.loadLocale() {
     } else
         Timber.v("    No language was set in settings, using system default.")
 }
+
+fun Context.isPermissionGranted(permission: String): Boolean =
+    ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
