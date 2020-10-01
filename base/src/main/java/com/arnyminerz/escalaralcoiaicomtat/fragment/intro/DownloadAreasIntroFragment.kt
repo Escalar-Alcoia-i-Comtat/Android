@@ -50,11 +50,13 @@ class DownloadAreasIntroFragment : Fragment() {
                         Timber.e("Areas data file wasn't written")
                 }
 
-                (activity as? IntroActivity)?.let {
-                    it.fabStatus(true)
-                    it.next()
+                activity.runOnUiThread {
+                    (activity as? IntroActivity)?.let {
+                        it.fabStatus(true)
+                        it.next()
+                    }
+                    finishListener?.invoke()
                 }
-                finishListener?.invoke()
             }
         }
     }
