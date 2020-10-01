@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -22,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.MainIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.StorageIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.StorageIntroFragment.Companion.STORAGE_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_SHOWN_INTRO
+import com.arnyminerz.escalaralcoiaicomtat.generic.isPermissionGranted
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.activity_intro.*
@@ -37,16 +37,11 @@ class IntroActivity : AppCompatActivity() {
         fun cacheFile(context: Context) = File(context.filesDir, "cache.json")
 
         fun hasStoragePermission(context: Context): Boolean =
-            ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) ==
-                    PackageManager.PERMISSION_GRANTED
+            context.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)
 
-        fun hasLocationPermission(context: Context): Boolean = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+        fun hasLocationPermission(context: Context): Boolean =
+            context.isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION) ||
+                    context.isPermissionGranted(Manifest.permission.ACCESS_COARSE_LOCATION)
 
         fun hasDownloaded(context: Context): Boolean = cacheFile(context).exists()
 
@@ -106,7 +101,9 @@ class IntroActivity : AppCompatActivity() {
         }
     }
 
-    fun fabStatus(enabled: Boolean) = intro_next_FAB.setEnabled(enabled)
+    fun fabStatus(enabled: Boolean) {
+        intro_next_FAB.isEnabled = enabled
+    }
 
     fun next() {
         if (view_pager.currentItem + 1 >= adapterViewPager!!.fragments.size) {
