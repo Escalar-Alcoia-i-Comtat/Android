@@ -56,6 +56,12 @@ abstract class DataClass<A : Serializable, B : Serializable>(
 
     operator fun get(index: Int): A = children[index]
 
+    override fun equals(other: Any?): Boolean {
+        if (other !is DataClass<*, *>)
+            return super.equals(other)
+        return other.namespace == namespace && other.id == id
+    }
+
     private var i: Int = 0
     override fun next(): A {
         i++
@@ -392,5 +398,21 @@ abstract class DataClass<A : Serializable, B : Serializable>(
                 .apply(imageLoadParameters)
                 .submit()
         }
+    }
+
+    override fun hashCode(): Int {
+        var result = id
+        result = 31 * result + version
+        result = 31 * result + displayName.hashCode()
+        result = 31 * result + (timestamp?.hashCode() ?: 0)
+        result = 31 * result + imageUrl.hashCode()
+        result = 31 * result + placeholderDrawable
+        result = 31 * result + errorPlaceholderDrawable
+        result = 31 * result + parentId
+        result = 31 * result + namespace.hashCode()
+        result = 31 * result + children.hashCode()
+        result = 31 * result + isDownloading.hashCode()
+        result = 31 * result + i
+        return result
     }
 }
