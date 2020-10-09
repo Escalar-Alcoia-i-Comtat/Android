@@ -59,28 +59,38 @@ data class DataClassScanHeights(
     val sectorIndex: Int? = null
 ) {
     @ExperimentalUnsignedTypes
-    fun launchActivity(context: Context) {
+    fun launchActivity(context: Context): Boolean {
         when {
-            sectorIndex != null -> context.startActivity(
-                Intent(context, SectorActivity::class.java).apply {
-                    putExtra(EXTRA_AREA, areaIndex!!)
-                    putExtra(EXTRA_ZONE, zoneIndex!!)
-                    putExtra(EXTRA_SECTOR, sectorIndex)
-                }
-            )
-            zoneIndex != null -> context.startActivity(
-                Intent(context, ZoneActivity::class.java).apply {
-                    putExtra(EXTRA_AREA, areaIndex!!)
-                    putExtra(EXTRA_ZONE, zoneIndex)
-                }
-            )
-            areaIndex != null -> context.startActivity(
-                Intent(context, AreaActivity::class.java).apply {
-                    putExtra(EXTRA_AREA, areaIndex)
-                }
-            )
+            sectorIndex != null -> {
+                context.startActivity(
+                    Intent(context, SectorActivity::class.java).apply {
+                        putExtra(EXTRA_AREA, areaIndex!!)
+                        putExtra(EXTRA_ZONE, zoneIndex!!)
+                        putExtra(EXTRA_SECTOR, sectorIndex)
+                    }
+                )
+                return true
+            }
+            zoneIndex != null -> {
+                context.startActivity(
+                    Intent(context, ZoneActivity::class.java).apply {
+                        putExtra(EXTRA_AREA, areaIndex!!)
+                        putExtra(EXTRA_ZONE, zoneIndex)
+                    }
+                )
+                return true
+            }
+            areaIndex != null -> {
+                context.startActivity(
+                    Intent(context, AreaActivity::class.java).apply {
+                        putExtra(EXTRA_AREA, areaIndex)
+                    }
+                )
+                return true
+            }
             else -> Timber.e("Can't find valid context to launch scan result")
         }
+        return false
     }
 }
 
@@ -92,19 +102,18 @@ data class DataClassScanHeights(
  * @return A scan result with the height set
  */
 @ExperimentalUnsignedTypes
-fun Collection<Area>.find(dataClass: DataClass<*, *>?): DataClassScanHeights {
-    if (dataClass != null)
-        for ((a, area) in this.withIndex())
-            if (area == dataClass)
-                return DataClassScanHeights(a)
-            else if (area.isNotEmpty())
-                for ((z, zone) in area.withIndex())
-                    if (zone == dataClass)
-                        return DataClassScanHeights(a, z)
-                    else if (zone.isNotEmpty())
-                        for ((s, sector) in zone.withIndex())
-                            if (sector == dataClass)
-                                return DataClassScanHeights(a, z, s)
+fun Collection<Area>.find(dataClass: DataClass<*, *>): DataClassScanHeights {
+    for ((a, area) in this.withIndex())
+        if (area == dataClass)
+            return DataClassScanHeights(a)
+        else if (area.isNotEmpty())
+            for ((z, zone) in area.withIndex())
+                if (zone == dataClass)
+                    return DataClassScanHeights(a, z)
+                else if (zone.isNotEmpty())
+                    for ((s, sector) in zone.withIndex())
+                        if (sector == dataClass)
+                            return DataClassScanHeights(a, z, s)
 
     return DataClassScanHeights()
 }
@@ -129,7 +138,7 @@ data class Area(
     R.drawable.ic_wide_placeholder,
     R.drawable.ic_wide_placeholder,
     parentId,
-    "area"
+    NAMESPACE
 ) {
     val transitionName
         get() = id.toString() + displayName.replace(" ", "_")
@@ -204,6 +213,8 @@ data class Area(
 
             return fromDB(json)
         }
+
+        const val NAMESPACE = "area"
     }
 }
 
