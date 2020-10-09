@@ -32,7 +32,7 @@ data class Zone(
     R.drawable.ic_tall_placeholder,
     R.drawable.ic_tall_placeholder,
     parentId,
-    "zone"
+    NAMESPACE
 ) {
     val transitionName = id.toString() + displayName.replace(" ", "_")
 
@@ -114,5 +114,7 @@ data class Zone(
 
             return fromDB(json)
         }
+
+        const val NAMESPACE = "zone"
     }
 }

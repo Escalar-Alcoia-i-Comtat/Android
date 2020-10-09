@@ -47,7 +47,7 @@ data class Sector constructor(
     R.drawable.ic_wide_placeholder,
     R.drawable.ic_wide_placeholder,
     parentId,
-    "sector"
+    NAMESPACE
 ) {
 
     constructor(json: JSONObject) : this(
@@ -212,5 +212,7 @@ data class Sector constructor(
 
             return fromDB(json)
         }
+
+        const val NAMESPACE = "sector"
     }
 }
