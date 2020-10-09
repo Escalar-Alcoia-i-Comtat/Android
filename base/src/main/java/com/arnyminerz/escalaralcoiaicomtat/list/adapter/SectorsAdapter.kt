@@ -26,10 +26,11 @@ import timber.log.Timber
 @ExperimentalUnsignedTypes
 class SectorsAdapter(
     private val dataClassListActivity: DataClassListActivity,
-    private val sectors: ArrayList<Sector>
+    private val sectors: ArrayList<Sector>,
+    listener: ((sector: Sector, viewHolder: SectorsViewHolder, index: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<SectorsViewHolder>() {
     private var onItemSelected: ((sector: Sector, viewHolder: SectorsViewHolder, index: Int) -> Unit)? =
-        null
+        listener
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SectorsViewHolder =
         SectorsViewHolder(
@@ -132,11 +133,6 @@ class SectorsAdapter(
                 }
             }
         }
-    }
-
-    fun withItemListener(listener: ((sector: Sector, viewHolder: SectorsViewHolder, index: Int) -> Unit)?): SectorsAdapter {
-        onItemSelected = listener
-        return this
     }
 
     private fun refreshDownloadImage(

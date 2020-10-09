@@ -56,9 +56,4 @@ class AreaAdapter(
             else ImageLoadParameters().withThumbnailSize(SETTINGS_PREVIEW_SCALE_PREF.default)
         )
     }
-
-    fun withClickListener(listener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?): AreaAdapter {
-        clickListener = listener
-        return this
-    }
 }

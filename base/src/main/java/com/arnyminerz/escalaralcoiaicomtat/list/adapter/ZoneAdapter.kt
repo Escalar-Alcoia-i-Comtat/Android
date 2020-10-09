@@ -26,18 +26,14 @@ import java.io.File
 @ExperimentalUnsignedTypes
 class ZoneAdapter(
     private val zones: ArrayList<Zone>,
-    private val dataClassListActivity: DataClassListActivity
+    private val dataClassListActivity: DataClassListActivity,
+    listener: ((zone: Zone, viewHolder: ZonesViewHolder, index: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<ZonesViewHolder>() {
     private var onItemSelected: ((zone: Zone, viewHolder: ZonesViewHolder, index: Int) -> Unit)? =
-        null
+        listener
 
     init {
         Timber.d("Created ZoneAdapter!")
-    }
-
-    fun withItemListener(listener: ((zone: Zone, viewHolder: ZonesViewHolder, index: Int) -> Unit)?): ZoneAdapter {
-        onItemSelected = listener
-        return this
     }
 
     override fun getItemCount(): Int = zones.size
