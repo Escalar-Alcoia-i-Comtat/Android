@@ -131,20 +131,21 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
     private fun updateBottomAppBar() {
         val position = main_viewPager.currentItem
+        val showingViewPager = visibility(main_viewPager)
         bottom_app_bar.navigationIcon =
             ContextCompat.getDrawable(
                 this,
-                if (position == TAB_ITEM_HOME) R.drawable.round_explore_24 else R.drawable.ic_outline_explore_24
+                if (position == TAB_ITEM_HOME && showingViewPager) R.drawable.round_explore_24 else R.drawable.ic_outline_explore_24
             )
         menuMapIcon?.icon =
             ContextCompat.getDrawable(
                 this,
-                if (position == TAB_ITEM_MAP) R.drawable.ic_round_map_24 else R.drawable.ic_outline_map_24
+                if (position == TAB_ITEM_MAP && showingViewPager) R.drawable.ic_round_map_24 else R.drawable.ic_outline_map_24
             )
         menuDownloadsIcon?.icon =
             ContextCompat.getDrawable(
                 this,
-                if (position == TAB_ITEM_DOWNLOADS) R.drawable.ic_round_cloud_download_24 else R.drawable.ic_outline_cloud_download_24
+                if (position == TAB_ITEM_DOWNLOADS && showingViewPager) R.drawable.ic_round_cloud_download_24 else R.drawable.ic_outline_cloud_download_24
             )
     }
 
@@ -180,6 +181,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                     replace(R.id.main_frameLayout, authFragment)
                     commit()
                 }
+                updateBottomAppBar()
             } else onBackPressed()
         }
         bottom_app_bar.setNavigationOnClickListener {
@@ -295,6 +297,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                 super.onBackPressed()
                 finish()
             }
+        updateBottomAppBar()
     }
 
     override fun onRequestPermissionsResult(
