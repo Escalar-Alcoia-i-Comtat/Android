@@ -24,11 +24,15 @@ class DownloadsFragment : NetworkChangeListenerFragment() {
     ): View? =
         inflater.inflate(R.layout.fragment_downloads, container, false)
 
+    fun reloadSizeTextView() {
+        val dataDir = dataDir(requireContext())
+        downloadSize_textView.text = dataDir.sizeString()
+    }
+
     override fun onResume() {
         super.onResume()
 
-        val dataDir = dataDir(requireContext())
-        downloadSize_textView.text = dataDir.sizeString()
+        reloadSizeTextView()
 
         val sections = DownloadedSection.list()
 

@@ -60,6 +60,7 @@ class DownloadSectionsAdapter(
                         }, {
                             visibility(downloadProgressBar, false)
                             Timber.v("Finished downloading. Updating Downloads Recycler View...")
+                            mainActivity.downloadsFragment.reloadSizeTextView()
                             notifyDataSetChanged()
                         }, { progress, max ->
                             downloadProgressBar.isIndeterminate = false
@@ -139,6 +140,7 @@ class DownloadSectionsAdapter(
                             )
                             .setPositiveButton(R.string.action_delete) { _, _ ->
                                 section.delete(mainActivity)
+                                mainActivity.downloadsFragment.reloadSizeTextView()
                                 notifyDataSetChanged()
                                 recyclerView.adapter?.notifyDataSetChanged()
                             }
