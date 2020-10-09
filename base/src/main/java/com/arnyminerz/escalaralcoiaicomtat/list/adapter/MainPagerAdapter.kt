@@ -10,8 +10,7 @@ import timber.log.Timber
 class MainPagerAdapter(
     fa: FragmentActivity,
     val items: HashMap<Int, NetworkChangeListenerFragment>
-) :
-    FragmentStateAdapter(fa) {
+) : FragmentStateAdapter(fa) {
     override fun getItemCount(): Int = items.size
 
     override fun createFragment(position: Int): Fragment {
