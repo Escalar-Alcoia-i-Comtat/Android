@@ -5,6 +5,7 @@
         android:id="@+id/action_1"
         android:icon="@drawable/ic_outline_map_24"
         android:title="@string/item_map"
+        android:visible="false"
         app:showAsAction="ifRoom" />
 
     <item
