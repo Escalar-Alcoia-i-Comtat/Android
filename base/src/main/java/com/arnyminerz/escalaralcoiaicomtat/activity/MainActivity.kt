@@ -49,6 +49,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_list.*
 import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.toast
 import timber.log.Timber
 import timber.log.Timber.DebugTree
 import java.io.File
@@ -351,6 +352,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             mapFragment.setAreas(AREAS)
 
             areasViewFragment.updateAreas { holder, position ->
+                toast(R.string.toast_loading)
                 Timber.v("Clicked item %s", position)
                 val intent = Intent(this, AreaActivity()::class.java)
                     .putExtra(EXTRA_AREA, position)

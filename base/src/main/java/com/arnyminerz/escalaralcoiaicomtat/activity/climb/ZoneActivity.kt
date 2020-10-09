@@ -13,14 +13,12 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_SMALL_MAP_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
-import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.SectorsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import kotlinx.android.synthetic.main.layout_list.*
+import org.jetbrains.anko.toast
 import timber.log.Timber
 
 @ExperimentalUnsignedTypes
@@ -90,7 +88,8 @@ class ZoneActivity : DataClassListActivity() {
                     SectorsAdapter(
                         this@ZoneActivity,
                         sectors
-                    ).withItemListener { _, viewHolder, index ->
+                    ) { _, viewHolder, index ->
+                        toast(R.string.toast_loading)
                         Timber.v("Clicked item $index")
                         val trn =
                             ViewCompat.getTransitionName(viewHolder.titleTextView)

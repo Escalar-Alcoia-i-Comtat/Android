@@ -21,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.libraries.maps.model.LatLng
 import kotlinx.android.synthetic.main.layout_list.*
+import org.jetbrains.anko.toast
 import timber.log.Timber
 
 @ExperimentalUnsignedTypes
@@ -86,28 +87,28 @@ class AreaActivity : DataClassListActivity() {
                             R.anim.item_enter_left_animator
                         )
                 recyclerView.adapter =
-                    ZoneAdapter(zones, this)
-                        .withItemListener { _, holder, position ->
-                            Timber.v("Clicked item $position")
-                            val intent =
-                                Intent(this@AreaActivity, ZoneActivity()::class.java)
-                                    .putExtra(EXTRA_AREA, areaIndex)
-                                    .putExtra(EXTRA_ZONE, position)
+                    ZoneAdapter(zones, this) { _, holder, position ->
+                        toast(R.string.toast_loading)
+                        Timber.v("Clicked item $position")
+                        val intent =
+                            Intent(this@AreaActivity, ZoneActivity()::class.java)
+                                .putExtra(EXTRA_AREA, areaIndex)
+                                .putExtra(EXTRA_ZONE, position)
 
-                            val optionsBundle =
-                                ViewCompat.getTransitionName(holder.titleTextView)
-                                    ?.let { transitionName ->
-                                        intent.putExtra(EXTRA_ZONE_TRANSITION_NAME, transitionName)
+                        val optionsBundle =
+                            ViewCompat.getTransitionName(holder.titleTextView)
+                                ?.let { transitionName ->
+                                    intent.putExtra(EXTRA_ZONE_TRANSITION_NAME, transitionName)
 
-                                        ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                            this,
-                                            holder.titleTextView,
-                                            transitionName
-                                        ).toBundle()
-                                    } ?: Bundle.EMPTY
+                                    ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                        this,
+                                        holder.titleTextView,
+                                        transitionName
+                                    ).toBundle()
+                                } ?: Bundle.EMPTY
 
-                            startActivity(intent, optionsBundle)
-                        }
+                        startActivity(intent, optionsBundle)
+                    }
 
                 if (smallMapEnabled) {
                     val mapHelper = MapHelper(this, R.id.map)

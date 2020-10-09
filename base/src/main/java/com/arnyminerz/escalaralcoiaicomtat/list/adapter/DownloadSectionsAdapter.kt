@@ -98,6 +98,7 @@ class DownloadSectionsAdapter(
             downloadedSection.updateView(cardView, toggleButton, recyclerView, mainActivity)
 
             viewButton.setOnClickListener {
+                toast(mainActivity, R.string.toast_loading)
                 val scan = AREAS.find(section)
                 if (!scan.launchActivity(mainActivity)) {
                     Timber.w("Could not launch activity.")
