@@ -276,11 +276,12 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
 
                     setOnInfoWindowClickListener { marker ->
                         val dataClass = MapHelper.getTarget(marker)
-                        val scan = AREAS.find(dataClass)
+                        val scan = dataClass?.let { AREAS.find(it) }
 
                         Timber.v("Marker Title: ${marker.title}")
                         Timber.v("Clicked info window! Data Class: $dataClass")
-                        scan.launchActivity(this@MapsActivity)
+                        scan?.launchActivity(this@MapsActivity)
+                            ?: Timber.w("Won't launch activity since dataClass is null")
                     }
 
                     setOnMarkerClickListener { marker ->

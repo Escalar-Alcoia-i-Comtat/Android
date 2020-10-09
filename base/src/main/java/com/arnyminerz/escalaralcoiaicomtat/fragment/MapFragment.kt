@@ -127,8 +127,9 @@ class MapFragment : NetworkChangeListenerFragment() {
 
                     googleMap.setOnInfoWindowClickListener { marker ->
                         val dataClass = MapHelper.getTarget(marker)
-                        val scan = AREAS.find(dataClass)
-                        scan.launchActivity(requireContext())
+                        val scan = dataClass?.let { AREAS.find(it) }
+                        scan?.launchActivity(requireContext())
+                            ?: Timber.w("Won't launch activity since dataClass is null")
 
                         Timber.e(
                             "Could not find any valid zone with name \"%s\".",
