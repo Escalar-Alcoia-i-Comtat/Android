@@ -110,19 +110,20 @@ class ZoneActivity : DataClassListActivity() {
                     }
 
                 if (smallMapEnabled) {
-                    val mapHelper = MapHelper(this@ZoneActivity, R.id.map)
-                    mapHelper.loadMap { _, _, googleMap ->
+                    val mapHelper = MapHelper(R.id.map)
+                    mapHelper.loadMap(this, { _, googleMap ->
                         googleMap.uiSettings.apply {
                             isCompassEnabled = false
                             setAllGesturesEnabled(false)
                         }
 
-                        mapHelper.loadKML(zone.kmlAddress, state)
+                        mapHelper
+                            .loadKML(this, zone.kmlAddress, state)
                             .listen(object : ResultListener<MapFeatures> {
                                 override fun onCompleted(result: MapFeatures) {
                                     googleMap.setOnMapClickListener {
                                         try {
-                                            mapHelper.showMapsActivity()
+                                            mapHelper.showMapsActivity(this@ZoneActivity)
                                         } catch (ex: MapAnyDataToLoadException) {
                                             Timber.e(
                                                 ex,
@@ -130,14 +131,20 @@ class ZoneActivity : DataClassListActivity() {
                                             )
                                         }
                                     }
-                                    googleMap.setOnMarkerClickListener { mapHelper.showMapsActivity(); return@setOnMarkerClickListener true }
+                                    googleMap.setOnMarkerClickListener {
+                                        mapHelper.showMapsActivity(
+                                            this@ZoneActivity
+                                        ); return@setOnMarkerClickListener true
+                                    }
                                 }
 
                                 override fun onFailure(error: Exception?) {
                                     error?.let { throw it }
                                 }
                             })
-                    }
+                    }, {
+                        Timber.e(it, "Could not load map:")
+                    })
                 }
 
                 loaded = true

@@ -111,19 +111,29 @@ class AreaActivity : DataClassListActivity() {
                     }
 
                 if (smallMapEnabled) {
-                    val mapHelper = MapHelper(this, R.id.map)
-                    mapHelper.withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5f)
-                        .loadMap { _, _, googleMap ->
+                    val mapHelper = MapHelper(R.id.map)
+                    mapHelper
+                        .withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5f)
+                        .loadMap(this, { _, googleMap ->
                             googleMap.uiSettings.apply {
                                 isCompassEnabled = false
                                 setAllGesturesEnabled(false)
                             }
 
-                            mapHelper.loadKML(area.kmlAddress, state)
+                            mapHelper
+                                .loadKML(this, area.kmlAddress, state)
                                 .listen(object : ResultListener<MapFeatures> {
                                     override fun onCompleted(result: MapFeatures) {
-                                        googleMap.setOnMapClickListener { mapHelper.showMapsActivity() }
-                                        googleMap.setOnMarkerClickListener { mapHelper.showMapsActivity(); return@setOnMarkerClickListener true }
+                                        googleMap.setOnMapClickListener {
+                                            mapHelper.showMapsActivity(
+                                                this@AreaActivity
+                                            )
+                                        }
+                                        googleMap.setOnMarkerClickListener {
+                                            mapHelper.showMapsActivity(
+                                                this@AreaActivity
+                                            ); return@setOnMarkerClickListener true
+                                        }
                                     }
 
                                     override fun onFailure(error: Exception?) {
@@ -133,7 +143,9 @@ class AreaActivity : DataClassListActivity() {
                                             error?.let { throw it }
                                     }
                                 })
-                        }
+                        }, {
+                            Timber.e(it, "Could not load map:")
+                        })
                 }
 
                 loaded = true

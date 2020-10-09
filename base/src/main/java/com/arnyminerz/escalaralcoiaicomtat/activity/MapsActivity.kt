@@ -689,7 +689,8 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
 
         val title = marker.title
         val description = marker.snippet
-        val infoWindow = MapHelper.getTarget(marker)
+        val iwdc = MapHelper.getTarget(marker) // Info Window Data Class
+        val dcSearch = iwdc?.let { AREAS.find(it) }
 
         map_info_textView.text = title
 
@@ -701,7 +702,7 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                 .load(imageUrl)
                 .into(map_info_imageView)
 
-        visibility(fab_enter, infoWindow != null)
+        visibility(fab_enter, iwdc != null && dcSearch?.isEmpty() == false)
         visibility(map_info_imageView, imageUrl != null)
         visibility(map_desc_textView, imageUrl == null)
 
@@ -715,11 +716,11 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
             }
         } else fab_maps.hide()
 
-        if (infoWindow != null)
+        if (iwdc != null && dcSearch?.isEmpty() == false)
             fab_enter.setOnClickListener {
-                val scan = AREAS.find(infoWindow)
-                scan.launchActivity(this)
+                Timber.v("Searching for info window ${iwdc.namespace}:${iwdc.id}")
+                if (!dcSearch.launchActivity(this))
+                    toast(R.string.toast_error_internal)
             }
     }
-
 }

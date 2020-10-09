@@ -1,8 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
-import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
@@ -21,7 +19,7 @@ import com.google.android.libraries.maps.model.Marker
 import org.jetbrains.anko.doAsync
 import timber.log.Timber
 
-class MapHelper(private val activity: Activity, private val mapFragmentLayoutId: Int) {
+class MapHelper(private val mapFragmentLayoutId: Int) {
     companion object {
         @ExperimentalUnsignedTypes
         fun getTarget(marker: Marker): DataClass<*, *>? {
@@ -70,17 +68,18 @@ class MapHelper(private val activity: Activity, private val mapFragmentLayoutId:
         return this
     }
 
-    fun loadMap(callback: (tag: String, supportMapFragment: SupportMapFragment, googleMap: GoogleMap) -> Unit) {
-        val tag = generateUUID()
-        val supportFragmentManager =
-            (if (activity is FragmentActivity) activity else activity as AppCompatActivity).supportFragmentManager
-        val supportMapFragment =
-            supportFragmentManager.findFragmentById(mapFragmentLayoutId) as SupportMapFragment
+    fun loadMap(
+        activity: FragmentActivity,
+        callback: (supportMapFragment: SupportMapFragment, googleMap: GoogleMap) -> Unit,
+        onError: ((exception: Exception) -> Unit)?
+    ) {
+        val sfm = activity.supportFragmentManager
+        val smf = sfm.findFragmentById(mapFragmentLayoutId) as? SupportMapFragment
 
-        supportMapFragment.getMapAsync { googleMap ->
+        smf?.getMapAsync { googleMap ->
             googleMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
             this.googleMap = googleMap
-            this.supportMapFragment = supportMapFragment
+            this.supportMapFragment = smf
 
             googleMap.moveCamera(
                 CameraUpdateFactory.newCameraPosition(
@@ -88,12 +87,13 @@ class MapHelper(private val activity: Activity, private val mapFragmentLayoutId:
                 )
             )
 
-            callback(tag, supportMapFragment, googleMap)
-        }
+            callback(smf, googleMap)
+        } ?: onError?.invoke(NullPointerException("Could not find support map fragment"))
     }
 
     @ExperimentalUnsignedTypes
     fun loadKML(
+        activity: FragmentActivity,
         kmlAddress: String?,
         networkState: ConnectivityProvider.NetworkState,
         addToMap: Boolean = true
@@ -130,7 +130,7 @@ class MapHelper(private val activity: Activity, private val mapFragmentLayoutId:
     }
 
     @ExperimentalUnsignedTypes
-    fun showMapsActivity() {
+    fun showMapsActivity(activity: FragmentActivity) {
         if (loadedKMLAddress.isNull()) throw MapAnyDataToLoadException("Map doesn't have any loaded data. You may run loadKML, for example.")
 
         Timber.v("Launching MapsActivity from KML \"$loadedKMLAddress\"")
