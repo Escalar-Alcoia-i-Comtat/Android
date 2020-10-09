@@ -120,7 +120,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             Timber.v("Downloading newest data...")
             progress_textView.setText(R.string.update_progress_downloading_new_cache)
             progressBar.isIndeterminate = true
-            DownloadAreasIntroFragment.downloadAreasCache(this, {
+            DownloadAreasIntroFragment.downloadAreasCache(this, null, null, {
                 // On finished
                 Timber.v("  Device data updated!")
 
@@ -146,7 +146,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             Timber.v("Downloading newest data...")
             progress_textView.setText(R.string.update_progress_downloading_new_cache)
             progressBar.isIndeterminate = true
-            DownloadAreasIntroFragment.downloadAreasCache(this, {
+            DownloadAreasIntroFragment.downloadAreasCache(this, null, null, {
                 // Download complete
                 val updatesToDo = 0 +
                         (if (updateArea != null) 1 else 0) +

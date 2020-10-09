@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -15,6 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.analytics
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.sharedPreferences
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.BetaIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.DownloadAreasIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.MainIntroFragment
@@ -22,15 +22,17 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.StorageIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.StorageIntroFragment.Companion.STORAGE_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_SHOWN_INTRO
 import com.arnyminerz.escalaralcoiaicomtat.generic.isPermissionGranted
+import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.activity_intro.*
+import kotlinx.android.synthetic.main.fragment_intro_download.*
 import org.jetbrains.anko.toast
 import java.io.File
 
 
 @ExperimentalUnsignedTypes
-class IntroActivity : AppCompatActivity() {
+class IntroActivity : NetworkChangeListenerActivity() {
     companion object {
         var shouldChange = false
 
@@ -50,6 +52,7 @@ class IntroActivity : AppCompatActivity() {
     }
 
     var adapterViewPager: IntroPagerAdapter? = null
+        private set
     val bundle = Bundle()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -161,6 +164,20 @@ class IntroActivity : AppCompatActivity() {
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
+    }
+
+    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
+        super.onStateChange(state)
+
+        if (state.hasInternet && view_pager.currentItem ==
+            adapterViewPager!!.fragments.indexOf(adapterViewPager!!.downloadIntroFragment)
+        )
+            if (!DownloadAreasIntroFragment.loading)
+                DownloadAreasIntroFragment.downloadAreasCache(
+                    this,
+                    findViewById(R.id.intro_download_spinner),
+                    findViewById(R.id.internetWaiting_layout)
+                )
     }
 
     @Suppress("MemberVisibilityCanBePrivate")

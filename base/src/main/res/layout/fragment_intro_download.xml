@@ -49,4 +49,38 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/intro_download_message_textView" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/internetWaiting_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/intro_download_spinner">
+
+        <ProgressBar
+            android:layout_width="28dp"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:translationZ="10dp"
+            android:layout_marginStart="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/internet_waiting_chip"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/internet_waiting_chip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_waiting_internet"
+            app:chipIcon="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
