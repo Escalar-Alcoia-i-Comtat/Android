@@ -58,6 +58,9 @@ data class DataClassScanHeights(
     val zoneIndex: Int? = null,
     val sectorIndex: Int? = null
 ) {
+    fun isEmpty(): Boolean =
+        areaIndex == null && zoneIndex == null && sectorIndex != null
+
     @ExperimentalUnsignedTypes
     fun launchActivity(context: Context): Boolean {
         when {
