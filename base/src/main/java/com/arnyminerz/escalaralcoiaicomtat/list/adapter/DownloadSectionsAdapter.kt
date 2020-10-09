@@ -17,6 +17,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.DownloadSectionViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -98,7 +99,10 @@ class DownloadSectionsAdapter(
 
             viewButton.setOnClickListener {
                 val scan = AREAS.find(section)
-                scan.launchActivity(mainActivity)
+                if (!scan.launchActivity(mainActivity)) {
+                    Timber.w("Could not launch activity.")
+                    toast(mainActivity, R.string.toast_error_internal)
+                }
             }
 
             recyclerView.layoutManager = LinearLayoutManager(mainActivity)
