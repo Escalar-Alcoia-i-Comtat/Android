@@ -1,9 +1,12 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
+import android.os.Build
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL_NO_SECURE
 import com.arnyminerz.escalaralcoiaicomtat.data.user.UserData
+import org.jetbrains.anko.getStackTraceString
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.File
@@ -36,7 +39,13 @@ suspend fun jsonFromUrl(url: String): JSONObject =
 private suspend fun jsonArrayFromURL(url: URL): JSONArray {
     Timber.v("Getting JSON Array from %s", url)
     val jsonRaw = url.readText()
-    return JSONArray(jsonRaw)
+    try {
+        return JSONArray(jsonRaw)
+    }catch (ex: JSONException){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1)
+            throw JSONException("Could not parse JSONArray from \"$url\".", ex)
+        throw JSONException("Could not parse JSONArray from \"$url\". Trace: ${ex.getStackTraceString()}")
+    }
 }
 
 suspend fun jsonArrayFromURL(url: String): JSONArray =
