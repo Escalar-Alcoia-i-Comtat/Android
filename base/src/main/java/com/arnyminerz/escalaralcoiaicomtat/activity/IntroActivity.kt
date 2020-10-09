@@ -106,7 +106,27 @@ class IntroActivity : AppCompatActivity() {
     }
 
     fun next() {
-        if (view_pager.currentItem + 1 >= adapterViewPager!!.fragments.size) {
+        val position = view_pager.currentItem
+
+        val storageIntroFragmentIndex =
+            adapterViewPager!!.fragments.indexOf(adapterViewPager!!.storageIntroFragment)
+        if (position == storageIntroFragmentIndex)
+            if (!hasStoragePermission(this@IntroActivity)) {
+                view_pager.currentItem = storageIntroFragmentIndex
+                intro_next_FAB.setImageResource(R.drawable.round_chevron_right_24)
+                shouldChange = false
+                ActivityCompat.requestPermissions(
+                    this@IntroActivity,
+                    arrayOf(
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    ),
+                    STORAGE_PERMISSION_REQUEST
+                )
+                return
+            }
+
+        if (position + 1 >= adapterViewPager!!.fragments.size) {
             sharedPreferences?.let {
                 PREF_SHOWN_INTRO.put(sharedPreferences!!, true)
                 analytics.logEvent(
