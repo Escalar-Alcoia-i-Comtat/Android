@@ -422,4 +422,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="pref_down_automatic_data_updates_sum">Instala las actualizaciones de los datos de escalada automáticamente.</string>
     <string name="notification_updating_title">Actualizando contenido…</string>
     <string name="notification_updating_message">El contenido está siendo actualizado, por favor, aguarde.</string>
+    <string name="status_waiting_internet">Esperando a tener conexión…</string>
+    <string name="toast_loading">Cargando…</string>
 </resources>

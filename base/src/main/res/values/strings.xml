@@ -82,6 +82,7 @@
     <string name="status_fixing">Fixing…</string>
     <string name="status_updating">Updating…</string>
     <string name="status_loading">Loading…</string>
+    <string name="status_waiting_internet">Waiting for Internet…</string>
     <string name="status_null" translatable="false">-</string>
     <string name="status_null_double" translatable="false">--</string>
     <string name="status_friend">Friend</string>
@@ -317,6 +318,7 @@
     <string name="toast_error_tts_init_failed">Could not initialize TTS</string>
     <string name="toast_error_tts_language_unsupported">Language not supported</string>
     <string name="toast_copied">Copied!</string>
+    <string name="toast_loading">Loading…</string>
 
     <string name="path_warning_dry">This path has some safes getting dry. This may be because some kind of chemical safe has been using for the safes. This should be active for 2 days more or less.</string>
     <string name="path_warning_build">This path is under construction or revision. This may take from days to weeks. Please, be patient. You can enable alert notifications on settings, and we will alert you when this is ready.</string>

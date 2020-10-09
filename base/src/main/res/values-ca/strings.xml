@@ -421,4 +421,6 @@
     <string name="pref_down_automatic_data_updates_sum">Instal·la actualitzacions a les dades d\'escalada desades automàticament.</string>
     <string name="notification_updating_title">Actualitzant contingut…</string>
     <string name="notification_updating_message">El contingut està sent actualitzat, per favor, espera</string>
+    <string name="status_waiting_internet">Esperant a tenir connexió…</string>
+    <string name="toast_loading">Carregant…</string>
 </resources>
