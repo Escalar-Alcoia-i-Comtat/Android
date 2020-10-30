@@ -122,7 +122,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
     private val areasViewFragment = AreasViewFragment()
     private val mapFragment = MapFragment()
     private val authFragment = AuthFragment()
-    private val downloadsFragment = DownloadsFragment()
+    val downloadsFragment = DownloadsFragment()
     private val settingsFragment = SettingsFragmentManager()
 
     var adapter: MainPagerAdapter? = null
