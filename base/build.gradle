@@ -120,7 +120,7 @@ dependencies {
 
     implementation('com.journeyapps:zxing-android-embedded:4.1.0') { transitive = false }
     //noinspection GradleDependency
-    implementation 'com.google.zxing:core:3.4.0'
+    implementation 'com.google.zxing:core:3.4.1'
 
     // Android Jetpack
     def jetpack_work_version = "2.4.0"
