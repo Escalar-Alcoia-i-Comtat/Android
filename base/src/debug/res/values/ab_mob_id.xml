@@ -1,5 +1,0 @@
-<resources>
-    <!-- Debugging Ads -->
-    <string name="ad_banner_main" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
-    <string name="ad_bonus" translatable="false">ca-app-pub-3940256099942544/5224354917</string>
-</resources>
