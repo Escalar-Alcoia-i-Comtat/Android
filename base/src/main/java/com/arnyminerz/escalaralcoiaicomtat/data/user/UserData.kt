@@ -84,7 +84,7 @@ data class UserData(
                 if (!networkState.hasInternet)
                     throw NoInternetAccessException()
 
-                val json = jsonFromUrl("https://arnyminerz.com:3001/user/%s".format(uid))
+                val json = jsonFromUrl("$EXTENDED_API_URL/user/%s".format(uid))
 
                 if (json.has("error"))
                     if (json.getString("error") == "user_not_found")
@@ -623,7 +623,7 @@ data class UserData(
         if (!networkState.hasInternet) throw NoInternetAccessException()
 
         val json =
-            jsonFromUrl("https://arnyminerz.com:3001/completed_paths/$completedPathId/liked/$uid")
+            jsonFromUrl("$EXTENDED_API_URL/completed_paths/$completedPathId/liked/$uid")
 
         return json.getBooleanFromString("liked")
     }
@@ -646,7 +646,7 @@ data class UserData(
         if (!networkState.hasInternet) throw NoInternetAccessException()
 
         val json =
-            jsonFromUrl("https://arnyminerz.com:3001/completed_paths/$completedPathId/like/$uid")
+            jsonFromUrl("$EXTENDED_API_URL/completed_paths/$completedPathId/like/$uid")
 
         return !json.has("error")
     }
