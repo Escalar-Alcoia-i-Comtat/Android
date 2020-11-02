@@ -38,14 +38,6 @@
         android:theme="@style/AppTheme"
         android:vmSafeMode="true"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute,LockedOrientationActivity">
-        <!--<activity android:name=".activity.train.TrainMainActivity"
-            android:label="@string/train_label">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>-->
         <activity
             android:name=".activity.ImageShareActivity"
             android:theme="@style/AppTheme.FullScreen" />
