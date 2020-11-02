@@ -25,7 +25,6 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.SettingsFragmentManager
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.AreasViewFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFragment.Companion.SettingsPage
-import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_SHOWN_INTRO
 import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.loadLocale
@@ -46,6 +45,7 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.ktx.Firebase
+import io.sentry.android.core.SentryAndroid
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_list.*
 import org.jetbrains.anko.doAsync
@@ -95,9 +95,10 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
     private fun prepareApp(): Boolean {
         Timber.v("Preparing App...")
-        if (!PREF_SHOWN_INTRO.get(sharedPreferences!!) ||
-            IntroActivity.shouldShow(this)
-        ) {
+        Timber.v("Instantiating Sentry")
+        SentryAndroid.init(this)
+
+        if (IntroActivity.shouldShow(this)) {
             Timber.w("  Showing intro!")
             startActivity(Intent(this, IntroActivity::class.java))
             return false

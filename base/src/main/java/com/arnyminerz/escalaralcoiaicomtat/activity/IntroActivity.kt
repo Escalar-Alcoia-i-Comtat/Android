@@ -48,7 +48,9 @@ class IntroActivity : NetworkChangeListenerActivity() {
         fun hasDownloaded(context: Context): Boolean = cacheFile(context).exists()
 
         fun shouldShow(context: Context): Boolean =
-            !hasStoragePermission(context) || !hasDownloaded(context)
+            !hasStoragePermission(context) || !hasDownloaded(context) || !PREF_SHOWN_INTRO.get(
+                sharedPreferences!!
+            )
     }
 
     var adapterViewPager: IntroPagerAdapter? = null
