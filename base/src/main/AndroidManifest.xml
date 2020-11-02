@@ -73,9 +73,6 @@
             android:name=".activity.UpdatingActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.DevActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activity.ProfileActivity"
             android:screenOrientation="portrait" />
         <activity
