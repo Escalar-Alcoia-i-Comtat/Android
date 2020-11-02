@@ -6,8 +6,6 @@ apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'com.google.firebase.firebase-perf'
 
-apply plugin: 'com.google.firebase.crashlytics'
-
 apply from: 'cred.gradle'
 
 android {
@@ -36,13 +34,6 @@ android {
 
             kotlinOptions {
                 freeCompilerArgs = [ '-Xuse-experimental=kotlin.Experimental' ]
-            }
-
-            firebaseCrashlytics {
-                nativeSymbolUploadEnabled true
-
-                strippedNativeLibsDir 'release/stripped'
-                unstrippedNativeLibsDir 'release/unstripped'
             }
 
             ndk.debugSymbolLevel = 'FULL'
@@ -111,7 +102,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-analytics-ktx'
-    implementation 'com.google.firebase:firebase-crashlytics-ndk'
     implementation 'com.google.firebase:firebase-dynamic-links-ktx'
     implementation 'com.google.firebase:firebase-perf'
     implementation 'com.google.firebase:firebase-storage-ktx'
