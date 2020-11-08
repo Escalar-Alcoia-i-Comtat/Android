@@ -18,6 +18,18 @@ if [[ -z "${FTP_PASS}" ]]; then
   echo "🛑 ${red_bg}${white}FTP_PASS${reset} not declared"
   ERROR=1
 fi
+if [[ -z "${MAPS_API_KEY}" ]]; then
+  echo "🛑 ${red_bg}${white}MAPS_API_KEY${reset} not declared"
+  ERROR=1
+fi
+if [[ -z "${SENTRY_DNS}" ]]; then
+  echo "🛑 ${red_bg}${white}SENTRY_DNS${reset} not declared"
+  ERROR=1
+fi
+if [[ -z "${AUTH_CLIENT_ID}" ]]; then
+  echo "🛑 ${red_bg}${white}AUTH_CLIENT_ID${reset} not declared"
+  ERROR=1
+fi
 
 if [ $ERROR -eq 1 ]; then
   echo "🛑 Some environment variables were missing, won't continue."
@@ -34,12 +46,15 @@ cd "$BASEDIR" || {
 }
 cd ..
 
-echo "🗑 Removing old cred.gradle..."
-rm -rf base/cred.gradle
+echo "🗑 Removing old secure.properties..."
+rm -rf base/secure.properties
 
-echo "✏ Writing preferences to cred.gradle..."
+echo "✏ Writing preferences to secure.properties..."
 {
-  echo "project.ext.FTP_SERVER=\"\\\"$FTP_SERVER\\\"\""
-  echo "project.ext.FTP_USER=\"\\\"$FTP_USER\\\"\""
-  echo "project.ext.FTP_PASS=\"\\\"$FTP_PASS\\\"\""
-} >>base/cred.gradle
+  echo "MAPS_API_KEY=$MAPS_API_KEY"
+  echo "AUTH_CLIENT_ID=$AUTH_CLIENT_ID"
+  echo "SENTRY_DNS=$SENTRY_DNS"
+  echo "FTP_SERVER=$FTP_SERVER"
+  echo "FTP_USER=$FTP_USER"
+  echo "FTP_PASS=$FTP_PASS"
+} >> secure.properties
