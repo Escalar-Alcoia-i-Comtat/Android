@@ -1,5 +1,13 @@
-build
+# IDE directories
 .idea
+.gradle/
+
+# Build directories
+build
+release
+
+# Configuration files
 local.properties
 google-services.json
 base/cred.gradle
+secure.properties
