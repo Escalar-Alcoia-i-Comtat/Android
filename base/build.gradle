@@ -6,8 +6,6 @@ apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'com.google.firebase.firebase-perf'
 
-apply from: 'cred.gradle'
-
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.2"
@@ -20,13 +18,25 @@ android {
         versionName "Shunt"
         // testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         setProperty("archivesBaseName", "EscalarAlcoiaIComtat-$versionCode-$versionName")
+
+        def secureProps = new Properties()
+        if (file("secure.properties").exists())
+            file("secure.properties")?.withInputStream { secureProps.load(it) }
+
+        resValue "string", "google_maps_key", (secureProps.getProperty("MAPS_API_KEY") ?: "")
+        resValue "string", "auth_client_id", (secureProps.getProperty("AUTH_CLIENT_ID") ?: "")
+        resValue "string", "sentry_dsn", (secureProps.getProperty("SENTRY_DNS") ?: "")
+        resValue "string", "ftp_host", (secureProps.getProperty("FTP_SERVER") ?: "")
+        resValue "string", "ftp_user", (secureProps.getProperty("FTP_USER") ?: "")
+        resValue "string", "ftp_pass", (secureProps.getProperty("FTP_PASS") ?: "")
+
+        buildTypes.each {
+            it.buildConfigField 'String', 'FTP_HOST', "\"" + (secureProps.getProperty("FTP_SERVER") ?: "") + "\""
+            it.buildConfigField 'String', 'FTP_USER', "\"" + (secureProps.getProperty("FTP_USER") ?: "") + "\""
+            it.buildConfigField 'String', 'FTP_PASS', "\"" + (secureProps.getProperty("FTP_PASS") ?: "") + "\""
+        }
     }
     buildTypes {
-        buildTypes.each {
-            it.buildConfigField 'String', 'FTP_HOST', project.FTP_SERVER
-            it.buildConfigField 'String', 'FTP_USER', project.FTP_USER
-            it.buildConfigField 'String', 'FTP_PASS', project.FTP_PASS
-        }
         release {
             minifyEnabled true
             shrinkResources true
@@ -37,17 +47,9 @@ android {
             }
 
             ndk.debugSymbolLevel = 'FULL'
-
-            resValue "string", "ftp_host", project.FTP_SERVER
-            resValue "string", "ftp_user", project.FTP_USER
-            resValue "string", "ftp_pass", project.FTP_PASS
         }
         debug {
             versionNameSuffix "-debug-build" + getDate()
-
-            resValue "string", "ftp_host", project.FTP_SERVER
-            resValue "string", "ftp_user", project.FTP_USER
-            resValue "string", "ftp_pass", project.FTP_PASS
         }
     }
     kotlinOptions {
