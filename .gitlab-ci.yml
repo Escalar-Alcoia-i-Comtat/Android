@@ -4,6 +4,8 @@ stages:
 before_script:
   - export GRADLE_USER_HOME=$(pwd)/.gradle
   - chmod +x ./gradlew
+  - chmod +x scripts/prepare_consts.sh
+  - ./scripts/prepare_consts.sh
 cache:
   key: ${CI_PROJECT_ID}
   paths:
