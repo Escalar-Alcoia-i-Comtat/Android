@@ -350,7 +350,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="intro_download_title">Descargando</string>
     <string name="intro_download_message">Descargando los datos necesarios</string>
     <string name="toast_login_server_error">El servidor no funciona ahora mismo, pruébalo de nuevo más tarde. Disculpe las molestias</string>
-    <string name="train_label">Entrenador de Escalada</string>
     <string name="action_start">Iniciar</string>
     <string name="dialog_steps_title">Pasos</string>
     <string name="dialog_steps_message">Selecciona la cantidad de pasos que quieres hacer</string>
@@ -364,18 +363,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="image_desc_timer">Temporizador</string>
     <string name="image_desc_move_up">Mover Arriba</string>
     <string name="image_desc_move_down">Mover Abajo</string>
-    <string name="train_type_gym">Rocódromo</string>
-    <string name="train_type_outside">Exterior</string>
-    <string name="train_record_type_timer">Temporizador</string>
-    <string name="train_record_type_period">Periodos</string>
-    <string name="train_record_type_steps">Pasos</string>
-    <string name="train_record_type_mixed">Mixto</string>
-    <string name="train_element_rest">Descanso</string>
-    <string name="train_element_climb">Escalar</string>
-    <string name="train_element_timer">Temporizador</string>
-    <string name="train_program_start">Inicio de entrenamiento</string>
-    <string name="train_program_end">Final de entrenamiento</string>
-    <string name="template_train_steps">%d Pasos</string>
     <string name="toast_error_gmaps_not_installed">Google Maps no está instalado!</string>
     <string name="image_desc_maximize_minimize_img">Maximizar o minimizar imagen</string>
     <string name="toast_error_already_downloaded">Ya se ha descargado!</string>
@@ -387,7 +374,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="update_progress_error_data_dir_creation">No se ha podido crear el directorio de datos!</string>
     <string name="toast_error_tts_init_failed">No se ha podido inicializar el motor de voz</string>
     <string name="toast_error_tts_language_unsupported">Idioma no soportado</string>
-    <string name="train_type_climbing_gym">Rocódromo</string>
     <string name="action_google_auth">Entrar con Google</string>
     <string name="action_continue">Continuar</string>
     <string name="action_copy">Copiar</string>

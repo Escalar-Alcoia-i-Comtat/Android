@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Escalar Alcoia i Comtat</string>
-    <string name="train_label">Climbing Training Helper</string>
 
     <string name="sector_sun_morning">Morning Sun</string>
     <string name="sector_sun_afternoon">Afternoon Sun</string>
@@ -451,25 +450,6 @@
     <string name="MAP_COPYRIGHTS_MAP_DATA_ONLY" translatable="false">© %1$d Google – Map Data © %2$d %3$s</string>
 
     <string name="share_text">Hey! Would you try Escalar Alcoià i Comtat? It\'s free! https://play.google.com/store/apps/details?id=com.arnyminerz.escalaralcoiaicomtat</string>
-
-    <string name="train_type_climbing_gym">Climbing Gym</string>
-    <string name="train_type_gym">Gym</string>
-    <string name="train_type_outside">Outside</string>
-
-    <string name="train_record_type_timer">Timer</string>
-    <string name="train_record_type_period">Periods</string>
-    <string name="train_record_type_steps">Steps</string>
-    <string name="train_record_type_mixed">Mixed</string>
-
-    <string name="train_element_rest">Rest</string>
-    <string name="train_element_climb">Climb</string>
-    <string name="train_element_timer">Timer</string>
-
-    <string name="train_program_start">Training Start</string>
-    <string name="train_program_end">Training End</string>
-
-    <string name="template_train_steps">%d Steps</string>
-    <string name="template_train_time" translatable="false">%s:%s</string>
 
     <string name="update_progress_internet_waiting">Waiting for Internet connection…</string>
     <string name="update_progress_deleting_old_cache">Deleting old data…</string>
