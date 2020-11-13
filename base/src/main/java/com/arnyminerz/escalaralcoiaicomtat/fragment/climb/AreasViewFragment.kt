@@ -1,10 +1,12 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.climb
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,13 +25,13 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerF
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.distanceTo
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
+import com.arnyminerz.escalaralcoiaicomtat.generic.isNull
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.location.LocationProvideError
-import com.arnyminerz.escalaralcoiaicomtat.location.LocationProvider
 import com.arnyminerz.escalaralcoiaicomtat.location.serializable
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.android.gms.location.*
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.model.LatLngBounds
@@ -54,7 +56,11 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
     private val showingMarkers = arrayListOf<GeoMarker>()
 
-    private var locationProvider: LocationProvider? = null
+    private var newLocationProvider: FusedLocationProviderClient? = null
+    private var locationRequest: LocationRequest? = null
+
+    private var addedAnyPoints = false
+    private var counter = 0
 
     fun updateNearbyZones(view: View?, currentLocation: Location?, googleMap: GoogleMap) {
         if (view == null)
@@ -63,8 +69,14 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         if (context == null)
             return Timber.e("Could not update Nearby Zones: Not showing fragment (context is null)")
 
-        if (isResumed)
+        if (!isResumed)
             return Timber.e("Could not update Nearby Zones: Not showing fragment (not resumed)")
+
+        if (newLocationProvider == null)
+            return Timber.e("Could not update Nearby Zones: Location provider is null")
+
+        if (AREAS.isEmpty())
+            return Timber.e("Could not update Nearby Zones: AREAS is empty")
 
         view.nearby_zones_icon.setImageResource(R.drawable.rotating_explore)
 
@@ -93,67 +105,62 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             view.nearby_zones_cardView?.isClickable = false
 
             val boundsBuilder = LatLngBounds.Builder()
-            var addedAnyPoints = false
-            var counter = 0
+            addedAnyPoints = false
+            counter = 0
 
             showingMarkers.clear()
 
-            if (locationProvider != null && !locationProvider!!.isStarted) {
-                Timber.d("Starting location provider.")
-                val startResult = locationProvider!!.start()
-                if (startResult == LocationProvideError.GPS_DISABLED)
-                    Timber.e("GPS is disabled")
-                else if (startResult == LocationProvideError.NO_PERMISSION)
-                    Timber.e("No GPS Permission")
-            }
-
             if (currentLocation != null && context != null)
-                for (area in AREAS) GlobalScope.launch {
-                    Timber.v("Current Location: [${currentLocation.latitude},${currentLocation.longitude}]")
-                    area.children.forEach { zone ->
-                        val zoneLocation = zone.position
-                        if (zoneLocation != null) {
-                            val requiredDistance =
-                                SETTINGS_NEARBY_DISTANCE_PREF.get(sharedPreferences)
-                            if (zoneLocation.distanceTo(currentLocation.toLatLng()) <= requiredDistance) {
-                                boundsBuilder.include(zoneLocation)
-                                addedAnyPoints = true
-                                showingMarkers.add(
-                                    GeoMarker(
-                                        zoneLocation.serializable(),
-                                        2f,
-                                        MapObjectWindowData(
-                                            zone.displayName,
-                                            null,
-                                            null
+                GlobalScope.launch {
+                    Timber.v("Iterating through ${AREAS.size} areas.")
+                    for (area in AREAS) {
+                        Timber.v("Current Location: [${currentLocation.latitude},${currentLocation.longitude}]")
+                        area.children.forEach { zone ->
+                            val zoneLocation = zone.position
+                            if (zoneLocation != null) {
+                                val requiredDistance =
+                                    SETTINGS_NEARBY_DISTANCE_PREF.get(sharedPreferences)
+                                if (zoneLocation.distanceTo(currentLocation.toLatLng()) <= requiredDistance) {
+                                    boundsBuilder.include(zoneLocation)
+                                    addedAnyPoints = true
+                                    showingMarkers.add(
+                                        GeoMarker(
+                                            zoneLocation.serializable(),
+                                            2f,
+                                            MapObjectWindowData(
+                                                zone.displayName,
+                                                null,
+                                                null
+                                            )
+                                        ).withImage(
+                                            requireContext(),
+                                            R.drawable.ic_waypoint_escalador_blanc
                                         )
-                                    ).withImage(
-                                        requireContext(),
-                                        R.drawable.ic_waypoint_escalador_blanc
                                     )
-                                )
+                                }
+                                //Log.v(TAG, "  Zone Location (${zoneLocation.distanceTo(currentLocation.toLatLng())}): [${zoneLocation.latitude},${zoneLocation.longitude}]")
                             }
-                            //Log.v(TAG, "  Zone Location (${zoneLocation.distanceTo(currentLocation.toLatLng())}): [${zoneLocation.latitude},${zoneLocation.longitude}]")
                         }
-                    }
-                    counter++
+                        counter++
 
-                    if (counter >= AREAS.size) {
-                        requireContext().runOnUiThread {
-                            for (marker in showingMarkers)
-                                marker.addToMap(googleMap)
+                        if (counter >= AREAS.size) {
+                            requireContext().runOnUiThread {
+                                for (marker in showingMarkers)
+                                    marker.addToMap(googleMap)
 
-                            if (addedAnyPoints)
-                                googleMap.animateCamera(
-                                    CameraUpdateFactory.newLatLngBounds(
-                                        boundsBuilder.build(),
-                                        10
+                                if (addedAnyPoints)
+                                    googleMap.animateCamera(
+                                        CameraUpdateFactory.newLatLngBounds(
+                                            boundsBuilder.build(),
+                                            10
+                                        )
                                     )
-                                )
-                            view.nearby_zones_icon.setImageResource(R.drawable.round_explore_24)
+                                view.nearby_zones_icon.setImageResource(R.drawable.round_explore_24)
+                            }
                         }
                     }
                 }
+            else Timber.e("Could not show nearby zones. currentLocation null? ${currentLocation.isNull()}")
         }
     }
 
@@ -162,6 +169,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         justAttached = true
     }
 
+    @SuppressLint("MissingPermission")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -202,12 +210,23 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 true
             }
 
-            if (locationProvider == null)
-                locationProvider = LocationProvider(requireContext())
+            if (newLocationProvider == null)
+                newLocationProvider =
+                    LocationServices.getFusedLocationProviderClient(requireContext())
+            if (locationRequest == null)
+                locationRequest = LocationRequest()
 
             Timber.d("Adding location provider listener")
-            locationProvider!!.addLocationChangedListener { location -> onLocationChanged(location) }
-            updateNearbyZones(view, null, googleMap)
+            if (hasLocationPermission(requireContext())) {
+                newLocationProvider!!.requestLocationUpdates(
+                    locationRequest,
+                    locationCallback,
+                    Looper.getMainLooper()
+                )
+                newLocationProvider!!.lastLocation.addOnSuccessListener {
+                    updateNearbyZones(view, it, googleMap)
+                }
+            }
         }
 
         return view
@@ -237,13 +256,28 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         refreshAreas()
     }
 
+    @SuppressLint("MissingPermission")
     override fun onResume() {
         super.onResume()
 
         if (isResumed)
             refreshAreas()
 
+        if (newLocationProvider != null && hasLocationPermission(requireContext())) {
+            newLocationProvider!!.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
+        }
+
         justAttached = false
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        newLocationProvider!!.removeLocationUpdates(locationCallback)
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
@@ -259,15 +293,20 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             refreshAreas()
     }
 
-    private fun onLocationChanged(location: Location) {
-        if (googleMap == null) return
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult?) {
+            googleMap ?: return
+            locationResult ?: return
 
-        Timber.v("Got new location: [${location.latitude}, ${location.longitude}]")
+            val location = locationResult.lastLocation
 
-        updateNearbyZones(view, location, googleMap!!)
+            Timber.v("Got new location: [${location.latitude}, ${location.longitude}]")
 
-        view?.nearby_zones_title?.setOnClickListener {
             updateNearbyZones(view, location, googleMap!!)
+
+            view?.nearby_zones_title?.setOnClickListener {
+                updateNearbyZones(view, location, googleMap!!)
+            }
         }
     }
 }
