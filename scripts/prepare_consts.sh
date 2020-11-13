@@ -30,6 +30,10 @@ if [[ -z "${AUTH_CLIENT_ID}" ]]; then
   echo "🛑 ${red_bg}${white}AUTH_CLIENT_ID${reset} not declared"
   ERROR=1
 fi
+if [[ -z "${GOOGLE_SERVICES}" ]]; then
+  echo "🛑 ${red_bg}${white}GOOGLE_SERVICES${reset} not declared"
+  ERROR=1
+fi
 
 if [ $ERROR -eq 1 ]; then
   echo "🛑 Some environment variables were missing, won't continue."
@@ -58,3 +62,8 @@ echo "✏ Writing preferences to secure.properties..."
   echo "FTP_USER=$FTP_USER"
   echo "FTP_PASS=$FTP_PASS"
 } >> secure.properties
+
+echo "✏ Writing google_services.json..."
+{
+  echo "$GOOGLE_SERVICES"
+} >> base/google-services.json
