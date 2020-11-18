@@ -110,41 +110,43 @@ class ZoneActivity : DataClassListActivity() {
                     }
 
                 if (smallMapEnabled) {
-                    val mapHelper = MapHelper(R.id.map)
-                    mapHelper.loadMap(this, { _, googleMap ->
-                        googleMap.uiSettings.apply {
-                            isCompassEnabled = false
-                            setAllGesturesEnabled(false)
-                        }
+                    val mapHelper = MapHelper()
+                    mapHelper.loadMap(
+                        supportFragmentManager.findFragmentById(R.id.map)!!,
+                        { _, googleMap ->
+                            googleMap.uiSettings.apply {
+                                isCompassEnabled = false
+                                setAllGesturesEnabled(false)
+                            }
 
-                        mapHelper
-                            .loadKML(this, zone.kmlAddress, state)
-                            .listen(object : ResultListener<MapFeatures> {
-                                override fun onCompleted(result: MapFeatures) {
-                                    googleMap.setOnMapClickListener {
-                                        try {
-                                            mapHelper.showMapsActivity(this@ZoneActivity)
-                                        } catch (ex: MapAnyDataToLoadException) {
-                                            Timber.e(
-                                                ex,
-                                                "Map doesn't have any data to show."
-                                            )
+                            mapHelper
+                                .loadKML(this, zone.kmlAddress, state)
+                                .listen(object : ResultListener<MapFeatures> {
+                                    override fun onCompleted(result: MapFeatures) {
+                                        googleMap.setOnMapClickListener {
+                                            try {
+                                                mapHelper.showMapsActivity(this@ZoneActivity)
+                                            } catch (ex: MapAnyDataToLoadException) {
+                                                Timber.e(
+                                                    ex,
+                                                    "Map doesn't have any data to show."
+                                                )
+                                            }
+                                        }
+                                        googleMap.setOnMarkerClickListener {
+                                            mapHelper.showMapsActivity(
+                                                this@ZoneActivity
+                                            ); return@setOnMarkerClickListener true
                                         }
                                     }
-                                    googleMap.setOnMarkerClickListener {
-                                        mapHelper.showMapsActivity(
-                                            this@ZoneActivity
-                                        ); return@setOnMarkerClickListener true
-                                    }
-                                }
 
-                                override fun onFailure(error: Exception?) {
-                                    error?.let { throw it }
-                                }
-                            })
-                    }, {
-                        Timber.e(it, "Could not load map:")
-                    })
+                                    override fun onFailure(error: Exception?) {
+                                        error?.let { throw it }
+                                    }
+                                })
+                        }, {
+                            Timber.e(it, "Could not load map:")
+                        })
                 }
 
                 loaded = true

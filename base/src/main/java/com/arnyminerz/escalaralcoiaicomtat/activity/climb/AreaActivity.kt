@@ -111,41 +111,43 @@ class AreaActivity : DataClassListActivity() {
                     }
 
                 if (smallMapEnabled) {
-                    val mapHelper = MapHelper(R.id.map)
+                    val mapHelper = MapHelper()
                     mapHelper
                         .withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5f)
-                        .loadMap(this, { _, googleMap ->
-                            googleMap.uiSettings.apply {
-                                isCompassEnabled = false
-                                setAllGesturesEnabled(false)
-                            }
+                        .loadMap(
+                            supportFragmentManager.findFragmentById(R.id.map)!!,
+                            { _, googleMap ->
+                                googleMap.uiSettings.apply {
+                                    isCompassEnabled = false
+                                    setAllGesturesEnabled(false)
+                                }
 
-                            mapHelper
-                                .loadKML(this, area.kmlAddress, state)
-                                .listen(object : ResultListener<MapFeatures> {
-                                    override fun onCompleted(result: MapFeatures) {
-                                        googleMap.setOnMapClickListener {
-                                            mapHelper.showMapsActivity(
-                                                this@AreaActivity
-                                            )
+                                mapHelper
+                                    .loadKML(this, area.kmlAddress, state)
+                                    .listen(object : ResultListener<MapFeatures> {
+                                        override fun onCompleted(result: MapFeatures) {
+                                            googleMap.setOnMapClickListener {
+                                                mapHelper.showMapsActivity(
+                                                    this@AreaActivity
+                                                )
+                                            }
+                                            googleMap.setOnMarkerClickListener {
+                                                mapHelper.showMapsActivity(
+                                                    this@AreaActivity
+                                                ); return@setOnMarkerClickListener true
+                                            }
                                         }
-                                        googleMap.setOnMarkerClickListener {
-                                            mapHelper.showMapsActivity(
-                                                this@AreaActivity
-                                            ); return@setOnMarkerClickListener true
-                                        }
-                                    }
 
-                                    override fun onFailure(error: Exception?) {
-                                        if (error is NoInternetAccessException)
-                                            visibility(map, false)
-                                        else
-                                            error?.let { throw it }
-                                    }
-                                })
-                        }, {
-                            Timber.e(it, "Could not load map:")
-                        })
+                                        override fun onFailure(error: Exception?) {
+                                            if (error is NoInternetAccessException)
+                                                visibility(map, false)
+                                            else
+                                                error?.let { throw it }
+                                        }
+                                    })
+                            }, {
+                                Timber.e(it, "Could not load map:")
+                            })
                 }
 
                 loaded = true

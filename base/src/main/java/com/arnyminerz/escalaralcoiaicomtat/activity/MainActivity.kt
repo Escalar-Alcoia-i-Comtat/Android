@@ -20,6 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.fragment.AuthFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.DownloadsFragment
+import com.arnyminerz.escalaralcoiaicomtat.fragment.MapFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.SettingsFragmentManager
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.AreasViewFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
@@ -64,9 +65,9 @@ val EXTRA_SECTOR_TRANSITION_NAME = IntentExtra<String>("sector_transition")
 
 const val TAB_ITEM_HOME = 0
 
-//const val TAB_ITEM_MAP = 1
-const val TAB_ITEM_DOWNLOADS = 1
-const val TAB_ITEM_SETTINGS = 2
+const val TAB_ITEM_MAP = 1
+const val TAB_ITEM_DOWNLOADS = 2
+const val TAB_ITEM_SETTINGS = 3
 
 const val ANALYTICS_EVENT_NAME_ERRORS = "errors"
 const val ANALYTICS_EVENT_KEY_SECTORS_NO_CONTEXT = "no_context"
@@ -122,7 +123,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
     private val areasViewFragment = AreasViewFragment()
 
-    //private val mapFragment = MapFragment()
+    private val mapFragment = MapFragment()
     private val authFragment = AuthFragment()
     val downloadsFragment = DownloadsFragment()
     private val settingsFragment = SettingsFragmentManager()
@@ -140,11 +141,11 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                 this,
                 if (position == TAB_ITEM_HOME && showingViewPager) R.drawable.round_explore_24 else R.drawable.ic_outline_explore_24
             )
-        /*menuMapIcon?.icon =
+        menuMapIcon?.icon =
             ContextCompat.getDrawable(
                 this,
                 if (position == TAB_ITEM_MAP && showingViewPager) R.drawable.ic_round_map_24 else R.drawable.ic_outline_map_24
-            )*/
+            )
         menuDownloadsIcon?.icon =
             ContextCompat.getDrawable(
                 this,
@@ -166,7 +167,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             this,
             hashMapOf(
                 TAB_ITEM_HOME to areasViewFragment,
-                //TAB_ITEM_MAP to mapFragment,
+                TAB_ITEM_MAP to mapFragment,
                 TAB_ITEM_DOWNLOADS to downloadsFragment,
                 TAB_ITEM_SETTINGS to settingsFragment
             )
@@ -201,8 +202,8 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
     private var menu: Menu? = null
 
-    /*private val menuMapIcon: MenuItem?
-        get() = menu?.getItem(0)*/
+    private val menuMapIcon: MenuItem?
+        get() = menu?.getItem(0)
     private val menuDownloadsIcon: MenuItem?
         get() = menu?.getItem(1)
 
@@ -219,10 +220,10 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         }
 
         return when (item.itemId) {
-            /*R.id.action_1 -> {
+            R.id.action_1 -> {
                 main_viewPager.currentItem = TAB_ITEM_MAP
                 true
-            }*/
+            }
             R.id.action_2 -> {
                 main_viewPager.currentItem = TAB_ITEM_DOWNLOADS
                 true
@@ -249,7 +250,6 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         super.onResume()
         if (loggedIn())
             Glide.with(this)
-//                .asBitmap()
                 .load(user()!!.photoUrl.toString())
                 .apply(
                     RequestOptions
@@ -295,8 +295,8 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                 else main_viewPager.currentItem = TAB_ITEM_HOME
             } else if (main_viewPager.currentItem == TAB_ITEM_DOWNLOADS)
                 main_viewPager.currentItem = TAB_ITEM_HOME
-            /*else if (main_viewPager.currentItem == TAB_ITEM_MAP)
-                main_viewPager.currentItem = TAB_ITEM_HOME*/
+            else if (main_viewPager.currentItem == TAB_ITEM_MAP)
+                main_viewPager.currentItem = TAB_ITEM_HOME
             else {
                 super.onBackPressed()
                 finish()
@@ -312,11 +312,12 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         Timber.v("Got permissions result. Code: %s", requestCode)
         val areasViewFragment = areasViewFragment
         when (requestCode) {
-            LOCATION_PERMISSION_REQUEST -> if (areasViewFragment.googleMap != null) areasViewFragment.updateNearbyZones(
-                areasViewFragment.view,
-                null,
-                areasViewFragment.googleMap!!
-            )
+            LOCATION_PERMISSION_REQUEST -> if (areasViewFragment.googleMap != null)
+                areasViewFragment.updateNearbyZones(
+                    areasViewFragment.view,
+                    null,
+                    areasViewFragment.googleMap!!
+                )
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
@@ -351,8 +352,8 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             AREAS.addAll(areasFlow)
             Timber.v("  --- Found ${AREAS.size} areas ---")
 
-            //Timber.v("Got areas, setting in map fragment")
-            //mapFragment.setAreas(AREAS)
+            Timber.v("Got areas, setting in map fragment")
+            mapFragment.setAreas(AREAS)
 
             areasViewFragment.updateAreas { holder, position ->
                 toast(R.string.toast_loading)

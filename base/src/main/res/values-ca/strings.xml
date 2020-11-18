@@ -349,7 +349,6 @@
     <string name="intro_download_title">Baixant…</string>
     <string name="intro_download_message">Baixant les dades necessaries</string>
     <string name="toast_login_server_error">El servidor no funciona correctament, prova-ho més tard. Sentim molt les molèsties.</string>
-    <string name="train_label">Entrenador d\'escalada</string>
     <string name="action_start">Iniciar</string>
     <string name="dialog_steps_title">Passos</string>
     <string name="dialog_steps_message">Selecciona la quantitat de passos que vols fer</string>
@@ -363,18 +362,6 @@
     <string name="image_desc_timer">Temporitzador</string>
     <string name="image_desc_move_up">Moure Amunt</string>
     <string name="image_desc_move_down">Moure Avall</string>
-    <string name="train_type_gym">Rocòdrom</string>
-    <string name="train_type_outside">Exterior</string>
-    <string name="train_record_type_timer">Temporitzador</string>
-    <string name="train_record_type_period">Períodes</string>
-    <string name="train_record_type_steps">Passos</string>
-    <string name="train_record_type_mixed">Mixte</string>
-    <string name="train_element_rest">Descans</string>
-    <string name="train_element_climb">Escalar</string>
-    <string name="train_element_timer">Temporitzador</string>
-    <string name="train_program_start">Inici d\'entrenament</string>
-    <string name="train_program_end">Final d\'entrenament</string>
-    <string name="template_train_steps">%d Passos</string>
     <string name="toast_error_gmaps_not_installed">Google Maps no està instal·lat!</string>
     <string name="image_desc_maximize_minimize_img">Maximitzar o minimitzar imatge</string>
     <string name="toast_error_already_downloaded">Ja s\'ha baixat!</string>
@@ -386,7 +373,6 @@
     <string name="update_progress_error_data_dir_creation">No s\'ha pogut crear el directori de dades!</string>
     <string name="toast_error_tts_init_failed">No s\'ha pogut inicialitzar el motor de veu</string>
     <string name="toast_error_tts_language_unsupported">Idioma no suportat</string>
-    <string name="train_type_climbing_gym">Rocòdrom</string>
     <string name="action_google_auth">Entrar amb Google</string>
     <string name="pref_down_downloads_update_sum">Torna a baixar totes les descàrregues completament. Alerta: Alt ús de dades!</string>
     <string name="pref_info_cat_app">Aplicació</string>

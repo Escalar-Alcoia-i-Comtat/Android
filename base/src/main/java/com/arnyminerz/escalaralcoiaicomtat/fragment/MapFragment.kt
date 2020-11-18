@@ -31,6 +31,8 @@ import timber.log.Timber
 
 @ExperimentalUnsignedTypes
 class MapFragment : NetworkChangeListenerFragment() {
+    private lateinit var mapHelper: MapHelper
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -47,10 +49,20 @@ class MapFragment : NetworkChangeListenerFragment() {
     override fun onStart() {
         super.onStart()
 
-        val mapHelper = MapHelper(R.id.page_mapView)
-        mapHelper
+        mapHelper = MapHelper()
             .withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5f)
-            .loadMap(requireActivity(), { _, googleMap ->
+
+        if (IntroActivity.hasLocationPermission(requireContext()))
+            googleMap?.isMyLocationEnabled = true
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun onResume() {
+        super.onResume()
+
+        mapHelper.loadMap(
+            childFragmentManager.findFragmentById(R.id.page_mapView)!!,
+            { _, googleMap ->
                 this@MapFragment.googleMap = googleMap
 
                 if (context != null)
@@ -134,12 +146,10 @@ class MapFragment : NetworkChangeListenerFragment() {
                         marker.title
                     )
                 }
-            }, {
+            },
+            {
                 Timber.e(it, "Could not load map:")
             })
-
-        if (IntroActivity.hasLocationPermission(requireContext()))
-            googleMap?.isMyLocationEnabled = true
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {

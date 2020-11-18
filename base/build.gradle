@@ -14,7 +14,7 @@ android {
         applicationId "com.arnyminerz.escalaralcoiaicomtat"
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode 72
+        versionCode 73
         versionName "Shunt"
         // testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         setProperty("archivesBaseName", "EscalarAlcoiaIComtat-$versionCode-$versionName")
