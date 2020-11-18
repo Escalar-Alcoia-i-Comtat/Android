@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
 import android.content.Intent
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
@@ -19,7 +20,7 @@ import com.google.android.libraries.maps.model.Marker
 import org.jetbrains.anko.doAsync
 import timber.log.Timber
 
-class MapHelper(private val mapFragmentLayoutId: Int) {
+class MapHelper {
     companion object {
         @ExperimentalUnsignedTypes
         fun getTarget(marker: Marker): DataClass<*, *>? {
@@ -69,12 +70,11 @@ class MapHelper(private val mapFragmentLayoutId: Int) {
     }
 
     fun loadMap(
-        activity: FragmentActivity,
+        fragment: Fragment,
         callback: (supportMapFragment: SupportMapFragment, googleMap: GoogleMap) -> Unit,
         onError: ((exception: Exception) -> Unit)?
-    ) {
-        val sfm = activity.supportFragmentManager
-        val smf = sfm.findFragmentById(mapFragmentLayoutId) as? SupportMapFragment
+    ): MapHelper {
+        val smf = fragment as? SupportMapFragment
 
         smf?.getMapAsync { googleMap ->
             googleMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
@@ -89,6 +89,8 @@ class MapHelper(private val mapFragmentLayoutId: Int) {
 
             callback(smf, googleMap)
         } ?: onError?.invoke(NullPointerException("Could not find support map fragment"))
+
+        return this
     }
 
     @ExperimentalUnsignedTypes
