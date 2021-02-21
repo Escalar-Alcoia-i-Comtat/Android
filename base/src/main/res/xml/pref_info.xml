@@ -12,18 +12,4 @@
             app:title="@string/pref_info_build_title" />
 
     </PreferenceCategory>
-
-    <PreferenceCategory app:title="@string/pref_info_cat_app">
-
-        <Preference
-            app:key="pref_mess_token"
-            app:title="@string/pref_info_messaging_token_title"
-            app:summary="@string/pref_info_messaging_token_sum" />
-
-        <Preference
-            app:key="pref_mess_topic"
-            app:title="@string/pref_info_messaging_topic_title"
-            app:summary="@string/pref_info_messaging_token_sum" />
-
-    </PreferenceCategory>
 </PreferenceScreen>

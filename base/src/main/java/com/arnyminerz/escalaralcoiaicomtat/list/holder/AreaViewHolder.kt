@@ -4,9 +4,9 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.list_item_area.view.*
+import com.arnyminerz.escalaralcoiaicomtat.R
 
 class AreaViewHolder (view: View) : RecyclerView.ViewHolder(view){
-    val imageView: ImageView = view.area_imageView
-    val titleTextView : TextView = view.title_textView
+    val imageView: ImageView = view.findViewById(R.id.area_imageView)
+    val titleTextView : TextView = view.findViewById(R.id.title_textView)
 }

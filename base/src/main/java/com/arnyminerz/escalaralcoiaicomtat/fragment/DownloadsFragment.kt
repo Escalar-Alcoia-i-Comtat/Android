@@ -5,28 +5,31 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
+import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentDownloadsBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.sizeString
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.DownloadSectionsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
-import kotlinx.android.synthetic.main.fragment_downloads.*
 
 @ExperimentalUnsignedTypes
 class DownloadsFragment : NetworkChangeListenerFragment() {
+    private var _binding: FragmentDownloadsBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? =
-        inflater.inflate(R.layout.fragment_downloads, container, false)
+    ): View {
+        _binding = FragmentDownloadsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     fun reloadSizeTextView() {
         val dataDir = dataDir(requireContext())
-        downloadSize_textView.text = dataDir.sizeString()
+        binding.downloadSizeTextView.text = dataDir.sizeString()
     }
 
     override fun onResume() {
@@ -36,8 +39,13 @@ class DownloadsFragment : NetworkChangeListenerFragment() {
 
         val sections = DownloadedSection.list()
 
-        downloadsRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-        downloadsRecyclerView?.adapter =
+        binding.downloadsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.downloadsRecyclerView.adapter =
             DownloadSectionsAdapter(sections, requireActivity() as MainActivity)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -2,12 +2,6 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <Preference
-        app:key="pref_account"
-        app:icon="@mipmap/ic_launcher"
-        app:title="@string/pref_account_title"
-        app:summary="@string/pref_account_sum" />
-
-    <Preference
         app:key="pref_general"
         app:icon="@drawable/round_grade_24"
         app:title="@string/pref_main_title"

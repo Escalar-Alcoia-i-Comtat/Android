@@ -4,15 +4,15 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.list_item_profile_path.view.*
+import com.arnyminerz.escalaralcoiaicomtat.R
 
 class ProfilePathViewHolder (view: View) : RecyclerView.ViewHolder(view){
-    val textView: TextView = view.textView
+    val textView: TextView = view.findViewById(R.id.textView)
 
-    val gradeTextView: TextView = view.grade_textView
+    val gradeTextView: TextView = view.findViewById(R.id.grade_textView)
 
-    val attemptsTextView: TextView = view.attempts_textView
-    val hangsTextView: TextView = view.hangs_textView
+    val attemptsTextView: TextView = view.findViewById(R.id.attempts_textView)
+    val hangsTextView: TextView = view.findViewById(R.id.hangs_textView)
 
-    val shareButton: ImageButton = view.share_button
+    val shareButton: ImageButton = view.findViewById(R.id.share_button)
 }

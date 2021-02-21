@@ -23,6 +23,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.find
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.data.map.KMLLoader
+import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMapsBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAskerFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
@@ -37,7 +38,6 @@ import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.OnMapReadyCallback
 import com.google.android.libraries.maps.SupportMapFragment
 import com.google.android.libraries.maps.model.*
-import kotlinx.android.synthetic.main.activity_maps.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.toast
 import org.w3c.dom.Document
@@ -80,6 +80,8 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
     private val polylines = arrayListOf<GeoGeometry>()
     private val markers = arrayListOf<GeoMarker>()
 
+    private lateinit var binding: ActivityMapsBinding
+
     private fun allPoints(): ArrayList<LatLng> {
         val list = arrayListOf<LatLng>()
         for (p in polygons) list.addAll(p.points)
@@ -91,7 +93,9 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_maps)
+        binding = ActivityMapsBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -103,14 +107,14 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                 .let { path -> if (path != null) kmzFile = File(path) }
         }
 
-        floating_action_button.setOnClickListener {
+        binding.floatingActionButton.setOnClickListener {
             onBackPressed()
         }
 
-        map_downloaded_imageView.visibility = View.GONE
+        binding.mapDownloadedImageView.visibility = View.GONE
 
         if (kmlAddress != null)
-            fab_download.setOnClickListener {
+            binding.fabDownload.setOnClickListener {
                 if (kmlAddress == null) return@setOnClickListener
 
                 val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -128,15 +132,15 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                 startActivityForResult(intent, FOLDER_ACCESS_PERMISSION_REQUEST_CODE)
             }
         if (kmzFile != null) {
-            fab_download.setImageDrawable(
+            binding.fabDownload.setImageDrawable(
                 ContextCompat.getDrawable(
                     this,
                     R.drawable.content_save_move
                 )
             )
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                fab_download.tooltipText = getString(R.string.action_store)
-            fab_download.setOnClickListener {
+                binding.fabDownload.tooltipText = getString(R.string.action_store)
+            binding.fabDownload.setOnClickListener {
                 if (kmzFile == null) return@setOnClickListener
 
                 val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -154,9 +158,9 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                 startActivityForResult(intent, FOLDER_ACCESS_PERMISSION_REQUEST_CODE)
             }
         }
-        visibility(fab_download, kmlAddress != null || kmzFile != null)
+        visibility(binding.fabDownload, kmlAddress != null || kmzFile != null)
 
-        fab_maps.setOnClickListener {
+        binding.fabMaps.setOnClickListener {
             if (markerLatLng == null || markerName == null) return@setOnClickListener
 
             val gmmIntentUri =
@@ -180,7 +184,7 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                 with(googleMap) {
                     Timber.v("Got googleMap. Setting type.")
 
-                    visibility(map_info_cardView, false)
+                    visibility(binding.mapInfoCardView, false)
 
                     mapType = GoogleMap.MAP_TYPE_SATELLITE
 
@@ -205,7 +209,7 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                     setOnCameraMoveStartedListener { reason ->
                         if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE)
                             if (lastKnownLocation != null)
-                                fab_current_location.setImageResource(R.drawable.round_gps_not_fixed_24)
+                                binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
                     }
                     setOnMapClickListener { position ->
                         showingPolyline = null
@@ -219,15 +223,15 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                                     Timber.w("Clicked on marker with no title!")
                                     return@setOnMapClickListener
                                 }
-                                map_info_textView.text = windowData.title
-                                map_desc_textView.text = windowData.message
+                                binding.mapInfoTextView.text = windowData.title
+                                binding.mapInfoTextView.text = windowData.message
                                 markerLatLng = marker.position.toLatLng()
                                 markerName = windowData.title
 
                                 showingPolyline = null
 
                                 Timber.w("Showing info window")
-                                visibility(map_info_cardView, true)
+                                visibility(binding.mapInfoCardView, true)
                                 val anim =
                                     AnimationUtils.loadAnimation(
                                         this@MapsActivity,
@@ -238,14 +242,14 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                                     override fun onAnimationRepeat(animation: Animation?) {}
 
                                     override fun onAnimationEnd(animation: Animation?) {
-                                        visibility(map_info_cardView, true)
+                                        visibility(binding.mapInfoCardView, true)
                                     }
 
                                     override fun onAnimationStart(animation: Animation?) {
-                                        visibility(map_info_cardView, true)
+                                        visibility(binding.mapInfoCardView, true)
                                     }
                                 })
-                                map_info_cardView.startAnimation(anim)
+                                binding.mapInfoCardView.startAnimation(anim)
                                 return@setOnMapClickListener
                             }
                         }
@@ -296,7 +300,7 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                     }
 
                     if (kmzFile != null)
-                        map_downloaded_imageView.visibility = View.VISIBLE
+                        binding.mapDownloadedImageView.visibility = View.VISIBLE
 
                     if (mapData != null) {
                         Timber.v("Got map data")
@@ -334,8 +338,8 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                         }
                     }
 
-                    fab_current_location.setImageResource(R.drawable.round_gps_not_fixed_24)
-                    fab_current_location.setOnLongClickListener {
+                    binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
+                    binding.fabCurrentLocation.setOnLongClickListener {
                         allPoints().let {
                             if (it.size > 1)
                                 googleMap.moveCamera(
@@ -540,8 +544,8 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
         if (!hasLocationPermission(this)) {
             googleMap?.isMyLocationEnabled = false
 
-            fab_current_location.setImageResource(R.drawable.round_gps_off_24)
-            fab_current_location.setOnClickListener {
+            binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
+            binding.fabCurrentLocation.setOnClickListener {
                 tryToShowCurrentLocation()
             }
 
@@ -563,7 +567,7 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
             googleMap?.isMyLocationEnabled = true
             googleMap?.uiSettings?.isMyLocationButtonEnabled = false
 
-            fab_current_location.setOnClickListener {
+            binding.fabCurrentLocation.setOnClickListener {
                 if (lastKnownLocation != null) {
                     val position = lastKnownLocation!!.toLatLng()
                     Timber.d("Moving camera to current location ($position)...")
@@ -576,14 +580,14 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                             )
                         )
                     ) ?: Timber.e("GoogleMap is null!")
-                    fab_current_location.setImageResource(R.drawable.round_gps_fixed_24)
+                    binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_fixed_24)
                 } else {
                     Timber.e("No known location!")
-                    fab_current_location.setImageResource(R.drawable.round_gps_off_24)
+                    binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
                 }
             }
 
-            fab_current_location.setImageResource(R.drawable.round_gps_off_24)
+            binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
 
             getDeviceLocation()
 
@@ -607,18 +611,18 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                         // Set the map's camera position to the current location of the device.
                         lastKnownLocation = task.result
                         Timber.d("Got new location: $lastKnownLocation")
-                        fab_current_location.setImageResource(R.drawable.round_gps_not_fixed_24)
+                        binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
                     } else {
                         Timber.d("Current location is null. Using defaults.")
                         Timber.e(task.exception, "Exception:")
-                        fab_current_location.setImageResource(R.drawable.round_gps_off_24)
+                        binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
                     }
                 } ?: Timber.e("fusedLocationProviderClient is null")
-                fab_current_location.setImageResource(R.drawable.round_gps_off_24)
+                binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
             }
         } catch (e: SecurityException) {
             Timber.e(e, "Exception:")
-            fab_current_location.setImageResource(R.drawable.round_gps_off_24)
+            binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
         }
     }
 
@@ -658,14 +662,14 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
             override fun onAnimationRepeat(animation: Animation?) {}
 
             override fun onAnimationEnd(animation: Animation?) {
-                map_info_cardView.visibility = View.GONE
+                binding.mapInfoCardView.visibility = View.GONE
             }
 
             override fun onAnimationStart(animation: Animation?) {
-                map_info_cardView.visibility = View.VISIBLE
+                binding.mapInfoCardView.visibility = View.VISIBLE
             }
         })
-        map_info_cardView.startAnimation(anim)
+        binding.mapInfoCardView.startAnimation(anim)
     }
 
     private fun infoCard(marker: Marker) {
@@ -678,46 +682,46 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
             override fun onAnimationRepeat(animation: Animation?) {}
 
             override fun onAnimationEnd(animation: Animation?) {
-                map_info_cardView.visibility = View.VISIBLE
+                binding.mapInfoCardView.visibility = View.VISIBLE
             }
 
             override fun onAnimationStart(animation: Animation?) {
-                map_info_cardView.visibility = View.VISIBLE
+                binding.mapInfoCardView.visibility = View.VISIBLE
             }
         })
-        map_info_cardView.startAnimation(anim)
+        binding.mapInfoCardView.startAnimation(anim)
 
         val title = marker.title
         val description = marker.snippet
         val iwdc = MapHelper.getTarget(marker) // Info Window Data Class
         val dcSearch = iwdc?.let { AREAS.find(it) }
 
-        map_info_textView.text = title
+        binding.mapInfoTextView.text = title
 
         val imageUrl = MapHelper.getImageUrl(description)
         if (imageUrl == null)
-            map_desc_textView.text = description
+            binding.mapDescTextView.text = description
         else
             Glide.with(this)
                 .load(imageUrl)
-                .into(map_info_imageView)
+                .into(binding.mapInfoImageView)
 
-        visibility(fab_enter, iwdc != null && dcSearch?.isEmpty() == false)
-        visibility(map_info_imageView, imageUrl != null)
-        visibility(map_desc_textView, imageUrl == null)
+        visibility(binding.fabEnter, iwdc != null && dcSearch?.isEmpty() == false)
+        visibility(binding.mapInfoImageView, imageUrl != null)
+        visibility(binding.mapDescTextView, imageUrl == null)
 
         val gmmIntentUri = markerLatLng!!.toUri(true, title)
         val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
             .setPackage("com.google.android.apps.maps")
         if (mapIntent.resolveActivity(packageManager) != null) {
-            fab_maps.show()
-            fab_maps.setOnClickListener {
+            binding.fabMaps.show()
+            binding.fabMaps.setOnClickListener {
                 startActivity(mapIntent)
             }
-        } else fab_maps.hide()
+        } else binding.fabMaps.hide()
 
         if (iwdc != null && dcSearch?.isEmpty() == false)
-            fab_enter.setOnClickListener {
+            binding.fabEnter.setOnClickListener {
                 Timber.v("Searching for info window ${iwdc.namespace}:${iwdc.id}")
                 if (!dcSearch.launchActivity(this))
                     toast(R.string.toast_error_internal)

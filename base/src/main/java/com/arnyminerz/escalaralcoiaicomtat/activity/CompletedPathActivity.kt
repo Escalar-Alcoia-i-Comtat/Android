@@ -8,6 +8,7 @@ import android.view.MenuItem
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.user.UserData
+import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityCompletedPathBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.getSerializable
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.CompletedPathBigAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -18,7 +19,6 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
-import kotlinx.android.synthetic.main.activity_completed_path.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.toast
@@ -35,9 +35,13 @@ class CompletedPathActivity : NetworkChangeListenerActivity() {
     private lateinit var completedPathInfo: CompletedPathBigAdapter.CompletedPathPathInfo
     private val completedPaths = arrayListOf<CompletedPathBigAdapter.CompletedPathInfo>()
 
+    private lateinit var binding: ActivityCompletedPathBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_completed_path)
+        binding = ActivityCompletedPathBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         if (intent == null) {
             Timber.e("Intent is null")
@@ -50,7 +54,7 @@ class CompletedPathActivity : NetworkChangeListenerActivity() {
             return
         }
 
-        setSupportActionBar(completedPath_toolbar)
+        setSupportActionBar(binding.completedPathToolbar)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_round_arrow_back_24)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -62,12 +66,12 @@ class CompletedPathActivity : NetworkChangeListenerActivity() {
         val first = info.first()
         completedPaths.addAll(info)
 
-        like_fab.hide()
+        binding.likeFab.hide()
         when {
             intent.extras!!.containsKey(BUNDLE_EXTRA_USER) -> {
                 user = intent.extras!!.getSerializable<UserData>(BUNDLE_EXTRA_USER)
 
-                like_fab.setOnClickListener {
+                binding.likeFab.setOnClickListener {
                     Timber.v("Liking...")
                     GlobalScope.launch {
                         try {
@@ -84,33 +88,6 @@ class CompletedPathActivity : NetworkChangeListenerActivity() {
                 }
                 GlobalScope.launch { refreshLikeFab() }
             }
-            MainActivity.loggedIn() -> GlobalScope.launch {
-                val uid = MainActivity.user()!!.uid
-                Timber.v("Loading like button user. UID: $uid")
-                val user = UserData.fromUID(networkState, uid)
-                this@CompletedPathActivity.user = user
-
-                runOnUiThread {
-                    Timber.v("Got user data!")
-                    like_fab.setOnClickListener {
-                        Timber.v("Liking...")
-                        GlobalScope.launch {
-                            try {
-                                val liked = paths.like(networkState, user)
-                                if (liked) {
-                                    Timber.v("Liked!")
-                                    refreshLikeFab()
-                                } else throw Exception()
-                            } catch (error: Exception) {
-                                Timber.e(error, "Could not like!")
-                                toast(R.string.toast_error_liked_check)
-                            }
-                        }
-                    }
-                }
-
-                refreshLikeFab()
-            }
             else -> Timber.e("User not logged in")
         }
 
@@ -118,12 +95,12 @@ class CompletedPathActivity : NetworkChangeListenerActivity() {
         theme.resolveAttribute(R.attr.text_dark, typedValue, true)
         val textColorDark = typedValue.data
 
-        toolbar_title.text = completedPathInfo.displayName
-        times_tried_textView.text =
+        binding.toolbarTitle.text = completedPathInfo.displayName
+        binding.timesTriedTextView.text =
             getString(R.string.completed_path_activity_info_times_tried, info.size)
-        difficulty_textView.text = completedPathInfo.grade.getSpannable(this)
+        binding.difficultyTextView.text = completedPathInfo.grade.getSpannable(this)
         //evolution_textView.text = "TODO" // TODO: Evolution Analysis
-        evolution_layout.hide()
+        binding.evolutionLayout.hide()
 
         val attempts = arrayListOf<Entry>()
         val hangs = arrayListOf<Entry>()
@@ -149,24 +126,25 @@ class CompletedPathActivity : NetworkChangeListenerActivity() {
                     setColors(intArrayOf(R.color.graph_hangs), this@CompletedPathActivity)
                 }
 
-        completed_path_lineChart.xAxis.apply {
-            valueFormatter = object : ValueFormatter() {
-                override fun getAxisLabel(value: Float, axis: AxisBase?): String = ""
+        with(binding.completedPathLineChart){
+            xAxis.apply {
+                valueFormatter = object : ValueFormatter() {
+                    override fun getAxisLabel(value: Float, axis: AxisBase?): String = ""
+                }
+                this.textColor = textColorDark
             }
-            this.textColor = textColorDark
-        }
-        completed_path_lineChart.axisLeft.textColor = textColorDark
-        completed_path_lineChart.axisRight.textColor = textColorDark
+            axisLeft.textColor = textColorDark
+            axisRight.textColor = textColorDark
 
-        val data = LineData(attemptsDataSet, hangsDataSet)
-        completed_path_lineChart.data = data
-        completed_path_lineChart.legend.apply {
-            textColor = textColorDark
+            data = LineData(attemptsDataSet, hangsDataSet)
+            legend.apply {
+                textColor = textColorDark
+            }
+            description = Description().apply {
+                text = ""
+            }
+            invalidate()
         }
-        completed_path_lineChart.description = Description().apply {
-            text = ""
-        }
-        completed_path_lineChart.invalidate()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean =
@@ -211,17 +189,19 @@ class CompletedPathActivity : NetworkChangeListenerActivity() {
             Timber.v("Refreshing like FAB...")
             val liked = paths.likedCompletedPath(networkState, user)
             runOnUiThread {
-                Timber.d("User has liked? $liked")
-                if (liked) // Liked
-                    like_fab.setImageResource(R.drawable.ic_round_favorite)
-                else
-                    like_fab.setImageResource(R.drawable.ic_round_favorite_border)
-                like_fab.show()
+                with(binding.likeFab){
+                    Timber.d("User has liked? $liked")
+                    if (liked) // Liked
+                        setImageResource(R.drawable.ic_round_favorite)
+                    else
+                        setImageResource(R.drawable.ic_round_favorite_border)
+                    show()
+                }
             }
         } catch (error: Exception) {
             Timber.e(error, "Could not check if path is liked.")
             runOnUiThread {
-                like_fab.hide()
+                binding.likeFab.hide()
             }
         }
     }

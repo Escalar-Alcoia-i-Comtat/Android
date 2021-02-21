@@ -9,7 +9,7 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity.Companion.hasStoragePermission
-import kotlinx.android.synthetic.main.fragment_intro_storage.view.*
+import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentIntroStorageBinding
 
 @ExperimentalUnsignedTypes
 class StorageIntroFragment : Fragment() {
@@ -17,14 +17,18 @@ class StorageIntroFragment : Fragment() {
         const val STORAGE_PERMISSION_REQUEST = 45
     }
 
+    private var _binding: FragmentIntroStorageBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_intro_storage, container, false)
+    ): View {
+        _binding = FragmentIntroStorageBinding.inflate(inflater, container, false)
+        val view = binding.root
 
-        view.grant_storage_permission_button.apply {
+        binding.grantStoragePermissionButton.apply {
             setOnClickListener {
                 ActivityCompat.requestPermissions(
                     requireActivity(),

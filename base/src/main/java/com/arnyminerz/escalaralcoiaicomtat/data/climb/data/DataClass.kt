@@ -25,7 +25,6 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
-import com.google.firebase.perf.metrics.AddTrace
 import org.jetbrains.anko.runOnUiThread
 import timber.log.Timber
 import java.io.File
@@ -94,7 +93,6 @@ abstract class DataClass<A : Serializable, B : Serializable>(
      * @throws FileAlreadyExistsException If the data has already been downloaded and overwrite is false
      * @throws AlreadyLoadingException If the content is already being downloaded
      */
-    @AddTrace(name = "downloadTrace", enabled = true)
     @Throws(FileAlreadyExistsException::class, AlreadyLoadingException::class)
     fun download(
         context: Context,

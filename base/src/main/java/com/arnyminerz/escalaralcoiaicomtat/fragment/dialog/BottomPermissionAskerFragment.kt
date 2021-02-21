@@ -8,8 +8,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.analytics
-import com.arnyminerz.escalaralcoiaicomtat.firebase.ANALYTICS_PERMISSION_ASK
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.button.MaterialButton
 import timber.log.Timber
@@ -42,7 +40,6 @@ class BottomPermissionAskerFragment(
                 MY_LOCATION_PERMISSION_EVENT_ID,
                 DISMISS_MY_LOCATION_PERMISSION_EVENT_NAME
             )
-            analytics.logEvent(ANALYTICS_PERMISSION_ASK, bundle)
 
             dismiss()
         }
@@ -53,7 +50,6 @@ class BottomPermissionAskerFragment(
                 MY_LOCATION_PERMISSION_EVENT_ID,
                 ENABLE_MY_LOCATION_PERMISSION_EVENT_NAME
             )
-            analytics.logEvent(ANALYTICS_PERMISSION_ASK, bundle)
 
             ActivityCompat.requestPermissions(activity, permissions, requestCode)
 

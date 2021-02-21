@@ -6,14 +6,12 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.list_item_area.view.title_textView
-import kotlinx.android.synthetic.main.list_item_zone.view.*
-import kotlinx.android.synthetic.main.list_item_zone.view.download_imageButton
+import com.arnyminerz.escalaralcoiaicomtat.R
 
 class ZonesViewHolder (view: View) : RecyclerView.ViewHolder(view){
-    val imageView: ImageView = view.zone_imageView
-    val titleTextView : TextView = view.title_textView
-    val mapImageButton: ImageButton = view.map_imageButton
-    val downloadImageButton : ImageButton = view.download_imageButton
-    val progressBar : ProgressBar = view.zone_download_progressBar
+    val imageView: ImageView = view.findViewById(R.id.zone_imageView)
+    val titleTextView : TextView = view.findViewById(R.id.title_textView)
+    val mapImageButton: ImageButton = view.findViewById(R.id.map_imageButton)
+    val downloadImageButton : ImageButton = view.findViewById(R.id.download_imageButton)
+    val progressBar : ProgressBar = view.findViewById(R.id.zone_download_progressBar)
 }

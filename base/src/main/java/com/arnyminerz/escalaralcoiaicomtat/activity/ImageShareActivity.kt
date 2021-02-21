@@ -10,12 +10,12 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
+import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityImageShareBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.getSerializable
 import com.arnyminerz.escalaralcoiaicomtat.generic.hasExtras
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNull
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.CompletedPathBigAdapter
 import com.arnyminerz.escalaralcoiaicomtat.social.generateSocialImage
-import kotlinx.android.synthetic.main.activity_image_share.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.net.URL
@@ -30,7 +30,7 @@ const val SHARE_DATE = "share_date"
 class ImageShareActivity : AppCompatActivity() {
     private fun updateImage() {
         runOnUiThread {
-            image_share_imageView.setImageBitmap(
+            binding.imageShareImageView.setImageBitmap(
                 generateSocialImage(
                     this,
                     path,
@@ -45,6 +45,8 @@ class ImageShareActivity : AppCompatActivity() {
     private lateinit var path: Path
     private lateinit var completedPath: CompletedPathBigAdapter.CompletedPathInfo
 
+    private lateinit var binding: ActivityImageShareBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -54,6 +56,9 @@ class ImageShareActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
 
+        binding = ActivityImageShareBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
         setContentView(R.layout.activity_image_share)
 
         if (intent.isNull()) return onBackPressed()

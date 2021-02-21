@@ -6,28 +6,25 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.ChipGroup
-import kotlinx.android.synthetic.main.list_item_path.view.*
+import com.arnyminerz.escalaralcoiaicomtat.R
 
 class SectorViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-    val cardView: CardView = view.cardView
+    val cardView: CardView = view.findViewById(R.id.cardView)
 
-    val completionImageView : ImageView = view.completion_imageView
-    val idTextView: TextView = view.id_textView
-    val titleTextView: TextView = view.name_textView
-    val difficultyTextView: TextView = view.difficulty_textView
-    val heightTextView: TextView = view.height_textView
+    val completionImageView : ImageView = view.findViewById(R.id.completion_imageView)
+    val idTextView: TextView = view.findViewById(R.id.id_textView)
+    val titleTextView: TextView = view.findViewById(R.id.name_textView)
+    val difficultyTextView: TextView = view.findViewById(R.id.difficulty_textView)
+    val heightTextView: TextView = view.findViewById(R.id.height_textView)
 
-    val warningImageView: ImageView = view.alert_imageView
-    val warningTextView : TextView = view.alert_textView
-    val warningCardView : CardView = view.alert_cardView
-    val warningNameImageView: ImageView = view.alert_name_imageView
+    val warningImageView: ImageView = view.findViewById(R.id.alert_imageView)
+    val warningTextView : TextView = view.findViewById(R.id.alert_textView)
+    val warningCardView : CardView = view.findViewById(R.id.alert_cardView)
+    val warningNameImageView: ImageView = view.findViewById(R.id.alert_name_imageView)
 
-    val toggleImageButton: ImageButton = view.toggle_imageButton
-    val infoImageButton: ImageButton = view.info_imageButton
+    val toggleImageButton: ImageButton = view.findViewById(R.id.toggle_imageButton)
+    val infoImageButton: ImageButton = view.findViewById(R.id.info_imageButton)
 
-    val safesChipGroup: ChipGroup = view.safesChipGroup
-
-    val markCompletedButton : MaterialButton = view.mark_completed_button
+    val safesChipGroup: ChipGroup = view.findViewById(R.id.safesChipGroup)
 }

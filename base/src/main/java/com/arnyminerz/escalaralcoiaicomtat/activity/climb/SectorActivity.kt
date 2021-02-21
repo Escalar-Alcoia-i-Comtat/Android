@@ -7,6 +7,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
+import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.SectorFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.SectorPagerAdapter
@@ -14,7 +15,6 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import it.sephiroth.android.library.xtooltip.ClosePolicy
 import it.sephiroth.android.library.xtooltip.Tooltip
-import kotlinx.android.synthetic.main.activity_sector.*
 import timber.log.Timber
 
 @ExperimentalUnsignedTypes
@@ -26,14 +26,18 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
     var sector: Int = 0
     lateinit var sectors: ArrayList<Sector>
 
+    private lateinit var binding: ActivitySectorBinding
+
     private fun updateTitle() {
-        title_textView.text = sectors[sector].displayName
-        title_textView.transitionName = transitionName
+        binding.titleTextView.text = sectors[sector].displayName
+        binding.titleTextView.transitionName = transitionName
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sector)
+        binding = ActivitySectorBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         val extras = intent.extras
         if (extras == null) {
@@ -56,10 +60,10 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
         if (transitionName == null)
             Timber.e("Transition name is null")
 
-        back_imageButton.bringToFront()
+        binding.backImageButton.bringToFront()
         updateTitle()
 
-        no_internet_imageView.setOnClickListener {
+        binding.noInternetImageView.setOnClickListener {
             val tooltip = Tooltip.Builder(this)
                 .text(R.string.tooltip_no_internet)
                 .anchor(0, 0)
@@ -70,19 +74,19 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
             tooltip.show(it, Tooltip.Gravity.LEFT, false)
         }
 
-        back_imageButton.setOnClickListener { onBackPressed() }
+        binding.backImageButton.setOnClickListener { onBackPressed() }
 
         val fragments = arrayListOf<Fragment>()
         for (sector in sectors) {
             Timber.v("Got sector \"$sector\" with ${sector.count()} paths.")
-            fragments.add(SectorFragment(sector, sector_viewPager))
+            fragments.add(SectorFragment(sector, binding.sectorViewPager))
         }
 
-        sector_viewPager.adapter =
+        binding.sectorViewPager.adapter =
             SectorPagerAdapter(this, fragments)
         if (savedInstanceState == null)
-            sector_viewPager.currentItem = sector
-        sector_viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            binding.sectorViewPager.currentItem = sector
+        binding.sectorViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 sector = position
@@ -97,6 +101,6 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         val hasInternet = state.hasInternet
-        visibility(no_internet_imageView, !hasInternet)
+        visibility(binding.noInternetImageView, !hasInternet)
     }
 }

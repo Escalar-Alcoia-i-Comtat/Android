@@ -5,26 +5,29 @@ import android.content.Context
 import android.os.Bundle
 import android.view.Window
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogPathEquipmentBinding
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.EquipmentAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.EquipmentAdapterType
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import kotlinx.android.synthetic.main.dialog_path_equipment.*
 
 @ExperimentalUnsignedTypes
 class PathEquipmentDialog(context: Context, private val fixedSafesData: FixedSafesData, private val requiredSafesData: RequiredSafesData): Dialog(context) {
+    private lateinit var binding: DialogPathEquipmentBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
-        setContentView(R.layout.dialog_path_equipment)
+        binding = DialogPathEquipmentBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
-        pathEquipment_recyclerView.layoutManager = LinearLayoutManager(context)
-        pathEquipment_recyclerView.adapter = EquipmentAdapter(context, fixedSafesData, EquipmentAdapterType.FIXED)
+        binding.pathEquipmentRecyclerView.layoutManager = LinearLayoutManager(context)
+        binding.pathEquipmentRecyclerView.adapter = EquipmentAdapter(context, fixedSafesData, EquipmentAdapterType.FIXED)
 
-        pathRequiredEquipment_recyclerView.layoutManager = LinearLayoutManager(context)
-        pathRequiredEquipment_recyclerView.adapter = EquipmentAdapter(context, requiredSafesData, EquipmentAdapterType.REQUIRED)
-        visibility(pathRequiredTitle_textView, requiredSafesData.any())
+        binding.pathRequiredEquipmentRecyclerView.layoutManager = LinearLayoutManager(context)
+        binding.pathRequiredEquipmentRecyclerView.adapter = EquipmentAdapter(context, requiredSafesData, EquipmentAdapterType.REQUIRED)
+        visibility(binding.pathRequiredTitleTextView, requiredSafesData.any())
     }
 }

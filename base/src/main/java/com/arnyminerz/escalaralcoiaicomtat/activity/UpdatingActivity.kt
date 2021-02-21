@@ -1,16 +1,14 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import androidx.core.content.FileProvider
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
+import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityUpdatingBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.DownloadAreasIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
@@ -19,17 +17,9 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
-import kotlinx.android.synthetic.main.activity_updating.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.toast
 import timber.log.Timber
-import java.io.File
-
-val DOWNLOAD_APK = IntentExtra<String>("apkUrl")
 
 val UPDATE_AREA = IntentExtra<Int>("update_area")
 val UPDATE_ZONE = IntentExtra<Int>("update_zone")
@@ -49,16 +39,19 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
         null // If this is true, the cache.json file will be re-downloaded
     private var updateDownloads: Boolean? =
         null // If this is true, all the downloaded images will be downloaded again
-    private var downloadAPKUrl: String? = null
 
     /**
      * If true, app won't be launched when finished updating.
      */
     private var quietUpdate: Boolean = false
 
+    private lateinit var binding: ActivityUpdatingBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_updating)
+        binding = ActivityUpdatingBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         if (intent == null || intent.extras == null) {
             Timber.e("Intent doesn't have data")
@@ -69,7 +62,6 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
         updateArea = intent.getExtra(UPDATE_AREA)
         updateZone = intent.getExtra(UPDATE_ZONE)
         updateSector = intent.getExtra(UPDATE_SECTOR)
-        downloadAPKUrl = intent.getExtra(DOWNLOAD_APK)
         updateCache = intent.getExtra(UPDATE_CACHE)
         updateDownloads = intent.getExtra(UPDATE_IMAGES)
         quietUpdate = intent.getExtra(QUIET_UPDATE) ?: false
@@ -83,8 +75,8 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
         val wifiConnected = state.wifiConnected
 
         if (!hasInternet) {
-            progressBar.isIndeterminate = true
-            progress_textView.setText(R.string.update_progress_internet_waiting)
+            binding.progressBar.isIndeterminate = true
+            binding.progressTextView.setText(R.string.update_progress_internet_waiting)
             return
         }
 
@@ -107,19 +99,17 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
     }
 
     private fun runActions() {
-        val hasInternet = networkState.hasInternet
-
         if (updateCache == true) { // Cache should be re-downloaded
             Timber.v("Has to update cache.json")
 
             val cacheFile = IntroActivity.cacheFile(this) // First delete the cache file
-            progress_textView.setText(R.string.update_progress_deleting_old_cache)
+            binding.progressTextView.setText(R.string.update_progress_deleting_old_cache)
             Timber.v("Deleting the cache file")
             cacheFile.deleteIfExists()
 
             Timber.v("Downloading newest data...")
-            progress_textView.setText(R.string.update_progress_downloading_new_cache)
-            progressBar.isIndeterminate = true
+            binding.progressTextView.setText(R.string.update_progress_downloading_new_cache)
+            binding.progressBar.isIndeterminate = true
             DownloadAreasIntroFragment.downloadAreasCache(this, null, null, {
                 // On finished
                 Timber.v("  Device data updated!")
@@ -129,9 +119,9 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
                 }
             }, { message -> // On error
                 vibrate(this, 500)
-                visibility(progressBar, false, setGone = false)
-                updating_textView.setText(R.string.update_progress_error)
-                progress_textView.setText(message)
+                visibility(binding.progressBar, false, setGone = false)
+                binding.updatingTextView.setText(R.string.update_progress_error)
+                binding.progressTextView.setText(message)
             })
         }
 
@@ -139,13 +129,13 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             Timber.v("Has to update - updateArea:$updateArea updateZone:$updateZone updateSector:$updateSector")
 
             val cacheFile = IntroActivity.cacheFile(this)
-            progress_textView.setText(R.string.update_progress_deleting_old_cache)
+            binding.progressTextView.setText(R.string.update_progress_deleting_old_cache)
             Timber.v("Deleting the cache file")
             cacheFile.deleteIfExists()
 
             Timber.v("Downloading newest data...")
-            progress_textView.setText(R.string.update_progress_downloading_new_cache)
-            progressBar.isIndeterminate = true
+            binding.progressTextView.setText(R.string.update_progress_downloading_new_cache)
+            binding.progressBar.isIndeterminate = true
             DownloadAreasIntroFragment.downloadAreasCache(this, null, null, {
                 // Download complete
                 val updatesToDo = 0 +
@@ -171,14 +161,14 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
                             }
                     }, { progress, max ->
                         // Progress
-                        progressBar.isIndeterminate = false
-                        progressBar.max = max
-                        progressBar.progress = progress
+                        binding.progressBar.isIndeterminate = false
+                        binding.progressBar.max = max
+                        binding.progressBar.progress = progress
                     }, {
                         // Error
                         vibrate(this@UpdatingActivity, 500)
-                        visibility(progressBar, false, setGone = false)
-                        updating_textView.setText(R.string.update_progress_error)
+                        visibility(binding.progressBar, false, setGone = false)
+                        binding.updatingTextView.setText(R.string.update_progress_error)
                     })
                 }
 
@@ -192,75 +182,14 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
                 }
             }, { message -> // On error
                 vibrate(this, 500)
-                visibility(progressBar, false, setGone = false)
-                updating_textView.setText(R.string.update_progress_error)
-                progress_textView.setText(message)
+                visibility(binding.progressBar, false, setGone = false)
+                binding.updatingTextView.setText(R.string.update_progress_error)
+                binding.progressTextView.setText(message)
             })
             return
         }
 
-        when {
-            downloadAPKUrl != null -> {
-                progressBar.isIndeterminate = true
-                doAsync {
-                    if (hasInternet) {
-                        val storage = Firebase.storage
-
-                        val apkFile = File(cacheDir, "update.apk")
-                        if (apkFile.exists())
-                            apkFile.delete()
-
-                        val gsRef = storage.getReferenceFromUrl(downloadAPKUrl!!)
-                        gsRef.getFile(apkFile).addOnSuccessListener {
-                            if (apkFile.exists()) {
-                                val apkURI = if (Build.VERSION.SDK_INT >= 24)
-                                    FileProvider.getUriForFile(
-                                        this@UpdatingActivity,
-                                        applicationContext.packageName.toString() + ".provider",
-                                        apkFile
-                                    )
-                                else
-                                    Uri.fromFile(apkFile)
-
-                                val install = Intent(Intent.ACTION_VIEW, apkURI)
-                                install.setDataAndType(
-                                    apkURI,
-                                    "application/vnd.android.package-archive"
-                                )
-
-                                install.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-
-                                install.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
-
-                                Timber.v("File ready, launching installation")
-                                startActivity(install)
-                                finishAffinity()
-                            } else {
-                                Timber.e("APK file doesn't exist.")
-                                toast(R.string.toast_error_internal)
-                                finishAffinity()
-                            }
-                        }.addOnFailureListener {
-                            Timber.e("Could not download: $it")
-                            toast(R.string.toast_error_internal)
-                            finishAffinity()
-                        }.addOnProgressListener { taskSnapshot ->
-                            val max = taskSnapshot.totalByteCount
-                            val progress = taskSnapshot.bytesTransferred
-                            progressBar.isIndeterminate = false
-                            progressBar.max = max.toInt()
-                            progressBar.progress = progress.toInt()
-                        }
-                    } else {
-                        Timber.e("Internet connection not available")
-                        toast(R.string.toast_error_no_internet)
-                        finishAffinity()
-                    }
-                }
-            }
-            else -> onBackPressed()
-        }
+        onBackPressed()
     }
 
 }

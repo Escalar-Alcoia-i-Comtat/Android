@@ -3,14 +3,9 @@ package com.arnyminerz.escalaralcoiaicomtat.data.user
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.CompletedPath
-import com.arnyminerz.escalaralcoiaicomtat.exception.JSONResultException
-import com.arnyminerz.escalaralcoiaicomtat.exception.MissingDataException
-import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
-import com.arnyminerz.escalaralcoiaicomtat.exception.UserNotFoundException
-import com.arnyminerz.escalaralcoiaicomtat.fragment.AuthFragment
+import com.arnyminerz.escalaralcoiaicomtat.exception.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getBooleanFromString
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getStringSafe
@@ -20,12 +15,9 @@ import com.arnyminerz.escalaralcoiaicomtat.security.encrypt
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toCollection
-import kotlinx.coroutines.tasks.await
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
@@ -104,28 +96,6 @@ data class UserData(
         }
 
         /**
-         * Gets an user's data from its Firebase profile
-         * @author ArnyminerZ
-         * @date 2020/05/31
-         * @patch ArnyminerZ 2020/06/06
-         * @param networkState The status of the device's network on the function execution time.
-         * @param firebaseUser The firebase user to get from
-         * @returns The user Data
-         * @throws NoInternetAccessException If no internet access was provided from networkState
-         * @throws UserNotFoundException If the uid specified didn't match any stored user
-         * @throws JSONResultException If there was an error loading the data
-         */
-        @Throws(
-            NoInternetAccessException::class,
-            UserNotFoundException::class,
-            JSONResultException::class
-        )
-        suspend fun fromFirebaseUser(
-            networkState: ConnectivityProvider.NetworkState,
-            firebaseUser: FirebaseUser
-        ): UserData = fromUID(networkState, firebaseUser.uid)
-
-        /**
          * Requests User's data from its QR code
          * @patch ArnyminerZ 2020/06/06
          * @param content The content text of the QR
@@ -193,24 +163,7 @@ data class UserData(
             password: String,
             register: Boolean = false
         ): UserData {
-            if (!networkState.hasInternet)
-                throw NoInternetAccessException()
-            else {
-                val requestUrl =
-                    "$EXTENDED_API_URL/firebase/authenticate/?email=%s&password=%s${if (register) "&register=true" else ""}".format(
-                        email,
-                        password
-                    )
-                val json = jsonFromUrl(requestUrl)
-
-                if (json.has("error"))
-                    throw JSONResultException(json.getError(), "Could not log in")
-                else {
-                    MainActivity.auth.signInWithEmailAndPassword(email, password).await()
-                    val record = json.getJSONObject("record")
-                    return UserData(record)
-                }
-            }
+            throw ActionNotSupportedException("Login is currently not supported")
         }
     }
 
@@ -224,21 +177,6 @@ data class UserData(
     )
 
     constructor(json: String) : this(JSONObject(json))
-
-    /**
-     * Instantiates from Firebase User without ID. Some functions may not work correctly
-     * @throws NullPointerException If displayName or email is null
-     */
-    @Deprecated("Use UserData:fromFirebaseUser()")
-    constructor(firebaseUser: FirebaseUser) : this(
-        -1,
-        firebaseUser.uid,
-        UserRole.NORMAL,
-        firebaseUser.displayName!!,
-        firebaseUser.email!!,
-        firebaseUser.photoUrl?.toString()
-            ?: "https://api.adorable.io/avatars/256/${firebaseUser.email!!}.png"
-    )
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun toJSON() =
@@ -257,12 +195,6 @@ data class UserData(
                 it.encrypt(QR_ENCRYPTION_KEY)
             else it
         }
-
-    override fun equals(other: Any?): Boolean {
-        if (other is FirebaseUser)
-            return other.uid == uid
-        return false
-    }
 
     /**
      * Changes the user's profile image
@@ -483,15 +415,6 @@ data class UserData(
         networkState: ConnectivityProvider.NetworkState,
         fromUid: String
     ): Boolean = sendFriendRequest(networkState, fromUid, uid)
-
-    /**
-     * Subscribes to the user's topic on Firebase Messaging
-     * @author ArnyminerZ
-     * @date 2020/05/29
-     */
-    suspend fun listenMessages() {
-        FirebaseMessaging.getInstance().subscribeToTopic(uid).await()
-    }
 
     /**
      * Removes the relation of friends between the current user and another
@@ -831,7 +754,7 @@ class UserPreferences(
         val friends = arrayListOf<UserData>()
         friendsFlow.toCollection(friends)
 
-        return friendsPublic || otherUser == AuthFragment.user || friends.contains(otherUser)
+        return friendsPublic || friends.contains(otherUser)
     }
 
     fun shouldShowProfileImage(): Boolean = profileImagePublic

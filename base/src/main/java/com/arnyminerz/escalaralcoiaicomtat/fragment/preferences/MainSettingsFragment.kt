@@ -1,20 +1,11 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.preferences
 
 import android.os.Bundle
-import androidx.core.graphics.drawable.toDrawable
 import androidx.preference.Preference
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.PreferenceData
-import com.arnyminerz.escalaralcoiaicomtat.data.user.UserData
-import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.*
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerPreferenceFragment
-import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import timber.log.Timber
 
 val SETTINGS_ALERT_PREF = PreferenceData("alert_pref", true)
 val SETTINGS_GESTURE_SENSIBILITY_PREF = PreferenceData("gest_sens_pref", 3)
@@ -39,8 +30,7 @@ class MainSettingsFragment : NetworkChangeListenerPreferenceFragment() {
             GENERAL(SETTINGS_HEIGHT_GENERAL),
             NOTIFICATIONS(SETTINGS_HEIGHT_NOTIFICATIONS),
             INFO(SETTINGS_HEIGHT_INFO),
-            DOWNLOADS(SETTINGS_HEIGHT_DOWNLOADS),
-            ACCOUNT(SETTINGS_HEIGHT_ACCOUNT)
+            DOWNLOADS(SETTINGS_HEIGHT_DOWNLOADS)
         }
     }
 
@@ -49,34 +39,10 @@ class MainSettingsFragment : NetworkChangeListenerPreferenceFragment() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.pref_main, rootKey)
 
-        val accountPreference: Preference? = findPreference("pref_account")
         val generalPreference: Preference? = findPreference("pref_general")
         val notificationsPreference: Preference? = findPreference("pref_notifications")
         val downloadsPreference: Preference? = findPreference("pref_downloads")
         val infoPreference: Preference? = findPreference("pref_info")
-
-        val loggedIn = MainActivity.loggedIn()
-        visibility(accountPreference, loggedIn)
-        if (loggedIn)
-            GlobalScope.launch {
-                try {
-                    val user = UserData.fromUID(networkState, MainActivity.user()!!.uid)
-                    user.profileImage(requireContext(), networkState) { bitmap ->
-                        runOnUiThread {
-                            accountPreference?.icon = bitmap.toDrawable(resources)
-
-                            accountPreference?.setOnPreferenceClickListener {
-                                settingsListener?.invoke(SettingsPage.ACCOUNT)
-                                true
-                            }
-                        }
-                    }
-                } catch (error: NoInternetAccessException) {
-                    Timber.e("No Internet connection was found for loading profile data")
-                } catch (error: Exception) {
-                    Timber.e(error, "Could not load profile image")
-                }
-            }
 
         generalPreference?.setOnPreferenceClickListener {
             settingsListener?.invoke(SettingsPage.GENERAL)

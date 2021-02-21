@@ -12,9 +12,9 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.analytics
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
+import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityIntroBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.BetaIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.DownloadAreasIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.MainIntroFragment
@@ -24,9 +24,6 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_SHOWN_INTRO
 import com.arnyminerz.escalaralcoiaicomtat.generic.isPermissionGranted
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.google.android.material.button.MaterialButton
-import com.google.firebase.analytics.FirebaseAnalytics
-import kotlinx.android.synthetic.main.activity_intro.*
-import kotlinx.android.synthetic.main.fragment_intro_download.*
 import org.jetbrains.anko.toast
 import java.io.File
 
@@ -57,20 +54,23 @@ class IntroActivity : NetworkChangeListenerActivity() {
         private set
     val bundle = Bundle()
 
+    private lateinit var binding: ActivityIntroBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_intro)
+        binding = ActivityIntroBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         val isBeta = BuildConfig.VERSION_NAME.contains("pre", true)
 
         bundle.clear()
         bundle.putString("os_version", android.os.Build.VERSION.RELEASE)
         bundle.putInt("api_level", android.os.Build.VERSION.SDK_INT)
-        analytics.logEvent(FirebaseAnalytics.Event.TUTORIAL_BEGIN, bundle)
 
         adapterViewPager = IntroPagerAdapter(supportFragmentManager, isBeta, this)
-        view_pager.adapter = adapterViewPager
-        view_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+        binding.viewPager.adapter = adapterViewPager
+        binding.viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {}
 
             override fun onPageScrolled(
@@ -82,8 +82,8 @@ class IntroActivity : NetworkChangeListenerActivity() {
                     adapterViewPager!!.fragments.indexOf(adapterViewPager!!.storageIntroFragment)
                 if (position - 1 == storageIntroFragmentIndex)
                     if (!hasStoragePermission(this@IntroActivity)) {
-                        view_pager.currentItem = storageIntroFragmentIndex
-                        intro_next_FAB.setImageResource(R.drawable.round_chevron_right_24)
+                        binding.viewPager.currentItem = storageIntroFragmentIndex
+                        binding.introNextFAB.setImageResource(R.drawable.round_chevron_right_24)
                         shouldChange = false
                         ActivityCompat.requestPermissions(
                             this@IntroActivity,
@@ -101,24 +101,24 @@ class IntroActivity : NetworkChangeListenerActivity() {
             }
         })
 
-        intro_next_FAB.setOnClickListener {
+        binding.introNextFAB.setOnClickListener {
             next()
         }
     }
 
     fun fabStatus(enabled: Boolean) {
-        intro_next_FAB.isEnabled = enabled
+        binding.introNextFAB.isEnabled = enabled
     }
 
     fun next() {
-        val position = view_pager.currentItem
+        val position = binding.viewPager.currentItem
 
         val storageIntroFragmentIndex =
             adapterViewPager!!.fragments.indexOf(adapterViewPager!!.storageIntroFragment)
         if (position == storageIntroFragmentIndex)
             if (!hasStoragePermission(this@IntroActivity)) {
-                view_pager.currentItem = storageIntroFragmentIndex
-                intro_next_FAB.setImageResource(R.drawable.round_chevron_right_24)
+                binding.viewPager.currentItem = storageIntroFragmentIndex
+                binding.introNextFAB.setImageResource(R.drawable.round_chevron_right_24)
                 shouldChange = false
                 ActivityCompat.requestPermissions(
                     this@IntroActivity,
@@ -134,16 +134,12 @@ class IntroActivity : NetworkChangeListenerActivity() {
         if (position + 1 >= adapterViewPager!!.fragments.size) {
             sharedPreferences?.let {
                 PREF_SHOWN_INTRO.put(sharedPreferences!!, true)
-                analytics.logEvent(
-                    FirebaseAnalytics.Event.TUTORIAL_COMPLETE,
-                    bundle
-                )
                 startActivity(Intent(this@IntroActivity, MainActivity()::class.java))
             }
         } else {
-            if (view_pager.currentItem == adapterViewPager!!.fragments.size - 2)
-                intro_next_FAB.setImageResource(R.drawable.round_check_24)
-            view_pager.currentItem++
+            if (binding.viewPager.currentItem == adapterViewPager!!.fragments.size - 2)
+                binding.introNextFAB.setImageResource(R.drawable.round_check_24)
+            binding.viewPager.currentItem++
         }
     }
 
@@ -171,7 +167,7 @@ class IntroActivity : NetworkChangeListenerActivity() {
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         super.onStateChange(state)
 
-        if (state.hasInternet && view_pager.currentItem ==
+        if (state.hasInternet && binding.viewPager.currentItem ==
             adapterViewPager!!.fragments.indexOf(adapterViewPager!!.downloadIntroFragment)
         )
             if (!DownloadAreasIntroFragment.loading)

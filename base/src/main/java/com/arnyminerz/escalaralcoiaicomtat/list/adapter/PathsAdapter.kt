@@ -21,7 +21,6 @@ import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.user
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.CompletedType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Path
@@ -100,37 +99,6 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
 
         holder.warningImageView.hide()
         holder.warningCardView.hide()
-
-        visibility(holder.markCompletedButton, user() != null)
-        holder.markCompletedButton.setOnClickListener {
-            val fragmentManager =
-                if (activity is FragmentActivity) activity.supportFragmentManager else if (activity is AppCompatActivity) activity.supportFragmentManager else null
-            fragmentManager?.let { supportFragmentManager ->
-                BottomMarkCompletedFragment(
-                    activity,
-                    path,
-                    object : MarkListener {
-                        override fun onMarkCompleted() {
-                            Timber.d("Marked as completed!")
-                            activity.runOnUiThread {
-                                notifyDataSetChanged()
-                                activity.toast("Marked")
-                            }
-                        }
-
-                        override fun onMarkFailed() {
-                            Timber.e("An error occurred while marking")
-                            activity.runOnUiThread {
-                                activity.toast("An error occurred")
-                            }
-                        }
-
-                    }).show(
-                    supportFragmentManager,
-                    BOTTOM_MARK_COMPLETED_TAG
-                )
-            }
-        }
 
         val hasInfo = path.hasInfo()
         visibility(holder.infoImageButton, hasInfo)

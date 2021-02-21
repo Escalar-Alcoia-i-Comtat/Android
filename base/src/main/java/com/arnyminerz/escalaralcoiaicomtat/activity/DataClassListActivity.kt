@@ -1,21 +1,26 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.os.Bundle
-import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
+import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
+import com.arnyminerz.escalaralcoiaicomtat.databinding.NoInternetCardBinding
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import kotlinx.android.synthetic.main.no_internet_card.*
 
 abstract class DataClassListActivity : NetworkChangeListenerActivity() {
+    protected lateinit var binding: LayoutListBinding
+    private lateinit var noInternetBinding: NoInternetCardBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.layout_list)
+        binding = LayoutListBinding.inflate(layoutInflater)
+        noInternetBinding = NoInternetCardBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         val hasInternet = state.hasInternet
-        visibility(noInternet_cardView, !hasInternet)
+        visibility(noInternetBinding.noInternetCardView, !hasInternet)
     }
 }
