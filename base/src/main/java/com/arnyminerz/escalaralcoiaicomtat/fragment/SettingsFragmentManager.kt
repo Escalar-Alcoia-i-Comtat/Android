@@ -14,7 +14,6 @@ const val SETTINGS_HEIGHT_MAIN = 0
 const val SETTINGS_HEIGHT_GENERAL = 1
 const val SETTINGS_HEIGHT_NOTIFICATIONS = 1
 const val SETTINGS_HEIGHT_DOWNLOADS = 1
-const val SETTINGS_HEIGHT_ACCOUNT = 1
 const val SETTINGS_HEIGHT_INFO = 1
 
 @ExperimentalUnsignedTypes
@@ -51,8 +50,6 @@ class SettingsFragmentManager : NetworkChangeListenerFragment() {
                     SettingsPage.NOTIFICATIONS -> NotificationsSettingsFragment()
                     SettingsPage.DOWNLOADS -> DownloadsSettingsFragment()
                     SettingsPage.INFO -> InfoSettingsFragment()
-
-                    SettingsPage.ACCOUNT -> AccountSettingsFragment()
                 }
             )
             commit()

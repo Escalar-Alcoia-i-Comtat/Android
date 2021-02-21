@@ -11,12 +11,12 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
+import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentIntroDownloadBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonArrayFromURL
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import kotlinx.android.synthetic.main.fragment_intro_download.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -85,13 +85,22 @@ class DownloadAreasIntroFragment : Fragment() {
         }
     }
 
+    private var _binding: FragmentIntroDownloadBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_intro_download, container, false)
+    ): View {
+        _binding = FragmentIntroDownloadBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {}
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 
     @ExperimentalUnsignedTypes
     override fun onResume() {
@@ -99,6 +108,10 @@ class DownloadAreasIntroFragment : Fragment() {
 
         (activity as? IntroActivity)?.fabStatus(false)
 
-        downloadAreasCache(requireActivity(), intro_download_spinner, internetWaiting_layout)
+        downloadAreasCache(
+            requireActivity(),
+            binding.introDownloadSpinner,
+            binding.internetWaitingLayout
+        )
     }
 }

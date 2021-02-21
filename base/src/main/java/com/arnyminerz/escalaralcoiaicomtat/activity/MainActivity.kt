@@ -2,12 +2,10 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ImageView
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -18,7 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerF
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.loadAreas
-import com.arnyminerz.escalaralcoiaicomtat.fragment.AuthFragment
+import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.DownloadsFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.MapFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.SettingsFragmentManager
@@ -29,25 +27,13 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.loadLocale
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.image.dpToPx
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.network.ping
 import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChannels
-import com.arnyminerz.escalaralcoiaicomtat.service.FirebaseMessagingService
 import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.ktx.Firebase
 import io.sentry.android.core.SentryAndroid
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.layout_list.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.toast
 import timber.log.Timber
@@ -69,9 +55,6 @@ const val TAB_ITEM_MAP = 1
 const val TAB_ITEM_DOWNLOADS = 2
 const val TAB_ITEM_SETTINGS = 3
 
-const val ANALYTICS_EVENT_NAME_ERRORS = "errors"
-const val ANALYTICS_EVENT_KEY_SECTORS_NO_CONTEXT = "no_context"
-
 @ExperimentalUnsignedTypes
 val AREAS = arrayListOf<Area>()
 
@@ -81,13 +64,6 @@ var serverAvailable = false
 @ExperimentalUnsignedTypes
 class MainActivity : NetworkChangeListenerFragmentActivity() {
     companion object {
-        val auth
-            get() = FirebaseAuth.getInstance()
-        var analytics = Firebase.analytics
-
-        fun user(): FirebaseUser? = auth.currentUser
-        fun loggedIn(): Boolean = user() != null
-
         var sharedPreferences: SharedPreferences? = null
 
         val betaUser: Boolean
@@ -114,9 +90,6 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             createNotificationChannels()
 
-        Timber.v("Instantiating Firebase Messaging")
-        FirebaseMessagingService()
-
         Timber.v("Finished preparing App...")
         return true
     }
@@ -124,19 +97,19 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
     private val areasViewFragment = AreasViewFragment()
 
     private val mapFragment = MapFragment()
-    private val authFragment = AuthFragment()
     val downloadsFragment = DownloadsFragment()
     private val settingsFragment = SettingsFragmentManager()
 
     var adapter: MainPagerAdapter? = null
+    private lateinit var binding: ActivityMainBinding
 
     private var loaded = false
     private var loading = false
 
     private fun updateBottomAppBar() {
-        val position = main_viewPager.currentItem
-        val showingViewPager = visibility(main_viewPager)
-        bottom_app_bar.navigationIcon =
+        val position = binding.mainViewPager.currentItem
+        val showingViewPager = visibility(binding.mainViewPager)
+        binding.bottomAppBar.navigationIcon =
             ContextCompat.getDrawable(
                 this,
                 if (position == TAB_ITEM_HOME && showingViewPager) R.drawable.round_explore_24 else R.drawable.ic_outline_explore_24
@@ -158,12 +131,14 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         Timber.plant(DebugTree())
         Timber.v("Planted Timber.")
 
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(bottom_app_bar)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+        setSupportActionBar(binding.bottomAppBar)
 
         if (!prepareApp()) return
 
-        main_viewPager.adapter = MainPagerAdapter(
+        binding.mainViewPager.adapter = MainPagerAdapter(
             this,
             hashMapOf(
                 TAB_ITEM_HOME to areasViewFragment,
@@ -172,29 +147,15 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                 TAB_ITEM_SETTINGS to settingsFragment
             )
         )
-        main_viewPager.isUserInputEnabled = false
+        binding.mainViewPager.isUserInputEnabled = false
 
-        main_fab.setOnClickListener {
-            Timber.v("Main FAB clicked")
-            if (visibility(main_viewPager)) {
-                visibility(main_viewPager, false)
-                visibility(main_frameLayout, true)
-
-                Timber.v("Changing fragment for main_frameLayout to authFragment")
-                supportFragmentManager.beginTransaction().apply {
-                    replace(R.id.main_frameLayout, authFragment)
-                    commit()
-                }
-                updateBottomAppBar()
-            } else onBackPressed()
-        }
-        bottom_app_bar.setNavigationOnClickListener {
-            if (!visibility(main_viewPager)) {
-                visibility(main_viewPager, true)
-                visibility(main_frameLayout, false)
+        binding.bottomAppBar.setNavigationOnClickListener {
+            if (!visibility(binding.mainViewPager)) {
+                visibility(binding.mainViewPager, true)
+                visibility(binding.mainFrameLayout, false)
             }
 
-            main_viewPager.currentItem = TAB_ITEM_HOME
+            binding.mainViewPager.currentItem = TAB_ITEM_HOME
 
             updateBottomAppBar()
         }
@@ -214,29 +175,32 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (!visibility(main_viewPager)) {
-            visibility(main_viewPager, true)
-            visibility(main_frameLayout, false)
+        if (!visibility(binding.mainViewPager)) {
+            visibility(binding.mainViewPager, true)
+            visibility(binding.mainFrameLayout, false)
         }
 
         return when (item.itemId) {
             R.id.action_1 -> {
-                main_viewPager.currentItem = TAB_ITEM_MAP
+                binding.mainViewPager.currentItem = TAB_ITEM_MAP
                 true
             }
             R.id.action_2 -> {
-                main_viewPager.currentItem = TAB_ITEM_DOWNLOADS
+                binding.mainViewPager.currentItem = TAB_ITEM_DOWNLOADS
                 true
             }
             R.id.settings -> {
-                main_viewPager.currentItem = TAB_ITEM_SETTINGS
+                binding.mainViewPager.currentItem = TAB_ITEM_SETTINGS
                 true
             }
             R.id.share -> {
                 startActivity(
                     Intent.createChooser(
                         Intent(Intent.ACTION_SEND).setType("text/plain")
-                            .putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text)),
+                            .putExtra(
+                                Intent.EXTRA_TEXT,
+                                getString(R.string.share_text)
+                            ),
                         getString(R.string.action_share_with)
                     )
                 )
@@ -246,57 +210,25 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (loggedIn())
-            Glide.with(this)
-                .load(user()!!.photoUrl.toString())
-                .apply(
-                    RequestOptions
-                        .circleCropTransform()
-                        .placeholder(R.drawable.ic_outline_person_24)
-                )
-                .into(object : CustomTarget<Drawable>(24.dpToPx(), 24.dpToPx()) {
-                    override fun onResourceReady(
-                        resource: Drawable,
-                        transition: Transition<in Drawable>?
-                    ) {
-                        Timber.v("Putting user's image on main fab")
-                        main_fab.apply {
-                            imageTintList = null
-                            imageTintMode = null
-                            scaleType = ImageView.ScaleType.FIT_XY
-                            setImageDrawable(resource)
-                        }
-                    }
-
-                    override fun onLoadCleared(placeholder: Drawable?) {}
-
-                })
-    }
-
     override fun onBackPressed() {
         Timber.v("Going back!")
-        if (visibility(main_frameLayout))
-            if (authFragment.profileFragment?.changedUser == true)
-                authFragment.profileFragment!!.restore()
-            else {
-                visibility(main_viewPager, true)
-                visibility(main_frameLayout, false)
+        if (visibility(binding.mainFrameLayout)) {
+                visibility(binding.mainViewPager, true)
+                visibility(binding.mainFrameLayout, false)
 
-                main_viewPager.currentItem = TAB_ITEM_HOME
+            binding.mainViewPager.currentItem = TAB_ITEM_HOME
             }
         else
-            if (main_viewPager.currentItem == TAB_ITEM_SETTINGS) {
+            if (binding.mainViewPager.currentItem == TAB_ITEM_SETTINGS) {
                 val settingsFragmentManager =
-                    (main_viewPager.adapter as? MainPagerAdapter)?.items?.get(TAB_ITEM_SETTINGS) as? SettingsFragmentManager
+                    (binding.mainViewPager.adapter as? MainPagerAdapter)?.items?.get(TAB_ITEM_SETTINGS) as? SettingsFragmentManager
                 if (settingsFragmentManager != null && settingsFragmentManager.height > 0)
                     settingsFragmentManager.loadPage(SettingsPage.MAIN, true)
-                else main_viewPager.currentItem = TAB_ITEM_HOME
-            } else if (main_viewPager.currentItem == TAB_ITEM_DOWNLOADS)
-                main_viewPager.currentItem = TAB_ITEM_HOME
-            else if (main_viewPager.currentItem == TAB_ITEM_MAP)
-                main_viewPager.currentItem = TAB_ITEM_HOME
+                else binding.mainViewPager.currentItem = TAB_ITEM_HOME
+            } else if (binding.mainViewPager.currentItem == TAB_ITEM_DOWNLOADS)
+                binding.mainViewPager.currentItem = TAB_ITEM_HOME
+            else if (binding.mainViewPager.currentItem == TAB_ITEM_MAP)
+                binding.mainViewPager.currentItem = TAB_ITEM_HOME
             else {
                 super.onBackPressed()
                 finish()
@@ -314,7 +246,6 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         when (requestCode) {
             LOCATION_PERMISSION_REQUEST -> if (areasViewFragment.googleMap != null)
                 areasViewFragment.updateNearbyZones(
-                    areasViewFragment.view,
                     null,
                     areasViewFragment.googleMap!!
                 )
@@ -342,7 +273,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
         if (!loaded && !loading) {
             loading = true
-            visibility(main_loading_progressBar, true)
+            visibility(binding.mainLoadingProgressBar, true)
 
             Timber.v("Loading areas...")
             val areasFlow = loadAreas(this)
@@ -367,7 +298,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
                         ActivityOptionsCompat.makeSceneTransitionAnimation(
                             this,
-                            title_textView,
+                            findViewById(R.id.title_textView),
                             transitionName
                         ).toBundle()
                     } ?: Bundle.EMPTY
@@ -376,8 +307,8 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             }
 
             Timber.v("Finished loading areas, hiding progress bar and showing frameLayout.")
-            visibility(main_loading_progressBar, false)
-            visibility(main_frameLayout, true)
+            visibility(binding.mainLoadingProgressBar, false)
+            visibility(binding.mainFrameLayout, true)
 
             loaded = true
             loading = false

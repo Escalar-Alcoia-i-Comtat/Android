@@ -6,16 +6,27 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.R
-import kotlinx.android.synthetic.main.fragment_intro_main.view.*
+import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentIntroMainBinding
 
 class MainIntroFragment : Fragment() {
+    private var _binding: FragmentIntroMainBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_intro_main, container, false)
+    ): View {
+        _binding = FragmentIntroMainBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        view.intro_main_title_textView.text = getString(R.string.intro_main_title, getString(R.string.app_name))
+        binding.introMainTitleTextView.text = getString(R.string.intro_main_title, getString(R.string.app_name))
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

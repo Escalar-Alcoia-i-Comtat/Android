@@ -5,25 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
-import androidx.work.*
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.user
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Path
-import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.arnyminerz.escalaralcoiaicomtat.work.*
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.button.MaterialButtonToggleGroup
-import com.google.android.material.datepicker.CalendarConstraints
-import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import me.angrybyte.numberpicker.view.ActualNumberPicker
-import timber.log.Timber
-import java.util.*
 
 interface MarkListener {
     fun onMarkCompleted()
@@ -46,12 +30,11 @@ class BottomMarkCompletedFragment(
     ): View? {
         val view = inflater.inflate(R.layout.fragment_bottomsheet_mark_completed, container, false)
 
-        if (user() == null) {
-            dismiss()
-            return null
-        }
+        // TODO: This should be called if not logged in, since rn it's disabled, call always
+        dismiss()
+        return null
 
-        val numberPicker = view.findViewById<ActualNumberPicker>(R.id.mark_completed_numberPicker)
+        /*val numberPicker = view.findViewById<ActualNumberPicker>(R.id.mark_completed_numberPicker)
         val dateTextView = view.findViewById<TextView>(R.id.date_textView)
         val nameTextView = view.findViewById<TextView>(R.id.zone_name_textView)
         val attemptsButtons = view.findViewById<MaterialButton>(R.id.mark_completed_attempts_button)
@@ -177,7 +160,7 @@ class BottomMarkCompletedFragment(
                 workManagerInstance
                     .getWorkInfoByIdLiveData(onetimeJob.id)
                     .observe(viewLifecycleOwner, androidx.lifecycle.Observer { workInfo ->
-                        if(workInfo == null) {
+                        if (workInfo == null) {
                             Timber.e("Got null workInfo")
                             return@Observer
                         }
@@ -198,6 +181,6 @@ class BottomMarkCompletedFragment(
             }
         }
 
-        return view
+        return view*/
     }
 }

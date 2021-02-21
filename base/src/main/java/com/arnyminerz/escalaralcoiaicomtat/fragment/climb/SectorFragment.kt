@@ -10,10 +10,8 @@ import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.ANALYTICS_EVENT_KEY_SECTORS_NO_CONTEXT
-import com.arnyminerz.escalaralcoiaicomtat.activity.ANALYTICS_EVENT_NAME_ERRORS
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.analytics
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
+import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.getDisplaySize
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.PathsAdapter
@@ -23,8 +21,6 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
-import com.google.firebase.analytics.ktx.logEvent
-import kotlinx.android.synthetic.main.fragment_sector.view.*
 import timber.log.Timber
 
 
@@ -35,8 +31,11 @@ class SectorFragment(private val sector: Sector, private val viewPager: ViewPage
 
     private var notMaximizedImageHeight = 0
 
-    private fun refreshMaximizeStatus(vw: View? = view) {
-        vw?.size_change_fab?.setImageResource(if (maximized) R.drawable.round_flip_to_front_24 else R.drawable.round_flip_to_back_24)
+    private var _binding: FragmentSectorBinding? = null
+    private val binding get() = _binding!!
+
+    private fun refreshMaximizeStatus() {
+        binding.sizeChangeFab.setImageResource(if (maximized) R.drawable.round_flip_to_front_24 else R.drawable.round_flip_to_back_24)
 
         viewPager.isUserInputEnabled = !maximized
     }
@@ -46,11 +45,11 @@ class SectorFragment(private val sector: Sector, private val viewPager: ViewPage
         refreshMaximizeStatus()
     }
 
-    fun loadImage(view: View) {
+    private fun loadImage() {
         sector.asyncLoadImage(
             requireContext(),
-            view.sector_imageView,
-            view.sector_progressBar,
+            binding.sectorImageView,
+            binding.sectorProgressBar,
             ImageLoadParameters().apply {
                 withTransitionOptions(BitmapTransitionOptions.withCrossFade(50))
                 withThumbnailSize(0.1f)
@@ -69,47 +68,45 @@ class SectorFragment(private val sector: Sector, private val viewPager: ViewPage
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_sector, container, false)
+    ): View {
+        _binding = FragmentSectorBinding.inflate(inflater, container, false)
+        val view = binding.root
 
-        view.sector_textView.text = sector.displayName
+        binding.sectorTextView.text = sector.displayName
 
         val size = getDisplaySize(requireActivity())
         notMaximizedImageHeight = size.second / 2
-        view.sector_imageView_layout.layoutParams.height = notMaximizedImageHeight
-        view.sector_imageView_layout.requestLayout()
+        binding.sectorImageViewLayout.layoutParams.height = notMaximizedImageHeight
+        binding.sectorImageViewLayout.requestLayout()
 
-        loadImage(view)
+        loadImage()
 
         if (context != null) {
             val context = requireContext()
             Timber.v("Loading paths...")
 
             // Load Paths
-            view.paths_recyclerView.layoutManager = LinearLayoutManager(context)
-            view.paths_recyclerView.layoutAnimation =
+            binding.pathsRecyclerView.layoutManager = LinearLayoutManager(context)
+            binding.pathsRecyclerView.layoutAnimation =
                 AnimationUtils.loadLayoutAnimation(context, R.anim.item_enter_left_animator)
-            view.paths_recyclerView.adapter = PathsAdapter(sector.children, requireActivity())
-            context.visibility(view.paths_recyclerView, true)
+            binding.pathsRecyclerView.adapter = PathsAdapter(sector.children, requireActivity())
+            context.visibility(binding.pathsRecyclerView, true)
 
             // Load info bar
-            sector.sunTime.appendChip(context, view.sun_chip)
-            sector.kidsAptChip(context, view.kidsApt_chip)
-            sector.walkingTimeView(context, view.walkingTime_textView)
+            sector.sunTime.appendChip(context, binding.sunChip)
+            sector.kidsAptChip(context, binding.kidsAptChip)
+            sector.walkingTimeView(context, binding.walkingTimeTextView)
 
             // Load chart
-            sector.loadChart(context, view.sector_bar_chart)
+            sector.loadChart(context, binding.sectorBarChart)
         } else {
             Timber.e("Could not start loading sectors since context is null")
-            analytics.logEvent(ANALYTICS_EVENT_NAME_ERRORS) {
-                param(ANALYTICS_EVENT_KEY_SECTORS_NO_CONTEXT, "true")
-            }
         }
 
-        view.size_change_fab.setOnClickListener {
+        binding.sizeChangeFab.setOnClickListener {
             maximized = !maximized
 
-            (view.sector_imageView_layout.layoutParams as ViewGroup.MarginLayoutParams).apply {
+            (binding.sectorImageViewLayout.layoutParams as ViewGroup.MarginLayoutParams).apply {
                 val tv = TypedValue()
                 requireContext().theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)
                 val actionBarHeight = resources.getDimensionPixelSize(tv.resourceId)
@@ -117,19 +114,24 @@ class SectorFragment(private val sector: Sector, private val viewPager: ViewPage
                 height =
                     if (maximized) LinearLayout.LayoutParams.MATCH_PARENT else notMaximizedImageHeight
             }
-            view.sector_imageView_layout.requestLayout()
+            binding.sectorImageViewLayout.requestLayout()
 
-            refreshMaximizeStatus(view)
+            refreshMaximizeStatus()
         }
-        refreshMaximizeStatus(view)
+        refreshMaximizeStatus()
 
         return view
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         super.onStateChange(state)
 
         if (isResumed && view != null)
-            loadImage(requireView())
+            loadImage()
     }
 }

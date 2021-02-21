@@ -20,7 +20,6 @@ import com.arnyminerz.escalaralcoiaicomtat.list.adapter.ZoneAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.libraries.maps.model.LatLng
-import kotlinx.android.synthetic.main.layout_list.*
 import org.jetbrains.anko.toast
 import timber.log.Timber
 
@@ -55,10 +54,10 @@ class AreaActivity : DataClassListActivity() {
 
         val transitionName = intent.getExtra(EXTRA_AREA_TRANSITION_NAME)
 
-        title_textView.text = area.displayName
-        title_textView.transitionName = transitionName
+        binding.titleTextView.text = area.displayName
+        binding.titleTextView.transitionName = transitionName
 
-        back_imageButton.setOnClickListener { onBackPressed() }
+        binding.backImageButton.setOnClickListener { onBackPressed() }
     }
 
     override fun onResume() {
@@ -72,21 +71,21 @@ class AreaActivity : DataClassListActivity() {
         super.onStateChange(state)
         val smallMapEnabled = SETTINGS_SMALL_MAP_PREF.get(MainActivity.sharedPreferences)
 
-        visibility(map, state.hasInternet && smallMapEnabled)
+        visibility(binding.map, state.hasInternet && smallMapEnabled)
 
         if (!loaded && !isDestroyed && !loading)
             try {
                 loading = true
                 val zones = area.children
 
-                recyclerView.layoutManager = GridLayoutManager(this, 2)
+                binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
                 if (justAttached)
-                    recyclerView.layoutAnimation =
+                    binding.recyclerView.layoutAnimation =
                         AnimationUtils.loadLayoutAnimation(
                             this@AreaActivity,
                             R.anim.item_enter_left_animator
                         )
-                recyclerView.adapter =
+                binding.recyclerView.adapter =
                     ZoneAdapter(zones, this) { _, holder, position ->
                         toast(R.string.toast_loading)
                         Timber.v("Clicked item $position")
@@ -140,7 +139,7 @@ class AreaActivity : DataClassListActivity() {
 
                                         override fun onFailure(error: Exception?) {
                                             if (error is NoInternetAccessException)
-                                                visibility(map, false)
+                                                visibility(binding.map, false)
                                             else
                                                 error?.let { throw it }
                                         }

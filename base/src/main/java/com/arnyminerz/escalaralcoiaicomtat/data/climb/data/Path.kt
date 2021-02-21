@@ -2,12 +2,10 @@ package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.user
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.Grade
-import com.arnyminerz.escalaralcoiaicomtat.data.user.UserData
 import com.arnyminerz.escalaralcoiaicomtat.exception.JSONResultException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotLoggedInException
@@ -16,7 +14,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getStringSafe
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import kotlinx.coroutines.flow.collect
 import org.json.JSONObject
 import java.io.Serializable
 import java.text.SimpleDateFormat
@@ -152,18 +149,7 @@ data class Path @ExperimentalUnsignedTypes constructor(
     suspend fun isCompleted(
         networkState: ConnectivityProvider.NetworkState
     ): CompletedPath? {
-        when {
-            user() == null -> throw NotLoggedInException()
-            networkState.hasInternet -> {
-                val user = UserData.fromUID(networkState, user()!!.uid)
-                val completedPaths = user.completedPaths(networkState)
-                var completedPath: CompletedPath? = null
-                completedPaths.collect { if (it.path.id == id) completedPath = it }
-
-                return completedPath
-            }
-            else -> throw NoInternetAccessException()
-        }
+        throw NotLoggedInException()
     }
 
     fun grade(): Grade =

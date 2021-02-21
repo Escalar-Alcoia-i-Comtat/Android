@@ -17,7 +17,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.SectorsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import kotlinx.android.synthetic.main.layout_list.*
 import org.jetbrains.anko.toast
 import timber.log.Timber
 
@@ -55,10 +54,10 @@ class ZoneActivity : DataClassListActivity() {
 
         val transitionName = intent.getExtra(EXTRA_ZONE_TRANSITION_NAME)
 
-        title_textView.text = zone.displayName
-        title_textView.transitionName = transitionName
+        binding.titleTextView.text = zone.displayName
+        binding.titleTextView.transitionName = transitionName
 
-        back_imageButton.setOnClickListener { onBackPressed() }
+        binding.backImageButton.setOnClickListener { onBackPressed() }
     }
 
     override fun onResume() {
@@ -70,21 +69,21 @@ class ZoneActivity : DataClassListActivity() {
         super.onStateChange(state)
         val smallMapEnabled = SETTINGS_SMALL_MAP_PREF.get(MainActivity.sharedPreferences)
 
-        visibility(map, state.hasInternet && smallMapEnabled)
+        visibility(binding.map, state.hasInternet && smallMapEnabled)
 
         if (!loaded)
             try {
                 val sectors = zone.children
                 Timber.v("Got ${sectors.size} sectors.")
 
-                recyclerView.layoutManager = LinearLayoutManager(this@ZoneActivity)
+                binding.recyclerView.layoutManager = LinearLayoutManager(this@ZoneActivity)
                 if (justAttached)
-                    recyclerView.layoutAnimation =
+                    binding.recyclerView.layoutAnimation =
                         AnimationUtils.loadLayoutAnimation(
                             this@ZoneActivity,
                             R.anim.item_enter_left_animator
                         )
-                recyclerView.adapter =
+                binding.recyclerView.adapter =
                     SectorsAdapter(
                         this@ZoneActivity,
                         sectors

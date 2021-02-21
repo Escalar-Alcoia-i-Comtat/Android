@@ -16,6 +16,8 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
 import com.arnyminerz.escalaralcoiaicomtat.data.map.addToMap
+import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentDownloadsBinding
+import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentMapBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
@@ -25,7 +27,6 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.model.LatLng
-import kotlinx.android.synthetic.main.fragment_map.*
 import org.jetbrains.anko.toast
 import timber.log.Timber
 
@@ -33,11 +34,17 @@ import timber.log.Timber
 class MapFragment : NetworkChangeListenerFragment() {
     private lateinit var mapHelper: MapHelper
 
+    private var _binding: FragmentMapBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_map, container, false)
+    ): View {
+        _binding = FragmentMapBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     private val areas = arrayListOf<Area>()
     private var googleMap: GoogleMap? = null
@@ -152,13 +159,18 @@ class MapFragment : NetworkChangeListenerFragment() {
             })
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         super.onStateChange(state)
         val hasInternet = state.hasInternet
 
         if (isResumed) {
-            visibility(page_mapView, hasInternet)
-            visibility(maps_no_internet_cardView, !hasInternet)
+            visibility(binding.pageMapView, hasInternet)
+            visibility(binding.mapsNoInternetCardView.noInternetCardView, !hasInternet)
         }
     }
 }
