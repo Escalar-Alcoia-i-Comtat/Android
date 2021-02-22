@@ -9,18 +9,16 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 
 abstract class DataClassListActivity : NetworkChangeListenerActivity() {
     protected lateinit var binding: LayoutListBinding
-    private lateinit var noInternetBinding: NoInternetCardBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = LayoutListBinding.inflate(layoutInflater)
-        noInternetBinding = NoInternetCardBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         val hasInternet = state.hasInternet
-        visibility(noInternetBinding.noInternetCardView, !hasInternet)
+        visibility(binding.noInternetCard.noInternetCardView, !hasInternet)
     }
 }
