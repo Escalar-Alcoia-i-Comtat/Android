@@ -9,7 +9,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.Grade
 import com.arnyminerz.escalaralcoiaicomtat.exception.JSONResultException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotLoggedInException
-import com.arnyminerz.escalaralcoiaicomtat.exception.UserNotFoundException
+import com.arnyminerz.escalaralcoiaicomtat.exception.auth.UserNotFoundException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getStringSafe
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl

@@ -42,7 +42,7 @@
             android:name=".activity.ImageShareActivity"
             android:theme="@style/AppTheme.FullScreen" />
         <activity android:name=".activity.ServerDownActivity" />
-        <activity android:name=".activity.FriendSearchActivity" />
+        <activity android:name=".activity.LoginActivity" />
         <activity android:name=".activity.CompletedPathActivity" />
         <activity
             android:name=".activity.MainActivity"
@@ -73,9 +73,6 @@
             android:name=".activity.UpdatingActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.ProfileActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activity.IntroActivity"
             android:screenOrientation="portrait" />
         <activity
@@ -90,15 +87,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
         <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/ic_launcher" />
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/colorAccent" />
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="Alert" />
-        <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
         <meta-data
@@ -107,14 +95,6 @@
         <meta-data
             android:name="io.sentry.dsn"
             android:value="@string/sentry_dsn" />
-
-        <service
-            android:name=".service.FirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
 
         <provider
             android:name="androidx.core.content.FileProvider"

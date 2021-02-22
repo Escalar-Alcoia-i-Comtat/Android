@@ -159,6 +159,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
             updateBottomAppBar()
         }
+        startActivity(Intent(this, LoginActivity::class.java))
     }
 
     private var menu: Menu? = null

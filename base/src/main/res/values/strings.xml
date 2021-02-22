@@ -35,6 +35,7 @@
     <string name="safe_strings_plural">Strings</string>
 
     <string name="login_email">Email</string>
+    <string name="login_username">Username</string>
     <string name="login_password">Password</string>
     <string name="login_info_register">If you don\'t have an account, we will help you out once you click the login button.</string>
     <string name="login_info_terms">When logging in, you are accepting our <a href="https://escalaralcoiaicomtat.centrexcursionistalcoi.org/terms/">Terms and Conditions of Use</a></string>
@@ -414,6 +415,7 @@
     <string name="image_desc_move_up">Move Up</string>
     <string name="image_desc_move_down">Move Down</string>
     <string name="image_desc_maximize_minimize_img">Maximize or minimize image</string>
+    <string name="image_desc_arnyminerz_logo">ArnyminerZ Logo</string>
 
     <string name="button_desc_view_download">View Download</string>
     <string name="button_desc_download">Download</string>

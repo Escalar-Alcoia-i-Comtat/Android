@@ -3,18 +3,24 @@ package com.arnyminerz.escalaralcoiaicomtat.data.user
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import androidx.work.*
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.CompletedPath
 import com.arnyminerz.escalaralcoiaicomtat.exception.*
+import com.arnyminerz.escalaralcoiaicomtat.exception.auth.UserNotAuthenticableException
+import com.arnyminerz.escalaralcoiaicomtat.exception.auth.UserNotFoundException
+import com.arnyminerz.escalaralcoiaicomtat.exception.auth.WrongPasswordException
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getBooleanFromString
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getStringSafe
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.security.decrypt
 import com.arnyminerz.escalaralcoiaicomtat.security.encrypt
+import com.arnyminerz.escalaralcoiaicomtat.work.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toCollection
@@ -22,6 +28,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.Serializable
+import java.lang.Exception
 
 @Suppress("unused")
 data class UserData(
@@ -148,22 +155,66 @@ data class UserData(
          * @author ArnyminerZ
          * @date 2020/05/31
          * @patch ArnyminerZ 2020/06/06
-         * @param networkState The status of the device's network on the function execution time.
-         * @param email The email of the user
+         * @param context The context where the login was called from
+         * @param username The username of the user
          * @param password The password for identifying the email
-         * @param register Whether or not to register if the user doesn't exist
-         * @throws NoInternetAccessException If no internet access was detected from network state
+         * @throws WrongPasswordException When the introduced password is wrong
+         * @throws UserNotFoundException When the user doesn't exist
+         * @throws UserNotAuthenticableException When the user doesn't have a password
          * @returns a User Data
          */
         @ExperimentalUnsignedTypes
-        @Throws(NoInternetAccessException::class)
+        @Throws(
+            WrongPasswordException::class,
+            UserNotFoundException::class,
+            UserNotAuthenticableException::class
+        )
         suspend fun login(
-            networkState: ConnectivityProvider.NetworkState,
-            email: String,
-            password: String,
-            register: Boolean = false
+            context: Context,
+            username: String,
+            password: String
         ): UserData {
-            throw ActionNotSupportedException("Login is currently not supported")
+            val loginWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<LoginJob>()
+                .setInputData(
+                    workDataOf(
+                        DATA_USERNAME to username,
+                        DATA_PASSWORD to password
+                    )
+                )
+                .setConstraints(
+                    Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                        .build()
+                )
+                .addTag("login")
+                .build()
+            val wm = WorkManager.getInstance(context)
+            wm.enqueue(loginWorkRequest)
+            Timber.d("Enqueued login")
+            var workInfo: ListenableFuture<WorkInfo>
+            var result: WorkInfo
+            while (true){
+                workInfo = wm.getWorkInfoById(loginWorkRequest.id)
+                result = workInfo.await()
+                if(result.state.isFinished)
+                    break
+            }
+
+            if (result.state != WorkInfo.State.SUCCEEDED) {
+                val error = result.outputData.getString(DATA_ERROR)
+                if (error != null)
+                    when(error){
+                        "wrong-password" -> throw WrongPasswordException()
+                        "user-not-found" -> throw UserNotFoundException()
+                        "user-has-no-password" -> throw UserNotAuthenticableException()
+                    }
+                throw Exception("Could not log in. State: ${result.state}")
+            }
+            val resultData = result.outputData.getStringArray(RESULT_DATA)
+            if (resultData != null)
+                for (ln in resultData.indices)
+                    Timber.v(resultData[ln])
+            return UserData("")
         }
     }
 
