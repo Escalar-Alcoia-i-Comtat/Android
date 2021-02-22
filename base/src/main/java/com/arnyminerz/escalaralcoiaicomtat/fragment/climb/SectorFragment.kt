@@ -42,7 +42,8 @@ class SectorFragment(private val sector: Sector, private val viewPager: ViewPage
 
     fun minimize() {
         maximized = false
-        refreshMaximizeStatus()
+        if (_binding != null)
+            refreshMaximizeStatus()
     }
 
     private fun loadImage() {
