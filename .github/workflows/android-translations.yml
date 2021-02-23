@@ -1,0 +1,18 @@
+on: [push]
+
+jobs:
+  check-translations:
+    name: Check Translations
+    # Linux is required since this is a docker container action
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: check_translations
+        uses: ashutoshgngwr/android-translations@v1
+        with:
+          projectDir: ./
+      - name: Add comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ GITHUB_REF }}
+          body: ${{ steps.check_translations.outputs.report }}
