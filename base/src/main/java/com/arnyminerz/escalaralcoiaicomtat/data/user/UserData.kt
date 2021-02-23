@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.data.user
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import androidx.preference.PreferenceManager
 import androidx.work.*
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.CompletedPath
@@ -14,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getBooleanFromString
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getStringSafe
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.security.SecurityStorage
 import com.arnyminerz.escalaralcoiaicomtat.security.decrypt
 import com.arnyminerz.escalaralcoiaicomtat.security.encrypt
 import com.arnyminerz.escalaralcoiaicomtat.work.*
@@ -27,8 +29,10 @@ import kotlinx.coroutines.flow.toCollection
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
+import java.io.IOException
 import java.io.Serializable
-import java.lang.Exception
+import java.security.*
+import java.security.cert.CertificateException
 
 @Suppress("unused")
 data class UserData(
@@ -161,19 +165,39 @@ data class UserData(
          * @throws WrongPasswordException When the introduced password is wrong
          * @throws UserNotFoundException When the user doesn't exist
          * @throws UserNotAuthenticableException When the user doesn't have a password
+         * @throws RuntimeException When an uncontrolled exception was thrown
+         * @throws NoSuchAlgorithmException RSA encryption not supported
+         * @throws InvalidAlgorithmParameterException Android Keystore provider doesn't exist
+         * @throws NoSuchProviderException Invalid Algorithm Parameter
+         * @throws KeyStoreException KeyStore not initialized
+         * @throws UnrecoverableEntryException KeyPair not recovered
+         * @throws InvalidKeyException Invalid key
+         * @throws SignatureException Invalid Signature
+         * @throws IOException IO Exception
+         * @throws CertificateException Error while loading certificates
          * @returns a User Data
          */
         @ExperimentalUnsignedTypes
         @Throws(
             WrongPasswordException::class,
             UserNotFoundException::class,
-            UserNotAuthenticableException::class
+            UserNotAuthenticableException::class,
+            RuntimeException::class,
+            NoSuchAlgorithmException::class,
+            InvalidAlgorithmParameterException::class,
+            NoSuchProviderException::class,
+            KeyStoreException::class,
+            UnrecoverableEntryException::class,
+            InvalidKeyException::class,
+            SignatureException::class,
+            IOException::class,
+            CertificateException::class
         )
         suspend fun login(
             context: Context,
             username: String,
             password: String
-        ): UserData {
+        ): String {
             val loginWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<LoginJob>()
                 .setInputData(
                     workDataOf(
@@ -211,10 +235,59 @@ data class UserData(
                 throw Exception("Could not log in. State: ${result.state}")
             }
             val resultData = result.outputData.getStringArray(RESULT_DATA)
-            if (resultData != null)
-                for (ln in resultData.indices)
-                    Timber.v(resultData[ln])
-            return UserData("")
+            if (resultData == null || resultData.isEmpty())
+                throw RuntimeException("Could not parse result data")
+            val jsonResult = JSONObject(resultData[0])
+            if (!jsonResult.has("token"))
+                throw RuntimeException("Result doesn't contain the token")
+            val token = jsonResult.getString("token")
+            val keysStorage = SecurityStorage()
+            try {
+                keysStorage.createKeys(context)
+                Timber.d("Keys created")
+            } catch (e: NoSuchAlgorithmException) {
+                Timber.e(e, "RSA not supported")
+                throw e
+            } catch (e: InvalidAlgorithmParameterException) {
+                Timber.e("No such provider: AndroidKeyStore")
+                throw e
+            } catch (e: NoSuchProviderException) {
+                Timber.e(e, "Invalid Algorithm Parameter Exception")
+                throw e
+            }
+            val signedToken: String
+            try {
+                signedToken = keysStorage.signData(token) ?:
+                throw RuntimeException("Could not sign token")
+            } catch (e: KeyStoreException) {
+                Timber.e(e, "KeyStore not Initialized")
+                throw e
+            } catch (e: UnrecoverableEntryException) {
+                Timber.e(e, "KeyPair not recovered")
+                throw e
+            } catch (e: NoSuchAlgorithmException) {
+                Timber.e(e, "RSA not supported")
+                throw e
+            } catch (e: InvalidKeyException) {
+                Timber.e(e, "Invalid Key")
+                throw e
+            } catch (e: SignatureException) {
+                Timber.e(e, "Invalid Signature")
+                throw e
+            } catch (e: IOException) {
+                Timber.e(e, "IO Exception")
+                throw e
+            } catch (e: CertificateException) {
+                Timber.e(e, "Error occurred while loading certificates")
+                throw e
+            }
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+            sharedPreferences.edit().apply {
+                putString("auth_token", signedToken)
+                apply()
+            }
+            Timber.v("Signed token: $signedToken")
+            return token
         }
     }
 
