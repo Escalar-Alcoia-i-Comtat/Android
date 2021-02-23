@@ -54,10 +54,11 @@ class LoginJob(
             if (client.responseCode == HttpURLConnection.HTTP_OK) {
                 Timber.d("Reading response...")
                 val bufferedReader = client.inputStream.bufferedReader()
-                var line: String
-                while (bufferedReader.readLine().also { line = it } != null) {
-                    lines.add(line)
-                }
+                var line: String?
+                while (bufferedReader.readLine().also { line = it } != null)
+                    line?.let {
+                        lines.add(it)
+                    }
             } else {
                 Timber.e("Could not log in! Response code: ${client.responseCode}. Error message:")
                 val bufferedReader = client.errorStream.bufferedReader()
