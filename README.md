@@ -32,7 +32,7 @@ We have prepared a page in Patreon so you can subscribe with a monthly membershi
 [issues]: https://github.com/Escalar-Alcoia-i-Comtat/Android/issues
 [pull-requests]: https://github.com/Escalar-Alcoia-i-Comtat/Android/pulls
 [releases]: https://github.com/Escalar-Alcoia-i-Comtat/Android/releases
-[commits]: https://github.com/Escalar-Alcoia-i-Comtat/Android/commits/{{ GITHUB_REF }}
+[commits]: https://github.com/Escalar-Alcoia-i-Comtat/Android/commits/master
 
 [activity-badge]: https://img.shields.io/github/commit-activity/m/Escalar-Alcoia-i-Comtat/Android?style=for-the-badge
 [commit-badge]: https://img.shields.io/github/last-commit/Escalar-Alcoia-i-Comtat/Android?style=for-the-badge
