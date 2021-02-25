@@ -11,8 +11,8 @@ jobs:
         uses: ashutoshgngwr/android-translations@v1
         with:
           projectDir: ./
-      - name: Add comment
-        uses: peter-evans/create-or-update-comment@v1
-        with:
-          issue-number: ${{ GITHUB_REF }}
-          body: ${{ steps.check_translations.outputs.report }}
+#      - name: Add comment
+#        uses: peter-evans/create-or-update-comment@v1
+#        with:
+#          issue-number: ${{ secrets.GITHUB_REF }}
+#          body: ${{ steps.check_translations.outputs.report }}
