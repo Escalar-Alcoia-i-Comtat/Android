@@ -33,7 +33,9 @@ import com.arnyminerz.escalaralcoiaicomtat.network.ping
 import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChannels
 import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import io.sentry.SentryLevel
 import io.sentry.android.core.SentryAndroid
+import io.sentry.android.timber.SentryTimberIntegration
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.toast
 import timber.log.Timber
@@ -71,7 +73,11 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
     private fun prepareApp(): Boolean {
         Timber.v("Preparing App...")
         Timber.v("Instantiating Sentry")
-        SentryAndroid.init(this)
+        SentryAndroid.init(this) { options ->
+            options.addIntegration(
+                SentryTimberIntegration(SentryLevel.ERROR, SentryLevel.INFO)
+            )
+        }
 
         if (IntroActivity.shouldShow(this)) {
             Timber.w("  Showing intro!")
@@ -211,15 +217,16 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
     override fun onBackPressed() {
         Timber.v("Going back!")
         if (visibility(binding.mainFrameLayout)) {
-                visibility(binding.mainViewPager, true)
-                visibility(binding.mainFrameLayout, false)
+            visibility(binding.mainViewPager, true)
+            visibility(binding.mainFrameLayout, false)
 
             binding.mainViewPager.currentItem = TAB_ITEM_HOME
-            }
-        else
+        } else
             if (binding.mainViewPager.currentItem == TAB_ITEM_SETTINGS) {
                 val settingsFragmentManager =
-                    (binding.mainViewPager.adapter as? MainPagerAdapter)?.items?.get(TAB_ITEM_SETTINGS) as? SettingsFragmentManager
+                    (binding.mainViewPager.adapter as? MainPagerAdapter)?.items?.get(
+                        TAB_ITEM_SETTINGS
+                    ) as? SettingsFragmentManager
                 if (settingsFragmentManager != null && settingsFragmentManager.height > 0)
                     settingsFragmentManager.loadPage(SettingsPage.MAIN, true)
                 else binding.mainViewPager.currentItem = TAB_ITEM_HOME
