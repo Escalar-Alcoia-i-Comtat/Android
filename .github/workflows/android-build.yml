@@ -26,6 +26,8 @@ jobs:
         with:
           java-version: '11'
           java-package: jdk
+      - name: Prepare google-services.json
+        run: echo ${{ GOOGLE_SERVICES }} >> base/google-services.json
       - name: Build debug APK
         run: bash ./gradlew assembleDebug --stacktrace
       - name: Upload APK
