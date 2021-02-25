@@ -13,7 +13,6 @@ android {
         versionCode 78
         versionName "Shunt"
         // testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        setProperty("archivesBaseName", "EscalarAlcoiaIComtat-$versionCode-$versionName")
 
         def secureProps = new Properties()
         if (file("secure.properties").exists())
@@ -37,6 +36,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            setProperty("archivesBaseName", "EscalarAlcoiaIComtat-${android.defaultConfig.versionCode}-${android.defaultConfig.versionName}")
 
             kotlinOptions {
                 freeCompilerArgs = [ '-Xuse-experimental=kotlin.Experimental' ]
@@ -46,6 +46,7 @@ android {
         }
         debug {
             versionNameSuffix "-debug-build" + getDate()
+            setProperty("archivesBaseName", "EscalarAlcoiaIComtat")
         }
     }
     kotlinOptions {

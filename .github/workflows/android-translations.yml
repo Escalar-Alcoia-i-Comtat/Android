@@ -14,5 +14,5 @@ jobs:
       - name: Add comment
         uses: peter-evans/create-or-update-comment@v1
         with:
-          issue-number: ${{ GITHUB_REF }}
+          issue-number: ${{ secrets.GITHUB_REF }}
           body: ${{ steps.check_translations.outputs.report }}
