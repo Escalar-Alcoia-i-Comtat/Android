@@ -69,7 +69,7 @@ class AreaActivity : DataClassListActivity() {
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         super.onStateChange(state)
-        val smallMapEnabled = SETTINGS_SMALL_MAP_PREF.get(MainActivity.sharedPreferences)
+        val smallMapEnabled = SETTINGS_SMALL_MAP_PREF.get(sharedPreferences)
 
         visibility(binding.map, state.hasInternet && smallMapEnabled)
 

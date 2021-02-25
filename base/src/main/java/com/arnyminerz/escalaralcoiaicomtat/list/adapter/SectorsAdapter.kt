@@ -7,7 +7,7 @@ import android.widget.ProgressBar
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.DataClassListActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.sharedPreferences
+import com.arnyminerz.escalaralcoiaicomtat.activity.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog

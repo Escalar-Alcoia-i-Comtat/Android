@@ -6,10 +6,10 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.activity.UPDATE_CACHE
 import com.arnyminerz.escalaralcoiaicomtat.activity.UPDATE_IMAGES
 import com.arnyminerz.escalaralcoiaicomtat.activity.UpdatingActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 
 @ExperimentalUnsignedTypes

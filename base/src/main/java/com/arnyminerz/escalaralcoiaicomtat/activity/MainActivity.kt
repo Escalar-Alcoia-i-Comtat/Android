@@ -60,15 +60,13 @@ val AREAS = arrayListOf<Area>()
 
 var serverAvailable = false
     private set
+val betaUser: Boolean
+    get() = BuildConfig.VERSION_NAME.contains("pre", true) || BuildConfig.DEBUG
+
+var sharedPreferences: SharedPreferences? = null
 
 @ExperimentalUnsignedTypes
 class MainActivity : NetworkChangeListenerFragmentActivity() {
-    companion object {
-        var sharedPreferences: SharedPreferences? = null
-
-        val betaUser: Boolean
-            get() = BuildConfig.VERSION_NAME.contains("pre", true) || BuildConfig.DEBUG
-    }
 
     private fun prepareApp(): Boolean {
         Timber.v("Preparing App...")

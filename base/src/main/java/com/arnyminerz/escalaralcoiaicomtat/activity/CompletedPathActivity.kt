@@ -148,7 +148,7 @@ class CompletedPathActivity : NetworkChangeListenerActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean =
-        if (MainActivity.betaUser)
+        if (betaUser)
             menu?.let { menuInflater.inflate(R.menu.completed_path_menu, menu); true }
                 ?: super.onCreateOptionsMenu(menu)
         else super.onCreateOptionsMenu(menu)

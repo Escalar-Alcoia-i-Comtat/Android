@@ -7,7 +7,7 @@ import android.os.LocaleList
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_LANGUAGE_PREF
 import org.jetbrains.anko.runOnUiThread
 import org.jetbrains.anko.toast
@@ -31,9 +31,9 @@ fun Activity.setAppLocale(localeCode: String) {
 @ExperimentalUnsignedTypes
 fun Activity.loadLocale() {
     Timber.v("  Loading default language...")
-    if (SETTINGS_LANGUAGE_PREF.isSet(MainActivity.sharedPreferences!!)) {
+    if (SETTINGS_LANGUAGE_PREF.isSet(sharedPreferences!!)) {
         val appLanguagesValues = resources.getStringArray(R.array.app_languages_values)
-        val langPref = SETTINGS_LANGUAGE_PREF.get(MainActivity.sharedPreferences!!)
+        val langPref = SETTINGS_LANGUAGE_PREF.get(sharedPreferences!!)
         val newLang = appLanguagesValues[langPref]
         setAppLocale(newLang)
         Timber.v("Set app locale to $newLang")
