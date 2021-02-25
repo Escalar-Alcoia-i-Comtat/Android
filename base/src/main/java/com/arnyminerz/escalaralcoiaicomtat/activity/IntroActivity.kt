@@ -12,7 +12,6 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityIntroBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.BetaIntroFragment

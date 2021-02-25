@@ -2,7 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.data.map
 
 import android.content.Context
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.sharedPreferences
+import com.arnyminerz.escalaralcoiaicomtat.activity.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF

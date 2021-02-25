@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity.Companion.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityStorageBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteDir
 import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
