@@ -6,7 +6,8 @@ import androidx.preference.Preference
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.FeedbackActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.PreferenceData
-import com.arnyminerz.escalaralcoiaicomtat.fragment.*
+import com.arnyminerz.escalaralcoiaicomtat.fragment.SETTINGS_HEIGHT_MAIN
+import com.arnyminerz.escalaralcoiaicomtat.fragment.SETTINGS_HEIGHT_UPPER
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerPreferenceFragment
 
 val SETTINGS_ALERT_PREF = PreferenceData("alert_pref", true)
@@ -29,10 +30,10 @@ class MainSettingsFragment : NetworkChangeListenerPreferenceFragment() {
     companion object {
         enum class SettingsPage(val height: Int) {
             MAIN(SETTINGS_HEIGHT_MAIN),
-            GENERAL(SETTINGS_HEIGHT_GENERAL),
-            NOTIFICATIONS(SETTINGS_HEIGHT_NOTIFICATIONS),
-            INFO(SETTINGS_HEIGHT_INFO),
-            DOWNLOADS(SETTINGS_HEIGHT_DOWNLOADS)
+            GENERAL(SETTINGS_HEIGHT_UPPER),
+            NOTIFICATIONS(SETTINGS_HEIGHT_UPPER),
+            INFO(SETTINGS_HEIGHT_UPPER),
+            DOWNLOADS(SETTINGS_HEIGHT_UPPER)
         }
     }
 

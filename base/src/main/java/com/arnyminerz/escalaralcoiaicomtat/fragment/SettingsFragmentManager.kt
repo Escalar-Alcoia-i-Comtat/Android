@@ -11,10 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFrag
 import timber.log.Timber
 
 const val SETTINGS_HEIGHT_MAIN = 0
-const val SETTINGS_HEIGHT_GENERAL = 1
-const val SETTINGS_HEIGHT_NOTIFICATIONS = 1
-const val SETTINGS_HEIGHT_DOWNLOADS = 1
-const val SETTINGS_HEIGHT_INFO = 1
+const val SETTINGS_HEIGHT_UPPER = 1
 
 @ExperimentalUnsignedTypes
 class SettingsFragmentManager : NetworkChangeListenerFragment() {
@@ -30,7 +27,7 @@ class SettingsFragmentManager : NetworkChangeListenerFragment() {
 
     fun loadPage(page: SettingsPage, backPressed: Boolean) {
         if (view == null) {
-            Timber.e("View not showing, should't load any pages.")
+            Timber.w("View not showing, shouldn't load any pages.")
             return
         }
 
@@ -56,6 +53,7 @@ class SettingsFragmentManager : NetworkChangeListenerFragment() {
         } ?: Timber.e("No Activity Found!")
 
         height = page.height
+        Timber.d("Loaded settings page $page. Height: $height")
     }
 
     override fun onResume() {

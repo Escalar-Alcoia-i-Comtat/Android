@@ -213,28 +213,24 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
     override fun onBackPressed() {
         Timber.v("Going back!")
-        if (visibility(binding.mainFrameLayout)) {
-            visibility(binding.mainViewPager, true)
-            visibility(binding.mainFrameLayout, false)
+        when(binding.mainViewPager.currentItem){
+            TAB_ITEM_HOME -> return finishAndRemoveTask()
+            TAB_ITEM_DOWNLOADS, TAB_ITEM_MAP -> {
+                visibility(binding.mainViewPager, true)
+                visibility(binding.mainFrameLayout, false)
 
-            binding.mainViewPager.currentItem = TAB_ITEM_HOME
-        } else
-            if (binding.mainViewPager.currentItem == TAB_ITEM_SETTINGS) {
+                binding.mainViewPager.currentItem = TAB_ITEM_HOME
+            }
+            TAB_ITEM_SETTINGS -> {
                 val settingsFragmentManager =
-                    (binding.mainViewPager.adapter as? MainPagerAdapter)?.items?.get(
-                        TAB_ITEM_SETTINGS
-                    ) as? SettingsFragmentManager
+                    (binding.mainViewPager.adapter as? MainPagerAdapter)?.items
+                        ?.get(TAB_ITEM_SETTINGS) as? SettingsFragmentManager
+                Timber.e("settingsFragmentManager is null!")
                 if (settingsFragmentManager != null && settingsFragmentManager.height > 0)
                     settingsFragmentManager.loadPage(SettingsPage.MAIN, true)
                 else binding.mainViewPager.currentItem = TAB_ITEM_HOME
-            } else if (binding.mainViewPager.currentItem == TAB_ITEM_DOWNLOADS)
-                binding.mainViewPager.currentItem = TAB_ITEM_HOME
-            else if (binding.mainViewPager.currentItem == TAB_ITEM_MAP)
-                binding.mainViewPager.currentItem = TAB_ITEM_HOME
-            else {
-                super.onBackPressed()
-                finish()
             }
+        }
         updateBottomAppBar()
     }
 
