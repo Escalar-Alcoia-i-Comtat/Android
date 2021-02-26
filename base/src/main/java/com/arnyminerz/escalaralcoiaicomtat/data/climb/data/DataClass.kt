@@ -297,7 +297,7 @@ abstract class DataClass<A : Serializable, B : Serializable>(
         MissingDataException::class,
         NoInternetAccessException::class
     )
-    suspend fun updateAvailable(context: Context?): Boolean =
+    fun updateAvailable(context: Context?): Boolean =
         when {
             context == null -> false // Context is null
             isDownloaded(context) == DownloadStatus.DOWNLOADED ->

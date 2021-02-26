@@ -109,7 +109,7 @@ data class Zone(
             return zone
         }
 
-        suspend fun fromId(id: Int): Zone {
+        fun fromId(id: Int): Zone {
             val json = jsonFromUrl("$EXTENDED_API_URL/zone/$id")
 
             return fromDB(json)

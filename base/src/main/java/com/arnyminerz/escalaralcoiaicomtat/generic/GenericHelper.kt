@@ -9,6 +9,9 @@ import android.util.DisplayMetrics
 import android.webkit.MimeTypeMap
 import androidx.core.content.ContextCompat
 import com.google.android.libraries.maps.model.LatLng
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 
@@ -121,3 +124,8 @@ inline fun <reified E> Context.getSystemService(service: String): E? =
     }
 
 fun Int.drawable(context: Context) = ContextCompat.getDrawable(context, this)
+
+fun runAsync(call: () -> Unit) =
+    CoroutineScope(Dispatchers.IO).launch {
+        runCatching(call)
+    }

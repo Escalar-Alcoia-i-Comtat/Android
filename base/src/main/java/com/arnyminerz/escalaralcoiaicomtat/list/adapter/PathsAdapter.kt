@@ -27,6 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
+import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.getColor
@@ -36,8 +37,6 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 
@@ -111,7 +110,7 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
             else -> ConnectivityProvider.NetworkState.NOT_CONNECTED
         }
         if (!networkState.hasInternet)
-            GlobalScope.launch {
+            runAsync {
                 activity.runOnUiThread {
                     holder.completionImageView.setBackgroundResource(R.drawable.circle_transparent)
                     holder.idTextView.setTextColor(

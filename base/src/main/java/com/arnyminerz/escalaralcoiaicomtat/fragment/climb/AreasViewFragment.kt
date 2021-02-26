@@ -27,6 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.distanceTo
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNull
+import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
@@ -39,8 +40,6 @@ import com.google.android.gms.location.*
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.model.LatLngBounds
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.Serializable
 
@@ -127,7 +126,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             showingMarkers.clear()
 
             if (currentLocation != null && context != null)
-                GlobalScope.launch {
+                runAsync {
                     Timber.v("Iterating through ${AREAS.size} areas.")
                     Timber.v("Current Location: [${currentLocation.latitude},${currentLocation.longitude}]")
                     boundsBuilder.include(currentLocation.toLatLng())

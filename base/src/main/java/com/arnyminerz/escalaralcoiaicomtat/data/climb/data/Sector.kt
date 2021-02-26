@@ -207,7 +207,7 @@ data class Sector constructor(
             return sector
         }
 
-        suspend fun fromId(id: Int): Sector {
+        fun fromId(id: Int): Sector {
             val json = jsonFromUrl("$EXTENDED_API_URL/sector/$id")
 
             return fromDB(json)
