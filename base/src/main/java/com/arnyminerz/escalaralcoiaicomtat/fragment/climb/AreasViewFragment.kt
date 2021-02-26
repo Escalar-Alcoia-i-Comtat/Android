@@ -135,8 +135,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         area.children.forEach { zone ->
                             val zoneLocation = zone.position
                             if (zoneLocation != null) {
-                                val requiredDistance =
-                                    SETTINGS_NEARBY_DISTANCE_PREF.get(sharedPreferences)
+                                val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get(sharedPreferences)
                                 if (zoneLocation.distanceTo(currentLocation.toLatLng()) <= requiredDistance) {
                                     boundsBuilder.include(zoneLocation)
                                     addedAnyPoints = true
