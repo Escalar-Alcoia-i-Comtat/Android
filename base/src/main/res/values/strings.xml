@@ -76,6 +76,7 @@
     <string name="action_continue">Continue</string>
     <string name="action_copy">Copy</string>
     <string name="action_share">Share</string>
+    <string name="action_send">Send</string>
 
     <string name="status_checking_updates">Checking…</string>
     <string name="status_fixing">Fixing…</string>
@@ -345,6 +346,14 @@
     <string name="completed_path_activity_info_evolution">Evolution: </string>
     <string name="completed_path_activity_info_graph_attempts">Attempts</string>
     <string name="completed_path_activity_info_graph_hangs">Hangs</string>
+
+    <string name="feedback_title">Send feedback</string>
+    <string name="feedback_name">Name</string>
+    <string name="feedback_name_help">This is confidential, and won\'t be shared with anyone. It will be used only for user registration, and for referring to you, in case we contact you.</string>
+    <string name="feedback_email">Email</string>
+    <string name="feedback_email_help">This is confidential, and won\'t be shared with anyone. It will be used only for user registration, and if you want, to contact you about your report.</string>
+    <string name="feedback_message">Message</string>
+    <string name="feedback_dont_contact">Don\'t contact me</string>
 
     <string name="sector_info_title">Sector Information</string>
 
