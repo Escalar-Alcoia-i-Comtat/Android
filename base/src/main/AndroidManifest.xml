@@ -39,6 +39,10 @@
         android:vmSafeMode="true"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute,LockedOrientationActivity">
         <activity
+            android:name=".activity.isolated.FeedbackActivity"
+            android:exported="true" >
+        </activity>
+        <activity
             android:name=".activity.ImageShareActivity"
             android:theme="@style/AppTheme.FullScreen" />
         <activity android:name=".activity.ServerDownActivity" />
