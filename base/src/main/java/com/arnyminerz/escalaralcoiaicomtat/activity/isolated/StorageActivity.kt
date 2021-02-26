@@ -69,6 +69,10 @@ class StorageActivity : AppCompatActivity() {
             startActivity(Intent(this, MainActivity::class.java))
         }
 
+        binding.feedbackButton.setOnClickListener {
+            startActivity(Intent(this, FeedbackActivity::class.java))
+        }
+
         refreshView()
     }
 

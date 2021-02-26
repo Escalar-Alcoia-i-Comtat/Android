@@ -77,6 +77,7 @@
     <string name="action_copy">Copy</string>
     <string name="action_share">Share</string>
     <string name="action_send">Send</string>
+    <string name="action_send_feedback">Send feedback</string>
 
     <string name="status_checking_updates">Checking…</string>
     <string name="status_fixing">Fixing…</string>
