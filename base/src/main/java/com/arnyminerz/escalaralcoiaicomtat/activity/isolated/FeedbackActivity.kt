@@ -3,9 +3,11 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.isolated
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
+import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityFeedbackBinding
 import io.sentry.Sentry
 import io.sentry.UserFeedback
+import org.jetbrains.anko.toast
 
 class FeedbackActivity : AppCompatActivity() {
     private lateinit var binding: ActivityFeedbackBinding
@@ -34,6 +36,8 @@ class FeedbackActivity : AppCompatActivity() {
                     this.name = name
                 }
                 Sentry.captureUserFeedback(feedback)
+                toast(R.string.toast_message_sent)
+                finish()
             }
         }
     }
