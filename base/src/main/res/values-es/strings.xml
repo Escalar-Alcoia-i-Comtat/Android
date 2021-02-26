@@ -230,7 +230,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="share_text">Hola! Te gustaría probar Escalar Alcoià i Comtat? Es gratis! https://play.google.com/store/apps/details?id=com.arnyminerz.escalaralcoiaicomtat</string>
     <string name="path_warning_rope_length">Esta vía es bastante larga, ve con cuidado con la cuerta que usas.</string>
     <string name="item_share">Compartir</string>
-    <string name="tooltip_account">Compte</string>
     <string name="intro_download_title">Descargando</string>
     <string name="intro_download_message">Descargando los datos necesarios</string>
     <string name="toast_error_gmaps_not_installed">Google Maps no está instalado!</string>
@@ -278,4 +277,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="feedback_message">Mensaje</string>
     <string name="feedback_dont_contact">No contacteis conmigo</string>
     <string name="toast_message_sent">Mensaje enviado!</string>
+    <string name="fab_desc_enter">Entrar</string>
+    <string name="image_desc_marker_image">Imagen del marcador</string>
 </resources>
