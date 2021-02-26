@@ -413,7 +413,7 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="action_send">Enviar</string>
     <string name="action_send_feedback">Enviar comentarios</string>
     <string name="pref_feedback_title">Enviar comentarios</string>
-    <string name="pref_feedback_sum">Informa a los desarrolladores sobre algun error o problema que hayas podido tener.</string>
+    <string name="pref_feedback_sum">Informa a los desarrolladores sobre algún error o problema que hayas podido tener.</string>
     <string name="feedback_title">Enviar comentarios</string>
     <string name="feedback_name">Nombre</string>
     <string name="feedback_name_help">Esto es confidencial, y no será compartido con nadie. Será solo usado para registrar usuarios, y para referirnos a ti en caso de que contactemos contigo.</string>
