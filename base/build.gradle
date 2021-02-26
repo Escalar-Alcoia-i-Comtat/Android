@@ -101,10 +101,6 @@ dependencies {
 
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.4.0'
 
-    implementation('com.journeyapps:zxing-android-embedded:4.1.0') { transitive = false }
-    //noinspection GradleDependency
-    implementation 'com.google.zxing:core:3.4.1'
-
     // Android Jetpack
     def jetpack_work_version = "2.5.0"
     implementation "androidx.work:work-runtime-ktx:$jetpack_work_version"
