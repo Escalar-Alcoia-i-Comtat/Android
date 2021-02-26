@@ -1,9 +1,8 @@
-package com.arnyminerz.escalaralcoiaicomtat.activity
+package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.os.Bundle
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
-import com.arnyminerz.escalaralcoiaicomtat.databinding.NoInternetCardBinding
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 

@@ -409,4 +409,16 @@
     <string name="notification_updating_message">El contingut està sent actualitzat, per favor, espera</string>
     <string name="status_waiting_internet">Esperant a tenir connexió…</string>
     <string name="toast_loading">Carregant…</string>
+    <string name="action_send">Enviar</string>
+    <string name="action_send_feedback">Enviar comentaris</string>
+    <string name="pref_feedback_title">Enviar comentaris</string>
+    <string name="pref_feedback_sum">Informa als desenvolupadors sobre cap error o problema que hages tingut.</string>
+    <string name="feedback_title">Enviar comentaris</string>
+    <string name="feedback_name">Nom</string>
+    <string name="feedback_name_help">Açò és confidencial, i no serà compartit amb ningú. Sols serà utilitzat per a registrar usuaris, i per a referir-se a tu en cas de que et contactem.</string>
+    <string name="feedback_email">Correu electrònic</string>
+    <string name="feedback_email_help">Açò és confidencial, i no serà compartit amb ningú. Sols serà utilitzat per a registrar usuaris, i si vols, per a contactar-te sobre el teu informe.</string>
+    <string name="feedback_message">Missatge</string>
+    <string name="feedback_dont_contact">No em contacteu</string>
+    <string name="toast_message_sent">Missatge enviat!</string>
 </resources>
