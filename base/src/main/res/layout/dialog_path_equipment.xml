@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent">
 
     <LinearLayout
@@ -15,11 +16,11 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginTop="8dp"
-            android:drawableStart="@drawable/ic_muntanya"
             android:fontFamily="@font/dosis_extrabold"
             android:text="@string/path_fixed_equipment"
             android:textColor="?attr/text_dark"
-            android:textSize="24sp" />
+            android:textSize="24sp"
+            app:drawableStartCompat="@drawable/ic_muntanya" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/pathEquipment_recyclerView"
@@ -37,11 +38,11 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginTop="8dp"
-            android:drawableStart="@drawable/ic_escalador_negre"
             android:fontFamily="@font/dosis_extrabold"
             android:text="@string/path_required_equipment"
             android:textColor="?attr/text_dark"
-            android:textSize="24sp" />
+            android:textSize="24sp"
+            app:drawableStartCompat="@drawable/ic_escalador_negre" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/pathRequiredEquipment_recyclerView"

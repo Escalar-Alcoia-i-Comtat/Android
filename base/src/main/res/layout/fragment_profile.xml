@@ -108,12 +108,12 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:drawableEnd="@drawable/pencil"
                     android:fontFamily="@font/dosis_extrabold"
                     android:layout_gravity="center_vertical"
                     android:text="@string/placeholder"
                     android:textColor="?attr/text_dark"
-                    android:textSize="28sp" />
+                    android:textSize="28sp"
+                    app:drawableEndCompat="@drawable/pencil" />
 
                 <ImageButton
                     android:id="@+id/shareProfile_imageButton"
