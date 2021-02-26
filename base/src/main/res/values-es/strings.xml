@@ -421,4 +421,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="feedback_email_help">Esto es confidencial, y no será compartido con nadie. Solo será usado para registrar usuarios, y si lo desea, contactar con used para informarle de su mensaje.</string>
     <string name="feedback_message">Mensaje</string>
     <string name="feedback_dont_contact">No contacteis conmigo</string>
+    <string name="toast_message_sent">Mensaje enviado!</string>
 </resources>

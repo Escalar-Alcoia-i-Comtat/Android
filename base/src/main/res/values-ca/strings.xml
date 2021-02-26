@@ -420,4 +420,5 @@
     <string name="feedback_email_help">Açò és confidencial, i no serà compartit amb ningú. Sols serà utilitzat per a registrar usuaris, i si vols, per a contactar-te sobre el teu informe.</string>
     <string name="feedback_message">Missatge</string>
     <string name="feedback_dont_contact">No em contacteu</string>
+    <string name="toast_message_sent">Missatge enviat!</string>
 </resources>
