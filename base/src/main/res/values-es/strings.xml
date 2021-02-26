@@ -279,4 +279,10 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="toast_message_sent">Mensaje enviado!</string>
     <string name="fab_desc_enter">Entrar</string>
     <string name="image_desc_marker_image">Imagen del marcador</string>
+    <string name="pref_info_cat_source">Fuente</string>
+    <string name="pref_info_git_title">Github</string>
+    <string name="pref_info_git_sum">Ver el repositorio de Github</string>
+    <string name="image_desc_ending_type">Tipo de reunión</string>
+    <string name="image_desc_storage">Tipo de almacenamiento</string>
+    <string name="image_desc_rappel">Rappel</string>
 </resources>
