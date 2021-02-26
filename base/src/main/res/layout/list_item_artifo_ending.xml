@@ -42,7 +42,7 @@
                 android:layout_marginStart="4dp"
                 android:layout_weight="1"
                 android:fontFamily="@font/average_sans"
-                android:text="TextView"
+                android:text="@string/placeholder"
                 android:textColor="@color/bg_color_dark"
                 android:textSize="15sp" />
 
