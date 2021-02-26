@@ -25,4 +25,10 @@
         app:title="@string/pref_info_title"
         app:summary="@string/pref_info_sum"/>
 
+    <Preference
+        app:icon="@drawable/ic_round_bug_report_24"
+        app:key="pref_feedback"
+        app:summary="@string/pref_feedback_sum"
+        app:title="@string/pref_feedback_title"/>
+
 </PreferenceScreen>

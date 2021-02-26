@@ -31,7 +31,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:manageSpaceActivity=".activity.StorageActivity"
+        android:manageSpaceActivity=".activity.isolated.StorageActivity"
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
@@ -39,14 +39,18 @@
         android:vmSafeMode="true"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute,LockedOrientationActivity">
         <activity
+            android:name=".activity.isolated.FeedbackActivity"
+            android:exported="true" >
+        </activity>
+        <activity
             android:name=".activity.ImageShareActivity"
             android:theme="@style/AppTheme.FullScreen" />
         <activity android:name=".activity.ServerDownActivity" />
-        <activity android:name=".activity.FriendSearchActivity" />
         <activity android:name=".activity.CompletedPathActivity" />
         <activity
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait"
+            android:exported="true"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -67,13 +71,10 @@
             android:name=".activity.SectorInfoActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.StorageActivity"
+            android:name=".activity.isolated.StorageActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.UpdatingActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.ProfileActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.IntroActivity"
@@ -107,14 +108,6 @@
         <meta-data
             android:name="io.sentry.dsn"
             android:value="@string/sentry_dsn" />
-
-        <service
-            android:name=".service.FirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
 
         <provider
             android:name="androidx.core.content.FileProvider"
