@@ -3,7 +3,6 @@
 buildscript {
     repositories {
         google()
-        jcenter()
         mavenCentral()
         maven { url 'https://maven.fabric.io/public' }
         maven { url 'https://jitpack.io' }
@@ -23,7 +22,6 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
         mavenCentral()
         flatDir { dirs 'libs' }
         maven { url "https://jitpack.io" }
