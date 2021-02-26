@@ -15,6 +15,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
+            android:id="@+id/sectorTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/tektonpro_bold"
@@ -43,6 +44,7 @@
     </LinearLayout>
 
     <ProgressBar
+        android:id="@+id/sectorProgressBar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -65,6 +67,7 @@
             android:orientation="vertical">
 
             <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/sectorBarChart"
                 android:layout_width="match_parent"
                 android:layout_height="90dp" />
 
@@ -94,6 +97,7 @@
                         android:layout_toStartOf="@+id/walkingTime_textView">
 
                         <com.google.android.material.chip.Chip
+                            android:id="@+id/sunChip"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/placeholder"
@@ -105,6 +109,7 @@
                             tools:ignore="UnusedAttribute" />
 
                         <com.google.android.material.chip.Chip
+                            android:id="@+id/kidsAptChip"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/sector_kids_apt"
@@ -132,6 +137,7 @@
             </androidx.cardview.widget.CardView>
 
             <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/pathsRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false" />
@@ -139,14 +145,15 @@
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/sizeChangeFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="4dp"
         android:clickable="true"
+        android:contentDescription="@string/image_desc_maximize_minimize_img"
         android:focusable="true"
         android:tint="@color/white"
-        android:contentDescription="@string/image_desc_maximize_minimize_img"
         app:fabSize="mini"
         app:layout_constraintBottom_toBottomOf="@+id/sector_imageView_layout"
         app:layout_constraintEnd_toEndOf="parent"

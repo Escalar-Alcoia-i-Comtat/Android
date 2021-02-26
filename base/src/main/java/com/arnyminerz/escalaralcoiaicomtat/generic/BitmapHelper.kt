@@ -1,22 +1,14 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCreateNewFileException
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotDeleteFileException
-import com.bumptech.glide.Glide
-import com.bumptech.glide.RequestManager
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import java.io.*
-import java.net.HttpURLConnection
-import java.net.URL
 
 
 fun textAsBitmap(text: String, textSize: Float, textColor: Int): Bitmap {
@@ -60,45 +52,6 @@ fun drawableToBitmap(drawable: Drawable): Bitmap? {
 
 fun scaleBitmap(bitmap: Bitmap, newWidth: Int, newHeight: Int): Bitmap =
     Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
-
-@Deprecated("Use Glide")
-suspend fun getBitmapFromURL(src: String): Bitmap? {
-    val url = URL(src)
-    val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
-    connection.doInput = true
-    connection.connect()
-    val input: InputStream = connection.inputStream
-    return BitmapFactory.decodeStream(input)
-}
-
-@Deprecated("Use Glide")
-suspend fun getBitmapFromURL(
-    glide: RequestManager,
-    url: String
-): Bitmap {
-    val futureBitmap = glide
-        .asBitmap()
-        .load(url)
-        .submit()
-
-    while (!futureBitmap.isDone);
-
-    return futureBitmap.get()
-}
-
-fun getBitmapFromURL(context: Context, src: String, callback: (bitmap: Bitmap) -> Unit) {
-    Glide.with(context)
-        .asBitmap()
-        .load(src)
-        .into(object : CustomTarget<Bitmap>() {
-            override fun onLoadCleared(placeholder: Drawable?) {}
-
-            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                callback(resource)
-            }
-
-        })
-}
 
 /**
  * Stores a bitmap into a file

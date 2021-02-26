@@ -22,6 +22,7 @@
             app:drawableStartCompat="@drawable/ic_muntanya" />
 
         <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/pathEquipmentRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
@@ -30,6 +31,7 @@
             android:nestedScrollingEnabled="false" />
 
         <TextView
+            android:id="@+id/pathRequiredTitleTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -42,6 +44,7 @@
             app:drawableStartCompat="@drawable/ic_escalador_negre" />
 
         <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/pathRequiredEquipmentRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"

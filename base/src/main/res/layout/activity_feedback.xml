@@ -70,6 +70,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <CheckBox
+                android:id="@+id/contactCheckBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/feedback_dont_contact" />
@@ -93,6 +94,7 @@
     </ScrollView>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/sendFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"

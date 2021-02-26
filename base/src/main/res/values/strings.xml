@@ -255,6 +255,8 @@
     <string name="item_settings">Settings</string>
     <string name="item_share">Share</string>
 
+    <string name="tooltip_no_internet">No Internet connection</string>
+
     <string name="message_nearby_zones">Nearby zones</string>
     <string name="message_nearby_zones_no_perm">You have not granted access to the location of the device, so this functionality is not usable. Press once to ask for permission, or press and hold to disable.</string>
     <string name="message_already_downloading">Content already downloading</string>
