@@ -17,7 +17,8 @@ import com.google.android.libraries.maps.SupportMapFragment
 import com.google.android.libraries.maps.model.CameraPosition
 import com.google.android.libraries.maps.model.LatLng
 import com.google.android.libraries.maps.model.Marker
-import org.jetbrains.anko.doAsync
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class MapHelper {
@@ -102,9 +103,9 @@ class MapHelper {
     ): LoadResult<MapFeatures> {
         val listener = LoadResult<MapFeatures>(activity)
 
-        doAsync {
+        GlobalScope.launch {
             if (googleMap.isNull() || supportMapFragment.isNull())
-                return@doAsync listener.onFailure(MapNotInitializedException("Map not initialized. Please run loadMap before this"))
+                return@launch listener.onFailure(MapNotInitializedException("Map not initialized. Please run loadMap before this"))
 
             val loader = KMLLoader(kmlAddress, null)
             loader.load(activity, googleMap!!, networkState, { result ->

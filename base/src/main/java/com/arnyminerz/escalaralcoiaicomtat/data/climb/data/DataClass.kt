@@ -25,7 +25,6 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
-import org.jetbrains.anko.runOnUiThread
 import timber.log.Timber
 import java.io.File
 import java.io.Serializable

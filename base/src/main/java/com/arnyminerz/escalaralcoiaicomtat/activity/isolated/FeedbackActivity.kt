@@ -5,9 +5,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityFeedbackBinding
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import io.sentry.Sentry
 import io.sentry.UserFeedback
-import org.jetbrains.anko.toast
 
 class FeedbackActivity : AppCompatActivity() {
     private lateinit var binding: ActivityFeedbackBinding

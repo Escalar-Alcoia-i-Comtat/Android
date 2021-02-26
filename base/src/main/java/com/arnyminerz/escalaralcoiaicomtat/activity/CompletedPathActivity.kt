@@ -10,6 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerA
 import com.arnyminerz.escalaralcoiaicomtat.data.user.UserData
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityCompletedPathBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.getSerializable
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.CompletedPathBigAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
@@ -21,7 +22,6 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.toast
 import timber.log.Timber
 
 const val BUNDLE_EXTRA_COMPLETED_PATHS = "completed_paths"

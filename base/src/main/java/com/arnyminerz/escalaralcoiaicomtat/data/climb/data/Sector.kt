@@ -13,6 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.view.BarChartHelper
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.github.mikephil.charting.charts.BarChart
@@ -21,7 +22,6 @@ import com.github.mikephil.charting.components.XAxis
 import com.google.android.libraries.maps.model.LatLng
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.jetbrains.anko.toast
 import org.json.JSONObject
 import timber.log.Timber
 import java.util.*

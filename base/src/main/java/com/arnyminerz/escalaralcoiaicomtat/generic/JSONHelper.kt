@@ -4,7 +4,6 @@ import android.os.Build
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL_NO_SECURE
 import com.arnyminerz.escalaralcoiaicomtat.data.user.UserData
-import org.jetbrains.anko.getStackTraceString
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -44,7 +43,7 @@ private suspend fun jsonArrayFromURL(url: URL): JSONArray {
     }catch (ex: JSONException){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1)
             throw JSONException("Could not parse JSONArray from \"$url\".", ex)
-        throw JSONException("Could not parse JSONArray from \"$url\". Trace: ${ex.getStackTraceString()}")
+        throw JSONException("Could not parse JSONArray from \"$url\". Trace: ${ex.localizedMessage}")
     }
 }
 

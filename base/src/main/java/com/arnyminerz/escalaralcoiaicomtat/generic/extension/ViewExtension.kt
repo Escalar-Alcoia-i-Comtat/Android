@@ -2,7 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.generic.extension
 
 import android.content.Context
 import android.view.View
-import org.jetbrains.anko.runOnUiThread
+import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 
 fun View.disable() {
     isEnabled = false

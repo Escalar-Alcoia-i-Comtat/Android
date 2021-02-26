@@ -11,10 +11,8 @@ import android.view.animation.RotateAnimation
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
@@ -42,7 +40,6 @@ import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.toast
 import timber.log.Timber
 
 
@@ -51,8 +48,6 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
     RecyclerView.Adapter<SectorViewHolder>() {
     companion object {
         private const val smallCardHeight = 57f
-
-        private const val BOTTOM_MARK_COMPLETED_TAG = "MarkCompletedDialog"
     }
 
     private val toggled = arrayListOf<Boolean>()

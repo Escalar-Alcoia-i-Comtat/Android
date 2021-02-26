@@ -27,6 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.distanceTo
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNull
+import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.location.serializable
@@ -40,7 +41,6 @@ import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.model.LatLngBounds
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.runOnUiThread
 import timber.log.Timber
 import java.io.Serializable
 

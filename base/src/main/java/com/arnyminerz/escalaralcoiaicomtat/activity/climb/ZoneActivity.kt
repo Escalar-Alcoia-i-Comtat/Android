@@ -17,7 +17,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.SectorsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import org.jetbrains.anko.toast
 import timber.log.Timber
 
 @ExperimentalUnsignedTypes

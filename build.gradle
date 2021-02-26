@@ -26,7 +26,6 @@ allprojects {
         flatDir { dirs 'libs' }
         maven { url "https://jitpack.io" }
         maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
-        maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local' }
     }
 }
 

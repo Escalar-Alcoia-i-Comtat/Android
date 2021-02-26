@@ -16,11 +16,11 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_SMALL_M
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.ZoneAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.libraries.maps.model.LatLng
-import org.jetbrains.anko.toast
 import timber.log.Timber
 
 @ExperimentalUnsignedTypes
