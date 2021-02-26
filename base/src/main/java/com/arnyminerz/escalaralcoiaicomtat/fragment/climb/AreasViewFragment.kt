@@ -72,22 +72,22 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
         if (context == null) {
             error = true
-            Timber.e("Could not update Nearby Zones: Not showing fragment (context is null)")
+            Timber.w("Could not update Nearby Zones: Not showing fragment (context is null)")
         }
 
         if (!isResumed) {
             error = true
-            Timber.e("Could not update Nearby Zones: Not showing fragment (not resumed)")
+            Timber.w("Could not update Nearby Zones: Not showing fragment (not resumed)")
         }
 
         if (newLocationProvider == null) {
             error = true
-            Timber.e("Could not update Nearby Zones: Location provider is null")
+            Timber.w("Could not update Nearby Zones: Location provider is null")
         }
 
         if (AREAS.isEmpty()) {
             error = true
-            Timber.e("Could not update Nearby Zones: AREAS is empty")
+            Timber.w("Could not update Nearby Zones: AREAS is empty")
         }
 
         if (error)
