@@ -12,4 +12,14 @@
             app:title="@string/pref_info_build_title" />
 
     </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/pref_info_cat_source">
+
+        <Preference
+            app:icon="@drawable/github"
+            app:key="pref_github"
+            app:summary="@string/pref_info_git_sum"
+            app:title="@string/pref_info_git_title"/>
+
+    </PreferenceCategory>
 </PreferenceScreen>

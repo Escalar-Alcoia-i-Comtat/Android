@@ -151,8 +151,11 @@
     <string name="pref_down_automatic_data_updates_sum">Install updates to the stored climbing data automatically.</string>
 
     <string name="pref_info_cat_app">Application</string>
+    <string name="pref_info_cat_source">Source</string>
     <string name="pref_info_version_title">Version</string>
     <string name="pref_info_build_title">Build Number</string>
+    <string name="pref_info_git_title">Github</string>
+    <string name="pref_info_git_sum">View the Github repository</string>
 
     <string name="notification_channel_downloads_group_name">Downloads</string>
     <string name="notification_channel_download_progress_name">Download Progress</string>
