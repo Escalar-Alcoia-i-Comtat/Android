@@ -105,7 +105,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
                 false
             else
                 sharedPreferences?.let {
-                    SETTINGS_NEARBY_DISTANCE_PREF.put(it, value as String)
+                    SETTINGS_NEARBY_DISTANCE_PREF.put(it, (value as String).toInt())
                     true
                 } ?: false
         }
