@@ -22,7 +22,7 @@
     </style>
 
     <style name="AppTheme.Intro">
-        <item name="backgroundColor">@color/intro_green</item>
+        <item name="android:windowBackground">@color/intro_green</item>
     </style>
 
 </resources>
