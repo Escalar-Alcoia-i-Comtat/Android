@@ -1,8 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.preferences
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.preference.Preference
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.FeedbackActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.PreferenceData
 import com.arnyminerz.escalaralcoiaicomtat.fragment.*
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerPreferenceFragment
@@ -43,6 +45,7 @@ class MainSettingsFragment : NetworkChangeListenerPreferenceFragment() {
         val notificationsPreference: Preference? = findPreference("pref_notifications")
         val downloadsPreference: Preference? = findPreference("pref_downloads")
         val infoPreference: Preference? = findPreference("pref_info")
+        val feedbackPreference: Preference? = findPreference("pref_feedback")
 
         generalPreference?.setOnPreferenceClickListener {
             settingsListener?.invoke(SettingsPage.GENERAL)
@@ -58,6 +61,10 @@ class MainSettingsFragment : NetworkChangeListenerPreferenceFragment() {
         }
         infoPreference?.setOnPreferenceClickListener {
             settingsListener?.invoke(SettingsPage.INFO)
+            true
+        }
+        feedbackPreference?.setOnPreferenceClickListener {
+            startActivity(Intent(context, FeedbackActivity::class.java))
             true
         }
     }

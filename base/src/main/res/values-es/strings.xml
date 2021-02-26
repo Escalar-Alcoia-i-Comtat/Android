@@ -410,4 +410,16 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="notification_updating_message">El contenido está siendo actualizado, por favor, aguarde.</string>
     <string name="status_waiting_internet">Esperando a tener conexión…</string>
     <string name="toast_loading">Cargando…</string>
+    <string name="action_send">Enviar</string>
+    <string name="action_send_feedback">Enviar comentarios</string>
+    <string name="pref_feedback_title">Enviar comentarios</string>
+    <string name="pref_feedback_sum">Informa a los desarrolladores sobre algun error o problema que hayas podido tener.</string>
+    <string name="feedback_title">Enviar comentarios</string>
+    <string name="feedback_name">Nombre</string>
+    <string name="feedback_name_help">Esto es confidencial, y no será compartido con nadie. Será solo usado para registrar usuarios, y para referirnos a ti en caso de que contactemos contigo.</string>
+    <string name="feedback_email">Correo electrónico</string>
+    <string name="feedback_email_help">Esto es confidencial, y no será compartido con nadie. Solo será usado para registrar usuarios, y si lo desea, contactar con used para informarle de su mensaje.</string>
+    <string name="feedback_message">Mensaje</string>
+    <string name="feedback_dont_contact">No contacteis conmigo</string>
+    <string name="toast_message_sent">Mensaje enviado!</string>
 </resources>
