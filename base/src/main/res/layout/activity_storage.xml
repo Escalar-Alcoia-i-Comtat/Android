@@ -5,7 +5,7 @@
     android:id="@+id/storage_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.StorageActivity">
+    tools:context=".activity.isolated.StorageActivity">
 
     <LinearLayout
         android:id="@+id/storage_clear_layout"

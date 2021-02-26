@@ -6,7 +6,7 @@ import android.widget.ImageButton
 import android.widget.ProgressBar
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.DataClassListActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.DownloadStatus
