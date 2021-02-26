@@ -30,7 +30,7 @@
                 android:layout_marginEnd="16dp"
                 android:text="@string/feedback_title"
                 android:textAlignment="center"
-                android:textColor="@color/bg_color_dark"
+                android:textColor="@color/black"
                 android:textSize="34sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -49,7 +49,10 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/name_editText"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:nextFocusDown="@id/email_editText"
+                    android:singleLine="false" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -64,7 +67,10 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/email_editText"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"
+                    android:nextFocusUp="@id/name_editText"
+                    android:nextFocusDown="@id/message_editText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <CheckBox
@@ -79,13 +85,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
+                android:layout_marginBottom="24dp"
                 android:hint="@string/feedback_message">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/message_editText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textLongMessage|text|textImeMultiLine" />
+                    android:inputType="textLongMessage|text|textImeMultiLine|textMultiLine"
+                    android:nextFocusUp="@id/email_editText"/>
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
     </ScrollView>
