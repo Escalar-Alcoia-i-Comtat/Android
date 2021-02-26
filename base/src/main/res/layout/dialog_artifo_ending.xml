@@ -36,6 +36,7 @@
         android:layout_height="0dp"
         android:layout_marginStart="4dp"
         android:tint="?attr/text_dark"
+        android:contentDescription="@string/image_desc_ending_type"
         app:layout_constraintBottom_toBottomOf="@+id/artifoTitle_textView"
         app:layout_constraintStart_toEndOf="@+id/artifoTitle_textView"
         app:layout_constraintTop_toTopOf="@+id/artifoTitle_textView"

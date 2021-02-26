@@ -20,6 +20,7 @@
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:layout_weight="0"
+            android:contentDescription="@string/image_desc_warning"
             android:src="@drawable/ic8_error_96" />
 
         <LinearLayout

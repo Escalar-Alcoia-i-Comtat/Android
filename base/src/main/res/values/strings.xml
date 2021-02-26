@@ -394,6 +394,7 @@
     <string name="fab_desc_next">Next</string>
     <string name="fab_desc_zone">Zone</string>
     <string name="fab_desc_date">Date</string>
+    <string name="fab_desc_enter">Enter</string>
 
     <string name="image_desc_downloaded">Downloaded</string>
     <string name="image_desc_no_internet">No Internet</string>
@@ -427,6 +428,10 @@
     <string name="image_desc_move_up">Move Up</string>
     <string name="image_desc_move_down">Move Down</string>
     <string name="image_desc_maximize_minimize_img">Maximize or minimize image</string>
+    <string name="image_desc_marker_image">Marker image</string>
+    <string name="image_desc_ending_type">Ending type</string>
+    <string name="image_desc_storage">Storage icon</string>
+    <string name="image_desc_rappel">Rappel</string>
 
     <string name="button_desc_view_download">View Download</string>
     <string name="button_desc_download">Download</string>
