@@ -14,11 +14,10 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.DownloadAreasIntroFrag
 import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 val UPDATE_AREA = IntentExtra<Int>("update_area")
@@ -172,7 +171,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
                     })
                 }
 
-                GlobalScope.launch {
+                runAsync {
                     if (updateArea != null) // Update area
                         iterateUpdate(Area.fromId(updateArea!!))
                     if (updateZone != null) // Update zone

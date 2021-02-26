@@ -38,8 +38,6 @@ import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.OnMapReadyCallback
 import com.google.android.libraries.maps.SupportMapFragment
 import com.google.android.libraries.maps.model.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import timber.log.Timber
@@ -459,7 +457,7 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                             toast(R.string.toast_error_internal)
                             return
                         }
-                        GlobalScope.launch {
+                        runAsync {
                             try {
                                 val kmlStream = download(kmlAddress!!)
 
@@ -513,7 +511,7 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                             toast(R.string.toast_error_internal)
                             return
                         }
-                        GlobalScope.launch {
+                        runAsync {
                             try {
                                 val kmzStream = kmzFile!!.inputStream()
 

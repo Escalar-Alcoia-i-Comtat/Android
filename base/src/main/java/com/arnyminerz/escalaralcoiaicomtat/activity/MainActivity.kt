@@ -33,8 +33,6 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import io.sentry.SentryLevel
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.timber.SentryTimberIntegration
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import timber.log.Timber.DebugTree
 import java.io.File
@@ -256,7 +254,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         Timber.v("Connectivity status Updated! Has Internet: %s", hasInternet)
 
         if (state.hasInternet && !serverAvailable) {
-            GlobalScope.launch {
+            runAsync {
                 val canReachServer = URL(EXTENDED_API_URL).ping()
                 if (canReachServer) {
                     Timber.v("Reached arnyminerz.com")

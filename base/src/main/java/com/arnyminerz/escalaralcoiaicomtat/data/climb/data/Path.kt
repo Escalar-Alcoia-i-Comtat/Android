@@ -13,7 +13,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import org.json.JSONObject
 import java.io.Serializable
-import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.NoSuchElementException
 import kotlin.collections.ArrayList
@@ -31,43 +30,6 @@ enum class CompletedType(val index: Int) {
                 2 -> LEAD
                 else -> null
             }
-        }
-    }
-}
-
-@ExperimentalUnsignedTypes
-data class CompletedPath(
-    val id: Int,
-    val timestamp: Date?,
-    val userUid: String,
-    val type: CompletedType,
-    val attempts: Int,
-    val hangs: Int,
-    val path: Path
-) : Serializable {
-    companion object {
-        fun fromDB(json: JSONObject): CompletedPath? {
-            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
-            val date = format.parse(json.getString("timestamp"))
-
-            val id = json.getInt("id")
-            val type = json.getInt("type")
-            val attempts = json.getInt("attempts")
-            val hangs = json.getInt("hangs")
-            val user = json.getString("user")
-            val path = json.get("path")
-            return if (path is JSONObject) {
-                CompletedPath(
-                    id,
-                    date,
-                    user,
-                    CompletedType.find(type)!!,
-                    attempts,
-                    hangs,
-                    Path.fromDB(path)
-                )
-            } else
-                null
         }
     }
 }
@@ -116,7 +78,7 @@ data class Path @ExperimentalUnsignedTypes constructor(
     }
 
     @Throws(NoInternetAccessException::class)
-    suspend fun isBlocked(networkState: ConnectivityProvider.NetworkState): BlockingType {
+    fun isBlocked(networkState: ConnectivityProvider.NetworkState): BlockingType {
         if (networkState.hasInternet) {
             val json = jsonFromUrl("$EXTENDED_API_URL/path/$id")
             val blocked = json.getStringSafe("blocked")

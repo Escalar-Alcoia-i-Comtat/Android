@@ -211,7 +211,7 @@ data class Area(
             return area
         }
 
-        suspend fun fromId(id: Int): Area {
+        fun fromId(id: Int): Area {
             val json = jsonFromUrl("$EXTENDED_API_URL/area/$id")
 
             return fromDB(json)

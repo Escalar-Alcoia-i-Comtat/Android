@@ -11,11 +11,10 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
+import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @ExperimentalUnsignedTypes
@@ -51,7 +50,7 @@ class DownloadDialog(private val context: Context, private val data: DataClass<*
                     .setPositiveButton(R.string.action_delete) { d, _ ->
                         d.dismiss()
                         when (data) {
-                            is Area, is Zone, is Sector -> GlobalScope.launch {
+                            is Area, is Zone, is Sector -> runAsync {
                                 for (child in data.children)
                                     if (child is DataClass<*, *>)
                                         child.delete(context)
@@ -78,7 +77,7 @@ class DownloadDialog(private val context: Context, private val data: DataClass<*
                 button.isEnabled = false
                 button.text = context.getString(R.string.status_checking_updates)
 
-                GlobalScope.launch {
+                runAsync {
                     try {
                         val updateAvailable = data.updateAvailable(context)
                         context.runOnUiThread {
