@@ -19,11 +19,7 @@ android {
             file("secure.properties")?.withInputStream { secureProps.load(it) }
 
         resValue "string", "google_maps_key", (secureProps.getProperty("MAPS_API_KEY") ?: "")
-        resValue "string", "auth_client_id", (secureProps.getProperty("AUTH_CLIENT_ID") ?: "")
         resValue "string", "sentry_dsn", (secureProps.getProperty("SENTRY_DNS") ?: "")
-        resValue "string", "ftp_host", (secureProps.getProperty("FTP_SERVER") ?: "")
-        resValue "string", "ftp_user", (secureProps.getProperty("FTP_USER") ?: "")
-        resValue "string", "ftp_pass", (secureProps.getProperty("FTP_PASS") ?: "")
 
         buildTypes.each {
             it.buildConfigField 'String', 'FTP_HOST', "\"" + (secureProps.getProperty("FTP_SERVER") ?: "") + "\""

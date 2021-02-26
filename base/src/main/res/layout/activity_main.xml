@@ -7,7 +7,6 @@
     tools:context=".activity.MainActivity">
 
     <ProgressBar
-        android:id="@+id/main_loading_progressBar"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,20 +16,17 @@
         android:progressTint="#FFFFFF" />
 
     <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/main_viewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:animateLayoutChanges="true" />
 
     <FrameLayout
-        android:id="@+id/main_frameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
         android:visibility="gone" />
 
     <com.google.android.material.bottomappbar.BottomAppBar
-        android:id="@+id/bottom_app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"

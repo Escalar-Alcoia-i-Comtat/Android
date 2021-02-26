@@ -74,7 +74,8 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.IntroActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.Intro"/>
         <activity
             android:name=".activity.MapsActivity"
             android:screenOrientation="portrait" />

@@ -22,7 +22,6 @@
             android:layout_height="match_parent">
 
             <ImageButton
-                android:id="@+id/back_imageButton"
                 android:layout_width="?android:attr/actionBarSize"
                 android:layout_height="?android:attr/actionBarSize"
                 android:background="@drawable/transparent"
@@ -47,8 +46,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <include android:id="@+id/no_internet_card"
-        layout="@layout/no_internet_card" />
+    <include layout="@layout/no_internet_card" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -71,7 +69,6 @@
                 android:name="com.google.android.libraries.maps.SupportMapFragment" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false" />

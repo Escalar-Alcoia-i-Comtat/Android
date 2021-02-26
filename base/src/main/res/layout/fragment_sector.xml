@@ -15,7 +15,6 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/sector_textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/tektonpro_bold"
@@ -44,7 +43,6 @@
     </LinearLayout>
 
     <ProgressBar
-        android:id="@+id/sector_progressBar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -67,12 +65,10 @@
             android:orientation="vertical">
 
             <com.github.mikephil.charting.charts.BarChart
-                android:id="@+id/sector_bar_chart"
                 android:layout_width="match_parent"
                 android:layout_height="90dp" />
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/characteristics_cardView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
@@ -98,7 +94,6 @@
                         android:layout_toStartOf="@+id/walkingTime_textView">
 
                         <com.google.android.material.chip.Chip
-                            android:id="@+id/sun_chip"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/placeholder"
@@ -110,7 +105,6 @@
                             tools:ignore="UnusedAttribute" />
 
                         <com.google.android.material.chip.Chip
-                            android:id="@+id/kidsApt_chip"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/sector_kids_apt"
@@ -138,7 +132,6 @@
             </androidx.cardview.widget.CardView>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/paths_recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false" />
@@ -146,7 +139,6 @@
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/size_change_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="4dp"
