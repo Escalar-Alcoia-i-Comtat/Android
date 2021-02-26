@@ -3,7 +3,6 @@ package com.arnyminerz.escalaralcoiaicomtat.generic
 import android.os.Build
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL_NO_SECURE
-import com.arnyminerz.escalaralcoiaicomtat.data.user.UserData
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -12,13 +11,13 @@ import java.io.File
 import java.io.IOException
 import java.net.URL
 
-private suspend fun jsonFromUrl(url: URL): JSONObject {
+private fun jsonFromUrl(url: URL): JSONObject {
     Timber.v("Getting JSON from %s", url)
     val jsonRaw = url.readText()
     return JSONObject(jsonRaw)
 }
 
-suspend fun jsonFromUrl(url: String): JSONObject =
+fun jsonFromUrl(url: String): JSONObject =
     try {
         jsonFromUrl(URL(url))
     } catch (e: IOException) {
@@ -35,7 +34,7 @@ suspend fun jsonFromUrl(url: String): JSONObject =
         ) // Replace the https address with the http one
     }
 
-private suspend fun jsonArrayFromURL(url: URL): JSONArray {
+private fun jsonArrayFromURL(url: URL): JSONArray {
     Timber.v("Getting JSON Array from %s", url)
     val jsonRaw = url.readText()
     try {
@@ -47,7 +46,7 @@ private suspend fun jsonArrayFromURL(url: URL): JSONArray {
     }
 }
 
-suspend fun jsonArrayFromURL(url: String): JSONArray =
+fun jsonArrayFromURL(url: String): JSONArray =
     try {
         jsonArrayFromURL(URL(url))
     } catch (e: IOException) {
@@ -66,7 +65,5 @@ suspend fun jsonArrayFromURL(url: String): JSONArray =
 fun jsonArrayFromFile(file: File): JSONArray =
     JSONArray(file.readText())
 
-fun JSONObject.getError(): JSONObject = getJSONObject("error")
-fun JSONObject.getUserData(key: String): UserData = UserData(getJSONObject(key))
 fun JSONArray.isEmpty(): Boolean = length() <= 0
 fun JSONArray.isNotEmpty(): Boolean = !isEmpty()

@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 class PreferenceData<T : Any> constructor(val key: String, val default: T) {
     private val d = default
 
+    @Suppress("UNCHECKED_CAST")
     fun get(sharedPreferences: SharedPreferences?): T =
         (sharedPreferences?.all?.getOrDefault(key, default) as? T?) ?: default
 
