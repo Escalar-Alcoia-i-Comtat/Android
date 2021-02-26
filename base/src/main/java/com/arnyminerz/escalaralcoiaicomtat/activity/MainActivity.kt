@@ -23,10 +23,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.SettingsFragmentManager
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.AreasViewFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFragment.Companion.SettingsPage
-import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
-import com.arnyminerz.escalaralcoiaicomtat.generic.loadLocale
-import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.network.ping
@@ -36,8 +33,8 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import io.sentry.SentryLevel
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.timber.SentryTimberIntegration
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.toast
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import timber.log.Timber.DebugTree
 import java.io.File
@@ -263,7 +260,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         Timber.v("Connectivity status Updated! Has Internet: %s", hasInternet)
 
         if (state.hasInternet && !serverAvailable) {
-            doAsync {
+            GlobalScope.launch {
                 val canReachServer = URL(EXTENDED_API_URL).ping()
                 if (canReachServer) {
                     Timber.v("Reached arnyminerz.com")

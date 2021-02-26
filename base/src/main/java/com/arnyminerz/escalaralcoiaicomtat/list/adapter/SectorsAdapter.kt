@@ -19,7 +19,6 @@ import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.request.RequestOptions
-import org.jetbrains.anko.toast
 import timber.log.Timber
 
 @Suppress("unused")

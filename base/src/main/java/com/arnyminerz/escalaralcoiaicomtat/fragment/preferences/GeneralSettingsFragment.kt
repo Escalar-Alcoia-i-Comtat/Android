@@ -12,7 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.store
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.generic.loadLocale
-import org.jetbrains.anko.toast
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import timber.log.Timber
 
 @ExperimentalUnsignedTypes

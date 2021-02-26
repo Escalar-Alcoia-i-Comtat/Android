@@ -7,8 +7,8 @@
     tools:context=".activity.MainActivity">
 
     <ProgressBar
-        android:id="@+id/main_loading_progressBar"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:id="@+id/mainLoadingProgressBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
@@ -17,29 +17,29 @@
         android:progressTint="#FFFFFF" />
 
     <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/main_viewPager"
+        android:id="@+id/mainViewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:animateLayoutChanges="true" />
 
     <FrameLayout
-        android:id="@+id/main_frameLayout"
+        android:id="@+id/mainFrameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
         android:visibility="gone" />
 
     <com.google.android.material.bottomappbar.BottomAppBar
-        android:id="@+id/bottom_app_bar"
+        android:id="@+id/bottomAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:tooltipText="@string/tooltip_account"
         app:fabAlignmentMode="end"
         app:fabAnimationMode="slide"
         app:fabCradleRoundedCornerRadius="24dp"
         app:hideOnScroll="true"
         app:menu="@menu/menu_main"
-        app:navigationIcon="@drawable/round_explore_24" />
+        app:navigationIcon="@drawable/round_explore_24"
+        tools:ignore="UnusedAttribute" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

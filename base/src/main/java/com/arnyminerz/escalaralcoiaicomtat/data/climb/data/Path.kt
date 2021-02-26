@@ -6,10 +6,7 @@ import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.Grade
-import com.arnyminerz.escalaralcoiaicomtat.exception.JSONResultException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
-import com.arnyminerz.escalaralcoiaicomtat.exception.NotLoggedInException
-import com.arnyminerz.escalaralcoiaicomtat.exception.UserNotFoundException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getStringSafe
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
@@ -131,27 +128,6 @@ data class Path @ExperimentalUnsignedTypes constructor(
 
     fun hasInfo(): Boolean = description != null || builtBy != null
 
-    /**
-     * Checks if the path's been completed by the logged in user
-     * @param networkState The network state
-     * @throws NotLoggedInException If the user's not logged in
-     * @throws NoInternetAccessException If there's no internet access
-     * @throws UserNotFoundException If the logged in user was not found in the database
-     * @throws JSONResultException If there was an error loading the user's data
-     * @return The completed path if found, or null if not.
-     */
-    @Throws(
-        NotLoggedInException::class,
-        NoInternetAccessException::class,
-        UserNotFoundException::class,
-        JSONResultException::class
-    )
-    suspend fun isCompleted(
-        networkState: ConnectivityProvider.NetworkState
-    ): CompletedPath? {
-        throw NotLoggedInException()
-    }
-
     fun grade(): Grade =
         if (grades.size > 0) grades.first() else throw NoSuchElementException("Grades list is empty")
 
@@ -190,12 +166,6 @@ data class Path @ExperimentalUnsignedTypes constructor(
                 if (showDescription) json.getString("built_by") else null,
                 if (showDescription) json.getString("rebuilt_by") else null
             )
-        }
-
-        suspend fun fromId(id: Int): Path {
-            val json = jsonFromUrl("$EXTENDED_API_URL/path/$id")
-
-            return fromDB(json)
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.ColorRes
@@ -13,6 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.SafeCountData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.SafesData
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.PathEquipmentViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import timber.log.Timber
 
 enum class EquipmentAdapterType {
     FIXED, REQUIRED;
@@ -30,10 +30,6 @@ class EquipmentAdapter(
     private val safes: SafesData,
     private val equipmentType: EquipmentAdapterType
 ) : RecyclerView.Adapter<PathEquipmentViewHolder>() {
-    companion object {
-        private const val TAG = "EquipmentAdapter"
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PathEquipmentViewHolder =
         PathEquipmentViewHolder(
             LayoutInflater.from(context).inflate(
@@ -43,17 +39,17 @@ class EquipmentAdapter(
 
     private val showableSafes = arrayListOf<SafeCountData>()
     override fun getItemCount(): Int {
-        Log.v(TAG, "Calculating showable safes")
+        Timber.v("Calculating showable safes")
         showableSafes.clear()
         for (s in 0 until safes.count()) {
             val safe = safes[s]
             if(safe != null)
             if (safe.count > 0u) {
                 showableSafes.add(safe)
-                Log.v(TAG, "  Added $safe")
+                Timber.v("  Added $safe")
             }
         }
-        Log.v(TAG, "There are ${showableSafes.size} showable safes")
+        Timber.v("There are ${showableSafes.size} showable safes")
         return showableSafes.size
     }
 

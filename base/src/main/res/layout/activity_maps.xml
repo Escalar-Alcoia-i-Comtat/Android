@@ -13,7 +13,7 @@
         android:name="com.google.android.libraries.maps.SupportMapFragment" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floating_action_button"
+        android:id="@+id/floatingActionButton"
         style="@style/Widget.MaterialComponents.FloatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -35,8 +35,8 @@
         android:layout_marginTop="76dp"
         android:orientation="vertical">
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_current_location"
             style="@style/Widget.MaterialComponents.FloatingActionButton"
+            android:id="@+id/fabCurrentLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/fab_desc_position"
@@ -48,8 +48,8 @@
             tools:ignore="UnusedAttribute" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_download"
             style="@style/Widget.MaterialComponents.FloatingActionButton"
+            android:id="@+id/fabDownload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:tooltipText="@string/action_download"
@@ -63,7 +63,7 @@
     </LinearLayout>
 
     <ImageView
-        android:id="@+id/map_downloaded_imageView"
+        android:id="@+id/mapDownloadedImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
@@ -72,7 +72,7 @@
         android:src="@drawable/cloud_check" />
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/map_info_cardView"
+        android:id="@+id/mapInfoCardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
@@ -113,6 +113,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"
+                android:contentDescription="@string/fab_desc_enter"
                 app:borderWidth="0dp"
                 app:fabSize="mini"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -137,7 +138,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/map_desc_textView"
+                android:id="@+id/mapDescTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
@@ -153,12 +154,13 @@
                 app:layout_constraintTop_toBottomOf="@id/map_info_textView" />
 
             <ImageView
-                android:id="@+id/map_info_imageView"
+                android:id="@+id/mapInfoImageView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
+                android:contentDescription="@string/image_desc_marker_image"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/fab_maps"
                 app:layout_constraintStart_toStartOf="parent"

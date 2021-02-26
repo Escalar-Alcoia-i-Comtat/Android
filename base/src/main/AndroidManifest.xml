@@ -42,11 +42,7 @@
             android:name=".activity.isolated.FeedbackActivity"
             android:exported="true" >
         </activity>
-        <activity
-            android:name=".activity.ImageShareActivity"
-            android:theme="@style/AppTheme.FullScreen" />
         <activity android:name=".activity.ServerDownActivity" />
-        <activity android:name=".activity.CompletedPathActivity" />
         <activity
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait"
@@ -78,14 +74,11 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.IntroActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.Intro"/>
         <activity
             android:name=".activity.MapsActivity"
             android:screenOrientation="portrait" />
-        <activity
-            android:name="com.journeyapps.barcodescanner.CaptureActivity"
-            android:screenOrientation="portrait"
-            tools:replace="screenOrientation" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

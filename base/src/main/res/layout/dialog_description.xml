@@ -6,7 +6,6 @@
     android:layout_margin="12dp">
 
     <TextView
-        android:id="@+id/builtByTitle_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -24,7 +23,6 @@
         android:layout_marginBottom="8dp" />
 
     <TextView
-        android:id="@+id/rebuiltByTitle_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -42,7 +40,6 @@
         android:layout_marginBottom="16dp" />
 
     <TextView
-        android:id="@+id/descriptionTitle_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"

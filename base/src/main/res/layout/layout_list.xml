@@ -22,7 +22,7 @@
             android:layout_height="match_parent">
 
             <ImageButton
-                android:id="@+id/back_imageButton"
+                android:id="@+id/backImageButton"
                 android:layout_width="?android:attr/actionBarSize"
                 android:layout_height="?android:attr/actionBarSize"
                 android:background="@drawable/transparent"
@@ -47,7 +47,8 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <include android:id="@+id/no_internet_card"
+    <include
+        android:id="@+id/noInternetCard"
         layout="@layout/no_internet_card" />
 
     <androidx.core.widget.NestedScrollView

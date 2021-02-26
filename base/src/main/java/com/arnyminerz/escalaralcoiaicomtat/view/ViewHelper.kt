@@ -8,8 +8,8 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.preference.Preference
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
+import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.ViewList
-import org.jetbrains.anko.runOnUiThread
 import timber.log.Timber
 
 fun <T : View?> visibility(
@@ -47,7 +47,7 @@ fun Context?.visibility(
     visible: Boolean,
     setGone: Boolean = true,
     debug: Boolean = false
-) =
+) {
     if (isNotNull())
         this!!.runOnUiThread {
             com.arnyminerz.escalaralcoiaicomtat.view.visibility(
@@ -58,6 +58,7 @@ fun Context?.visibility(
             )
         }
     else com.arnyminerz.escalaralcoiaicomtat.view.visibility(view, visible, setGone, debug)
+}
 
 /**
  * Checks if a view is visible

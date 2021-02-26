@@ -17,6 +17,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <include
-        android:id="@+id/maps_no_internet_cardView"
+        android:id="@+id/mapsNoInternetCardView"
         layout="@layout/no_internet_card" />
 </androidx.constraintlayout.widget.ConstraintLayout>

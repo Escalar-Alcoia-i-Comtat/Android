@@ -6,12 +6,8 @@
 
     <color name="dark_background_color">#303030</color>
 
-    <color name="light_card_color">#ffffff</color>
-
     <color name="bg_color">#f5f5f5</color>
     <color name="bg_color_dark">#202020</color>
-
-    <color name="checked_light_gray">#aaaaaa</color>
 
     <color name="white">#fff</color>
     <color name="black">#000</color>
@@ -25,25 +21,10 @@
     <color name="grade_yellow">#ffeb3b</color>
     <color name="grade_purple">#7b1fa2</color>
 
-    <color name="semitransparent_black">#B3000000</color>
-
-    <color name="dialog_shadow_color">#99000000</color>
-
     <color name="dialog_green">#c0ca33</color>
     <color name="dialog_blue">#039be5</color>
 
-    <color name="graph_attempts">#9CCC65</color>
-    <color name="graph_hangs">#F44336</color>
-
-    <color name="google_auth_color">#E65C52</color>
-
     <color name="path_description_button_color">#0033FF</color>
-
-    <color name="role_moderator">#7b1fa2</color>
-    <color name="role_expert">#B71C1C</color>
-    <color name="role_maintainer">#2196F3</color>
-    <color name="role_admin">#00897B</color>
-    <color name="role_developer">#FFC107</color>
 
 
     <color name="intro_green">#8BC34A</color>

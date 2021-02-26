@@ -21,9 +21,9 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.StorageIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.StorageIntroFragment.Companion.STORAGE_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_SHOWN_INTRO
 import com.arnyminerz.escalaralcoiaicomtat.generic.isPermissionGranted
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.google.android.material.button.MaterialButton
-import org.jetbrains.anko.toast
 import java.io.File
 
 

@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/artifoDialog_recyclerView"
+        android:id="@+id/artifoDialogRecyclerView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -31,11 +31,12 @@
         app:layout_constraintTop_toBottomOf="@+id/artifoTitle_textView" />
 
     <ImageView
-        android:id="@+id/artifoEndingType_imageView"
+        android:id="@+id/artifoEndingTypeImageView"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginStart="4dp"
-        android:tint="?attr/text_dark"
+        android:contentDescription="@string/image_desc_ending_type"
+        app:tint="?attr/text_dark"
         app:layout_constraintBottom_toBottomOf="@+id/artifoTitle_textView"
         app:layout_constraintStart_toEndOf="@+id/artifoTitle_textView"
         app:layout_constraintTop_toTopOf="@+id/artifoTitle_textView"

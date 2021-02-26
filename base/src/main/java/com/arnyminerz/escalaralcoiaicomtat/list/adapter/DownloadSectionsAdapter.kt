@@ -21,7 +21,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.DownloadSectionViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.jetbrains.anko.toast
 import timber.log.Timber
 
 const val TOGGLED_CARD_HEIGHT = 96f

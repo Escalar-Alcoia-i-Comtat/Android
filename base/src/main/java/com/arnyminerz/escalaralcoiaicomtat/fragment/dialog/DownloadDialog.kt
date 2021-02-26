@@ -11,11 +11,11 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
+import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.runOnUiThread
 import timber.log.Timber
 
 @ExperimentalUnsignedTypes
@@ -91,7 +91,7 @@ class DownloadDialog(private val context: Context, private val data: DataClass<*
                                         .setMessage(R.string.dialog_update_message)
                                         .setPositiveButton(R.string.action_update) { _, _ ->
                                             Timber.v("  Going to update!")
-                                            startActivity(
+                                            context.startActivity(
                                                 Intent(
                                                     context,
                                                     UpdatingActivity::class.java

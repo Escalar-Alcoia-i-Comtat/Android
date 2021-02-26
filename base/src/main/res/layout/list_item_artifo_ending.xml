@@ -32,6 +32,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_weight="0"
+                android:contentDescription="@string/image_desc_rappel"
                 app:srcCompat="@drawable/circle_red" />
 
             <TextView
@@ -41,7 +42,7 @@
                 android:layout_marginStart="4dp"
                 android:layout_weight="1"
                 android:fontFamily="@font/average_sans"
-                android:text="TextView"
+                android:text="@string/placeholder"
                 android:textColor="@color/bg_color_dark"
                 android:textSize="15sp" />
 
@@ -50,6 +51,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_weight="0"
+                android:contentDescription="@string/image_desc_ending_type"
                 app:srcCompat="@drawable/circle_green" />
 
         </LinearLayout>

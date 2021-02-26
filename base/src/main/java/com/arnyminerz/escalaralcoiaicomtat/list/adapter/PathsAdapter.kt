@@ -11,10 +11,8 @@ import android.view.animation.RotateAnimation
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
@@ -22,12 +20,10 @@ import androidx.transition.TransitionSet
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.CompletedType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.Grade
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
-import com.arnyminerz.escalaralcoiaicomtat.exception.NotLoggedInException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
@@ -42,7 +38,6 @@ import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.toast
 import timber.log.Timber
 
 
@@ -51,8 +46,6 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
     RecyclerView.Adapter<SectorViewHolder>() {
     companion object {
         private const val smallCardHeight = 57f
-
-        private const val BOTTOM_MARK_COMPLETED_TAG = "MarkCompletedDialog"
     }
 
     private val toggled = arrayListOf<Boolean>()
@@ -119,35 +112,14 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
         }
         if (!networkState.hasInternet)
             GlobalScope.launch {
-                try {
-                    val completed = path.isCompleted(networkState)!!
-
-                    activity.runOnUiThread {
-                        Timber.d("Completion: ${completed.type}")
-                        holder.completionImageView.setBackgroundResource(
-                            when (completed.type) {
-                                CompletedType.FIRST -> R.drawable.circle_red
-                                CompletedType.TOP_ROPE -> R.drawable.circle_yellow
-                                CompletedType.LEAD -> R.drawable.circle_green
-                            }
+                activity.runOnUiThread {
+                    holder.completionImageView.setBackgroundResource(R.drawable.circle_transparent)
+                    holder.idTextView.setTextColor(
+                        getColor(
+                            activity,
+                            R.color.dark_background_color
                         )
-                        holder.idTextView.setTextColor(getColor(activity, R.color.bg_color))
-                    }
-                } catch (_: NoInternetAccessException) { // This shouldn't be thrown, but who knows
-                    Timber.e("Could not check if the path is completed. No Internet.")
-                } catch (_: NotLoggedInException) {
-                    Timber.w("Could not check if the path is completed. User not logged in")
-                } catch (error: Exception) {
-                    Timber.e(error, "Could not check if the path is completed")
-                    activity.runOnUiThread {
-                        holder.completionImageView.setBackgroundResource(R.drawable.circle_transparent)
-                        holder.idTextView.setTextColor(
-                            getColor(
-                                activity,
-                                R.color.dark_background_color
-                            )
-                        )
-                    }
+                    )
                 }
 
                 try {

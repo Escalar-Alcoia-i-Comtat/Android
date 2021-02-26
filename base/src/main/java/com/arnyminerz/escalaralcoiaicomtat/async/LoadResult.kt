@@ -1,10 +1,9 @@
 package com.arnyminerz.escalaralcoiaicomtat.async
 
 import android.content.Context
-import org.jetbrains.anko.runOnUiThread
+import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import java.io.Serializable
 
-@Suppress("unused")
 open class LoadResult<R : Serializable>(private val context: Context? = null) {
     private var resultListeners = arrayListOf<ResultListener<R>>()
     private var result: R? = null

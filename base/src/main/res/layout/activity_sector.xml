@@ -36,7 +36,7 @@
     </androidx.cardview.widget.CardView>
 
     <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/sector_viewPager"
+        android:id="@+id/sectorViewPager"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:translationZ="10dp"
@@ -46,19 +46,19 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
-        android:id="@+id/back_imageButton"
+        android:id="@+id/backImageButton"
         android:layout_width="?android:attr/actionBarSize"
         android:layout_height="?android:attr/actionBarSize"
         android:background="@drawable/transparent"
+        android:contentDescription="@string/image_desc_go_back"
         android:src="@drawable/round_chevron_left_24"
         android:translationZ="10dp"
         android:visibility="visible"
-        android:contentDescription="@string/image_desc_go_back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/no_internet_imageView"
+        android:id="@+id/noInternetImageView"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginEnd="8dp"

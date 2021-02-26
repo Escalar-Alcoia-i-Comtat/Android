@@ -8,6 +8,7 @@ import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
+import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.location.serializable
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.storage.UnzipUtil
@@ -19,8 +20,8 @@ import com.google.android.libraries.maps.model.CameraPosition
 import com.google.android.libraries.maps.model.JointType
 import com.google.android.libraries.maps.model.LatLng
 import com.google.android.libraries.maps.model.RoundCap
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.runOnUiThread
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import timber.log.Timber
@@ -50,7 +51,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
     ) {
         val loadResult = LoadResult()
         with(context) {
-            doAsync {
+            GlobalScope.launch {
                 if (networkState.hasInternet) {
                     Timber.v(
                         if (kmlAddress != null) "Downloading source KML ($kmlAddress)..." else if (kmzFile != null) "Loading stored KML..." else "WTF am I loading?"
@@ -151,7 +152,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                             val kmlFile = File(tempDir, "doc.kml")
                             if (!kmlFile.exists()) {
                                 Timber.e("KML file (${kmlFile.path}) doesn't exist!")
-                                return@doAsync
+                                return@launch
                             }
 
                             Timber.v("Parsing KML...")

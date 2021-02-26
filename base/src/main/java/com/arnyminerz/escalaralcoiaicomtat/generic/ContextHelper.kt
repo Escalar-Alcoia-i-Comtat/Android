@@ -3,22 +3,34 @@ package com.arnyminerz.escalaralcoiaicomtat.generic
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Handler
 import android.os.LocaleList
+import android.os.Looper
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_LANGUAGE_PREF
-import org.jetbrains.anko.runOnUiThread
-import org.jetbrains.anko.toast
 import timber.log.Timber
 import java.util.*
 
+fun Context.toast(text: String, duration: Int = Toast.LENGTH_SHORT) =
+    Toast.makeText(this, text, duration).show()
+
+fun Context.toast(@StringRes text: Int, duration: Int = Toast.LENGTH_SHORT) =
+    Toast.makeText(this, text, duration).show()
+
+fun Context.runOnUiThread(call: (context: Context) -> Unit) =
+    Handler(Looper.getMainLooper()).post {
+        call(this)
+    }
+
 fun toast(context: Context?, @StringRes text: Int) =
-    context?.runOnUiThread { toast(text) }
+    context?.runOnUiThread { it.toast(text) }
 
 fun toast(context: Context?, text: String) =
-    context?.runOnUiThread { toast(text) }
+    context?.runOnUiThread { it.toast(text) }
 
 fun Activity.setAppLocale(localeCode: String) {
     val config = baseContext.resources.configuration

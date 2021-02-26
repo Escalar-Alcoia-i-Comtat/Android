@@ -4,7 +4,6 @@ import android.content.Context
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
-import android.util.Log
 import androidx.annotation.ColorRes
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.join
@@ -12,9 +11,8 @@ import com.arnyminerz.escalaralcoiaicomtat.view.getColor
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import timber.log.Timber
 import java.io.Serializable
-
-private const val TAG = "Grade"
 
 fun Collection<Grade>.toGradesList(): Grade.GradesList {
     return Grade.GradesList(this)
@@ -174,14 +172,11 @@ class Grade(val displayName: String) : Serializable {
                     for (grade in line.split("/")) {
                         if (grade.isEmpty()) continue
 
-                        Log.v(
-                            TAG,
-                            "Generating spannable for \"$grade\". Current char: $charCounter"
-                        )
+                        Timber.v("Generating spannable for \"$grade\". Current char: $charCounter")
                         if (grade.indexOf(" ") >= 0) {
                             val prefix = grade.substring(0, 1)
                             val gradePiece = grade.substring(3)
-                            Log.v(TAG, "  It is pitch! GradePiece: $gradePiece")
+                            Timber.v("  It is pitch! GradePiece: $gradePiece")
                             spannable.setSpan(
                                 ForegroundColorSpan(getColor(context, gradeColor(prefix))),
                                 charCounter,

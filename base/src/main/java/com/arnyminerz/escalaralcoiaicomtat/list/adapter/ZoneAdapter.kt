@@ -19,7 +19,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.ZonesViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import org.jetbrains.anko.toast
 import timber.log.Timber
 import java.io.File
 
