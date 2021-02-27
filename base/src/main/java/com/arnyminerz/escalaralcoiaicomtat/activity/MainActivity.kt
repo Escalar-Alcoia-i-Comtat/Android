@@ -9,7 +9,6 @@ import android.view.MenuItem
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
@@ -57,8 +56,6 @@ val AREAS = arrayListOf<Area>()
 
 var serverAvailable = false
     private set
-val betaUser: Boolean
-    get() = BuildConfig.VERSION_NAME.contains("pre", true) || BuildConfig.DEBUG
 
 var sharedPreferences: SharedPreferences? = null
 
@@ -106,23 +103,25 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
     private var loading = false
 
     private fun updateBottomAppBar() {
+        Timber.d("Updating bottom app bar...")
         val position = binding.mainViewPager.currentItem
-        val showingViewPager = visibility(binding.mainViewPager)
         binding.bottomAppBar.navigationIcon =
             ContextCompat.getDrawable(
                 this,
-                if (position == TAB_ITEM_HOME && showingViewPager) R.drawable.round_explore_24 else R.drawable.ic_outline_explore_24
+                if (position == TAB_ITEM_HOME) R.drawable.round_explore_24 else R.drawable.ic_outline_explore_24
             )
-        menuMapIcon?.icon =
+        menuMapIcon?.setIcon(
             ContextCompat.getDrawable(
                 this,
-                if (position == TAB_ITEM_MAP && showingViewPager) R.drawable.ic_round_map_24 else R.drawable.ic_outline_map_24
+                if (position == TAB_ITEM_MAP) R.drawable.ic_round_map_24 else R.drawable.ic_outline_map_24
             )
-        menuDownloadsIcon?.icon =
+        ) ?: Timber.w("menuMapIcon is null")
+        menuDownloadsIcon?.setIcon(
             ContextCompat.getDrawable(
                 this,
-                if (position == TAB_ITEM_DOWNLOADS && showingViewPager) R.drawable.ic_round_cloud_download_24 else R.drawable.ic_outline_cloud_download_24
+                if (position == TAB_ITEM_DOWNLOADS) R.drawable.ic_round_cloud_download_24 else R.drawable.ic_outline_cloud_download_24
             )
+        ) ?: Timber.w("menuDownloadsIcon is null")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -179,7 +178,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             visibility(binding.mainFrameLayout, false)
         }
 
-        return when (item.itemId) {
+        val result = when (item.itemId) {
             R.id.action_1 -> {
                 binding.mainViewPager.currentItem = TAB_ITEM_MAP
                 true
@@ -207,6 +206,8 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             }
             else -> false
         }
+        updateBottomAppBar()
+        return result
     }
 
     override fun onBackPressed() {
