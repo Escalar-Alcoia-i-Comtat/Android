@@ -26,6 +26,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.KMLLoader
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMapsBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAskerFragment
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -286,6 +287,9 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                     }
 
                     setOnMarkerClickListener { marker ->
+                        if (SETTINGS_CENTER_MARKER_PREF.get(sharedPreferences))
+                            googleMap.animateCamera(CameraUpdateFactory.newLatLng(marker.position))
+
                         if (marker.title != null && marker.title.isNotEmpty()) {
                             markerLatLng = marker.position
 
