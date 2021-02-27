@@ -63,7 +63,7 @@ class MapHelper {
         }
 
         @ExperimentalUnsignedTypes
-        fun infoCard(context: Context, marker: Marker, binding: DialogMapMarkerBinding) {
+        fun infoCard(context: Context, marker: Marker, binding: DialogMapMarkerBinding): MarkerWindow {
             val latLng = marker.position
 
             val anim =
@@ -117,6 +117,8 @@ class MapHelper {
                     if (!dcSearch.launchActivity(context))
                         context.toast(R.string.toast_error_internal)
                 }
+
+            return MarkerWindow(context, marker, binding)
         }
     }
 
@@ -214,3 +216,21 @@ class MapHelper {
 
 class MapNotInitializedException(message: String) : Exception(message)
 class MapAnyDataToLoadException(message: String) : Exception(message)
+data class MarkerWindow(val context: Context, val marker: Marker, val binding: DialogMapMarkerBinding)
+
+fun MarkerWindow.hide(){
+    val anim = AnimationUtils.loadAnimation(context, R.anim.exit_bottom)
+    anim.duration = 500
+    anim.setAnimationListener(object : Animation.AnimationListener {
+        override fun onAnimationRepeat(animation: Animation?) {}
+
+        override fun onAnimationEnd(animation: Animation?) {
+            binding.mapInfoCardView.visibility = View.GONE
+        }
+
+        override fun onAnimationStart(animation: Animation?) {
+            binding.mapInfoCardView.visibility = View.VISIBLE
+        }
+    })
+    binding.mapInfoCardView.startAnimation(anim)
+}
