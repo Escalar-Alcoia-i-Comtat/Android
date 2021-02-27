@@ -112,10 +112,6 @@
     <string name="notification_channel_friend_accepted_desc">"Esto te avisará cuando una petición pendiente haya sido aceptada"</string>
     <string name="notification_download_progress_title">Descargando…</string>
     <string name="notification_download_progress_msg">Descargando %s…</string>
-    <string name="notification_friend_request_title">"Nueva petición de amistad"</string>
-    <string name="notification_friend_request_message">"%s quiere ser tu amigo."</string>
-    <string name="notification_friend_request_accepted_title">"Petición de amistad aceptada"</string>
-    <string name="notification_friend_request_accepted_message">"Ahora %s es tu amigo!"</string>
     <string name="no_internet_title">"Sin acceso a Internet"</string>
     <string name="no_internet_message">"Puedes acceder al contenido descargado o volverlo a intentar"</string>
     <string name="downloads_size">"Tamaño de las descargas:"</string>
@@ -189,10 +185,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="pref_down_roaming_sum">Usar conexiones de uso medido para las descargas</string>
     <string name="notification_channel_task_completed_name">Tarea completada</string>
     <string name="notification_channel_task_completed_desc">Te notificaremos en el momento se complete una tarea en segundo plano</string>
-    <string name="notification_new_update_title">Nueva actualización disponible!</string>
-    <string name="notification_new_update_beta_message">Hay una nueva actualización disponible en el canal beta, ve a descargarla!</string>
-    <string name="notification_task_completed_title">Tarea Completada</string>
-    <string name="notification_task_completed_mark_completed_message">Se ha marcado %s como completada con éxito.</string>
     <string name="toast_permission_required">Se requiere el permiso</string>
     <string name="sector_info_title">Información del Sector</string>
     <string name="item_map">Mapa</string>
@@ -202,8 +194,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="intro_storage_message">Para hacer posibles las descargas necesitamos acceso a tu almacenamiento</string>
     <string name="notification_channel_friend_removed_name">Relación de amistad eliminada</string>
     <string name="notification_channel_friend_removed_desc">Esto te avisará cuando alguien con quien eres amigo te elimina de su lista de amistad.</string>
-    <string name="notification_friend_removed_title">Relación de amistad cancelada</string>
-    <string name="notification_friend_removed_message">%s te ha eliminado como amigo. Ya no sois amigos.</string>
     <string name="dialog_description_description_title">Descripción</string>
     <string name="dialog_description_builder_title">Equipada por</string>
     <string name="dialog_description_rebuilder_title">Reequipada por</string>
@@ -220,8 +210,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="action_try_again">Reintentar</string>
     <string name="notification_channel_user_interacted_name">Nueva interacción de un usuario</string>
     <string name="notification_channel_user_interacted_desc">Te informa cuando un usuario comenta, o le gusta algo relacionado contigo.</string>
-    <string name="notification_user_liked_title">Tienes un nuevo me gusta!</string>
-    <string name="notification_user_liked_message">A %s le ha gustado tu compleción de %s!</string>
     <string name="image_desc_path_completed">Vía Completada</string>
     <string name="image_desc_path_info">Información de Vía</string>
     <string name="image_desc_view_more">Ver más</string>
@@ -255,8 +243,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="pref_info_cat_app">Aplicación</string>
     <string name="notification_channel_new_update_name">Nueva actualización disponible</string>
     <string name="notification_channel_new_update_desc">Esto te avisará de nuevas versiones, y cuando haya una nueva, te ayudará a descargarla.</string>
-    <string name="notification_update_available_title">Nueva Actualización Disponible</string>
-    <string name="notification_update_available_message">Hay una nueva actualización disponible. Pulsa aquí para descargarla ahora!</string>
     <string name="pref_gene_map_small_map_enable_title">Mapa Pequeño</string>
     <string name="pref_gene_map_small_map_enable_sum">Si se debe mostrar un mapa pequeño al entrar a una Área o Zona.</string>
     <string name="pref_down_automatic_updates_title">Actualización Automática de Descargas</string>

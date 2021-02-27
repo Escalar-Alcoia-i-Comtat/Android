@@ -1,16 +1,26 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
+import android.content.Context
 import android.content.Intent
+import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity.Companion.KML_ADDRESS_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.async.LoadResult
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.find
 import com.arnyminerz.escalaralcoiaicomtat.data.map.KMLLoader
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
+import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogMapMarkerBinding
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.bumptech.glide.Glide
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.SupportMapFragment
@@ -40,16 +50,76 @@ class MapHelper {
             return null
         }
 
-        fun getImageUrl(description: String?): String? {
+        private fun getImageUrl(description: String?): String? {
             if (description == null || description.isEmpty()) return null
 
             if (description.startsWith("<img")) {
-                val urlFirstPart =
-                    description.substring(description.indexOf('"') + 1) // This takes from the first "
-                return urlFirstPart.substring(urlFirstPart.indexOf('"') - 1) // This from the previous to the next
+                val linkPos = description.indexOf("https://")
+                val urlFirstPart = description.substring(linkPos) // This takes from the first "
+                return urlFirstPart.substring(0, urlFirstPart.indexOf('"')) // This from the previous to the next
             }
 
             return null
+        }
+
+        @ExperimentalUnsignedTypes
+        fun infoCard(context: Context, marker: Marker, binding: DialogMapMarkerBinding): MarkerWindow {
+            val latLng = marker.position
+
+            val anim =
+                AnimationUtils.loadAnimation(context, R.anim.enter_bottom)
+            anim.duration = 500
+            anim.setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationRepeat(animation: Animation?) {}
+
+                override fun onAnimationEnd(animation: Animation?) {
+                    binding.mapInfoCardView.visibility = View.VISIBLE
+                }
+
+                override fun onAnimationStart(animation: Animation?) {
+                    binding.mapInfoCardView.visibility = View.VISIBLE
+                }
+            })
+            binding.mapInfoCardView.startAnimation(anim)
+
+            val title = marker.title
+            val description = marker.snippet
+            val iwdc = getTarget(marker) // Info Window Data Class
+            val dcSearch = iwdc?.let { AREAS.find(it) }
+
+            binding.mapInfoTextView.text = title
+
+            Timber.v("Marker description: $description")
+            val imageUrl = getImageUrl(description)
+            if (imageUrl == null)
+                binding.mapDescTextView.text = description
+            else
+                Glide.with(context)
+                    .load(imageUrl)
+                    .into(binding.mapInfoImageView)
+
+            visibility(binding.fabEnter, iwdc != null && dcSearch?.isEmpty() == false)
+            visibility(binding.mapInfoImageView, imageUrl != null)
+            visibility(binding.mapDescTextView, imageUrl == null)
+
+            val gmmIntentUri = latLng!!.toUri(true, title)
+            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                .setPackage("com.google.android.apps.maps")
+            val mapsAvailable = mapIntent.resolveActivity(context.packageManager) != null
+            binding.fabMaps.visibility(mapsAvailable)
+            if (mapsAvailable)
+                binding.fabMaps.setOnClickListener {
+                    context.startActivity(mapIntent)
+                }
+
+            if (iwdc != null && dcSearch?.isEmpty() == false)
+                binding.fabEnter.setOnClickListener {
+                    Timber.v("Searching for info window ${iwdc.namespace}:${iwdc.id}")
+                    if (!dcSearch.launchActivity(context))
+                        context.toast(R.string.toast_error_internal)
+                }
+
+            return MarkerWindow(context, marker, binding)
         }
     }
 
@@ -147,3 +217,21 @@ class MapHelper {
 
 class MapNotInitializedException(message: String) : Exception(message)
 class MapAnyDataToLoadException(message: String) : Exception(message)
+data class MarkerWindow(val context: Context, val marker: Marker, val binding: DialogMapMarkerBinding)
+
+fun MarkerWindow.hide(){
+    val anim = AnimationUtils.loadAnimation(context, R.anim.exit_bottom)
+    anim.duration = 500
+    anim.setAnimationListener(object : Animation.AnimationListener {
+        override fun onAnimationRepeat(animation: Animation?) {}
+
+        override fun onAnimationEnd(animation: Animation?) {
+            binding.mapInfoCardView.visibility = View.GONE
+        }
+
+        override fun onAnimationStart(animation: Animation?) {
+            binding.mapInfoCardView.visibility = View.VISIBLE
+        }
+    })
+    binding.mapInfoCardView.startAnimation(anim)
+}

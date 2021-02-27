@@ -26,11 +26,11 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.KMLLoader
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMapsBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAskerFragment
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.maps.CameraUpdateFactory
@@ -66,7 +66,7 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
     private var mapData: Serializable? = null
     private var kmzFile: File? = null
     private var googleMap: GoogleMap? = null
-    private var markerLatLng: LatLng? = null
+    private var markerWindow: MarkerWindow? = null
     private var markerName: String? = null
 
     private var showingPolyline: GeoGeometry? = null
@@ -158,11 +158,11 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
         }
         visibility(binding.fabDownload, kmlAddress != null || kmzFile != null)
 
-        binding.fabMaps.setOnClickListener {
-            if (markerLatLng == null || markerName == null) return@setOnClickListener
+        binding.dialogMapMarker.fabMaps.setOnClickListener {
+            if (markerWindow == null || markerName == null) return@setOnClickListener
 
             val gmmIntentUri =
-                Uri.parse("geo:${markerLatLng!!.latitude},${markerLatLng!!.longitude}?q=${markerLatLng!!.latitude},${markerLatLng!!.longitude}($markerName)")
+                Uri.parse("geo:${markerWindow!!.marker.position.latitude},${markerWindow!!.marker.position!!.longitude}?q=${markerWindow!!.marker.position!!.latitude},${markerWindow!!.marker.position!!.longitude}($markerName)")
             val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
             mapIntent.setPackage("com.google.android.apps.maps")
             if (mapIntent.resolveActivity(packageManager) != null) {
@@ -182,7 +182,7 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                 with(googleMap) {
                     Timber.v("Got googleMap. Setting type.")
 
-                    visibility(binding.mapInfoCardView, false)
+                    visibility(binding.dialogMapMarker.mapInfoCardView, false)
 
                     mapType = GoogleMap.MAP_TYPE_SATELLITE
 
@@ -221,15 +221,14 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                                     Timber.w("Clicked on marker with no title!")
                                     return@setOnMapClickListener
                                 }
-                                binding.mapInfoTextView.text = windowData.title
-                                binding.mapInfoTextView.text = windowData.message
-                                markerLatLng = marker.position.toLatLng()
+                                binding.dialogMapMarker.mapInfoTextView.text = windowData.title
+                                binding.dialogMapMarker.mapInfoTextView.text = windowData.message
                                 markerName = windowData.title
 
                                 showingPolyline = null
 
                                 Timber.w("Showing info window")
-                                visibility(binding.mapInfoCardView, true)
+                                visibility(binding.dialogMapMarker.mapInfoCardView, true)
                                 val anim =
                                     AnimationUtils.loadAnimation(
                                         this@MapsActivity,
@@ -240,14 +239,14 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                                     override fun onAnimationRepeat(animation: Animation?) {}
 
                                     override fun onAnimationEnd(animation: Animation?) {
-                                        visibility(binding.mapInfoCardView, true)
+                                        visibility(binding.dialogMapMarker.mapInfoCardView, true)
                                     }
 
                                     override fun onAnimationStart(animation: Animation?) {
-                                        visibility(binding.mapInfoCardView, true)
+                                        visibility(binding.dialogMapMarker.mapInfoCardView, true)
                                     }
                                 })
-                                binding.mapInfoCardView.startAnimation(anim)
+                                binding.dialogMapMarker.mapInfoCardView.startAnimation(anim)
                                 return@setOnMapClickListener
                             }
                         }
@@ -273,7 +272,8 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                                 }
                         }
 
-                        hideInfoCard()
+                        markerWindow?.hide()
+                        markerWindow = null
                     }
 
                     setOnInfoWindowClickListener { marker ->
@@ -287,10 +287,11 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                     }
 
                     setOnMarkerClickListener { marker ->
-                        if (marker.title != null && marker.title.isNotEmpty()) {
-                            markerLatLng = marker.position
+                        if (SETTINGS_CENTER_MARKER_PREF.get(sharedPreferences))
+                            googleMap.animateCamera(CameraUpdateFactory.newLatLng(marker.position))
 
-                            infoCard(marker)
+                        if (marker.title != null && marker.title.isNotEmpty()) {
+                            markerWindow = MapHelper.infoCard(this@MapsActivity, marker, binding.dialogMapMarker)
 
                             true
                         } else
@@ -647,82 +648,5 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
             })
         } else
             Timber.e("MapboxMap is null!")
-    }
-
-    private fun hideInfoCard() {
-        if (markerLatLng == null) return
-        markerLatLng = null
-
-        val anim =
-            AnimationUtils.loadAnimation(this@MapsActivity, R.anim.exit_bottom)
-        anim.duration = 500
-        anim.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationRepeat(animation: Animation?) {}
-
-            override fun onAnimationEnd(animation: Animation?) {
-                binding.mapInfoCardView.visibility = View.GONE
-            }
-
-            override fun onAnimationStart(animation: Animation?) {
-                binding.mapInfoCardView.visibility = View.VISIBLE
-            }
-        })
-        binding.mapInfoCardView.startAnimation(anim)
-    }
-
-    private fun infoCard(marker: Marker) {
-        if (markerLatLng == null) return
-
-        val anim =
-            AnimationUtils.loadAnimation(this@MapsActivity, R.anim.enter_bottom)
-        anim.duration = 500
-        anim.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationRepeat(animation: Animation?) {}
-
-            override fun onAnimationEnd(animation: Animation?) {
-                binding.mapInfoCardView.visibility = View.VISIBLE
-            }
-
-            override fun onAnimationStart(animation: Animation?) {
-                binding.mapInfoCardView.visibility = View.VISIBLE
-            }
-        })
-        binding.mapInfoCardView.startAnimation(anim)
-
-        val title = marker.title
-        val description = marker.snippet
-        val iwdc = MapHelper.getTarget(marker) // Info Window Data Class
-        val dcSearch = iwdc?.let { AREAS.find(it) }
-
-        binding.mapInfoTextView.text = title
-
-        val imageUrl = MapHelper.getImageUrl(description)
-        if (imageUrl == null)
-            binding.mapDescTextView.text = description
-        else
-            Glide.with(this)
-                .load(imageUrl)
-                .into(binding.mapInfoImageView)
-
-        visibility(binding.fabEnter, iwdc != null && dcSearch?.isEmpty() == false)
-        visibility(binding.mapInfoImageView, imageUrl != null)
-        visibility(binding.mapDescTextView, imageUrl == null)
-
-        val gmmIntentUri = markerLatLng!!.toUri(true, title)
-        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-            .setPackage("com.google.android.apps.maps")
-        if (mapIntent.resolveActivity(packageManager) != null) {
-            binding.fabMaps.show()
-            binding.fabMaps.setOnClickListener {
-                startActivity(mapIntent)
-            }
-        } else binding.fabMaps.hide()
-
-        if (iwdc != null && dcSearch?.isEmpty() == false)
-            binding.fabEnter.setOnClickListener {
-                Timber.v("Searching for info window ${iwdc.namespace}:${iwdc.id}")
-                if (!dcSearch.launchActivity(this))
-                    toast(R.string.toast_error_internal)
-            }
     }
 }
