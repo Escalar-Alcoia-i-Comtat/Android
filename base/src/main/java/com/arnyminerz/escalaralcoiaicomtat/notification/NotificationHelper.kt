@@ -9,8 +9,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.firebase.FirebaseMessageNotificationType
 import com.arnyminerz.escalaralcoiaicomtat.generic.TranslatableString
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
 import timber.log.Timber
@@ -160,25 +158,6 @@ fun updateNotification(
         intent,
         progress,
         notificationId
-    )
-}
-
-fun updateNotification(
-    context: Context,
-    type: FirebaseMessageNotificationType,
-    intent: Intent? = null,
-    vararg parameters: Any
-): Int {
-    return updateNotification(
-        context,
-        type.channel,
-        R.drawable.ic_notifications,
-        context.getString(type.title),
-        context.getString(
-            type.message,
-            parameters
-        ),
-        intent
     )
 }
 
