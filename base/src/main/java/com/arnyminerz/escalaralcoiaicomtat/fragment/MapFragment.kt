@@ -95,10 +95,7 @@ class MapFragment : NetworkChangeListenerFragment() {
                             override fun onCompleted(result: MapFeatures) {
                                 if (context == null || !isResumed) return
 
-                                for (marker in result.markers) {
-                                    marker.windowData?.message = ""
-                                    markers.add(marker)
-                                }
+                                markers.addAll(result.markers)
                                 polygons.addAll(result.polygons)
                                 polylines.addAll(result.polylines)
 
@@ -145,7 +142,7 @@ class MapFragment : NetworkChangeListenerFragment() {
                         markerWindow = MapHelper.infoCard(it, marker, binding.dialogMapMarker)
                     }
 
-                    false
+                    true
                 }
 
                 googleMap.setOnMapClickListener {

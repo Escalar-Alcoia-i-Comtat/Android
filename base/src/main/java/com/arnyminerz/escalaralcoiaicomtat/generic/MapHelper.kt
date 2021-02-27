@@ -104,12 +104,12 @@ class MapHelper {
             val gmmIntentUri = latLng!!.toUri(true, title)
             val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
                 .setPackage("com.google.android.apps.maps")
-            if (mapIntent.resolveActivity(context.packageManager) != null) {
-                binding.fabMaps.show()
+            val mapsAvailable = mapIntent.resolveActivity(context.packageManager) != null
+            binding.fabMaps.visibility(mapsAvailable)
+            if (mapsAvailable)
                 binding.fabMaps.setOnClickListener {
                     context.startActivity(mapIntent)
                 }
-            } else binding.fabMaps.hide()
 
             if (iwdc != null && dcSearch?.isEmpty() == false)
                 binding.fabEnter.setOnClickListener {
