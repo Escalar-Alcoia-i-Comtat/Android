@@ -54,7 +54,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
     private var areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null
 
-    private val showingMarkers = arrayListOf<GeoMarker>()
+    private val showingMarkers = arrayListOf<GeoMarker?>()
 
     private var newLocationProvider: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
@@ -65,7 +65,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     private var _binding: FragmentViewAreasBinding? = null
     private val binding get() = _binding!!
 
-    fun updateNearbyZones(currentLocation: Location?, googleMap: GoogleMap) {
+    fun updateNearbyZones(currentLocation: Location?, googleMap: GoogleMap?) {
         var error = false
         binding.nearbyZonesCardView.hide()
 
@@ -158,10 +158,10 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         }
                         counter++
 
-                        if (counter >= AREAS.size) {
+                        if (counter >= AREAS.size && googleMap != null)
                             requireContext().runOnUiThread {
                                 for (marker in showingMarkers)
-                                    marker.addToMap(googleMap)
+                                    marker?.addToMap(googleMap)
 
                                 if (addedAnyPoints)
                                     googleMap.animateCamera(
@@ -172,7 +172,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                                     )
                                 binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
                             }
-                        }
                     }
                 }
             else Timber.e("Could not show nearby zones. currentLocation null? ${currentLocation.isNull()}")
@@ -212,7 +211,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 val mapData = arrayListOf<Serializable>()
                 for (zm in showingMarkers)
                     zm.let { zoneMarker ->
-                        Timber.v("  Adding position [${zoneMarker.position.latitude}, ${zoneMarker.position.longitude}]")
+                        Timber.v("  Adding position [${zoneMarker?.position?.latitude}, ${zoneMarker?.position?.longitude}]")
                         mapData.add(zoneMarker as Serializable)
                     }
                 intent.putExtra(MAP_DATA_BUNDLE_EXTRA, mapData)

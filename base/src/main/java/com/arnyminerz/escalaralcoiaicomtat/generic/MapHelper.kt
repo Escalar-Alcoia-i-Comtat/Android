@@ -54,9 +54,9 @@ class MapHelper {
             if (description == null || description.isEmpty()) return null
 
             if (description.startsWith("<img")) {
-                val urlFirstPart =
-                    description.substring(description.indexOf('"') + 1) // This takes from the first "
-                return urlFirstPart.substring(urlFirstPart.indexOf('"') - 1) // This from the previous to the next
+                val linkPos = description.indexOf("https://")
+                val urlFirstPart = description.substring(linkPos) // This takes from the first "
+                return urlFirstPart.substring(0, urlFirstPart.indexOf('"')) // This from the previous to the next
             }
 
             return null
@@ -89,6 +89,7 @@ class MapHelper {
 
             binding.mapInfoTextView.text = title
 
+            Timber.v("Marker description: $description")
             val imageUrl = getImageUrl(description)
             if (imageUrl == null)
                 binding.mapDescTextView.text = description
