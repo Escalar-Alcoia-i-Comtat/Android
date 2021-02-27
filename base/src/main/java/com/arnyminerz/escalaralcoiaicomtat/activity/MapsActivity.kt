@@ -273,6 +273,7 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                         }
 
                         markerWindow?.hide()
+                        markerWindow = null
                     }
 
                     setOnInfoWindowClickListener { marker ->

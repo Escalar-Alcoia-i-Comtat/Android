@@ -20,7 +20,9 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentMapBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.generic.MarkerWindow
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.bounds
+import com.arnyminerz.escalaralcoiaicomtat.generic.hide
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -47,6 +49,7 @@ class MapFragment : NetworkChangeListenerFragment() {
 
     private val areas = arrayListOf<Area>()
     private var googleMap: GoogleMap? = null
+    private var markerWindow: MarkerWindow? = null
 
     fun setAreas(areas: ArrayList<Area>) =
         this.areas.addAll(areas)
@@ -138,7 +141,16 @@ class MapFragment : NetworkChangeListenerFragment() {
                     if (SETTINGS_CENTER_MARKER_PREF.get(sharedPreferences))
                         googleMap.animateCamera(CameraUpdateFactory.newLatLng(marker.position))
 
+                    context?.let {
+                        markerWindow = MapHelper.infoCard(it, marker, binding.dialogMapMarker)
+                    }
+
                     false
+                }
+
+                googleMap.setOnMapClickListener {
+                    markerWindow?.hide()
+                    markerWindow = null
                 }
 
                 googleMap.setOnInfoWindowClickListener { marker ->
