@@ -278,7 +278,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
         if (hasLocationPermission(requireContext()))
             newLocationProvider?.requestLocationUpdates(
-                locationRequest,
+                locationRequest!!,
                 locationCallback,
                 Looper.getMainLooper()
             )

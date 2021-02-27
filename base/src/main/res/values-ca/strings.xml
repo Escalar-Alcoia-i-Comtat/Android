@@ -112,10 +112,6 @@
     <string name="notification_channel_friend_accepted_desc">"Açò t'avisarà quan una petició d'amistat pendent siga acceptada"</string>
     <string name="notification_download_progress_title">Baixant…</string>
     <string name="notification_download_progress_msg">S\'està baixant %s…</string>
-    <string name="notification_friend_request_title">"Nova petició d'amistat"</string>
-    <string name="notification_friend_request_message">"%s vol ser el teu amic."</string>
-    <string name="notification_friend_request_accepted_title">"Petició d'amistat acceptada"</string>
-    <string name="notification_friend_request_accepted_message">"Ara %s és el teu amic"</string>
     <string name="no_internet_title">"No tens accés a Internet"</string>
     <string name="no_internet_message">"Pots accedir al contingut descarregat, o tornar-ho a intentar."</string>
     <string name="downloads_size">"Tamany de les descàrregues:"</string>
@@ -184,8 +180,6 @@
     <string name="pref_down_mobile_sum">Fes ús de les dades mòbils per a les descàrregues</string>
     <string name="pref_down_roaming_title">Roaming</string>
     <string name="pref_down_roaming_sum">Fes ús de connexions d\'ús mesurat (Roaming) per a baixar</string>
-    <string name="notification_new_update_title">Nova actualització disponible!</string>
-    <string name="notification_new_update_beta_message">Hi ha una nova actualització disponible en el canal beta, ves a descarregar-la!</string>
     <string name="toast_permission_required">El permís és necessari</string>
     <string name="sector_info_title">Informació del Sector</string>
     <string name="item_map">Mapa</string>
@@ -195,14 +189,10 @@
     <string name="intro_beta_title">Prova Beta</string>
     <string name="notification_channel_task_completed_name">Tasca completada</string>
     <string name="notification_channel_task_completed_desc">Et notificarem en el moment s\'haja completat una tasca en segon pla.</string>
-    <string name="notification_task_completed_title">Tasca completada</string>
-    <string name="notification_task_completed_mark_completed_message">S\'ha marcat %s com a completada correctament</string>
     <string name="intro_storage_title">Permís d\'Emmagatzematge</string>
     <string name="intro_storage_message">Per a fer possibles les baixades necessitem accés al teu emmagatzematge</string>
     <string name="notification_channel_friend_removed_name">Relació d\'amistat eliminada</string>
     <string name="notification_channel_friend_removed_desc">Açò t\'advertirà si algú amb qui eres amic t\'elimina de la seua llista d\'amistats.</string>
-    <string name="notification_friend_removed_title">Relació d\'amistat eliminada</string>
-    <string name="notification_friend_removed_message">%s t\'ha eliminat com a amic. Ja no sou amics.</string>
     <string name="dialog_description_description_title">Descripció</string>
     <string name="dialog_description_builder_title">Equipada per</string>
     <string name="dialog_description_rebuilder_title">Reequipada per</string>
@@ -244,8 +234,6 @@
     <string name="pref_info_cat_app">Aplicació</string>
     <string name="notification_channel_new_update_name">Nova actualització disponible</string>
     <string name="notification_channel_new_update_desc">Açò t\'advertirà de noves versions, i t\'ajudarà a descarregar-les.</string>
-    <string name="notification_update_available_title">Nova Actualització Disponible</string>
-    <string name="notification_update_available_message">Hi ha una nova actualització disponible. Prem per a descarregar-la ara!</string>
     <string name="action_continue">Continuar</string>
     <string name="dialog_high_data_usage_title">Alerta d\'ús de dades elevat</string>
     <string name="dialog_high_data_usage_message">Estàs a punt de fer alguna cosa que sol necessitar una gran quantitat de comunicacions per Internet, i hem detectat que no estàs connectat a una xarxa WiFi, estàs segur que vols continuar?</string>

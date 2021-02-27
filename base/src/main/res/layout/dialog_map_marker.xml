@@ -2,6 +2,7 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mapInfoCardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -22,7 +23,6 @@
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_maps"
             style="@style/Widget.MaterialComponents.FloatingActionButton"
-            tools:ignore="UnusedAttribute"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
@@ -34,7 +34,8 @@
             app:layout_constraintEnd_toStartOf="@id/fab_enter"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/google_maps"
-            app:tint="@color/white" />
+            app:tint="@color/white"
+            tools:ignore="UnusedAttribute" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_enter"
