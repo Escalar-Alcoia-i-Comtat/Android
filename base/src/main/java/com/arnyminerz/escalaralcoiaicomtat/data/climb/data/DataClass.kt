@@ -340,14 +340,18 @@ abstract class DataClass<A : Serializable, B : Serializable>(
         val downloadedImageFile = imageFile(context)
         if (downloadedImageFile.exists()) {
             Timber.d("Loading area image from storage: ${downloadedImageFile.path}")
-            imageView.setImageBitmap(readBitmap(downloadedImageFile))
-            progressBar?.let { context.visibility(it, false) }
-            visibility(imageView, true)
+            context.runOnUiThread {
+                imageView.setImageBitmap(readBitmap(downloadedImageFile))
+                progressBar?.let { context.visibility(it, false) }
+                visibility(imageView, true)
+            }
         } else {
             Timber.d("Getting image from URL ($imageUrl)")
 
             val scale = imageLoadParameters?.resultImageScale ?: 1f
-            imageView.setImageResource(placeholderDrawable)
+            context.runOnUiThread {
+                imageView.setImageResource(placeholderDrawable)
+            }
 
             Glide.with(context)
                 .asBitmap()
