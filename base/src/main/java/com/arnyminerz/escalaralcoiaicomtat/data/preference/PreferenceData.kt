@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.data.preference
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.preference.PreferenceManager
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 // May only be String, Boolean, Int, Float and Long
@@ -41,12 +40,13 @@ fun <T : Any> T?.store(
     } else false
 }
 
-private val sharedPreferencesStorage: HashMap<Context, SharedPreferences> = hashMapOf()
+private const val PREFERENCES_NAME = "EAICPreferences"
+private var sharedPreferencesStorage: SharedPreferences? = null
 val Context.sharedPreferences: SharedPreferences
     get() {
-        if (sharedPreferencesStorage[this] == null)
-            sharedPreferencesStorage[this] = PreferenceManager.getDefaultSharedPreferences(this)
-        return sharedPreferencesStorage[this]!!
+        if (sharedPreferencesStorage == null)
+            sharedPreferencesStorage = getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+        return sharedPreferencesStorage!!
     }
 
 class DataTypeNonStorable : Exception("The given data type cannot be stored in settings")

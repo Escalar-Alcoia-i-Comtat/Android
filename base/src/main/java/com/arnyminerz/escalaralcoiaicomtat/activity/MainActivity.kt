@@ -80,8 +80,6 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
         File(cacheDir, "update.apk").deleteIfExists()
 
-        loadLocale()
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             createNotificationChannels()
 
