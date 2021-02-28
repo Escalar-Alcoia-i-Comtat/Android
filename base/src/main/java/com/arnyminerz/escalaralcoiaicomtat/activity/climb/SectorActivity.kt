@@ -64,14 +64,14 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
         updateTitle()
 
         binding.noInternetImageView.setOnClickListener {
-            val tooltip = Tooltip.Builder(this)
+            Tooltip.Builder(this)
                 .text(R.string.tooltip_no_internet)
                 .anchor(0, 0)
                 .arrow(true)
                 .closePolicy(ClosePolicy.TOUCH_ANYWHERE_CONSUME)
                 .overlay(true)
                 .create()
-            tooltip.show(it, Tooltip.Gravity.LEFT, false)
+                .show(it, Tooltip.Gravity.LEFT, false)
         }
 
         binding.backImageButton.setOnClickListener { onBackPressed() }
@@ -100,7 +100,11 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
+        if (!this::binding.isInitialized)
+            return Timber.e("Binding not initialized")
+
         val hasInternet = state.hasInternet
+        Timber.v("Has internet? $hasInternet")
         visibility(binding.noInternetImageView, !hasInternet)
     }
 }

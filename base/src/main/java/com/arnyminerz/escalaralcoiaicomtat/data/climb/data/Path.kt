@@ -3,9 +3,9 @@ package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 import android.os.Parcel
 import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.BlockingType
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.EndingType
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.Grade
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.BlockingType
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.EndingType
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.Grade
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getStringSafe
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp

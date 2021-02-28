@@ -13,7 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.find
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin

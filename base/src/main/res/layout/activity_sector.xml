@@ -66,7 +66,6 @@
         android:contentDescription="@string/image_desc_no_internet"
         android:src="@drawable/ic8_cloud_cross_96"
         android:translationZ="10dp"
-        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="@+id/cardView4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

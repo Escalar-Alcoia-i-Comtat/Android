@@ -154,6 +154,6 @@ class ZoneActivity : DataClassListActivity() {
                 Timber.v("An AlreadyLoadingException has been thrown while loading the zones in ZoneActivity.") // Let's just warn the debugger this is controlled
             }
         else
-            Timber.w("Already loaded!")
+            Timber.d("Already loaded!")
     }
 }

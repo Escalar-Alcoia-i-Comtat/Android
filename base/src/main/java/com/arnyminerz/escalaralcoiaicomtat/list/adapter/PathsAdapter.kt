@@ -21,8 +21,8 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Path
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.BlockingType
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.Grade
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.BlockingType
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.Grade
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
