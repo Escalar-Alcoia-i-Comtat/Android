@@ -4,9 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
-import com.arnyminerz.escalaralcoiaicomtat.activity.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.data.SerializableBitmap
-import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.drawableToBitmap
 import com.arnyminerz.escalaralcoiaicomtat.generic.generateUUID
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
@@ -20,7 +18,7 @@ import java.io.Serializable
 @Suppress("unused")
 data class GeoMarker(
     val position: SerializableLatLng,
-    val iconSize: Float = 2f,
+    val iconSize: Int = 30,
     val windowData: MapObjectWindowData? = null
 ) : Serializable {
     val id = generateUUID()
@@ -50,13 +48,12 @@ data class GeoMarker(
 
         if (icon.isNotNull())
             icon!!.let { fullSizeBitmap ->
-                val size = (30 * SETTINGS_MARKER_SIZE_PREF.get(sharedPreferences).toFloat()).toInt()
                 marker.icon(
                     BitmapDescriptorFactory.fromBitmap(
                         Bitmap.createScaledBitmap(
                             fullSizeBitmap.bitmap,
-                            size,
-                            size,
+                            iconSize,
+                            iconSize,
                             false
                         )
                     )

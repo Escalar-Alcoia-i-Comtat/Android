@@ -13,6 +13,7 @@ import androidx.viewpager.widget.ViewPager
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
+import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityIntroBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.BetaIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.DownloadAreasIntroFragment
@@ -44,9 +45,9 @@ class IntroActivity : NetworkChangeListenerActivity() {
         fun hasDownloaded(context: Context): Boolean = cacheFile(context).exists()
 
         fun shouldShow(context: Context): Boolean =
-            !hasStoragePermission(context) || !hasDownloaded(context) || !PREF_SHOWN_INTRO.get(
-                sharedPreferences!!
-            )
+            !hasStoragePermission(context)
+                    || !hasDownloaded(context)
+                    || !PREF_SHOWN_INTRO.get(context.sharedPreferences)
     }
 
     var adapterViewPager: IntroPagerAdapter? = null
@@ -131,10 +132,8 @@ class IntroActivity : NetworkChangeListenerActivity() {
             }
 
         if (position + 1 >= adapterViewPager!!.fragments.size) {
-            sharedPreferences?.let {
-                PREF_SHOWN_INTRO.put(sharedPreferences!!, true)
-                startActivity(Intent(this@IntroActivity, MainActivity()::class.java))
-            }
+            PREF_SHOWN_INTRO.put(sharedPreferences, true)
+            startActivity(Intent(this@IntroActivity, MainActivity()::class.java))
         } else {
             if (binding.viewPager.currentItem == adapterViewPager!!.fragments.size - 2)
                 binding.introNextFAB.setImageResource(R.drawable.round_check_24)

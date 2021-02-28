@@ -11,6 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.async.ResultListener
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
+import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_SMALL_MAP_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
@@ -28,6 +29,7 @@ class ZoneActivity : DataClassListActivity() {
     private lateinit var zone: Zone
     private var zoneIndex = -1
     private var areaIndex = -1
+
     private var savedInstanceState: Bundle? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {

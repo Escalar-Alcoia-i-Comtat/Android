@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.async.ResultListener
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.find
@@ -16,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
 import com.arnyminerz.escalaralcoiaicomtat.data.map.addToMap
+import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentMapBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
@@ -135,7 +135,7 @@ class MapFragment : NetworkChangeListenerFragment() {
                         })
 
                 googleMap.setOnMarkerClickListener { marker ->
-                    if (SETTINGS_CENTER_MARKER_PREF.get(sharedPreferences))
+                    if (SETTINGS_CENTER_MARKER_PREF.get(requireContext().sharedPreferences))
                         googleMap.animateCamera(CameraUpdateFactory.newLatLng(marker.position))
 
                     context?.let {

@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
@@ -57,7 +56,7 @@ val AREAS = arrayListOf<Area>()
 var serverAvailable = false
     private set
 
-var sharedPreferences: SharedPreferences? = null
+
 
 @ExperimentalUnsignedTypes
 class MainActivity : NetworkChangeListenerFragmentActivity() {

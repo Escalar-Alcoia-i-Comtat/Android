@@ -8,19 +8,13 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.preference.*
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.sharedPreferences
-import com.arnyminerz.escalaralcoiaicomtat.data.preference.store
+import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.generic.loadLocale
-import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import timber.log.Timber
 
 @ExperimentalUnsignedTypes
 class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragmentCompat() {
-    companion object {
-        fun getNearbyZonesDistance(): Int = SETTINGS_NEARBY_DISTANCE_PREF.get(sharedPreferences!!)
-    }
-
     private var sensibilityPreference: SeekBarPreference? = null
     private var markerSizePreference: SeekBarPreference? = null
     private var previewScalePreference: SeekBarPreference? = null
@@ -37,12 +31,8 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
 
         sensibilityPreference = findPreference("pref_swipe_sensibility")
         sensibilityPreference?.setOnPreferenceChangeListener { _, value ->
-            if (sharedPreferences == null)
-                false
-            else {
-                SETTINGS_GESTURE_SENSIBILITY_PREF.put(sharedPreferences!!, value as Int)
-                true
-            }
+            SETTINGS_GESTURE_SENSIBILITY_PREF.put(requireContext().sharedPreferences, value as Int)
+            true
         }
 
         languagePreference = findPreference("pref_language")
@@ -52,7 +42,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
             if (languages != null) {
                 val langIndex = languages.indexOf(newValue)
                 Timber.d("Language index: $langIndex")
-                SETTINGS_LANGUAGE_PREF.put(sharedPreferences!!, langIndex)
+                SETTINGS_LANGUAGE_PREF.put(requireContext().sharedPreferences, langIndex)
                 when (langIndex) {
                     0 -> { // English
                         Timber.d("Set English")
@@ -62,7 +52,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
                         Timber.d("Set Catalan")
                         requireActivity().loadLocale()
                     }
-                    2 -> { // Castellano
+                    2 -> { // Spanish
                         Timber.d("Set Spanish")
                         requireActivity().loadLocale()
                     }
@@ -80,11 +70,8 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                val enabled = value as Boolean
-                sharedPreferences?.let {
-                    (!enabled).store(sharedPreferences!!, PREF_DISABLE_NEARBY)
-                    true
-                } ?: false
+                PREF_DISABLE_NEARBY.put(requireContext().sharedPreferences, !(value as Boolean))
+                true
             } else {
                 ActivityCompat.requestPermissions(
                     activity,
@@ -101,102 +88,61 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
 
         nearbyDistance = findPreference("pref_nearby_distance")
         nearbyDistance?.setOnPreferenceChangeListener { _, value ->
-            if (sharedPreferences == null)
-                false
-            else
-                sharedPreferences?.let {
-                    SETTINGS_NEARBY_DISTANCE_PREF.put(it, (value as String).toInt())
-                    true
-                } ?: false
+            SETTINGS_NEARBY_DISTANCE_PREF.put(requireContext().sharedPreferences, (value as String).toInt())
+            true
         }
 
         markerSizePreference = findPreference("pref_marker_size")
         markerSizePreference?.setOnPreferenceChangeListener { _, value ->
-            if (sharedPreferences == null)
-                false
-            else
-                if (sharedPreferences != null && context != null) {
-                    SETTINGS_MARKER_SIZE_PREF.put(sharedPreferences!!, value as Int)
-                    true
-                } else {
-                    context?.toast(R.string.toast_error_internal)
-                    Timber.e("Context nor sharedPreferences are null")
-                    false
-                }
+            SETTINGS_MARKER_SIZE_PREF.put(requireContext().sharedPreferences, value as Int)
+            true
         }
 
         centerMarkerPreference = findPreference("pref_move_marker")
         centerMarkerPreference?.setOnPreferenceChangeListener { _, value ->
-            if (sharedPreferences == null)
-                false
-            else
-                if (sharedPreferences != null && context != null) {
-                    SETTINGS_CENTER_MARKER_PREF.put(sharedPreferences!!, value as Boolean)
-                    true
-                } else {
-                    context?.toast(R.string.toast_error_internal)
-                    Timber.e("Context nor sharedPreferences are null")
-                    false
-                }
+            SETTINGS_CENTER_MARKER_PREF.put(requireContext().sharedPreferences, value as Boolean)
+            true
         }
 
         smallMapPreference = findPreference("pref_small_map_enable")
         smallMapPreference?.setOnPreferenceChangeListener { _, value ->
-            if (sharedPreferences == null)
-                false
-            else
-                if (sharedPreferences != null && context != null) {
-                    SETTINGS_SMALL_MAP_PREF.put(sharedPreferences!!, value as Boolean)
-                    true
-                } else {
-                    context?.toast(R.string.toast_error_internal)
-                    Timber.e("Context nor sharedPreferences are null")
-                    false
-                }
+            SETTINGS_SMALL_MAP_PREF.put(requireContext().sharedPreferences, value as Boolean)
+            true
         }
 
         previewScalePreference = findPreference("pref_preview_scale")
         previewScalePreference?.setOnPreferenceChangeListener { _, value ->
-            if (sharedPreferences == null)
-                false
-            else
-                if (sharedPreferences != null && context != null) {
-                    SETTINGS_PREVIEW_SCALE_PREF.put(
-                        sharedPreferences!!,
-                        (value as Int).toFloat() / 10f
-                    )
-                    true
-                } else {
-                    context?.toast(R.string.toast_error_internal)
-                    Timber.d("Context nor sharedPreferences are null")
-                    false
-                }
+            SETTINGS_PREVIEW_SCALE_PREF.put(
+                requireContext().sharedPreferences,
+                (value as Int).toFloat() / 10f
+            )
+            true
         }
     }
 
     override fun onResume() {
         super.onResume()
 
-        sensibilityPreference?.value = SETTINGS_GESTURE_SENSIBILITY_PREF.get(sharedPreferences)
+        sensibilityPreference?.value = SETTINGS_GESTURE_SENSIBILITY_PREF.get(requireContext().sharedPreferences)
 
         languagePreference?.setValueIndex(
-            SETTINGS_LANGUAGE_PREF.get(sharedPreferences)
+            SETTINGS_LANGUAGE_PREF.get(requireContext().sharedPreferences)
         ) ?: Timber.d("Could not set languagePreference default value")
 
-        enableNearby?.isChecked = !(PREF_DISABLE_NEARBY.get(sharedPreferences)) &&
+        enableNearby?.isChecked = !(PREF_DISABLE_NEARBY.get(requireContext().sharedPreferences)) &&
                 (ContextCompat.checkSelfPermission(
                     activity,
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED)
 
-        val nearbyDistancePref = getNearbyZonesDistance().toString()
+        val nearbyDistancePref = SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences).toString()
         Timber.d("Nearby distance: $nearbyDistancePref")
         nearbyDistance?.setText(nearbyDistancePref)
             ?: Timber.e("Could not set nearbyDistance default value")
 
-        markerSizePreference?.value = SETTINGS_MARKER_SIZE_PREF.get(sharedPreferences)
+        markerSizePreference?.value = SETTINGS_MARKER_SIZE_PREF.get(requireContext().sharedPreferences)
         previewScalePreference?.value =
-            (SETTINGS_PREVIEW_SCALE_PREF.get(sharedPreferences) * 10).toInt()
-        smallMapPreference?.isChecked = SETTINGS_SMALL_MAP_PREF.get(sharedPreferences)
+            (SETTINGS_PREVIEW_SCALE_PREF.get(requireContext().sharedPreferences) * 10).toInt()
+        smallMapPreference?.isChecked = SETTINGS_SMALL_MAP_PREF.get(requireContext().sharedPreferences)
     }
 }
