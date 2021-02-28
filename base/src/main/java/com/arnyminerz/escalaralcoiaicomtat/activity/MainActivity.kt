@@ -57,7 +57,6 @@ var serverAvailable = false
     private set
 
 
-
 @ExperimentalUnsignedTypes
 class MainActivity : NetworkChangeListenerFragmentActivity() {
 
@@ -209,7 +208,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
     override fun onBackPressed() {
         Timber.v("Going back!")
-        when(binding.mainViewPager.currentItem){
+        when (binding.mainViewPager.currentItem) {
             TAB_ITEM_HOME -> return finishAndRemoveTask()
             TAB_ITEM_DOWNLOADS, TAB_ITEM_MAP -> {
                 visibility(binding.mainViewPager, true)
@@ -265,47 +264,50 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         } else
             Timber.v("Didn't check for server connection since Internet is not available")
 
-        if (!loaded && !loading) {
-            loading = true
-            visibility(binding.mainLoadingProgressBar, true)
+        if (!loaded && !loading)
+            runAsync {
+                loading = true
+                visibility(binding.mainLoadingProgressBar, true)
 
-            Timber.v("Loading areas...")
-            val areasFlow = loadAreas(this)
-            Timber.v("  Clearing AREAS collection...")
-            AREAS.clear()
-            Timber.v("  Importing to collection...")
-            AREAS.addAll(areasFlow)
-            Timber.v("  --- Found ${AREAS.size} areas ---")
+                Timber.v("Loading areas...")
+                val areasFlow = loadAreas(this)
+                Timber.v("  Clearing AREAS collection...")
+                AREAS.clear()
+                Timber.v("  Importing to collection...")
+                AREAS.addAll(areasFlow)
+                Timber.v("  --- Found ${AREAS.size} areas ---")
 
-            Timber.v("Got areas, setting in map fragment")
-            mapFragment.setAreas(AREAS)
+                Timber.v("Got areas, setting in map fragment")
+                mapFragment.setAreas(AREAS)
 
-            areasViewFragment.updateAreas { holder, position ->
-                toast(R.string.toast_loading)
-                Timber.v("Clicked item %s", position)
-                val intent = Intent(this, AreaActivity()::class.java)
-                    .putExtra(EXTRA_AREA, position)
+                areasViewFragment.updateAreas { holder, position ->
+                    toast(R.string.toast_loading)
+                    Timber.v("Clicked item %s", position)
+                    val intent = Intent(this, AreaActivity()::class.java)
+                        .putExtra(EXTRA_AREA, position)
 
-                val optionsBundle =
-                    ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->
-                        intent.putExtra(EXTRA_AREA_TRANSITION_NAME, transitionName)
+                    val optionsBundle =
+                        ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->
+                            intent.putExtra(EXTRA_AREA_TRANSITION_NAME, transitionName)
 
-                        ActivityOptionsCompat.makeSceneTransitionAnimation(
-                            this,
-                            findViewById(R.id.title_textView),
-                            transitionName
-                        ).toBundle()
-                    } ?: Bundle.EMPTY
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                this,
+                                findViewById(R.id.title_textView),
+                                transitionName
+                            ).toBundle()
+                        } ?: Bundle.EMPTY
 
-                startActivity(intent, optionsBundle)
+                    startActivity(intent, optionsBundle)
+                }
+
+                runOnUiThread {
+                    Timber.v("Finished loading areas, hiding progress bar and showing frameLayout.")
+                    visibility(binding.mainLoadingProgressBar, false)
+                    visibility(binding.mainFrameLayout, true)
+                }
+
+                loaded = true
+                loading = false
             }
-
-            Timber.v("Finished loading areas, hiding progress bar and showing frameLayout.")
-            visibility(binding.mainLoadingProgressBar, false)
-            visibility(binding.mainFrameLayout, true)
-
-            loaded = true
-            loading = false
-        }
     }
 }
