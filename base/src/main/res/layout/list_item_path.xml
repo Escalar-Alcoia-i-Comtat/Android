@@ -36,6 +36,7 @@
                     android:layout_height="28dp"
                     android:layout_marginStart="16dp"
                     android:contentDescription="@string/image_desc_path_completed"
+                    android:src="@drawable/circle_transparent"
                     app:layout_constraintBottom_toBottomOf="@+id/name_textView"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/name_textView" />

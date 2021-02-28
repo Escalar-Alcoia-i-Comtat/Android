@@ -30,7 +30,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.view.getColor
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.setTextColor
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -103,25 +102,19 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
                     Timber.e("Could not create dialog")
             }
 
-        Timber.v("Checking if completed...")
+        Timber.v("Getting network state...")
         val networkState = when (activity) {
             is SectorActivity -> activity.networkState
             is MainActivity -> activity.networkState
-            else -> ConnectivityProvider.NetworkState.NOT_CONNECTED
+            else -> {
+                Timber.w("Could not fetch network state. Set to NOT_CONNECTED")
+                ConnectivityProvider.NetworkState.NOT_CONNECTED
+            }
         }
         if (!networkState.hasInternet)
             runAsync {
-                activity.runOnUiThread {
-                    holder.completionImageView.setBackgroundResource(R.drawable.circle_transparent)
-                    holder.idTextView.setTextColor(
-                        getColor(
-                            activity,
-                            R.color.dark_background_color
-                        )
-                    )
-                }
-
                 try {
+                    Timber.v("Checking if blocked...")
                     val blocked = path.isBlocked(networkState)
 
                     activity.runOnUiThread {
@@ -138,7 +131,7 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
                         visibility(holder.warningNameImageView, anyBlocking)
                     }
                 } catch (_: NoInternetAccessException) {
-                    Timber.e("Could not check if the path is blocked. No Internet.")
+                    Timber.w("Could not check if the path is blocked. No Internet.")
                 } catch (error: Exception) {
                     Timber.e(error, "Could not check if path is blocked.")
                 }
