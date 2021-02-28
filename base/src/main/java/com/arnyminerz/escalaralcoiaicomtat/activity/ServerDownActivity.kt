@@ -2,11 +2,11 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityServerDownBinding
 
 @ExperimentalUnsignedTypes
-class ServerDownActivity : AppCompatActivity() {
+class ServerDownActivity : LanguageAppCompatActivity() {
     private lateinit var binding: ActivityServerDownBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {

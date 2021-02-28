@@ -1,7 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
-import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.LocaleList
@@ -32,25 +32,22 @@ fun toast(context: Context?, @StringRes text: Int) =
 fun toast(context: Context?, text: String) =
     context?.runOnUiThread { it.toast(text) }
 
-fun Activity.setAppLocale(localeCode: String) {
-    val config = baseContext.resources.configuration
-    val locale = Locale(localeCode)
-    Locale.setDefault(locale)
-    config.setLocales(LocaleList(locale))
-    baseContext.createConfigurationContext(config)
-}
-
+class ContextUtils(base: Context): ContextWrapper(base)
 @ExperimentalUnsignedTypes
-fun Activity.loadLocale() {
-    Timber.v("  Loading default language...")
-    if (SETTINGS_LANGUAGE_PREF.isSet(sharedPreferences)) {
-        val appLanguagesValues = resources.getStringArray(R.array.app_languages_values)
-        val langPref = SETTINGS_LANGUAGE_PREF.get(sharedPreferences)
-        val newLang = appLanguagesValues[langPref]
-        setAppLocale(newLang)
-        Timber.v("Set app locale to $newLang")
-    } else
-        Timber.v("    No language was set in settings, using system default.")
+fun loadLocale(context: Context): ContextWrapper {
+    Timber.v("Loading app language...")
+    val resources = context.resources
+    val sharedPreferences = context.sharedPreferences
+    val appLanguagesValues = resources.getStringArray(R.array.app_languages_values)
+    val langPref = SETTINGS_LANGUAGE_PREF.get(sharedPreferences)
+    val newLang = appLanguagesValues[langPref]
+
+    val config = resources.configuration
+    val localeList = LocaleList(Locale(newLang))
+    config.setLocales(localeList)
+
+    Timber.v("Set app locale to $newLang")
+    return ContextUtils(context.createConfigurationContext(config))
 }
 
 fun Context.isPermissionGranted(permission: String): Boolean =

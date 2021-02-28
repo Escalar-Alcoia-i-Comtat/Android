@@ -1,15 +1,15 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.isolated
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityFeedbackBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import io.sentry.Sentry
 import io.sentry.UserFeedback
 
-class FeedbackActivity : AppCompatActivity() {
+class FeedbackActivity : LanguageAppCompatActivity() {
     private lateinit var binding: ActivityFeedbackBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {

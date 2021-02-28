@@ -2,9 +2,9 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.isolated
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityStorageBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteDir
@@ -13,7 +13,7 @@ import com.google.android.material.snackbar.Snackbar
 import java.io.IOException
 
 @ExperimentalUnsignedTypes
-class StorageActivity : AppCompatActivity() {
+class StorageActivity : LanguageAppCompatActivity() {
     private lateinit var binding: ActivityStorageBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {

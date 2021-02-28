@@ -10,7 +10,6 @@ import androidx.preference.*
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
-import com.arnyminerz.escalaralcoiaicomtat.generic.loadLocale
 import timber.log.Timber
 
 @ExperimentalUnsignedTypes
@@ -43,22 +42,22 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
                 val langIndex = languages.indexOf(newValue)
                 Timber.d("Language index: $langIndex")
                 SETTINGS_LANGUAGE_PREF.put(requireContext().sharedPreferences, langIndex)
-                when (langIndex) {
-                    0 -> { // English
+                when (SETTINGS_LANGUAGE_PREF.get(requireContext().sharedPreferences)) {
+                    0 -> // English
                         Timber.d("Set English")
-                        requireActivity().loadLocale()
-                    }
-                    1 -> { // Catalan
+                    1 -> // Catalan
                         Timber.d("Set Catalan")
-                        requireActivity().loadLocale()
-                    }
-                    2 -> { // Spanish
+                    2 -> // Spanish
                         Timber.d("Set Spanish")
-                        requireActivity().loadLocale()
-                    }
                     else -> Timber.d("Option not handled!")
                 }
-                activity.finish()
+
+                with(requireActivity()) {
+                    finish()
+                    overridePendingTransition(0, 0)
+                    startActivity(intent)
+                    overridePendingTransition(0, 0)
+                }
             } else Timber.d("Language not found!")
             true
         }
