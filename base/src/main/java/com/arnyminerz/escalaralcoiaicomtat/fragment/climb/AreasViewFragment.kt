@@ -174,7 +174,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                             }
                     }
                 }
-            else Timber.e("Could not show nearby zones. currentLocation null? ${currentLocation.isNull()}")
+            else Timber.w("Could not show nearby zones. currentLocation null? ${currentLocation.isNull()}")
         }
     }
 
@@ -229,12 +229,12 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 newLocationProvider =
                     LocationServices.getFusedLocationProviderClient(requireContext())
             if (locationRequest == null)
-                locationRequest = LocationRequest()
+                locationRequest = LocationRequest.create()
 
             Timber.d("Adding location provider listener")
             if (hasLocationPermission(requireContext())) {
                 newLocationProvider!!.requestLocationUpdates(
-                    locationRequest,
+                    locationRequest!!,
                     locationCallback,
                     Looper.getMainLooper()
                 )
@@ -260,7 +260,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         R.anim.item_fall_animator
                     )
             binding.areasRecyclerView.adapter = adapter
-        } else Timber.e("Context is null or AreasViewFragment isn't resumed")
+        } else Timber.w("Context is null or AreasViewFragment isn't resumed")
     }
 
     fun updateAreas(listener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?) {
