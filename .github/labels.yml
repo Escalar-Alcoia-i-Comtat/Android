@@ -57,6 +57,10 @@
   description: This will not be worked on
   color: ffffff
 
+- name: cleanup
+  description: When code cleanup is done
+  color: c1e050
+
 - name: major
   description: Major changes. Used for release bump
   color: 16970B
