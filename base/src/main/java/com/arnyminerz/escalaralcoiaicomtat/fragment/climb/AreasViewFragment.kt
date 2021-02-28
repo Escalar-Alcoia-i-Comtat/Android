@@ -174,7 +174,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                             }
                     }
                 }
-            else Timber.e("Could not show nearby zones. currentLocation null? ${currentLocation.isNull()}")
+            else Timber.w("Could not show nearby zones. currentLocation null? ${currentLocation.isNull()}")
         }
     }
 
@@ -260,7 +260,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         R.anim.item_fall_animator
                     )
             binding.areasRecyclerView.adapter = adapter
-        } else Timber.e("Context is null or AreasViewFragment isn't resumed")
+        } else Timber.w("Context is null or AreasViewFragment isn't resumed")
     }
 
     fun updateAreas(listener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?) {
