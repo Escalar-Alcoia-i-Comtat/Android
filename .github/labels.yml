@@ -17,6 +17,10 @@
   description: New feature or request
   color: a2eeef
 
+- name: dependency
+  description: Adding or removing dependencies
+  color: fcba03
+
 - name: github_structure
   description: Pull requests that update Github actions/workflow code
   color: "000000"
