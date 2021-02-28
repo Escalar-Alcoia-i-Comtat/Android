@@ -229,12 +229,12 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 newLocationProvider =
                     LocationServices.getFusedLocationProviderClient(requireContext())
             if (locationRequest == null)
-                locationRequest = LocationRequest()
+                locationRequest = LocationRequest.create()
 
             Timber.d("Adding location provider listener")
             if (hasLocationPermission(requireContext())) {
                 newLocationProvider!!.requestLocationUpdates(
-                    locationRequest,
+                    locationRequest!!,
                     locationCallback,
                     Looper.getMainLooper()
                 )
