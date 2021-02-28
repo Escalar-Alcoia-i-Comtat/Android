@@ -2,6 +2,8 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.animation.AnimationUtils
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
@@ -17,9 +19,10 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_SMALL_M
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.ZoneAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.libraries.maps.model.LatLng
 import timber.log.Timber
@@ -73,6 +76,7 @@ class AreaActivity : DataClassListActivity() {
         val smallMapEnabled = SETTINGS_SMALL_MAP_PREF.get(sharedPreferences)
 
         visibility(binding.map, state.hasInternet && smallMapEnabled)
+        binding.loadingLayout.hide()
 
         if (!loaded && !isDestroyed && !loading)
             try {
@@ -88,26 +92,28 @@ class AreaActivity : DataClassListActivity() {
                         )
                 binding.recyclerView.adapter =
                     ZoneAdapter(zones, this) { _, holder, position ->
-                        toast(R.string.toast_loading)
-                        Timber.v("Clicked item $position")
-                        val intent =
-                            Intent(this@AreaActivity, ZoneActivity()::class.java)
-                                .putExtra(EXTRA_AREA, areaIndex)
-                                .putExtra(EXTRA_ZONE, position)
+                        binding.loadingLayout.show()
+                        Handler(Looper.getMainLooper()).post {
+                            Timber.v("Clicked item $position")
+                            val intent =
+                                Intent(this@AreaActivity, ZoneActivity()::class.java)
+                                    .putExtra(EXTRA_AREA, areaIndex)
+                                    .putExtra(EXTRA_ZONE, position)
 
-                        val optionsBundle =
-                            ViewCompat.getTransitionName(holder.titleTextView)
-                                ?.let { transitionName ->
-                                    intent.putExtra(EXTRA_ZONE_TRANSITION_NAME, transitionName)
+                            val optionsBundle =
+                                ViewCompat.getTransitionName(holder.titleTextView)
+                                    ?.let { transitionName ->
+                                        intent.putExtra(EXTRA_ZONE_TRANSITION_NAME, transitionName)
 
-                                    ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                        this,
-                                        holder.titleTextView,
-                                        transitionName
-                                    ).toBundle()
-                                } ?: Bundle.EMPTY
+                                        ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                            this,
+                                            holder.titleTextView,
+                                            transitionName
+                                        ).toBundle()
+                                    } ?: Bundle.EMPTY
 
-                        startActivity(intent, optionsBundle)
+                            startActivity(intent, optionsBundle)
+                        }
                     }
 
                 if (smallMapEnabled) {

@@ -13,6 +13,7 @@
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog</item>
 
         <item name="text_dark">@color/bg_color</item>
+        <item name="overlay_color">@color/loading_overlay_dark</item>
 
         <item name="android:windowContentTransitions">true</item>
     </style>

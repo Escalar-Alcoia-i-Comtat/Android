@@ -2,6 +2,8 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.animation.AnimationUtils
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
@@ -17,6 +19,8 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_SMALL_M
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.SectorsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
 
@@ -71,6 +75,7 @@ class ZoneActivity : DataClassListActivity() {
         val smallMapEnabled = SETTINGS_SMALL_MAP_PREF.get(sharedPreferences)
 
         visibility(binding.map, state.hasInternet && smallMapEnabled)
+        binding.loadingLayout.hide()
 
         if (!loaded)
             try {
@@ -89,24 +94,26 @@ class ZoneActivity : DataClassListActivity() {
                         this@ZoneActivity,
                         sectors
                     ) { _, viewHolder, index ->
-                        toast(R.string.toast_loading)
-                        Timber.v("Clicked item $index")
-                        val trn =
-                            ViewCompat.getTransitionName(viewHolder.titleTextView)
-                                .toString()
-                        Timber.v("Transition name: $trn")
-                        val intent =
-                            Intent(this@ZoneActivity, SectorActivity()::class.java)
-                                .putExtra(EXTRA_AREA, areaIndex)
-                                .putExtra(EXTRA_ZONE, zoneIndex)
-                                .putExtra(EXTRA_SECTOR, index)
-                                .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
-                        val options =
-                            ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                this@ZoneActivity, viewHolder.titleTextView, trn
-                            )
+                        binding.loadingLayout.show()
+                        Handler(Looper.getMainLooper()).post {
+                            Timber.v("Clicked item $index")
+                            val trn =
+                                ViewCompat.getTransitionName(viewHolder.titleTextView)
+                                    .toString()
+                            Timber.v("Transition name: $trn")
+                            val intent =
+                                Intent(this@ZoneActivity, SectorActivity()::class.java)
+                                    .putExtra(EXTRA_AREA, areaIndex)
+                                    .putExtra(EXTRA_ZONE, zoneIndex)
+                                    .putExtra(EXTRA_SECTOR, index)
+                                    .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
+                            val options =
+                                ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                    this@ZoneActivity, viewHolder.titleTextView, trn
+                                )
 
-                        startActivity(intent, options.toBundle())
+                            startActivity(intent, options.toBundle())
+                        }
                     }
 
                 if (smallMapEnabled) {

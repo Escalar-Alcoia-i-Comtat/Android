@@ -3,6 +3,8 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
 import androidx.core.app.ActivityOptionsCompat
@@ -27,6 +29,8 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.network.ping
 import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChannels
 import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import io.sentry.SentryLevel
 import io.sentry.android.core.SentryAndroid
@@ -249,6 +253,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         val hasInternet = state.hasInternet
         Timber.v("Connectivity status Updated! Has Internet: %s", hasInternet)
+        binding.loadingLayout.hide()
 
         if (state.hasInternet && !serverAvailable) {
             runAsync {
@@ -281,23 +286,25 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                 mapFragment.setAreas(AREAS)
 
                 areasViewFragment.updateAreas { holder, position ->
-                    toast(R.string.toast_loading)
-                    Timber.v("Clicked item %s", position)
-                    val intent = Intent(this, AreaActivity()::class.java)
-                        .putExtra(EXTRA_AREA, position)
+                    binding.loadingLayout.show()
+                    Handler(Looper.getMainLooper()).post {
+                        Timber.v("Clicked item %s", position)
+                        val intent = Intent(this, AreaActivity()::class.java)
+                            .putExtra(EXTRA_AREA, position)
 
-                    val optionsBundle =
-                        ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->
-                            intent.putExtra(EXTRA_AREA_TRANSITION_NAME, transitionName)
+                        val optionsBundle =
+                            ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->
+                                intent.putExtra(EXTRA_AREA_TRANSITION_NAME, transitionName)
 
-                            ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                this,
-                                findViewById(R.id.title_textView),
-                                transitionName
-                            ).toBundle()
-                        } ?: Bundle.EMPTY
+                                ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                    this,
+                                    findViewById(R.id.title_textView),
+                                    transitionName
+                                ).toBundle()
+                            } ?: Bundle.EMPTY
 
-                    startActivity(intent, optionsBundle)
+                        startActivity(intent, optionsBundle)
+                    }
                 }
 
                 runOnUiThread {
