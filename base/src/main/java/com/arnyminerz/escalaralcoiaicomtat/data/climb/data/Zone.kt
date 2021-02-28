@@ -19,7 +19,7 @@ data class Zone(
     override val displayName: String,
     override val timestamp: Date?,
     val image: String,
-    val kmlAddress: String?,
+    override val kmlAddress: String?,
     override val parentId: Int,
     val position: LatLng?,
     private val downloaded: Boolean = false
@@ -29,6 +29,7 @@ data class Zone(
     displayName,
     timestamp,
     image,
+    kmlAddress,
     R.drawable.ic_tall_placeholder,
     R.drawable.ic_tall_placeholder,
     parentId,

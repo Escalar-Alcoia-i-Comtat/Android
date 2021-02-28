@@ -39,6 +39,7 @@ abstract class DataClass<A : Serializable, B : Serializable>(
     open val displayName: String,
     open val timestamp: Date?,
     open val imageUrl: String,
+    open val kmlAddress: String?,
     @DrawableRes val placeholderDrawable: Int,
     @DrawableRes val errorPlaceholderDrawable: Int,
     open val parentId: Int,
@@ -340,7 +341,7 @@ abstract class DataClass<A : Serializable, B : Serializable>(
         val downloadedImageFile = imageFile(context)
         if (downloadedImageFile.exists()) {
             Timber.d("Loading area image from storage: ${downloadedImageFile.path}")
-            context.runOnUiThread {
+            context.onUiThread {
                 imageView.setImageBitmap(readBitmap(downloadedImageFile))
                 progressBar?.let { context.visibility(it, false) }
                 visibility(imageView, true)
@@ -349,7 +350,7 @@ abstract class DataClass<A : Serializable, B : Serializable>(
             Timber.d("Getting image from URL ($imageUrl)")
 
             val scale = imageLoadParameters?.resultImageScale ?: 1f
-            context.runOnUiThread {
+            context.onUiThread {
                 imageView.setImageResource(placeholderDrawable)
             }
 
@@ -368,7 +369,7 @@ abstract class DataClass<A : Serializable, B : Serializable>(
                         target: Target<Bitmap>?,
                         isFirstResource: Boolean
                     ): Boolean {
-                        context.runOnUiThread {
+                        context.onUiThread {
                             imageView.setImageResource(errorPlaceholderDrawable)
                             visibility(progressBar, false)
                         }
@@ -384,7 +385,7 @@ abstract class DataClass<A : Serializable, B : Serializable>(
                         isFirstResource: Boolean
                     ): Boolean {
                         Timber.d("Got bitmap, loading on imageView. Namespace: $namespace")
-                        context.runOnUiThread {
+                        context.onUiThread {
                             visibility(progressBar, false)
 
                             if (resource.isNull())

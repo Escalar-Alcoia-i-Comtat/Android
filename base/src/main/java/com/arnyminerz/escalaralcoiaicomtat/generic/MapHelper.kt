@@ -140,7 +140,7 @@ class MapHelper {
 
     fun loadMap(
         fragment: Fragment,
-        callback: (supportMapFragment: SupportMapFragment, googleMap: GoogleMap) -> Unit,
+        callback: MapHelper.(supportMapFragment: SupportMapFragment, googleMap: GoogleMap) -> Unit,
         onError: ((exception: Exception) -> Unit)?
     ): MapHelper {
         val smf = fragment as? SupportMapFragment
@@ -156,7 +156,7 @@ class MapHelper {
                 )
             )
 
-            callback(smf, googleMap)
+            callback(this, smf, googleMap)
         } ?: onError?.invoke(NullPointerException("Could not find support map fragment"))
 
         return this

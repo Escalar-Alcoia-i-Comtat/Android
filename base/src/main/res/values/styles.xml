@@ -1,6 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <attr name="text_dark" format="color" />
+    <attr name="overlay_color" format="color" />
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
@@ -17,6 +18,7 @@
         </item>
 
         <item name="text_dark">@color/bg_color_dark</item>
+        <item name="overlay_color">@color/loading_overlay_light</item>
 
         <item name="android:windowContentTransitions">true</item>
     </style>

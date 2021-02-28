@@ -44,6 +44,7 @@ data class Sector constructor(
     displayName,
     timestamp,
     imageUrl,
+    null,
     R.drawable.ic_wide_placeholder,
     R.drawable.ic_wide_placeholder,
     parentId,

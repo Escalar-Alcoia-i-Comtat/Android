@@ -129,7 +129,7 @@ data class Area(
     override val displayName: String,
     override val timestamp: Date?,
     val image: String,
-    val kmlAddress: String?,
+    override val kmlAddress: String?,
     override val parentId: Int,
     private val downloaded: Boolean = false
 ) : DataClass<Zone, Serializable>(
@@ -138,6 +138,7 @@ data class Area(
     displayName,
     timestamp,
     image,
+    kmlAddress,
     R.drawable.ic_wide_placeholder,
     R.drawable.ic_wide_placeholder,
     parentId,

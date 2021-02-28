@@ -24,7 +24,7 @@ import timber.log.Timber
 @Suppress("unused")
 @ExperimentalUnsignedTypes
 class SectorsAdapter(
-    private val dataClassListActivity: DataClassListActivity,
+    private val dataClassListActivity: DataClassListActivity<*>,
     private val sectors: ArrayList<Sector>,
     listener: ((sector: Sector, viewHolder: SectorsViewHolder, index: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<SectorsViewHolder>() {

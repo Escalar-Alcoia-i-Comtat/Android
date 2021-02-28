@@ -2,7 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.generic.extension
 
 import android.content.Context
 import android.view.View
-import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
+import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 
 fun View.disable() {
     isEnabled = false
@@ -14,7 +14,7 @@ fun View.enable() {
 
 fun Collection<View>.disable(context: Context? = null) {
     if (context != null)
-        context.runOnUiThread {
+        context.onUiThread {
             this@disable.forEach { it.disable() }
         }
     else
@@ -23,7 +23,7 @@ fun Collection<View>.disable(context: Context? = null) {
 
 fun Collection<View>.enable(context: Context? = null) {
     if (context != null)
-        context.runOnUiThread {
+        context.onUiThread {
             this@enable.forEach { it.enable() }
         }
     else

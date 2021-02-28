@@ -1,7 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.async
 
 import android.content.Context
-import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
+import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import java.io.Serializable
 
 open class LoadResult<R : Serializable>(private val context: Context? = null) {
@@ -15,7 +15,7 @@ open class LoadResult<R : Serializable>(private val context: Context? = null) {
     open fun onCompleted(result: R) {
         for (listener in resultListeners)
             if (context != null)
-                context.runOnUiThread {
+                context.onUiThread {
                     listener.onCompleted(result)
                 }
             else
@@ -25,7 +25,7 @@ open class LoadResult<R : Serializable>(private val context: Context? = null) {
     open fun onFailure(error: Exception?) {
         for (listener in resultListeners)
             if (context != null)
-                context.runOnUiThread {
+                context.onUiThread {
                     listener.onFailure(error)
                 }
             else
@@ -50,7 +50,7 @@ open class LoadResultProgress<R : Serializable, P : Number>(private val context:
     open fun onCompleted(result: R) {
         for (listener in resultListeners)
             if (context != null)
-                context.runOnUiThread {
+                context.onUiThread {
                     listener.onCompleted(result)
                 }
             else
@@ -60,7 +60,7 @@ open class LoadResultProgress<R : Serializable, P : Number>(private val context:
     open fun onProgress(progress: P, max: P) {
         for (listener in resultListeners)
             if (context != null)
-                context.runOnUiThread {
+                context.onUiThread {
                     listener.onProgress(progress, max)
                 }
             else
@@ -70,7 +70,7 @@ open class LoadResultProgress<R : Serializable, P : Number>(private val context:
     open fun onFailure(error: Exception?) {
         for (listener in resultListeners)
             if (context != null)
-                context.runOnUiThread {
+                context.onUiThread {
                     listener.onFailure(error)
                 }
             else
@@ -93,7 +93,7 @@ class LoadNoResult(private val context: Context? = null) {
     fun onCompleted() {
         for (listener in resultListeners)
             if (context != null)
-                context.runOnUiThread {
+                context.onUiThread {
                     listener.onCompleted()
                 }
             else
@@ -103,7 +103,7 @@ class LoadNoResult(private val context: Context? = null) {
     fun onFailure(error: Exception?) {
         for (listener in resultListeners)
             if (context != null)
-                context.runOnUiThread {
+                context.onUiThread {
                     listener.onFailure(error)
                 }
             else
@@ -120,7 +120,7 @@ open class LoadNoResultProgress<P : Number>(private val context: Context? = null
     open fun onCompleted() {
         for (listener in resultListeners)
             if (context != null)
-                context.runOnUiThread {
+                context.onUiThread {
                     listener.onCompleted()
                 }
             else
@@ -130,7 +130,7 @@ open class LoadNoResultProgress<P : Number>(private val context: Context? = null
     open fun onProgress(progress: P, max: P) {
         for (listener in resultListeners)
             if (context != null)
-                context.runOnUiThread {
+                context.onUiThread {
                     listener.onProgress(progress, max)
                 }
             else
@@ -140,7 +140,7 @@ open class LoadNoResultProgress<P : Number>(private val context: Context? = null
     open fun onFailure(error: Exception?) {
         for (listener in resultListeners)
             if (context != null)
-                context.runOnUiThread {
+                context.onUiThread {
                     listener.onFailure(error)
                 }
             else
