@@ -2,6 +2,8 @@ apply plugin: 'com.android.application'
 
 apply plugin: 'kotlin-android'
 
+apply plugin: 'io.sentry.android.gradle'
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
@@ -20,12 +22,6 @@ android {
 
         resValue "string", "google_maps_key", (secureProps.getProperty("MAPS_API_KEY") ?: "")
         resValue "string", "sentry_dsn", (secureProps.getProperty("SENTRY_DNS") ?: "")
-
-        buildTypes.each {
-            it.buildConfigField 'String', 'FTP_HOST', "\"" + (secureProps.getProperty("FTP_SERVER") ?: "") + "\""
-            it.buildConfigField 'String', 'FTP_USER', "\"" + (secureProps.getProperty("FTP_USER") ?: "") + "\""
-            it.buildConfigField 'String', 'FTP_PASS', "\"" + (secureProps.getProperty("FTP_PASS") ?: "") + "\""
-        }
     }
     buildTypes {
         release {
