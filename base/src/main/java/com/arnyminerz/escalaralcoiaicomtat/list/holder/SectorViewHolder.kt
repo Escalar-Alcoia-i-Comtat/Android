@@ -6,13 +6,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.chip.ChipGroup
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.google.android.material.chip.ChipGroup
 
 class SectorViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val cardView: CardView = view.findViewById(R.id.cardView)
 
-    val completionImageView : ImageView = view.findViewById(R.id.completion_imageView)
     val idTextView: TextView = view.findViewById(R.id.id_textView)
     val titleTextView: TextView = view.findViewById(R.id.name_textView)
     val difficultyTextView: TextView = view.findViewById(R.id.difficulty_textView)
