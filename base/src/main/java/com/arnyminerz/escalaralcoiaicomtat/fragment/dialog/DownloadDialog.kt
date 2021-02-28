@@ -11,8 +11,8 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
+import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
-import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber
@@ -80,11 +80,11 @@ class DownloadDialog(private val context: Context, private val data: DataClass<*
                 runAsync {
                     try {
                         val updateAvailable = data.updateAvailable(context)
-                        context.runOnUiThread {
+                        context.onUiThread {
                             dialog.dismiss()
                             if (updateAvailable) {
                                 Timber.v("  New version available!")
-                                context.runOnUiThread {
+                                context.onUiThread {
                                     MaterialAlertDialogBuilder(context)
                                         .setTitle(R.string.dialog_update_title)
                                         .setMessage(R.string.dialog_update_message)
@@ -100,7 +100,7 @@ class DownloadDialog(private val context: Context, private val data: DataClass<*
                                 }
                             } else {
                                 Timber.v("  No new version available!")
-                                context.runOnUiThread {
+                                context.onUiThread {
                                     MaterialAlertDialogBuilder(context)
                                         .setTitle(R.string.dialog_no_update_title)
                                         .setMessage(R.string.dialog_no_update_message)

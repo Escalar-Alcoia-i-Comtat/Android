@@ -7,8 +7,8 @@ import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
-import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.location.serializable
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.storage.UnzipUtil
@@ -261,7 +261,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                                     val latLng =
                                         LatLng(latLngD[1].toDouble(), latLngD[0].toDouble())
 
-                                    context.runOnUiThread {
+                                    context.onUiThread {
                                         Timber.v("New Marker: $title")
                                         val m = GeoMarker(
                                             latLng.serializable(),
@@ -311,7 +311,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                                         Timber.d("  Fill Color: #$polyColor")
                                     }
 
-                                    runOnUiThread {
+                                    onUiThread {
                                         loadResult.polygons.add(
                                             GeoGeometry(
                                                 GeoStyle(
@@ -373,7 +373,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                         }
 
                     Timber.v("Centering map...")
-                    runOnUiThread {
+                    onUiThread {
                         if (addedPoints.size > 1)
                             try {
                                 googleMap.moveCamera(
@@ -400,7 +400,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                     errorListener?.invoke(NoInternetAccessException())
                 }
 
-                finishedListener?.let { context.runOnUiThread { it(loadResult) } }
+                finishedListener?.let { context.onUiThread { it(loadResult) } }
             }
         }
     }

@@ -28,8 +28,8 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.distanceTo
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNull
+import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
-import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.location.serializable
@@ -160,7 +160,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         counter++
 
                         if (counter >= AREAS.size && googleMap != null)
-                            requireContext().runOnUiThread {
+                            requireContext().onUiThread {
                                 for (marker in showingMarkers)
                                     marker?.addToMap(googleMap)
 
@@ -266,7 +266,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
     fun updateAreas(listener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?) {
         this.areaClickListener = listener
-        runOnUiThread { refreshAreas() }
+        onUiThread { refreshAreas() }
     }
 
     @SuppressLint("MissingPermission")

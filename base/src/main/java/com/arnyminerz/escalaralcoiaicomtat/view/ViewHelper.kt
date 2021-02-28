@@ -8,7 +8,7 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.preference.Preference
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
-import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
+import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.ViewList
 import timber.log.Timber
 
@@ -49,7 +49,7 @@ fun Context?.visibility(
     debug: Boolean = false
 ) {
     if (isNotNull())
-        this!!.runOnUiThread {
+        this!!.onUiThread {
             com.arnyminerz.escalaralcoiaicomtat.view.visibility(
                 view,
                 visible,

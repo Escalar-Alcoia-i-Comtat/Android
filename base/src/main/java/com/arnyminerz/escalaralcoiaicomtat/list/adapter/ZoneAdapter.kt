@@ -26,7 +26,7 @@ import java.io.File
 @ExperimentalUnsignedTypes
 class ZoneAdapter(
     private val zones: ArrayList<Zone>,
-    private val dataClassListActivity: DataClassListActivity,
+    private val dataClassListActivity: DataClassListActivity<*>,
     listener: ((zone: Zone, viewHolder: ZonesViewHolder, index: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<ZonesViewHolder>() {
     private var onItemSelected: ((zone: Zone, viewHolder: ZonesViewHolder, index: Int) -> Unit)? =

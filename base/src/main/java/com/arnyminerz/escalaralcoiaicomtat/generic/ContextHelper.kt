@@ -21,16 +21,16 @@ fun Context.toast(text: String, duration: Int = Toast.LENGTH_SHORT) =
 fun Context.toast(@StringRes text: Int, duration: Int = Toast.LENGTH_SHORT) =
     Toast.makeText(this, text, duration).show()
 
-fun Context.runOnUiThread(call: (context: Context) -> Unit) =
+fun Context.onUiThread(call: (context: Context) -> Unit) =
     Handler(Looper.getMainLooper()).post {
         call(this)
     }
 
 fun toast(context: Context?, @StringRes text: Int) =
-    context?.runOnUiThread { it.toast(text) }
+    context?.onUiThread { it.toast(text) }
 
 fun toast(context: Context?, text: String) =
-    context?.runOnUiThread { it.toast(text) }
+    context?.onUiThread { it.toast(text) }
 
 class ContextUtils(base: Context): ContextWrapper(base)
 @ExperimentalUnsignedTypes

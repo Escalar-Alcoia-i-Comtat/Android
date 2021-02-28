@@ -10,27 +10,20 @@ import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.*
-import com.arnyminerz.escalaralcoiaicomtat.async.ResultListener
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
-import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
-import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
-import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_SMALL_MAP_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.SectorsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
 
 @ExperimentalUnsignedTypes
-class ZoneActivity : DataClassListActivity() {
+class ZoneActivity : DataClassListActivity<Zone>() {
 
     private var justAttached = false
     private var loaded = false
 
-    private lateinit var zone: Zone
     private var zoneIndex = -1
     private var areaIndex = -1
 
@@ -55,11 +48,11 @@ class ZoneActivity : DataClassListActivity() {
             onBackPressed()
             return
         }
-        zone = AREAS[areaIndex][zoneIndex]
+        dataClass = AREAS[areaIndex][zoneIndex]
 
         val transitionName = intent.getExtra(EXTRA_ZONE_TRANSITION_NAME)
 
-        binding.titleTextView.text = zone.displayName
+        binding.titleTextView.text = dataClass.displayName
         binding.titleTextView.transitionName = transitionName
 
         binding.backImageButton.setOnClickListener { onBackPressed() }
@@ -72,14 +65,10 @@ class ZoneActivity : DataClassListActivity() {
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         super.onStateChange(state)
-        val smallMapEnabled = SETTINGS_SMALL_MAP_PREF.get(sharedPreferences)
-
-        visibility(binding.map, state.hasInternet && smallMapEnabled)
-        binding.loadingLayout.hide()
 
         if (!loaded)
             try {
-                val sectors = zone.children
+                val sectors = dataClass.children
                 Timber.v("Got ${sectors.size} sectors.")
 
                 binding.recyclerView.layoutManager = LinearLayoutManager(this@ZoneActivity)
@@ -115,46 +104,6 @@ class ZoneActivity : DataClassListActivity() {
                             startActivity(intent, options.toBundle())
                         }
                     }
-
-                if (smallMapEnabled) {
-                    val mapHelper = MapHelper()
-                    mapHelper.loadMap(
-                        supportFragmentManager.findFragmentById(R.id.map)!!,
-                        { _, googleMap ->
-                            googleMap.uiSettings.apply {
-                                isCompassEnabled = false
-                                setAllGesturesEnabled(false)
-                            }
-
-                            mapHelper
-                                .loadKML(this, zone.kmlAddress, state)
-                                .listen(object : ResultListener<MapFeatures> {
-                                    override fun onCompleted(result: MapFeatures) {
-                                        googleMap.setOnMapClickListener {
-                                            try {
-                                                mapHelper.showMapsActivity(this@ZoneActivity)
-                                            } catch (ex: MapAnyDataToLoadException) {
-                                                Timber.e(
-                                                    ex,
-                                                    "Map doesn't have any data to show."
-                                                )
-                                            }
-                                        }
-                                        googleMap.setOnMarkerClickListener {
-                                            mapHelper.showMapsActivity(
-                                                this@ZoneActivity
-                                            ); return@setOnMarkerClickListener true
-                                        }
-                                    }
-
-                                    override fun onFailure(error: Exception?) {
-                                        error?.let { throw it }
-                                    }
-                                })
-                        }, {
-                            Timber.e(it, "Could not load map:")
-                        })
-                }
 
                 loaded = true
             } catch (_: AlreadyLoadingException) { // Ignore an already loading exception. The content will be loaded from somewhere else
