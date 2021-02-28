@@ -15,6 +15,15 @@ jobs:
           java-package: jdk
       - name: Prepare google-services.json
         run: echo "${{ secrets.GOOGLE_SERVICES }}" >> base/google-services.json
+      - name: Prepare secure.properties
+        run: |
+          echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" >> base/secure.properties
+          echo "SENTRY_DNS=${{ secrets.SENTRY_DNS }}" >> base/secure.properties
+      - name: Prepare sentry.properties
+        run: |
+          echo "defaults.project=${{ secrets.SENTRY_PROJECT }}" >> sentry.properties
+          echo "defaults.org=${{ secrets.SENTRY_ORGANIZATION }}" >> sentry.properties
+          echo "auth.token=${{ secrets.SENTRY_TOKEN }}" >> sentry.properties
       - name: Unit tests
         run: bash ./gradlew test --stacktrace
   apk:
