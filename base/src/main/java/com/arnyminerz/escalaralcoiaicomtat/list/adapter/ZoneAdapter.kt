@@ -12,7 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity.Companion.KMZ_F
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity.Companion.ZONE_NAME_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast

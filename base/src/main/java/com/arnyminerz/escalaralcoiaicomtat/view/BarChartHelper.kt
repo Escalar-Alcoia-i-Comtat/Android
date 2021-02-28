@@ -3,7 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.view
 import android.content.Context
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Path
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.Grade
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.Grade
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.BarData

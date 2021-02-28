@@ -3,8 +3,8 @@ package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 import android.content.Context
 import androidx.annotation.DrawableRes
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.PitchEndingOrientation
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.PitchEndingRappel
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.PitchEndingOrientation
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.PitchEndingRappel
 
 data class Pitch(
     private val endingData: PitchEndingData

@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Pitch
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.EndingType
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNull
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.ArtifoEndingPitchViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility

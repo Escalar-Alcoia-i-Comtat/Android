@@ -10,7 +10,7 @@ import android.view.View
 import android.widget.TextView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.SunTime
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast

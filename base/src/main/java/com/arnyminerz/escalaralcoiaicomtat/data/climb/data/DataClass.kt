@@ -10,7 +10,7 @@ import android.widget.ProgressBar
 import androidx.annotation.DrawableRes
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.exception.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
