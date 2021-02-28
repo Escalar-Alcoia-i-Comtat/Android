@@ -7,9 +7,9 @@ import android.widget.ProgressBar
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.enum.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_PREVIEW_SCALE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
@@ -72,7 +72,7 @@ class SectorsAdapter(
                     )
                     .withThumbnailSize(0.1f)
                     .withResultImageScale(
-                        with(SETTINGS_PREVIEW_SCALE_PREF.get(sharedPreferences)) {
+                        with(SETTINGS_PREVIEW_SCALE_PREF.get(dataClassListActivity.sharedPreferences)) {
                             Timber.v("Preview scale: $this")
                             this
                         }

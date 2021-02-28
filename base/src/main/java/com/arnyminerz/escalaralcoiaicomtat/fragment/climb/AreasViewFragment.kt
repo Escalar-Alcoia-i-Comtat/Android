@@ -18,11 +18,12 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity.Companion.hasLocationPermission
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity.Companion.MAP_DATA_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.activity.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData
+import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.distanceTo
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
@@ -134,14 +135,14 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         area.children.forEach { zone ->
                             val zoneLocation = zone.position
                             if (zoneLocation != null) {
-                                val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get(sharedPreferences)
+                                val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences)
                                 if (zoneLocation.distanceTo(currentLocation.toLatLng()) <= requiredDistance) {
                                     boundsBuilder.include(zoneLocation)
                                     addedAnyPoints = true
                                     showingMarkers.add(
                                         GeoMarker(
                                             zoneLocation.serializable(),
-                                            2f,
+                                            (30 * SETTINGS_MARKER_SIZE_PREF.get(requireContext().sharedPreferences).toFloat()).toInt(),
                                             MapObjectWindowData(
                                                 zone.displayName,
                                                 null,

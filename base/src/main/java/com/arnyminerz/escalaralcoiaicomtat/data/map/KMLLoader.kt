@@ -2,8 +2,8 @@ package com.arnyminerz.escalaralcoiaicomtat.data.map
 
 import android.content.Context
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
+import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
@@ -265,8 +265,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                                         Timber.v("New Marker: $title")
                                         val m = GeoMarker(
                                             latLng.serializable(),
-                                            SETTINGS_MARKER_SIZE_PREF.get(sharedPreferences)
-                                                .toFloat(),
+                                            (30 * SETTINGS_MARKER_SIZE_PREF.get(sharedPreferences).toFloat()).toInt(),
                                             MapObjectWindowData(title, description, null)
                                         )
                                         if (iconBitmap != null) {
