@@ -15,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
+import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.ZonesViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
@@ -60,7 +61,9 @@ class ZoneAdapter(
 
             onItemSelected?.let { it(zone, holder, position) }
         }
-        zone.asyncLoadImage(dataClassListActivity, holder.imageView)
+        runAsync {
+            zone.asyncLoadImage(dataClassListActivity, holder.imageView)
+        }
 
         if (zone.isDownloaded(
                 dataClassListActivity

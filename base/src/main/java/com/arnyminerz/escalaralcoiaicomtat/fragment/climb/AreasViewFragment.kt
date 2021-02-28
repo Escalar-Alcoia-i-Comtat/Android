@@ -266,7 +266,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
     fun updateAreas(listener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?) {
         this.areaClickListener = listener
-        refreshAreas()
+        runOnUiThread { refreshAreas() }
     }
 
     @SuppressLint("MissingPermission")
