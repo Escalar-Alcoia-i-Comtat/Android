@@ -36,9 +36,6 @@ jobs:
         run: bash ./gradlew assembleDebug --stacktrace
       - uses: release-drafter/release-drafter@v5
         id: create_release
-        with:
-          tag_name: ${{ github.ref }}
-          prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload Release Asset
@@ -59,4 +56,4 @@ jobs:
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
         with:
           environment: production
-          version: ${{ github.ref }}
+          version: ${{ steps.create_release.outputs.tag_name }}
