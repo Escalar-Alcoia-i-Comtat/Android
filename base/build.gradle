@@ -8,6 +8,12 @@ android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
     ndkVersion "23.0.7123448"
+
+    def secureProps = new Properties()
+    def secureFile = file("secure.properties")
+    if (secureFile.exists())
+        secureFile?.withInputStream { secureProps.load(it) }
+
     defaultConfig {
         applicationId "com.arnyminerz.escalaralcoiaicomtat"
         minSdkVersion 24
@@ -16,12 +22,16 @@ android {
         versionName "Shunt"
         // testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        def secureProps = new Properties()
-        if (file("secure.properties").exists())
-            file("secure.properties")?.withInputStream { secureProps.load(it) }
-
         resValue "string", "google_maps_key", (secureProps.getProperty("MAPS_API_KEY") ?: "")
         resValue "string", "sentry_dsn", (secureProps.getProperty("SENTRY_DNS") ?: "")
+    }
+    signingConfigs {
+        release {
+            storeFile file("keystore.jks")
+            storePassword secureProps.getProperty("SIGNING_KEYSTORE_PASSWORD")
+            keyAlias secureProps.getProperty("SIGNING_KEY_ALIAS")
+            keyPassword secureProps.getProperty("SIGNING_KEY_PASSWORD")
+        }
     }
     buildTypes {
         release {
