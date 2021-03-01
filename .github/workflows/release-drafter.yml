@@ -27,6 +27,7 @@ jobs:
         with:
           java-version: '15'
           java-package: jdk
+
       - name: Prepare google-services.json
         run: echo "${{ secrets.GOOGLE_SERVICES }}" >> base/google-services.json
       - name: Prepare Gradle secure file
@@ -48,19 +49,20 @@ jobs:
           echo "ext {" >> base/version.gradle
           echo "VERSION_NAME=\"${{ steps.create_release.outputs.tag_name }}\"" >> base/version.gradle
           echo "}" >> base/version.gradle
-      - name: Build debug APK
+
+      - name: Build APK
         id: build_apk
         run: |
           echo "Building ${{ steps.create_release.outputs.tag_name }}..."
           bash ./gradlew assembleRelease --stacktrace
-      - name: Upload Release Asset
+      - name: Upload APK file
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./base/release/EscalarAlcoiaIComtat-release.apk
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./base/build/outputs/apk/release/EscalarAlcoiaIComtat-release.apk
           asset_name: EscalarAlcoiaIComtat.apk
           asset_content_type: application/vnd.android.package-archive
       - name: Create Sentry release
