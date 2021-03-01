@@ -32,13 +32,13 @@ jobs:
         run: echo "${{ secrets.GOOGLE_SERVICES }}" >> base/google-services.json
       - name: Prepare Gradle secure file
         run: |
-          echo "ext {" >> base/secure.gradle
-          echo "MAPS_API_KEY=\"${{ secrets.MAPS_API_KEY }}\"" >> base/secure.gradle
-          echo "SENTRY_DNS=\"${{ secrets.SENTRY_DNS }}\"" >> base/secure.gradle
-          echo "SIGNING_KEYSTORE_PASSWORD=\"${{ secrets.SIGNING_KEYSTORE_PASSWORD }}\"" >> base/secure.gradle
-          echo "SIGNING_KEY_ALIAS=\"${{ secrets.SIGNING_KEY_ALIAS }}\"" >> base/secure.gradle
-          echo "SIGNING_KEY_PASSWORD=\"${{ secrets.SIGNING_KEY_PASSWORD }}\"" >> base/secure.gradle
-          echo "}" >> base/secure.gradle
+          echo 'ext {' >> base/secure.gradle
+          echo 'MAPS_API_KEY="${{ secrets.MAPS_API_KEY }}"' >> base/secure.gradle
+          echo 'SENTRY_DNS="${{ secrets.SENTRY_DNS }}"' >> base/secure.gradle
+          echo 'SIGNING_KEYSTORE_PASSWORD="${{ secrets.SIGNING_KEYSTORE_PASSWORD }}"' >> base/secure.gradle
+          echo 'SIGNING_KEY_ALIAS="${{ secrets.SIGNING_KEY_ALIAS }}"' >> base/secure.gradle
+          echo 'SIGNING_KEY_PASSWORD="${{ secrets.SIGNING_KEY_PASSWORD }}"' >> base/secure.gradle
+          echo '}' >> base/secure.gradle
       - name: Prepare sentry.properties
         run: |
           echo "defaults.project=${{ secrets.SENTRY_PROJECT }}" >> sentry.properties
@@ -91,3 +91,7 @@ jobs:
           asset_path: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
           asset_name: EscalarAlcoiaIComtat.aab
           asset_content_type: application/octet-stream
+  upload_play_store:
+    runs-on: ubuntu-latest
+    needs: update_release_draft
+    steps:
