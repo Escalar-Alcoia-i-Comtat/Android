@@ -36,6 +36,8 @@ jobs:
         run: bash ./gradlew assembleDebug --stacktrace
       - uses: release-drafter/release-drafter@v5
         id: create_release
+        with:
+          prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload Release Asset
