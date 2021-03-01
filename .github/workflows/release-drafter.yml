@@ -66,6 +66,11 @@ jobs:
           asset_name: EscalarAlcoiaIComtat.apk
           asset_content_type: application/vnd.android.package-archive
 
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: ":robot: Commit Changes"
+          file_pattern: "*.properties"
+
       - name: Create Sentry release
         uses: getsentry/action-release@v1
         env:
