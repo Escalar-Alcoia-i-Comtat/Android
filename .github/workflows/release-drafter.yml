@@ -22,7 +22,7 @@ jobs:
           java-package: jdk
       - name: Prepare google-services.json
         run: echo "${{ secrets.GOOGLE_SERVICES }}" >> base/google-services.json
-      - name: Prepare secure.properties
+      - name: Prepare Gradle secure file
         run: |
           echo "ext {" >> base/secure.gradle
           echo "MAPS_API_KEY=\"${{ secrets.MAPS_API_KEY }}\"" >> base/secure.gradle
