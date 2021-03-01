@@ -5,6 +5,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'io.sentry.android.gradle'
 
 apply from: './secure.gradle'
+apply from: './version.gradle'
 
 android {
     compileSdkVersion 30
@@ -14,8 +15,8 @@ android {
         applicationId "com.arnyminerz.escalaralcoiaicomtat"
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode 79
-        versionName "Shunt"
+        versionCode findProperty("android.versionCode") as Integer
+        versionName VERSION_NAME
         // testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         resValue "string", "google_maps_key", MAPS_API_KEY
@@ -51,8 +52,8 @@ android {
         jvmTarget = '1.8'
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_15
-        targetCompatibility JavaVersion.VERSION_15
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     dynamicFeatures = []
 
