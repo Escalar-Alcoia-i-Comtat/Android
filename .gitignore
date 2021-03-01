@@ -10,5 +10,5 @@ release
 local.properties
 google-services.json
 base/cred.gradle
-secure.properties
+secure.gradle
 sentry.properties

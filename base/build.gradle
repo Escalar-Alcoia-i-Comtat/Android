@@ -4,16 +4,12 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'io.sentry.android.gradle'
 
+apply from: './secure.gradle'
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
     ndkVersion "23.0.7123448"
-
-    def secureProps = new Properties()
-    def secureFile = file("secure.properties")
-    if (secureFile.exists())
-        secureFile?.withInputStream { secureProps.load(it) }
-
     defaultConfig {
         applicationId "com.arnyminerz.escalaralcoiaicomtat"
         minSdkVersion 24
@@ -22,15 +18,15 @@ android {
         versionName "Shunt"
         // testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        resValue "string", "google_maps_key", (secureProps.getProperty("MAPS_API_KEY") ?: "")
-        resValue "string", "sentry_dsn", (secureProps.getProperty("SENTRY_DNS") ?: "")
+        resValue "string", "google_maps_key", MAPS_API_KEY
+        resValue "string", "sentry_dsn", SENTRY_DNS
     }
     signingConfigs {
         release {
             storeFile file("keystore.jks")
-            storePassword secureProps.getProperty("SIGNING_KEYSTORE_PASSWORD")
-            keyAlias secureProps.getProperty("SIGNING_KEY_ALIAS")
-            keyPassword secureProps.getProperty("SIGNING_KEY_PASSWORD")
+            storePassword SIGNING_KEYSTORE_PASSWORD
+            keyAlias SIGNING_KEY_ALIAS
+            keyPassword SIGNING_KEY_PASSWORD
         }
     }
     buildTypes {
@@ -55,8 +51,8 @@ android {
         jvmTarget = '1.8'
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_15
+        targetCompatibility JavaVersion.VERSION_15
     }
     dynamicFeatures = []
 
