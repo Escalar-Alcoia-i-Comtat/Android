@@ -65,6 +65,7 @@ jobs:
           asset_path: ./base/build/outputs/apk/release/EscalarAlcoiaIComtat-release.apk
           asset_name: EscalarAlcoiaIComtat.apk
           asset_content_type: application/vnd.android.package-archive
+
       - name: Create Sentry release
         uses: getsentry/action-release@v1
         env:
@@ -74,3 +75,19 @@ jobs:
         with:
           environment: production
           version: ${{ steps.create_release.outputs.tag_name }}
+
+      - name: Build AAB
+        id: build_aab
+        run: |
+          echo "Building ${{ steps.create_release.outputs.tag_name }}..."
+          bash ./gradlew :base:bundleRelease --stacktrace
+      - name: Upload AAB
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
+          asset_name: EscalarAlcoiaIComtat.aab
+          asset_content_type: application/octet-stream
