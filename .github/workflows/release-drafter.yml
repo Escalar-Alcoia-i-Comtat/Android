@@ -56,7 +56,7 @@ jobs:
           echo "Building ${{ steps.create_release.outputs.tag_name }}..."
           bash ./gradlew assembleRelease --stacktrace
       - name: Upload APK file
-        id: upload-release-asset
+        id: upload_apk_asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -82,7 +82,7 @@ jobs:
           echo "Building ${{ steps.create_release.outputs.tag_name }}..."
           bash ./gradlew :base:bundleRelease --stacktrace
       - name: Upload AAB
-        id: upload-release-asset
+        id: upload_aab_asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
