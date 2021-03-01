@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'io.sentry.android.gradle'
 
+apply from: './secure.gradle'
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
@@ -16,12 +18,16 @@ android {
         versionName "Shunt"
         // testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        def secureProps = new Properties()
-        if (file("secure.properties").exists())
-            file("secure.properties")?.withInputStream { secureProps.load(it) }
-
-        resValue "string", "google_maps_key", (secureProps.getProperty("MAPS_API_KEY") ?: "")
-        resValue "string", "sentry_dsn", (secureProps.getProperty("SENTRY_DNS") ?: "")
+        resValue "string", "google_maps_key", MAPS_API_KEY
+        resValue "string", "sentry_dsn", SENTRY_DNS
+    }
+    signingConfigs {
+        release {
+            storeFile file("keystore.jks")
+            storePassword SIGNING_KEYSTORE_PASSWORD
+            keyAlias SIGNING_KEY_ALIAS
+            keyPassword SIGNING_KEY_PASSWORD
+        }
     }
     buildTypes {
         release {
@@ -45,8 +51,8 @@ android {
         jvmTarget = '1.8'
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_15
+        targetCompatibility JavaVersion.VERSION_15
     }
     dynamicFeatures = []
 
