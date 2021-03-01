@@ -32,8 +32,10 @@ jobs:
           echo "defaults.org=${{ secrets.SENTRY_ORGANIZATION }}" >> sentry.properties
           echo "auth.token=${{ secrets.SENTRY_TOKEN }}" >> sentry.properties
       - name: Build debug APK
+        id: build_apk
         run: bash ./gradlew assembleDebug --stacktrace
       - uses: release-drafter/release-drafter@v5
+        id: create_release
         with:
           tag_name: ${{ github.ref }}
           prerelease: true
