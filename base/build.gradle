@@ -65,6 +65,21 @@ android {
     }
 }
 
+android.applicationVariants.all {  variant ->
+    if ( variant.buildType.name == "release"){
+        variant.assemble.doLast {
+            // This increases version code on release
+            def versionPropsFile = file("../gradle.properties")
+            Properties versionProps = new Properties()
+            versionProps.load(new FileInputStream(versionPropsFile))
+            def code = versionProps['android.versionCode'].toInteger() + 1
+            versionProps['android.versionCode'] = code.toString()
+            versionProps.store(versionPropsFile.newWriter(), null)
+            logger.lifecycle("Increased version code to $code")
+        }
+    }
+}
+
 configurations {
     all {
         exclude module: 'httpclient'
