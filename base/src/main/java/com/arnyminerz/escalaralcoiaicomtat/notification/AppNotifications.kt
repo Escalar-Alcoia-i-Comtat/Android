@@ -8,7 +8,7 @@ import android.content.Context
 import android.os.Build
 import com.arnyminerz.escalaralcoiaicomtat.R
 
-@TargetApi(Build.VERSION_CODES.O)
+/*@TargetApi(Build.VERSION_CODES.O)
 private fun Context.createFriendRequestsChannel(): NotificationChannel {
     val name = getString(R.string.notification_channel_friend_request_name)
     val description = getString(R.string.notification_channel_friend_request_desc)
@@ -48,7 +48,7 @@ private fun Context.createFriendRemovedChannel(): NotificationChannel {
         channel.group = PEOPLE_NOTIFICATION_CHANNEL_GROUP
 
     return channel
-}
+}*/
 
 @TargetApi(Build.VERSION_CODES.O)
 private fun Context.createAlertsChannel(): NotificationChannel {
@@ -102,7 +102,7 @@ private fun Context.createDownloadCompleteChannel(): NotificationChannel {
     return channel
 }
 
-@TargetApi(Build.VERSION_CODES.O)
+/*@TargetApi(Build.VERSION_CODES.O)
 private fun Context.createBetaUpdateChannel(): NotificationChannel {
     val name = getString(R.string.notification_channel_beta_update_available_name)
     val description = getString(R.string.notification_channel_beta_update_available_desc)
@@ -126,7 +126,7 @@ private fun Context.createUserInteractedChannel(): NotificationChannel {
         channel.group = PEOPLE_NOTIFICATION_CHANNEL_GROUP
 
     return channel
-}
+}*/
 
 @TargetApi(Build.VERSION_CODES.O)
 private fun Context.createNewUpdateChannel(): NotificationChannel {
@@ -166,11 +166,11 @@ fun Context.createNotificationChannels() {
     notificationManager.createNotificationChannel(createDownloadProgressChannel())
     notificationManager.createNotificationChannel(createDownloadCompleteChannel())
     notificationManager.createNotificationChannel(createAlertsChannel())
-    notificationManager.createNotificationChannel(createFriendRequestsChannel())
-    notificationManager.createNotificationChannel(createFriendRequestAcceptedChannel())
-    notificationManager.createNotificationChannel(createFriendRemovedChannel())
+//    notificationManager.createNotificationChannel(createFriendRequestsChannel())
+//    notificationManager.createNotificationChannel(createFriendRequestAcceptedChannel())
+//    notificationManager.createNotificationChannel(createFriendRemovedChannel())
     notificationManager.createNotificationChannel(createTaskCompletedChannel())
-    notificationManager.createNotificationChannel(createBetaUpdateChannel())
-    notificationManager.createNotificationChannel(createUserInteractedChannel())
+//    notificationManager.createNotificationChannel(createBetaUpdateChannel())
+//    notificationManager.createNotificationChannel(createUserInteractedChannel())
     notificationManager.createNotificationChannel(createNewUpdateChannel())
 }
