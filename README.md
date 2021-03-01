@@ -36,6 +36,6 @@ We have prepared a page in Patreon so you can subscribe with a monthly membershi
 
 [activity-badge]: https://img.shields.io/github/commit-activity/m/Escalar-Alcoia-i-Comtat/Android?style=for-the-badge
 [commit-badge]: https://img.shields.io/github/last-commit/Escalar-Alcoia-i-Comtat/Android?style=for-the-badge
-[build-badge]: https://img.shields.io/github/workflow/status/Escalar-Alcoia-i-Comtat/Android/Build?style=for-the-badge
+[build-badge]: https://img.shields.io/github/workflow/status/Escalar-Alcoia-i-Comtat/Android/Release%20Drafter?style=for-the-badge
 [issues-badge]: https://img.shields.io/github/issues-raw/Escalar-Alcoia-i-Comtat/Android?style=for-the-badge
 [pr-badge]: https://img.shields.io/github/issues-pr-raw/Escalar-Alcoia-i-Comtat/Android?style=for-the-badge
