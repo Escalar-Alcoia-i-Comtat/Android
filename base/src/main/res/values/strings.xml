@@ -182,7 +182,6 @@
 
     <string name="notification_download_progress_title">Downloading…</string>
     <string name="notification_download_progress_msg">Downloading %s…</string>
-    <string name="notification_friend_request_title">New Friend Request</string>
 
     <string name="no_internet_title">You have no Internet access</string>
     <string name="no_internet_message">You can access the downloaded content, or try again.</string>
@@ -220,7 +219,7 @@
     <string name="path_chip_ending">Ending type for choosing the descent maneuver to use or top-rope.</string>
     <string name="path_chip_required">The shown component is required</string>
     <string name="path_stats_chart_title">Grades</string>
-    <string name="path_ending_pitch">%s %s</string>
+    <string name="path_ending_pitch">$1%s $2%s</string>
     <string name="path_ending_pitch_vertical">Vertical</string>
     <string name="path_ending_pitch_shelf">Shelf</string>
     <string name="path_ending_pitch_inclined">Inclined</string>
