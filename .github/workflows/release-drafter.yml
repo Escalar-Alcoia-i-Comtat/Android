@@ -36,7 +36,7 @@ jobs:
           echo "auth.token=${{ secrets.SENTRY_TOKEN }}" >> sentry.properties
       - name: Build debug APK
         id: build_apk
-        run: bash ./gradlew assembleDebug --stacktrace
+        run: bash ./gradlew assembleRelease --stacktrace
       - uses: release-drafter/release-drafter@v5
         id: create_release
         with:
@@ -50,8 +50,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./base/build/outputs/apk/debug/EscalarAlcoiaIComtat-debug.apk
-          asset_name: EscalarAlcoiaIComtat-debug.apk
+          asset_path: ./base/build/outputs/apk/debug/EscalarAlcoiaIComtat*.apk
+          asset_name: EscalarAlcoiaIComtat.apk
           asset_content_type: application/vnd.android.package-archive
       - name: Create Sentry release
         uses: getsentry/action-release@v1
