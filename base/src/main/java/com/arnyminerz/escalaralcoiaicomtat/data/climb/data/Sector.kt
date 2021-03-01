@@ -13,7 +13,6 @@ import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
-import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.view.BarChartHelper
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.github.mikephil.charting.charts.BarChart
@@ -120,20 +119,11 @@ data class Sector constructor(
             val mapIntent = Intent(
                 Intent.ACTION_VIEW,
                 Uri.parse(
-                    "geo:0,0?q=${location.latitude},${location.longitude}(${
-                        displayName.replace(" ", "+")
-                    })"
+                    "geo:0,0?q=${location.latitude},${location.longitude}($displayName)".replace(" ", "+")
                 )
             ).setPackage("com.google.android.apps.maps")
-            if (mapIntent.resolveActivity(context.packageManager) != null)
-                view.setOnClickListener {
-                    context.startActivity(mapIntent)
-                }
-            else {
-                view.setOnClickListener {
-                    context.toast(R.string.toast_error_gmaps_not_installed)
-                }
-                Timber.e("Could not resolve activity")
+            view.setOnClickListener {
+                context.startActivity(mapIntent)
             }
         } else {
             view.isClickable = false
