@@ -139,7 +139,7 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="path_chip_ending">"Tipo de reunión para escoger la maniobra de descenso o top-rope."</string>
     <string name="path_chip_required">"Se requiere el componente que se muestra"</string>
     <string name="path_stats_chart_title">"Grados"</string>
-    <string name="path_ending_pitch">"%s %s"</string>
+    <string name="path_ending_pitch">"$1%s $1%s"</string>
     <string name="path_ending_pitch_vertical">"Vertical"</string>
     <string name="path_ending_pitch_shelf">"Placa"</string>
     <string name="path_ending_pitch_inclined">"Inclinado"</string>
