@@ -209,8 +209,6 @@
     <string name="action_try_again">Reintentar</string>
     <string name="notification_channel_user_interacted_name">Nova interacció d\'un usuari</string>
     <string name="notification_channel_user_interacted_desc">T\'informa quan un usuari comenta o li agrada alguna cosa sobre tu.</string>
-    <string name="notification_user_liked_title">Tens un nou m\'agrada!</string>
-    <string name="notification_user_liked_message">A %s li ha agradat la teua compleció de %s!</string>
     <string name="image_desc_path_completed">Via Completada</string>
     <string name="image_desc_path_info">Informació de Via</string>
     <string name="image_desc_view_more">Veure més</string>
