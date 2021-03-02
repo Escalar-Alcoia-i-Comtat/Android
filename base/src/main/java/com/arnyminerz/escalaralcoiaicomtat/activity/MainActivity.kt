@@ -10,6 +10,10 @@ import android.view.MenuItem
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
@@ -32,6 +36,7 @@ import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.worker.UpdateWorker
 import io.sentry.SentryLevel
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.timber.SentryTimberIntegration
@@ -39,6 +44,7 @@ import timber.log.Timber
 import timber.log.Timber.DebugTree
 import java.io.File
 import java.net.URL
+import java.util.concurrent.TimeUnit
 
 val EXTRA_AREA = IntentExtra<Int>("area")
 val EXTRA_ZONE = IntentExtra<Int>("zone")
@@ -85,6 +91,21 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             createNotificationChannels()
+
+        Timber.v("Initializing update checker...")
+        WorkManager.getInstance(this).enqueue(
+            PeriodicWorkRequestBuilder<UpdateWorker>(
+                1, TimeUnit.HOURS,
+                15, TimeUnit.MINUTES)
+                .setConstraints(
+                    Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                        .setRequiresBatteryNotLow(true)
+                        .build()
+                )
+                .addTag("update")
+                .build()
+        )
 
         Timber.v("Finished preparing App...")
         return true
