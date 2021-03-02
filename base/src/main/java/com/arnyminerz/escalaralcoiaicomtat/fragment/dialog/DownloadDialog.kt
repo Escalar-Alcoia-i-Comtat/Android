@@ -79,7 +79,7 @@ class DownloadDialog(private val context: Context, private val data: DataClass<*
 
                 runAsync {
                     try {
-                        val updateAvailable = data.updateAvailable(context)
+                        val updateAvailable = data.updateAvailable()
                         context.onUiThread {
                             dialog.dismiss()
                             if (updateAvailable) {
