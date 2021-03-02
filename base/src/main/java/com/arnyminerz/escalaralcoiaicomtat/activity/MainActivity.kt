@@ -10,10 +10,7 @@ import android.view.MenuItem
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.work.Constraints
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.*
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
@@ -60,6 +57,9 @@ const val TAB_ITEM_MAP = 1
 const val TAB_ITEM_DOWNLOADS = 2
 const val TAB_ITEM_SETTINGS = 3
 
+const val UPDATE_CHECKER_WORK_NAME = "update_checker"
+const val UPDATE_CHECKER_TAG = "update"
+
 @ExperimentalUnsignedTypes
 val AREAS = arrayListOf<Area>()
 
@@ -93,7 +93,9 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             createNotificationChannels()
 
         Timber.v("Initializing update checker...")
-        WorkManager.getInstance(this).enqueue(
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            UPDATE_CHECKER_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
             PeriodicWorkRequestBuilder<UpdateWorker>(
                 1, TimeUnit.HOURS,
                 15, TimeUnit.MINUTES)
@@ -103,7 +105,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                         .setRequiresBatteryNotLow(true)
                         .build()
                 )
-                .addTag("update")
+                .addTag(UPDATE_CHECKER_TAG)
                 .build()
         )
 
