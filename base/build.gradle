@@ -124,7 +124,7 @@ dependencies {
     def camerax_version = "1.1.0-alpha02"
     implementation "androidx.camera:camera-camera2:$camerax_version"
     implementation "androidx.camera:camera-lifecycle:$camerax_version"
-    implementation "androidx.camera:camera-view:1.0.0-alpha21"
+    implementation "androidx.camera:camera-view:1.0.0-alpha22"
 
     // Android Maps SDK 3.0.0 BETA
     implementation 'com.google.android.libraries.maps:maps:3.1.0-beta'
