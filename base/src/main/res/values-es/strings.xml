@@ -139,7 +139,7 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="path_chip_ending">"Tipo de reunión para escoger la maniobra de descenso o top-rope."</string>
     <string name="path_chip_required">"Se requiere el componente que se muestra"</string>
     <string name="path_stats_chart_title">"Grados"</string>
-    <string name="path_ending_pitch">"$1%s $1%s"</string>
+    <string name="path_ending_pitch">"%1$s %1$s"</string>
     <string name="path_ending_pitch_vertical">"Vertical"</string>
     <string name="path_ending_pitch_shelf">"Placa"</string>
     <string name="path_ending_pitch_inclined">"Inclinado"</string>
@@ -271,4 +271,14 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="image_desc_ending_type">Tipo de reunión</string>
     <string name="image_desc_storage">Tipo de almacenamiento</string>
     <string name="image_desc_rappel">Rappel</string>
+    <string name="status_not_running">no en ejecución</string>
+    <string name="status_running">ejecutándose</string>
+    <string name="status_enqueued">esperando</string>
+    <string name="status_succeeded">finalizado</string>
+    <string name="status_failed">fallido</string>
+    <string name="status_blocked">bloqueado</string>
+    <string name="status_cancelled">cancelado</string>
+    <string name="pref_info_cat_services">Servicios</string>
+    <string name="pref_info_service_updates_title">Comprobador de actualizaciones</string>
+    <string name="pref_info_service_updates_sum">El servicio que busca nuevas actualizaciones está ahora mismo %1$s</string>
 </resources>

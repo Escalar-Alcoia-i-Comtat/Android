@@ -67,6 +67,13 @@
     <string name="status_permission_granted">Permission Granted</string>
     <string name="status_server_down">Could not reach server</string>
     <string name="status_server_down_long">You have Internet connection, but we can\'t reach the server. It may be under maintenance, or broken. Wait a bit, a notification may pop up notifying you about any issue.</string>
+    <string name="status_not_running">not Running</string>
+    <string name="status_running">Running</string>
+    <string name="status_enqueued">waiting</string>
+    <string name="status_succeeded">succeeded</string>
+    <string name="status_failed">failed</string>
+    <string name="status_blocked">blocked</string>
+    <string name="status_cancelled">Cancelled</string>
 
     <string name="dialog_permission_title">Permission Required!</string>
     <string name="dialog_permission_message">The functionality you are trying to use requires the %s permission. Please grant it, or refuse to use that.</string>
@@ -152,10 +159,13 @@
 
     <string name="pref_info_cat_app">Application</string>
     <string name="pref_info_cat_source">Source</string>
+    <string name="pref_info_cat_services">Services</string>
     <string name="pref_info_version_title">Version</string>
     <string name="pref_info_build_title">Build Number</string>
     <string name="pref_info_git_title">Github</string>
     <string name="pref_info_git_sum">View the Github repository</string>
+    <string name="pref_info_service_updates_title">Update checker</string>
+    <string name="pref_info_service_updates_sum">The service that checks for new updates is currently %1$s</string>
 
     <string name="notification_channel_downloads_group_name">Downloads</string>
     <string name="notification_channel_download_progress_name">Download Progress</string>
@@ -219,7 +229,7 @@
     <string name="path_chip_ending">Ending type for choosing the descent maneuver to use or top-rope.</string>
     <string name="path_chip_required">The shown component is required</string>
     <string name="path_stats_chart_title">Grades</string>
-    <string name="path_ending_pitch">$1%s $2%s</string>
+    <string name="path_ending_pitch">%1$s %2$s</string>
     <string name="path_ending_pitch_vertical">Vertical</string>
     <string name="path_ending_pitch_shelf">Shelf</string>
     <string name="path_ending_pitch_inclined">Inclined</string>

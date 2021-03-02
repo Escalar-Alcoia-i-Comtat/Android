@@ -1,6 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.intro
 
-import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,16 +9,18 @@ import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentIntroDownloadBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonArrayFromURL
+import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
+import java.io.IOException
 
 const val AREAS_URL = "$EXTENDED_API_URL/area/-1"
 
@@ -28,34 +30,33 @@ class DownloadAreasIntroFragment : Fragment() {
             private set
 
         @ExperimentalUnsignedTypes
+        @Throws(
+            IOException::class
+        )
         fun downloadAreasCache(
-            activity: Activity,
+            context: Context,
+            networkState: ConnectivityProvider.NetworkState,
             progressBar: ProgressBar? = null,
-            connectionWaitingView: View? = null,
-            finishListener: (() -> Unit)? = null,
-            errorListener: ((message: Int) -> Unit)? = null
+            connectionWaitingView: View? = null
         ) {
-            loading = false
-            progressBar?.visibility(true)
-            connectionWaitingView?.visibility(false)
-            val storageDataDir = activity.filesDir
-            val areasDataFile = IntroActivity.cacheFile(activity)
-            val hasInternet =
-                (activity as? NetworkChangeListenerActivity)?.networkState?.hasInternet
-            if (hasInternet == false) {
-                vibrate(activity, 100)
-                toast(activity, R.string.toast_error_no_internet)
-                progressBar?.visibility(false)
-                connectionWaitingView?.visibility(true)
-                loading = false
-            } else
-                runAsync {
+            loading = true
+            context.onUiThread {
+                progressBar?.visibility(true)
+                connectionWaitingView?.visibility(false)
+            }
+            try {
+                val storageDataDir = context.filesDir
+                val areasDataFile = IntroActivity.cacheFile(context)
+                val hasInternet = networkState.hasInternet
+                if (!hasInternet) {
+                    vibrate(context, 100)
+                    toast(context, R.string.toast_error_no_internet)
+                    progressBar?.visibility(false)
+                    connectionWaitingView?.visibility(true)
+                } else {
                     if (!storageDataDir.exists())
-                        if (!storageDataDir.mkdirs()) {
-                            Timber.e("Could not create data dir")
-                            errorListener?.invoke(R.string.update_progress_error_data_dir_creation)
-                            return@runAsync
-                        }
+                        if (!storageDataDir.mkdirs())
+                            throw IOException("Could not create data dir")
 
                     if (!areasDataFile.exists()) {
                         Timber.v("Downloading areas from \"$AREAS_URL\"...")
@@ -72,15 +73,19 @@ class DownloadAreasIntroFragment : Fragment() {
                             Timber.e("Areas data file wasn't written")
                     }
 
-                    activity.runOnUiThread {
-                        (activity as? IntroActivity)?.let {
+                    context.onUiThread {
+                        (context as? IntroActivity)?.let {
                             it.fabStatus(true)
                             it.next()
                         }
-                        finishListener?.invoke()
                     }
-                    loading = false
                 }
+            }catch (ex: Exception){
+                loading = false
+                throw ex
+            } finally {
+                loading = false
+            }
         }
     }
 
@@ -105,12 +110,16 @@ class DownloadAreasIntroFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
-        (activity as? IntroActivity)?.fabStatus(false)
+        val introActivity = if (activity is IntroActivity) (activity as IntroActivity) else null
+        introActivity?.fabStatus(false)
 
-        downloadAreasCache(
-            requireActivity(),
-            binding.introDownloadSpinner,
-            binding.internetWaitingLayout
-        )
+        runAsync {
+            downloadAreasCache(
+                requireContext(),
+                introActivity?.networkState ?: ConnectivityProvider.NetworkState.CONNECTED_NO_WIFI,
+                binding.introDownloadSpinner,
+                binding.internetWaitingLayout
+            )
+        }
     }
 }

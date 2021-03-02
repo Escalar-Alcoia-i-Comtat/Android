@@ -287,7 +287,7 @@ abstract class DataClass<A : Serializable, B : Serializable>(
      * Checks if an update is available
      * @author ArnyminerZ
      * @patch ArnyminerZ 2020/07/06
-     * @param context The context to run from
+     * @patch ArnyminerZ 2021/03/02
      * @return If an update is available or not
      * @throws JSONResultException If there's not timestamp in the download
      * @throws MissingDataException If the download date of the file is null
@@ -298,14 +298,9 @@ abstract class DataClass<A : Serializable, B : Serializable>(
         MissingDataException::class,
         NoInternetAccessException::class
     )
-    fun updateAvailable(context: Context?): Boolean =
-        when {
-            context == null -> false // Context is null
-            isDownloaded(context) == DownloadStatus.DOWNLOADED ->
-                jsonFromUrl("$EXTENDED_API_URL/update_available/$namespace/$id/?version=$version")
-                    .getBoolean("update-available")
-            else -> false // Not downloaded
-        }
+    fun updateAvailable(): Boolean =
+        jsonFromUrl("$EXTENDED_API_URL/update_available/$namespace/$id/?version=$version")
+            .getBoolean("update-available")
 
     /**
      * Returns the File that represents the image of the DataClass
