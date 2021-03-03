@@ -112,7 +112,7 @@ dependencies {
     //androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'com.android.volley:volley:1.2.0-rc1'
 
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.4.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.4.2-native-mt'
 
     // Android Jetpack
     def jetpack_work_version = "2.5.0"
