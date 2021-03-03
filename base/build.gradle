@@ -129,6 +129,7 @@ dependencies {
 
     // MapBox SDK
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.6.1'
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:0.9.0'
 
     // Android Maps SDK 3.0.0 BETA
     implementation 'com.google.android.libraries.maps:maps:3.1.0-beta'
