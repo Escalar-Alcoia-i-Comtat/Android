@@ -75,6 +75,7 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
     private var mapData: Serializable? = null
     private var kmzFile: File? = null
     private var map: MapboxMap? = null
+    private var mapStyle: Style? = null
     private var markerWindow: MarkerWindow? = null
     private var markerName: String? = null
 
@@ -228,6 +229,7 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                 with(map!!) {
                     Timber.v("Got map. Setting style...")
                     map?.setStyle(Style.MAPBOX_STREETS) { style ->
+                        mapStyle = style
                         val symbolManager = SymbolManager(binding.map, this, style)
                         val fillManager = FillManager(binding.map, this, style)
                         val lineManager = LineManager(binding.map, this, style)
@@ -313,6 +315,7 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                                     if (polygon.windowData != null)
                                         marker = marker
                                             .withImage(
+                                                style,
                                                 textAsBitmap(
                                                     polygon.windowData.title,
                                                     2.0f,
@@ -689,9 +692,9 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
     ) {
         Timber.v("Found KML/KMZ to load")
         val loader = KMLLoader(kmlAddress, kmzFile)
-        if (map != null) {
+        if (map != null && mapStyle != null && mapStyle!!.isFullyLoaded) {
             try {
-                val result = loader.load(this, map!!, networkState)
+                val result = loader.load(this, map!!, mapStyle!!, networkState)
 
                 Timber.v("  Loaded KML!")
                 markers.clear()
@@ -705,6 +708,6 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                 Timber.e(e, "  Could not load!")
             }
         } else
-            Timber.e("MapboxMap is null!")
+            Timber.e("MapboxMap is null or style not loaded!")
     }
 }

@@ -211,7 +211,7 @@ class MapHelper(private val mapView: MapView) {
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
         val loader = KMLLoader(kmlAddress, null)
-        val result = loader.load(activity, map!!, networkState)
+        val result = loader.load(activity, map!!, style!!, networkState)
         activity.runOnUiThread {
             Timber.v("Loaded kml. Loading managers...")
             val symbolManager = SymbolManager(mapView, map!!, style!!)

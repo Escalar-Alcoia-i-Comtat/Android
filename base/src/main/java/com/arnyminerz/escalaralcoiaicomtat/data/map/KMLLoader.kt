@@ -17,6 +17,7 @@ import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.layers.Property
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -48,6 +49,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
     fun load(
         context: Context,
         map: MapboxMap,
+        mapStyle: Style,
         networkState: ConnectivityProvider.NetworkState
     ): LoadResult {
         val result = LoadResult()
@@ -288,7 +290,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                                     else null
                                 )
                                 if (iconBitmap != null) {
-                                    m.withImage(iconBitmap)
+                                    m.withImage(mapStyle, iconBitmap)
                                     Timber.v("Marker has image!")
                                 }
                                 result.markers.add(m)
