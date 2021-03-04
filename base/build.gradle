@@ -139,7 +139,7 @@ dependencies {
     implementation 'com.google.maps.android:android-maps-utils-v3:2.2.0'
 
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3-native-mt'
 
     // Android Jetpack
     implementation 'androidx.exifinterface:exifinterface:1.3.2'
