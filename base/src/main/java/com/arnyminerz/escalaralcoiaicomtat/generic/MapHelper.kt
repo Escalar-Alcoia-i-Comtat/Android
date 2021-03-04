@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -18,14 +19,19 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
 import com.arnyminerz.escalaralcoiaicomtat.data.map.addToMap
 import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogMapMarkerBinding
+import com.arnyminerz.escalaralcoiaicomtat.exception.MissingPermissionException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.Glide
+import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
+import com.mapbox.mapboxsdk.location.modes.CameraMode
+import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
@@ -245,6 +251,40 @@ class MapHelper(private val mapView: MapView) {
                     loadedKMLAddress!!
                 )
         )
+    }
+
+    /**
+     * Enables the current location pointer. Requires the location permission to be granted
+     * @param context The context to call from
+     * @param cameraMode The camera mode to set
+     * @param renderMode The pointer render mode to set
+     * @author Arnau Mora
+     * @see CameraMode
+     * @see RenderMode
+     * @see PermissionsManager
+     * @throws MissingPermissionException If the location permission is not granted
+     */
+    @SuppressLint("MissingPermission")
+    @Throws(MissingPermissionException::class)
+    fun enableLocationComponent(
+        context: Context,
+        cameraMode: Int = CameraMode.TRACKING,
+        renderMode: Int = RenderMode.COMPASS
+    ) {
+        if (map == null || style == null || !style!!.isFullyLoaded)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+
+        if (!PermissionsManager.areLocationPermissionsGranted(context))
+            throw MissingPermissionException("Location permission not granted")
+
+        map!!.locationComponent.apply {
+            activateLocationComponent(
+                LocationComponentActivationOptions.builder(context, style!!).build()
+            )
+            isLocationComponentEnabled = true
+            this.cameraMode = cameraMode
+            this.renderMode = renderMode
+        }
     }
 }
 
