@@ -47,11 +47,6 @@
             android:key="pref_move_marker"
             android:title="@string/pref_gene_map_move_marker_title"
             android:summary="@string/pref_gene_map_move_marker_sum" />
-
-        <SwitchPreference
-            android:key="pref_small_map_enable"
-            android:title="@string/pref_gene_map_small_map_enable_title"
-            android:summary="@string/pref_gene_map_small_map_enable_sum" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_gene_section_advanced">
