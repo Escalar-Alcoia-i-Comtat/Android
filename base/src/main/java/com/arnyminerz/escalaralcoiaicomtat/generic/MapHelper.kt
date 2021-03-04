@@ -15,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.find
 import com.arnyminerz.escalaralcoiaicomtat.data.map.KMLLoader
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
+import com.arnyminerz.escalaralcoiaicomtat.data.map.addToMap
 import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogMapMarkerBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
@@ -187,25 +188,24 @@ class MapHelper {
 
             val loader = KMLLoader(kmlAddress, null)
             loader.load(activity, map!!, networkState, { result ->
-                Timber.v("Loaded kml. Loading managers...")
-                val symbolManager = SymbolManager(mapView!!, map!!, style!!)
-                val lineManager = LineManager(mapView!!, map!!, style!!)
-                val fillManager = FillManager(mapView!!, map!!, style!!)
-                Timber.v("Loading features...")
+                activity.onUiThread {
+                    Timber.v("Loaded kml. Loading managers...")
+                    val symbolManager = SymbolManager(mapView!!, map!!, style!!)
+                    val lineManager = LineManager(mapView!!, map!!, style!!)
+                    val fillManager = FillManager(mapView!!, map!!, style!!)
+                    Timber.v("Loading features...")
 
-                if (addToMap) {
-                    for (marker in result.markers)
-                        marker.addToMap(symbolManager)
-                    for (polygon in result.polygons)
-                        polygon.addToMap(fillManager, lineManager)
-                    for (polyline in result.polylines)
-                        polyline.addToMap(fillManager, lineManager)
+                    if (addToMap) {
+                        (result.markers).addToMap(symbolManager)
+                        (result.polygons).addToMap(fillManager, lineManager)
+                        (result.polylines).addToMap(fillManager, lineManager)
+                    }
+
+                    loadedKMLAddress = kmlAddress
+
+                    val mapFeatures = MapFeatures(result.markers, result.polylines, result.polygons)
+                    listener.onCompleted(mapFeatures)
                 }
-
-                loadedKMLAddress = kmlAddress
-
-                val mapFeatures = MapFeatures(result.markers, result.polylines, result.polygons)
-                listener.onCompleted(mapFeatures)
             }, { error ->
                 listener.onFailure(error)
             })
