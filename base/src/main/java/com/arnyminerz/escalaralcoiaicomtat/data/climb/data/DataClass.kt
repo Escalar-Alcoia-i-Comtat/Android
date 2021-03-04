@@ -383,7 +383,7 @@ abstract class DataClass<A : Serializable, B : Serializable>(
                         context.onUiThread {
                             visibility(progressBar, false)
 
-                            if (resource.isNull())
+                            if (resource == null)
                                 Timber.e("Bitmap is null!")
                             else
                                 imageView.setImageBitmap(resource)

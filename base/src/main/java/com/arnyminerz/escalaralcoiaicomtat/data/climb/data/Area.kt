@@ -1,21 +1,13 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 
 import android.content.Context
-import android.content.Intent
 import android.os.Parcel
 import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_AREA
-import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_SECTOR
-import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_ZONE
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonArrayFromFile
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
-import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.File
@@ -25,10 +17,10 @@ import java.util.*
 /**
  * Loads all the areas available in the server.
  * @param context The context to call from
- * @return A flow of areas.
+ * @return A collection of areas
  */
 @ExperimentalUnsignedTypes
-fun loadAreas(context: Context): Collection<Area> {
+fun loadAreasFromCache(context: Context): Collection<Area> {
     val areas = arrayListOf<Area>()
 
     val storageDataDir = context.filesDir
@@ -45,80 +37,12 @@ fun loadAreas(context: Context): Collection<Area> {
             for (a in 0 until toLoad) {
                 val json = areasJSON.getJSONObject(a)
                 val area = Area.fromDB(json)
-                Timber.d("  Emitting area $a")
+                Timber.d("  Adding area $a")
                 areas.add(area)
             }
     }
 
     return areas
-}
-
-data class DataClassScanHeights(
-    val areaIndex: Int? = null,
-    val zoneIndex: Int? = null,
-    val sectorIndex: Int? = null
-) {
-    fun isEmpty(): Boolean =
-        areaIndex == null && zoneIndex == null && sectorIndex != null
-
-    @ExperimentalUnsignedTypes
-    fun launchActivity(context: Context): Boolean {
-        when {
-            sectorIndex != null -> {
-                context.startActivity(
-                    Intent(context, SectorActivity::class.java).apply {
-                        putExtra(EXTRA_AREA, areaIndex!!)
-                        putExtra(EXTRA_ZONE, zoneIndex!!)
-                        putExtra(EXTRA_SECTOR, sectorIndex)
-                    }
-                )
-                return true
-            }
-            zoneIndex != null -> {
-                context.startActivity(
-                    Intent(context, ZoneActivity::class.java).apply {
-                        putExtra(EXTRA_AREA, areaIndex!!)
-                        putExtra(EXTRA_ZONE, zoneIndex)
-                    }
-                )
-                return true
-            }
-            areaIndex != null -> {
-                context.startActivity(
-                    Intent(context, AreaActivity::class.java).apply {
-                        putExtra(EXTRA_AREA, areaIndex)
-                    }
-                )
-                return true
-            }
-            else -> Timber.e("Can't find valid context to launch scan result")
-        }
-        return false
-    }
-}
-
-/**
- * This gets the heights indexes for a data class.
- * @author ArnyminerZ
- * @date 2020/08/31
- * @param dataClass The class to search for
- * @return A scan result with the height set
- */
-@ExperimentalUnsignedTypes
-fun Collection<Area>.find(dataClass: DataClass<*, *>): DataClassScanHeights {
-    for ((a, area) in this.withIndex())
-        if (area == dataClass)
-            return DataClassScanHeights(a)
-        else if (area.isNotEmpty())
-            for ((z, zone) in area.withIndex())
-                if (zone == dataClass)
-                    return DataClassScanHeights(a, z)
-                else if (zone.isNotEmpty())
-                    for ((s, sector) in zone.withIndex())
-                        if (sector == dataClass)
-                            return DataClassScanHeights(a, z, s)
-
-    return DataClassScanHeights()
 }
 
 @Suppress("UNCHECKED_CAST")

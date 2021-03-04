@@ -18,9 +18,9 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.components.XAxis
-import com.google.android.libraries.maps.model.LatLng
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.mapbox.mapboxsdk.geometry.LatLng
 import org.json.JSONObject
 import timber.log.Timber
 import java.util.*

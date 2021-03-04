@@ -6,12 +6,10 @@ import android.widget.ImageButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.find
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
@@ -98,12 +96,14 @@ class DownloadSectionsAdapter(
             downloadedSection.updateView(cardView, toggleButton, recyclerView, mainActivity)
 
             viewButton.setOnClickListener {
-                toast(mainActivity, R.string.toast_loading)
+                toast(mainActivity, "Currently disabled")
+                // TODO: View button
+                /*toast(mainActivity, R.string.toast_loading)
                 val scan = AREAS.find(section)
                 if (!scan.launchActivity(mainActivity)) {
                     Timber.w("Could not launch activity.")
                     toast(mainActivity, R.string.toast_error_internal)
-                }
+                }*/
             }
 
             recyclerView.layoutManager = LinearLayoutManager(mainActivity)

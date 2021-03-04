@@ -1,7 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic.extension
 
-import com.arnyminerz.escalaralcoiaicomtat.generic.nonNull
-import com.google.android.libraries.maps.model.LatLng
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -26,14 +24,4 @@ fun String?.toTimestamp(): Date? =
         } catch (ex: ArrayIndexOutOfBoundsException) {
             null
         }
-    }
-
-fun String?.toLatLng(): LatLng? =
-    this?.replace("/ /g".toRegex(), "")?.let {
-        val parts = it.split(",")
-        val lat = parts[0].toDoubleOrNull()
-        val lng = parts[1].toDoubleOrNull()
-        if (listOf(lat, lng).nonNull())
-            LatLng(lat!!, lng!!)
-        else null
     }

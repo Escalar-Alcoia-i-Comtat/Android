@@ -3,8 +3,6 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
 import androidx.core.app.ActivityOptionsCompat
@@ -15,8 +13,9 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
+import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL_NO_SECURE
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.loadAreas
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.loadAreasFromCache
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.DownloadsFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.MapFragment
@@ -34,6 +33,7 @@ import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.worker.UpdateWorker
+import io.sentry.Sentry
 import io.sentry.SentryLevel
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.timber.SentryTimberIntegration
@@ -262,13 +262,8 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         grantResults: IntArray
     ) {
         Timber.v("Got permissions result. Code: %s", requestCode)
-        val areasViewFragment = areasViewFragment
         when (requestCode) {
-            LOCATION_PERMISSION_REQUEST -> if (areasViewFragment.googleMap != null)
-                areasViewFragment.updateNearbyZones(
-                    null,
-                    areasViewFragment.googleMap!!
-                )
+            LOCATION_PERMISSION_REQUEST -> areasViewFragment.requestLocationUpdates()
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
@@ -280,13 +275,22 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
         if (state.hasInternet && !serverAvailable) {
             runAsync {
-                val canReachServer = URL(EXTENDED_API_URL).ping()
-                if (canReachServer) {
-                    Timber.v("Reached arnyminerz.com")
-                    serverAvailable = true
-                } else {
-                    Timber.e("Could not ping $EXTENDED_API_URL")
-                    startActivity(Intent(this@MainActivity, ServerDownActivity::class.java))
+                val canReachRecureServer = URL(EXTENDED_API_URL).ping()
+                val canReachServer = URL(EXTENDED_API_URL_NO_SECURE).ping()
+                when {
+                    canReachRecureServer -> {
+                        Timber.v("Reached arnyminerz.com")
+                        serverAvailable = true
+                    }
+                    canReachServer -> {
+                        Timber.w("Misconfigured SSL in API. Please, check! Working at insecure address.")
+                        Sentry.captureMessage("Misconfigured SSL in API. Please, check! Working at insecure address.", SentryLevel.WARNING)
+                        serverAvailable = true
+                    }
+                    else -> {
+                        Timber.e("Could not ping $EXTENDED_API_URL")
+                        startActivity(Intent(this@MainActivity, ServerDownActivity::class.java))
+                    }
                 }
             }
         } else
@@ -298,39 +302,39 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                 visibility(binding.mainLoadingProgressBar, true)
 
                 Timber.v("Loading areas...")
-                val areasFlow = loadAreas(this)
+                val areasList = loadAreasFromCache(this)
                 Timber.v("  Clearing AREAS collection...")
                 AREAS.clear()
                 Timber.v("  Importing to collection...")
-                AREAS.addAll(areasFlow)
+                AREAS.addAll(areasList)
                 Timber.v("  --- Found ${AREAS.size} areas ---")
 
                 Timber.v("Got areas, setting in map fragment")
                 mapFragment.setAreas(AREAS)
 
-                areasViewFragment.updateAreas { holder, position ->
+                areasViewFragment.setItemClickListener { holder, position ->
                     binding.loadingLayout.show()
-                    Handler(Looper.getMainLooper()).post {
-                        Timber.v("Clicked item %s", position)
-                        val intent = Intent(this, AreaActivity()::class.java)
-                            .putExtra(EXTRA_AREA, position)
+                    Timber.v("Clicked item %s", position)
+                    val intent = Intent(this, AreaActivity()::class.java)
+                        .putExtra(EXTRA_AREA, position)
 
-                        val optionsBundle =
-                            ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->
-                                intent.putExtra(EXTRA_AREA_TRANSITION_NAME, transitionName)
+                    val optionsBundle =
+                        ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->
+                            intent.putExtra(EXTRA_AREA_TRANSITION_NAME, transitionName)
 
-                                ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                    this,
-                                    findViewById(R.id.title_textView),
-                                    transitionName
-                                ).toBundle()
-                            } ?: Bundle.EMPTY
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                this,
+                                findViewById(R.id.title_textView),
+                                transitionName
+                            ).toBundle()
+                        } ?: Bundle.EMPTY
 
-                        startActivity(intent, optionsBundle)
-                    }
+                    startActivity(intent, optionsBundle)
                 }
 
                 runOnUiThread {
+                    Timber.v("Refreshing areas...")
+                    areasViewFragment.refreshAreas()
                     Timber.v("Finished loading areas, hiding progress bar and showing frameLayout.")
                     visibility(binding.mainLoadingProgressBar, false)
                     visibility(binding.mainFrameLayout, true)

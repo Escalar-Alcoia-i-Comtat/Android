@@ -6,7 +6,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
-import com.google.android.libraries.maps.model.LatLng
+import com.mapbox.mapboxsdk.geometry.LatLng
 import org.json.JSONObject
 import timber.log.Timber
 import java.util.*

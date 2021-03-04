@@ -20,7 +20,6 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
     private var languagePreference: ListPreference? = null
     private var enableNearby: SwitchPreference? = null
     private var centerMarkerPreference: SwitchPreference? = null
-    private var smallMapPreference: SwitchPreference? = null
     private var nearbyDistance: EditTextPreference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -103,12 +102,6 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
             true
         }
 
-        smallMapPreference = findPreference("pref_small_map_enable")
-        smallMapPreference?.setOnPreferenceChangeListener { _, value ->
-            SETTINGS_SMALL_MAP_PREF.put(requireContext().sharedPreferences, value as Boolean)
-            true
-        }
-
         previewScalePreference = findPreference("pref_preview_scale")
         previewScalePreference?.setOnPreferenceChangeListener { _, value ->
             SETTINGS_PREVIEW_SCALE_PREF.put(
@@ -142,6 +135,5 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
         markerSizePreference?.value = SETTINGS_MARKER_SIZE_PREF.get(requireContext().sharedPreferences)
         previewScalePreference?.value =
             (SETTINGS_PREVIEW_SCALE_PREF.get(requireContext().sharedPreferences) * 10).toInt()
-        smallMapPreference?.isChecked = SETTINGS_SMALL_MAP_PREF.get(requireContext().sharedPreferences)
     }
 }

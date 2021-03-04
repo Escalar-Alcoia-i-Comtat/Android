@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic.extension
 
-import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
-import com.google.android.libraries.maps.model.LatLng
+import com.mapbox.mapboxsdk.geometry.LatLng
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -11,7 +10,7 @@ fun JSONObject.getBooleanFromString(key: String): Boolean {
     return when (val obj = get(key, false)) {
         is Boolean -> obj
         is Int -> obj == 1
-        else -> if (getString(key).isNotNull()) getString(key).toBoolean() else false
+        else -> getString(key).toBoolean()
     }
 }
 
