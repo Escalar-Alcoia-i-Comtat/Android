@@ -7,7 +7,10 @@ import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.data.SerializableBitmap
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.generic.drawableToBitmap
+import com.arnyminerz.escalaralcoiaicomtat.generic.generateUUID
+import com.arnyminerz.escalaralcoiaicomtat.generic.mapFloat
 import com.arnyminerz.escalaralcoiaicomtat.location.SerializableLatLng
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.Style
@@ -81,7 +84,7 @@ data class GeoMarker(
         var symbolOptions = SymbolOptions()
             .withLatLng(LatLng(position.latitude, position.longitude))
 
-        if (icon.isNotNull()) {
+        if (icon != null) {
             val iconSize = iconSize ?: mapFloat(
                 SETTINGS_MARKER_SIZE_PREF.get(context.sharedPreferences)
                     .toFloat(),

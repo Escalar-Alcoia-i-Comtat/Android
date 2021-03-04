@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic.extension
 
-import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -13,7 +12,7 @@ fun newLatLngBounds(points: ArrayList<LatLng>, padding: Int): CameraUpdate? {
         else null
     val boundsBuilder = LatLngBounds.Builder()
     for (point in points)
-        if (point.latitude.isNotNull() && point.longitude.isNotNull())
+        if (point.latitude != null && point.longitude != null)
             boundsBuilder.include(point)
     val bounds = boundsBuilder.build()
     return CameraUpdateFactory.newLatLngBounds(bounds, padding)

@@ -7,7 +7,6 @@ import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.preference.Preference
-import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
 import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.ViewList
 import timber.log.Timber
@@ -48,8 +47,8 @@ fun Context?.visibility(
     setGone: Boolean = true,
     debug: Boolean = false
 ) {
-    if (isNotNull())
-        this!!.onUiThread {
+    if (this != null)
+        this.onUiThread {
             com.arnyminerz.escalaralcoiaicomtat.view.visibility(
                 view,
                 visible,
@@ -100,5 +99,3 @@ fun getColor(context: Context, @ColorRes color: Int): Int = ContextCompat.getCol
 
 fun View.isInside(x: Float, y: Float) =
     this.x < x && this.x + width > x && this.y < y && this.y + height > y
-
-fun View.isInside(point: Pair<Float, Float>) = isInside(point.first, point.second)

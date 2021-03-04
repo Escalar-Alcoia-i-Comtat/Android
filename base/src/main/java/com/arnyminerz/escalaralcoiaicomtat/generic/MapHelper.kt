@@ -117,8 +117,8 @@ class MapHelper(private val mapView: MapView) {
     fun onDestroy() = mapView.onDestroy()
 
     fun withStartingPosition(startingPosition: LatLng?, zoom: Double = 2.0): MapHelper {
-        if (startingPosition.isNotNull())
-            this.startingPosition = startingPosition!!
+        if (startingPosition != null)
+            this.startingPosition = startingPosition
         this.startingZoom = zoom
         return this
     }
@@ -206,7 +206,7 @@ class MapHelper(private val mapView: MapView) {
 
     @ExperimentalUnsignedTypes
     fun showMapsActivity(activity: FragmentActivity) {
-        if (loadedKMLAddress.isNull()) throw MapAnyDataToLoadException("Map doesn't have any loaded data. You may run loadKML, for example.")
+        if (loadedKMLAddress == null) throw MapAnyDataToLoadException("Map doesn't have any loaded data. You may run loadKML, for example.")
 
         Timber.v("Launching MapsActivity from KML \"$loadedKMLAddress\"")
         activity.startActivity(

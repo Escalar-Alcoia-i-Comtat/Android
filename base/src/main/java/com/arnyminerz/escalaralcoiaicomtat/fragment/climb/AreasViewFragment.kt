@@ -23,7 +23,6 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerF
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
-import com.arnyminerz.escalaralcoiaicomtat.generic.isNull
 import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
@@ -156,7 +155,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                             }
                     }
                 }
-            else Timber.w("Could not show nearby zones. currentLocation null? ${currentLocation.isNull()}")
+            else Timber.w("Could not show nearby zones. currentLocation null? ${currentLocation == null}")
         }
     }
 
