@@ -74,10 +74,7 @@ class DownloadAreasIntroFragment : Fragment() {
                     }
 
                     context.onUiThread {
-                        (context as? IntroActivity)?.let {
-                            it.fabStatus(true)
-                            it.next()
-                        }
+                        (context as? IntroActivity)?.next()
                     }
                 }
             }catch (ex: Exception){
