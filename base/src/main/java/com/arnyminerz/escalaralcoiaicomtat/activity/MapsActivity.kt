@@ -10,8 +10,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity.Companion.hasLocationPermission
@@ -33,9 +31,7 @@ import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
-import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import timber.log.Timber
@@ -163,15 +159,12 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
 
         mapHelper = MapHelper(binding.map)
         mapHelper.onCreate(savedInstanceState)
-        mapHelper.loadMap { mapView, map, style ->
+        mapHelper.loadMap { _, map, _ ->
             runAsync {
-                val result = if (kmlAddress != null || kmzFile != null)
+                if (kmlAddress != null || kmzFile != null)
                     loadData(networkState)
-                else null
 
                 runOnUiThread {
-                    val symbolManager = SymbolManager(mapView, map, style)
-
                     visibility(binding.dialogMapMarker.mapInfoCardView, false)
 
                     Timber.v("Loading current location")
@@ -191,49 +184,8 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                         override fun onMove(detector: MoveGestureDetector) {}
                         override fun onMoveEnd(detector: MoveGestureDetector) {}
                     })
-                    map.addOnMapClickListener { position ->
+                    map.addOnMapClickListener {
                         showingPolyline = null
-
-                        if (result != null)
-                        for (marker in result.markers) {
-                            if (position.distanceTo(marker.position.toLatLng()) < 15f) {
-                                val windowData = marker.windowData ?: continue
-
-                                binding.dialogMapMarker.mapInfoTextView.text = windowData.title
-                                binding.dialogMapMarker.mapInfoTextView.text = windowData.message
-                                markerName = windowData.title
-
-                                showingPolyline = null
-
-                                Timber.w("Showing info window")
-                                visibility(binding.dialogMapMarker.mapInfoCardView, true)
-                                val anim =
-                                    AnimationUtils.loadAnimation(
-                                        this@MapsActivity,
-                                        R.anim.enter_bottom
-                                    )
-                                anim.duration = 500
-                                anim.setAnimationListener(object : Animation.AnimationListener {
-                                    override fun onAnimationRepeat(animation: Animation?) {}
-
-                                    override fun onAnimationEnd(animation: Animation?) {
-                                        visibility(
-                                            binding.dialogMapMarker.mapInfoCardView,
-                                            true
-                                        )
-                                    }
-
-                                    override fun onAnimationStart(animation: Animation?) {
-                                        visibility(
-                                            binding.dialogMapMarker.mapInfoCardView,
-                                            true
-                                        )
-                                    }
-                                })
-                                binding.dialogMapMarker.mapInfoCardView.startAnimation(anim)
-                                return@addOnMapClickListener true
-                            }
-                        }
 
                         markerWindow?.hide()
                         markerWindow = null
@@ -241,16 +193,16 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                         true
                     }
 
-                    symbolManager.addClickListener { marker ->
+                    mapHelper.addSymbolClickListener {
                         if (SETTINGS_CENTER_MARKER_PREF.get(sharedPreferences))
-                            map.animateCamera(CameraUpdateFactory.newLatLng(marker.latLng))
-                        val window = marker.getWindow()
+                            map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+                        val window = getWindow()
                         val title = window.title
 
                         if (title.isNotEmpty()) {
                             markerWindow = mapHelper.infoCard(
                                 this@MapsActivity,
-                                marker,
+                                this,
                                 binding.dialogMapMarker
                             )
 
@@ -264,34 +216,24 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
 
                     if (mapData != null) {
                         Timber.v("Got map data")
-                        val bounds = LatLngBounds.Builder()
                         val items = mapData as ArrayList<*>
                         when {
                             items.size > 1 -> {
                                 Timber.v("  Multiple points")
                                 for (item in items)
                                     if (item is GeoMarker) {
-                                        item.addToMap(this@MapsActivity, symbolManager)
-                                        bounds.include(item.position.toLatLng())
+                                        mapHelper.add(item)
                                     } else Timber.e("  Item is not GeoMarker")
-                                map.moveCamera(
-                                    CameraUpdateFactory.newLatLngBounds(
-                                        bounds.build(),
-                                        50
-                                    )
-                                )
+                                mapHelper.display(this@MapsActivity)
+                                mapHelper.center(50)
                             }
                             items.size > 0 -> items.first().let { item ->
                                 Timber.v("  Only one point")
                                 if (item is GeoMarker) {
                                     Timber.v("  Adding marker and moving camera")
-                                    item.addToMap(this@MapsActivity, symbolManager)
-                                    map.moveCamera(
-                                        CameraUpdateFactory.newLatLngZoom(
-                                            item.position.toLatLng(),
-                                            15.0
-                                        )
-                                    )
+                                    mapHelper.add(item)
+                                    mapHelper.display(this@MapsActivity)
+                                    mapHelper.center(50)
                                 } else Timber.e("  Item is not MarkerOptions")
                             }
                             else -> Timber.e("  Could not get items")
