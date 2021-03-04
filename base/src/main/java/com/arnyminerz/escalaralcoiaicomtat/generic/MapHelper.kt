@@ -254,6 +254,26 @@ class MapHelper(private val mapView: MapView) {
     }
 
     /**
+     * Moves the camera position
+     * @param position The target position
+     * @param zoom The target zoomo
+     * @param animate If the movement should be animated
+     * @author Arnau Mora
+     */
+    fun move(position: LatLng, zoom: Double, animate: Boolean = true) {
+        val update = CameraUpdateFactory.newCameraPosition(
+            CameraPosition.Builder()
+                .target(position)
+                .zoom(zoom)
+                .build()
+        )
+        if (animate)
+            map?.animateCamera(update)
+        else
+            map?.moveCamera(update)
+    }
+
+    /**
      * Enables the current location pointer. Requires the location permission to be granted
      * @param context The context to call from
      * @param cameraMode The camera mode to set
