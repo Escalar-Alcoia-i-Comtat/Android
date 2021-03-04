@@ -86,7 +86,7 @@ data class GeoMarker(
                 SETTINGS_MARKER_SIZE_PREF.get(context.sharedPreferences)
                     .toFloat(),
                 1f, 5f,
-                .1f, 2.5f
+                .1f, 1.2f
             )
             symbolOptions = symbolOptions
                 .withIconImage(id)
