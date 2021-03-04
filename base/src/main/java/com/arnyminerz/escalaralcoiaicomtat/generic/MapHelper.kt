@@ -41,7 +41,8 @@ import timber.log.Timber
 import java.io.FileNotFoundException
 import java.io.Serializable
 
-val ICON_WAYPOINT_ESCALADOR_BLANC = GeoIconDrawable("ic_waypoint_escalador_blanc", R.drawable.ic_waypoint_escalador_blanc)
+val ICON_WAYPOINT_ESCALADOR_BLANC =
+    GeoIconDrawable("ic_waypoint_escalador_blanc", R.drawable.ic_waypoint_escalador_blanc)
 
 val ICONS = listOf(ICON_WAYPOINT_ESCALADOR_BLANC)
 
