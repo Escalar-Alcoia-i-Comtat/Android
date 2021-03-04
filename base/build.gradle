@@ -131,18 +131,6 @@ dependencies {
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.6.1'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:0.9.0'
 
-    // Android Maps SDK 3.0.0 BETA
-    implementation 'com.google.android.libraries.maps:maps:3.1.0-beta'
-
-    // Android Maps SDK Extra
-    implementation 'com.google.android.gms:play-services-basement:17.6.0'
-    implementation 'com.google.android.gms:play-services-base:17.6.0'
-    implementation 'com.google.android.gms:play-services-gcm:17.0.0'
-    implementation 'com.google.android.gms:play-services-location:18.0.0'
-
-    // Android Maps SDK Utility Lib
-    implementation 'com.google.maps.android:android-maps-utils-v3:2.0.3'
-
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
 
