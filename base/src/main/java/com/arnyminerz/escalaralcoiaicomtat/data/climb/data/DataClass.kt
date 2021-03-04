@@ -2,12 +2,20 @@ package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.annotation.DrawableRes
+import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_AREA
+import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_SECTOR
+import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
@@ -29,6 +37,48 @@ import timber.log.Timber
 import java.io.File
 import java.io.Serializable
 import java.util.*
+
+/**
+ * Searches in AREAS and tries to get an intent from them
+ */
+@ExperimentalUnsignedTypes
+fun getIntent(context: Context, queryName: String): Intent? {
+    val areas = arrayListOf<Area>()
+    areas.addAll(AREAS)
+
+    Timber.d("Trying to generate intent from \"$queryName\". Searching in ${areas.size} areas.")
+    for ((a, area) in areas.withIndex()) {
+        Timber.d("  Finding in ${area.displayName}. It has ${area.count()} zones.")
+        if (area.displayName.equals(queryName, true))
+            return Intent(context, AreaActivity::class.java).apply {
+                Timber.d("Found Area id ${area.id}!")
+                putExtra(EXTRA_AREA, a)
+            }
+        else if (area.isNotEmpty())
+            for ((z, zone) in area.withIndex()) {
+                Timber.d("    Finding in ${zone.displayName}. It has ${zone.count()} sectors.")
+                if (zone.displayName.equals(queryName, true))
+                    return Intent(context, ZoneActivity::class.java).apply {
+                        Timber.d("Found Zone id ${zone.id}!")
+                        putExtra(EXTRA_AREA, a)
+                        putExtra(EXTRA_ZONE, z)
+                    }
+                else if (zone.isNotEmpty())
+                    for ((s, sector) in zone.withIndex()) {
+                        Timber.d("      Finding in ${sector.displayName}.")
+                        if (sector.displayName.equals(queryName, true))
+                            return Intent(context, SectorActivity::class.java).apply {
+                                Timber.d("Found Sector id ${sector.id}!")
+                                putExtra(EXTRA_AREA, a)
+                                putExtra(EXTRA_ZONE, z)
+                                putExtra(EXTRA_SECTOR, s)
+                            }
+                    }
+            }
+    }
+    Timber.w("Could not generate intent")
+    return null
+}
 
 @ExperimentalUnsignedTypes
 // A: List type

@@ -10,9 +10,10 @@ import android.view.animation.AnimationUtils
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.*
+import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity.Companion.KML_ADDRESS_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogMapMarkerBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.MissingPermissionException
@@ -50,29 +51,7 @@ class MapHelper(private val mapView: MapView) {
             Timber.d("Getting marker's title...")
             val title = marker.getWindow().title
             Timber.v("Searching in ${AREAS.size} cached areas...")
-            for (area in AREAS)
-                if (area.displayName.equals(title, true))
-                    return Intent(context, AreaActivity::class.java).apply {
-                        putExtra(EXTRA_AREA, area.id)
-                    }
-                else if (area.isNotEmpty())
-                    for (zone in area)
-                        if (zone.displayName.equals(title, true))
-                            return Intent(context, AreaActivity::class.java).apply {
-                                putExtra(EXTRA_AREA, area.id)
-                                putExtra(EXTRA_ZONE, zone.id)
-                            }
-                        else if (zone.isNotEmpty())
-                            for (sector in zone)
-                                if (sector.displayName.equals(title, true))
-                                    return Intent(context, AreaActivity::class.java).apply {
-                                        putExtra(EXTRA_AREA, area.id)
-                                        putExtra(EXTRA_ZONE, zone.id)
-                                        putExtra(EXTRA_SECTOR, sector.id)
-                                    }
-
-            Timber.w("Could not find targeted data class")
-            return null
+            return getIntent(context, title)
         }
 
         private fun getImageUrl(description: String?): String? {
