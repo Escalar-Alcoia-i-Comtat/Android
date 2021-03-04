@@ -32,6 +32,7 @@ import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.annotation.FillManager
 import com.mapbox.mapboxsdk.plugins.annotation.LineManager
@@ -123,41 +124,57 @@ class MapHelper(private val mapView: MapView) {
         return this
     }
 
+    fun mapSetup(map: MapboxMap, style: Style) {
+        this.map = map
+        this.style = style
+
+        Timber.d("Loading managers...")
+        symbolManager = SymbolManager(mapView, map, style)
+        fillManager = FillManager(mapView, map, style)
+        lineManager = LineManager(mapView, map, style)
+
+        Timber.d("Configuring SymbolManager...")
+        symbolManager!!.iconAllowOverlap = true
+        symbolManager!!.addClickListener {
+            Timber.d("Clicked symbol!")
+            var anyFalse = false
+            for (list in symbolClickListeners)
+                if (!list(it))
+                    anyFalse = true
+            !anyFalse
+        }
+
+        map.uiSettings.apply {
+            isCompassEnabled = false
+            setAllGesturesEnabled(false)
+        }
+
+        map.moveCamera(
+            CameraUpdateFactory.newCameraPosition(
+                CameraPosition.Builder()
+                    .target(startingPosition)
+                    .zoom(startingZoom)
+                    .build()
+            )
+        )
+    }
+
+    fun loadMapStyles(map: MapboxMap, callback: Style.OnStyleLoaded){
+        Timber.d("Setting map style...")
+        map.setStyle(Style.SATELLITE, callback)
+    }
+
+    fun loadMap(callback: OnMapReadyCallback) {
+        mapView.getMapAsync(callback)
+    }
+
     fun loadMap(
         callback: MapHelper.(mapView: MapView, map: MapboxMap, style: Style) -> Unit
     ): MapHelper {
         Timber.d("Loading map...")
-        mapView.getMapAsync { map ->
-            Timber.d("Setting map style...")
-            map.setStyle(Style.SATELLITE) { style ->
-                this.map = map
-                this.style = style
-
-                Timber.d("Loading managers...")
-                symbolManager = SymbolManager(mapView, map, style)
-                fillManager = FillManager(mapView, map, style)
-                lineManager = LineManager(mapView, map, style)
-
-                Timber.d("Configuring SymbolManager...")
-                symbolManager!!.iconAllowOverlap = true
-                symbolManager!!.addClickListener {
-                    Timber.d("Clicked symbol!")
-                    var anyFalse = false
-                    for (list in symbolClickListeners)
-                        if (!list(it))
-                            anyFalse = true
-                    !anyFalse
-                }
-
-                map.moveCamera(
-                    CameraUpdateFactory.newCameraPosition(
-                        CameraPosition.Builder()
-                            .target(startingPosition)
-                            .zoom(startingZoom)
-                            .build()
-                    )
-                )
-
+        loadMap { map ->
+            loadMapStyles(map) { style ->
+                mapSetup(map, style)
                 callback(this, mapView, map, style)
             }
         }
