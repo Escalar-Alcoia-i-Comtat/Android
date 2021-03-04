@@ -444,9 +444,6 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
     @SuppressLint("MissingPermission")
     private fun tryToShowCurrentLocation(): Boolean {
         if (!hasLocationPermission(this)) {
-            mapHelper.enableLocationComponent(this)
-            toast("My location is still being implemented")
-
             binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
             binding.fabCurrentLocation.setOnClickListener {
                 tryToShowCurrentLocation()
