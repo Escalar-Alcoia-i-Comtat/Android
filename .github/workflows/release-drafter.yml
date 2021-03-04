@@ -64,6 +64,22 @@ jobs:
           name: APK Artifact
           path: ./base/build/outputs/apk/release/EscalarAlcoiaIComtat-release.apk
 
+      - name: Debug Symbols Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Debug Symbols Artifact
+          path: ./base/build/outputs/native-debug-symbols/release/native-debug-symbols.zip
+      - name: Upload Symbols file
+        id: upload_symbols_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./base/build/outputs/native-debug-symbols/release/native-debug-symbols.zip
+          asset_name: native-debug-symbols.zip
+          asset_content_type: application/zip
+
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: ":robot: Commit Changes"
@@ -110,3 +126,19 @@ jobs:
           asset_path: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
           asset_name: EscalarAlcoiaIComtat.aab
           asset_content_type: application/octet-stream
+
+      - name: Debug Symbols Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Debug Symbols Artifact
+          path: ./base/build/outputs/native-debug-symbols/release/native-debug-symbols.zip
+      - name: Upload Symbols file
+        id: upload_symbols_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./base/build/outputs/native-debug-symbols/release/native-debug-symbols.zip
+          asset_name: native-debug-symbols.zip
+          asset_content_type: application/zip
