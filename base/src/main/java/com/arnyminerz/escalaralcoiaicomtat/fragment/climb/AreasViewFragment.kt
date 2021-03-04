@@ -3,7 +3,6 @@ package com.arnyminerz.escalaralcoiaicomtat.fragment.climb
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
@@ -16,14 +15,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity.Companion.hasLocationPermission
-import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity.Companion.MAP_DATA_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNull
 import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
@@ -37,13 +35,8 @@ import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.gms.location.*
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
-import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import timber.log.Timber
-import java.io.Serializable
 
 
 const val LOCATION_PERMISSION_REQUEST = 0
@@ -52,18 +45,13 @@ const val LOCATION_PERMISSION_REQUEST = 0
 class AreasViewFragment : NetworkChangeListenerFragment() {
     private var justAttached = false
 
-    var map: MapboxMap? = null
-    var style: Style? = null
-    private var symbolManager: SymbolManager? = null
+    var mapHelper: MapHelper? = null
 
     private var areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null
-
-    private val showingMarkers = arrayListOf<GeoMarker?>()
 
     private var newLocationProvider: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
-    private var addedAnyPoints = false
     private var counter = 0
 
     private var _binding: FragmentViewAreasBinding? = null
@@ -124,12 +112,9 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             binding.nearbyZonesCardView.isClickable = false
 
             val boundsBuilder = LatLngBounds.Builder()
-            addedAnyPoints = false
             counter = 0
 
-            showingMarkers.clear()
-
-            if (currentLocation != null && context != null && style != null)
+            if (currentLocation != null && context != null && mapHelper != null)
                 runAsync {
                     Timber.v("Iterating through ${AREAS.size} areas.")
                     Timber.v("Current Location: [${currentLocation.latitude},${currentLocation.longitude}]")
@@ -142,8 +127,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                                     SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences)
                                 if (zoneLocation.distanceTo(currentLocation.toLatLng()) <= requiredDistance) {
                                     boundsBuilder.include(zoneLocation)
-                                    addedAnyPoints = true
-                                    showingMarkers.add(
+                                    mapHelper!!.add(
                                         GeoMarker(
                                             zoneLocation.serializable(),
                                             null,
@@ -153,7 +137,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                                             )
                                         ).withImage(
                                             requireContext(),
-                                            style!!,
+                                            mapHelper!!,
                                             R.drawable.ic_waypoint_escalador_blanc
                                         )
                                     )
@@ -163,18 +147,11 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         }
                         counter++
 
-                        if (counter >= AREAS.size && map != null && symbolManager != null)
+                        if (counter >= AREAS.size)
                             requireContext().onUiThread {
-                                for (marker in showingMarkers)
-                                    marker?.addToMap(it, symbolManager!!)
+                                mapHelper!!.display(it)
+                                mapHelper!!.center()
 
-                                if (addedAnyPoints)
-                                    map!!.animateCamera(
-                                        CameraUpdateFactory.newLatLngBounds(
-                                            boundsBuilder.build(),
-                                            11
-                                        )
-                                    )
                                 binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
                             }
                     }
@@ -200,55 +177,41 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
         binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
 
-        binding.mapView.onCreate(savedInstanceState)
-        binding.mapView.getMapAsync { map ->
-            map.setStyle(Style.SATELLITE) { style ->
-                this.map = map
-                this.style = style
-                this.symbolManager = SymbolManager(binding.mapView, map, style)
-                updateNearbyZones(null)
+        mapHelper = MapHelper(binding.mapView)
+        mapHelper!!.onCreate(savedInstanceState)
+        mapHelper!!.loadMap { _, map, _ ->
+            updateNearbyZones(null)
 
-                map.uiSettings.apply {
-                    setAllGesturesEnabled(false)
-                }
+            map.uiSettings.apply {
+                setAllGesturesEnabled(false)
+            }
 
-                fun onMapClickListener() {
-                    Timber.v("Starting MapActivity...")
-                    val intent = Intent(requireContext(), MapsActivity::class.java)
-                    val mapData = arrayListOf<Serializable>()
-                    for (zm in showingMarkers)
-                        zm.let { zoneMarker ->
-                            Timber.v("  Adding position [${zoneMarker?.position?.latitude}, ${zoneMarker?.position?.longitude}]")
-                            mapData.add(zoneMarker as Serializable)
-                        }
-                    intent.putExtra(MAP_DATA_BUNDLE_EXTRA, mapData)
-                    startActivity(intent)
-                }
-                map.addOnMapClickListener {
-                    onMapClickListener()
-                    true
-                }
-                symbolManager?.addClickListener {
-                    onMapClickListener()
-                    true
-                }
+            map.addOnMapClickListener {
+                Timber.v("Starting MapActivity...")
+                startActivity(mapHelper!!.mapsActivityIntent(requireContext()))
+                true
+            }
+            mapHelper!!.addSymbolClickListener {
+                Timber.v("Starting MapActivity...")
+                startActivity(mapHelper!!.mapsActivityIntent(requireContext()))
+                true
+            }
 
-                if (newLocationProvider == null)
-                    newLocationProvider =
-                        LocationServices.getFusedLocationProviderClient(requireContext())
-                if (locationRequest == null)
-                    locationRequest = LocationRequest.create()
+            if (newLocationProvider == null)
+                newLocationProvider =
+                    LocationServices.getFusedLocationProviderClient(requireContext())
+            if (locationRequest == null)
+                locationRequest = LocationRequest.create()
 
-                Timber.d("Adding location provider listener")
-                if (hasLocationPermission(requireContext())) {
-                    newLocationProvider!!.requestLocationUpdates(
-                        locationRequest!!,
-                        locationCallback,
-                        Looper.getMainLooper()
-                    )
-                    newLocationProvider!!.lastLocation.addOnSuccessListener {
-                        updateNearbyZones(it)
-                    }
+            Timber.d("Adding location provider listener")
+            if (hasLocationPermission(requireContext())) {
+                newLocationProvider!!.requestLocationUpdates(
+                    locationRequest!!,
+                    locationCallback,
+                    Looper.getMainLooper()
+                )
+                newLocationProvider!!.lastLocation.addOnSuccessListener {
+                    updateNearbyZones(it)
                 }
             }
         }
