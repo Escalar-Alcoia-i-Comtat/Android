@@ -67,7 +67,7 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./base/build/outputs/apk/release/EscalarAlcoiaIComtat-release.apk
           asset_name: EscalarAlcoiaIComtat.apk
-          asset_content_type: application/vnd.android.package-archive
+#          asset_content_type: application/vnd.android.package-archive
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
@@ -98,4 +98,4 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
           asset_name: EscalarAlcoiaIComtat.aab
-          asset_content_type: application/octet-stream
+#          asset_content_type: application/octet-stream
