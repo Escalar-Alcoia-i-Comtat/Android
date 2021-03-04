@@ -27,6 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNull
+import com.arnyminerz.escalaralcoiaicomtat.generic.mapDouble
 import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
@@ -139,14 +140,18 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         area.children.forEach { zone ->
                             val zoneLocation = zone.position
                             if (zoneLocation != null) {
-                                val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences)
+                                val requiredDistance =
+                                    SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences)
                                 if (zoneLocation.distanceTo(currentLocation.toLatLng()) <= requiredDistance) {
                                     boundsBuilder.include(zoneLocation)
                                     addedAnyPoints = true
                                     showingMarkers.add(
                                         GeoMarker(
                                             zoneLocation.serializable(),
-                                            (30 * SETTINGS_MARKER_SIZE_PREF.get(requireContext().sharedPreferences).toFloat()).toInt(),
+                                            mapDouble(
+                                                SETTINGS_MARKER_SIZE_PREF.get(requireContext().sharedPreferences)
+                                                    .toDouble(), 1.0, 5.0, 0.5, 3.0
+                                            ).toInt(),
                                             MapObjectWindowData(
                                                 zone.displayName,
                                                 null

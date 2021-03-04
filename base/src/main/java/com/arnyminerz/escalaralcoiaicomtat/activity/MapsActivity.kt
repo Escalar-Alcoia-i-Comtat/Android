@@ -75,7 +75,6 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
     private var mapData: Serializable? = null
     private var kmzFile: File? = null
     private var map: MapboxMap? = null
-    private var mapStyle: Style? = null
     private var markerWindow: MarkerWindow? = null
     private var markerName: String? = null
 
@@ -224,12 +223,12 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
     override fun onMapReady(mapboxMap: MapboxMap) {
         map = mapboxMap
 
-        fun innerLoad() {
-            runOnUiThread {
-                with(map!!) {
-                    Timber.v("Got map. Setting style...")
-                    map?.setStyle(Style.MAPBOX_STREETS) { style ->
-                        mapStyle = style
+        with(map!!) {
+            Timber.v("Got map. Setting style...")
+            this.setStyle(Style.MAPBOX_STREETS) { style ->
+
+                fun innerLoad() {
+                    runOnUiThread {
                         val symbolManager = SymbolManager(binding.map, this, style)
                         val fillManager = FillManager(binding.map, this, style)
                         val lineManager = LineManager(binding.map, this, style)
@@ -414,14 +413,14 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                         }
                     }
                 }
+                if (kmlAddress != null || kmzFile != null)
+                    runAsync {
+                        loadData(networkState, style)
+                        innerLoad()
+                    }
+                else innerLoad()
             }
         }
-        if (kmlAddress != null || kmzFile != null)
-            runAsync {
-                loadData(networkState)
-                innerLoad()
-            }
-        else innerLoad()
     }
 
     @SuppressLint("MissingPermission")
@@ -688,13 +687,14 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
     }
 
     private fun loadData(
-        networkState: ConnectivityProvider.NetworkState
+        networkState: ConnectivityProvider.NetworkState,
+        style: Style
     ) {
         Timber.v("Found KML/KMZ to load")
         val loader = KMLLoader(kmlAddress, kmzFile)
-        if (map != null && mapStyle != null && mapStyle!!.isFullyLoaded) {
+        if (map != null && style.isFullyLoaded) {
             try {
-                val result = loader.load(this, map!!, mapStyle!!, networkState)
+                val result = loader.load(this, map!!, style, networkState)
 
                 Timber.v("  Loaded KML!")
                 markers.clear()
@@ -704,7 +704,7 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                 markers.addAll(result.markers)
                 polygons.addAll(result.polygons)
                 polylines.addAll(result.polylines)
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 Timber.e(e, "  Could not load!")
             }
         } else

@@ -7,6 +7,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.mapDouble
 import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.location.serializable
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -283,8 +284,10 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                                 Timber.v("New Marker: $title")
                                 val m = GeoMarker(
                                     latLng.serializable(),
-                                    (30 * SETTINGS_MARKER_SIZE_PREF.get(context.sharedPreferences)
-                                        .toFloat()).toInt(),
+                                    mapDouble(
+                                        SETTINGS_MARKER_SIZE_PREF.get(context.sharedPreferences)
+                                            .toDouble(), 1.0, 5.0, 0.5, 3.0
+                                    ).toInt(),
                                     if (title != null)
                                         MapObjectWindowData(title, description)
                                     else null
