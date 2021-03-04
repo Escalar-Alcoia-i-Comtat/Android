@@ -32,7 +32,6 @@ import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.annotation.FillManager
 import com.mapbox.mapboxsdk.plugins.annotation.LineManager
@@ -124,7 +123,7 @@ class MapHelper(private val mapView: MapView) {
         return this
     }
 
-    fun mapSetup(map: MapboxMap, style: Style) {
+    private fun mapSetup(map: MapboxMap, style: Style) {
         this.map = map
         this.style = style
 
@@ -159,21 +158,13 @@ class MapHelper(private val mapView: MapView) {
         )
     }
 
-    fun loadMapStyles(map: MapboxMap, callback: Style.OnStyleLoaded){
-        Timber.d("Setting map style...")
-        map.setStyle(Style.SATELLITE, callback)
-    }
-
-    fun loadMap(callback: OnMapReadyCallback) {
-        mapView.getMapAsync(callback)
-    }
-
     fun loadMap(
         callback: MapHelper.(mapView: MapView, map: MapboxMap, style: Style) -> Unit
     ): MapHelper {
         Timber.d("Loading map...")
-        loadMap { map ->
-            loadMapStyles(map) { style ->
+        mapView.getMapAsync { map ->
+            Timber.d("Setting map style...")
+            map.setStyle(Style.SATELLITE) { style ->
                 mapSetup(map, style)
                 callback(this, mapView, map, style)
             }
@@ -205,19 +196,22 @@ class MapHelper(private val mapView: MapView) {
 
         val loader = KMLLoader(kmlAddress, null)
         val result = loader.load(activity, map!!, style!!, networkState)
+        if (addToMap)
         activity.runOnUiThread {
             Timber.v("Loading features...")
-            if (addToMap) with(result) {
+            with(result) {
                 Timber.v("  Loading ${markers.size} markers...")
-                markers.addToMap(activity, symbolManager!!)
+                add(*markers.toTypedArray())
                 Timber.v("  Loading ${polygons.size} polygons...")
-                polygons.addToMap(fillManager!!, lineManager!!)
+                add(*polygons.toTypedArray())
                 Timber.v("  Loading ${polylines.size} polylines...")
-                polylines.addToMap(fillManager!!, lineManager!!)
-            }
+                add(*polylines.toTypedArray())
 
-            loadedKMLAddress = kmlAddress
+                display(activity)
+                center()
+            }
         }
+        loadedKMLAddress = kmlAddress
         return MapFeatures(result.markers, result.polylines, result.polygons)
     }
 
@@ -349,13 +343,13 @@ class MapHelper(private val mapView: MapView) {
      * @param context The context to call from
      * @throws MapNotInitializedException If the map has not been initialized
      */
+    @ExperimentalUnsignedTypes
     @Throws(MapNotInitializedException::class)
     fun display(context: Context) {
         if (symbolManager == null || fillManager == null || lineManager == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
-        for (marker in markers)
-            marker.addToMap(context, symbolManager!!)
+        markers.addToMap(context, symbolManager!!)
         for (geometry in geometries)
             geometry.addToMap(fillManager!!, lineManager!!)
     }

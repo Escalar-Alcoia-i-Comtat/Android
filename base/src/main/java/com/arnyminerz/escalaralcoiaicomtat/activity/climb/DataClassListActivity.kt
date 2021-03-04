@@ -11,15 +11,11 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
-import com.mapbox.mapboxsdk.maps.Style
 import timber.log.Timber
 import java.io.FileNotFoundException
 
 @ExperimentalUnsignedTypes
-abstract class DataClassListActivity<T : DataClass<*, *>>
-    : NetworkChangeListenerActivity(), OnMapReadyCallback, Style.OnStyleLoaded {
+abstract class DataClassListActivity<T : DataClass<*, *>> : NetworkChangeListenerActivity() {
     protected lateinit var binding: LayoutListBinding
     protected lateinit var dataClass: T
     private lateinit var mapHelper: MapHelper
@@ -74,38 +70,41 @@ abstract class DataClassListActivity<T : DataClass<*, *>>
         val hasInternet = state.hasInternet
         visibility(binding.noInternetCard.noInternetCardView, !hasInternet)
 
-        if (!mapLoaded) {
+        if (!mapLoaded && hasInternet) {
             Timber.v("Loading map...")
             mapHelper
                 .withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5)
-                .loadMap(this)
-        }
-    }
+                .loadMap { _, map, _ ->
+                    mapLoaded = true
+                    val kmlAddress = dataClass.kmlAddress
 
-    lateinit var mapboxMap: MapboxMap
-    override fun onMapReady(mapboxMap: MapboxMap) {
-        this.mapboxMap = mapboxMap
-        mapHelper.loadMapStyles(mapboxMap, this)
-    }
+                    if (kmlAddress != null)
+                        runAsync {
+                            try {
+                                mapHelper.loadKML(
+                                    this@DataClassListActivity,
+                                    kmlAddress,
+                                    state
+                                )
+                            } catch (e: NoInternetAccessException) {
+                                Timber.w("Could not load KML since internet connection is not available")
+                                visibility(binding.map, false)
+                            } catch (e: FileNotFoundException) {
+                                Timber.w("KMZ file not found")
+                            } finally {
+                                runOnUiThread { binding.loadingLayout.hide() }
+                            }
+                        }
+                    else {
+                        Timber.w("KML was not found")
+                        binding.loadingLayout.hide()
+                    }
 
-    override fun onStyleLoaded(style: Style) {
-        mapLoaded = true
-        binding.loadingLayout.hide()
-
-        runAsync {
-            try {
-                mapHelper.loadKML(this@DataClassListActivity, dataClass.kmlAddress, networkState)
-            } catch (e: NoInternetAccessException) {
-                Timber.w("Could not load KML since internet connection is not available")
-                visibility(binding.map, false)
-            } catch (e: FileNotFoundException) {
-                Timber.w("KMZ file not found")
-            }
-        }
-
-        mapboxMap.addOnMapClickListener {
-            mapHelper.showMapsActivity(this@DataClassListActivity)
-            true
+                    map.addOnMapClickListener {
+                        mapHelper.showMapsActivity(this@DataClassListActivity)
+                        true
+                    }
+                }
         }
     }
 }
