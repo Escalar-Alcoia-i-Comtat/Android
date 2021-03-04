@@ -27,9 +27,9 @@ data class MapObjectWindowData(
             if (!windowData.has("title"))
                 throw MalformedJsonException("Window data doesn't contain title")
             return MapObjectWindowData(
-                obj.get("title").asString,
-                if (obj.has("message"))
-                    obj.get("message").asString
+                windowData.get("title").asString,
+                if (windowData.has("message"))
+                    windowData.get("message").asString
                         .replace("\\\"", "\"")
                         .replace("\\\\", "\\")
                 else null
