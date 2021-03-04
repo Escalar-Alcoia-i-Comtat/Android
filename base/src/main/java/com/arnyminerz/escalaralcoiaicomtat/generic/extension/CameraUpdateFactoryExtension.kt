@@ -12,8 +12,7 @@ fun newLatLngBounds(points: ArrayList<LatLng>, padding: Int): CameraUpdate? {
         else null
     val boundsBuilder = LatLngBounds.Builder()
     for (point in points)
-        if (point.latitude != null && point.longitude != null)
-            boundsBuilder.include(point)
+        boundsBuilder.include(point)
     val bounds = boundsBuilder.build()
     return CameraUpdateFactory.newLatLngBounds(bounds, padding)
 }
