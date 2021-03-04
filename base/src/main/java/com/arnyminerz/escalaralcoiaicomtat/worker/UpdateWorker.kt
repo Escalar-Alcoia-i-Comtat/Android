@@ -5,7 +5,7 @@ import androidx.work.Data
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.loadAreas
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.loadAreasFromCache
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.DownloadAreasIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -25,7 +25,7 @@ class UpdateWorker(appContext: Context, workerParams: WorkerParameters) :
     override fun doWork(): Result {
         Timber.v("Will check for updates")
         Timber.d("Getting areas...")
-        val areas = loadAreas(applicationContext)
+        val areas = loadAreasFromCache(applicationContext)
         var shouldUpdate = false
         for (area in areas)
             if (area.updateAvailable()) {

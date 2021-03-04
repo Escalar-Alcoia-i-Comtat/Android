@@ -17,10 +17,10 @@ import java.util.*
 /**
  * Loads all the areas available in the server.
  * @param context The context to call from
- * @return A flow of areas.
+ * @return A collection of areas
  */
 @ExperimentalUnsignedTypes
-fun loadAreas(context: Context): Collection<Area> {
+fun loadAreasFromCache(context: Context): Collection<Area> {
     val areas = arrayListOf<Area>()
 
     val storageDataDir = context.filesDir
@@ -37,7 +37,7 @@ fun loadAreas(context: Context): Collection<Area> {
             for (a in 0 until toLoad) {
                 val json = areasJSON.getJSONObject(a)
                 val area = Area.fromDB(json)
-                Timber.d("  Emitting area $a")
+                Timber.d("  Adding area $a")
                 areas.add(area)
             }
     }

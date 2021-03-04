@@ -11,9 +11,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.core.app.ActivityCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getZones
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
@@ -22,7 +24,6 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerF
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
-import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
@@ -33,7 +34,6 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.gms.location.*
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import timber.log.Timber
 
 
@@ -83,6 +83,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         if (error)
             return
         Timber.v("Updating nearby zones...")
+        val position = currentLocation.toLatLng()
 
         binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
 
@@ -109,52 +110,57 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
             binding.nearbyZonesCardView.isClickable = false
 
-            val boundsBuilder = LatLngBounds.Builder()
             counter = 0
 
-            if (context != null && mapHelper != null)
-                runAsync {
-                    Timber.v("Iterating through ${AREAS.size} areas.")
-                    Timber.v("Current Location: [${currentLocation.latitude},${currentLocation.longitude}]")
-                    boundsBuilder.include(currentLocation.toLatLng())
-                    for (area in AREAS) {
-                        area.children.forEach { zone ->
-                            val zoneLocation = zone.position
-                            if (zoneLocation != null) {
-                                val requiredDistance =
-                                    SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences)
-                                if (zoneLocation.distanceTo(currentLocation.toLatLng()) <= requiredDistance) {
-                                    boundsBuilder.include(zoneLocation)
-                                    mapHelper!!.add(
-                                        GeoMarker(
-                                            zoneLocation.serializable(),
-                                            null,
-                                            MapObjectWindowData(
-                                                zone.displayName,
-                                                null
-                                            )
-                                        ).withImage(
-                                            requireContext(),
-                                            mapHelper!!,
-                                            R.drawable.ic_waypoint_escalador_blanc
+            val requiredDistance =
+                SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences)
+
+            if (context != null && mapHelper != null) {
+                mapHelper!!.clearSymbols()
+
+                Timber.d("Decoding symbol icon...")
+                val img = ResourcesCompat.getDrawable(
+                    requireContext().resources,
+                    R.drawable.ic_waypoint_escalador_blanc,
+                    requireContext().theme
+                )?.let {
+                    mapHelper!!.style!!.addImage("ic_waypoint_escalador_blanc", it)
+                    "ic_waypoint_escalador_blanc"
+                }
+
+                if (img != null)
+                    runAsync {
+                        val zones = AREAS.getZones()
+                        Timber.v("Iterating through ${zones.size} zones.")
+                        Timber.v("Current Location: [${currentLocation.latitude},${currentLocation.longitude}]")
+                        for (zone in zones)
+                            zone.position?.let { zoneLocation ->
+                                if (zoneLocation.distanceTo(position) <= requiredDistance) {
+                                    Timber.d("Adding zone #${zone.id}. Creating marker...")
+                                    var marker = GeoMarker(
+                                        zoneLocation.serializable(),
+                                        null,
+                                        MapObjectWindowData(
+                                            zone.displayName,
+                                            null
                                         )
                                     )
+                                    Timber.d("Setting image...")
+                                    marker = marker.withImage(img)
+                                    Timber.d("Adding marker to map")
+                                    mapHelper!!.add(marker)
                                 }
-                                //Log.v(TAG, "  Zone Location (${zoneLocation.distanceTo(currentLocation.toLatLng())}): [${zoneLocation.latitude},${zoneLocation.longitude}]")
-                            }
+                            } ?: Timber.d("Zone #${zone.id} doesn't have an stored location.")
+
+                        Timber.d("Finished adding markers.")
+                        requireActivity().runOnUiThread {
+                            mapHelper!!.display(requireContext())
+                            mapHelper!!.center()
+
+                            binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
                         }
-                        counter++
-
-                        if (counter >= AREAS.size)
-                            requireContext().onUiThread {
-                                mapHelper!!.display(it)
-                                mapHelper!!.center()
-
-                                binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
-                            }
-                    }
-                }
-            else Timber.w("Could not show nearby zones")
+                    } else Timber.w("Could not decode marker icon")
+            } else Timber.w("Could not show nearby zones")
         }
     }
 
@@ -171,33 +177,11 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentViewAreasBinding.inflate(inflater, container, false)
-        val view = binding.root
-
-        binding.nearbyZonesCardView.hide()
-        binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
 
         mapHelper = MapHelper(binding.mapView)
         mapHelper!!.onCreate(savedInstanceState)
-        mapHelper!!.loadMap { _, map, _ ->
-            map.uiSettings.apply {
-                setAllGesturesEnabled(false)
-            }
 
-            map.addOnMapClickListener {
-                Timber.v("Starting MapActivity...")
-                startActivity(mapHelper!!.mapsActivityIntent(requireContext()))
-                true
-            }
-            mapHelper!!.addSymbolClickListener {
-                Timber.v("Starting MapActivity...")
-                startActivity(mapHelper!!.mapsActivityIntent(requireContext()))
-                true
-            }
-
-            requestLocationUpdates()
-        }
-
-        return view
+        return binding.root
     }
 
     @SuppressLint("MissingPermission")
@@ -227,9 +211,31 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         } else Timber.w("Location listener not added since permission is not granted")
     }
 
-    private fun refreshAreas() {
+    fun refreshAreas() {
         if (context != null && isResumed) {
-            Timber.v("Initializing area adapter for AreasViewFragment...")
+            Timber.v("Refreshing areas...")
+            binding.nearbyZonesCardView.hide()
+            binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
+
+            Timber.d("Loading map...")
+            mapHelper!!.loadMap { _, map, _ ->
+                Timber.d("Map is ready.")
+
+                map.addOnMapClickListener {
+                    Timber.v("Starting MapActivity...")
+                    startActivity(mapHelper!!.mapsActivityIntent(requireContext()))
+                    true
+                }
+                mapHelper!!.addSymbolClickListener {
+                    Timber.v("Starting MapActivity...")
+                    startActivity(mapHelper!!.mapsActivityIntent(requireContext()))
+                    true
+                }
+
+                requestLocationUpdates()
+            }
+
+            Timber.d("Initializing area adapter for AreasViewFragment...")
             val adapter = AreaAdapter(requireContext(), areaClickListener)
 
             binding.areasRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -243,19 +249,13 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         } else Timber.w("Context is null or AreasViewFragment isn't resumed")
     }
 
-    fun updateAreas(listener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?) {
-        this.areaClickListener = listener
-        onUiThread { refreshAreas() }
+    fun setItemClickListener(areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?) {
+        this.areaClickListener = areaClickListener
     }
 
     @SuppressLint("MissingPermission")
     override fun onResume() {
         super.onResume()
-
-        if (isResumed)
-            refreshAreas()
-
-        requestLocationUpdates()
 
         justAttached = false
     }
@@ -276,9 +276,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         if (!isResumed) return
 
         visibility(binding.areasNoInternetCardView.noInternetCardView, !state.hasInternet)
-
-        if (isResumed)
-            refreshAreas()
     }
 
     private val locationCallback = object : LocationCallback() {

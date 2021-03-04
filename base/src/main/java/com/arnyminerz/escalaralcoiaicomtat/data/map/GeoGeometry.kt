@@ -2,10 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.data.map
 
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
-import com.mapbox.mapboxsdk.plugins.annotation.FillManager
-import com.mapbox.mapboxsdk.plugins.annotation.FillOptions
-import com.mapbox.mapboxsdk.plugins.annotation.LineManager
-import com.mapbox.mapboxsdk.plugins.annotation.LineOptions
+import com.mapbox.mapboxsdk.plugins.annotation.*
 import timber.log.Timber
 import java.io.Serializable
 
@@ -15,7 +12,7 @@ data class GeoGeometry(
     val windowData: MapObjectWindowData?,
     val closedShape: Boolean
 ) : Serializable {
-    fun addToMap(fillManager: FillManager, lineManager: LineManager) {
+    fun addToMap(fillManager: FillManager, lineManager: LineManager): Pair<Line, Fill?> {
         Timber.v("Creating new polygon with ${points.size} points...")
         if (closedShape) { // Polygon
             val fillOptions = FillOptions()
@@ -25,21 +22,25 @@ data class GeoGeometry(
                 .withLatLngs(points)
                 .apply(style)
 
-            fillManager.create(fillOptions)
-            lineManager.create(lineOptions)
+            val fill = fillManager.create(fillOptions)
+            val line = lineManager.create(lineOptions)
+            return Pair(line, fill)
         } else { // Polyline
             val lineOptions = LineOptions()
                 .withLatLngs(points)
                 .apply(style)
-            lineManager.create(lineOptions)
+            val line = lineManager.create(lineOptions)
+            return Pair(line, null)
         }
     }
 }
 
 @ExperimentalUnsignedTypes
-fun Collection<GeoGeometry>.addToMap(fillManager: FillManager, lineManager: LineManager) {
+fun Collection<GeoGeometry>.addToMap(fillManager: FillManager, lineManager: LineManager): List<Pair<Line, Fill?>> {
+    val list = arrayListOf<Pair<Line, Fill?>>()
     for (marker in this)
-        marker.addToMap(fillManager, lineManager)
+        list.add(marker.addToMap(fillManager, lineManager))
+    return list.toList()
 }
 
 fun LatLngBounds.Builder.include(points: ArrayList<LatLng>) {

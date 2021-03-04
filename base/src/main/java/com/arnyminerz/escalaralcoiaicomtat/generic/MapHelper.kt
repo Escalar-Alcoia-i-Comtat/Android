@@ -33,10 +33,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.plugins.annotation.FillManager
-import com.mapbox.mapboxsdk.plugins.annotation.LineManager
-import com.mapbox.mapboxsdk.plugins.annotation.Symbol
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
+import com.mapbox.mapboxsdk.plugins.annotation.*
 import timber.log.Timber
 import java.io.FileNotFoundException
 import java.io.Serializable
@@ -103,6 +100,9 @@ class MapHelper(private val mapView: MapView) {
 
     private val markers = arrayListOf<GeoMarker>()
     private val geometries = arrayListOf<GeoGeometry>()
+    private val symbols = arrayListOf<Symbol>()
+    private val lines = arrayListOf<Line>()
+    private val fills = arrayListOf<Fill>()
 
     private val symbolClickListeners = arrayListOf<Symbol.() -> Boolean>()
 
@@ -197,20 +197,20 @@ class MapHelper(private val mapView: MapView) {
         val loader = KMLLoader(kmlAddress, null)
         val result = loader.load(activity, map!!, style!!, networkState)
         if (addToMap)
-        activity.runOnUiThread {
-            Timber.v("Loading features...")
-            with(result) {
-                Timber.v("  Loading ${markers.size} markers...")
-                add(*markers.toTypedArray())
-                Timber.v("  Loading ${polygons.size} polygons...")
-                add(*polygons.toTypedArray())
-                Timber.v("  Loading ${polylines.size} polylines...")
-                add(*polylines.toTypedArray())
+            activity.runOnUiThread {
+                Timber.v("Loading features...")
+                with(result) {
+                    Timber.v("  Loading ${markers.size} markers...")
+                    add(*markers.toTypedArray())
+                    Timber.v("  Loading ${polygons.size} polygons...")
+                    add(*polygons.toTypedArray())
+                    Timber.v("  Loading ${polylines.size} polylines...")
+                    add(*polylines.toTypedArray())
 
-                display(activity)
-                center()
+                    display(activity)
+                    center()
+                }
             }
-        }
         loadedKMLAddress = kmlAddress
         return MapFeatures(result.markers, result.polylines, result.polygons)
     }
@@ -339,6 +339,48 @@ class MapHelper(private val mapView: MapView) {
     }
 
     /**
+     * Clears all the symbols from the map
+     * @author Arnau Mora
+     * @see SymbolManager
+     * @see Symbol
+     */
+    fun clearSymbols() {
+        if (symbolManager == null)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+        Timber.d("Clearing symbols from map...")
+        symbolManager!!.delete(symbols)
+        symbols.clear()
+    }
+
+    /**
+     * Clears all the lines from the map
+     * @author Arnau Mora
+     * @see LineManager
+     * @see Line
+     */
+    fun clearLines() {
+        if (lineManager == null)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+        Timber.d("Clearing lines from map...")
+        lineManager!!.delete(lines)
+        lines.clear()
+    }
+
+    /**
+     * Clears all the lines from the map
+     * @author Arnau Mora
+     * @see LineManager
+     * @see Line
+     */
+    fun clearFills() {
+        if (fillManager == null)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+        Timber.d("Clearing fills from map...")
+        fillManager!!.delete(fills)
+        fills.clear()
+    }
+
+    /**
      * Makes effective all the additions to the map through the add methods
      * @param context The context to call from
      * @throws MapNotInitializedException If the map has not been initialized
@@ -349,9 +391,20 @@ class MapHelper(private val mapView: MapView) {
         if (symbolManager == null || fillManager == null || lineManager == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
-        markers.addToMap(context, symbolManager!!)
-        for (geometry in geometries)
-            geometry.addToMap(fillManager!!, lineManager!!)
+        Timber.d("Displaying map features...")
+        Timber.d("Clearing old features...")
+        clearSymbols()
+        clearFills()
+        clearLines()
+
+        val symbols = markers.addToMap(context, symbolManager!!)
+        this.symbols.addAll(symbols)
+
+        val geometries = geometries.addToMap(fillManager!!, lineManager!!)
+        for (geometry in geometries){
+            lines.add(geometry.first)
+            geometry.second?.let { fills.add(it) }
+        }
     }
 
     /**
@@ -368,6 +421,7 @@ class MapHelper(private val mapView: MapView) {
         if (symbolManager == null || fillManager == null || lineManager == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
+        Timber.d("Centering map in features...")
         val points = arrayListOf<LatLng>()
         for (marker in markers)
             points.add(marker.position.toLatLng())
