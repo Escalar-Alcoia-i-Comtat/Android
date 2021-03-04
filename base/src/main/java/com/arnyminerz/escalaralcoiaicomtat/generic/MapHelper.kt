@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.LinearLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -514,6 +515,10 @@ class MapHelper(private val mapView: MapView) {
                 Timber.v("Launching intent...")
                 context.startActivity(activityIntent)
             }
+
+        binding.actionsLayout.orientation =
+            if (imageUrl != null) LinearLayout.VERTICAL
+            else LinearLayout.HORIZONTAL
 
         return MarkerWindow(context, marker, binding)
     }

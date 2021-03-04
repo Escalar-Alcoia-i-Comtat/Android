@@ -16,38 +16,41 @@
         android:layout_height="wrap_content"
         android:layout_margin="8dp">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_maps"
-            style="@style/Widget.MaterialComponents.FloatingActionButton"
+        <LinearLayout
+            android:id="@+id/actions_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:contentDescription="@string/fab_desc_map"
-            android:tooltipText="@string/action_open_maps"
-            app:borderWidth="0dp"
-            app:fabSize="mini"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/fab_enter"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/google_maps"
-            app:tint="@color/white"
-            tools:ignore="UnusedAttribute" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_enter"
-            style="@style/Widget.MaterialComponents.FloatingActionButton"
-            tools:ignore="UnusedAttribute"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:contentDescription="@string/fab_desc_enter"
-            app:borderWidth="0dp"
-            app:fabSize="mini"
+            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp"
-            app:tint="@color/white" />
+            app:layout_constraintTop_toTopOf="parent">
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_maps"
+                style="@style/Widget.MaterialComponents.FloatingActionButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:contentDescription="@string/fab_desc_map"
+                android:tooltipText="@string/action_open_maps"
+                app:borderWidth="0dp"
+                app:fabSize="mini"
+                app:srcCompat="@drawable/map_marker"
+                app:tint="@color/white"
+                tools:ignore="UnusedAttribute" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_enter"
+                style="@style/Widget.MaterialComponents.FloatingActionButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:contentDescription="@string/fab_desc_enter"
+                app:borderWidth="0dp"
+                app:fabSize="mini"
+                app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp"
+                app:tint="@color/white"
+                tools:ignore="UnusedAttribute" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/map_info_textView"
@@ -59,7 +62,7 @@
             android:text="@string/placeholder"
             android:textColor="?attr/text_dark"
             android:textSize="26sp"
-            app:layout_constraintEnd_toStartOf="@+id/fab_maps"
+            app:layout_constraintEnd_toStartOf="@+id/actions_layout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -75,7 +78,7 @@
             android:textColor="?attr/text_dark"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/fab_maps"
+            app:layout_constraintEnd_toStartOf="@+id/actions_layout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/map_info_textView" />
 
@@ -85,11 +88,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/image_desc_marker_image"
             android:scaleType="fitCenter"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/fab_maps"
+            app:layout_constraintEnd_toStartOf="@+id/actions_layout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/map_info_textView" />
     </androidx.constraintlayout.widget.ConstraintLayout>
