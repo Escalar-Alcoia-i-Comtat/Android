@@ -148,6 +148,7 @@ class MapHelper(private val mapView: MapView) {
 
     private var map: MapboxMap? = null
     private var style: Style? = null
+    private var symbolManager: SymbolManager? = null
 
     private var loadedKMLAddress: String? = null
 
@@ -178,6 +179,8 @@ class MapHelper(private val mapView: MapView) {
             map.setStyle(Style.SATELLITE) { style ->
                 this.map = map
                 this.style = style
+
+                symbolManager = SymbolManager(mapView, map, style)
 
                 map.moveCamera(
                     CameraUpdateFactory.newCameraPosition(
@@ -261,6 +264,9 @@ class MapHelper(private val mapView: MapView) {
      * @author Arnau Mora
      */
     fun move(position: LatLng, zoom: Double, animate: Boolean = true) {
+        if (map == null)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+
         val update = CameraUpdateFactory.newCameraPosition(
             CameraPosition.Builder()
                 .target(position)
@@ -304,6 +310,19 @@ class MapHelper(private val mapView: MapView) {
             isLocationComponentEnabled = true
             this.cameraMode = cameraMode
             this.renderMode = renderMode
+        }
+    }
+
+    /**
+     * Adds a click listener for a symbol
+     * @param call What to call on click
+     */
+    fun addSymbolClickListener(call: Symbol.() -> Boolean){
+        if (map == null || style == null)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+
+        symbolManager!!.addClickListener {
+            call(it)
         }
     }
 }
