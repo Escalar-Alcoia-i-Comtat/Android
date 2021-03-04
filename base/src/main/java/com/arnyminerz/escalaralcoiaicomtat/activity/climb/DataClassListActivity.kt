@@ -39,6 +39,8 @@ abstract class DataClassListActivity<T : DataClass<*, *>> : NetworkChangeListene
     override fun onResume() {
         super.onResume()
         mapHelper.onResume()
+        if(mapLoaded)
+            binding.loadingLayout.hide()
     }
 
     override fun onPause() {
