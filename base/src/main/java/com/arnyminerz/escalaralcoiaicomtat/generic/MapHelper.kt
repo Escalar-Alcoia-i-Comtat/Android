@@ -14,10 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity.Companion.KML_ADDRESS_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.find
-import com.arnyminerz.escalaralcoiaicomtat.data.map.KMLLoader
-import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
-import com.arnyminerz.escalaralcoiaicomtat.data.map.addToMap
-import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
+import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogMapMarkerBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.MissingPermissionException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
@@ -27,8 +24,10 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.Glide
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraPosition
+import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
 import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
@@ -155,6 +154,8 @@ class MapHelper(private val mapView: MapView) {
     private var startingPosition: LatLng = LatLng(-52.6885, -70.1395)
     private var startingZoom: Double = 2.0
 
+    private val markers = arrayListOf<GeoMarker>()
+
     fun onCreate(savedInstanceState: Bundle?) = mapView.onCreate(savedInstanceState)
 
     fun onStart() = mapView.onStart()
@@ -267,12 +268,27 @@ class MapHelper(private val mapView: MapView) {
         if (map == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
-        val update = CameraUpdateFactory.newCameraPosition(
-            CameraPosition.Builder()
-                .target(position)
-                .zoom(zoom)
-                .build()
+        move(
+            CameraUpdateFactory.newCameraPosition(
+                CameraPosition.Builder()
+                    .target(position)
+                    .zoom(zoom)
+                    .build()
+            ),
+            animate
         )
+    }
+
+    /**
+     * Moves the camera position
+     * @param update The movement to make
+     * @param animate If the movement should be animated
+     * @author Arnau Mora
+     */
+    fun move(update: CameraUpdate, animate: Boolean = true) {
+        if (map == null)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+
         if (animate)
             map?.animateCamera(update)
         else
@@ -316,14 +332,67 @@ class MapHelper(private val mapView: MapView) {
     /**
      * Adds a click listener for a symbol
      * @param call What to call on click
+     * @throws MapNotInitializedException If the map has not been initialized
      */
-    fun addSymbolClickListener(call: Symbol.() -> Boolean){
+    @Throws(MapNotInitializedException::class)
+    fun addSymbolClickListener(call: Symbol.() -> Boolean) {
         if (map == null || style == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
         symbolManager!!.addClickListener {
             call(it)
         }
+    }
+
+    /**
+     * Adds a marker to the map
+     * @param marker The marker to add
+     * @see GeoMarker
+     * @throws MapNotInitializedException If the map has not been initialized
+     */
+    @Throws(MapNotInitializedException::class)
+    fun add(marker: GeoMarker) {
+        markers.add(marker)
+    }
+
+    /**
+     * Makes effective all the additions to the map through the add methods
+     * @param context The context to call from
+     * @throws MapNotInitializedException If the map has not been initialized
+     */
+    @Throws(MapNotInitializedException::class)
+    fun display(context: Context) {
+        if (symbolManager == null)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+
+        for (marker in markers)
+            marker.addToMap(context, symbolManager!!)
+    }
+
+    /**
+     * Centers all the contents into the map window
+     * @param padding Padding added to the bounds
+     * @param animate If the movement should be animated
+     * @throws MapNotInitializedException If the map has not been initialized
+     */
+    @Throws(MapNotInitializedException::class)
+    fun center(padding: Int = 11, animate: Boolean = true) {
+        if (markers.isEmpty())
+            return
+
+        if (symbolManager == null)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+
+        val boundsBuilder = LatLngBounds.Builder()
+        for (marker in markers)
+            boundsBuilder.include(marker.position.toLatLng())
+
+        move(
+            CameraUpdateFactory.newLatLngBounds(
+                boundsBuilder.build(),
+                padding
+            ), animate
+        )
     }
 }
 
