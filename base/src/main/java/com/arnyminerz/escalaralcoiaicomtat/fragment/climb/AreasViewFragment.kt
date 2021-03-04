@@ -27,7 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNull
-import com.arnyminerz.escalaralcoiaicomtat.generic.mapDouble
+import com.arnyminerz.escalaralcoiaicomtat.generic.mapFloat
 import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
@@ -148,10 +148,12 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                                     showingMarkers.add(
                                         GeoMarker(
                                             zoneLocation.serializable(),
-                                            mapDouble(
+                                            mapFloat(
                                                 SETTINGS_MARKER_SIZE_PREF.get(requireContext().sharedPreferences)
-                                                    .toDouble(), 1.0, 5.0, 0.5, 3.0
-                                            ).toInt(),
+                                                    .toFloat(),
+                                                1f, 5f,
+                                                .5f, 2.5f
+                                            ),
                                             MapObjectWindowData(
                                                 zone.displayName,
                                                 null

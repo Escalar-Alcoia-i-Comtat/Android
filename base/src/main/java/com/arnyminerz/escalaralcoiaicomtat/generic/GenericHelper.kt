@@ -115,5 +115,5 @@ fun runAsync(call: () -> Unit) =
         runCatching(call)
     }
 
-fun mapDouble(x: Double, in_min: Double, in_max: Double, out_min: Double, out_max: Double): Double =
+fun mapFloat(x: Float, in_min: Float, in_max: Float, out_min: Float, out_max: Float): Float =
     (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min

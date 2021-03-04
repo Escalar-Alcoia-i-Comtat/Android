@@ -20,7 +20,7 @@ import java.io.Serializable
 @Suppress("unused")
 data class GeoMarker(
     val position: SerializableLatLng,
-    val iconSize: Int = 30,
+    val iconSize: Float = 2.0f,
     val windowData: MapObjectWindowData? = null
 ) : Serializable {
     val id = generateUUID()
@@ -63,7 +63,7 @@ data class GeoMarker(
         if (icon.isNotNull())
             symbolOptions = symbolOptions
                 .withIconImage(id)
-                .withIconSize(iconSize.toFloat())
+                .withIconSize(iconSize)
 
         if (windowData != null)
             symbolOptions.withData(windowData.data())
