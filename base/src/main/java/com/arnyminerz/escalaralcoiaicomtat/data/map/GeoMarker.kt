@@ -51,7 +51,7 @@ data class GeoMarker(
     }
 
     fun withImage(style: Style, bitmap: Bitmap): GeoMarker {
-        style.addImage(id, bitmap, true)
+        style.addImage(id, bitmap, false)
         icon = SerializableBitmap(bitmap)
         return this
     }
