@@ -85,6 +85,8 @@ class MapHelper(private val mapView: MapView) {
     var style: Style? = null
         private set
     private var symbolManager: SymbolManager? = null
+    private var fillManager: FillManager? = null
+    private var lineManager: LineManager? = null
 
     private var loadedKMLAddress: String? = null
 
@@ -92,6 +94,7 @@ class MapHelper(private val mapView: MapView) {
     private var startingZoom: Double = 2.0
 
     private val markers = arrayListOf<GeoMarker>()
+    private val geometries = arrayListOf<GeoGeometry>()
 
     fun onCreate(savedInstanceState: Bundle?) = mapView.onCreate(savedInstanceState)
 
@@ -119,6 +122,8 @@ class MapHelper(private val mapView: MapView) {
                 this.style = style
 
                 symbolManager = SymbolManager(mapView, map, style)
+                fillManager = FillManager(mapView, map, style)
+                lineManager = LineManager(mapView, map, style)
 
                 map.moveCamera(
                     CameraUpdateFactory.newCameraPosition(
@@ -294,17 +299,31 @@ class MapHelper(private val mapView: MapView) {
     }
 
     /**
+     * Adds geometries to the map
+     * @param geometries The geometries to add
+     * @see GeoGeometry
+     * @throws MapNotInitializedException If the map has not been initialized
+     */
+    @Throws(MapNotInitializedException::class)
+    fun add(vararg geometries: GeoGeometry) {
+        for (geometry in geometries)
+            this.geometries.add(geometry)
+    }
+
+    /**
      * Makes effective all the additions to the map through the add methods
      * @param context The context to call from
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @Throws(MapNotInitializedException::class)
     fun display(context: Context) {
-        if (symbolManager == null)
+        if (symbolManager == null || fillManager == null || lineManager == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
         for (marker in markers)
             marker.addToMap(context, symbolManager!!)
+        for (geometry in geometries)
+            geometry.addToMap(fillManager!!, lineManager!!)
     }
 
     /**
@@ -318,8 +337,14 @@ class MapHelper(private val mapView: MapView) {
         if (markers.isEmpty())
             return
 
-        if (symbolManager == null)
+        if (symbolManager == null || fillManager == null || lineManager == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+
+        val points = arrayListOf<LatLng>()
+        for (marker in markers)
+            points.add(marker.position.toLatLng())
+        for (geometry in geometries)
+            points.addAll(geometry.points)
 
         if (markers.size == 1)
             move(
