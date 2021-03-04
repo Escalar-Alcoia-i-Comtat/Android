@@ -222,7 +222,7 @@ class MapHelper(private val mapView: MapView) {
      * @param animate If the movement should be animated
      * @author Arnau Mora
      */
-    fun move(update: CameraUpdate, animate: Boolean = true) {
+    private fun move(update: CameraUpdate, animate: Boolean = true) {
         if (map == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
@@ -320,16 +320,24 @@ class MapHelper(private val mapView: MapView) {
         if (symbolManager == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
-        val boundsBuilder = LatLngBounds.Builder()
-        for (marker in markers)
-            boundsBuilder.include(marker.position.toLatLng())
+        if (markers.size == 1)
+            move(
+                CameraUpdateFactory.newCameraPosition(
+                    CameraPosition.Builder().target(markers.first().position.toLatLng()).build()
+                )
+            )
+        else {
+            val boundsBuilder = LatLngBounds.Builder()
+            for (marker in markers)
+                boundsBuilder.include(marker.position.toLatLng())
 
-        move(
-            CameraUpdateFactory.newLatLngBounds(
-                boundsBuilder.build(),
-                padding
-            ), animate
-        )
+            move(
+                CameraUpdateFactory.newLatLngBounds(
+                    boundsBuilder.build(),
+                    padding
+                ), animate
+            )
+        }
     }
 
     @ExperimentalUnsignedTypes
