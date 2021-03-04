@@ -118,17 +118,22 @@ class MapHelper(private val mapView: MapView) {
     fun loadMap(
         callback: MapHelper.(mapView: MapView, map: MapboxMap, style: Style) -> Unit
     ): MapHelper {
+        Timber.d("Loading map...")
         mapView.getMapAsync { map ->
+            Timber.d("Setting map style...")
             map.setStyle(Style.SATELLITE) { style ->
                 this.map = map
                 this.style = style
 
+                Timber.d("Loading managers...")
                 symbolManager = SymbolManager(mapView, map, style)
                 fillManager = FillManager(mapView, map, style)
                 lineManager = LineManager(mapView, map, style)
 
-                symbolManager!!.iconAllowOverlap = false
+                Timber.d("Configuring SymbolManager...")
+                symbolManager!!.iconAllowOverlap = true
                 symbolManager!!.addClickListener {
+                    Timber.d("Clicked symbol!")
                     var anyFalse = false
                     for (list in symbolClickListeners)
                         if (!list(it))
@@ -170,25 +175,20 @@ class MapHelper(private val mapView: MapView) {
         networkState: ConnectivityProvider.NetworkState,
         addToMap: Boolean = true
     ): MapFeatures {
-        if (map == null || style == null)
+        if (map == null || style == null || symbolManager == null || fillManager == null || lineManager == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
         val loader = KMLLoader(kmlAddress, null)
         val result = loader.load(activity, map!!, style!!, networkState)
         activity.runOnUiThread {
-            Timber.v("Loaded kml. Loading managers...")
-            val symbolManager = SymbolManager(mapView, map!!, style!!)
-            val lineManager = LineManager(mapView, map!!, style!!)
-            val fillManager = FillManager(mapView, map!!, style!!)
-
             Timber.v("Loading features...")
             if (addToMap) with(result) {
                 Timber.v("  Loading ${markers.size} markers...")
-                markers.addToMap(activity, symbolManager)
+                markers.addToMap(activity, symbolManager!!)
                 Timber.v("  Loading ${polygons.size} polygons...")
-                polygons.addToMap(fillManager, lineManager)
+                polygons.addToMap(fillManager!!, lineManager!!)
                 Timber.v("  Loading ${polylines.size} polylines...")
-                polylines.addToMap(fillManager, lineManager)
+                polylines.addToMap(fillManager!!, lineManager!!)
             }
 
             loadedKMLAddress = kmlAddress
