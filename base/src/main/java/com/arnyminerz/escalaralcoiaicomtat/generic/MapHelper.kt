@@ -132,7 +132,7 @@ class MapHelper(private val mapView: MapView) {
 
         map.uiSettings.apply {
             isCompassEnabled = false
-            setAllGesturesEnabled(false)
+            setAllGesturesEnabled(true)
         }
 
         map.moveCamera(
