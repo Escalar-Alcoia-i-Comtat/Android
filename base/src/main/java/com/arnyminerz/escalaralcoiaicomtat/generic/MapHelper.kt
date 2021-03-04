@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.*
@@ -37,6 +38,10 @@ import com.mapbox.mapboxsdk.plugins.annotation.*
 import timber.log.Timber
 import java.io.FileNotFoundException
 import java.io.Serializable
+
+val ICON_WAYPOINT_ESCALADOR_BLANC = GeoIconDrawable("ic_waypoint_escalador_blanc", R.drawable.ic_waypoint_escalador_blanc)
+
+val ICONS = listOf(ICON_WAYPOINT_ESCALADOR_BLANC)
 
 class MapHelper(private val mapView: MapView) {
     companion object {
@@ -123,7 +128,7 @@ class MapHelper(private val mapView: MapView) {
         return this
     }
 
-    private fun mapSetup(map: MapboxMap, style: Style) {
+    private fun mapSetup(context: Context, map: MapboxMap, style: Style) {
         this.map = map
         this.style = style
 
@@ -142,6 +147,7 @@ class MapHelper(private val mapView: MapView) {
                     anyFalse = true
             !anyFalse
         }
+        loadDefaultIcons(context)
 
         map.uiSettings.apply {
             isCompassEnabled = false
@@ -158,14 +164,33 @@ class MapHelper(private val mapView: MapView) {
         )
     }
 
-    fun loadMap(
-        callback: MapHelper.(mapView: MapView, map: MapboxMap, style: Style) -> Unit
+    private fun loadDefaultIcons(context: Context){
+        if (style == null)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+
+        Timber.d("Loading default icons...")
+        for(icon in ICONS){
+            val drawable = ResourcesCompat.getDrawable(
+                context.resources,
+                icon.icon,
+                context.theme
+            )
+            if (drawable == null){
+                Timber.d("Icon ${icon.name} doesn't have a valid drawable.")
+                continue
+            }
+            style!!.addImage(icon.name, drawable)
+        }
+    }
+
+    fun loadMap(context: Context,
+                callback: MapHelper.(mapView: MapView, map: MapboxMap, style: Style) -> Unit
     ): MapHelper {
         Timber.d("Loading map...")
         mapView.getMapAsync { map ->
             Timber.d("Setting map style...")
             map.setStyle(Style.SATELLITE) { style ->
-                mapSetup(map, style)
+                mapSetup(context, map, style)
                 callback(this, mapView, map, style)
             }
         }

@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.data.map
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.arnyminerz.escalaralcoiaicomtat.data.SerializableBitmap
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.generateUUID
@@ -24,23 +23,18 @@ data class GeoMarker(
 ) : Serializable {
     val id = generateUUID()
 
-    private var icon: SerializableBitmap? = null
     private var iconImage: String? = null
-
-    fun getIcon(): Bitmap? = icon?.bitmap
 
     fun withImage(style: Style, bitmap: Bitmap): GeoMarker {
         Timber.d("Setting image for GeoMarker...")
         Timber.d("Adding image to Style...")
         style.addImage(id, bitmap, false)
-        Timber.d("Storing image to class...")
-        icon = SerializableBitmap(bitmap)
         iconImage = id
         return this
     }
 
-    fun withImage(image: String): GeoMarker {
-        iconImage = image
+    fun withImage(icon: GeoIcon): GeoMarker {
+        iconImage = icon.name
         return this
     }
 
@@ -49,6 +43,7 @@ data class GeoMarker(
             .withLatLng(LatLng(position.latitude, position.longitude))
 
         if (iconImage != null) {
+            Timber.d("Marker $id has an icon named $iconImage")
             val iconSize = iconSize ?: mapFloat(
                 SETTINGS_MARKER_SIZE_PREF.get(context.sharedPreferences)
                     .toFloat(),
@@ -58,7 +53,8 @@ data class GeoMarker(
             symbolOptions = symbolOptions
                 .withIconImage(iconImage)
                 .withIconSize(iconSize)
-        }
+        } else
+            Timber.d("Marker $id doesn't have an icon.")
 
         if (windowData != null)
             symbolOptions.withData(windowData.data())

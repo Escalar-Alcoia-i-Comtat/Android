@@ -158,7 +158,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
 
         mapHelper = MapHelper(binding.map)
         mapHelper.onCreate(savedInstanceState)
-        mapHelper.loadMap { _, map, _ ->
+        mapHelper.loadMap(this) { _, map, _ ->
             runAsync {
                 if (kmlAddress != null || kmzFile != null)
                     loadData(networkState)
@@ -220,23 +220,24 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                             items.size > 1 -> {
                                 Timber.v("  Multiple points")
                                 for (item in items)
-                                    if (item is GeoMarker) {
+                                    if (item is GeoMarker)
                                         mapHelper.add(item)
-                                    } else Timber.e("  Item is not GeoMarker")
-                                mapHelper.display(this@MapsActivity)
-                                mapHelper.center(50)
+                                    else Timber.e("  Item is not GeoMarker")
                             }
                             items.size > 0 -> items.first().let { item ->
                                 Timber.v("  Only one point")
                                 if (item is GeoMarker) {
                                     Timber.v("  Adding marker and moving camera")
                                     mapHelper.add(item)
-                                    mapHelper.display(this@MapsActivity)
-                                    mapHelper.center(50)
                                 } else Timber.e("  Item is not MarkerOptions")
                             }
-                            else -> Timber.e("  Could not get items")
+                            else -> {
+                                Timber.e("  Could not get items")
+                                return@runOnUiThread
+                            }
                         }
+                        mapHelper.display(this@MapsActivity)
+                        mapHelper.center(50)
                     }
 
                     binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)

@@ -51,7 +51,7 @@ class MapFragment : NetworkChangeListenerFragment() {
         mapHelper.onCreate(savedInstanceState)
         mapHelper
             .withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5)
-            .loadMap { _, map, _ ->
+            .loadMap(requireContext()) { _, map, _ ->
                 this@MapFragment.map = map
 
                 if (context != null)

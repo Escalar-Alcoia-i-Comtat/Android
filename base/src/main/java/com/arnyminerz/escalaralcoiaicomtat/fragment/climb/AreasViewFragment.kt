@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.core.app.ActivityCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
@@ -22,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
+import com.arnyminerz.escalaralcoiaicomtat.generic.ICON_WAYPOINT_ESCALADOR_BLANC
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
@@ -118,48 +118,37 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             if (context != null && mapHelper != null) {
                 mapHelper!!.clearSymbols()
 
-                Timber.d("Decoding symbol icon...")
-                val img = ResourcesCompat.getDrawable(
-                    requireContext().resources,
-                    R.drawable.ic_waypoint_escalador_blanc,
-                    requireContext().theme
-                )?.let {
-                    mapHelper!!.style!!.addImage("ic_waypoint_escalador_blanc", it)
-                    "ic_waypoint_escalador_blanc"
-                }
-
-                if (img != null)
-                    runAsync {
-                        val zones = AREAS.getZones()
-                        Timber.v("Iterating through ${zones.size} zones.")
-                        Timber.v("Current Location: [${currentLocation.latitude},${currentLocation.longitude}]")
-                        for (zone in zones)
-                            zone.position?.let { zoneLocation ->
-                                if (zoneLocation.distanceTo(position) <= requiredDistance) {
-                                    Timber.d("Adding zone #${zone.id}. Creating marker...")
-                                    var marker = GeoMarker(
-                                        zoneLocation.serializable(),
-                                        null,
-                                        MapObjectWindowData(
-                                            zone.displayName,
-                                            null
-                                        )
+                runAsync {
+                    val zones = AREAS.getZones()
+                    Timber.v("Iterating through ${zones.size} zones.")
+                    Timber.v("Current Location: [${currentLocation.latitude},${currentLocation.longitude}]")
+                    for (zone in zones)
+                        zone.position?.let { zoneLocation ->
+                            if (zoneLocation.distanceTo(position) <= requiredDistance) {
+                                Timber.d("Adding zone #${zone.id}. Creating marker...")
+                                var marker = GeoMarker(
+                                    zoneLocation.serializable(),
+                                    null,
+                                    MapObjectWindowData(
+                                        zone.displayName,
+                                        null
                                     )
-                                    Timber.d("Setting image...")
-                                    marker = marker.withImage(img)
-                                    Timber.d("Adding marker to map")
-                                    mapHelper!!.add(marker)
-                                }
-                            } ?: Timber.d("Zone #${zone.id} doesn't have an stored location.")
+                                )
+                                Timber.d("Setting image...")
+                                marker = marker.withImage(ICON_WAYPOINT_ESCALADOR_BLANC)
+                                Timber.d("Adding marker to map")
+                                mapHelper!!.add(marker)
+                            }
+                        } ?: Timber.d("Zone #${zone.id} doesn't have an stored location.")
 
-                        Timber.d("Finished adding markers.")
-                        requireActivity().runOnUiThread {
-                            mapHelper!!.display(requireContext())
-                            mapHelper!!.center()
+                    Timber.d("Finished adding markers.")
+                    requireActivity().runOnUiThread {
+                        mapHelper!!.display(requireContext())
+                        mapHelper!!.center()
 
-                            binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
-                        }
-                    } else Timber.w("Could not decode marker icon")
+                        binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
+                    }
+                }
             } else Timber.w("Could not show nearby zones")
         }
     }
@@ -218,7 +207,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
 
             Timber.d("Loading map...")
-            mapHelper!!.loadMap { _, map, _ ->
+            mapHelper!!.loadMap(requireContext()) { _, map, _ ->
                 Timber.d("Map is ready.")
 
                 map.addOnMapClickListener {
