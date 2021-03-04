@@ -96,6 +96,8 @@ class MapHelper(private val mapView: MapView) {
     private val markers = arrayListOf<GeoMarker>()
     private val geometries = arrayListOf<GeoGeometry>()
 
+    private val symbolClickListeners = arrayListOf<Symbol.() -> Boolean>()
+
     fun onCreate(savedInstanceState: Bundle?) = mapView.onCreate(savedInstanceState)
 
     fun onStart() = mapView.onStart()
@@ -124,6 +126,15 @@ class MapHelper(private val mapView: MapView) {
                 symbolManager = SymbolManager(mapView, map, style)
                 fillManager = FillManager(mapView, map, style)
                 lineManager = LineManager(mapView, map, style)
+
+                symbolManager!!.iconAllowOverlap = false
+                symbolManager!!.addClickListener {
+                    var anyFalse = false
+                    for (list in symbolClickListeners)
+                        if (!list(it))
+                            anyFalse = true
+                    !anyFalse
+                }
 
                 map.moveCamera(
                     CameraUpdateFactory.newCameraPosition(
@@ -281,9 +292,7 @@ class MapHelper(private val mapView: MapView) {
         if (map == null || style == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
-        symbolManager!!.addClickListener {
-            call(it)
-        }
+        symbolClickListeners.add(call)
     }
 
     /**
