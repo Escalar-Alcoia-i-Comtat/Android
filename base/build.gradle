@@ -104,7 +104,7 @@ dependencies {
     implementation 'androidx.preference:preference-ktx:1.1.1'
 
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
-    implementation 'com.google.api-client:google-api-client:1.30.11'
+    implementation 'com.google.api-client:google-api-client:1.31.3'
     implementation 'com.google.android.play:core-ktx:1.8.1'
 
     //testImplementation 'junit:junit:4.13'
