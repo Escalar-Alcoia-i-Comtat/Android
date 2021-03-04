@@ -51,48 +51,62 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
         with(context) {
             runAsync {
                 if (networkState.hasInternet) {
-                    Timber.v(
-                        if (kmlAddress != null) "Downloading source KML ($kmlAddress)..." else if (kmzFile != null) "Loading stored KML..." else "WTF am I loading?"
-                    )
+                    val tempDir = kmlAddress?.let { addr -> File(cacheDir, addr.replace("/", "")) }
+                    val docKmlFile = File(tempDir, "doc.kml")
+                    var kmlDownloaded = false
                     val stream =
-                        if (kmlAddress != null)
-                            if (kmlAddress.endsWith("kmz")) null
-                            else download(kmlAddress)
-                        else null
+                        if (tempDir?.exists() == true && docKmlFile.exists()) {
+                            Timber.v("The kml for ($kmlAddress) is already downloaded in cache. Loading from there.")
+                            kmlDownloaded = true
+                            null
+                        } else {
+                            val stream = if (kmlAddress != null)
+                                if (kmlAddress.endsWith("kmz")) null
+                                else {
+                                    Timber.v("Downloading source KML ($kmlAddress)...")
+                                    download(kmlAddress)
+                                }
+                            else null
 
-                    val tempDirParent = File(cacheDir, "temp")
-                    val tempDir = if (kmlAddress != null) File(
-                        tempDirParent,
-                        kmlAddress.replace("/", "")
-                    ) else null
-                    if (kmlAddress != null) {
-                        if (tempDir!!.exists())
-                            if (tempDir.deleteRecursively())
-                                Timber.d("Deleted old tempDir")
-                            else
-                                Timber.e("Could not delete tempDir!")
-                        if (tempDir.mkdirs())
-                            Timber.d("Created tempDir")
-                        else
-                            Timber.e("Could not create tempDir!")
+                            if (tempDir != null)
+                                if (tempDir.mkdirs())
+                                    Timber.d("Created tempDir")
+                                else
+                                    Timber.e("Could not create tempDir!")
+
+                            stream
+                        }
+                    val kmldbf: DocumentBuilderFactory =
+                        DocumentBuilderFactory.newInstance()
+                    val kmlDB: DocumentBuilder = kmldbf.newDocumentBuilder()
+                    val kmlDoc: Document? = when {
+                        stream != null -> {
+                            Timber.d("Parsing stream...")
+                            val doc = kmlDB.parse(stream)
+                            Timber.d("Stream ready.")
+                            doc
+                        }
+                        kmlDownloaded -> {
+                            Timber.d("Parsing file contents ($docKmlFile)...")
+                            val doc = kmlDB.parse(docKmlFile)
+                            Timber.d("Contents loaded!")
+                            doc
+                        }
+                        else -> null
                     }
 
-                    val kmlDoc: Document? = if (stream != null) {
-                        val kmldbf: DocumentBuilderFactory =
-                            DocumentBuilderFactory.newInstance()
-                        val kmlDB: DocumentBuilder = kmldbf.newDocumentBuilder()
-                        kmlDB.parse(stream)
-                    } else null
-
                     //Timber.d("Source KML: ${kmlDoc?.toReadableString()}")
+                    if (kmzFile != null)
+                        Timber.v("Loading stored KML...")
 
                     val hrefL = kmlDoc?.getElementsByTagName("href")
+                    val isKmlAddressValid = (hrefL != null && hrefL.length > 0) ||
+                            kmlAddress?.endsWith("kmz") == true
                     val doc =
-                        if (kmlAddress != null &&
-                            ((hrefL != null && hrefL.length > 0) || kmlAddress.endsWith(
-                                "kmz"
-                            )) || kmzFile != null
+                        if (kmlAddress != null && isKmlAddressValid
+                            || kmzFile != null
                         ) {
+                            Timber.v("The document needs to be loaded.")
                             val kmzUrl = if (hrefL != null && hrefL.length > 0) {
                                 val href = hrefL.item(0) as Element
                                 href.textContent?.replace("http://", "https://")
@@ -163,8 +177,10 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                                 DocumentBuilderFactory.newInstance()
                             val db: DocumentBuilder = dbf.newDocumentBuilder()
                             db.parse(kmlFile)
-                        } else
+                        } else {
+                            Timber.v("The document doesn't need to be processed. Loading document...")
                             kmlDoc
+                        }
 
                     val kml = doc?.getElementsByTagName("kml")
                     val kmlElem = kml?.item(0) as Element?
