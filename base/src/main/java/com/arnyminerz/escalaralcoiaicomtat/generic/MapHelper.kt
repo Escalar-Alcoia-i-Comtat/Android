@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.generic
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -35,7 +36,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import timber.log.Timber
 import java.io.FileNotFoundException
 
-class MapHelper {
+class MapHelper(private val mapView: MapView) {
     companion object {
         @ExperimentalUnsignedTypes
         fun getTarget(marker: Symbol): DataClass<*, *>? {
@@ -139,7 +140,6 @@ class MapHelper {
         }
     }
 
-    private var mapView: MapView? = null
     private var map: MapboxMap? = null
     private var style: Style? = null
 
@@ -147,6 +147,16 @@ class MapHelper {
 
     private var startingPosition: LatLng = LatLng(-52.6885, -70.1395)
     private var startingZoom: Double = 2.0
+
+    fun onCreate(savedInstanceState: Bundle?) = mapView.onCreate(savedInstanceState)
+
+    fun onStart() = mapView.onStart()
+    fun onResume() = mapView.onResume()
+    fun onPause() = mapView.onPause()
+    fun onStop() = mapView.onStop()
+    fun onSaveInstanceState(outState: Bundle) = mapView.onSaveInstanceState(outState)
+    fun onLowMemory() = mapView.onLowMemory()
+    fun onDestroy() = mapView.onDestroy()
 
     fun withStartingPosition(startingPosition: LatLng?, zoom: Double = 2.0): MapHelper {
         if (startingPosition.isNotNull())
@@ -156,12 +166,10 @@ class MapHelper {
     }
 
     fun loadMap(
-        mapView: MapView,
         callback: MapHelper.(mapView: MapView, map: MapboxMap, style: Style) -> Unit
     ): MapHelper {
         mapView.getMapAsync { map ->
             map.setStyle(Style.SATELLITE) { style ->
-                this.mapView = mapView
                 this.map = map
                 this.style = style
 
@@ -199,22 +207,25 @@ class MapHelper {
         networkState: ConnectivityProvider.NetworkState,
         addToMap: Boolean = true
     ): MapFeatures {
-        if (map == null || style == null || mapView == null)
+        if (map == null || style == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
         val loader = KMLLoader(kmlAddress, null)
         val result = loader.load(activity, map!!, networkState)
-        activity.onUiThread {
+        activity.runOnUiThread {
             Timber.v("Loaded kml. Loading managers...")
-            val symbolManager = SymbolManager(mapView!!, map!!, style!!)
-            val lineManager = LineManager(mapView!!, map!!, style!!)
-            val fillManager = FillManager(mapView!!, map!!, style!!)
-            Timber.v("Loading features...")
+            val symbolManager = SymbolManager(mapView, map!!, style!!)
+            val lineManager = LineManager(mapView, map!!, style!!)
+            val fillManager = FillManager(mapView, map!!, style!!)
 
-            if (addToMap) {
-                (result.markers).addToMap(symbolManager)
-                (result.polygons).addToMap(fillManager, lineManager)
-                (result.polylines).addToMap(fillManager, lineManager)
+            Timber.v("Loading features...")
+            if (addToMap) with(result) {
+                Timber.v("  Loading ${markers.size} markers...")
+                markers.addToMap(symbolManager)
+                Timber.v("  Loading ${polygons.size} polygons...")
+                polygons.addToMap(fillManager, lineManager)
+                Timber.v("  Loading ${polylines.size} polylines...")
+                polylines.addToMap(fillManager, lineManager)
             }
 
             loadedKMLAddress = kmlAddress
