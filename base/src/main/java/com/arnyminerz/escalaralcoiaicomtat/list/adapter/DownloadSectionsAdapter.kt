@@ -128,26 +128,27 @@ class DownloadSectionsAdapter(
                     Timber.v("  Section List has ${sectionList.count()} sections")
                     Timber.v("Loading data for \"${section.displayName}\"...")
                     recyclerView.adapter = DownloadSectionsAdapter(sectionList, mainActivity)
-
-                    deleteButton.setOnClickListener {
-                        MaterialAlertDialogBuilder(mainActivity)
-                            .setTitle(R.string.downloads_delete_dialog_title)
-                            .setMessage(
-                                mainActivity.getString(
-                                    R.string.downloads_delete_dialog_msg,
-                                    section.displayName
-                                )
-                            )
-                            .setPositiveButton(R.string.action_delete) { _, _ ->
-                                section.delete(mainActivity)
-                                mainActivity.downloadsFragment.reloadSizeTextView()
-                                notifyDataSetChanged()
-                                recyclerView.adapter?.notifyDataSetChanged()
-                            }
-                            .setNegativeButton(R.string.action_cancel) { dialog, _ -> dialog.dismiss() }
-                            .show()
-                    }
                 }
+
+                deleteButton.setOnClickListener {
+                    MaterialAlertDialogBuilder(mainActivity)
+                        .setTitle(R.string.downloads_delete_dialog_title)
+                        .setMessage(
+                            mainActivity.getString(
+                                R.string.downloads_delete_dialog_msg,
+                                section.displayName
+                            )
+                        )
+                        .setPositiveButton(R.string.action_delete) { _, _ ->
+                            section.delete(mainActivity)
+                            mainActivity.downloadsFragment.reloadSizeTextView()
+                            notifyDataSetChanged()
+                            recyclerView.adapter?.notifyDataSetChanged()
+                        }
+                        .setNegativeButton(R.string.action_cancel) { dialog, _ -> dialog.dismiss() }
+                        .show()
+                }
+
                 visibility(progressBar, false)
             } else
                 Timber.e("Section is not valid!")
