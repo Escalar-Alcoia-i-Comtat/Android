@@ -79,71 +79,6 @@ class MapHelper(private val mapView: MapView) {
 
             return null
         }
-
-        @ExperimentalUnsignedTypes
-        fun infoCard(
-            context: Context,
-            marker: Symbol,
-            binding: DialogMapMarkerBinding
-        ): MarkerWindow {
-            val latLng = marker.latLng
-
-            val anim =
-                AnimationUtils.loadAnimation(context, R.anim.enter_bottom)
-            anim.duration = 500
-            anim.setAnimationListener(object : Animation.AnimationListener {
-                override fun onAnimationRepeat(animation: Animation?) {}
-
-                override fun onAnimationEnd(animation: Animation?) {
-                    binding.mapInfoCardView.visibility = View.VISIBLE
-                }
-
-                override fun onAnimationStart(animation: Animation?) {
-                    binding.mapInfoCardView.visibility = View.VISIBLE
-                }
-            })
-            binding.mapInfoCardView.startAnimation(anim)
-
-            val window = marker.getWindow()
-            val title = window.title
-            val description = window.message
-            val iwdc = getTarget(marker) // Info Window Data Class
-            val dcSearch = iwdc?.let { AREAS.find(it) }
-
-            binding.mapInfoTextView.text = title
-
-            Timber.v("Marker description: $description")
-            val imageUrl = getImageUrl(description)
-            if (imageUrl == null)
-                binding.mapDescTextView.text = description
-            else
-                Glide.with(context)
-                    .load(imageUrl)
-                    .into(binding.mapInfoImageView)
-
-            visibility(binding.fabEnter, iwdc != null && dcSearch?.isEmpty() == false)
-            visibility(binding.mapInfoImageView, imageUrl != null)
-            visibility(binding.mapDescTextView, imageUrl == null)
-
-            val gmmIntentUri = latLng.toUri(true, title)
-            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-                .setPackage("com.google.android.apps.maps")
-            val mapsAvailable = mapIntent.resolveActivity(context.packageManager) != null
-            binding.fabMaps.visibility(mapsAvailable)
-            if (mapsAvailable)
-                binding.fabMaps.setOnClickListener {
-                    context.startActivity(mapIntent)
-                }
-
-            if (iwdc != null && dcSearch?.isEmpty() == false)
-                binding.fabEnter.setOnClickListener {
-                    Timber.v("Searching for info window ${iwdc.namespace}:${iwdc.id}")
-                    if (!dcSearch.launchActivity(context))
-                        context.toast(R.string.toast_error_internal)
-                }
-
-            return MarkerWindow(context, marker, binding)
-        }
     }
 
     private var map: MapboxMap? = null
@@ -408,6 +343,71 @@ class MapHelper(private val mapView: MapView) {
                 }
             putExtra(MapsActivity.MAP_DATA_BUNDLE_EXTRA, mapData)
         }
+
+    @ExperimentalUnsignedTypes
+    fun infoCard(
+        context: Context,
+        marker: Symbol,
+        binding: DialogMapMarkerBinding
+    ): MarkerWindow {
+        val latLng = marker.latLng
+
+        val anim =
+            AnimationUtils.loadAnimation(context, R.anim.enter_bottom)
+        anim.duration = 500
+        anim.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationRepeat(animation: Animation?) {}
+
+            override fun onAnimationEnd(animation: Animation?) {
+                binding.mapInfoCardView.visibility = View.VISIBLE
+            }
+
+            override fun onAnimationStart(animation: Animation?) {
+                binding.mapInfoCardView.visibility = View.VISIBLE
+            }
+        })
+        binding.mapInfoCardView.startAnimation(anim)
+
+        val window = marker.getWindow()
+        val title = window.title
+        val description = window.message
+        val iwdc = getTarget(marker) // Info Window Data Class
+        val dcSearch = iwdc?.let { AREAS.find(it) }
+
+        binding.mapInfoTextView.text = title
+
+        Timber.v("Marker description: $description")
+        val imageUrl = getImageUrl(description)
+        if (imageUrl == null)
+            binding.mapDescTextView.text = description
+        else
+            Glide.with(context)
+                .load(imageUrl)
+                .into(binding.mapInfoImageView)
+
+        visibility(binding.fabEnter, iwdc != null && dcSearch?.isEmpty() == false)
+        visibility(binding.mapInfoImageView, imageUrl != null)
+        visibility(binding.mapDescTextView, imageUrl == null)
+
+        val gmmIntentUri = latLng.toUri(true, title)
+        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+            .setPackage("com.google.android.apps.maps")
+        val mapsAvailable = mapIntent.resolveActivity(context.packageManager) != null
+        binding.fabMaps.visibility(mapsAvailable)
+        if (mapsAvailable)
+            binding.fabMaps.setOnClickListener {
+                context.startActivity(mapIntent)
+            }
+
+        if (iwdc != null && dcSearch?.isEmpty() == false)
+            binding.fabEnter.setOnClickListener {
+                Timber.v("Searching for info window ${iwdc.namespace}:${iwdc.id}")
+                if (!dcSearch.launchActivity(context))
+                    context.toast(R.string.toast_error_internal)
+            }
+
+        return MarkerWindow(context, marker, binding)
+    }
 }
 
 class MapNotInitializedException(message: String) : Exception(message)
