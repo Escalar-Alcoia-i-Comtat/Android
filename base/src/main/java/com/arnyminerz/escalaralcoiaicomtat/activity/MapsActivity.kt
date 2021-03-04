@@ -414,7 +414,8 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
             }
         }
         if (kmlAddress != null || kmzFile != null)
-            loadData(networkState) {
+            runAsync {
+                loadData(networkState)
                 innerLoad()
             }
         else innerLoad()
@@ -684,13 +685,14 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
     }
 
     private fun loadData(
-        networkState: ConnectivityProvider.NetworkState,
-        finishedListener: () -> Unit
+        networkState: ConnectivityProvider.NetworkState
     ) {
         Timber.v("Found KML/KMZ to load")
         val loader = KMLLoader(kmlAddress, kmzFile)
         if (map != null) {
-            loader.load(this, map!!, networkState, { result ->
+            try {
+                val result = loader.load(this, map!!, networkState)
+
                 Timber.v("  Loaded KML!")
                 markers.clear()
                 polygons.clear()
@@ -699,11 +701,9 @@ class MapsActivity : OnMapReadyCallback, NetworkChangeListenerFragmentActivity()
                 markers.addAll(result.markers)
                 polygons.addAll(result.polygons)
                 polylines.addAll(result.polylines)
-
-                finishedListener()
-            }, { error ->
-                Timber.e(error, "  Could not load!")
-            })
+            }catch (e: Exception){
+                Timber.e(e, "  Could not load!")
+            }
         } else
             Timber.e("MapboxMap is null!")
     }

@@ -10,7 +10,6 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity.Companion.KML_ADDRESS_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.async.LoadResult
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.find
 import com.arnyminerz.escalaralcoiaicomtat.data.map.KMLLoader
@@ -18,6 +17,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
 import com.arnyminerz.escalaralcoiaicomtat.data.map.addToMap
 import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogMapMarkerBinding
+import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -33,6 +33,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.LineManager
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import timber.log.Timber
+import java.io.FileNotFoundException
 
 class MapHelper {
     companion object {
@@ -63,14 +64,21 @@ class MapHelper {
             if (description.startsWith("<img")) {
                 val linkPos = description.indexOf("https://")
                 val urlFirstPart = description.substring(linkPos) // This takes from the first "
-                return urlFirstPart.substring(0, urlFirstPart.indexOf('"')) // This from the previous to the next
+                return urlFirstPart.substring(
+                    0,
+                    urlFirstPart.indexOf('"')
+                ) // This from the previous to the next
             }
 
             return null
         }
 
         @ExperimentalUnsignedTypes
-        fun infoCard(context: Context, marker: Symbol, binding: DialogMapMarkerBinding): MarkerWindow {
+        fun infoCard(
+            context: Context,
+            marker: Symbol,
+            binding: DialogMapMarkerBinding
+        ): MarkerWindow {
             val latLng = marker.latLng
 
             val anim =
@@ -152,7 +160,7 @@ class MapHelper {
         callback: MapHelper.(mapView: MapView, map: MapboxMap, style: Style) -> Unit
     ): MapHelper {
         mapView.getMapAsync { map ->
-            map.setStyle(Style.SATELLITE){ style ->
+            map.setStyle(Style.SATELLITE) { style ->
                 this.mapView = mapView
                 this.map = map
                 this.style = style
@@ -173,45 +181,45 @@ class MapHelper {
         return this
     }
 
+    /**
+     * Loads the KML address. Should be called asyncronously.
+     * @throws FileNotFoundException When the KMZ file could not be found
+     * @throws NoInternetAccessException When no Internet access was detected
+     * @throws MapNotInitializedException If this function is called before loadMap
+     * @see loadMap
+     * @see MapFeatures
+     * @author Arnau Mora
+     * @return A MapFeatures object with all the loaded data
+     */
+    @Throws(FileNotFoundException::class, NoInternetAccessException::class)
     @ExperimentalUnsignedTypes
     fun loadKML(
         activity: FragmentActivity,
         kmlAddress: String?,
         networkState: ConnectivityProvider.NetworkState,
         addToMap: Boolean = true
-    ): LoadResult<MapFeatures> {
-        val listener = LoadResult<MapFeatures>(activity)
+    ): MapFeatures {
+        if (map == null || style == null || mapView == null)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
-        runAsync {
-            if (map == null || style == null || mapView == null)
-                return@runAsync listener.onFailure(MapNotInitializedException("Map not initialized. Please run loadMap before this"))
+        val loader = KMLLoader(kmlAddress, null)
+        val result = loader.load(activity, map!!, networkState)
+        activity.onUiThread {
+            Timber.v("Loaded kml. Loading managers...")
+            val symbolManager = SymbolManager(mapView!!, map!!, style!!)
+            val lineManager = LineManager(mapView!!, map!!, style!!)
+            val fillManager = FillManager(mapView!!, map!!, style!!)
+            Timber.v("Loading features...")
 
-            val loader = KMLLoader(kmlAddress, null)
-            loader.load(activity, map!!, networkState, { result ->
-                activity.onUiThread {
-                    Timber.v("Loaded kml. Loading managers...")
-                    val symbolManager = SymbolManager(mapView!!, map!!, style!!)
-                    val lineManager = LineManager(mapView!!, map!!, style!!)
-                    val fillManager = FillManager(mapView!!, map!!, style!!)
-                    Timber.v("Loading features...")
+            if (addToMap) {
+                (result.markers).addToMap(symbolManager)
+                (result.polygons).addToMap(fillManager, lineManager)
+                (result.polylines).addToMap(fillManager, lineManager)
+            }
 
-                    if (addToMap) {
-                        (result.markers).addToMap(symbolManager)
-                        (result.polygons).addToMap(fillManager, lineManager)
-                        (result.polylines).addToMap(fillManager, lineManager)
-                    }
-
-                    loadedKMLAddress = kmlAddress
-
-                    val mapFeatures = MapFeatures(result.markers, result.polylines, result.polygons)
-                    listener.onCompleted(mapFeatures)
-                }
-            }, { error ->
-                listener.onFailure(error)
-            })
+            loadedKMLAddress = kmlAddress
         }
-
-        return listener
+        return MapFeatures(result.markers, result.polylines, result.polygons)
     }
 
     @ExperimentalUnsignedTypes
@@ -231,9 +239,13 @@ class MapHelper {
 
 class MapNotInitializedException(message: String) : Exception(message)
 class MapAnyDataToLoadException(message: String) : Exception(message)
-data class MarkerWindow(val context: Context, val marker: Symbol, val binding: DialogMapMarkerBinding)
+data class MarkerWindow(
+    val context: Context,
+    val marker: Symbol,
+    val binding: DialogMapMarkerBinding
+)
 
-fun MarkerWindow.hide(){
+fun MarkerWindow.hide() {
     val anim = AnimationUtils.loadAnimation(context, R.anim.exit_bottom)
     anim.duration = 500
     anim.setAnimationListener(object : Animation.AnimationListener {

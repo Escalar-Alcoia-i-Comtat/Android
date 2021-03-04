@@ -7,21 +7,16 @@ import android.view.View
 import android.view.ViewGroup
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity
-import com.arnyminerz.escalaralcoiaicomtat.async.ResultListener
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
-import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
 import com.arnyminerz.escalaralcoiaicomtat.data.map.addToMap
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentMapBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
-import com.arnyminerz.escalaralcoiaicomtat.generic.MarkerWindow
+import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.bounds
-import com.arnyminerz.escalaralcoiaicomtat.generic.hide
-import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
@@ -100,53 +95,53 @@ class MapFragment : NetworkChangeListenerFragment() {
             val polygons = arrayListOf<GeoGeometry>()
             val polylines = arrayListOf<GeoGeometry>()
 
-            for (area in areas)
-                mapHelper
-                    .loadKML(requireActivity(), area.kmlAddress, networkState)
-                    .listen(object : ResultListener<MapFeatures> {
-                        override fun onCompleted(result: MapFeatures) {
-                            if (context == null || !isResumed) return
+            runAsync {
+                for (area in areas) {
+                    if (context == null || !isResumed) break
 
-                            Timber.d("Adding features to list...")
-                            markers.addAll(result.markers)
-                            polygons.addAll(result.polygons)
-                            polylines.addAll(result.polylines)
+                    try {
+                        val result =
+                            mapHelper.loadKML(requireActivity(), area.kmlAddress, networkState)
 
-                            Timber.d("Adding features to map...")
-                            counter++
-                            if (counter >= max) {
-                                markers.addToMap(symbolManager)
-                                polygons.addToMap(fillManager, lineManager)
-                                polylines.addToMap(fillManager, lineManager)
+                        Timber.d("Adding features to list...")
+                        markers.addAll(result.markers)
+                        polygons.addAll(result.polygons)
+                        polylines.addAll(result.polylines)
 
-                                val positions = arrayListOf<LatLng>()
+                        Timber.d("Adding features to map...")
+                        counter++
+                        if (counter >= max) {
+                            markers.addToMap(symbolManager)
+                            polygons.addToMap(fillManager, lineManager)
+                            polylines.addToMap(fillManager, lineManager)
 
-                                for (marker in markers)
-                                    positions.add(marker.position.toLatLng())
-                                for (marker in polygons)
-                                    positions.addAll(marker.points)
-                                for (marker in polylines)
-                                    positions.addAll(marker.points)
+                            val positions = arrayListOf<LatLng>()
 
-                                if (positions.size > 1)
-                                    map.moveCamera(
-                                        CameraUpdateFactory.newLatLngBounds(
-                                            positions.bounds(),
-                                            30
-                                        )
+                            for (marker in markers)
+                                positions.add(marker.position.toLatLng())
+                            for (marker in polygons)
+                                positions.addAll(marker.points)
+                            for (marker in polylines)
+                                positions.addAll(marker.points)
+
+                            if (positions.size > 1)
+                                map.moveCamera(
+                                    CameraUpdateFactory.newLatLngBounds(
+                                        positions.bounds(),
+                                        30
                                     )
-                                else if (positions.size > 0)
-                                    map.moveCamera(
-                                        CameraUpdateFactory.newLatLng(positions.first())
-                                    )
-                            }
+                                )
+                            else if (positions.size > 0)
+                                map.moveCamera(
+                                    CameraUpdateFactory.newLatLng(positions.first())
+                                )
                         }
-
-                        override fun onFailure(error: Exception?) {
-                            Timber.e(error, "Could not load KML")
-                            requireContext().toast(R.string.toast_error_internal)
-                        }
-                    })
+                    }catch (e: Exception){
+                        Timber.e(e, "Could not load KML")
+                        requireContext().toast(R.string.toast_error_internal)
+                    }
+                }
+            }
 
             symbolManager.addClickListener { marker ->
                 if (SETTINGS_CENTER_MARKER_PREF.get(requireContext().sharedPreferences))

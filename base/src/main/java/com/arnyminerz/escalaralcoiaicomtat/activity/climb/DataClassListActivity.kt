@@ -2,15 +2,14 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.os.Bundle
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
-import com.arnyminerz.escalaralcoiaicomtat.async.ResultListener
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_SMALL_MAP_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
+import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -49,22 +48,18 @@ abstract class DataClassListActivity<T : DataClass<*, *>> : NetworkChangeListene
                             setAllGesturesEnabled(false)
                         }
 
-                        loadKML(this@DataClassListActivity, dataClass.kmlAddress, state)
-                            .listen(object : ResultListener<MapFeatures> {
-                                override fun onCompleted(result: MapFeatures) {
-                                    map.addOnMapClickListener {
-                                        showMapsActivity(this@DataClassListActivity)
-                                        true
-                                    }
-                                }
+                        runAsync {
+                            try{
+                                loadKML(this@DataClassListActivity, dataClass.kmlAddress, state)
+                            }catch (e: NoInternetAccessException){
+                                visibility(mapView, false)
+                            }
+                        }
 
-                                override fun onFailure(error: Exception?) {
-                                    if (error is NoInternetAccessException)
-                                        visibility(mapView, false)
-                                    else
-                                        error?.let { throw it }
-                                }
-                            })
+                        map.addOnMapClickListener {
+                            showMapsActivity(this@DataClassListActivity)
+                            true
+                        }
                     }
             }
     }
