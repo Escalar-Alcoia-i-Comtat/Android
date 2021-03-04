@@ -4,6 +4,7 @@ import android.graphics.Color
 import com.mapbox.mapboxsdk.plugins.annotation.FillOptions
 import com.mapbox.mapboxsdk.plugins.annotation.LineOptions
 import com.mapbox.mapboxsdk.style.layers.Property
+import com.mapbox.mapboxsdk.utils.ColorUtils.colorToRgbaString
 import java.io.Serializable
 
 data class GeoStyle(
@@ -33,9 +34,9 @@ fun FillOptions.apply(geoStyle: GeoStyle): FillOptions {
     var modOptions = this
 
     if (geoStyle.strokeColor != null)
-        modOptions = modOptions.withFillOutlineColor(geoStyle.strokeColor)
+        modOptions = modOptions.withFillOutlineColor(colorToRgbaString(geoStyle.strokeColor()!!))
     if (geoStyle.fillColor != null)
-        modOptions = modOptions.withFillColor(geoStyle.fillColor)
+        modOptions = modOptions.withFillColor(colorToRgbaString(geoStyle.fillColor()!!))
 
     return modOptions
 }
@@ -43,6 +44,8 @@ fun FillOptions.apply(geoStyle: GeoStyle): FillOptions {
 fun LineOptions.apply(geoStyle: GeoStyle): LineOptions {
     var modOptions = this
 
+    if (geoStyle.strokeColor != null)
+        modOptions = modOptions.withLineColor(colorToRgbaString(geoStyle.strokeColor()!!))
     if (geoStyle.lineJoin != null)
         modOptions = modOptions.withLineJoin(geoStyle.lineJoin)
     if (geoStyle.lineWidth != null)
