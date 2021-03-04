@@ -9,17 +9,16 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity.Companion.KML_ADDRESS_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.find
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogMapMarkerBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.MissingPermissionException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.Glide
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -45,21 +44,30 @@ import java.io.Serializable
 class MapHelper(private val mapView: MapView) {
     companion object {
         @ExperimentalUnsignedTypes
-        fun getTarget(marker: Symbol): DataClass<*, *>? {
+        fun getTarget(context: Context, marker: Symbol): Intent? {
             Timber.d("Getting marker's title...")
             val title = marker.getWindow().title
             Timber.v("Searching in ${AREAS.size} cached areas...")
             for (area in AREAS)
                 if (area.displayName.equals(title, true))
-                    return area
+                    return Intent(context, AreaActivity::class.java).apply {
+                        putExtra(EXTRA_AREA, area.id)
+                    }
                 else if (area.isNotEmpty())
                     for (zone in area)
                         if (zone.displayName.equals(title, true))
-                            return zone
+                            return Intent(context, AreaActivity::class.java).apply {
+                                putExtra(EXTRA_AREA, area.id)
+                                putExtra(EXTRA_ZONE, zone.id)
+                            }
                         else if (zone.isNotEmpty())
                             for (sector in zone)
                                 if (sector.displayName.equals(title, true))
-                                    return sector
+                                    return Intent(context, AreaActivity::class.java).apply {
+                                        putExtra(EXTRA_AREA, area.id)
+                                        putExtra(EXTRA_ZONE, zone.id)
+                                        putExtra(EXTRA_SECTOR, sector.id)
+                                    }
 
             Timber.w("Could not find targeted data class")
             return null
@@ -398,24 +406,13 @@ class MapHelper(private val mapView: MapView) {
         val anim =
             AnimationUtils.loadAnimation(context, R.anim.enter_bottom)
         anim.duration = 500
-        anim.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationRepeat(animation: Animation?) {}
-
-            override fun onAnimationEnd(animation: Animation?) {
-                binding.mapInfoCardView.visibility = View.VISIBLE
-            }
-
-            override fun onAnimationStart(animation: Animation?) {
-                binding.mapInfoCardView.visibility = View.VISIBLE
-            }
-        })
+        binding.mapInfoCardView.show()
         binding.mapInfoCardView.startAnimation(anim)
 
         val window = marker.getWindow()
         val title = window.title
         val description = window.message
-        val iwdc = getTarget(marker) // Info Window Data Class
-        val dcSearch = iwdc?.let { AREAS.find(it) }
+        val activityIntent = getTarget(context, marker) // Info Window Data Class
 
         Timber.v("Marker title: $title")
         Timber.v("Marker description: $description")
@@ -430,13 +427,12 @@ class MapHelper(private val mapView: MapView) {
                 .load(imageUrl)
                 .into(binding.mapInfoImageView)
 
-        visibility(binding.fabEnter, iwdc != null && dcSearch?.isEmpty() == false)
+        visibility(binding.fabEnter, activityIntent != null)
         visibility(binding.mapInfoImageView, imageUrl != null)
         visibility(binding.mapDescTextView, imageUrl == null)
 
         val gmmIntentUri = latLng.toUri(true, title)
         val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-            .setPackage("com.google.android.apps.maps")
         val mapsAvailable = mapIntent.resolveActivity(context.packageManager) != null
         binding.fabMaps.visibility(mapsAvailable)
         if (mapsAvailable)
@@ -444,11 +440,10 @@ class MapHelper(private val mapView: MapView) {
                 context.startActivity(mapIntent)
             }
 
-        if (iwdc != null && dcSearch?.isEmpty() == false)
+        if (activityIntent != null)
             binding.fabEnter.setOnClickListener {
-                Timber.v("Searching for info window ${iwdc.namespace}:${iwdc.id}")
-                if (!dcSearch.launchActivity(context))
-                    context.toast(R.string.toast_error_internal)
+                Timber.v("Launching intent...")
+                context.startActivity(activityIntent)
             }
 
         return MarkerWindow(context, marker, binding)
