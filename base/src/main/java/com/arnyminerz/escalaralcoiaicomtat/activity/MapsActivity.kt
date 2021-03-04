@@ -248,7 +248,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                         val title = window.title
 
                         if (title.isNotEmpty()) {
-                            markerWindow = MapHelper.infoCard(
+                            markerWindow = mapHelper.infoCard(
                                 this@MapsActivity,
                                 marker,
                                 binding.dialogMapMarker

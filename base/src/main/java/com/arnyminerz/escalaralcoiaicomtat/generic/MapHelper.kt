@@ -374,9 +374,11 @@ class MapHelper(private val mapView: MapView) {
         val iwdc = getTarget(marker) // Info Window Data Class
         val dcSearch = iwdc?.let { AREAS.find(it) }
 
+        Timber.v("Marker title: $title")
+        Timber.v("Marker description: $description")
+
         binding.mapInfoTextView.text = title
 
-        Timber.v("Marker description: $description")
         val imageUrl = getImageUrl(description)
         if (imageUrl == null)
             binding.mapDescTextView.text = description

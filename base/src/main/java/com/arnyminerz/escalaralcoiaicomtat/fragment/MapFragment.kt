@@ -133,7 +133,7 @@ class MapFragment : NetworkChangeListenerFragment() {
                         map.animateCamera(CameraUpdateFactory.newLatLng(marker.latLng))
 
                     context?.let {
-                        markerWindow = MapHelper.infoCard(it, marker, binding.dialogMapMarker)
+                        markerWindow = mapHelper.infoCard(it, marker, binding.dialogMapMarker)
                     }
 
                     true
