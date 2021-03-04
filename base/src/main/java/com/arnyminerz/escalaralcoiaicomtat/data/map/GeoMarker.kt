@@ -7,10 +7,7 @@ import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.data.SerializableBitmap
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.drawableToBitmap
-import com.arnyminerz.escalaralcoiaicomtat.generic.generateUUID
-import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
-import com.arnyminerz.escalaralcoiaicomtat.generic.mapFloat
+import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.location.SerializableLatLng
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.Style
@@ -46,6 +43,27 @@ data class GeoMarker(
             val bitmap = drawableToBitmap(it)
             if (bitmap != null) {
                 style.addImage(id, bitmap, true)
+                icon = SerializableBitmap(bitmap)
+            } else
+                throw UnsupportedOperationException("Could not convert drawable to bitmap")
+        } ?: Timber.e("Could not find drawable image.")
+        return this
+    }
+
+    /**
+     * Sets an icon for the marker.
+     * @param context The context to call from
+     * @param mapHelper The Mapbox map style
+     * @param drawable The icon to set
+     * @return The same GeoMarker instance updated
+     * @throws UnsupportedOperationException When the drawable could not be converted to bitmap
+     */
+    @Throws(UnsupportedOperationException::class)
+    fun withImage(context: Context, mapHelper: MapHelper, @DrawableRes drawable: Int): GeoMarker {
+        ContextCompat.getDrawable(context, drawable)?.let {
+            val bitmap = drawableToBitmap(it)
+            if (bitmap != null) {
+                mapHelper.style!!.addImage(id, bitmap, true)
                 icon = SerializableBitmap(bitmap)
             } else
                 throw UnsupportedOperationException("Could not convert drawable to bitmap")
