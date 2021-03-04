@@ -161,7 +161,7 @@ dependencies {
 
     implementation 'com.github.sephiroth74:android-target-tooltip:2.0.4'
 
-    implementation 'io.noties.markwon:core:4.6.0'
+    implementation 'io.noties.markwon:core:4.6.2'
 }
 
 apply plugin: 'com.google.gms.google-services'
