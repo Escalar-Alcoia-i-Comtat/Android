@@ -12,7 +12,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity.Companion.hasLocationPermission
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
@@ -443,7 +442,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
 
     @SuppressLint("MissingPermission")
     private fun tryToShowCurrentLocation(): Boolean {
-        if (!hasLocationPermission(this)) {
+        if (!PermissionsManager.areLocationPermissionsGranted(this)) {
             binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
             binding.fabCurrentLocation.setOnClickListener {
                 tryToShowCurrentLocation()
@@ -498,7 +497,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
          * cases when a location is not available.
          */
         try {
-            if (hasLocationPermission(this)) {
+            if (PermissionsManager.areLocationPermissionsGranted(this)) {
                 val locationResult = fusedLocationProviderClient?.lastLocation
                 Timber.v("Adding complete listener")
                 locationResult?.addOnCompleteListener { task ->

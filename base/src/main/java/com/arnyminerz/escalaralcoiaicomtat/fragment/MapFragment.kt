@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
@@ -17,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -56,7 +56,7 @@ class MapFragment : NetworkChangeListenerFragment() {
 
                 if (context != null)
                     try {
-                        if (IntroActivity.hasLocationPermission(requireContext()))
+                        if (PermissionsManager.areLocationPermissionsGranted(requireContext()))
                             mapHelper.enableLocationComponent(requireContext())
                         else
                             Timber.w("User hasn't granted the location permission. Marker won't be enabled.")

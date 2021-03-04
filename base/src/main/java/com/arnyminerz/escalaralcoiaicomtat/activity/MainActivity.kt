@@ -264,9 +264,8 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         grantResults: IntArray
     ) {
         Timber.v("Got permissions result. Code: %s", requestCode)
-        val areasViewFragment = areasViewFragment
         when (requestCode) {
-            LOCATION_PERMISSION_REQUEST -> areasViewFragment.updateNearbyZones(null)
+            LOCATION_PERMISSION_REQUEST -> areasViewFragment.requestLocationUpdates()
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }

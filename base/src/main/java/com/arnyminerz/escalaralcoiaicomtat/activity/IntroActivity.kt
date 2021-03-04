@@ -39,10 +39,6 @@ class IntroActivity : NetworkChangeListenerActivity() {
         fun hasStoragePermission(context: Context): Boolean =
             context.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)
 
-        fun hasLocationPermission(context: Context): Boolean =
-            context.isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION) ||
-                    context.isPermissionGranted(Manifest.permission.ACCESS_COARSE_LOCATION)
-
         fun hasDownloaded(context: Context): Boolean = cacheFile(context).exists()
 
         fun shouldShow(context: Context): Boolean =

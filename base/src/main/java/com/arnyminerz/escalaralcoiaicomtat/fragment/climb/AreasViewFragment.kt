@@ -14,7 +14,6 @@ import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity.Companion.hasLocationPermission
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
@@ -29,8 +28,10 @@ import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.location.serializable
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.gms.location.*
+import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import timber.log.Timber
@@ -42,12 +43,13 @@ const val LOCATION_PERMISSION_REQUEST = 0
 class AreasViewFragment : NetworkChangeListenerFragment() {
     private var justAttached = false
 
-    var mapHelper: MapHelper? = null
+    private var mapHelper: MapHelper? = null
 
     private var areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null
 
     private var newLocationProvider: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
+    private var locationListenerAdded = false
 
     private var counter = 0
 
@@ -80,15 +82,15 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         visibility(binding.nearbyZonesCardView, !error)
         if (error)
             return
+        Timber.v("Updating nearby zones...")
 
         binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
 
-        val hasLocationPermission =
-            if (context != null) hasLocationPermission(requireContext()) else false
+        val hasLocationPermission = if (context != null)
+            PermissionsManager.areLocationPermissionsGranted(requireContext())
+        else false
         visibility(binding.mapView, hasLocationPermission)
         visibility(binding.nearbyZonesPermissionMessage, !hasLocationPermission)
-
-        Timber.v("Has location permission? $hasLocationPermission")
 
         if (!hasLocationPermission) {
             binding.nearbyZonesCardView.isClickable = true
@@ -171,6 +173,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         _binding = FragmentViewAreasBinding.inflate(inflater, container, false)
         val view = binding.root
 
+        binding.nearbyZonesCardView.hide()
         binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
 
         mapHelper = MapHelper(binding.mapView)
@@ -191,26 +194,37 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 true
             }
 
-            if (newLocationProvider == null)
-                newLocationProvider =
-                    LocationServices.getFusedLocationProviderClient(requireContext())
-            if (locationRequest == null)
-                locationRequest = LocationRequest.create()
-
-            Timber.d("Adding location provider listener")
-            if (hasLocationPermission(requireContext())) {
-                newLocationProvider!!.requestLocationUpdates(
-                    locationRequest!!,
-                    locationCallback,
-                    Looper.getMainLooper()
-                )
-                newLocationProvider!!.lastLocation.addOnSuccessListener {
-                    updateNearbyZones(it)
-                }
-            }
+            requestLocationUpdates()
         }
 
         return view
+    }
+
+    @SuppressLint("MissingPermission")
+    fun requestLocationUpdates() {
+        if (locationListenerAdded)
+            return
+
+        if (newLocationProvider == null)
+            newLocationProvider = LocationServices.getFusedLocationProviderClient(requireContext())
+        if (locationRequest == null)
+            locationRequest = LocationRequest.create()
+
+        if (PermissionsManager.areLocationPermissionsGranted(requireContext())) {
+            Timber.v("Adding location provider listener...")
+            Timber.d("Requesting location updates...")
+            newLocationProvider!!.requestLocationUpdates(
+                locationRequest!!,
+                locationCallback,
+                Looper.getMainLooper()
+            )
+            Timber.d("Adding on success listener...")
+            newLocationProvider!!.lastLocation.addOnSuccessListener {
+                Timber.d("Location provider got location!")
+                updateNearbyZones(it)
+            }
+            locationListenerAdded = true
+        } else Timber.w("Location listener not added since permission is not granted")
     }
 
     private fun refreshAreas() {
@@ -241,12 +255,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         if (isResumed)
             refreshAreas()
 
-        if (hasLocationPermission(requireContext()))
-            newLocationProvider?.requestLocationUpdates(
-                locationRequest!!,
-                locationCallback,
-                Looper.getMainLooper()
-            )
+        requestLocationUpdates()
 
         justAttached = false
     }
