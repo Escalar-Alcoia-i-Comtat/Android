@@ -23,11 +23,9 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
-import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNull
-import com.arnyminerz.escalaralcoiaicomtat.generic.mapFloat
 import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
@@ -148,12 +146,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                                     showingMarkers.add(
                                         GeoMarker(
                                             zoneLocation.serializable(),
-                                            mapFloat(
-                                                SETTINGS_MARKER_SIZE_PREF.get(requireContext().sharedPreferences)
-                                                    .toFloat(),
-                                                1f, 5f,
-                                                .5f, 2.5f
-                                            ),
+                                            null,
                                             MapObjectWindowData(
                                                 zone.displayName,
                                                 null
@@ -173,7 +166,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         if (counter >= AREAS.size && map != null && symbolManager != null)
                             requireContext().onUiThread {
                                 for (marker in showingMarkers)
-                                    marker?.addToMap(symbolManager!!)
+                                    marker?.addToMap(it, symbolManager!!)
 
                                 if (addedAnyPoints)
                                     map!!.animateCamera(

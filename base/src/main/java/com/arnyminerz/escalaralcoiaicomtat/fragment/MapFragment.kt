@@ -96,7 +96,7 @@ class MapFragment : NetworkChangeListenerFragment() {
                             Timber.d("Adding features to map...")
                             counter++
                             if (counter >= max) {
-                                markers.addToMap(symbolManager)
+                                markers.addToMap(requireContext(), symbolManager)
                                 polygons.addToMap(fillManager, lineManager)
                                 polylines.addToMap(fillManager, lineManager)
 

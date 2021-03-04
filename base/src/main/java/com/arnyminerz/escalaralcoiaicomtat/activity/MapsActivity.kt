@@ -12,7 +12,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity.Companion.hasLocationPermission
@@ -30,6 +29,7 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
@@ -271,7 +271,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                                 Timber.v("  Multiple points")
                                 for (item in items)
                                     if (item is GeoMarker) {
-                                        item.addToMap(symbolManager)
+                                        item.addToMap(this@MapsActivity, symbolManager)
                                         bounds.include(item.position.toLatLng())
                                     } else Timber.e("  Item is not GeoMarker")
                                 map.moveCamera(
@@ -285,7 +285,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                                 Timber.v("  Only one point")
                                 if (item is GeoMarker) {
                                     Timber.v("  Adding marker and moving camera")
-                                    item.addToMap(symbolManager)
+                                    item.addToMap(this@MapsActivity, symbolManager)
                                     map.moveCamera(
                                         CameraUpdateFactory.newLatLngZoom(
                                             item.position.toLatLng(),
@@ -348,19 +348,10 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
         when (requestCode) {
             LOCATION_PERMISSION_REQUEST_CODE -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) &&
-                    !(ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED
-                            )
-                ) {
-                    // TODO: Enable my location show
-                    toast("My location is still being implemented")
-                    //map?.isMyLocationEnabled = true
-                } else {
+                    PermissionsManager.areLocationPermissionsGranted(this)
+                )
+                    mapHelper.enableLocationComponent(this)
+                else {
                     toast(R.string.toast_location_not_shown)
                     vibrate(this, 20)
                 }
@@ -511,9 +502,8 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
     @SuppressLint("MissingPermission")
     private fun tryToShowCurrentLocation(): Boolean {
         if (!hasLocationPermission(this)) {
-            // TODO: Enable my location show
+            mapHelper.enableLocationComponent(this)
             toast("My location is still being implemented")
-            //map?.isMyLocationEnabled = false
 
             binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
             binding.fabCurrentLocation.setOnClickListener {
@@ -538,10 +528,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
             if (fusedLocationProviderClient == null)
                 fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
-            // TODO: Enable my location show
-            toast("My location is still being implemented")
-            //map?.isMyLocationEnabled = true
-            //map?.uiSettings?.isMyLocationButtonEnabled = false
+            mapHelper.enableLocationComponent(this)
 
             binding.fabCurrentLocation.setOnClickListener {
                 if (lastKnownLocation != null) {

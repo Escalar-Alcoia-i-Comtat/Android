@@ -227,7 +227,7 @@ class MapHelper(private val mapView: MapView) {
             Timber.v("Loading features...")
             if (addToMap) with(result) {
                 Timber.v("  Loading ${markers.size} markers...")
-                markers.addToMap(symbolManager)
+                markers.addToMap(activity, symbolManager)
                 Timber.v("  Loading ${polygons.size} polygons...")
                 polygons.addToMap(fillManager, lineManager)
                 Timber.v("  Loading ${polylines.size} polylines...")

@@ -5,9 +5,12 @@ import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.data.SerializableBitmap
+import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.drawableToBitmap
 import com.arnyminerz.escalaralcoiaicomtat.generic.generateUUID
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
+import com.arnyminerz.escalaralcoiaicomtat.generic.mapFloat
 import com.arnyminerz.escalaralcoiaicomtat.location.SerializableLatLng
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.Style
@@ -20,7 +23,7 @@ import java.io.Serializable
 @Suppress("unused")
 data class GeoMarker(
     val position: SerializableLatLng,
-    val iconSize: Float = 2.0f,
+    val iconSize: Float? = null,
     val windowData: MapObjectWindowData? = null
 ) : Serializable {
     val id = generateUUID()
@@ -44,7 +47,7 @@ data class GeoMarker(
             if (bitmap != null) {
                 style.addImage(id, bitmap, true)
                 icon = SerializableBitmap(bitmap)
-            }else
+            } else
                 throw UnsupportedOperationException("Could not convert drawable to bitmap")
         } ?: Timber.e("Could not find drawable image.")
         return this
@@ -56,14 +59,21 @@ data class GeoMarker(
         return this
     }
 
-    fun addToMap(symbolManager: SymbolManager): Symbol? {
+    fun addToMap(context: Context, symbolManager: SymbolManager): Symbol? {
         var symbolOptions = SymbolOptions()
             .withLatLng(LatLng(position.latitude, position.longitude))
 
-        if (icon.isNotNull())
+        if (icon.isNotNull()) {
+            val iconSize = iconSize ?: mapFloat(
+                SETTINGS_MARKER_SIZE_PREF.get(context.sharedPreferences)
+                    .toFloat(),
+                1f, 5f,
+                .1f, 2.5f
+            )
             symbolOptions = symbolOptions
                 .withIconImage(id)
                 .withIconSize(iconSize)
+        }
 
         if (windowData != null)
             symbolOptions.withData(windowData.data())
@@ -76,7 +86,7 @@ fun Symbol.getWindow(): MapObjectWindowData =
     MapObjectWindowData.load(this)
 
 @ExperimentalUnsignedTypes
-fun Collection<GeoMarker>.addToMap(symbolManager: SymbolManager) {
+fun Collection<GeoMarker>.addToMap(context: Context, symbolManager: SymbolManager) {
     for (marker in this)
-        marker.addToMap(symbolManager)
+        marker.addToMap(context, symbolManager)
 }
