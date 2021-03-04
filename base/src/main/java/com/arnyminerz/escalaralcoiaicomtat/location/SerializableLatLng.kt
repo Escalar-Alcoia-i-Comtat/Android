@@ -1,7 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.location
 
-import com.google.android.libraries.maps.model.LatLng
-import com.google.android.libraries.maps.model.LatLngBounds
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import java.io.Serializable
 
 class SerializableLatLng(val latitude: Double, val longitude: Double) : Serializable {

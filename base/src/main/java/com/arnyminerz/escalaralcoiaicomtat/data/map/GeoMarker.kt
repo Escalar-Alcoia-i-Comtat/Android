@@ -2,78 +2,76 @@ package com.arnyminerz.escalaralcoiaicomtat.data.map
 
 import android.content.Context
 import android.graphics.Bitmap
-import androidx.annotation.DrawableRes
-import androidx.core.content.ContextCompat
-import com.arnyminerz.escalaralcoiaicomtat.data.SerializableBitmap
-import com.arnyminerz.escalaralcoiaicomtat.generic.drawableToBitmap
+import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.generateUUID
-import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
+import com.arnyminerz.escalaralcoiaicomtat.generic.mapFloat
 import com.arnyminerz.escalaralcoiaicomtat.location.SerializableLatLng
-import com.google.android.libraries.maps.GoogleMap
-import com.google.android.libraries.maps.model.BitmapDescriptorFactory
-import com.google.android.libraries.maps.model.MarkerOptions
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import timber.log.Timber
 import java.io.Serializable
 
 @Suppress("unused")
 data class GeoMarker(
     val position: SerializableLatLng,
-    val iconSize: Int = 30,
+    val iconSize: Float? = null,
     val windowData: MapObjectWindowData? = null
 ) : Serializable {
     val id = generateUUID()
 
-    private var icon: SerializableBitmap? = null
+    private var iconImage: String? = null
 
-    fun getIcon(): Bitmap? = icon?.bitmap
-
-    fun withImage(context: Context, @DrawableRes drawable: Int): GeoMarker {
-        ContextCompat.getDrawable(context, drawable)?.let {
-            val bitmap = drawableToBitmap(it)
-            if (bitmap != null)
-                icon = SerializableBitmap(bitmap)
-        } ?: Timber.e("Could not find drawable image.")
+    fun withImage(style: Style, bitmap: Bitmap): GeoMarker {
+        Timber.d("Setting image for GeoMarker...")
+        Timber.d("Adding image to Style...")
+        style.addImage(id, bitmap, false)
+        iconImage = id
         return this
     }
 
-    fun withImage(bitmap: Bitmap): GeoMarker {
-        icon = SerializableBitmap(bitmap)
+    fun withImage(icon: GeoIcon): GeoMarker {
+        iconImage = icon.name
         return this
     }
 
-    @ExperimentalUnsignedTypes
-    fun addToMap(googleMap: GoogleMap) {
-        val marker = MarkerOptions()
-            .position(position.toLatLng())
+    fun addToMap(context: Context, symbolManager: SymbolManager): Symbol? {
+        var symbolOptions = SymbolOptions()
+            .withLatLng(LatLng(position.latitude, position.longitude))
 
-        if (icon.isNotNull())
-            icon!!.let { fullSizeBitmap ->
-                marker.icon(
-                    BitmapDescriptorFactory.fromBitmap(
-                        Bitmap.createScaledBitmap(
-                            fullSizeBitmap.bitmap,
-                            iconSize,
-                            iconSize,
-                            false
-                        )
-                    )
-                )
-            }
+        if (iconImage != null) {
+            Timber.d("Marker $id has an icon named $iconImage")
+            val iconSize = iconSize ?: mapFloat(
+                SETTINGS_MARKER_SIZE_PREF.get(context.sharedPreferences)
+                    .toFloat(),
+                1f, 5f,
+                .1f, 1.2f
+            )
+            symbolOptions = symbolOptions
+                .withIconImage(iconImage)
+                .withIconSize(iconSize)
+        } else
+            Timber.d("Marker $id doesn't have an icon.")
 
         if (windowData != null)
-            marker.apply {
-                snippet(windowData.message)
-                title(windowData.title)
-            }
+            symbolOptions.withData(windowData.data())
 
-        googleMap.addMarker(marker).apply {
-            tag = id
-        }
+        return symbolManager.create(symbolOptions)
     }
 }
 
+fun Symbol.getWindow(): MapObjectWindowData =
+    MapObjectWindowData.load(this)
+
 @ExperimentalUnsignedTypes
-fun Collection<GeoMarker>.addToMap(googleMap: GoogleMap) {
-    for (marker in this)
-        marker.addToMap(googleMap)
+fun Collection<GeoMarker>.addToMap(context: Context, symbolManager: SymbolManager): List<Symbol> {
+    val symbols = arrayListOf<Symbol>()
+    for (marker in this) {
+        val symbol = marker.addToMap(context, symbolManager) ?: continue
+        symbols.add(symbol)
+    }
+    return symbols.toList()
 }

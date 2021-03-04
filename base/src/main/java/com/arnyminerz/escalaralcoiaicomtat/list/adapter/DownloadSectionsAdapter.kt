@@ -6,12 +6,11 @@ import android.widget.ImageButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.find
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
@@ -98,11 +97,13 @@ class DownloadSectionsAdapter(
             downloadedSection.updateView(cardView, toggleButton, recyclerView, mainActivity)
 
             viewButton.setOnClickListener {
-                toast(mainActivity, R.string.toast_loading)
-                val scan = AREAS.find(section)
-                if (!scan.launchActivity(mainActivity)) {
+                val intent = getIntent(mainActivity, section.displayName)
+                if (intent == null) {
                     Timber.w("Could not launch activity.")
                     toast(mainActivity, R.string.toast_error_internal)
+                } else {
+                    Timber.v("Loading intent...")
+                    mainActivity.startActivity(intent)
                 }
             }
 
@@ -127,26 +128,27 @@ class DownloadSectionsAdapter(
                     Timber.v("  Section List has ${sectionList.count()} sections")
                     Timber.v("Loading data for \"${section.displayName}\"...")
                     recyclerView.adapter = DownloadSectionsAdapter(sectionList, mainActivity)
-
-                    deleteButton.setOnClickListener {
-                        MaterialAlertDialogBuilder(mainActivity)
-                            .setTitle(R.string.downloads_delete_dialog_title)
-                            .setMessage(
-                                mainActivity.getString(
-                                    R.string.downloads_delete_dialog_msg,
-                                    section.displayName
-                                )
-                            )
-                            .setPositiveButton(R.string.action_delete) { _, _ ->
-                                section.delete(mainActivity)
-                                mainActivity.downloadsFragment.reloadSizeTextView()
-                                notifyDataSetChanged()
-                                recyclerView.adapter?.notifyDataSetChanged()
-                            }
-                            .setNegativeButton(R.string.action_cancel) { dialog, _ -> dialog.dismiss() }
-                            .show()
-                    }
                 }
+
+                deleteButton.setOnClickListener {
+                    MaterialAlertDialogBuilder(mainActivity)
+                        .setTitle(R.string.downloads_delete_dialog_title)
+                        .setMessage(
+                            mainActivity.getString(
+                                R.string.downloads_delete_dialog_msg,
+                                section.displayName
+                            )
+                        )
+                        .setPositiveButton(R.string.action_delete) { _, _ ->
+                            section.delete(mainActivity)
+                            mainActivity.downloadsFragment.reloadSizeTextView()
+                            notifyDataSetChanged()
+                            recyclerView.adapter?.notifyDataSetChanged()
+                        }
+                        .setNegativeButton(R.string.action_cancel) { dialog, _ -> dialog.dismiss() }
+                        .show()
+                }
+
                 visibility(progressBar, false)
             } else
                 Timber.e("Section is not valid!")

@@ -5,7 +5,6 @@ import android.content.Context.CONNECTIVITY_SERVICE
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.*
-import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
 import com.arnyminerz.escalaralcoiaicomtat.network.ConnectivityProviderImpl
 
 interface ConnectivityProvider {
@@ -39,19 +38,18 @@ interface ConnectivityProvider {
             "[hasInternet()=%s,wifiConnected()=%s]".format(hasInternet, wifiConnected)
 
         val hasInternet: Boolean
-            get() = if (forceInternetStatus.isNotNull()) forceInternetStatus!! else (networkCapabilities?.hasCapability(
+            get() = forceInternetStatus ?: ((networkCapabilities?.hasCapability(
                 NET_CAPABILITY_INTERNET
-            ) ?: false) && isConnectionFast
+            ) ?: false) && isConnectionFast)
 
         val wifiConnected: Boolean
-            get() = if (forceWifiStatus.isNotNull()) forceWifiStatus!! else networkCapabilities?.hasTransport(
-                TRANSPORT_WIFI
-            ) ?: false
+            get() = forceWifiStatus ?: (networkCapabilities?.hasTransport(TRANSPORT_WIFI) ?: false)
 
         val usingMobileData: Boolean
-            get() = if (forceWifiStatus.isNotNull()) forceWifiStatus!! else networkCapabilities?.hasTransport(
-                TRANSPORT_CELLULAR
-            ) ?: false
+            get() = forceWifiStatus
+                ?: (networkCapabilities?.hasTransport(
+                    TRANSPORT_CELLULAR
+                ) ?: false)
 
         val usingEthernet: Boolean
             get() = networkCapabilities?.hasTransport(TRANSPORT_ETHERNET) ?: false

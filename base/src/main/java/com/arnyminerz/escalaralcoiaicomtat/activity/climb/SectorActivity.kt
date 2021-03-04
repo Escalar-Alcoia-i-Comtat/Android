@@ -23,7 +23,7 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
 
     private var areaIndex = -1
     private var zoneIndex = -1
-    var sector: Int = 0
+    private var sector: Int = 0
     lateinit var sectors: ArrayList<Sector>
 
     private lateinit var binding: ActivitySectorBinding
@@ -58,7 +58,7 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
 
         transitionName = intent.getExtra(EXTRA_SECTOR_TRANSITION_NAME)
         if (transitionName == null)
-            Timber.e("Transition name is null")
+            Timber.w("Transition name is null")
 
         binding.backImageButton.bringToFront()
         updateTitle()
@@ -82,11 +82,11 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
             fragments.add(SectorFragment(sector, binding.sectorViewPager))
         }
 
-        binding.sectorViewPager.adapter =
-            SectorPagerAdapter(this, fragments)
+        binding.sectorViewPager.adapter = SectorPagerAdapter(this, fragments)
         if (savedInstanceState == null)
             binding.sectorViewPager.currentItem = sector
-        binding.sectorViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+        binding.sectorViewPager.registerOnPageChangeCallback(object :
+            ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 sector = position

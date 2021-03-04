@@ -8,7 +8,6 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import androidx.core.app.ActivityCompat
-import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
 import timber.log.Timber
 
 @Suppress("unused")
@@ -101,12 +100,12 @@ class LocationProvider(private val context: Context): LocationListener {
         ) null else locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
 
         var gpsLocationTime: Long = 0
-        if (locationGPS.isNotNull())
-            gpsLocationTime = locationGPS!!.time
+        if (locationGPS != null)
+            gpsLocationTime = locationGPS.time
 
         var netLocationTime: Long = 0
-        if (locationNet.isNotNull())
-            netLocationTime = locationNet!!.time
+        if (locationNet != null)
+            netLocationTime = locationNet.time
 
         return if (gpsLocationTime - netLocationTime > 0)
             locationGPS

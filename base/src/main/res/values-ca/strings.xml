@@ -138,7 +138,7 @@
     <string name="path_chip_ending">"Tipus de reunió per a conéixer la maniobra de descens o top-rope"</string>
     <string name="path_chip_required">"El component mostrat és necessari"</string>
     <string name="path_stats_chart_title">"Graus"</string>
-    <string name="path_ending_pitch">"$1%s $2%s"</string>
+    <string name="path_ending_pitch">"%1$s %2$s"</string>
     <string name="path_ending_pitch_vertical">"Vertical"</string>
     <string name="path_ending_pitch_shelf">"Placa"</string>
     <string name="path_ending_pitch_inclined">"Inclinat"</string>
@@ -270,4 +270,14 @@
     <string name="image_desc_ending_type">Tipus de reunió</string>
     <string name="image_desc_storage">Icona d\'emmagatzematge</string>
     <string name="image_desc_rappel">Rappel</string>
+    <string name="status_not_running">no en execució</string>
+    <string name="status_running">executant-se</string>
+    <string name="status_enqueued">esperant</string>
+    <string name="status_succeeded">finalitzat</string>
+    <string name="status_failed">fallat</string>
+    <string name="status_blocked">bloquejat</string>
+    <string name="status_cancelled">cancel·lat</string>
+    <string name="pref_info_cat_services">Serveis</string>
+    <string name="pref_info_service_updates_title">Comprovador d\'actualitzacions</string>
+    <string name="pref_info_service_updates_sum">El servei que busca noves actualitzacions està ara mateix %1$s</string>
 </resources>

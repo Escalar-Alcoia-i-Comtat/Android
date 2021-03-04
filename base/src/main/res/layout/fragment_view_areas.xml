@@ -76,7 +76,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/nearby_zones_title_cardView" />
 
-                <com.google.android.libraries.maps.MapView
+                <com.mapbox.mapboxsdk.maps.MapView
                     android:id="@+id/mapView"
                     android:layout_width="match_parent"
                     android:layout_height="130dp"
