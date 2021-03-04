@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.os.Bundle
-import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.async.ResultListener
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
@@ -15,8 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.google.android.libraries.maps.model.LatLng
-import timber.log.Timber
+import com.mapbox.mapboxsdk.geometry.LatLng
 
 @ExperimentalUnsignedTypes
 abstract class DataClassListActivity<T : DataClass<*, *>> : NetworkChangeListenerActivity() {
@@ -42,37 +40,32 @@ abstract class DataClassListActivity<T : DataClass<*, *>> : NetworkChangeListene
         if (smallMapEnabled)
             onUiThread {
                 MapHelper()
-                    .withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5f)
+                    .withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5)
                     .loadMap(
-                        supportFragmentManager.findFragmentById(R.id.map)!!,
-                        { _, googleMap ->
-                            googleMap.uiSettings.apply {
-                                isCompassEnabled = false
-                                setAllGesturesEnabled(false)
-                            }
+                        binding.map
+                    ) { mapView, map, _ ->
+                        map.uiSettings.apply {
+                            isCompassEnabled = false
+                            setAllGesturesEnabled(false)
+                        }
 
-                            loadKML(this@DataClassListActivity, dataClass.kmlAddress, state)
-                                .listen(object : ResultListener<MapFeatures> {
-                                    override fun onCompleted(result: MapFeatures) {
-                                        googleMap.setOnMapClickListener {
-                                            showMapsActivity(this@DataClassListActivity)
-                                        }
-                                        googleMap.setOnMarkerClickListener {
-                                            showMapsActivity(this@DataClassListActivity)
-                                            return@setOnMarkerClickListener true
-                                        }
+                        loadKML(this@DataClassListActivity, dataClass.kmlAddress, state)
+                            .listen(object : ResultListener<MapFeatures> {
+                                override fun onCompleted(result: MapFeatures) {
+                                    map.addOnMapClickListener {
+                                        showMapsActivity(this@DataClassListActivity)
+                                        true
                                     }
+                                }
 
-                                    override fun onFailure(error: Exception?) {
-                                        if (error is NoInternetAccessException)
-                                            visibility(binding.map, false)
-                                        else
-                                            error?.let { throw it }
-                                    }
-                                })
-                        }, {
-                            Timber.e(it, "Could not load map:")
-                        })
+                                override fun onFailure(error: Exception?) {
+                                    if (error is NoInternetAccessException)
+                                        visibility(mapView, false)
+                                    else
+                                        error?.let { throw it }
+                                }
+                            })
+                    }
             }
     }
 }

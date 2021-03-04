@@ -9,9 +9,11 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.drawableToBitmap
 import com.arnyminerz.escalaralcoiaicomtat.generic.generateUUID
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
 import com.arnyminerz.escalaralcoiaicomtat.location.SerializableLatLng
-import com.google.android.libraries.maps.GoogleMap
-import com.google.android.libraries.maps.model.BitmapDescriptorFactory
-import com.google.android.libraries.maps.model.MarkerOptions
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import timber.log.Timber
 import java.io.Serializable
 
@@ -27,11 +29,23 @@ data class GeoMarker(
 
     fun getIcon(): Bitmap? = icon?.bitmap
 
-    fun withImage(context: Context, @DrawableRes drawable: Int): GeoMarker {
+    /**
+     * Sets an icon for the marker.
+     * @param context The context to call from
+     * @param style The Mapbox map style
+     * @param drawable The icon to set
+     * @return The same GeoMarker instance updated
+     * @throws UnsupportedOperationException When the drawable could not be converted to bitmap
+     */
+    @Throws(UnsupportedOperationException::class)
+    fun withImage(context: Context, style: Style, @DrawableRes drawable: Int): GeoMarker {
         ContextCompat.getDrawable(context, drawable)?.let {
             val bitmap = drawableToBitmap(it)
-            if (bitmap != null)
+            if (bitmap != null) {
+                style.addImage(id, bitmap, true)
                 icon = SerializableBitmap(bitmap)
+            }else
+                throw UnsupportedOperationException("Could not convert drawable to bitmap")
         } ?: Timber.e("Could not find drawable image.")
         return this
     }
@@ -41,39 +55,27 @@ data class GeoMarker(
         return this
     }
 
-    @ExperimentalUnsignedTypes
-    fun addToMap(googleMap: GoogleMap) {
-        val marker = MarkerOptions()
-            .position(position.toLatLng())
+    fun addToMap(symbolManager: SymbolManager): Symbol? {
+        var symbolOptions = SymbolOptions()
+            .withLatLng(LatLng(position.latitude, position.longitude))
 
         if (icon.isNotNull())
-            icon!!.let { fullSizeBitmap ->
-                marker.icon(
-                    BitmapDescriptorFactory.fromBitmap(
-                        Bitmap.createScaledBitmap(
-                            fullSizeBitmap.bitmap,
-                            iconSize,
-                            iconSize,
-                            false
-                        )
-                    )
-                )
-            }
+            symbolOptions = symbolOptions
+                .withIconImage(id)
+                .withIconSize(iconSize.toFloat())
 
         if (windowData != null)
-            marker.apply {
-                snippet(windowData.message)
-                title(windowData.title)
-            }
+            symbolOptions.withData(windowData.data())
 
-        googleMap.addMarker(marker).apply {
-            tag = id
-        }
+        return symbolManager.create(symbolOptions)
     }
 }
 
+fun Symbol.getWindow(): MapObjectWindowData =
+    MapObjectWindowData.load(this)
+
 @ExperimentalUnsignedTypes
-fun Collection<GeoMarker>.addToMap(googleMap: GoogleMap) {
+fun Collection<GeoMarker>.addToMap(symbolManager: SymbolManager) {
     for (marker in this)
-        marker.addToMap(googleMap)
+        marker.addToMap(symbolManager)
 }

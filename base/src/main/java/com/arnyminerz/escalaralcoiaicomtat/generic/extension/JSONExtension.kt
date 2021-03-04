@@ -1,7 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic.extension
 
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
-import com.google.android.libraries.maps.model.LatLng
+import com.mapbox.mapboxsdk.geometry.LatLng
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject

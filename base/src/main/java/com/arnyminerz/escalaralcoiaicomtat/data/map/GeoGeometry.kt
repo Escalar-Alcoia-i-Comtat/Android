@@ -1,57 +1,45 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.map
 
-import com.google.android.libraries.maps.GoogleMap
-import com.google.android.libraries.maps.model.LatLng
-import com.google.android.libraries.maps.model.LatLngBounds
-import com.google.android.libraries.maps.model.PolygonOptions
-import com.google.android.libraries.maps.model.PolylineOptions
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.geometry.LatLngBounds
+import com.mapbox.mapboxsdk.plugins.annotation.FillManager
+import com.mapbox.mapboxsdk.plugins.annotation.FillOptions
+import com.mapbox.mapboxsdk.plugins.annotation.LineManager
+import com.mapbox.mapboxsdk.plugins.annotation.LineOptions
 import timber.log.Timber
 import java.io.Serializable
 
 data class GeoGeometry(
     val style: GeoStyle,
     val points: ArrayList<LatLng>,
-    val windowData: MapObjectWindowData,
+    val windowData: MapObjectWindowData?,
     val closedShape: Boolean
 ) : Serializable {
-    companion object {
-        private const val TAG = "GeoGeometry"
-    }
-
-    fun addToMap(googleMap: GoogleMap) {
+    fun addToMap(fillManager: FillManager, lineManager: LineManager) {
         Timber.v("Creating new polygon with ${points.size} points...")
         if (closedShape) { // Polygon
-            val options = PolygonOptions()
-                .addAll(points)
-            with(style) {
-                val fillColor = fillColor()
-                val strokeColor = strokeColor()
-                if (strokeColor != null) options.strokeColor(strokeColor()!!)
-                if (fillColor != null) options.fillColor(fillColor()!!)
-                if (lineJoint != null) options.strokeJointType(lineJoint)
-                if (lineWidth != null) options.strokeWidth(lineWidth)
-            }
-            googleMap.addPolygon(options)
+            val fillOptions = FillOptions()
+                .withLatLngs(listOf(points))
+                .apply(style)
+            val lineOptions = LineOptions()
+                .withLatLngs(points)
+                .apply(style)
+
+            fillManager.create(fillOptions)
+            lineManager.create(lineOptions)
         } else { // Polyline
-            val options = PolylineOptions()
-                .addAll(points)
-            with(style) {
-                Timber.v("Polyline fill color: $fillColor")
-                val strokeColor = strokeColor()
-                if (strokeColor != null) options.color(strokeColor)
-                if (lineCap != null) options.startCap(lineCap).endCap(lineCap)
-                if (lineJoint != null) options.jointType(lineJoint)
-                if (lineWidth != null) options.width(lineWidth)
-            }
-            googleMap.addPolyline(options)
+            val lineOptions = LineOptions()
+                .withLatLngs(points)
+                .apply(style)
+            lineManager.create(lineOptions)
         }
     }
 }
 
 @ExperimentalUnsignedTypes
-fun Collection<GeoGeometry>.addToMap(googleMap: GoogleMap) {
+fun Collection<GeoGeometry>.addToMap(fillManager: FillManager, lineManager: LineManager) {
     for (marker in this)
-        marker.addToMap(googleMap)
+        marker.addToMap(fillManager, lineManager)
 }
 
 fun LatLngBounds.Builder.include(points: ArrayList<LatLng>) {

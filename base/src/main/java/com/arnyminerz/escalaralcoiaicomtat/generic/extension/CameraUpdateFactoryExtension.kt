@@ -1,10 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic.extension
 
 import com.arnyminerz.escalaralcoiaicomtat.generic.isNotNull
-import com.google.android.libraries.maps.CameraUpdate
-import com.google.android.libraries.maps.CameraUpdateFactory
-import com.google.android.libraries.maps.model.LatLng
-import com.google.android.libraries.maps.model.LatLngBounds
+import com.mapbox.mapboxsdk.camera.CameraUpdate
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.geometry.LatLngBounds
 
 fun newLatLngBounds(points: ArrayList<LatLng>, padding: Int): CameraUpdate? {
     if (points.size < 2)

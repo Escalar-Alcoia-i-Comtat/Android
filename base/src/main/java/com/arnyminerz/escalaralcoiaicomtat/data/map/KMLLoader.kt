@@ -14,12 +14,11 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.storage.UnzipUtil
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.storage.storeFile
-import com.google.android.libraries.maps.CameraUpdateFactory
-import com.google.android.libraries.maps.GoogleMap
-import com.google.android.libraries.maps.model.CameraPosition
-import com.google.android.libraries.maps.model.JointType
-import com.google.android.libraries.maps.model.LatLng
-import com.google.android.libraries.maps.model.RoundCap
+import com.mapbox.mapboxsdk.camera.CameraPosition
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.style.layers.Property
 import kotlinx.coroutines.*
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -43,7 +42,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
 
     fun load(
         context: Context,
-        googleMap: GoogleMap,
+        map: MapboxMap,
         networkState: ConnectivityProvider.NetworkState,
         finishedListener: ((result: LoadResult) -> Unit)?,
         errorListener: ((error: Exception) -> Unit)?
@@ -265,8 +264,11 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                                         Timber.v("New Marker: $title")
                                         val m = GeoMarker(
                                             latLng.serializable(),
-                                            (30 * SETTINGS_MARKER_SIZE_PREF.get(sharedPreferences).toFloat()).toInt(),
-                                            MapObjectWindowData(title, description, null)
+                                            (30 * SETTINGS_MARKER_SIZE_PREF.get(sharedPreferences)
+                                                .toFloat()).toInt(),
+                                            if (title != null)
+                                                MapObjectWindowData(title, description)
+                                            else null
                                         )
                                         if (iconBitmap != null) {
                                             m.withImage(iconBitmap)
@@ -318,11 +320,12 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                                                     "#$polyColor",
                                                     "#$lineColor",
                                                     lineWidth?.toFloat(),
-                                                    RoundCap(),
-                                                    JointType.ROUND
+                                                    Property.LINE_JOIN_ROUND
                                                 ),
                                                 polygonPoints,
-                                                MapObjectWindowData(title, description, null),
+                                                (if (title != null)
+                                                    MapObjectWindowData(title, description)
+                                                else null),
                                                 true
                                             )
                                         )
@@ -360,11 +363,12 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                                                 "#$polyColor",
                                                 "#$lineColor",
                                                 lineWidth?.toFloat(),
-                                                RoundCap(),
-                                                JointType.ROUND
+                                                Property.LINE_JOIN_ROUND
                                             ),
                                             polygonPoints,
-                                            MapObjectWindowData(title, description, null),
+                                            (if (title != null)
+                                                MapObjectWindowData(title, description)
+                                            else null),
                                             false
                                         )
                                     )
@@ -376,19 +380,22 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                     onUiThread {
                         if (addedPoints.size > 1)
                             try {
-                                googleMap.moveCamera(
-                                    newLatLngBounds(
-                                        addedPoints,
-                                        resources.getInteger(R.integer.marker_padding)
-                                    )
-                                )
+                                newLatLngBounds(
+                                    addedPoints,
+                                    resources.getInteger(R.integer.marker_padding)
+                                )?.let { bounds ->
+                                    map.moveCamera(bounds)
+                                }
                             } catch (ex: NullPointerException) { // This sometimes throw when trying to get bounds
                                 Timber.e(ex, "Could not find bounds:")
                             }
                         else if (addedPoints.size > 0)
-                            googleMap.moveCamera(
+                            map.moveCamera(
                                 CameraUpdateFactory.newCameraPosition(
-                                    CameraPosition.fromLatLngZoom(addedPoints.first(), 16f)
+                                    CameraPosition.Builder()
+                                        .target(addedPoints.first())
+                                        .zoom(16.0)
+                                        .build()
                                 )
                             )
                     }

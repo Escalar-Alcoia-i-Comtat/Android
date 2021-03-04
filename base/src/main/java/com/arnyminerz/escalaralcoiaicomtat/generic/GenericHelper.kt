@@ -1,18 +1,14 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
 import android.app.Activity
-import android.content.ContentResolver
 import android.content.Context
-import android.net.Uri
 import android.os.Build
 import android.util.DisplayMetrics
-import android.webkit.MimeTypeMap
 import androidx.core.content.ContextCompat
-import com.google.android.libraries.maps.model.LatLng
+import com.mapbox.mapboxsdk.geometry.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
 import java.util.*
 
 
@@ -63,17 +59,6 @@ fun polygonContains(test: LatLng, points: MutableList<LatLng>): Boolean {
         j = i++
     }
     return result
-}
-
-fun getMimeType(context: Context, uri: Uri): String? {
-    val extension: String?
-    extension = if (uri.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
-        val mime = MimeTypeMap.getSingleton()
-        mime.getExtensionFromMimeType(context.contentResolver.getType(uri))
-    } else {
-        MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(File(uri.path!!)).toString())
-    }
-    return extension
 }
 
 fun generateUUID(): String {

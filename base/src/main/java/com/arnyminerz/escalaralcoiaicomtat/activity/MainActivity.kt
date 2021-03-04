@@ -15,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
+import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL_NO_SECURE
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
@@ -34,6 +35,7 @@ import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.worker.UpdateWorker
+import io.sentry.Sentry
 import io.sentry.SentryLevel
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.timber.SentryTimberIntegration
@@ -264,11 +266,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         Timber.v("Got permissions result. Code: %s", requestCode)
         val areasViewFragment = areasViewFragment
         when (requestCode) {
-            LOCATION_PERMISSION_REQUEST -> if (areasViewFragment.googleMap != null)
-                areasViewFragment.updateNearbyZones(
-                    null,
-                    areasViewFragment.googleMap!!
-                )
+            LOCATION_PERMISSION_REQUEST -> areasViewFragment.updateNearbyZones(null)
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
@@ -280,13 +278,22 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
         if (state.hasInternet && !serverAvailable) {
             runAsync {
-                val canReachServer = URL(EXTENDED_API_URL).ping()
-                if (canReachServer) {
-                    Timber.v("Reached arnyminerz.com")
-                    serverAvailable = true
-                } else {
-                    Timber.e("Could not ping $EXTENDED_API_URL")
-                    startActivity(Intent(this@MainActivity, ServerDownActivity::class.java))
+                val canReachRecureServer = URL(EXTENDED_API_URL).ping()
+                val canReachServer = URL(EXTENDED_API_URL_NO_SECURE).ping()
+                when {
+                    canReachRecureServer -> {
+                        Timber.v("Reached arnyminerz.com")
+                        serverAvailable = true
+                    }
+                    canReachServer -> {
+                        Timber.w("Misconfigured SSL in API. Please, check! Working at insecure address.")
+                        Sentry.captureMessage("Misconfigured SSL in API. Please, check! Working at insecure address.", SentryLevel.WARNING)
+                        serverAvailable = true
+                    }
+                    else -> {
+                        Timber.e("Could not ping $EXTENDED_API_URL")
+                        startActivity(Intent(this@MainActivity, ServerDownActivity::class.java))
+                    }
                 }
             }
         } else

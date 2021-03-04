@@ -6,11 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity
 import com.arnyminerz.escalaralcoiaicomtat.async.ResultListener
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.find
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
@@ -26,9 +24,12 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.hide
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.google.android.libraries.maps.CameraUpdateFactory
-import com.google.android.libraries.maps.GoogleMap
-import com.google.android.libraries.maps.model.LatLng
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.plugins.annotation.FillManager
+import com.mapbox.mapboxsdk.plugins.annotation.LineManager
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import timber.log.Timber
 
 @ExperimentalUnsignedTypes
@@ -48,7 +49,7 @@ class MapFragment : NetworkChangeListenerFragment() {
     }
 
     private val areas = arrayListOf<Area>()
-    private var googleMap: GoogleMap? = null
+    private var map: MapboxMap? = null
     private var markerWindow: MarkerWindow? = null
 
     fun setAreas(areas: ArrayList<Area>) =
@@ -59,10 +60,13 @@ class MapFragment : NetworkChangeListenerFragment() {
         super.onStart()
 
         mapHelper = MapHelper()
-            .withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5f)
+            .withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5)
 
-        if (IntroActivity.hasLocationPermission(requireContext()))
-            googleMap?.isMyLocationEnabled = true
+        if (IntroActivity.hasLocationPermission(requireContext())) {
+            // TODO: Enable my location show
+            toast(requireContext(), "My location is still being implemented")
+            //googleMap?.isMyLocationEnabled = true
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -70,101 +74,97 @@ class MapFragment : NetworkChangeListenerFragment() {
         super.onResume()
 
         mapHelper.loadMap(
-            childFragmentManager.findFragmentById(R.id.page_mapView)!!,
-            { _, googleMap ->
-                this@MapFragment.googleMap = googleMap
+            binding.pageMapView
+        ) { mapView, map, style ->
+            this@MapFragment.map = map
 
-                if (context != null)
-                    try {
-                        if (IntroActivity.hasLocationPermission(requireContext()))
-                            googleMap.isMyLocationEnabled = true
-                    } catch (ex: IllegalStateException) {
-                        Timber.w("Tried to check location permission without being attached to a context.")
+            Timber.d("Getting map managers...")
+            val symbolManager = SymbolManager(mapView, map, style)
+            val lineManager = LineManager(mapView, map, style)
+            val fillManager = FillManager(mapView, map, style)
+
+            if (context != null)
+                try {
+                    if (IntroActivity.hasLocationPermission(requireContext())) {
+                        // TODO: Enable my location show
+                        toast(requireContext(), "My location is still being implemented")
+                        //map.isMyLocationEnabled = true
                     }
+                } catch (ex: IllegalStateException) {
+                    Timber.w("Tried to check location permission without being attached to a context.")
+                }
 
-                var counter = 0
-                val max = 3
-                val markers = arrayListOf<GeoMarker>()
-                val polygons = arrayListOf<GeoGeometry>()
-                val polylines = arrayListOf<GeoGeometry>()
+            var counter = 0
+            val max = 3
+            val markers = arrayListOf<GeoMarker>()
+            val polygons = arrayListOf<GeoGeometry>()
+            val polylines = arrayListOf<GeoGeometry>()
 
-                for (area in areas)
-                    mapHelper
-                        .loadKML(requireActivity(), area.kmlAddress, networkState)
-                        .listen(object : ResultListener<MapFeatures> {
-                            override fun onCompleted(result: MapFeatures) {
-                                if (context == null || !isResumed) return
+            for (area in areas)
+                mapHelper
+                    .loadKML(requireActivity(), area.kmlAddress, networkState)
+                    .listen(object : ResultListener<MapFeatures> {
+                        override fun onCompleted(result: MapFeatures) {
+                            if (context == null || !isResumed) return
 
-                                markers.addAll(result.markers)
-                                polygons.addAll(result.polygons)
-                                polylines.addAll(result.polylines)
+                            Timber.d("Adding features to list...")
+                            markers.addAll(result.markers)
+                            polygons.addAll(result.polygons)
+                            polylines.addAll(result.polylines)
 
-                                counter++
-                                if (counter >= max) {
-                                    markers.addToMap(googleMap)
-                                    polygons.addToMap(googleMap)
-                                    polylines.addToMap(googleMap)
+                            Timber.d("Adding features to map...")
+                            counter++
+                            if (counter >= max) {
+                                markers.addToMap(symbolManager)
+                                polygons.addToMap(fillManager, lineManager)
+                                polylines.addToMap(fillManager, lineManager)
 
-                                    val positions = arrayListOf<LatLng>()
+                                val positions = arrayListOf<LatLng>()
 
-                                    for (marker in markers)
-                                        positions.add(marker.position.toLatLng())
-                                    for (marker in polygons)
-                                        positions.addAll(marker.points)
-                                    for (marker in polylines)
-                                        positions.addAll(marker.points)
+                                for (marker in markers)
+                                    positions.add(marker.position.toLatLng())
+                                for (marker in polygons)
+                                    positions.addAll(marker.points)
+                                for (marker in polylines)
+                                    positions.addAll(marker.points)
 
-                                    if (positions.size > 1)
-                                        googleMap.moveCamera(
-                                            CameraUpdateFactory.newLatLngBounds(
-                                                positions.bounds(),
-                                                30
-                                            )
+                                if (positions.size > 1)
+                                    map.moveCamera(
+                                        CameraUpdateFactory.newLatLngBounds(
+                                            positions.bounds(),
+                                            30
                                         )
-                                    else if (positions.size > 0)
-                                        googleMap.moveCamera(
-                                            CameraUpdateFactory.newLatLng(positions.first())
-                                        )
-                                }
+                                    )
+                                else if (positions.size > 0)
+                                    map.moveCamera(
+                                        CameraUpdateFactory.newLatLng(positions.first())
+                                    )
                             }
+                        }
 
-                            override fun onFailure(error: Exception?) {
-                                Timber.e(error, "Could not load KML")
-                                requireContext().toast(R.string.toast_error_internal)
-                            }
-                        })
+                        override fun onFailure(error: Exception?) {
+                            Timber.e(error, "Could not load KML")
+                            requireContext().toast(R.string.toast_error_internal)
+                        }
+                    })
 
-                googleMap.setOnMarkerClickListener { marker ->
-                    if (SETTINGS_CENTER_MARKER_PREF.get(requireContext().sharedPreferences))
-                        googleMap.animateCamera(CameraUpdateFactory.newLatLng(marker.position))
+            symbolManager.addClickListener { marker ->
+                if (SETTINGS_CENTER_MARKER_PREF.get(requireContext().sharedPreferences))
+                    map.animateCamera(CameraUpdateFactory.newLatLng(marker.latLng))
 
-                    context?.let {
-                        markerWindow = MapHelper.infoCard(it, marker, binding.dialogMapMarker)
-                    }
-
-                    true
+                context?.let {
+                    markerWindow = MapHelper.infoCard(it, marker, binding.dialogMapMarker)
                 }
 
-                googleMap.setOnMapClickListener {
-                    markerWindow?.hide()
-                    markerWindow = null
-                }
+                true
+            }
 
-                googleMap.setOnInfoWindowClickListener { marker ->
-                    val dataClass = MapHelper.getTarget(marker)
-                    val scan = dataClass?.let { AREAS.find(it) }
-                    scan?.launchActivity(requireContext())
-                        ?: Timber.w("Won't launch activity since dataClass is null")
-
-                    Timber.e(
-                        "Could not find any valid zone with name \"%s\".",
-                        marker.title
-                    )
-                }
-            },
-            {
-                Timber.e(it, "Could not load map:")
-            })
+            map.addOnMapClickListener {
+                markerWindow?.hide()
+                markerWindow = null
+                true
+            }
+        }
     }
 
     override fun onDestroyView() {

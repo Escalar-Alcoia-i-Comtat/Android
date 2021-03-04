@@ -1,15 +1,17 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.map
 
 import android.graphics.Color
-import com.google.android.libraries.maps.model.Cap
+import com.mapbox.mapboxsdk.plugins.annotation.FillOptions
+import com.mapbox.mapboxsdk.plugins.annotation.LineOptions
+import com.mapbox.mapboxsdk.style.layers.Property
 import java.io.Serializable
 
 data class GeoStyle(
     val fillColor: String?,
     val strokeColor: String?,
     val lineWidth: Float?,
-    val lineCap: Cap?,
-    val lineJoint: Int?
+    @Property.LINE_JOIN
+    val lineJoin: String?
 ) : Serializable {
     private fun colorIsNull(color: String?) =
         color == null || !color.startsWith("#") || color.contains("null")
@@ -25,4 +27,26 @@ data class GeoStyle(
     } catch (ex: NumberFormatException) {
         null
     } else null
+}
+
+fun FillOptions.apply(geoStyle: GeoStyle): FillOptions {
+    var modOptions = this
+
+    if (geoStyle.strokeColor != null)
+        modOptions = modOptions.withFillOutlineColor(geoStyle.strokeColor)
+    if (geoStyle.fillColor != null)
+        modOptions = modOptions.withFillColor(geoStyle.fillColor)
+
+    return modOptions
+}
+
+fun LineOptions.apply(geoStyle: GeoStyle): LineOptions {
+    var modOptions = this
+
+    if (geoStyle.lineJoin != null)
+        modOptions = modOptions.withLineJoin(geoStyle.lineJoin)
+    if (geoStyle.lineWidth != null)
+        modOptions = modOptions.withLineWidth(geoStyle.lineWidth)
+
+    return modOptions
 }
