@@ -145,18 +145,18 @@ class MapHelper(private val mapView: MapView) {
         )
     }
 
-    private fun loadDefaultIcons(context: Context){
+    private fun loadDefaultIcons(context: Context) {
         if (style == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
         Timber.d("Loading default icons...")
-        for(icon in ICONS){
+        for (icon in ICONS) {
             val drawable = ResourcesCompat.getDrawable(
                 context.resources,
                 icon.icon,
                 context.theme
             )
-            if (drawable == null){
+            if (drawable == null) {
                 Timber.d("Icon ${icon.name} doesn't have a valid drawable.")
                 continue
             }
@@ -164,8 +164,9 @@ class MapHelper(private val mapView: MapView) {
         }
     }
 
-    fun loadMap(context: Context,
-                callback: MapHelper.(mapView: MapView, map: MapboxMap, style: Style) -> Unit
+    fun loadMap(
+        context: Context,
+        callback: MapHelper.(mapView: MapView, map: MapboxMap, style: Style) -> Unit
     ): MapHelper {
         Timber.d("Loading map...")
         mapView.getMapAsync { map ->
@@ -407,7 +408,7 @@ class MapHelper(private val mapView: MapView) {
         this.symbols.addAll(symbols)
 
         val geometries = geometries.addToMap(fillManager!!, lineManager!!)
-        for (geometry in geometries){
+        for (geometry in geometries) {
             lines.add(geometry.first)
             geometry.second?.let { fills.add(it) }
         }
@@ -504,12 +505,10 @@ class MapHelper(private val mapView: MapView) {
 
         val gmmIntentUri = latLng.toUri(true, title)
         val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-        val mapsAvailable = mapIntent.resolveActivity(context.packageManager) != null
-        binding.fabMaps.visibility(mapsAvailable)
-        if (mapsAvailable)
-            binding.fabMaps.setOnClickListener {
-                context.startActivity(mapIntent)
-            }
+        binding.fabMaps.visibility(true)
+        binding.fabMaps.setOnClickListener {
+            context.startActivity(mapIntent)
+        }
 
         if (activityIntent != null)
             binding.fabEnter.setOnClickListener {
