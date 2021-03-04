@@ -10,21 +10,16 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
-import com.arnyminerz.escalaralcoiaicomtat.data.map.addToMap
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentMapBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.bounds
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.plugins.annotation.FillManager
-import com.mapbox.mapboxsdk.plugins.annotation.LineManager
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import timber.log.Timber
 
 @ExperimentalUnsignedTypes
@@ -56,13 +51,8 @@ class MapFragment : NetworkChangeListenerFragment() {
         mapHelper.onCreate(savedInstanceState)
         mapHelper
             .withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5)
-            .loadMap { mapView, map, style ->
+            .loadMap { _, map, _ ->
                 this@MapFragment.map = map
-
-                Timber.d("Getting map managers...")
-                val symbolManager = SymbolManager(mapView, map, style)
-                val lineManager = LineManager(mapView, map, style)
-                val fillManager = FillManager(mapView, map, style)
 
                 if (context != null)
                     try {
@@ -96,30 +86,12 @@ class MapFragment : NetworkChangeListenerFragment() {
                             Timber.d("Adding features to map...")
                             counter++
                             if (counter >= max) {
-                                markers.addToMap(requireContext(), symbolManager)
-                                polygons.addToMap(fillManager, lineManager)
-                                polylines.addToMap(fillManager, lineManager)
+                                mapHelper.add(*markers.toTypedArray())
+                                mapHelper.add(*polygons.toTypedArray())
+                                mapHelper.add(*polylines.toTypedArray())
 
-                                val positions = arrayListOf<LatLng>()
-
-                                for (marker in markers)
-                                    positions.add(marker.position.toLatLng())
-                                for (marker in polygons)
-                                    positions.addAll(marker.points)
-                                for (marker in polylines)
-                                    positions.addAll(marker.points)
-
-                                if (positions.size > 1)
-                                    map.moveCamera(
-                                        CameraUpdateFactory.newLatLngBounds(
-                                            positions.bounds(),
-                                            30
-                                        )
-                                    )
-                                else if (positions.size > 0)
-                                    map.moveCamera(
-                                        CameraUpdateFactory.newLatLng(positions.first())
-                                    )
+                                mapHelper.display(requireContext())
+                                mapHelper.center()
                             }
                         } catch (e: Exception) {
                             Timber.e(e, "Could not load KML")
@@ -128,12 +100,12 @@ class MapFragment : NetworkChangeListenerFragment() {
                     }
                 }
 
-                symbolManager.addClickListener { marker ->
+                mapHelper.addSymbolClickListener {
                     if (SETTINGS_CENTER_MARKER_PREF.get(requireContext().sharedPreferences))
-                        map.animateCamera(CameraUpdateFactory.newLatLng(marker.latLng))
+                        map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
 
                     context?.let {
-                        markerWindow = mapHelper.infoCard(it, marker, binding.dialogMapMarker)
+                        markerWindow = mapHelper.infoCard(it, this, binding.dialogMapMarker)
                     }
 
                     true
