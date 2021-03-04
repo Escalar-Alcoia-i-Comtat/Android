@@ -44,7 +44,7 @@ abstract class DataClass<A : Serializable, B : Serializable>(
     @DrawableRes val errorPlaceholderDrawable: Int,
     open val parentId: Int,
     open val namespace: String
-) : Parcelable, Serializable, Iterator<A> {
+) : Parcelable, Serializable, Iterable<A> {
     val children: ArrayList<A> = arrayListOf()
 
     /**
@@ -61,13 +61,7 @@ abstract class DataClass<A : Serializable, B : Serializable>(
         return other.namespace == namespace && other.id == id
     }
 
-    private var i: Int = 0
-    override fun next(): A {
-        i++
-        return children[i - 1]
-    }
-
-    override fun hasNext(): Boolean = i < children.size
+    override fun iterator(): Iterator<A> = DataClassIterator(children)
 
     override fun toString(): String = displayName
 
@@ -409,7 +403,16 @@ abstract class DataClass<A : Serializable, B : Serializable>(
         result = 31 * result + namespace.hashCode()
         result = 31 * result + children.hashCode()
         result = 31 * result + isDownloading.hashCode()
-        result = 31 * result + i
         return result
     }
+}
+
+class DataClassIterator<A: Serializable> (private val children: List<A>) : Iterator<A> {
+    private var i: Int = 0
+    override fun next(): A {
+        i++
+        return children[i - 1]
+    }
+
+    override fun hasNext(): Boolean = i < children.size
 }
