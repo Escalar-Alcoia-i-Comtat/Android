@@ -283,13 +283,14 @@ class MapHelper(private val mapView: MapView) {
 
     /**
      * Adds a marker to the map
-     * @param marker The marker to add
+     * @param markers The markers to add
      * @see GeoMarker
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @Throws(MapNotInitializedException::class)
-    fun add(marker: GeoMarker) {
-        markers.add(marker)
+    fun add(vararg markers: GeoMarker) {
+        for (marker in markers)
+            this.markers.add(marker)
     }
 
     /**
