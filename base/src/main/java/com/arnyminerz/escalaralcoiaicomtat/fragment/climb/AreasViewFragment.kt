@@ -29,8 +29,6 @@ import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.location.serializable
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
-import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.gms.location.*
 import com.mapbox.mapboxsdk.Mapbox
@@ -56,9 +54,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     private var _binding: FragmentViewAreasBinding? = null
     private val binding get() = _binding!!
 
-    fun updateNearbyZones(currentLocation: Location?) {
+    fun updateNearbyZones(currentLocation: Location) {
         var error = false
-        binding.nearbyZonesCardView.hide()
 
         if (context == null) {
             error = true
@@ -80,10 +77,10 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             Timber.w("Could not update Nearby Zones: AREAS is empty")
         }
 
+        visibility(binding.nearbyZonesCardView, !error)
         if (error)
             return
 
-        binding.nearbyZonesCardView.show()
         binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
 
         val hasLocationPermission =
@@ -113,7 +110,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             val boundsBuilder = LatLngBounds.Builder()
             counter = 0
 
-            if (currentLocation != null && context != null && mapHelper != null)
+            if (context != null && mapHelper != null)
                 runAsync {
                     Timber.v("Iterating through ${AREAS.size} areas.")
                     Timber.v("Current Location: [${currentLocation.latitude},${currentLocation.longitude}]")
@@ -155,7 +152,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                             }
                     }
                 }
-            else Timber.w("Could not show nearby zones. currentLocation null? ${currentLocation == null}")
+            else Timber.w("Could not show nearby zones")
         }
     }
 
@@ -179,8 +176,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         mapHelper = MapHelper(binding.mapView)
         mapHelper!!.onCreate(savedInstanceState)
         mapHelper!!.loadMap { _, map, _ ->
-            updateNearbyZones(null)
-
             map.uiSettings.apply {
                 setAllGesturesEnabled(false)
             }
