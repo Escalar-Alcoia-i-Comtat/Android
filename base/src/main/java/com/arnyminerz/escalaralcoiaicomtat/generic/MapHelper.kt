@@ -40,6 +40,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.Symbol
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import timber.log.Timber
 import java.io.FileNotFoundException
+import java.io.Serializable
 
 class MapHelper(private val mapView: MapView) {
     companion object {
@@ -146,7 +147,8 @@ class MapHelper(private val mapView: MapView) {
     }
 
     private var map: MapboxMap? = null
-    private var style: Style? = null
+    var style: Style? = null
+        private set
     private var symbolManager: SymbolManager? = null
 
     private var loadedKMLAddress: String? = null
@@ -394,6 +396,18 @@ class MapHelper(private val mapView: MapView) {
             ), animate
         )
     }
+
+    @ExperimentalUnsignedTypes
+    fun mapsActivityIntent(context: Context): Intent =
+        Intent(context, MapsActivity::class.java).apply {
+            val mapData = arrayListOf<Serializable>()
+            for (zm in markers)
+                zm.let { zoneMarker ->
+                    Timber.d("  Adding position [${zoneMarker.position.latitude}, ${zoneMarker.position.longitude}]")
+                    mapData.add(zoneMarker as Serializable)
+                }
+            putExtra(MapsActivity.MAP_DATA_BUNDLE_EXTRA, mapData)
+        }
 }
 
 class MapNotInitializedException(message: String) : Exception(message)
