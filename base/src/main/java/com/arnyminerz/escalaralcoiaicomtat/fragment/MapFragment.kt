@@ -54,50 +54,6 @@ class MapFragment : NetworkChangeListenerFragment() {
         super.onActivityCreated(savedInstanceState)
         mapHelper = MapHelper(binding.pageMapView)
         mapHelper.onCreate(savedInstanceState)
-    }
-
-    @SuppressLint("MissingPermission")
-    override fun onStart() {
-        super.onStart()
-        mapHelper.onStart()
-
-        if (IntroActivity.hasLocationPermission(requireContext())) {
-            // TODO: Enable my location show
-            toast(requireContext(), "My location is still being implemented")
-            //googleMap?.isMyLocationEnabled = true
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mapHelper.onPause()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        mapHelper.onStop()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        mapHelper.onSaveInstanceState(outState)
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        mapHelper.onLowMemory()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mapHelper.onDestroy()
-    }
-
-    @SuppressLint("MissingPermission")
-    override fun onResume() {
-        super.onResume()
-        mapHelper.onResume()
-
         mapHelper
             .withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5)
             .loadMap { mapView, map, style ->
@@ -110,11 +66,10 @@ class MapFragment : NetworkChangeListenerFragment() {
 
                 if (context != null)
                     try {
-                        if (IntroActivity.hasLocationPermission(requireContext())) {
-                            // TODO: Enable my location show
-                            toast(requireContext(), "My location is still being implemented")
-                            //map.isMyLocationEnabled = true
-                        }
+                        if (IntroActivity.hasLocationPermission(requireContext()))
+                            mapHelper.enableLocationComponent(requireContext())
+                        else
+                            Timber.w("User hasn't granted the location permission. Marker won't be enabled.")
                     } catch (ex: IllegalStateException) {
                         Timber.w("Tried to check location permission without being attached to a context.")
                     }
@@ -190,6 +145,42 @@ class MapFragment : NetworkChangeListenerFragment() {
                     true
                 }
             }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mapHelper.onStart()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapHelper.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mapHelper.onStop()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapHelper.onSaveInstanceState(outState)
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapHelper.onLowMemory()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mapHelper.onDestroy()
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun onResume() {
+        super.onResume()
+        mapHelper.onResume()
     }
 
     override fun onDestroyView() {
