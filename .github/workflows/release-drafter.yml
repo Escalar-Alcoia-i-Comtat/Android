@@ -65,7 +65,7 @@ jobs:
 
       - name: Show build tree
         run: |
-          apt install tree
+          sudo apt install tree
           tree -a
 
       - name: Debug Symbols Artifact
