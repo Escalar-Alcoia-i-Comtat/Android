@@ -288,7 +288,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                         serverAvailable = true
                     }
                     else -> {
-                        Timber.e("Could not ping $EXTENDED_API_URL")
+                        Timber.e("Could not ping $EXTENDED_API_URL. Tried through http and https.")
                         startActivity(Intent(this@MainActivity, ServerDownActivity::class.java))
                     }
                 }
