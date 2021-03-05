@@ -27,6 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.google.android.material.button.MaterialButton
+import timber.log.Timber
 import java.io.File
 
 
@@ -52,7 +53,6 @@ class IntroActivity : NetworkChangeListenerActivity() {
 
     var adapterViewPager: IntroPagerAdapter? = null
         private set
-    val bundle = Bundle()
 
     private lateinit var binding: ActivityIntroBinding
 
@@ -62,13 +62,7 @@ class IntroActivity : NetworkChangeListenerActivity() {
         val view = binding.root
         setContentView(view)
 
-        val isBeta = BuildConfig.VERSION_NAME.contains("pre", true)
-
-        bundle.clear()
-        bundle.putString("os_version", android.os.Build.VERSION.RELEASE)
-        bundle.putInt("api_level", android.os.Build.VERSION.SDK_INT)
-
-        adapterViewPager = IntroPagerAdapter(supportFragmentManager, isBeta, this)
+        adapterViewPager = IntroPagerAdapter(supportFragmentManager, this)
         binding.viewPager.adapter = adapterViewPager
         binding.viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {}
@@ -81,7 +75,7 @@ class IntroActivity : NetworkChangeListenerActivity() {
                 val storageIntroFragmentIndex =
                     adapterViewPager!!.fragments.indexOf(adapterViewPager!!.storageIntroFragment)
                 if (position - 1 == storageIntroFragmentIndex)
-                    if (!this@IntroActivity.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    if (!isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
                         binding.viewPager.currentItem = storageIntroFragmentIndex
                         binding.introNextFAB.setImageResource(R.drawable.round_chevron_right_24)
                         shouldChange = false
@@ -116,7 +110,7 @@ class IntroActivity : NetworkChangeListenerActivity() {
         val storageIntroFragmentIndex =
             adapterViewPager!!.fragments.indexOf(adapterViewPager!!.storageIntroFragment)
         if (position == storageIntroFragmentIndex)
-            if (!this.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            if (!isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 binding.viewPager.currentItem = storageIntroFragmentIndex
                 binding.introNextFAB.setImageResource(R.drawable.round_chevron_right_24)
                 shouldChange = false
@@ -132,12 +126,14 @@ class IntroActivity : NetworkChangeListenerActivity() {
             }
 
         if (position + 1 >= adapterViewPager!!.fragments.size) {
+            Timber.v("Finished showing intro pages. Loading MainActivity")
             PREF_SHOWN_INTRO.put(sharedPreferences, true)
-            startActivity(Intent(this@IntroActivity, MainActivity()::class.java))
+            startActivity(Intent(this, MainActivity()::class.java))
         } else {
             if (binding.viewPager.currentItem == adapterViewPager!!.fragments.size - 2)
                 binding.introNextFAB.setImageResource(R.drawable.round_check_24)
             binding.viewPager.currentItem++
+            Timber.v("Showing intro page ${binding.viewPager.currentItem}")
         }
     }
 
@@ -179,7 +175,7 @@ class IntroActivity : NetworkChangeListenerActivity() {
     }
 
     @Suppress("MemberVisibilityCanBePrivate")
-    class IntroPagerAdapter(fragmentManager: FragmentManager, isBeta: Boolean, context: Context) :
+    class IntroPagerAdapter(fragmentManager: FragmentManager, context: Context) :
         FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
         val fragments = arrayListOf<Fragment>()
 
@@ -190,7 +186,7 @@ class IntroActivity : NetworkChangeListenerActivity() {
 
         init {
             fragments.add(mainIntroFragment)
-            if (isBeta)
+            if (BuildConfig.DEBUG)
                 fragments.add(betaIntroFragment)
             if (!context.isPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE))
                 fragments.add(storageIntroFragment)
