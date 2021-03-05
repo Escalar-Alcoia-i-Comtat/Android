@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -39,7 +40,6 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.annotation.*
 import timber.log.Timber
 import java.io.FileNotFoundException
-import java.io.Serializable
 
 val ICON_WAYPOINT_ESCALADOR_BLANC =
     GeoIconDrawable("ic_waypoint_escalador_blanc", R.drawable.ic_waypoint_escalador_blanc)
@@ -440,20 +440,20 @@ class MapHelper(private val mapView: MapView) {
         Timber.d("Centering map in features...")
         val points = arrayListOf<LatLng>()
         for (marker in markers)
-            points.add(marker.position.toLatLng())
+            points.add(marker.position)
         for (geometry in geometries)
             points.addAll(geometry.points)
 
         if (markers.size == 1)
             move(
                 CameraUpdateFactory.newCameraPosition(
-                    CameraPosition.Builder().target(markers.first().position.toLatLng()).build()
+                    CameraPosition.Builder().target(markers.first().position).build()
                 )
             )
         else {
             val boundsBuilder = LatLngBounds.Builder()
             for (marker in markers)
-                boundsBuilder.include(marker.position.toLatLng())
+                boundsBuilder.include(marker.position)
 
             move(
                 CameraUpdateFactory.newLatLngBounds(
@@ -467,11 +467,11 @@ class MapHelper(private val mapView: MapView) {
     @ExperimentalUnsignedTypes
     fun mapsActivityIntent(context: Context): Intent =
         Intent(context, MapsActivity::class.java).apply {
-            val mapData = arrayListOf<Serializable>()
+            val mapData = arrayListOf<Parcelable>()
             for (zm in markers)
                 zm.let { zoneMarker ->
                     Timber.d("  Adding position [${zoneMarker.position.latitude}, ${zoneMarker.position.longitude}]")
-                    mapData.add(zoneMarker as Serializable)
+                    mapData.add(zoneMarker)
                 }
             putExtra(MapsActivity.MAP_DATA_BUNDLE_EXTRA, mapData)
         }
