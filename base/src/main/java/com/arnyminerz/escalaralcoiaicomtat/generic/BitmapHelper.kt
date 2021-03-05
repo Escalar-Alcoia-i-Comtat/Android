@@ -2,56 +2,11 @@ package com.arnyminerz.escalaralcoiaicomtat.generic
 
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCreateNewFileException
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotDeleteFileException
-import java.io.*
-
-
-fun textAsBitmap(text: String, textSize: Float, textColor: Int): Bitmap {
-    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    paint.textSize = textSize
-    paint.color = textColor
-    paint.textAlign = Paint.Align.LEFT
-    val baseline: Float = -paint.ascent() // ascent() is negative
-    val width = (paint.measureText(text) + 0.5f).toInt() // round
-    val height = (baseline + paint.descent() + 0.5f).toInt()
-    val image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(image)
-    canvas.drawText(text, 0f, baseline, paint)
-    return image
-}
-
-fun drawableToBitmap(drawable: Drawable): Bitmap? {
-    if (drawable is BitmapDrawable) {
-        if (drawable.bitmap != null) {
-            return drawable.bitmap
-        }
-    }
-    val bitmap = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
-        Bitmap.createBitmap(
-            1,
-            1,
-            Bitmap.Config.ARGB_8888
-        ) // Single color bitmap will be created of 1x1 pixel
-    } else {
-        Bitmap.createBitmap(
-            drawable.intrinsicWidth,
-            drawable.intrinsicHeight,
-            Bitmap.Config.ARGB_8888
-        )
-    }
-    val canvas = Canvas(bitmap)
-    drawable.setBounds(0, 0, canvas.width, canvas.height)
-    drawable.draw(canvas)
-    return bitmap
-}
-
-fun scaleBitmap(bitmap: Bitmap, newWidth: Int, newHeight: Int): Bitmap =
-    Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
 
 /**
  * Stores a bitmap into a file
@@ -124,28 +79,3 @@ fun File.storeBitmap(
     quality: Int = 100
 ) =
     bitmap.storeToFile(this, overwrite, mkdirs, format, quality)
-
-fun Bitmap.scale(maxWidth: Int, maxHeight: Int): Bitmap =
-    scaleBitmap(this, maxWidth, maxHeight)
-
-fun Bitmap.cutSquare(): Bitmap {
-    val width: Int = width
-    val height: Int = height
-    val newWidth = if (height > width) width else height
-    val newHeight = if (height > width) height - (height - width) else height
-    var cropW = (width - height) / 2
-    cropW = if (cropW < 0) 0 else cropW
-    var cropH = (height - width) / 2
-    cropH = if (cropH < 0) 0 else cropH
-
-    return Bitmap.createBitmap(this, cropW, cropH, newWidth, newHeight)
-}
-
-fun Bitmap.toInputStream(): InputStream {
-    val bos = ByteArrayOutputStream()
-    compress(CompressFormat.PNG, 0 /*ignored for PNG*/, bos)
-    val bitmapdata: ByteArray = bos.toByteArray()
-    return ByteArrayInputStream(bitmapdata)
-}
-
-fun Drawable?.toBitmap(): Bitmap? = this?.let { drawableToBitmap(this) }

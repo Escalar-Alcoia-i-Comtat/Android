@@ -47,7 +47,7 @@
                 android:contentDescription="@string/fab_desc_enter"
                 app:borderWidth="0dp"
                 app:fabSize="mini"
-                app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp"
+                app:srcCompat="@drawable/ic_round_keyboard_arrow_right_24"
                 app:tint="@color/white"
                 tools:ignore="UnusedAttribute" />
         </LinearLayout>

@@ -52,14 +52,6 @@ fun java.util.ArrayList<String>.split(delimiter: String): java.util.ArrayList<St
     return list
 }
 
-/*fun IntArray.addAll(items: IntArray): IntArray {
-    val offset = size
-    for (i in items.indices)
-        set(offset + i, items[i])
-
-    return this
-}*/
-
 @ExperimentalUnsignedTypes
 fun UIntArray.addAll(items: ArrayList<UInt>): UIntArray {
     val offset = size

@@ -17,7 +17,6 @@ android {
         versionName VERSION_NAME
         // testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        resValue "string", "google_maps_key", MAPS_API_KEY
         resValue "string", "mapbox_access_token", MAPBOX_PUBLIC_TOKEN
         resValue "string", "sentry_dsn", SENTRY_DNS
     }
@@ -142,19 +141,16 @@ dependencies {
 
     // Android Jetpack
     implementation 'androidx.exifinterface:exifinterface:1.3.2'
-    implementation "androidx.datastore:datastore-preferences:1.0.0-alpha06"
+    implementation "androidx.datastore:datastore-preferences:1.0.0-alpha07"
 
     // Sentry
-    implementation 'io.sentry:sentry-android:4.2.0'
-    implementation 'io.sentry:sentry-android-timber:4.2.0'
+    implementation 'io.sentry:sentry-android:4.3.0'
+    implementation 'io.sentry:sentry-android-timber:4.3.0'
 
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
     implementation 'com.google.code.gson:gson:2.8.6'
-
-    // Number picker for Mark Completed
-    implementation 'me.angrybyte.picker:picker:1.3.1'
 
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 

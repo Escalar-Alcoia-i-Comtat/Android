@@ -12,46 +12,16 @@ class UnzipUtil(private val zipFile: File, private val targetLocation: File) {
     }
 
     fun unzip() {
-        /*try {
-            val fin = FileInputStream(zipFile)
-            val zin = ZipInputStream(fin as InputStream?)
-            var ze: ZipEntry?
-            while (zin.nextEntry.also { ze = it } != null) {
-                if (!targetLocation.exists())
-                    targetLocation.mkdirs()
-
-                val targetFile = File(targetLocation, ze!!.name)
-                val targetParent = targetFile.parentFile
-                if(targetParent != null && !targetParent.exists())
-                    if(!targetParent.mkdirs())
-                        Timber.e("Could not create parent dir: %s", targetParent)
-
-                Timber.v("Unzipping %s", ze!!.name)
-
-                val fout = FileOutputStream(targetFile)
-                val buffer = ByteArray(8192)
-                var len: Int
-                while (zin.read(buffer).also { len = it } != -1)
-                    fout.write(buffer, 0, len)
-
-                fout.close()
-                zin.closeEntry()
-            }
-            zin.close()
-        } catch (e: Exception) {
-            Timber.e(e, "unzip")
-        }*/
         if (!targetLocation.exists()) {
             targetLocation.mkdir()
         }
         val zipIn = ZipInputStream(FileInputStream(zipFile))
         var entry = zipIn.nextEntry
         // iterates over entries in the zip file
-        // iterates over entries in the zip file
         while (entry != null) {
             val file = File(targetLocation, entry.name)
             if (entry.isDirectory)
-            // if the entry is a file, extracts it
+                // if the entry is a file, extracts it
                 file.mkdir()
             else
                 extractFile(zipIn, file)

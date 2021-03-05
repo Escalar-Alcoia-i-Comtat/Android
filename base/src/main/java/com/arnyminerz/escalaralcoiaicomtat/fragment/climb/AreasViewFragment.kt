@@ -27,7 +27,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.location.serializable
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -43,7 +42,7 @@ const val LOCATION_PERMISSION_REQUEST = 0
 class AreasViewFragment : NetworkChangeListenerFragment() {
     private var justAttached = false
 
-    private var mapHelper: MapHelper? = null
+    private lateinit var mapHelper: MapHelper
 
     private var areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null
 
@@ -115,36 +114,36 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             val requiredDistance =
                 SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences)
 
-            if (context != null && mapHelper != null) {
-                mapHelper!!.clearSymbols()
+            if (context != null) {
+                mapHelper.clearSymbols()
 
                 runAsync {
                     val zones = AREAS.getZones()
                     Timber.v("Iterating through ${zones.size} zones.")
                     Timber.v("Current Location: [${currentLocation.latitude},${currentLocation.longitude}]")
-                    for (zone in zones)
-                        zone.position?.let { zoneLocation ->
-                            if (zoneLocation.distanceTo(position) <= requiredDistance) {
-                                Timber.d("Adding zone #${zone.id}. Creating marker...")
-                                var marker = GeoMarker(
-                                    zoneLocation.serializable(),
-                                    null,
-                                    MapObjectWindowData(
-                                        zone.displayName,
-                                        null
-                                    )
+                    for (zone in zones){
+                        val zoneLocation = zone.position ?: continue
+                        if (zoneLocation.distanceTo(position) <= requiredDistance) {
+                            Timber.d("Adding zone #${zone.id}. Creating marker...")
+                            var marker = GeoMarker(
+                                zoneLocation,
+                                null,
+                                MapObjectWindowData(
+                                    zone.displayName,
+                                    null
                                 )
-                                Timber.d("Setting image...")
-                                marker = marker.withImage(ICON_WAYPOINT_ESCALADOR_BLANC)
-                                Timber.d("Adding marker to map")
-                                mapHelper!!.add(marker)
-                            }
-                        } ?: Timber.d("Zone #${zone.id} doesn't have an stored location.")
+                            )
+                            Timber.d("Setting image...")
+                            marker = marker.withImage(ICON_WAYPOINT_ESCALADOR_BLANC)
+                            Timber.d("Adding marker to map")
+                            mapHelper.add(marker)
+                        }
+                    }
 
                     Timber.d("Finished adding markers.")
                     requireActivity().runOnUiThread {
-                        mapHelper!!.display(requireContext())
-                        mapHelper!!.center()
+                        mapHelper.display(requireContext())
+                        mapHelper.center()
 
                         binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
                     }
@@ -168,7 +167,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         _binding = FragmentViewAreasBinding.inflate(inflater, container, false)
 
         mapHelper = MapHelper(binding.mapView)
-        mapHelper!!.onCreate(savedInstanceState)
+        mapHelper.onCreate(savedInstanceState)
 
         return binding.root
     }
@@ -207,17 +206,19 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
 
             Timber.d("Loading map...")
-            mapHelper!!.loadMap(requireContext()) { _, map, _ ->
+            mapHelper
+                .withControllable(false)
+                .loadMap(requireContext()) { _, map, _ ->
                 Timber.d("Map is ready.")
 
                 map.addOnMapClickListener {
                     Timber.v("Starting MapActivity...")
-                    startActivity(mapHelper!!.mapsActivityIntent(requireContext()))
+                    startActivity(mapHelper.mapsActivityIntent(requireContext()))
                     true
                 }
-                mapHelper!!.addSymbolClickListener {
+                mapHelper.addSymbolClickListener {
                     Timber.v("Starting MapActivity...")
-                    startActivity(mapHelper!!.mapsActivityIntent(requireContext()))
+                    startActivity(mapHelper.mapsActivityIntent(requireContext()))
                     true
                 }
 

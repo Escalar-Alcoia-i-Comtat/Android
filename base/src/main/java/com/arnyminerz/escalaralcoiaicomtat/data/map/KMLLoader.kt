@@ -6,7 +6,6 @@ import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
-import com.arnyminerz.escalaralcoiaicomtat.location.serializable
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.storage.UnzipUtil
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
@@ -280,7 +279,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                             context.onUiThread {
                                 Timber.v("New Marker: $title")
                                 val m = GeoMarker(
-                                    latLng.serializable(),
+                                    latLng,
                                     null,
                                     if (title != null)
                                         MapObjectWindowData(title, description)

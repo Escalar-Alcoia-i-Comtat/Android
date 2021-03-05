@@ -8,48 +8,6 @@ import android.content.Context
 import android.os.Build
 import com.arnyminerz.escalaralcoiaicomtat.R
 
-/*@TargetApi(Build.VERSION_CODES.O)
-private fun Context.createFriendRequestsChannel(): NotificationChannel {
-    val name = getString(R.string.notification_channel_friend_request_name)
-    val description = getString(R.string.notification_channel_friend_request_desc)
-    val importance = NotificationManager.IMPORTANCE_HIGH
-
-    val channel = NotificationChannel(FRIEND_REQUEST_CHANNEL_ID, name, importance)
-    channel.description = description
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-        channel.group = PEOPLE_NOTIFICATION_CHANNEL_GROUP
-
-    return channel
-}
-
-@TargetApi(Build.VERSION_CODES.O)
-private fun Context.createFriendRequestAcceptedChannel(): NotificationChannel {
-    val name = getString(R.string.notification_channel_friend_accepted_name)
-    val description = getString(R.string.notification_channel_friend_accepted_desc)
-    val importance = NotificationManager.IMPORTANCE_HIGH
-
-    val channel = NotificationChannel(FRIEND_REQUEST_ACCEPTED_CHANNEL_ID, name, importance)
-    channel.description = description
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-        channel.group = PEOPLE_NOTIFICATION_CHANNEL_GROUP
-
-    return channel
-}
-
-@TargetApi(Build.VERSION_CODES.O)
-private fun Context.createFriendRemovedChannel(): NotificationChannel {
-    val name = getString(R.string.notification_channel_friend_removed_name)
-    val description = getString(R.string.notification_channel_friend_removed_desc)
-    val importance = NotificationManager.IMPORTANCE_HIGH
-
-    val channel = NotificationChannel(FRIEND_REMOVED_CHANNEL_ID, name, importance)
-    channel.description = description
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-        channel.group = PEOPLE_NOTIFICATION_CHANNEL_GROUP
-
-    return channel
-}*/
-
 @TargetApi(Build.VERSION_CODES.O)
 private fun Context.createAlertsChannel(): NotificationChannel {
     val name = getString(R.string.notification_channel_alert_name)
@@ -102,32 +60,6 @@ private fun Context.createDownloadCompleteChannel(): NotificationChannel {
     return channel
 }
 
-/*@TargetApi(Build.VERSION_CODES.O)
-private fun Context.createBetaUpdateChannel(): NotificationChannel {
-    val name = getString(R.string.notification_channel_beta_update_available_name)
-    val description = getString(R.string.notification_channel_beta_update_available_desc)
-    val importance = NotificationManager.IMPORTANCE_HIGH
-
-    val channel = NotificationChannel(BETA_UPDATE_CHANNEL_ID, name, importance)
-    channel.description = description
-
-    return channel
-}
-
-@TargetApi(Build.VERSION_CODES.O)
-private fun Context.createUserInteractedChannel(): NotificationChannel {
-    val name = getString(R.string.notification_channel_user_interacted_name)
-    val description = getString(R.string.notification_channel_user_interacted_desc)
-    val importance = NotificationManager.IMPORTANCE_DEFAULT
-
-    val channel = NotificationChannel(USER_INTERACTED_CHANNEL_ID, name, importance)
-    channel.description = description
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-        channel.group = PEOPLE_NOTIFICATION_CHANNEL_GROUP
-
-    return channel
-}*/
-
 @TargetApi(Build.VERSION_CODES.O)
 private fun Context.createNewUpdateChannel(): NotificationChannel {
     val name = getString(R.string.notification_channel_new_update_name)
@@ -166,11 +98,6 @@ fun Context.createNotificationChannels() {
     notificationManager.createNotificationChannel(createDownloadProgressChannel())
     notificationManager.createNotificationChannel(createDownloadCompleteChannel())
     notificationManager.createNotificationChannel(createAlertsChannel())
-//    notificationManager.createNotificationChannel(createFriendRequestsChannel())
-//    notificationManager.createNotificationChannel(createFriendRequestAcceptedChannel())
-//    notificationManager.createNotificationChannel(createFriendRemovedChannel())
     notificationManager.createNotificationChannel(createTaskCompletedChannel())
-//    notificationManager.createNotificationChannel(createBetaUpdateChannel())
-//    notificationManager.createNotificationChannel(createUserInteractedChannel())
     notificationManager.createNotificationChannel(createNewUpdateChannel())
 }

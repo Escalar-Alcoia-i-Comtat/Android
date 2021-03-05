@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.times
 import java.io.File
 import java.text.CharacterIterator
 import java.text.StringCharacterIterator
@@ -32,19 +31,6 @@ fun File.deleteIfExists(): Boolean {
     return if (exists())
         deleteDirAndContents()
     else true
-}
-
-fun File.tree(height: Int = 0): String {
-    val builder = StringBuilder()
-    if (isDirectory && listFiles() != null)
-        for (file in listFiles()!!) {
-            builder.append((' ' * height) + "-" + file + "\n")
-            if (file.isDirectory)
-                builder.append(file.tree(height + 1) + "\n")
-        }
-    else
-        return name
-    return builder.toString()
 }
 
 fun dirSize(file: File): Long {

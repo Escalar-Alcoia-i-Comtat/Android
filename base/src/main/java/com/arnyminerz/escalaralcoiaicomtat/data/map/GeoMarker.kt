@@ -2,28 +2,41 @@ package com.arnyminerz.escalaralcoiaicomtat.data.map
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Parcel
+import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.generateUUID
 import com.arnyminerz.escalaralcoiaicomtat.generic.mapFloat
-import com.arnyminerz.escalaralcoiaicomtat.location.SerializableLatLng
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import timber.log.Timber
-import java.io.Serializable
 
 @Suppress("unused")
 data class GeoMarker(
-    val position: SerializableLatLng,
+    val position: LatLng,
     val iconSize: Float? = null,
     val windowData: MapObjectWindowData? = null
-) : Serializable {
+) : Parcelable {
     val id = generateUUID()
 
     private var iconImage: String? = null
+
+    constructor(parcel: Parcel) : this(
+        parcel.readParcelable<LatLng>(LatLng::class.java.classLoader)!!,
+        parcel.readFloat(),
+        if (parcel.readInt() == 1)
+            MapObjectWindowData(
+                parcel.readString()!!,
+                parcel.readString()
+            )
+        else null
+    ) {
+        iconImage = parcel.readString()
+    }
 
     fun withImage(style: Style, bitmap: Bitmap): GeoMarker {
         Timber.d("Setting image for GeoMarker...")
@@ -60,6 +73,31 @@ data class GeoMarker(
             symbolOptions.withData(windowData.data())
 
         return symbolManager.create(symbolOptions)
+    }
+
+    override fun describeContents(): Int = 0
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeParcelable(position, 0)
+        iconSize?.let { dest.writeFloat(it) }
+        if (windowData == null)
+            dest.writeInt(0)
+        else {
+            dest.writeInt(1)
+            dest.writeString(windowData.title)
+            windowData.message?.let { dest.writeString(it) }
+        }
+        iconImage?.let { dest.writeString(it) }
+    }
+
+    companion object CREATOR : Parcelable.Creator<GeoMarker> {
+        override fun createFromParcel(parcel: Parcel): GeoMarker {
+            return GeoMarker(parcel)
+        }
+
+        override fun newArray(size: Int): Array<GeoMarker?> {
+            return arrayOfNulls(size)
+        }
     }
 }
 
