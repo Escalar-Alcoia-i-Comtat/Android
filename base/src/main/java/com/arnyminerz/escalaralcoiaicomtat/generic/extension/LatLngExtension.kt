@@ -21,11 +21,3 @@ fun LatLngBounds.Builder.includeAll(points: Collection<LatLng>) {
     for (point in points)
         include(point)
 }
-
-fun Collection<LatLng>.bounds(): LatLngBounds {
-    val bounds = LatLngBounds.Builder()
-
-    bounds.includeAll(this)
-
-    return bounds.build()
-}

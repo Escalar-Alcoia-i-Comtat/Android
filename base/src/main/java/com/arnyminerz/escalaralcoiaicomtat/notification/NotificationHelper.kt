@@ -9,7 +9,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.arnyminerz.escalaralcoiaicomtat.generic.TranslatableString
+import com.arnyminerz.escalaralcoiaicomtat.data.TranslatableString
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
 import timber.log.Timber
 

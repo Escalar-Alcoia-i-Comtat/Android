@@ -109,6 +109,3 @@ fun jsonArrayFromURL(url: String): JSONArray =
 
 fun jsonArrayFromFile(file: File): JSONArray =
     JSONArray(file.readText())
-
-fun JSONArray.isEmpty(): Boolean = length() <= 0
-fun JSONArray.isNotEmpty(): Boolean = !isEmpty()

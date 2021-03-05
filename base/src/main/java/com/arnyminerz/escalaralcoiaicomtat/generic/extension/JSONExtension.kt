@@ -79,3 +79,6 @@ fun JSONArray.sort(keyName: String): JSONArray {
 
     return sortedJsonArray
 }
+
+fun JSONArray.isEmpty(): Boolean = length() <= 0
+fun JSONArray.isNotEmpty(): Boolean = !isEmpty()

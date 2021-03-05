@@ -96,6 +96,3 @@ fun setTextColor(view: TextView, context: Context, @ColorRes color: Int) {
 
 @Suppress("DEPRECATION")
 fun getColor(context: Context, @ColorRes color: Int): Int = ContextCompat.getColor(context, color)
-
-fun View.isInside(x: Float, y: Float) =
-    this.x < x && this.x + width > x && this.y < y && this.y + height > y
