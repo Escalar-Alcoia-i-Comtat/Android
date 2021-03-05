@@ -83,6 +83,7 @@ class MapHelper(private val mapView: MapView) {
 
     private var startingPosition: LatLng = LatLng(-52.6885, -70.1395)
     private var startingZoom: Double = 2.0
+    private var allGesturesEnabled: Boolean = true
 
     private val markers = arrayListOf<GeoMarker>()
     private val geometries = arrayListOf<GeoGeometry>()
@@ -109,6 +110,14 @@ class MapHelper(private val mapView: MapView) {
         return this
     }
 
+    fun withControllable(controllable: Boolean): MapHelper {
+        if (map != null)
+            map?.uiSettings?.setAllGesturesEnabled(controllable)
+        else
+            allGesturesEnabled = controllable
+        return this
+    }
+
     private fun mapSetup(context: Context, map: MapboxMap, style: Style) {
         this.map = map
         this.style = style
@@ -132,7 +141,7 @@ class MapHelper(private val mapView: MapView) {
 
         map.uiSettings.apply {
             isCompassEnabled = false
-            setAllGesturesEnabled(true)
+            setAllGesturesEnabled(allGesturesEnabled)
         }
 
         map.moveCamera(
