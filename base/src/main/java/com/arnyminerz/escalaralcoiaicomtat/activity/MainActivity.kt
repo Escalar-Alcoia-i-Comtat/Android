@@ -83,6 +83,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         val showIntro = IntroActivity.shouldShow(this)
         if (showIntro != IntroShowReason.OK) {
             Timber.w("  Showing intro! Reason: ${showIntro.msg}")
+            skipLoad = true
             startActivity(Intent(this, IntroActivity::class.java))
             return false
         } else Timber.v("  Won't show intro.")
@@ -126,6 +127,13 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
     private var loaded = false
     private var loading = false
+    private var skipLoad = false
+
+    private var menu: Menu? = null
+    private val menuMapIcon: MenuItem?
+        get() = menu?.getItem(0)
+    private val menuDownloadsIcon: MenuItem?
+        get() = menu?.getItem(1)
 
     private fun updateBottomAppBar() {
         Timber.d("Updating bottom app bar...")
@@ -183,13 +191,6 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             updateBottomAppBar()
         }
     }
-
-    private var menu: Menu? = null
-
-    private val menuMapIcon: MenuItem?
-        get() = menu?.getItem(0)
-    private val menuDownloadsIcon: MenuItem?
-        get() = menu?.getItem(1)
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -271,6 +272,11 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
+        if (skipLoad){
+            Timber.w("Skipped onStateChange since skipLoad is true.")
+            return
+        }
+
         val hasInternet = state.hasInternet
         Timber.v("Connectivity status Updated! Has Internet: %s", hasInternet)
         binding.loadingLayout.hide()
