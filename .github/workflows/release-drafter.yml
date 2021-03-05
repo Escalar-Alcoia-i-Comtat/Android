@@ -63,6 +63,11 @@ jobs:
           name: APK Artifact
           path: ./base/build/outputs/apk/release/EscalarAlcoiaIComtat-release.apk
 
+      - name: Show build tree
+        run: |
+          apt install tree
+          tree -a
+
       - name: Debug Symbols Artifact
         uses: actions/upload-artifact@v2
         with:
