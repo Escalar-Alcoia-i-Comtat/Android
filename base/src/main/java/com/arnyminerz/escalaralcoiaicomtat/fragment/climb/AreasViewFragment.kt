@@ -27,7 +27,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.location.serializable
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -127,7 +126,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         if (zoneLocation.distanceTo(position) <= requiredDistance) {
                             Timber.d("Adding zone #${zone.id}. Creating marker...")
                             var marker = GeoMarker(
-                                zoneLocation.serializable(),
+                                zoneLocation,
                                 null,
                                 MapObjectWindowData(
                                     zone.displayName,
