@@ -110,7 +110,7 @@ jobs:
           name: AAB Artifact
           path: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
 
-      - name: Upload APK file
+      - name: Upload APK
         id: upload_apk_asset
         uses: svenstaro/upload-release-action@v2
         with:
