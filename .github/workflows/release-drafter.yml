@@ -135,7 +135,7 @@ jobs:
         id: upload_play_store
         uses: r0adkll/upload-google-play@v1
         with:
-          serviceAccountJson: ${{ SERVICE_ACCOUNT_JSON }}
+          serviceAccountJson: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: com.arnyminerz.escalaralcoiaicomtat
           releaseFiles: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
           track: internal
