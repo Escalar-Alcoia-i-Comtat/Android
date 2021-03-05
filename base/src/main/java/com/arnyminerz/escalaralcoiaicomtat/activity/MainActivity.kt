@@ -14,6 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL_NO_SECURE
+import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.loadAreasFromCache
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
@@ -79,8 +80,9 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             )
         }
 
-        if (IntroActivity.shouldShow(this)) {
-            Timber.w("  Showing intro!")
+        val showIntro = IntroActivity.shouldShow(this)
+        if (showIntro != IntroShowReason.OK) {
+            Timber.w("  Showing intro! Reason: ${showIntro.msg}")
             startActivity(Intent(this, IntroActivity::class.java))
             return false
         } else Timber.v("  Won't show intro.")
