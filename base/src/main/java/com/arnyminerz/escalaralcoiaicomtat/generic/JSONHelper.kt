@@ -66,7 +66,7 @@ fun jsonFromUrl(url: String): JSONObject =
     try {
         jsonFromUrl(URL(url))
     } catch (e: IOException) {
-        Timber.e(e, "Could not get JSON from %s", url)
+        Timber.w(e, "Could not get JSON from %s", url)
         jsonFromUrl(
             URL(
                 if (url.contains(EXTENDED_API_URL))
