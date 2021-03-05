@@ -23,11 +23,12 @@ The recommended installation method is always Play Store, but if you want to try
 functionalities before than anyone, you can check Github's [Releases][releases] page.
 
 ## Donations ##
-We are really pleased to receive donations from the people that want to. It's not mandatory, you can even disable the in-app ads, but since we have put a lot of hours in the app, we really love that people love our work.
+We are really pleased to receive donations from the people that want to. It's not mandatory, but since we have put a lot of hours in the app, we really love that people love our work.
 
-We have prepared a page in Patreon so you can subscribe with a monthly membership with some off-app benefits. You can access it from [Patreon](https://www.patreon.com/escalaralcoiaicomtat).
+The simplest way of donating some money is through [Github Sponsors][sponsors]. You can access it from the link specified, or through the repository's button.
 
 ---
+[sponsors]: https://github.com/sponsors/ArnyminerZ
 [play-store]: https://play.google.com/store/apps/details?id=com.arnyminerz.escalaralcoiaicomtat
 [issues]: https://github.com/Escalar-Alcoia-i-Comtat/Android/issues
 [pull-requests]: https://github.com/Escalar-Alcoia-i-Comtat/Android/pulls
