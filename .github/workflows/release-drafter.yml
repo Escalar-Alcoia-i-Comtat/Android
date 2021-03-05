@@ -130,3 +130,17 @@ jobs:
           asset_path: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
           asset_name: EscalarAlcoiaIComtat.aab
           asset_content_type: application/octet-stream
+
+      - name: Upload to Play Store
+        id: upload_play_store
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: ${{ SERVICE_ACCOUNT_JSON }}
+          packageName: com.arnyminerz.escalaralcoiaicomtat
+          releaseFiles: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
+          track: internal
+          inAppUpdatePriority: 2
+          mappingFile: ./base/build/outputs/mapping/release/mapping.txt
+
+
+
