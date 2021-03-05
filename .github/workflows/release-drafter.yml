@@ -112,24 +112,22 @@ jobs:
 
       - name: Upload APK file
         id: upload_apk_asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./base/build/outputs/apk/release/EscalarAlcoiaIComtat-release.apk
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.create_release.outputs.tag_name }}
+          file: ./base/build/outputs/apk/release/EscalarAlcoiaIComtat-release.apk
           asset_name: EscalarAlcoiaIComtat.apk
-          asset_content_type: application/vnd.android.package-archive
+          overwrite: true
       - name: Upload AAB
         id: upload_aab_asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.create_release.outputs.tag_name }}
+          file: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
           asset_name: EscalarAlcoiaIComtat.aab
-          asset_content_type: application/octet-stream
+          overwrite: true
 
       - name: Upload to Play Store
         id: upload_play_store
