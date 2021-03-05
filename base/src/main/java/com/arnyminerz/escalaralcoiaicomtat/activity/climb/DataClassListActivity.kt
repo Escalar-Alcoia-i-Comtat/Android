@@ -76,6 +76,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>> : NetworkChangeListene
             Timber.v("Loading map...")
             mapHelper
                 .withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5)
+                .withControllable(false)
                 .loadMap(this) { _, map, _ ->
                     mapLoaded = true
                     val kmlAddress = dataClass.kmlAddress
