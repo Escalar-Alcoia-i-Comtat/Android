@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -24,8 +25,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.Mapbox
@@ -71,7 +70,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
 
     private lateinit var binding: ActivityMapsBinding
 
-    private var fusedLocationProviderClient: FusedLocationProviderClient? = null
+    private var locationManager: LocationManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -464,8 +463,8 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
             )
             return false
         } else {
-            if (fusedLocationProviderClient == null)
-                fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+            if (locationManager == null)
+                locationManager = applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
 
             mapHelper.enableLocationComponent(this)
 
@@ -497,23 +496,17 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
          * Get the best and most recent location of the device, which may be null in rare
          * cases when a location is not available.
          */
+        if (locationManager == null)
+            return Timber.w("Location Manager not initialized")
+
         try {
             if (PermissionsManager.areLocationPermissionsGranted(this)) {
-                val locationResult = fusedLocationProviderClient?.lastLocation
+                val locationResult = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                    ?: return Timber.w("Could not get last known location")
                 Timber.v("Adding complete listener")
-                locationResult?.addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        // Set the map's camera position to the current location of the device.
-                        lastKnownLocation = task.result
-                        Timber.d("Got new location: $lastKnownLocation")
-                        binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
-                    } else {
-                        Timber.d("Current location is null. Using defaults.")
-                        Timber.e(task.exception, "Exception:")
-                        binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
-                    }
-                } ?: Timber.e("fusedLocationProviderClient is null")
-                binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
+                lastKnownLocation = locationResult
+                Timber.d("Got new location: $lastKnownLocation")
+                binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
             }
         } catch (e: SecurityException) {
             Timber.e(e, "Exception:")
