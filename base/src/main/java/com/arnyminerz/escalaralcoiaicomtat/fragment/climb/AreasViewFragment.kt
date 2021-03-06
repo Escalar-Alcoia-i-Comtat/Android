@@ -3,7 +3,10 @@ package com.arnyminerz.escalaralcoiaicomtat.fragment.climb
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Context.LOCATION_SERVICE
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.os.Looper
 import android.view.LayoutInflater
@@ -16,6 +19,8 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getZones
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
+import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_MIN_DIST
+import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_MIN_TIME
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
@@ -30,7 +35,6 @@ import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.google.android.gms.location.*
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
 import timber.log.Timber
@@ -46,8 +50,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
     private var areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null
 
-    private var newLocationProvider: FusedLocationProviderClient? = null
-    private var locationRequest: LocationRequest? = null
+    private var locationManager: LocationManager? = null
     private var locationListenerAdded = false
 
     private var counter = 0
@@ -68,9 +71,9 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             Timber.w("Could not update Nearby Zones: Not showing fragment (not resumed)")
         }
 
-        if (newLocationProvider == null) {
+        if (locationManager == null) {
             error = true
-            Timber.w("Could not update Nearby Zones: Location provider is null")
+            Timber.w("Could not update Nearby Zones: Location manager is null")
         }
 
         if (AREAS.isEmpty()) {
@@ -177,24 +180,19 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         if (locationListenerAdded)
             return
 
-        if (newLocationProvider == null)
-            newLocationProvider = LocationServices.getFusedLocationProviderClient(requireContext())
-        if (locationRequest == null)
-            locationRequest = LocationRequest.create()
+        if (locationManager == null)
+            locationManager = requireContext().applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
 
         if (PermissionsManager.areLocationPermissionsGranted(requireContext())) {
             Timber.v("Adding location provider listener...")
             Timber.d("Requesting location updates...")
-            newLocationProvider!!.requestLocationUpdates(
-                locationRequest!!,
+            locationManager!!.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                LOCATION_UPDATE_MIN_TIME,
+                LOCATION_UPDATE_MIN_DIST,
                 locationCallback,
                 Looper.getMainLooper()
             )
-            Timber.d("Adding on success listener...")
-            newLocationProvider!!.lastLocation.addOnSuccessListener {
-                Timber.d("Location provider got location!")
-                updateNearbyZones(it)
-            }
             locationListenerAdded = true
         } else Timber.w("Location listener not added since permission is not granted")
     }
@@ -250,12 +248,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         justAttached = false
     }
 
-    override fun onPause() {
-        super.onPause()
-
-        newLocationProvider?.removeLocationUpdates(locationCallback)
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -268,19 +260,13 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         visibility(binding.areasNoInternetCardView.noInternetCardView, !state.hasInternet)
     }
 
-    private val locationCallback = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult?) {
-            locationResult ?: return
+    private val locationCallback = LocationListener { location ->
+        Timber.v("Got new location: [${location.latitude}, ${location.longitude}]")
 
-            val location = locationResult.lastLocation
+        updateNearbyZones(location)
 
-            Timber.v("Got new location: [${location.latitude}, ${location.longitude}]")
-
+        binding.nearbyZonesTitle.setOnClickListener {
             updateNearbyZones(location)
-
-            binding.nearbyZonesTitle.setOnClickListener {
-                updateNearbyZones(location)
-            }
         }
     }
 }
