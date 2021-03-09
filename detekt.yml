@@ -1,0 +1,6 @@
+formatting:
+  active: true
+  android: true
+  autoCorrect: true
+  MultiLineIfElse:
+    active: false
