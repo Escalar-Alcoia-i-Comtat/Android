@@ -6,6 +6,7 @@ import android.widget.ImageButton
 import android.widget.ProgressBar
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
@@ -30,11 +31,14 @@ private const val IMAGE_THUMBNAIL_SIZE = 0.1f
 @ExperimentalUnsignedTypes
 class SectorsAdapter(
     private val dataClassListActivity: DataClassListActivity<*>,
-    private val sectors: ArrayList<Sector>,
-    listener: ((sector: Sector, viewHolder: SectorsViewHolder, index: Int) -> Unit)? = null
+    area: Int,
+    zone: Int,
+    listener: ((viewHolder: SectorsViewHolder, index: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<SectorsViewHolder>() {
-    private var onItemSelected: ((sector: Sector, viewHolder: SectorsViewHolder, index: Int) -> Unit)? =
+    private var onItemSelected: ((viewHolder: SectorsViewHolder, index: Int) -> Unit)? =
         listener
+
+    private val sectors = AREAS[area][zone].children
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SectorsViewHolder =
         SectorsViewHolder(
@@ -85,7 +89,7 @@ class SectorsAdapter(
             visibility(downloadProgressBar, false)
 
             imageView.setOnClickListener {
-                onItemSelected?.let { it(sector, holder, position) }
+                onItemSelected?.let { it(holder, position) }
             }
 
             refreshDownloadImage(sector, downloadImageButton, downloadProgressBar)
