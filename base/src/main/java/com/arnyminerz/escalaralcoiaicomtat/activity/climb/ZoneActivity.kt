@@ -62,6 +62,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
     override fun onResume() {
         super.onResume()
         loaded = false
+        justAttached = false
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
