@@ -461,10 +461,11 @@ abstract class DataClass<A : Serializable, B : Serializable>(
 class DataClassIterator<A : Serializable> (private val children: List<A>) : Iterator<A> {
     private var i: Int = 0
     override fun next(): A {
-        if (i + 1 >= children.size)
+        i++
+        if (i >= children.size)
             throw NoSuchElementException()
-        return children[i++]
+        return children[i]
     }
 
-    override fun hasNext(): Boolean = i < children.size
+    override fun hasNext(): Boolean = i + 1 < children.size
 }
