@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -33,6 +32,7 @@ import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
+import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -147,19 +147,6 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
             }
         }
         visibility(binding.fabDownload, kmlAddress != null || kmzFile != null)
-
-        binding.dialogMapMarker.fabMaps.setOnClickListener {
-            if (markerWindow == null || markerName == null) return@setOnClickListener
-
-            val pos = markerWindow!!.marker.latLng
-            val gmmIntentUri =
-                Uri.parse("geo:${pos.latitude},${pos.longitude}?q=${pos.latitude},${pos.longitude}($markerName)")
-            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-            mapIntent.setPackage("com.google.android.apps.maps")
-            if (mapIntent.resolveActivity(packageManager) != null) {
-                startActivity(mapIntent)
-            }
-        }
 
         mapHelper = MapHelper(binding.map)
         mapHelper.onCreate(savedInstanceState)
@@ -293,7 +280,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) &&
                     PermissionsManager.areLocationPermissionsGranted(this)
                 )
-                    mapHelper.enableLocationComponent(this)
+                    mapHelper.enableLocationComponent(this, cameraMode = CameraMode.NONE)
                 else {
                     toast(R.string.toast_location_not_shown)
                     vibrate(this, VIBRATION)
@@ -452,7 +439,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
 
             val bottomNavigationDrawerFragment =
                 BottomPermissionAskerFragment(
-                    this@MapsActivity,
+                    this,
                     arrayOf(
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION
@@ -468,7 +455,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
             if (locationManager == null)
                 locationManager = applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
 
-            mapHelper.enableLocationComponent(this)
+            mapHelper.enableLocationComponent(this, cameraMode = CameraMode.NONE)
 
             binding.fabCurrentLocation.setOnClickListener {
                 if (lastKnownLocation != null) {
@@ -516,9 +503,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
         }
     }
 
-    private fun loadData(
-        networkState: ConnectivityProvider.NetworkState
-    ): MapFeatures {
+    private fun loadData(networkState: ConnectivityProvider.NetworkState): MapFeatures {
         Timber.v("Loading KML...")
         return mapHelper.loadKML(this, kmlAddress, networkState)
     }
