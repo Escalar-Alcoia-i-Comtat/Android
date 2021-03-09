@@ -12,10 +12,7 @@ import android.widget.LinearLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.activity.KML_ADDRESS_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.activity.MAP_DATA_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogMapMarkerBinding
@@ -52,6 +49,7 @@ const val MARKER_WINDOW_SHOW_DURATION: Long = 500
 
 const val DEFAULT_LATITUDE = -52.6885
 const val DEFAULT_LONGITUDE = -70.1395
+const val DEFAULT_ZOOM = 2.0
 
 class MapHelper(private val mapView: MapView) {
     companion object {
@@ -89,7 +87,8 @@ class MapHelper(private val mapView: MapView) {
     private var loadedKMLAddress: String? = null
 
     private var startingPosition: LatLng = LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
-    private var startingZoom: Double = 2.0
+    private var startingZoom: Double = DEFAULT_ZOOM
+    private var markerSizeMultiplier: Float = ICON_SIZE_MULTIPLIER
     private var allGesturesEnabled: Boolean = true
 
     private val markers = arrayListOf<GeoMarker>()
@@ -110,10 +109,15 @@ class MapHelper(private val mapView: MapView) {
     fun onLowMemory() = mapView.onLowMemory()
     fun onDestroy() = mapView.onDestroy()
 
-    fun withStartingPosition(startingPosition: LatLng?, zoom: Double = 2.0): MapHelper {
+    fun withStartingPosition(startingPosition: LatLng?, zoom: Double = DEFAULT_ZOOM): MapHelper {
         if (startingPosition != null)
             this.startingPosition = startingPosition
         this.startingZoom = zoom
+        return this
+    }
+
+    fun withIconSizeMultiplier(multiplier: Float): MapHelper {
+        this.markerSizeMultiplier = multiplier
         return this
     }
 
@@ -239,17 +243,25 @@ class MapHelper(private val mapView: MapView) {
     }
 
     @ExperimentalUnsignedTypes
-    fun showMapsActivity(activity: FragmentActivity) {
+    fun showMapsActivity(context: Context, overrideLoadedValues: Boolean = false) {
         if (loadedKMLAddress == null)
             throw MapAnyDataToLoadException("Map doesn't have any loaded data. You may run loadKML, for example.")
 
-        Timber.v("Launching MapsActivity from KML \"$loadedKMLAddress\"")
-        activity.startActivity(
-            Intent(activity, MapsActivity::class.java)
-                .putExtra(
-                    KML_ADDRESS_BUNDLE_EXTRA,
-                    loadedKMLAddress!!
-                )
+        val loadedElements = markers.isNotEmpty() || geometries.isNotEmpty()
+        context.startActivity(
+            Intent(context, MapsActivity::class.java).apply {
+                if (loadedElements && !overrideLoadedValues) {
+                    Timber.v("Passing to MapsActivity with parcelable list.")
+                    Timber.d("  Putting ${markers.size} markers...")
+                    putExtra(MAP_MARKERS_BUNDLE_EXTRA, markers.toTypedArray())
+                    Timber.d("  Putting ${geometries.size} geometries...")
+                    putExtra(MAP_GEOMETRIES_BUNDLE_EXTRA, geometries.toTypedArray())
+                } else {
+                    Timber.d("Passing to MapsActivity with kml address ($loadedKMLAddress).")
+                    putExtra(KML_ADDRESS_BUNDLE_EXTRA, loadedKMLAddress!!)
+                }
+                putExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA, markerSizeMultiplier)
+            }
         )
     }
 
@@ -346,7 +358,8 @@ class MapHelper(private val mapView: MapView) {
      */
     @Throws(MapNotInitializedException::class)
     fun addMarkers(markers: Collection<GeoMarker>) {
-        this.markers.addAll(markers)
+        for (marker in markers)
+            addMarker(marker)
     }
 
     /**
@@ -357,6 +370,7 @@ class MapHelper(private val mapView: MapView) {
      */
     @Throws(MapNotInitializedException::class)
     fun addMarker(marker: GeoMarker) {
+        marker.iconSizeMultiplier = markerSizeMultiplier
         markers.add(marker)
     }
 
@@ -368,7 +382,8 @@ class MapHelper(private val mapView: MapView) {
      */
     @Throws(MapNotInitializedException::class)
     fun addGeometries(geometries: Collection<GeoGeometry>) {
-        this.geometries.addAll(geometries)
+        for (geometry in geometries)
+            addGeometry(geometry)
     }
 
     /**
@@ -391,7 +406,7 @@ class MapHelper(private val mapView: MapView) {
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @Throws(MapNotInitializedException::class)
-    fun add(element: Any) {
+    fun add(element: Parcelable) {
         if (element is GeoMarker)
             addMarker(element)
         else if (element is GeoGeometry)
@@ -448,7 +463,7 @@ class MapHelper(private val mapView: MapView) {
     @ExperimentalUnsignedTypes
     @Throws(MapNotInitializedException::class)
     fun display(context: Context) {
-        if (symbolManager == null || fillManager == null || lineManager == null)
+        if (symbolManager == null || fillManager == null || lineManager == null || style == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
         Timber.d("Displaying map features...")
@@ -457,14 +472,14 @@ class MapHelper(private val mapView: MapView) {
         clearFills()
         clearLines()
 
-        val symbols = markers.addToMap(context, symbolManager!!)
-        this.symbols.addAll(symbols)
-
         val geometries = geometries.addToMap(fillManager!!, lineManager!!)
-        for (geometry in geometries) {
-            lines.add(geometry.first)
-            geometry.second?.let { fills.add(it) }
+        for ((line, fill) in geometries) {
+            lines.add(line)
+            fill?.let { fills.add(it) }
         }
+
+        val symbols = markers.addToMap(context, style!!, symbolManager!!)
+        this.symbols.addAll(symbols)
     }
 
     /**
@@ -507,18 +522,6 @@ class MapHelper(private val mapView: MapView) {
             )
         }
     }
-
-    @ExperimentalUnsignedTypes
-    fun mapsActivityIntent(context: Context): Intent =
-        Intent(context, MapsActivity::class.java).apply {
-            val mapData = arrayListOf<Parcelable>()
-            for (zm in markers)
-                zm.let { zoneMarker ->
-                    Timber.d("  Adding position [${zoneMarker.position.latitude}, ${zoneMarker.position.longitude}]")
-                    mapData.add(zoneMarker)
-                }
-            putExtra(MAP_DATA_BUNDLE_EXTRA, mapData)
-        }
 
     @ExperimentalUnsignedTypes
     fun infoCard(

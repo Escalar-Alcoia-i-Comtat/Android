@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.ZonesViewHolder
@@ -104,10 +105,8 @@ class ZoneAdapter(
                         Timber.w(error, "Zone already downloaded!")
                         toast(dataClassListActivity, R.string.toast_error_already_downloaded)
 
-                        dataClassListActivity.runOnUiThread {
-                            visibility(holder.progressBar, false)
-                            holder.downloadImageButton.setImageResource(R.drawable.download)
-                        }
+                        visibility(holder.progressBar, false)
+                        holder.downloadImageButton.setImageResource(R.drawable.download)
                     } catch (error: NoInternetAccessException) {
                         dataClassListActivity.toast(R.string.toast_error_no_internet)
                     } catch (error: AlreadyLoadingException) {

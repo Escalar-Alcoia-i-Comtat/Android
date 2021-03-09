@@ -18,8 +18,10 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import timber.log.Timber
 
+private const val ICON_SIZE_MULTIPLIER = .2f
+
 @ExperimentalUnsignedTypes
-class AreaActivity : DataClassListActivity<Area>() {
+class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER) {
 
     private var justAttached = false
     private var loaded = false
