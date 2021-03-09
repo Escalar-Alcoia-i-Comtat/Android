@@ -1,4 +1,4 @@
-name: Release Drafter
+name: Android Test
 
 on: [push, pull_request]
 
@@ -34,14 +34,3 @@ jobs:
       - name: Run tests
         id: test
         run: bash ./gradlew test --stacktrace
-
-      - name: Build APK
-        id: build_apk
-        run: |
-          echo "Building ${{ steps.create_release.outputs.tag_name }}..."
-          bash ./gradlew assembleRelease --stacktrace
-      - name: APK Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: APK Artifact
-          path: ./base/build/outputs/apk/release/EscalarAlcoiaIComtat-release.apk
