@@ -14,10 +14,7 @@ import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
-import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
-import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
-import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
-import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
+import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMapsBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
@@ -54,6 +51,7 @@ val KML_ADDRESS_BUNDLE_EXTRA = IntentExtra<String>("KMLAddr")
 val KMZ_FILE_BUNDLE_EXTRA = IntentExtra<String>("KMZFle")
 const val MAP_MARKERS_BUNDLE_EXTRA = "Markers"
 const val MAP_GEOMETRIES_BUNDLE_EXTRA = "Geometries"
+val ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA = IntentExtra<Float>("IconSize")
 val ZONE_NAME_BUNDLE_EXTRA = IntentExtra<String>("ZneNm")
 
 @ExperimentalUnsignedTypes
@@ -64,6 +62,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
     private var markers = arrayListOf<GeoMarker>()
     private var geometries = arrayListOf<GeoGeometry>()
     private var kmzFile: File? = null
+    private var iconSizeMultiplier = ICON_SIZE_MULTIPLIER
 
     private lateinit var mapHelper: MapHelper
 
@@ -103,6 +102,9 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                         geometries.add(g)
             }
             Timber.d("Got ${markers.size} markers and ${geometries.size} geometries.")
+
+            iconSizeMultiplier =
+                intent.getExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA) ?: ICON_SIZE_MULTIPLIER
 
             kmlAddress = intent.getExtra(KML_ADDRESS_BUNDLE_EXTRA)
             zoneName = intent.getExtra(ZONE_NAME_BUNDLE_EXTRA)
@@ -165,75 +167,77 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
 
         mapHelper = MapHelper(binding.map)
         mapHelper.onCreate(savedInstanceState)
-        mapHelper.loadMap(this) { _, map, _ ->
-            runAsync {
-                if (kmlAddress != null || kmzFile != null)
-                    loadData(networkState)
+        mapHelper
+            .withIconSizeMultiplier(iconSizeMultiplier)
+            .loadMap(this) { _, map, _ ->
+                runAsync {
+                    if (kmlAddress != null || kmzFile != null)
+                        loadData(networkState)
 
-                runOnUiThread {
-                    visibility(binding.dialogMapMarker.mapInfoCardView, false)
+                    runOnUiThread {
+                        visibility(binding.dialogMapMarker.mapInfoCardView, false)
 
-                    Timber.v("Loading current location")
-                    tryToShowCurrentLocation()
+                        Timber.v("Loading current location")
+                        tryToShowCurrentLocation()
 
-                    map.uiSettings.apply {
-                        isCompassEnabled = true
-                        isDoubleTapGesturesEnabled = true
-                    }
-
-                    map.addOnMoveListener(object : MapboxMap.OnMoveListener {
-                        override fun onMoveBegin(detector: MoveGestureDetector) {
-                            if (lastKnownLocation != null)
-                                binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
+                        map.uiSettings.apply {
+                            isCompassEnabled = true
+                            isDoubleTapGesturesEnabled = true
                         }
 
-                        override fun onMove(detector: MoveGestureDetector) {}
-                        override fun onMoveEnd(detector: MoveGestureDetector) {}
-                    })
-                    map.addOnMapClickListener {
-                        showingPolyline = null
+                        map.addOnMoveListener(object : MapboxMap.OnMoveListener {
+                            override fun onMoveBegin(detector: MoveGestureDetector) {
+                                if (lastKnownLocation != null)
+                                    binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
+                            }
 
-                        markerWindow?.hide()
-                        markerWindow = null
+                            override fun onMove(detector: MoveGestureDetector) {}
+                            override fun onMoveEnd(detector: MoveGestureDetector) {}
+                        })
+                        map.addOnMapClickListener {
+                            showingPolyline = null
 
-                        true
-                    }
-
-                    mapHelper.addSymbolClickListener {
-                        if (SETTINGS_CENTER_MARKER_PREF.get(sharedPreferences))
-                            map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
-                        val window = getWindow()
-                        val title = window.title
-
-                        if (title.isNotEmpty()) {
-                            markerWindow = mapHelper.infoCard(
-                                this@MapsActivity,
-                                this,
-                                binding.dialogMapMarker
-                            )
+                            markerWindow?.hide()
+                            markerWindow = null
 
                             true
-                        } else
-                            false
+                        }
+
+                        mapHelper.addSymbolClickListener {
+                            if (SETTINGS_CENTER_MARKER_PREF.get(sharedPreferences))
+                                map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+                            val window = getWindow()
+                            val title = window.title
+
+                            if (title.isNotEmpty()) {
+                                markerWindow = mapHelper.infoCard(
+                                    this@MapsActivity,
+                                    this,
+                                    binding.dialogMapMarker
+                                )
+
+                                true
+                            } else
+                                false
+                        }
+
+                        if (kmzFile != null)
+                            binding.mapDownloadedImageView.visibility = View.VISIBLE
+
+                        Timber.v(
+                            "Got ${markers.size} markers and ${geometries.size} geometries from intent."
+                        )
+
+                        mapHelper.addMarkers(markers)
+                        mapHelper.addGeometries(geometries)
+
+                        mapHelper.display(this@MapsActivity)
+                        mapHelper.center(MAP_LOAD_PADDING)
+
+                        binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
                     }
-
-                    if (kmzFile != null)
-                        binding.mapDownloadedImageView.visibility = View.VISIBLE
-
-                    Timber.v(
-                        "Got ${markers.size} markers and ${geometries.size} geometries from intent."
-                    )
-
-                    mapHelper.addMarkers(markers)
-                    mapHelper.addGeometries(geometries)
-
-                    mapHelper.display(this@MapsActivity)
-                    mapHelper.center(MAP_LOAD_PADDING)
-
-                    binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
                 }
             }
-        }
     }
 
     override fun onStart() {

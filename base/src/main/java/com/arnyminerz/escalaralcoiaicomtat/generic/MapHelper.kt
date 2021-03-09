@@ -260,6 +260,7 @@ class MapHelper(private val mapView: MapView) {
                     Timber.d("Passing to MapsActivity with kml address ($loadedKMLAddress).")
                     putExtra(KML_ADDRESS_BUNDLE_EXTRA, loadedKMLAddress!!)
                 }
+                putExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA, markerSizeMultiplier)
             }
         )
     }
