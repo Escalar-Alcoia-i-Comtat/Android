@@ -52,6 +52,7 @@ const val MARKER_WINDOW_SHOW_DURATION: Long = 500
 
 const val DEFAULT_LATITUDE = -52.6885
 const val DEFAULT_LONGITUDE = -70.1395
+const val DEFAULT_ZOOM = 2.0
 
 class MapHelper(private val mapView: MapView) {
     companion object {
@@ -89,7 +90,8 @@ class MapHelper(private val mapView: MapView) {
     private var loadedKMLAddress: String? = null
 
     private var startingPosition: LatLng = LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
-    private var startingZoom: Double = 2.0
+    private var startingZoom: Double = DEFAULT_ZOOM
+    private var markerSizeMultiplier: Float = ICON_SIZE_MULTIPLIER
     private var allGesturesEnabled: Boolean = true
 
     private val markers = arrayListOf<GeoMarker>()
@@ -110,10 +112,15 @@ class MapHelper(private val mapView: MapView) {
     fun onLowMemory() = mapView.onLowMemory()
     fun onDestroy() = mapView.onDestroy()
 
-    fun withStartingPosition(startingPosition: LatLng?, zoom: Double = 2.0): MapHelper {
+    fun withStartingPosition(startingPosition: LatLng?, zoom: Double = DEFAULT_ZOOM): MapHelper {
         if (startingPosition != null)
             this.startingPosition = startingPosition
         this.startingZoom = zoom
+        return this
+    }
+
+    fun withIconSizeMultiplier(multiplier: Float): MapHelper {
+        this.markerSizeMultiplier = multiplier
         return this
     }
 
@@ -346,7 +353,8 @@ class MapHelper(private val mapView: MapView) {
      */
     @Throws(MapNotInitializedException::class)
     fun addMarkers(markers: Collection<GeoMarker>) {
-        this.markers.addAll(markers)
+        for (marker in markers)
+            addMarker(marker)
     }
 
     /**
@@ -357,6 +365,7 @@ class MapHelper(private val mapView: MapView) {
      */
     @Throws(MapNotInitializedException::class)
     fun addMarker(marker: GeoMarker) {
+        marker.iconSizeMultiplier = markerSizeMultiplier
         markers.add(marker)
     }
 
@@ -368,7 +377,8 @@ class MapHelper(private val mapView: MapView) {
      */
     @Throws(MapNotInitializedException::class)
     fun addGeometries(geometries: Collection<GeoGeometry>) {
-        this.geometries.addAll(geometries)
+        for (geometry in geometries)
+            addGeometry(geometry)
     }
 
     /**
@@ -457,14 +467,14 @@ class MapHelper(private val mapView: MapView) {
         clearFills()
         clearLines()
 
+        val geometries = geometries.addToMap(fillManager!!, lineManager!!)
+        for ((line, fill) in geometries) {
+            lines.add(line)
+            fill?.let { fills.add(it) }
+        }
+
         val symbols = markers.addToMap(context, symbolManager!!)
         this.symbols.addAll(symbols)
-
-        val geometries = geometries.addToMap(fillManager!!, lineManager!!)
-        for (geometry in geometries) {
-            lines.add(geometry.first)
-            geometry.second?.let { fills.add(it) }
-        }
     }
 
     /**
