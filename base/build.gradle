@@ -107,7 +107,7 @@ dependencies {
     //testImplementation 'junit:junit:4.13'
     //androidTestImplementation 'androidx.test:runner:1.2.0'
     //androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation 'com.android.volley:volley:1.2.0-rc1'
+    implementation 'com.android.volley:volley:1.2.0'
 
     // Android Jetpack
     def jetpack_work_version = "2.5.0"
