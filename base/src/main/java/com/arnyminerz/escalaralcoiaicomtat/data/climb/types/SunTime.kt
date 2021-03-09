@@ -6,11 +6,16 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
+const val ALL_DAY_INDEX = 0
+const val MORNING_INDEX = 1
+const val AFTERNOON_INDEX = 2
+const val NO_SUN_INDEX = 3
+
 enum class SunTime(val value: Int) {
-    AllDay(0),
-    Morning(1),
-    Afternoon(2),
-    NoSun(3);
+    AllDay(ALL_DAY_INDEX),
+    Morning(MORNING_INDEX),
+    Afternoon(AFTERNOON_INDEX),
+    NoSun(NO_SUN_INDEX);
 
     override fun toString(): String {
         return value.toString()
@@ -47,6 +52,3 @@ enum class SunTime(val value: Int) {
         fun find(value: Int): SunTime = sunTimes[value]
     }
 }
-
-fun Int?.toSunTime(): SunTime =
-    this?.let { SunTime.find(it) } ?: SunTime.NoSun

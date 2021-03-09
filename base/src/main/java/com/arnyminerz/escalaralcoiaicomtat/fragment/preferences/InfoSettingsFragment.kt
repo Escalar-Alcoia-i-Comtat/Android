@@ -14,7 +14,6 @@ import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.UPDATE_CHECKER_TAG
 
-
 class InfoSettingsFragment : PreferenceFragmentCompat() {
     private var serviceUpdateCheckerPreference: Preference? = null
 
@@ -50,14 +49,14 @@ class InfoSettingsFragment : PreferenceFragmentCompat() {
         workManager.getWorkInfosByTagLiveData(UPDATE_CHECKER_TAG)
             .observe(viewLifecycleOwner) { workInfos ->
                 // There should be just one or any
-                if (workInfos.isEmpty()){
+                if (workInfos.isEmpty()) {
                     serviceUpdateCheckerPreference?.summary =
                         getString(R.string.pref_info_service_updates_sum, getString(R.string.status_not_running))
                     return@observe
                 }
                 val workInfo = workInfos.first()
                 val workStateString =
-                    when(workInfo.state){
+                    when (workInfo.state) {
                         WorkInfo.State.RUNNING -> R.string.status_running
                         WorkInfo.State.ENQUEUED -> R.string.status_enqueued
                         WorkInfo.State.SUCCEEDED -> R.string.status_succeeded

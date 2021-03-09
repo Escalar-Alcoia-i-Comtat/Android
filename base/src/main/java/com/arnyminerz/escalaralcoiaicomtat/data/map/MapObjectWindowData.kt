@@ -14,14 +14,14 @@ const val WINDOW_DATA_KEY = "window_data"
 data class MapObjectWindowData(
     var title: String,
     var message: String?
-): Serializable {
+) : Serializable {
     companion object {
         fun load(symbol: Symbol): MapObjectWindowData {
             val json = symbol.data ?: throw InvalidObjectException("Symbol doesn't have any data")
             if (!json.isJsonObject)
                 throw MalformedJsonException("Data is not a json object")
             val obj = json.asJsonObject
-            if(!obj.has(WINDOW_DATA_KEY))
+            if (!obj.has(WINDOW_DATA_KEY))
                 throw MalformedJsonException("Data doesn't contain")
             val windowData = obj.getAsJsonObject(WINDOW_DATA_KEY)
             if (!windowData.has("title"))
@@ -50,7 +50,7 @@ data class MapObjectWindowData(
         try {
             Timber.d("Parsing: $json")
             JsonParser.parseString(json)
-        }catch (e: com.google.gson.stream.MalformedJsonException){
+        } catch (e: com.google.gson.stream.MalformedJsonException) {
             Timber.e(e, "Could not parse JSON. Source: $json")
             throw e
         }

@@ -4,3 +4,17 @@ formatting:
   autoCorrect: true
   MultiLineIfElse:
     active: false
+  LongMethod:
+    active: false
+  EmptyFunctionBlock:
+    active: true
+    ignoreOverridden: true
+  ThrowsCount:
+    active: false
+  TooManyFunctions:
+    active: true
+    ignoreDeprecated: true
+    ignorePrivate: true
+    ignoreOverridden: true
+  NoWildcardImports:
+    active: false

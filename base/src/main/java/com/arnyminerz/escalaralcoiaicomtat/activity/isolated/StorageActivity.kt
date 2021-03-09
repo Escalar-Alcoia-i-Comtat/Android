@@ -25,9 +25,9 @@ class StorageActivity : LanguageAppCompatActivity() {
         binding.clearCacheButton.setOnClickListener {
             try {
                 deleteDir(cacheDir)
-            }catch (ex: IOException){
+            } catch (ex: IOException) {
                 ex.printStackTrace()
-            }finally {
+            } finally {
                 Snackbar.make(binding.storageLayout, R.string.toast_clear_ok, Snackbar.LENGTH_SHORT).show()
                 refreshView()
             }
@@ -36,9 +36,9 @@ class StorageActivity : LanguageAppCompatActivity() {
         binding.clearStorageButton.setOnClickListener {
             try {
                 deleteDir(cacheDir.parentFile)
-            }catch (ex: IOException){
+            } catch (ex: IOException) {
                 ex.printStackTrace()
-            }finally {
+            } finally {
                 Snackbar.make(binding.storageLayout, R.string.toast_clear_ok, Snackbar.LENGTH_SHORT).show()
                 refreshView()
             }
@@ -47,9 +47,9 @@ class StorageActivity : LanguageAppCompatActivity() {
         binding.clearDownloadsButton.setOnClickListener {
             try {
                 deleteDir(filesDir(this))
-            }catch (ex: IOException){
+            } catch (ex: IOException) {
                 ex.printStackTrace()
-            }finally {
+            } finally {
                 Snackbar.make(binding.storageLayout, R.string.toast_clear_ok, Snackbar.LENGTH_SHORT).show()
                 refreshView()
             }
@@ -72,7 +72,7 @@ class StorageActivity : LanguageAppCompatActivity() {
         refreshView()
     }
 
-    private fun refreshView(){
+    private fun refreshView() {
         with(binding) {
             clearCacheButton.isEnabled = cacheDir.exists()
             clearStorageButton.isEnabled = cacheDir.parentFile?.exists() ?: false

@@ -9,7 +9,7 @@ fun LatLng.toUri(showMarker: Boolean = false, markerTitle: String? = null): Uri 
     return Uri.parse(
         if (showMarker)
             "geo:0,0?q=$latitude,$longitude${
-            if (markerTitle != null) "(${markerTitle.replace(" ","+")})" 
+            if (markerTitle != null) "(${markerTitle.replace(" ","+")})"
             else ""}"
         else "geo:$latitude,$longitude"
     )

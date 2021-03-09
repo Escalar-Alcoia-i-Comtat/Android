@@ -1,14 +1,14 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.types
 
-enum class BlockingType(val value: Int, val idName: String) {
-    UNKNOWN(-1, "NULL"),
-    DRY(0, "dry"),
-    BUILD(1, "build"),
-    BIRD(2, "bird"),
-    OLD(3, "old"),
-    ROCKS(4, "rocks"),
-    PLANTS(5, "plants"),
-    ROPE_LENGTH(6, "rope_length");
+enum class BlockingType(val idName: String) {
+    UNKNOWN("NULL"),
+    DRY("dry"),
+    BUILD("build"),
+    BIRD("bird"),
+    OLD("old"),
+    ROCKS("rocks"),
+    PLANTS("plants"),
+    ROPE_LENGTH("rope_length");
 
     companion object {
         fun find(idName: String?): BlockingType {
@@ -19,6 +19,14 @@ enum class BlockingType(val value: Int, val idName: String) {
             return UNKNOWN
         }
     }
+
+    val index: Int
+        get() {
+            for ((t, type) in values().withIndex())
+                if (type.idName.startsWith(idName))
+                    return t - 1
+            return -1
+        }
 
     override fun toString(): String = idName
 }

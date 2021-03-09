@@ -23,6 +23,8 @@ import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import timber.log.Timber
 
+const val CROSSFADE_DURATION = 50
+const val THUMBNAIL_SIZE = .1f
 
 @ExperimentalUnsignedTypes
 class SectorFragment(private val sector: Sector, private val viewPager: ViewPager2) :
@@ -35,7 +37,10 @@ class SectorFragment(private val sector: Sector, private val viewPager: ViewPage
     private val binding get() = _binding!!
 
     private fun refreshMaximizeStatus() {
-        binding.sizeChangeFab.setImageResource(if (maximized) R.drawable.round_flip_to_front_24 else R.drawable.round_flip_to_back_24)
+        binding.sizeChangeFab.setImageResource(
+            if (maximized) R.drawable.round_flip_to_front_24
+            else R.drawable.round_flip_to_back_24
+        )
 
         viewPager.isUserInputEnabled = !maximized
     }
@@ -52,11 +57,10 @@ class SectorFragment(private val sector: Sector, private val viewPager: ViewPage
             binding.sectorImageView,
             binding.sectorProgressBar,
             ImageLoadParameters().apply {
-                withTransitionOptions(BitmapTransitionOptions.withCrossFade(50))
-                withThumbnailSize(0.1f)
+                withTransitionOptions(BitmapTransitionOptions.withCrossFade(CROSSFADE_DURATION))
+                withThumbnailSize(THUMBNAIL_SIZE)
                 withRequestOptions(
                     with(RequestOptions()) {
-                        //centerCrop()
                         fitCenter()
                         format(DecodeFormat.PREFER_RGB_565)
                         this

@@ -24,7 +24,10 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.SettingsFragmentManager
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.AreasViewFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFragment.Companion.SettingsPage
-import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.network.ping
@@ -53,20 +56,19 @@ val EXTRA_AREA_TRANSITION_NAME = IntentExtra<String>("area_transition")
 val EXTRA_SECTOR_TRANSITION_NAME = IntentExtra<String>("sector_transition")
 
 const val TAB_ITEM_HOME = 0
-
 const val TAB_ITEM_MAP = 1
 const val TAB_ITEM_DOWNLOADS = 2
 const val TAB_ITEM_SETTINGS = 3
 
 const val UPDATE_CHECKER_WORK_NAME = "update_checker"
 const val UPDATE_CHECKER_TAG = "update"
+const val UPDATE_CHECKER_FLEX_MINUTES: Long = 15
 
 @ExperimentalUnsignedTypes
 val AREAS = arrayListOf<Area>()
 
 var serverAvailable = false
     private set
-
 
 @ExperimentalUnsignedTypes
 class MainActivity : NetworkChangeListenerFragmentActivity() {
@@ -101,7 +103,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             ExistingPeriodicWorkPolicy.KEEP,
             PeriodicWorkRequestBuilder<UpdateWorker>(
                 1, TimeUnit.HOURS,
-                15, TimeUnit.MINUTES)
+                UPDATE_CHECKER_FLEX_MINUTES, TimeUnit.MINUTES)
                 .setConstraints(
                     Constraints.Builder()
                         .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -152,7 +154,9 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         menuDownloadsIcon?.setIcon(
             ContextCompat.getDrawable(
                 this,
-                if (position == TAB_ITEM_DOWNLOADS) R.drawable.ic_round_cloud_download_24 else R.drawable.ic_outline_cloud_download_24
+                if (position == TAB_ITEM_DOWNLOADS)
+                    R.drawable.ic_round_cloud_download_24
+                else R.drawable.ic_outline_cloud_download_24
             )
         ) ?: Timber.w("menuDownloadsIcon is null")
     }
@@ -272,7 +276,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        if (skipLoad){
+        if (skipLoad) {
             Timber.w("Skipped onStateChange since skipLoad is true.")
             return
         }
@@ -292,7 +296,10 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                     }
                     canReachServer -> {
                         Timber.w("Misconfigured SSL in API. Please, check! Working at insecure address.")
-                        Sentry.captureMessage("Misconfigured SSL in API. Please, check! Working at insecure address.", SentryLevel.WARNING)
+                        Sentry.captureMessage(
+                            "Misconfigured SSL in API. Please, check! Working at insecure address.",
+                            SentryLevel.WARNING
+                        )
                         serverAvailable = true
                     }
                     else -> {

@@ -11,6 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentMapBinding
+import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
@@ -21,6 +22,7 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import timber.log.Timber
+import java.io.FileNotFoundException
 
 @ExperimentalUnsignedTypes
 class MapFragment : NetworkChangeListenerFragment() {
@@ -86,14 +88,20 @@ class MapFragment : NetworkChangeListenerFragment() {
                             Timber.d("Adding features to map...")
                             counter++
                             if (counter >= max) {
-                                mapHelper.add(*markers.toTypedArray())
-                                mapHelper.add(*polygons.toTypedArray())
-                                mapHelper.add(*polylines.toTypedArray())
+                                mapHelper.addMarkers(markers)
+                                mapHelper.addGeometries(polygons.toList())
+                                mapHelper.addGeometries(polylines.toList())
 
                                 mapHelper.display(requireContext())
                                 mapHelper.center()
                             }
-                        } catch (e: Exception) {
+                        } catch (e: FileNotFoundException) {
+                            Timber.e(e, "Could not load KML")
+                            requireContext().toast(R.string.toast_error_internal)
+                        } catch (e: NoInternetAccessException) {
+                            Timber.e(e, "Could not load KML")
+                            requireContext().toast(R.string.toast_error_internal)
+                        } catch (e: MapNotInitializedException) {
                             Timber.e(e, "Could not load KML")
                             requireContext().toast(R.string.toast_error_internal)
                         }

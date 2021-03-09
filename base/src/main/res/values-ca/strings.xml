@@ -280,4 +280,5 @@
     <string name="pref_info_cat_services">Serveis</string>
     <string name="pref_info_service_updates_title">Comprovador d\'actualitzacions</string>
     <string name="pref_info_service_updates_sum">El servei que busca noves actualitzacions està ara mateix %1$s</string>
+    <string name="toast_error_already_downloading">Ja s\'està baixant!</string>
 </resources>

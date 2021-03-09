@@ -13,7 +13,7 @@ data class FixedSafesData(
     val tensorCount: UInt,
     val pitonCount: UInt,
     val burilCount: UInt
-): SafesData {
+) : SafesData {
     companion object {
         @Throws(JSONException::class)
         fun fromJSON(json: JSONObject): FixedSafesData {
@@ -25,11 +25,6 @@ data class FixedSafesData(
                 json.getInt("piton_count", 0).toUInt(),
                 json.getInt("buril_count", 0).toUInt()
             )
-        }
-
-        @Throws(JSONException::class)
-        fun transformOldSafesData(json: JSONObject): JSONObject {
-            return json.put("fixed_safes_data", fromJSON(json))
         }
 
         fun fromDB(obj: JSONObject): FixedSafesData {
@@ -50,36 +45,35 @@ data class FixedSafesData(
         return paraboltCount + spitCount + tensorCount + pitonCount + burilCount
     }
 
-    override operator fun get(index: Int): SafeCountData? {
-        return when (index) {
-            0 -> SafeCountData(
+    @kotlin.jvm.Throws(ArrayIndexOutOfBoundsException::class)
+    override operator fun get(index: Int): SafeCountData =
+        arrayOf(
+            SafeCountData(
                 paraboltCount,
                 R.string.safe_parabolt,
                 R.drawable.ic_parabolt
-            )
-            1 -> SafeCountData(
+            ),
+            SafeCountData(
                 spitCount,
                 R.string.safe_spit,
                 R.drawable.ic_spit
-            )
-            2 -> SafeCountData(
+            ),
+            SafeCountData(
                 tensorCount,
                 R.string.safe_tensor,
                 R.drawable.ic_tensor
-            )
-            3 -> SafeCountData(
+            ),
+            SafeCountData(
                 pitonCount,
                 R.string.safe_piton,
                 R.drawable.ic_reunio_clau
-            )
-            4 -> SafeCountData(
+            ),
+            SafeCountData(
                 burilCount,
                 R.string.safe_buril,
                 R.drawable.ic_buril
             )
-            else -> null
-        }
-    }
+        )[index]
 
     override fun toJSONString(): String {
         return "{" +

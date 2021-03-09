@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.network
 
+import java.io.IOException
 import java.net.URL
 
 fun URL.ping(timeout: Int = 3000): Boolean {
@@ -8,7 +9,7 @@ fun URL.ping(timeout: Int = 3000): Boolean {
         conn.connectTimeout = timeout
         conn.connect()
         true
-    } catch (ex: Exception) {
+    } catch (ex: IOException) {
         false
     }
 }

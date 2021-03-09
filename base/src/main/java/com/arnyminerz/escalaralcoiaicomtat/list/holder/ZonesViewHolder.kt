@@ -8,10 +8,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 
-class ZonesViewHolder (view: View) : RecyclerView.ViewHolder(view){
+class ZonesViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val imageView: ImageView = view.findViewById(R.id.zone_imageView)
-    val titleTextView : TextView = view.findViewById(R.id.title_textView)
+    val titleTextView: TextView = view.findViewById(R.id.title_textView)
     val mapImageButton: ImageButton = view.findViewById(R.id.map_imageButton)
-    val downloadImageButton : ImageButton = view.findViewById(R.id.download_imageButton)
-    val progressBar : ProgressBar = view.findViewById(R.id.zone_download_progressBar)
+    val downloadImageButton: ImageButton = view.findViewById(R.id.download_imageButton)
+    val progressBar: ProgressBar = view.findViewById(R.id.zone_download_progressBar)
 }

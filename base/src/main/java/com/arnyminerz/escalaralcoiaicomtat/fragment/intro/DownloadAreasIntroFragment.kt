@@ -24,15 +24,15 @@ import java.io.IOException
 
 const val AREAS_URL = "$EXTENDED_API_URL/area/-1"
 
+private const val VIBRATE_DURATION: Long = 100
+
 class DownloadAreasIntroFragment : Fragment() {
     companion object {
         var loading = false
             private set
 
         @ExperimentalUnsignedTypes
-        @Throws(
-            IOException::class
-        )
+        @Throws(IOException::class)
         fun downloadAreasCache(
             context: Context,
             networkState: ConnectivityProvider.NetworkState,
@@ -49,7 +49,7 @@ class DownloadAreasIntroFragment : Fragment() {
                 val areasDataFile = IntroActivity.cacheFile(context)
                 val hasInternet = networkState.hasInternet
                 if (!hasInternet) {
-                    vibrate(context, 100)
+                    vibrate(context, VIBRATE_DURATION)
                     toast(context, R.string.toast_error_no_internet)
                     progressBar?.visibility(false)
                     connectionWaitingView?.visibility(true)
@@ -77,7 +77,7 @@ class DownloadAreasIntroFragment : Fragment() {
                         (context as? IntroActivity)?.next()
                     }
                 }
-            }catch (ex: Exception){
+            } catch (ex: IOException) {
                 loading = false
                 throw ex
             } finally {

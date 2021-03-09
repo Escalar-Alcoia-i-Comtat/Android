@@ -12,8 +12,11 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogArtifoEndingBinding
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.ArtifoEndingPitchAdapter
 import timber.log.Timber
 
-class ArtifoPathEndingDialog(context: Context, private val endings: ArrayList<EndingType>, private val pitches: ArrayList<Pitch>) :
-    Dialog(context) {
+class ArtifoPathEndingDialog(
+    context: Context,
+    private val endings: ArrayList<EndingType>,
+    private val pitches: ArrayList<Pitch>
+) : Dialog(context) {
 
     private lateinit var binding: DialogArtifoEndingBinding
 
@@ -37,6 +40,7 @@ class ArtifoPathEndingDialog(context: Context, private val endings: ArrayList<En
         Timber.v("  List will show ${listEndings.size} endings.")
         Timber.v("  List will show ${pitches.size} pitches.")
         binding.artifoDialogRecyclerView.layoutManager = LinearLayoutManager(context)
-        binding.artifoDialogRecyclerView.adapter = ArtifoEndingPitchAdapter(context, listEndings, pitches)
+        binding.artifoDialogRecyclerView.adapter =
+            ArtifoEndingPitchAdapter(context, listEndings, pitches)
     }
 }

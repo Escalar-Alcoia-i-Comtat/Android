@@ -39,7 +39,6 @@ import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
 import timber.log.Timber
 
-
 const val LOCATION_PERMISSION_REQUEST = 0
 
 @ExperimentalUnsignedTypes
@@ -58,7 +57,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     private var _binding: FragmentViewAreasBinding? = null
     private val binding get() = _binding!!
 
-    fun updateNearbyZones(currentLocation: Location) {
+    fun updateNearbyZones(location: Location) {
         var error = false
 
         if (context == null) {
@@ -85,7 +84,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         if (error)
             return
         Timber.v("Updating nearby zones...")
-        val position = currentLocation.toLatLng()
+        val position = location.toLatLng()
 
         binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
 
@@ -123,8 +122,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 runAsync {
                     val zones = AREAS.getZones()
                     Timber.v("Iterating through ${zones.size} zones.")
-                    Timber.v("Current Location: [${currentLocation.latitude},${currentLocation.longitude}]")
-                    for (zone in zones){
+                    Timber.v("Current Location: [${location.latitude},${location.longitude}]")
+                    for (zone in zones) {
                         val zoneLocation = zone.position ?: continue
                         if (zoneLocation.distanceTo(position) <= requiredDistance) {
                             Timber.d("Adding zone #${zone.id}. Creating marker...")

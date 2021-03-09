@@ -281,4 +281,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="pref_info_cat_services">Servicios</string>
     <string name="pref_info_service_updates_title">Comprobador de actualizaciones</string>
     <string name="pref_info_service_updates_sum">El servicio que busca nuevas actualizaciones está ahora mismo %1$s</string>
+    <string name="toast_error_already_downloading">Ya se está descargando!</string>
 </resources>

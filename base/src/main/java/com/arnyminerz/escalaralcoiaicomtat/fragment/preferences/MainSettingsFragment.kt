@@ -10,13 +10,18 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.SETTINGS_HEIGHT_MAIN
 import com.arnyminerz.escalaralcoiaicomtat.fragment.SETTINGS_HEIGHT_UPPER
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerPreferenceFragment
 
+private const val GESTURE_SENSIBILITY_DEFAULT = 3
+private const val NEARBY_DISTANCE_DEFAULT = 1000
+private const val MARKER_SIZE_DEFAULT = 3
+private const val PREVIEW_SCALE_DEFAULT = .5f
+
 val SETTINGS_ALERT_PREF = PreferenceData("alert_pref", true)
-val SETTINGS_GESTURE_SENSIBILITY_PREF = PreferenceData("gest_sens_pref", 3)
+val SETTINGS_GESTURE_SENSIBILITY_PREF = PreferenceData("gest_sens_pref", GESTURE_SENSIBILITY_DEFAULT)
 val SETTINGS_LANGUAGE_PREF = PreferenceData("language_pref", 0)
-val SETTINGS_NEARBY_DISTANCE_PREF = PreferenceData("nearby_distance", 1000)
-val SETTINGS_MARKER_SIZE_PREF = PreferenceData("marker_size", 3)
+val SETTINGS_NEARBY_DISTANCE_PREF = PreferenceData("nearby_distance", NEARBY_DISTANCE_DEFAULT)
+val SETTINGS_MARKER_SIZE_PREF = PreferenceData("marker_size", MARKER_SIZE_DEFAULT)
 val SETTINGS_CENTER_MARKER_PREF = PreferenceData("center_marker", true)
-val SETTINGS_PREVIEW_SCALE_PREF = PreferenceData("preview_scale", .5f)
+val SETTINGS_PREVIEW_SCALE_PREF = PreferenceData("preview_scale", PREVIEW_SCALE_DEFAULT)
 val SETTINGS_MOBILE_DOWNLOAD_PREF = PreferenceData("mobile_download", true)
 val SETTINGS_ROAMING_DOWNLOAD_PREF = PreferenceData("roaming_download", false)
 val AUTOMATIC_DOWNLOADS_UPDATE_PREF = PreferenceData("automatic_downloads_update", false)

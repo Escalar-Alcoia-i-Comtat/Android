@@ -215,6 +215,7 @@
     <string name="toast_permission_required">This permission is required</string>
     <string name="toast_error_gmaps_not_installed">Google Maps not installed!</string>
     <string name="toast_error_already_downloaded">Already downloaded!</string>
+    <string name="toast_error_already_downloading">Already downloading!</string>
     <string name="toast_loading">Loading…</string>
     <string name="toast_message_sent">Message sent!</string>
 

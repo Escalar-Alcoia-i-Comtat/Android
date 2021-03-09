@@ -6,10 +6,10 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.chip.Chip
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.google.android.material.chip.Chip
 
-class DownloadSectionViewHolder (view: View) : RecyclerView.ViewHolder(view){
+class DownloadSectionViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val titleTextView: TextView = view.findViewById(R.id.downloadSection_title_textView)
     val deleteButton: ImageButton = view.findViewById(R.id.downloadSection_delete_imageButton)
     val toggleButton: ImageButton = view.findViewById(R.id.downloadSection_toggle_imageButton)

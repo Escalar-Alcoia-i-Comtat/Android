@@ -21,7 +21,5 @@ fun String?.toTimestamp(): Date? =
             TIMESTAMP_FORMAT.parse(this)
         } catch (ex: ParseException) {
             null
-        } catch (ex: ArrayIndexOutOfBoundsException) {
-            null
         }
     }

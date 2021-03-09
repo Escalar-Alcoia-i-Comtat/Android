@@ -37,18 +37,17 @@ class BarChartHelper private constructor(
         )
 
         private fun barIndex(grade: String): Int {
-            if (grade.isEmpty()) return -1
-
-            var b = 0
-            barsList.forEach { bar ->
-                bar.first.forEach { gr ->
-                    if (grade[0] == gr)
-                        return b
-                }
-                b++
+            var result = -1
+            if (grade.isNotEmpty()) {
+                for ((b, bar) in barsList.withIndex())
+                    for (gr in bar.first)
+                        if (grade[0] == gr) {
+                            result = b
+                            break
+                        }
             }
 
-            return -1
+            return result
         }
 
         private val yFormatter = object : ValueFormatter() {
@@ -60,39 +59,29 @@ class BarChartHelper private constructor(
 
         fun fromPaths(context: Context, paths: Collection<Path>): BarChartHelper {
             val gradeEntries = arrayListOf<BarEntry>()
-            val grades = hashMapOf<Int, Pair<Grade, Int>?>(
-                0 to null,
-                1 to null,
-                2 to null,
-                3 to null
-            ) //ID, [Grade, count]
+            val grades = arrayListOf<Pair<Grade, Int>?>(null, null, null, null)
             val gradeQuarters = arrayListOf<String>()
             val gradeColors = arrayListOf<Int>()
             paths.forEach { path ->
                 try {
                     val grade = path.grade()
-                    val id = barIndex(grade.displayName)
-                    if (id >= 0)
-                        if (grades.containsKey(id))
-                            grades[id] = Pair(grade, (grades[id]?.second ?: 0) + 1)
+                    val index = barIndex(grade.displayName)
+                    if (index >= 0)
+                        if (grades[index] != null)
+                            grades[index] = Pair(grade, (grades[index]?.second ?: 0) + 1)
                         else
-                            grades[id] = Pair(grade, 1)
+                            grades[index] = Pair(grade, 1)
                 } catch (ex: NoSuchElementException) {
                 }
             }
             var c = 0
-            grades.forEach { (id, gradec) ->
-                val formatting = if (gradec != null) {
-                    val grade = gradec.first
-                    val count = gradec.second
-
-                    Pair(BarEntry(c.toFloat(), count.toFloat()), grade.color())
-                } else {
-                    Pair(BarEntry(c.toFloat(), 0.5f), Grade.gradeColor(barsList[id].second))
-                }
+            for ((g, gr) in grades.withIndex()){
+                if (gr == null) continue
+                val (grade, count) = gr
+                val formatting = Pair(BarEntry(c.toFloat(), count.toFloat()), grade.color())
                 gradeEntries.add(formatting.first)
 
-                gradeQuarters.add(barsList[id].second)
+                gradeQuarters.add(barsList[g].second)
                 gradeColors.add(formatting.second)
                 c++
             }
@@ -132,5 +121,4 @@ class BarChartHelper private constructor(
             setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
             this
         }
-
 }

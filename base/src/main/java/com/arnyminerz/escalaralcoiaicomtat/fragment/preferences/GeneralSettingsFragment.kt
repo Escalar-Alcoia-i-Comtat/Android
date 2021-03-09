@@ -12,6 +12,8 @@ import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
 import timber.log.Timber
 
+private const val PREVIEW_SCALE_REDUCER = 10f
+
 @ExperimentalUnsignedTypes
 class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragmentCompat() {
     private var sensibilityPreference: SeekBarPreference? = null
@@ -106,7 +108,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
         previewScalePreference?.setOnPreferenceChangeListener { _, value ->
             SETTINGS_PREVIEW_SCALE_PREF.put(
                 requireContext().sharedPreferences,
-                (value as Int).toFloat() / 10f
+                (value as Int).toFloat() / PREVIEW_SCALE_REDUCER
             )
             true
         }

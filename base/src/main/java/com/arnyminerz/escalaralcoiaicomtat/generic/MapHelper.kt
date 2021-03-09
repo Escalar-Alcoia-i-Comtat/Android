@@ -13,8 +13,9 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.activity.KML_ADDRESS_BUNDLE_EXTRA
+import com.arnyminerz.escalaralcoiaicomtat.activity.MAP_DATA_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity.Companion.KML_ADDRESS_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogMapMarkerBinding
@@ -45,6 +46,9 @@ val ICON_WAYPOINT_ESCALADOR_BLANC =
     GeoIconDrawable("ic_waypoint_escalador_blanc", R.drawable.ic_waypoint_escalador_blanc)
 
 val ICONS = listOf(ICON_WAYPOINT_ESCALADOR_BLANC)
+
+const val MARKER_WINDOW_HIDE_DURATION: Long = 500
+const val MARKER_WINDOW_SHOW_DURATION: Long = 500
 
 class MapHelper(private val mapView: MapView) {
     companion object {
@@ -217,11 +221,11 @@ class MapHelper(private val mapView: MapView) {
                 Timber.v("Loading features...")
                 with(result) {
                     Timber.v("  Loading ${markers.size} markers...")
-                    add(*markers.toTypedArray())
+                    addMarkers(markers)
                     Timber.v("  Loading ${polygons.size} polygons...")
-                    add(*polygons.toTypedArray())
+                    addGeometries(polygons)
                     Timber.v("  Loading ${polylines.size} polylines...")
-                    add(*polylines.toTypedArray())
+                    addGeometries(polylines)
 
                     display(activity)
                     center()
@@ -233,7 +237,8 @@ class MapHelper(private val mapView: MapView) {
 
     @ExperimentalUnsignedTypes
     fun showMapsActivity(activity: FragmentActivity) {
-        if (loadedKMLAddress == null) throw MapAnyDataToLoadException("Map doesn't have any loaded data. You may run loadKML, for example.")
+        if (loadedKMLAddress == null)
+            throw MapAnyDataToLoadException("Map doesn't have any loaded data. You may run loadKML, for example.")
 
         Timber.v("Launching MapsActivity from KML \"$loadedKMLAddress\"")
         activity.startActivity(
@@ -337,9 +342,8 @@ class MapHelper(private val mapView: MapView) {
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @Throws(MapNotInitializedException::class)
-    fun add(vararg markers: GeoMarker) {
-        for (marker in markers)
-            this.markers.add(marker)
+    fun addMarkers(markers: Collection<GeoMarker>) {
+        this.markers.addAll(markers)
     }
 
     /**
@@ -349,9 +353,8 @@ class MapHelper(private val mapView: MapView) {
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @Throws(MapNotInitializedException::class)
-    fun add(vararg geometries: GeoGeometry) {
-        for (geometry in geometries)
-            this.geometries.add(geometry)
+    fun addGeometries(geometries: Collection<GeoGeometry>) {
+        this.geometries.addAll(geometries)
     }
 
     /**
@@ -473,7 +476,7 @@ class MapHelper(private val mapView: MapView) {
                     Timber.d("  Adding position [${zoneMarker.position.latitude}, ${zoneMarker.position.longitude}]")
                     mapData.add(zoneMarker)
                 }
-            putExtra(MapsActivity.MAP_DATA_BUNDLE_EXTRA, mapData)
+            putExtra(MAP_DATA_BUNDLE_EXTRA, mapData)
         }
 
     @ExperimentalUnsignedTypes
@@ -484,9 +487,8 @@ class MapHelper(private val mapView: MapView) {
     ): MarkerWindow {
         val latLng = marker.latLng
 
-        val anim =
-            AnimationUtils.loadAnimation(context, R.anim.enter_bottom)
-        anim.duration = 500
+        val anim = AnimationUtils.loadAnimation(context, R.anim.enter_bottom)
+        anim.duration = MARKER_WINDOW_SHOW_DURATION
         binding.mapInfoCardView.show()
         binding.mapInfoCardView.startAnimation(anim)
 
@@ -543,7 +545,7 @@ data class MarkerWindow(
 
 fun MarkerWindow.hide() {
     val anim = AnimationUtils.loadAnimation(context, R.anim.exit_bottom)
-    anim.duration = 500
+    anim.duration = MARKER_WINDOW_HIDE_DURATION
     anim.setAnimationListener(object : Animation.AnimationListener {
         override fun onAnimationRepeat(animation: Animation?) {}
 

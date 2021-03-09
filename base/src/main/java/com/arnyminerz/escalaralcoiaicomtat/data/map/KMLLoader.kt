@@ -65,8 +65,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                         else {
                             Timber.v("Downloading source KML ($kmlAddress)...")
                             download(kmlAddress)
-                        }
-                    else null
+                        } else null
 
                     if (tempDir != null)
                         if (tempDir.mkdirs())
@@ -95,7 +94,6 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                 else -> null
             }
 
-            //Timber.d("Source KML: ${kmlDoc?.toReadableString()}")
             if (kmzFile != null)
                 Timber.v("Loading stored KML...")
 
@@ -103,9 +101,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
             val isKmlAddressValid = (hrefL != null && hrefL.length > 0) ||
                     kmlAddress?.endsWith("kmz") == true
             val doc =
-                if (kmlAddress != null && isKmlAddressValid
-                    || kmzFile != null
-                ) {
+                if (kmlAddress != null && isKmlAddressValid || kmzFile != null) {
                     Timber.v("The document needs to be loaded.")
                     val kmzUrl = if (hrefL != null && hrefL.length > 0) {
                         val href = hrefL.item(0) as Element
@@ -187,7 +183,6 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
             val kmlDocument = kmlElem?.getElementByTagName("Document")
             val folders = kmlElem?.getElementsByTagName("Folder")?.toElementList()
 
-            //Timber.d("KML: ${doc?.toReadableString() ?: "No KML"}")
             Timber.d("Got ${folders?.size ?: -1} folders.")
 
             val addedPoints = arrayListOf<LatLng>()
@@ -273,8 +268,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
 
                             if (latLngD == null) continue
 
-                            val latLng =
-                                LatLng(latLngD[1].toDouble(), latLngD[0].toDouble())
+                            val latLng = LatLng(latLngD[1].toDouble(), latLngD[0].toDouble())
 
                             context.onUiThread {
                                 Timber.v("New Marker: $title")

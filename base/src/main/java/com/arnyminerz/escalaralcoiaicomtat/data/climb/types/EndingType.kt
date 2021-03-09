@@ -4,20 +4,28 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.arnyminerz.escalaralcoiaicomtat.R
 
-enum class EndingType(val value: Int, val idName: String, @StringRes val displayName: Int) {
-    Unknown(-1, "NULL", R.string.path_ending_unknown),
-    Plate(0, "plate", R.string.path_ending_plate),
-    PlateRing(1, "plate_ring", R.string.path_ending_plate_ring),
-    PlateLanyard(2, "plate_lanyard", R.string.path_ending_plate_lanyard),
-    ChainRing(3, "chain_ring", R.string.path_ending_chain_ring),
-    ChainCarabiner(4, "chain_carabiner", R.string.path_ending_chain_carabiner),
-    Piton(6, "piton", R.string.path_ending_piton),
-    Walking(7, "walking", R.string.path_ending_walking),
-    Rappel(8, "rappel", R.string.path_ending_rappel),
-    Lanyard(9, "lanyard", R.string.path_ending_lanyard),
-    None(5, "none", R.string.path_ending_none);
+enum class EndingType(val idName: String, @StringRes val displayName: Int) {
+    Unknown("NULL", R.string.path_ending_unknown),
+    Plate("plate", R.string.path_ending_plate),
+    PlateRing("plate_ring", R.string.path_ending_plate_ring),
+    PlateLanyard("plate_lanyard", R.string.path_ending_plate_lanyard),
+    ChainRing("chain_ring", R.string.path_ending_chain_ring),
+    ChainCarabiner("chain_carabiner", R.string.path_ending_chain_carabiner),
+    Piton("piton", R.string.path_ending_piton),
+    Walking("walking", R.string.path_ending_walking),
+    Rappel("rappel", R.string.path_ending_rappel),
+    Lanyard("lanyard", R.string.path_ending_lanyard),
+    None("none", R.string.path_ending_none);
 
     override fun toString(): String = idName
+
+    val index: Int
+        get() {
+            for ((t, type) in values().withIndex())
+                if (type.idName.startsWith(idName))
+                    return t - 1
+            return -1
+        }
 
     @DrawableRes
     fun getImage(): Int {
@@ -42,7 +50,7 @@ enum class EndingType(val value: Int, val idName: String, @StringRes val display
         fun find(idName: String?): EndingType {
             if (idName != null) {
                 var idNameParsed = idName
-                if(idName.startsWith("L"))
+                if (idName.startsWith("L"))
                     idNameParsed = idNameParsed.substring(idNameParsed.indexOf(' '))
                 return with(idNameParsed.replace("\n", "").replace("\r", "")) {
                     for (ending in values())
@@ -54,7 +62,7 @@ enum class EndingType(val value: Int, val idName: String, @StringRes val display
             return Unknown
         }
 
-        fun fromDB(obj: String): ArrayList<EndingType>{
+        fun fromDB(obj: String): ArrayList<EndingType> {
             val list = arrayListOf<EndingType>()
 
             if (obj.contains("\n"))
@@ -69,6 +77,3 @@ enum class EndingType(val value: Int, val idName: String, @StringRes val display
         }
     }
 }
-
-fun String?.toEnding(): EndingType =
-    EndingType.find(this)

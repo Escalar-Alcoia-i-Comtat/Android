@@ -13,7 +13,11 @@ import com.arnyminerz.escalaralcoiaicomtat.list.adapter.EquipmentAdapterType
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 
 @ExperimentalUnsignedTypes
-class PathEquipmentDialog(context: Context, private val fixedSafesData: FixedSafesData, private val requiredSafesData: RequiredSafesData): Dialog(context) {
+class PathEquipmentDialog(
+    context: Context,
+    private val fixedSafesData: FixedSafesData,
+    private val requiredSafesData: RequiredSafesData
+) : Dialog(context) {
     private lateinit var binding: DialogPathEquipmentBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,10 +28,12 @@ class PathEquipmentDialog(context: Context, private val fixedSafesData: FixedSaf
         setContentView(view)
 
         binding.pathEquipmentRecyclerView.layoutManager = LinearLayoutManager(context)
-        binding.pathEquipmentRecyclerView.adapter = EquipmentAdapter(context, fixedSafesData, EquipmentAdapterType.FIXED)
+        binding.pathEquipmentRecyclerView.adapter =
+            EquipmentAdapter(context, fixedSafesData, EquipmentAdapterType.FIXED)
 
         binding.pathRequiredEquipmentRecyclerView.layoutManager = LinearLayoutManager(context)
-        binding.pathRequiredEquipmentRecyclerView.adapter = EquipmentAdapter(context, requiredSafesData, EquipmentAdapterType.REQUIRED)
+        binding.pathRequiredEquipmentRecyclerView.adapter =
+            EquipmentAdapter(context, requiredSafesData, EquipmentAdapterType.REQUIRED)
         visibility(binding.pathRequiredTitleTextView, requiredSafesData.any())
     }
 }

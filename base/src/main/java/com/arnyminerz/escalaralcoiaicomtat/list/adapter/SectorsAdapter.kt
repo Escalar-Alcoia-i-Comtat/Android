@@ -10,6 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
+import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_PREVIEW_SCALE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
@@ -18,8 +19,12 @@ import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.load.DecodeFormat
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import timber.log.Timber
+
+private const val IMAGE_LOAD_TRANSITION_TIME = 50
+private const val IMAGE_THUMBNAIL_SIZE = 0.1f
 
 @Suppress("unused")
 @ExperimentalUnsignedTypes
@@ -66,11 +71,9 @@ class SectorsAdapter(
                         }
                     )
                     .withTransitionOptions(
-                        com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions.withCrossFade(
-                            50
-                        )
+                        BitmapTransitionOptions.withCrossFade(IMAGE_LOAD_TRANSITION_TIME)
                     )
-                    .withThumbnailSize(0.1f)
+                    .withThumbnailSize(IMAGE_THUMBNAIL_SIZE)
                     .withResultImageScale(
                         with(SETTINGS_PREVIEW_SCALE_PREF.get(dataClassListActivity.sharedPreferences)) {
                             Timber.v("Preview scale: $this")
@@ -114,13 +117,17 @@ class SectorsAdapter(
                                 toast(dataClassListActivity, R.string.toast_error_internal)
                                 visibility(downloadProgressBar, false)
                             })
-                        } catch (error: Exception) {
+                        } catch (error: FileAlreadyExistsException) {
                             Timber.e(error, "Could not download!")
+                            toast(dataClassListActivity, R.string.toast_error_already_downloaded)
 
                             dataClassListActivity.runOnUiThread {
                                 visibility(holder.downloadProgressBar, false)
                                 downloadImageButton.setImageResource(R.drawable.download)
                             }
+                        } catch (error: AlreadyLoadingException) {
+                            Timber.w("Already downloading!")
+                            toast(dataClassListActivity, R.string.toast_error_already_downloading)
                         }
                     DownloadStatus.DOWNLOADING -> dataClassListActivity.toast(R.string.toast_downloading)
                     DownloadStatus.DOWNLOADED -> DownloadDialog(
@@ -136,17 +143,17 @@ class SectorsAdapter(
 
     private fun refreshDownloadImage(
         sector: Sector,
-        download_imageButton: ImageButton,
-        download_progressBar: ProgressBar
+        downloadImagebutton: ImageButton,
+        downloadProgressbar: ProgressBar
     ) {
         when (sector.isDownloaded(dataClassListActivity)) {
-            DownloadStatus.NOT_DOWNLOADED -> download_imageButton.setImageResource(R.drawable.download)
+            DownloadStatus.NOT_DOWNLOADED -> downloadImagebutton.setImageResource(R.drawable.download)
             DownloadStatus.DOWNLOADING -> {
-                download_imageButton.setImageResource(R.drawable.download_outline)
-                visibility(download_progressBar, true)
-                download_progressBar.isIndeterminate = true
+                downloadImagebutton.setImageResource(R.drawable.download_outline)
+                visibility(downloadProgressbar, true)
+                downloadProgressbar.isIndeterminate = true
             }
-            DownloadStatus.DOWNLOADED -> download_imageButton.setImageResource(R.drawable.cloud_check)
+            DownloadStatus.DOWNLOADED -> downloadImagebutton.setImageResource(R.drawable.cloud_check)
         }
     }
 }

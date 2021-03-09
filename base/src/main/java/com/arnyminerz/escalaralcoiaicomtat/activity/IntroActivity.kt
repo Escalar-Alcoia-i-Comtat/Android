@@ -41,13 +41,14 @@ class IntroActivity : NetworkChangeListenerActivity() {
         fun hasDownloaded(context: Context): Boolean = cacheFile(context).exists()
 
         fun shouldShow(context: Context): IntroShowReason {
+            var result: IntroShowReason? = null
             if (!context.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE))
-                return IntroShowReason.STORAGE_PERMISSION
+                result = IntroShowReason.STORAGE_PERMISSION
             if (!hasDownloaded(context))
-                return IntroShowReason.DOWNLOAD
+                result = IntroShowReason.DOWNLOAD
             if (!PREF_SHOWN_INTRO.get(context.sharedPreferences))
-                return IntroShowReason.PREF_FALSE
-            return IntroShowReason.OK
+                result = IntroShowReason.PREF_FALSE
+            return result ?: IntroShowReason.OK
         }
     }
 
