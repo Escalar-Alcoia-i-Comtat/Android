@@ -125,10 +125,8 @@ class SectorsAdapter(
                             Timber.e(error, "Could not download!")
                             toast(dataClassListActivity, R.string.toast_error_already_downloaded)
 
-                            dataClassListActivity.runOnUiThread {
-                                visibility(holder.downloadProgressBar, false)
-                                downloadImageButton.setImageResource(R.drawable.download)
-                            }
+                            visibility(holder.downloadProgressBar, false)
+                            downloadImageButton.setImageResource(R.drawable.download)
                         } catch (error: AlreadyLoadingException) {
                             Timber.w("Already downloading!")
                             toast(dataClassListActivity, R.string.toast_error_already_downloading)

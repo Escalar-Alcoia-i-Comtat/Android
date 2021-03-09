@@ -104,10 +104,8 @@ class ZoneAdapter(
                         Timber.w(error, "Zone already downloaded!")
                         toast(dataClassListActivity, R.string.toast_error_already_downloaded)
 
-                        dataClassListActivity.runOnUiThread {
-                            visibility(holder.progressBar, false)
-                            holder.downloadImageButton.setImageResource(R.drawable.download)
-                        }
+                        visibility(holder.progressBar, false)
+                        holder.downloadImageButton.setImageResource(R.drawable.download)
                     } catch (error: NoInternetAccessException) {
                         dataClassListActivity.toast(R.string.toast_error_no_internet)
                     } catch (error: AlreadyLoadingException) {
