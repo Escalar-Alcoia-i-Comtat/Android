@@ -17,7 +17,7 @@ import timber.log.Timber
 
 private const val ICON_SIZE_IN_MIN = 1f
 private const val ICON_SIZE_IN_MAX = 5f
-private const val ICON_SIZE_OUT_MIN = .1f
+private const val ICON_SIZE_OUT_MIN = .3f
 private const val ICON_SIZE_OUT_MAX = 1.2f
 
 @Suppress("unused")
@@ -63,8 +63,7 @@ data class GeoMarker(
         if (iconImage != null) {
             Timber.d("Marker $id has an icon named $iconImage")
             val iconSize = iconSize ?: mapFloat(
-                SETTINGS_MARKER_SIZE_PREF.get(context.sharedPreferences)
-                    .toFloat(),
+                SETTINGS_MARKER_SIZE_PREF.get(context.sharedPreferences).toFloat(),
                 ICON_SIZE_IN_MIN, ICON_SIZE_IN_MAX,
                 ICON_SIZE_OUT_MIN, ICON_SIZE_OUT_MAX
             )

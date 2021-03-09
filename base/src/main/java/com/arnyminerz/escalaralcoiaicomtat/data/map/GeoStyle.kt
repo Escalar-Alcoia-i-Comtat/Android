@@ -7,6 +7,8 @@ import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.utils.ColorUtils.colorToRgbaString
 import java.io.Serializable
 
+const val LINE_WIDTH_MULTIPLIER = .5f
+
 data class GeoStyle(
     val fillColor: String?,
     val strokeColor: String?,
@@ -49,7 +51,7 @@ fun LineOptions.apply(geoStyle: GeoStyle): LineOptions {
     if (geoStyle.lineJoin != null)
         modOptions = modOptions.withLineJoin(geoStyle.lineJoin)
     if (geoStyle.lineWidth != null)
-        modOptions = modOptions.withLineWidth(geoStyle.lineWidth)
+        modOptions = modOptions.withLineWidth(geoStyle.lineWidth * LINE_WIDTH_MULTIPLIER)
 
     return modOptions
 }
