@@ -225,16 +225,12 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                             items.size > 1 -> {
                                 Timber.v("  Multiple points")
                                 for (item in items)
-                                    if (item is GeoMarker)
-                                        mapHelper.add(item)
-                                    else Timber.e("  Item is not GeoMarker")
+                                    mapHelper.add(item)
                             }
                             items.size > 0 -> items.first().let { item ->
                                 Timber.v("  Only one point")
-                                if (item is GeoMarker) {
-                                    Timber.v("  Adding marker and moving camera")
-                                    mapHelper.add(item)
-                                } else Timber.e("  Item is not MarkerOptions")
+                                Timber.v("  Adding marker and moving camera")
+                                mapHelper.add(item)
                             }
                             else -> {
                                 Timber.e("  Could not get items")
