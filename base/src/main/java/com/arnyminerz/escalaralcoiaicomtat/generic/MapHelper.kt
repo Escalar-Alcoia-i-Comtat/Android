@@ -243,14 +243,14 @@ class MapHelper(private val mapView: MapView) {
     }
 
     @ExperimentalUnsignedTypes
-    fun showMapsActivity(context: Context) {
+    fun showMapsActivity(context: Context, overrideLoadedValues: Boolean = false) {
         if (loadedKMLAddress == null)
             throw MapAnyDataToLoadException("Map doesn't have any loaded data. You may run loadKML, for example.")
 
         val loadedElements = markers.isNotEmpty() || geometries.isNotEmpty()
         context.startActivity(
             Intent(context, MapsActivity::class.java).apply {
-                if (loadedElements) {
+                if (loadedElements && !overrideLoadedValues) {
                     Timber.v("Passing to MapsActivity with parcelable list.")
                     Timber.d("  Putting ${markers.size} markers...")
                     putExtra(MAP_MARKERS_BUNDLE_EXTRA, markers.toTypedArray())

@@ -117,7 +117,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                     }
 
                     map.addOnMapClickListener {
-                        mapHelper.showMapsActivity(this@DataClassListActivity)
+                        mapHelper.showMapsActivity(this@DataClassListActivity, true)
                         true
                     }
                 }

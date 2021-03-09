@@ -91,7 +91,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
         if (intent != null) {
             val markersList = intent.getParcelableArrayExtra(MAP_MARKERS_BUNDLE_EXTRA)
             if (markersList != null)
-                for (m in markersList){
+                for (m in markersList) {
                     val marker = m as GeoMarker?
                     if (marker != null)
                         markers.add(marker)
