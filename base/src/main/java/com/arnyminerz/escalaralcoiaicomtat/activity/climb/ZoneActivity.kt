@@ -72,18 +72,18 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                 val sectors = dataClass.children
                 Timber.v("Got ${sectors.size} sectors.")
 
-                binding.recyclerView.layoutManager = LinearLayoutManager(this@ZoneActivity)
+                binding.recyclerView.layoutManager = LinearLayoutManager(this)
                 if (justAttached)
                     binding.recyclerView.layoutAnimation =
                         AnimationUtils.loadLayoutAnimation(
-                            this@ZoneActivity,
+                            this,
                             R.anim.item_enter_left_animator
                         )
                 binding.recyclerView.adapter =
                     SectorsAdapter(
-                        this@ZoneActivity,
-                        sectors
-                    ) { _, viewHolder, index ->
+                        this,
+                        areaIndex, zoneIndex
+                    ) { viewHolder, index ->
                         binding.loadingLayout.show()
                         Handler(Looper.getMainLooper()).post {
                             Timber.v("Clicked item $index")

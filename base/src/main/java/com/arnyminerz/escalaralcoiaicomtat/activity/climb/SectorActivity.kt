@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.*
@@ -10,7 +11,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.SectorFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
-import com.arnyminerz.escalaralcoiaicomtat.list.adapter.SectorPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import it.sephiroth.android.library.xtooltip.ClosePolicy
@@ -24,7 +24,9 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
     private var areaIndex = -1
     private var zoneIndex = -1
     private var sector: Int = 0
-    lateinit var sectors: ArrayList<Sector>
+    val sectors = arrayListOf<Sector>()
+
+    private val fragments = arrayListOf<Fragment>()
 
     private lateinit var binding: ActivitySectorBinding
 
@@ -49,12 +51,16 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
         areaIndex = intent.getExtra(EXTRA_AREA, -1)
         zoneIndex = intent.getExtra(EXTRA_ZONE, -1)
         sector = intent.getExtra(EXTRA_SECTOR, 0)
+        if (savedInstanceState != null)
+            sector = savedInstanceState.getInt(EXTRA_SECTOR.key, sector)
         if (areaIndex < 0 || zoneIndex < 0) {
             Timber.e("Area or Zone index wasn't specified")
             onBackPressed()
             return
-        }
-        sectors = AREAS[areaIndex][zoneIndex].children
+        } else
+            Timber.d("Loading sectors from area #$areaIndex, zone #$zoneIndex...")
+        sectors.clear()
+        sectors.addAll(AREAS[areaIndex][zoneIndex].children)
 
         transitionName = intent.getExtra(EXTRA_SECTOR_TRANSITION_NAME)
         if (transitionName == null)
@@ -76,19 +82,23 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
 
         binding.backImageButton.setOnClickListener { onBackPressed() }
 
-        val fragments = arrayListOf<Fragment>()
-        for (sector in sectors) {
-            Timber.v("Got sector \"$sector\" with ${sector.count()} paths.")
+        fragments.clear()
+        for (sector in sectors)
             fragments.add(SectorFragment(sector, binding.sectorViewPager))
-        }
 
-        binding.sectorViewPager.adapter = SectorPagerAdapter(this, fragments)
-        if (savedInstanceState == null)
-            binding.sectorViewPager.currentItem = sector
+        Timber.d("Sector index: $sector")
+        binding.sectorViewPager.adapter = object : FragmentStateAdapter(this) {
+            override fun getItemCount(): Int = sectors.size
+            override fun createFragment(position: Int): Fragment {
+                Timber.d("Creating fragment #$position")
+                return fragments[position]
+            }
+        }
         binding.sectorViewPager.registerOnPageChangeCallback(object :
             ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
+                Timber.d("Selected page #$position")
                 sector = position
 
                 for (fragment in fragments)
@@ -97,6 +107,12 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
                 updateTitle()
             }
         })
+        binding.sectorViewPager.setCurrentItem(sector, false)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt(EXTRA_SECTOR.key, sector)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
