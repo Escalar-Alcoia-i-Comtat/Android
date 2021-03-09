@@ -9,7 +9,6 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Parcelable
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -53,7 +52,8 @@ private const val FOLDER_ACCESS_PERMISSION_REQUEST_CODE = 7
 
 val KML_ADDRESS_BUNDLE_EXTRA = IntentExtra<String>("KMLAddr")
 val KMZ_FILE_BUNDLE_EXTRA = IntentExtra<String>("KMZFle")
-val MAP_DATA_BUNDLE_EXTRA = IntentExtra<List<Parcelable>>("MapDta")
+const val MAP_MARKERS_BUNDLE_EXTRA = "Markers"
+const val MAP_GEOMETRIES_BUNDLE_EXTRA = "Geometries"
 val ZONE_NAME_BUNDLE_EXTRA = IntentExtra<String>("ZneNm")
 
 @ExperimentalUnsignedTypes
@@ -61,7 +61,8 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
 
     private var zoneName: String? = null
     private var kmlAddress: String? = null
-    private var mapData: List<Parcelable>? = null
+    private var markers = arrayListOf<GeoMarker>()
+    private var geometries = arrayListOf<GeoGeometry>()
     private var kmzFile: File? = null
 
     private lateinit var mapHelper: MapHelper
@@ -88,8 +89,21 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
 
         if (intent != null) {
+            val markersList = intent.getParcelableArrayExtra(MAP_MARKERS_BUNDLE_EXTRA)
+            val geometriesList = intent.getParcelableArrayExtra(MAP_GEOMETRIES_BUNDLE_EXTRA)
+            markersList?.let {
+                for (m in it)
+                    if (m is GeoMarker)
+                        markers.add(m)
+            }
+            geometriesList?.let {
+                for (g in it)
+                    if (g is GeoGeometry)
+                        geometries.add(g)
+            }
+            Timber.d("Got ${markers.size} markers and ${geometries.size} geometries.")
+
             kmlAddress = intent.getExtra(KML_ADDRESS_BUNDLE_EXTRA)
-            mapData = intent.getExtra(MAP_DATA_BUNDLE_EXTRA)
             zoneName = intent.getExtra(ZONE_NAME_BUNDLE_EXTRA)
             intent.getExtra(KMZ_FILE_BUNDLE_EXTRA)
                 .let { path -> if (path != null) kmzFile = File(path) }
@@ -205,13 +219,15 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                     if (kmzFile != null)
                         binding.mapDownloadedImageView.visibility = View.VISIBLE
 
-                    if (mapData != null) {
-                        Timber.v("Got map data, ${mapData!!.size} elements.")
-                        for (item in mapData!!)
-                            mapHelper.add(item)
-                        mapHelper.display(this@MapsActivity)
-                        mapHelper.center(MAP_LOAD_PADDING)
-                    }
+                    Timber.v(
+                        "Got ${markers.size} markers and ${geometries.size} geometries from intent."
+                    )
+
+                    mapHelper.addMarkers(markers)
+                    mapHelper.addGeometries(geometries)
+
+                    mapHelper.display(this@MapsActivity)
+                    mapHelper.center(MAP_LOAD_PADDING)
 
                     binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
                 }
@@ -438,7 +454,8 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
             return false
         } else {
             if (locationManager == null)
-                locationManager = applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
+                locationManager =
+                    applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
 
             mapHelper.enableLocationComponent(this, cameraMode = CameraMode.NONE)
 
@@ -475,8 +492,9 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
 
         try {
             if (PermissionsManager.areLocationPermissionsGranted(this)) {
-                val locationResult = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                    ?: return Timber.w("Could not get last known location")
+                val locationResult =
+                    locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                        ?: return Timber.w("Could not get last known location")
                 Timber.v("Adding complete listener")
                 lastKnownLocation = locationResult
                 Timber.d("Got new location: $lastKnownLocation")

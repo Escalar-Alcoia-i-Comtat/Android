@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.map
 
-import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -16,20 +15,15 @@ data class GeoGeometry(
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readParcelable<GeoStyle>(GeoStyle::class.java.classLoader)!!,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            parcel.readParcelableList<LatLng>(listOf(), LatLng::class.java.classLoader)
-        else
-            with(parcel.readParcelableArray(LatLng::class.java.classLoader)!!) {
-                val list = arrayListOf<LatLng>()
-                for (e in this)
-                    list.add(e as LatLng)
-                list
-            },
+        with(parcel.readParcelableArray(LatLng::class.java.classLoader)!!.toList()) {
+            val list = arrayListOf<LatLng>()
+            for (i in this)
+                if (i is LatLng)
+                    list.add(i)
+            list
+        },
         parcel.readParcelable(MapObjectWindowData::class.java.classLoader),
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            parcel.readBoolean()
-        else
-            parcel.readInt() == 1
+        parcel.readInt() == 1
     )
 
     fun addToMap(fillManager: FillManager, lineManager: LineManager): Pair<Line, Fill?> {
@@ -58,14 +52,9 @@ data class GeoGeometry(
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeParcelable(style, 0)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            dest.writeParcelableList(points, 0)
-            dest.writeBoolean(closedShape)
-        } else {
-            dest.writeParcelableArray(points.toTypedArray(), 0)
-            dest.writeInt(if (closedShape) 1 else 0)
-        }
+        dest.writeParcelableArray(points.toTypedArray(), 0)
         dest.writeParcelable(windowData, 0)
+        dest.writeInt(if (closedShape) 1 else 0)
     }
 
     companion object CREATOR : Parcelable.Creator<GeoGeometry> {

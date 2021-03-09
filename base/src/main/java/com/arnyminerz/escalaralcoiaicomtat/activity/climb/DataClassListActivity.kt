@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.os.Bundle
+import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
@@ -11,6 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
 import timber.log.Timber
 import java.io.FileNotFoundException
@@ -30,6 +32,9 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
+
         binding = LayoutListBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)

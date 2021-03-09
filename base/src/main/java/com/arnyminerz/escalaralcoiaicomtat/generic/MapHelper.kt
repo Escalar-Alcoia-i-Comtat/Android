@@ -12,10 +12,7 @@ import android.widget.LinearLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.activity.KML_ADDRESS_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.activity.MAP_DATA_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogMapMarkerBinding
@@ -246,21 +243,22 @@ class MapHelper(private val mapView: MapView) {
     }
 
     @ExperimentalUnsignedTypes
-    fun showMapsActivity(activity: FragmentActivity) {
+    fun showMapsActivity(context: Context) {
         if (loadedKMLAddress == null)
             throw MapAnyDataToLoadException("Map doesn't have any loaded data. You may run loadKML, for example.")
 
-        val elements = arrayListOf<Parcelable>()
-        elements.addAll(markers)
-        elements.addAll(geometries)
-        activity.startActivity(
-            Intent(activity, MapsActivity::class.java).apply {
-                if (elements.isEmpty()) {
+        val loadedElements = markers.isNotEmpty() || geometries.isNotEmpty()
+        context.startActivity(
+            Intent(context, MapsActivity::class.java).apply {
+                if (loadedElements) {
+                    Timber.v("Passing to MapsActivity with parcelable list.")
+                    Timber.d("  Putting ${markers.size} markers...")
+                    putExtra(MAP_MARKERS_BUNDLE_EXTRA, markers.toTypedArray())
+                    Timber.d("  Putting ${geometries.size} geometries...")
+                    putExtra(MAP_GEOMETRIES_BUNDLE_EXTRA, geometries.toTypedArray())
+                } else {
                     Timber.d("Passing to MapsActivity with kml address ($loadedKMLAddress).")
                     putExtra(KML_ADDRESS_BUNDLE_EXTRA, loadedKMLAddress!!)
-                } else {
-                    Timber.d("Passing to MapsActivity with parcelable list.")
-                    putExtra(MAP_DATA_BUNDLE_EXTRA, elements)
                 }
             }
         )
@@ -523,18 +521,6 @@ class MapHelper(private val mapView: MapView) {
             )
         }
     }
-
-    @ExperimentalUnsignedTypes
-    fun mapsActivityIntent(context: Context): Intent =
-        Intent(context, MapsActivity::class.java).apply {
-            val mapData = arrayListOf<Parcelable>()
-            for (zm in markers)
-                zm.let { zoneMarker ->
-                    Timber.d("  Adding position [${zoneMarker.position.latitude}, ${zoneMarker.position.longitude}]")
-                    mapData.add(zoneMarker)
-                }
-            putExtra(MAP_DATA_BUNDLE_EXTRA, mapData)
-        }
 
     @ExperimentalUnsignedTypes
     fun infoCard(

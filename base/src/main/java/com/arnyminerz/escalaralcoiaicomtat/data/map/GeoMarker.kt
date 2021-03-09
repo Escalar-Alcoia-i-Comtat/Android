@@ -51,7 +51,7 @@ class GeoMarker(
             )
         else null
     ) {
-        icon = parcel.readSerializable() as GeoIcon
+        icon = parcel.readSerializable() as GeoIcon?
     }
 
     fun withImage(bitmap: Bitmap): GeoMarker {

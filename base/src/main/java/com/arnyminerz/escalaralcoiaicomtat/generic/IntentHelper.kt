@@ -6,8 +6,8 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.app.ShareCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
+import timber.log.Timber
 import java.io.Serializable
-
 
 fun Intent.hasExtras(vararg extras: String): Boolean {
     val hases = arrayListOf<Boolean>()
@@ -41,6 +41,7 @@ fun <T> Intent.putExtra(key: IntentExtra<T>, value: T): Intent {
         is Serializable -> putExtra(key.key, value)
         is Float -> putExtra(key.key, value)
         is Short -> putExtra(key.key, value)
+        else -> Timber.e("Unsupported type ${value!!::class.java.simpleName}. Could not add to intent")
     }
 
     return this
@@ -59,6 +60,9 @@ fun Activity.shareString(text: String) {
 }
 
 inline fun <reified T> Intent.getExtra(key: IntentExtra<T>): T? {
+    if (extras?.containsKey(key.key) != true)
+        return null
+
     val result = extras?.get(key.key)
     return if (result is T)
         result
