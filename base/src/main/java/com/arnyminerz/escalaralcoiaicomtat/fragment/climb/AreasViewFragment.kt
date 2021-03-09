@@ -129,11 +129,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                             Timber.d("Adding zone #${zone.id}. Creating marker...")
                             var marker = GeoMarker(
                                 zoneLocation,
-                                null,
-                                MapObjectWindowData(
-                                    zone.displayName,
-                                    null
-                                )
+                                windowData=MapObjectWindowData(zone.displayName, null)
                             )
                             Timber.d("Setting image...")
                             marker = marker.withImage(ICON_WAYPOINT_ESCALADOR_BLANC)
@@ -210,12 +206,12 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
                 map.addOnMapClickListener {
                     Timber.v("Starting MapActivity...")
-                    startActivity(mapHelper.mapsActivityIntent(requireContext()))
+                    mapHelper.showMapsActivity(requireContext())
                     true
                 }
                 mapHelper.addSymbolClickListener {
                     Timber.v("Starting MapActivity...")
-                    startActivity(mapHelper.mapsActivityIntent(requireContext()))
+                    mapHelper.showMapsActivity(requireContext())
                     true
                 }
 

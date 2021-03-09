@@ -1,11 +1,14 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.map
 
 import android.graphics.Color
+import android.os.Parcel
+import android.os.Parcelable
 import com.mapbox.mapboxsdk.plugins.annotation.FillOptions
 import com.mapbox.mapboxsdk.plugins.annotation.LineOptions
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.utils.ColorUtils.colorToRgbaString
-import java.io.Serializable
+
+const val LINE_WIDTH_MULTIPLIER = .5f
 
 data class GeoStyle(
     val fillColor: String?,
@@ -13,7 +16,14 @@ data class GeoStyle(
     val lineWidth: Float?,
     @Property.LINE_JOIN
     val lineJoin: String?
-) : Serializable {
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readFloat(),
+        parcel.readString()
+    )
+
     private fun colorIsNull(color: String?) =
         color == null || !color.startsWith("#") || color.contains("null")
 
@@ -28,6 +38,25 @@ data class GeoStyle(
     } catch (ex: NumberFormatException) {
         null
     } else null
+
+    override fun describeContents(): Int = 0
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeString(fillColor)
+        dest.writeString(strokeColor)
+        lineWidth?.let { dest.writeFloat(it) }
+        dest.writeString(lineJoin)
+    }
+
+    companion object CREATOR : Parcelable.Creator<GeoStyle> {
+        override fun createFromParcel(parcel: Parcel): GeoStyle {
+            return GeoStyle(parcel)
+        }
+
+        override fun newArray(size: Int): Array<GeoStyle?> {
+            return arrayOfNulls(size)
+        }
+    }
 }
 
 fun FillOptions.apply(geoStyle: GeoStyle): FillOptions {
@@ -49,7 +78,7 @@ fun LineOptions.apply(geoStyle: GeoStyle): LineOptions {
     if (geoStyle.lineJoin != null)
         modOptions = modOptions.withLineJoin(geoStyle.lineJoin)
     if (geoStyle.lineWidth != null)
-        modOptions = modOptions.withLineWidth(geoStyle.lineWidth)
+        modOptions = modOptions.withLineWidth(geoStyle.lineWidth * LINE_WIDTH_MULTIPLIER)
 
     return modOptions
 }
