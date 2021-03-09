@@ -15,11 +15,18 @@ import com.arnyminerz.escalaralcoiaicomtat.list.adapter.TOGGLED_CARD_HEIGHT
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
 
+private const val ROTATION_A = 90f
+private const val ROTATION_B = -90f
+
+private const val TOGGLE_ANIMATION_DURATION: Long = 300
+
 @Suppress("UNCHECKED_CAST")
 @ExperimentalUnsignedTypes
 // This must be Serializable and not DataClass because A at DataClass can't be specified as DataClass
 data class DownloadedSection(val section: DataClass<*, *>) {
-    /// toggled -> true : Content hidden
+    /**
+     * toggled -> true : Content hidden
+     */
     private var toggled: Boolean = true
 
     companion object {
@@ -48,8 +55,8 @@ data class DownloadedSection(val section: DataClass<*, *>) {
         context: Context
     ) {
         toggleButton.animate()
-            .rotation(if (toggled) 90f else -90f)
-            .setDuration(300)
+            .rotation(if (toggled) ROTATION_A else ROTATION_B)
+            .setDuration(TOGGLE_ANIMATION_DURATION)
             .setInterpolator(AccelerateDecelerateInterpolator())
             .start()
 

@@ -57,7 +57,7 @@ data class Path @ExperimentalUnsignedTypes constructor(
         var anyGreaterThanOne = false
 
         for (c in 0 until fixedSafesData.count())
-            fixedSafesData[c]?.let { data ->
+            fixedSafesData[c].let { data ->
                 if (data.count > 1u)
                     anyGreaterThanOne = true
             }
@@ -115,9 +115,8 @@ data class Path @ExperimentalUnsignedTypes constructor(
                             .replace("\r", "")
                             .split("\n"))
                             list.add(ln.toInt())
-                    else
-                        if (it.toLowerCase(Locale.getDefault()) != "null" && it.isNotEmpty())
-                            list.add(it.toInt())
+                    else if (it.toLowerCase(Locale.getDefault()) != "null" && it.isNotEmpty())
+                        list.add(it.toInt())
                     list
                 } ?: arrayListOf(),
                 if (json.has("ending")) EndingType.fromDB(json.getString("ending")) else arrayListOf(),

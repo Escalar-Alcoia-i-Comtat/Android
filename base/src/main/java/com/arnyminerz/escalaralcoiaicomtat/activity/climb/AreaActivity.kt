@@ -64,49 +64,45 @@ class AreaActivity : DataClassListActivity<Area>() {
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         super.onStateChange(state)
 
-        if (!loaded && !isDestroyed && !loading)
-            try {
-                loading = true
-                val zones = dataClass.children
+        if (!loaded && !isDestroyed && !loading) {
+            loading = true
+            val zones = dataClass.children
 
-                binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
-                if (justAttached)
-                    binding.recyclerView.layoutAnimation =
-                        AnimationUtils.loadLayoutAnimation(
-                            this@AreaActivity,
-                            R.anim.item_enter_left_animator
-                        )
-                binding.recyclerView.adapter =
-                    ZoneAdapter(zones, this) { _, holder, position ->
-                        binding.loadingLayout.show()
-                        Handler(Looper.getMainLooper()).post {
-                            Timber.v("Clicked item $position")
-                            val intent =
-                                Intent(this@AreaActivity, ZoneActivity()::class.java)
-                                    .putExtra(EXTRA_AREA, areaIndex)
-                                    .putExtra(EXTRA_ZONE, position)
+            binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
+            if (justAttached)
+                binding.recyclerView.layoutAnimation =
+                    AnimationUtils.loadLayoutAnimation(
+                        this@AreaActivity,
+                        R.anim.item_enter_left_animator
+                    )
+            binding.recyclerView.adapter =
+                ZoneAdapter(zones, this) { _, holder, position ->
+                    binding.loadingLayout.show()
+                    Handler(Looper.getMainLooper()).post {
+                        Timber.v("Clicked item $position")
+                        val intent =
+                            Intent(this@AreaActivity, ZoneActivity()::class.java)
+                                .putExtra(EXTRA_AREA, areaIndex)
+                                .putExtra(EXTRA_ZONE, position)
 
-                            val optionsBundle =
-                                ViewCompat.getTransitionName(holder.titleTextView)
-                                    ?.let { transitionName ->
-                                        intent.putExtra(EXTRA_ZONE_TRANSITION_NAME, transitionName)
+                        val optionsBundle =
+                            ViewCompat.getTransitionName(holder.titleTextView)
+                                ?.let { transitionName ->
+                                    intent.putExtra(EXTRA_ZONE_TRANSITION_NAME, transitionName)
 
-                                        ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                            this,
-                                            holder.titleTextView,
-                                            transitionName
-                                        ).toBundle()
-                                    } ?: Bundle.EMPTY
+                                    ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                        this,
+                                        holder.titleTextView,
+                                        transitionName
+                                    ).toBundle()
+                                } ?: Bundle.EMPTY
 
-                            startActivity(intent, optionsBundle)
-                        }
+                        startActivity(intent, optionsBundle)
                     }
+                }
 
-                loaded = true
-            } catch (error: Exception) {
-                Timber.e(error, "Could not load area")
-            } finally {
-                loading = false
-            }
+            loaded = true
+            loading = false
+        }
     }
 }

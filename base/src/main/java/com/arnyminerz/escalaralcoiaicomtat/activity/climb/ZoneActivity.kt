@@ -12,7 +12,8 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
-import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.SectorsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.show
@@ -91,7 +92,10 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                                     .toString()
                             Timber.v("Transition name: $trn")
                             val intent =
-                                Intent(this@ZoneActivity, SectorActivity()::class.java)
+                                Intent(
+                                    this@ZoneActivity,
+                                    SectorActivity()::class.java
+                                )
                                     .putExtra(EXTRA_AREA, areaIndex)
                                     .putExtra(EXTRA_ZONE, zoneIndex)
                                     .putExtra(EXTRA_SECTOR, index)
@@ -106,10 +110,12 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                     }
 
                 loaded = true
-            } catch (_: AlreadyLoadingException) { // Ignore an already loading exception. The content will be loaded from somewhere else
-                Timber.v("An AlreadyLoadingException has been thrown while loading the zones in ZoneActivity.") // Let's just warn the debugger this is controlled
-            }
-        else
+            } catch (_: AlreadyLoadingException) {
+                // Ignore an already loading exception. The content will be loaded from somewhere else
+                Timber.v(
+                    "An AlreadyLoadingException has been thrown while loading the zones in ZoneActivity."
+                ) // Let's just warn the debugger this is controlled
+            } else
             Timber.d("Already loaded!")
     }
 }

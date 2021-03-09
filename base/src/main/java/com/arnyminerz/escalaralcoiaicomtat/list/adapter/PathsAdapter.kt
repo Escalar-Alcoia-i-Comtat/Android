@@ -124,7 +124,7 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
                         if (anyBlocking) {
                             setTextColor(holder.titleTextView, activity, R.color.grade_red)
                             holder.warningTextView.text =
-                                activity.resources.getStringArray(R.array.path_warnings)[blocked.value]
+                                activity.resources.getStringArray(R.array.path_warnings)[blocked.index]
                         }
                         visibility(holder.warningImageView, anyBlocking)
                         visibility(holder.warningCardView, anyBlocking)
@@ -254,7 +254,7 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
         val endings = path.endings
         if (endings.size == 1 && !endings[0].isUnknown()) {
             val ending = endings.first()
-            val endingVal = ending.value
+            val endingVal = ending.index
 
             addChip(
                 activity.resources.getStringArray(R.array.path_endings)[endingVal],

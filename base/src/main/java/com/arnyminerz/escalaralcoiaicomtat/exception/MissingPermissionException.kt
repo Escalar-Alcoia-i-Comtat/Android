@@ -1,3 +1,3 @@
 package com.arnyminerz.escalaralcoiaicomtat.exception
 
-class MissingPermissionException(message: String): Exception(message)
+class MissingPermissionException(message: String) : Exception(message)

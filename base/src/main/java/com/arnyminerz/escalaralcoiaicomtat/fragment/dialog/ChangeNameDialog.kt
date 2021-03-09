@@ -8,7 +8,6 @@ import android.widget.EditText
 import androidx.annotation.StringRes
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-
 @Suppress("unused")
 class ChangeNameDialog(private val context: Context) {
     private val alertDialog: AlertDialog? = null
@@ -113,18 +112,15 @@ class ChangeNameDialog(private val context: Context) {
         if (title != null) dialog.setTitle(title)
         if (message != null) dialog.setMessage(message)
         if (positiveButton != null) dialog
-            .setPositiveButton(positiveButton!!.first)
-            { d: DialogInterface, which: Int ->
+            .setPositiveButton(positiveButton!!.first) { d: DialogInterface, which: Int ->
                 positiveButton!!.second(d, which)
             }
         if (negativeButton != null) dialog
-            .setNegativeButton(negativeButton!!.first)
-            { d: DialogInterface, which: Int ->
+            .setNegativeButton(negativeButton!!.first) { d: DialogInterface, which: Int ->
                 negativeButton!!.second(d, which)
             }
         if (neutralButton != null) dialog
-            .setNeutralButton(neutralButton!!.first)
-            { d: DialogInterface, which: Int ->
+            .setNeutralButton(neutralButton!!.first) { d: DialogInterface, which: Int ->
                 neutralButton!!.second(d, which)
             }
         if (showInput) {
@@ -133,7 +129,7 @@ class ChangeNameDialog(private val context: Context) {
             input!!.inputType = inputType
             if (hint != null)
                 input!!.hint = hint!!
-            if(defaultText != null)
+            if (defaultText != null)
                 input!!.setText(defaultText)
             dialog.setView(input)
         }

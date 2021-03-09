@@ -6,10 +6,10 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.KML_ADDRESS_BUNDLE_EXTRA
+import com.arnyminerz.escalaralcoiaicomtat.activity.KMZ_FILE_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity.Companion.KML_ADDRESS_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity.Companion.KMZ_FILE_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity.Companion.ZONE_NAME_BUNDLE_EXTRA
+import com.arnyminerz.escalaralcoiaicomtat.activity.ZONE_NAME_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus

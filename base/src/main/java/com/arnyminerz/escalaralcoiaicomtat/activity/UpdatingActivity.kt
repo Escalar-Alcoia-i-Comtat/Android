@@ -11,12 +11,17 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityUpdatingBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.DownloadAreasIntroFragment
-import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
+import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber
 import java.io.IOException
+
+private const val ERROR_VIBRATE: Long = 500
 
 val UPDATE_AREA = IntentExtra<Int>("update_area")
 val UPDATE_ZONE = IntentExtra<Int>("update_zone")
@@ -92,7 +97,6 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
                 .setCancelable(false)
                 .show()
         else runActions()
-
     }
 
     private fun runActions() {
@@ -113,11 +117,11 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
                     // On finished
                     Timber.v("  Device data updated!")
 
-                    if (updateDownloads == true) {
-                        // TODO: Update downloads
-                    }
+                    // if (updateDownloads == true) {
+                    // TODO: Update downloads
+                    // }
                 } catch (e: IOException) {
-                    vibrate(this, 500)
+                    vibrate(this, ERROR_VIBRATE)
                     visibility(binding.progressBar, false, setGone = false)
                     binding.updatingTextView.setText(R.string.update_progress_error)
                     binding.progressTextView.setText(R.string.toast_error_internal)
@@ -139,44 +143,6 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             try {
                 runAsync {
                     DownloadAreasIntroFragment.downloadAreasCache(this, networkState, null, null)
-                    // Download complete
-                    val updatesToDo = 0 +
-                            (if (updateArea != null) 1 else 0) +
-                            (if (updateZone != null) 1 else 0) +
-                            (if (updateSector != null) 1 else 0)
-                    var updatesCounter = 0
-
-                    fun iterateUpdate(dataClass: DataClass<*, *>) {
-                        Timber.v("Deleting area #$updateArea...")
-                        dataClass.delete(this@UpdatingActivity)
-
-                        Timber.v("Downloading area #$updateArea...")
-                        dataClass.download(this@UpdatingActivity, true, { /* Start */ }, {
-                            // Finish
-                            updatesCounter++
-                            if (updatesCounter >= updatesToDo)
-                                if (quietUpdate) {
-                                    Timber.v("Finished downloading everything, quiet mode enabled, won't launch anything...")
-                                } else {
-                                    Timber.v("Finished downloading everything, launching MainActivity...")
-                                    startActivity(Intent(this, MainActivity::class.java))
-                                }
-                        }, { progress, max ->
-                            // Progress
-                            onUiThread {
-                                binding.progressBar.isIndeterminate = false
-                                binding.progressBar.max = max
-                                binding.progressBar.progress = progress
-                            }
-                        }, {
-                            // Error
-                            onUiThread {
-                                vibrate(this@UpdatingActivity, 500)
-                                visibility(binding.progressBar, false, setGone = false)
-                                binding.updatingTextView.setText(R.string.update_progress_error)
-                            }
-                        })
-                    }
 
                     if (updateArea != null) // Update area
                         iterateUpdate(Area.fromId(updateArea!!))
@@ -186,7 +152,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
                         iterateUpdate(Sector.fromId(updateSector!!))
                 }
             } catch (e: IOException) {
-                vibrate(this, 500)
+                vibrate(this, ERROR_VIBRATE)
                 visibility(binding.progressBar, false, setGone = false)
                 binding.updatingTextView.setText(R.string.update_progress_error)
                 binding.progressTextView.setText(R.string.toast_error_internal)
@@ -197,4 +163,41 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
         onBackPressed()
     }
 
+    // Download complete
+    private val updatesToDo = 0 +
+            (if (updateArea != null) 1 else 0) +
+            (if (updateZone != null) 1 else 0) +
+            (if (updateSector != null) 1 else 0)
+    private var updatesCounter = 0
+    private fun iterateUpdate(dataClass: DataClass<*, *>) {
+        Timber.v("Deleting area #$updateArea...")
+        dataClass.delete(this@UpdatingActivity)
+
+        Timber.v("Downloading area #$updateArea...")
+        dataClass.download(this@UpdatingActivity, true, { /* Start */ }, {
+            // Finish
+            updatesCounter++
+            if (updatesCounter >= updatesToDo)
+                if (quietUpdate) {
+                    Timber.v("Finished downloading everything, quiet mode enabled, won't launch anything...")
+                } else {
+                    Timber.v("Finished downloading everything, launching MainActivity...")
+                    startActivity(Intent(this, MainActivity::class.java))
+                }
+        }, { progress, max ->
+            // Progress
+            runOnUiThread {
+                binding.progressBar.isIndeterminate = false
+                binding.progressBar.max = max
+                binding.progressBar.progress = progress
+            }
+        }, {
+            // Error
+            runOnUiThread {
+                vibrate(this@UpdatingActivity, ERROR_VIBRATE)
+                visibility(binding.progressBar, false, setGone = false)
+                binding.updatingTextView.setText(R.string.update_progress_error)
+            }
+        })
+    }
 }

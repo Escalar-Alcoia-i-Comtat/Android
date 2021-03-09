@@ -3,7 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 import java.io.Serializable
 
 @ExperimentalUnsignedTypes
-interface SafesData: Serializable {
+interface SafesData : Serializable {
     /**
      * @return The amount of parameters there are
      */

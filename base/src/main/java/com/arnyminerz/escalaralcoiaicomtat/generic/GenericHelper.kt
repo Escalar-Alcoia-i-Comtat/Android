@@ -14,9 +14,6 @@ fun generateUUID(): String {
     return UUID.randomUUID().toString()
 }
 
-fun Boolean.toInt(): Int =
-    if (this) 1 else 0
-
 @Suppress("DEPRECATION")
 fun getDisplaySize(activity: Activity): Pair<Int, Int> =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

@@ -15,14 +15,18 @@ import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
-import com.arnyminerz.escalaralcoiaicomtat.data.map.*
+import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
+import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
+import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
+import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMapsBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAskerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -34,24 +38,26 @@ import org.w3c.dom.Document
 import org.w3c.dom.Element
 import timber.log.Timber
 import java.io.File
+import java.io.IOException
 import java.io.Serializable
 import javax.xml.parsers.DocumentBuilderFactory
 
+private const val CURRENT_LOCATION_DEFAULT_ZOOM = 17.0
+private const val MAP_LOAD_PADDING = 50
+private const val VIBRATION: Long = 20
+
+private const val PERMISSION_DIALOG_TAG = "PERM_TAG"
+
+private const val LOCATION_PERMISSION_REQUEST_CODE = 3 // This number was chosen by Dono
+private const val FOLDER_ACCESS_PERMISSION_REQUEST_CODE = 7
+
+const val KML_ADDRESS_BUNDLE_EXTRA = "KMLAddr"
+const val KMZ_FILE_BUNDLE_EXTRA = "KMZFle"
+const val MAP_DATA_BUNDLE_EXTRA = "MapDta"
+const val ZONE_NAME_BUNDLE_EXTRA = "ZneNm"
 
 @ExperimentalUnsignedTypes
 class MapsActivity : NetworkChangeListenerFragmentActivity() {
-
-    companion object {
-        private const val PERMISSION_DIALOG_TAG = "PERM_TAG"
-
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 3 // This number was chosen by Dono
-        private const val FOLDER_ACCESS_PERMISSION_REQUEST_CODE = 7
-
-        const val KML_ADDRESS_BUNDLE_EXTRA = "KMLAddr"
-        const val KMZ_FILE_BUNDLE_EXTRA = "KMZFle"
-        const val MAP_DATA_BUNDLE_EXTRA = "MapDta"
-        const val ZONE_NAME_BUNDLE_EXTRA = "ZneNm"
-    }
 
     private var zoneName: String? = null
     private var kmlAddress: String? = null
@@ -236,7 +242,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                             }
                         }
                         mapHelper.display(this@MapsActivity)
-                        mapHelper.center(50)
+                        mapHelper.center(MAP_LOAD_PADDING)
                     }
 
                     binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
@@ -294,7 +300,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                     mapHelper.enableLocationComponent(this)
                 else {
                     toast(R.string.toast_location_not_shown)
-                    vibrate(this, 20)
+                    vibrate(this, VIBRATION)
                 }
                 return
             }
@@ -343,7 +349,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                             stream.write("</gpx>")
 
                             runOnUiThread { toast(R.string.toast_stored_gpx) }
-                        } catch (e: Exception) {
+                        } catch (e: IOException) {
                             Timber.e(e, "Could not store GPX: ")
                             runOnUiThread {
                                 toast(R.string.toast_error_internal)
@@ -399,7 +405,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                                     Timber.e("Unknown kml type")
 
                                 runOnUiThread { toast(R.string.toast_download_complete) }
-                            } catch (e: Exception) {
+                            } catch (e: IOException) {
                                 Timber.e(e, "Could not store GPX: ")
                                 runOnUiThread { toast(R.string.toast_error_internal) }
                             } finally {
@@ -421,7 +427,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                                 stream.write(kmzStream.readBytes())
 
                                 runOnUiThread { toast(R.string.toast_stored_kmz) }
-                            } catch (e: Exception) {
+                            } catch (e: IOException) {
                                 Timber.e(e, "Could not store GPX:")
                                 runOnUiThread { toast(R.string.toast_error_internal) }
                             } finally {
@@ -473,7 +479,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                     val position = lastKnownLocation!!.toLatLng()
                     Timber.d("Moving camera to current location ($position)...")
                     movingCamera = true
-                    mapHelper.move(position, 17.0)
+                    mapHelper.move(position, CURRENT_LOCATION_DEFAULT_ZOOM)
                     binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_fixed_24)
                 } else {
                     Timber.e("No known location!")

@@ -37,6 +37,7 @@ import timber.log.Timber
 import java.io.File
 import java.io.Serializable
 import java.util.*
+import kotlin.NoSuchElementException
 
 /**
  * Searches in AREAS and tries to get an intent from them
@@ -203,20 +204,20 @@ abstract class DataClass<A : Serializable, B : Serializable>(
      * @return a matching DownloadStatus representing the Data Class' download status
      */
     fun isDownloaded(context: Context): DownloadStatus {
+        var result: DownloadStatus? = null
         when {
-            isDownloading -> return DownloadStatus.DOWNLOADING
+            isDownloading -> result = DownloadStatus.DOWNLOADING
             else -> {
                 val imageFileExists = imageFile(context).exists()
                 if (!imageFileExists)
-                    return DownloadStatus.NOT_DOWNLOADED
+                    result = DownloadStatus.NOT_DOWNLOADED
                 else for (child in children)
                     if (child is DataClass<*, *>)
                         if (!child.isDownloaded(context))
-                            return DownloadStatus.NOT_DOWNLOADED
-
-                return DownloadStatus.DOWNLOADED
+                            result = DownloadStatus.NOT_DOWNLOADED
             }
         }
+        return result ?: DownloadStatus.DOWNLOADED
     }
 
     /**
@@ -457,11 +458,12 @@ abstract class DataClass<A : Serializable, B : Serializable>(
     }
 }
 
-class DataClassIterator<A: Serializable> (private val children: List<A>) : Iterator<A> {
+class DataClassIterator<A : Serializable> (private val children: List<A>) : Iterator<A> {
     private var i: Int = 0
     override fun next(): A {
-        i++
-        return children[i - 1]
+        if (i + 1 >= children.size)
+            throw NoSuchElementException()
+        return children[i++]
     }
 
     override fun hasNext(): Boolean = i < children.size

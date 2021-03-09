@@ -14,6 +14,10 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import timber.log.Timber
 import java.io.FileNotFoundException
 
+const val DEFAULT_LAT = 38.7216704
+const val DEFAULT_LON = -0.4799751
+const val DEFAULT_ZOOM = 12.5
+
 @ExperimentalUnsignedTypes
 abstract class DataClassListActivity<T : DataClass<*, *>> : NetworkChangeListenerActivity() {
     protected lateinit var binding: LayoutListBinding
@@ -39,7 +43,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>> : NetworkChangeListene
     override fun onResume() {
         super.onResume()
         mapHelper.onResume()
-        if(mapLoaded)
+        if (mapLoaded)
             binding.loadingLayout.hide()
     }
 
@@ -75,7 +79,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>> : NetworkChangeListene
         if (!mapLoaded && hasInternet) {
             Timber.v("Loading map...")
             mapHelper
-                .withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5)
+                .withStartingPosition(LatLng(DEFAULT_LAT, DEFAULT_LON), DEFAULT_ZOOM)
                 .withControllable(false)
                 .loadMap(this) { _, map, _ ->
                     mapLoaded = true

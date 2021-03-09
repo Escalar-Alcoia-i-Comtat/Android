@@ -5,4 +5,4 @@ import java.io.Serializable
 
 abstract class GeoIcon(open val name: String): Serializable
 
-data class GeoIconDrawable(override val name: String, @DrawableRes val icon: Int): GeoIcon(name)
+data class GeoIconDrawable(override val name: String, @DrawableRes val icon: Int) : GeoIcon(name)

@@ -15,6 +15,11 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import timber.log.Timber
 
+private const val ICON_SIZE_IN_MIN = 1f
+private const val ICON_SIZE_IN_MAX = 5f
+private const val ICON_SIZE_OUT_MIN = .1f
+private const val ICON_SIZE_OUT_MAX = 1.2f
+
 @Suppress("unused")
 data class GeoMarker(
     val position: LatLng,
@@ -60,8 +65,8 @@ data class GeoMarker(
             val iconSize = iconSize ?: mapFloat(
                 SETTINGS_MARKER_SIZE_PREF.get(context.sharedPreferences)
                     .toFloat(),
-                1f, 5f,
-                .1f, 1.2f
+                ICON_SIZE_IN_MIN, ICON_SIZE_IN_MAX,
+                ICON_SIZE_OUT_MIN, ICON_SIZE_OUT_MAX
             )
             symbolOptions = symbolOptions
                 .withIconImage(iconImage)

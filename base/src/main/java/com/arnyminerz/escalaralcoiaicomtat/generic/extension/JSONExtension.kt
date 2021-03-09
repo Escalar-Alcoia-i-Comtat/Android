@@ -81,4 +81,3 @@ fun JSONArray.sort(keyName: String): JSONArray {
 }
 
 fun JSONArray.isEmpty(): Boolean = length() <= 0
-fun JSONArray.isNotEmpty(): Boolean = !isEmpty()

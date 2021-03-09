@@ -204,6 +204,3 @@ class Grade(val displayName: String) : Serializable {
         }
     }
 }
-
-fun String?.toGrade(): Grade? =
-    this?.let { Grade(it) }

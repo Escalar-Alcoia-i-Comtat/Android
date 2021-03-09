@@ -24,27 +24,24 @@ data class Pitch(
             return Pitch(PitchEndingData(inclination, descent))
         }
 
-        fun fromDB(obj: String): ArrayList<Pitch>{
+        fun fromDB(obj: String): ArrayList<Pitch> {
             val list = arrayListOf<Pitch>()
 
             if (obj.contains("/\r|\n/".toRegex()))
                 for (ln in obj
                     .replace("/\r/g".toRegex(), "")
                     .split("\n"))
-                    fromEndingDataString(ln)?.let{list.add(it)}
+                    fromEndingDataString(ln)?.let { list.add(it) }
             else
-                fromEndingDataString(obj)?.let{list.add(it)}
+                fromEndingDataString(obj)?.let { list.add(it) }
 
             return list
         }
     }
 
     fun getDisplayText(context: Context): String {
-        return context.getString(
-            R.string.path_ending_pitch,
-            endingData.orientation.toString(context),
+        return endingData.orientation.toString(context) + " " +
             endingData.rappel.toString(context)
-        )
     }
 
     @DrawableRes
