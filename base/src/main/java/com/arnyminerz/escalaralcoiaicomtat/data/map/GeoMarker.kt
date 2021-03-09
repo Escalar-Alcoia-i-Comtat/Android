@@ -14,12 +14,12 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import timber.log.Timber
 
-private const val ICON_SIZE_MULTIPLIER = .4f
+const val ICON_SIZE_MULTIPLIER = .4f
 
 @Suppress("unused")
 data class GeoMarker(
     val position: LatLng,
-    val iconSizeMultiplier: Float = ICON_SIZE_MULTIPLIER,
+    var iconSizeMultiplier: Float = ICON_SIZE_MULTIPLIER,
     val windowData: MapObjectWindowData? = null
 ) : Parcelable {
     val id = generateUUID()
