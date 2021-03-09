@@ -277,7 +277,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                                     windowData=title?.let { MapObjectWindowData(it, description) }
                                 )
                                 if (iconBitmap != null) {
-                                    m.withImage(mapStyle, iconBitmap)
+                                    m.withImage(iconBitmap)
                                     Timber.v("Marker has image!")
                                 }
                                 result.markers.add(m)

@@ -250,13 +250,19 @@ class MapHelper(private val mapView: MapView) {
         if (loadedKMLAddress == null)
             throw MapAnyDataToLoadException("Map doesn't have any loaded data. You may run loadKML, for example.")
 
-        Timber.v("Launching MapsActivity from KML \"$loadedKMLAddress\"")
+        val elements = arrayListOf<Parcelable>()
+        elements.addAll(markers)
+        elements.addAll(geometries)
         activity.startActivity(
-            Intent(activity, MapsActivity::class.java)
-                .putExtra(
-                    KML_ADDRESS_BUNDLE_EXTRA,
-                    loadedKMLAddress!!
-                )
+            Intent(activity, MapsActivity::class.java).apply {
+                if (elements.isEmpty()) {
+                    Timber.d("Passing to MapsActivity with kml address ($loadedKMLAddress).")
+                    putExtra(KML_ADDRESS_BUNDLE_EXTRA, loadedKMLAddress!!)
+                } else {
+                    Timber.d("Passing to MapsActivity with parcelable list.")
+                    putExtra(MAP_DATA_BUNDLE_EXTRA, elements)
+                }
+            }
         )
     }
 
@@ -401,7 +407,7 @@ class MapHelper(private val mapView: MapView) {
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @Throws(MapNotInitializedException::class)
-    fun add(element: Any) {
+    fun add(element: Parcelable) {
         if (element is GeoMarker)
             addMarker(element)
         else if (element is GeoGeometry)
@@ -458,7 +464,7 @@ class MapHelper(private val mapView: MapView) {
     @ExperimentalUnsignedTypes
     @Throws(MapNotInitializedException::class)
     fun display(context: Context) {
-        if (symbolManager == null || fillManager == null || lineManager == null)
+        if (symbolManager == null || fillManager == null || lineManager == null || style == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
         Timber.d("Displaying map features...")
@@ -473,7 +479,7 @@ class MapHelper(private val mapView: MapView) {
             fill?.let { fills.add(it) }
         }
 
-        val symbols = markers.addToMap(context, symbolManager!!)
+        val symbols = markers.addToMap(context, style!!, symbolManager!!)
         this.symbols.addAll(symbols)
     }
 

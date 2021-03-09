@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.ZonesViewHolder

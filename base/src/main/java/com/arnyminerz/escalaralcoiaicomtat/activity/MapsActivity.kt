@@ -9,6 +9,7 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -39,7 +40,6 @@ import org.w3c.dom.Element
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
-import java.io.Serializable
 import javax.xml.parsers.DocumentBuilderFactory
 
 private const val CURRENT_LOCATION_DEFAULT_ZOOM = 17.0
@@ -51,17 +51,17 @@ private const val PERMISSION_DIALOG_TAG = "PERM_TAG"
 private const val LOCATION_PERMISSION_REQUEST_CODE = 3 // This number was chosen by Dono
 private const val FOLDER_ACCESS_PERMISSION_REQUEST_CODE = 7
 
-const val KML_ADDRESS_BUNDLE_EXTRA = "KMLAddr"
-const val KMZ_FILE_BUNDLE_EXTRA = "KMZFle"
-const val MAP_DATA_BUNDLE_EXTRA = "MapDta"
-const val ZONE_NAME_BUNDLE_EXTRA = "ZneNm"
+val KML_ADDRESS_BUNDLE_EXTRA = IntentExtra<String>("KMLAddr")
+val KMZ_FILE_BUNDLE_EXTRA = IntentExtra<String>("KMZFle")
+val MAP_DATA_BUNDLE_EXTRA = IntentExtra<List<Parcelable>>("MapDta")
+val ZONE_NAME_BUNDLE_EXTRA = IntentExtra<String>("ZneNm")
 
 @ExperimentalUnsignedTypes
 class MapsActivity : NetworkChangeListenerFragmentActivity() {
 
     private var zoneName: String? = null
     private var kmlAddress: String? = null
-    private var mapData: Serializable? = null
+    private var mapData: List<Parcelable>? = null
     private var kmzFile: File? = null
 
     private lateinit var mapHelper: MapHelper
@@ -88,10 +88,10 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
 
         if (intent != null) {
-            kmlAddress = intent.getStringExtra(KML_ADDRESS_BUNDLE_EXTRA)
-            mapData = intent.getSerializableExtra(MAP_DATA_BUNDLE_EXTRA)
-            zoneName = intent.getStringExtra(ZONE_NAME_BUNDLE_EXTRA)
-            intent.getStringExtra(KMZ_FILE_BUNDLE_EXTRA)
+            kmlAddress = intent.getExtra(KML_ADDRESS_BUNDLE_EXTRA)
+            mapData = intent.getExtra(MAP_DATA_BUNDLE_EXTRA)
+            zoneName = intent.getExtra(ZONE_NAME_BUNDLE_EXTRA)
+            intent.getExtra(KMZ_FILE_BUNDLE_EXTRA)
                 .let { path -> if (path != null) kmzFile = File(path) }
         }
 
@@ -206,24 +206,9 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
                         binding.mapDownloadedImageView.visibility = View.VISIBLE
 
                     if (mapData != null) {
-                        Timber.v("Got map data")
-                        val items = mapData as ArrayList<*>
-                        when {
-                            items.size > 1 -> {
-                                Timber.v("  Multiple points")
-                                for (item in items)
-                                    mapHelper.add(item)
-                            }
-                            items.size > 0 -> items.first().let { item ->
-                                Timber.v("  Only one point")
-                                Timber.v("  Adding marker and moving camera")
-                                mapHelper.add(item)
-                            }
-                            else -> {
-                                Timber.e("  Could not get items")
-                                return@runOnUiThread
-                            }
-                        }
+                        Timber.v("Got map data, ${mapData!!.size} elements.")
+                        for (item in mapData!!)
+                            mapHelper.add(item)
                         mapHelper.display(this@MapsActivity)
                         mapHelper.center(MAP_LOAD_PADDING)
                     }
