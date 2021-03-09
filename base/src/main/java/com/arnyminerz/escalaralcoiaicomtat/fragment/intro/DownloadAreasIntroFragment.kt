@@ -63,6 +63,11 @@ class DownloadAreasIntroFragment : Fragment() {
                         val areasJSON = jsonArrayFromURL(AREAS_URL)
                         val areasString = areasJSON.toString()
 
+                        Timber.v("Creating areas parent dir...")
+                        val areasParent = areasDataFile.parentFile
+                        if (areasParent != null && !areasParent.exists() && !areasParent.mkdirs())
+                            Timber.e("Could not create areas parent dir")
+
                         Timber.v("Writing areas to \"${areasDataFile.path}\"...")
                         if (!areasDataFile.createNewFile())
                             Timber.e("Could not create areas file")

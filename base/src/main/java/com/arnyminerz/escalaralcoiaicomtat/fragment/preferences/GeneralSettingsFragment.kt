@@ -121,7 +121,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
 
         languagePreference?.setValueIndex(
             SETTINGS_LANGUAGE_PREF.get(requireContext().sharedPreferences)
-        ) ?: Timber.d("Could not set languagePreference default value")
+        )
 
         enableNearby?.isChecked = !(PREF_DISABLE_NEARBY.get(requireContext().sharedPreferences)) &&
                 (ContextCompat.checkSelfPermission(
@@ -131,8 +131,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
 
         val nearbyDistancePref = SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences).toString()
         Timber.d("Nearby distance: $nearbyDistancePref")
-        nearbyDistance?.setText(nearbyDistancePref)
-            ?: Timber.e("Could not set nearbyDistance default value")
+        nearbyDistance?.text = nearbyDistancePref
 
         markerSizePreference?.value = SETTINGS_MARKER_SIZE_PREF.get(requireContext().sharedPreferences)
         previewScalePreference?.value =
