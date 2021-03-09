@@ -16,3 +16,5 @@ formatting:
     ignoreDeprecated: true
     ignorePrivate: true
     ignoreOverridden: true
+  NoWildcardImports:
+    active: false

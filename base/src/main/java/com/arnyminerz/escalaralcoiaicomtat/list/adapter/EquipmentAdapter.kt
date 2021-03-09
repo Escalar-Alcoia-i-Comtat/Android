@@ -43,8 +43,7 @@ class EquipmentAdapter(
         showableSafes.clear()
         for (s in 0 until safes.count()) {
             val safe = safes[s]
-            if(safe != null)
-            if (safe.count > 0u) {
+            if (safe != null && safe.count > 0u) {
                 showableSafes.add(safe)
                 Timber.v("  Added $safe")
             }

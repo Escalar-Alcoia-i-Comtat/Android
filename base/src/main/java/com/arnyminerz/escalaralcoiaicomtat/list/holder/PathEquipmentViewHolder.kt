@@ -8,7 +8,7 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 
-class PathEquipmentViewHolder(view: View) : RecyclerView.ViewHolder(view){
+class PathEquipmentViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val layout: LinearLayout = view.findViewById(R.id.fixedEquipment_layout)
     val imageView: ImageView = view.findViewById(R.id.fixedEquipment_imageView)
     val textView: TextView = view.findViewById(R.id.fixedEquipment_textView)

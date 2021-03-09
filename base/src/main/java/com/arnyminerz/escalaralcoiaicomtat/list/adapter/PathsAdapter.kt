@@ -38,23 +38,21 @@ import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber
 
+const val ROTATION_A = 0f
+const val ROTATION_B = 180f
+const val ROTATION_PIVOT_X = 0.5f
+const val ROTATION_PIVOT_Y = 0.5f
+
+const val SMALL_CARD_HEIGHT = 57f
 
 @ExperimentalUnsignedTypes
 class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Activity) :
     RecyclerView.Adapter<SectorViewHolder>() {
-    companion object {
-        private const val smallCardHeight = 57f
-    }
-
     private val toggled = arrayListOf<Boolean>()
 
     init {
         val pathsSize = paths.size
-        try {
-            if (pathsSize > 0) paths.sort()
-        } catch (ex: NullPointerException) {
-            Timber.e(ex, "Could not sort paths.")
-        }
+        if (pathsSize > 0) paths.sort()
         Timber.d("Created with %d paths", pathsSize)
         (0 until pathsSize).forEach { _ -> toggled.add(false) }
     }
@@ -73,7 +71,7 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
         val params = cardView.layoutParams
         params.height = if (!toggled) TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
-            smallCardHeight,
+            SMALL_CARD_HEIGHT,
             activity.resources.displayMetrics
         ).toInt() else ViewGroup.LayoutParams.WRAP_CONTENT
         cardView.layoutParams = params
@@ -132,8 +130,6 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
                     }
                 } catch (_: NoInternetAccessException) {
                     Timber.w("Could not check if the path is blocked. No Internet.")
-                } catch (error: Exception) {
-                    Timber.e(error, "Could not check if path is blocked.")
                 }
             }
 
@@ -201,7 +197,7 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
 
                 holder.difficultyTextView.isSingleLine = true
                 holder.difficultyTextView.setText(
-                    path.grade().getSpannable(activity), //firstLineSpannable,
+                    path.grade().getSpannable(activity),
                     TextView.BufferType.SPANNABLE
                 )
 
@@ -209,12 +205,12 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
             }
 
             val rotate = RotateAnimation(
-                if (toggled) 0F else 180F,
-                if (toggled) 180F else 0F,
+                if (toggled) ROTATION_A else ROTATION_B,
+                if (toggled) ROTATION_B else ROTATION_A,
                 Animation.RELATIVE_TO_SELF,
-                0.5f,
+                ROTATION_PIVOT_X,
                 Animation.RELATIVE_TO_SELF,
-                0.5f
+                ROTATION_PIVOT_Y
             )
             rotate.duration = 300
             rotate.interpolator = LinearInterpolator()
@@ -236,18 +232,22 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
                 addChip(
                     R.string.safe_strings,
                     path.fixedSafesData.stringCount,
-                    holder.safesChipGroup,
-                    R.drawable.ic_icona_express,
-                    chipType = ChipType.SAFE,
+                    ChipData(
+                        holder.safesChipGroup,
+                        ChipType.SAFE,
+                        R.drawable.ic_icona_express
+                    ),
                     path = path
                 )
             else
                 addChip(
                     R.string.safe_strings_plural,
                     null,
-                    holder.safesChipGroup,
-                    R.drawable.ic_icona_express,
-                    chipType = ChipType.SAFE,
+                    ChipData(
+                        holder.safesChipGroup,
+                        ChipType.SAFE,
+                        R.drawable.ic_icona_express
+                    ),
                     path = path
                 )
 
@@ -259,27 +259,32 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
             addChip(
                 activity.resources.getStringArray(R.array.path_endings)[endingVal],
                 null,
-                holder.safesChipGroup,
-                ending.getImage(),
-                chipType = ChipType.ENDING,
+                ChipData(
+                    holder.safesChipGroup,
+                    ChipType.ENDING,
+                    ending.getImage()
+                ),
                 path = path
             )
         } else if (endings.size > 1) {
             addChip(
                 activity.resources.getString(R.string.path_ending_multiple),
                 null,
-                holder.safesChipGroup,
-                null,
-                chipType = ChipType.ENDING_MULTIPLE,
+                ChipData(
+                    holder.safesChipGroup,
+                    ChipType.ENDING_MULTIPLE
+                ),
                 path = path
             )
         } else
             addChip(
                 activity.resources.getString(R.string.path_ending_none),
                 null,
-                holder.safesChipGroup,
-                R.drawable.round_close_24,
-                chipType = ChipType.ENDING,
+                ChipData(
+                    holder.safesChipGroup,
+                    ChipType.ENDING,
+                    R.drawable.round_close_24
+                ),
                 path = path
             )
     }
@@ -288,21 +293,23 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
         SAFE, ENDING, ENDING_MULTIPLE, REQUIRED
     }
 
+    private data class ChipData(
+        val chipGroup: ChipGroup,
+        val chipType: ChipType,
+        @DrawableRes val icon: Int? = null
+    )
+
     @ExperimentalUnsignedTypes
     private fun addChip(
         @StringRes string: Int?,
         count: UInt?,
-        chipGroup: ChipGroup,
-        @DrawableRes icon: Int? = null,
-        chipType: ChipType,
+        chipData: ChipData,
         path: Path
     ) {
         addChip(
             if (string != null) activity.resources.getString(string) else null,
             count,
-            chipGroup,
-            icon,
-            chipType,
+            chipData,
             path
         )
     }
@@ -311,22 +318,22 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
     private fun addChip(
         string: String?,
         count: UInt?,
-        chipGroup: ChipGroup,
-        @DrawableRes icon: Int? = null,
-        chipType: ChipType,
+        chipData: ChipData,
         path: Path
     ) {
         val chip = Chip(activity)
-        val str = string ?: ""
-        chip.text = if (string != null) if (count == null) str else String.format(
-            str,
-            count.toString()
-        ) else ""
+        val icon = chipData.icon
+        val chipType = chipData.chipType
+        val chipGroup = chipData.chipGroup
+
+        chip.text = string?.let {
+            if (count == null) it
+            else String.format(it, count.toString())
+        } ?: ""
 
         chip.isClickable = true
-        if (icon != null) {
+        if (icon != null)
             chip.chipIcon = ContextCompat.getDrawable(activity, icon)
-        }
         chip.isCloseIconVisible = true
         chip.setOnCloseIconClickListener { chip.performClick() }
         chip.closeIcon = ContextCompat.getDrawable(activity, R.drawable.round_launch_24)

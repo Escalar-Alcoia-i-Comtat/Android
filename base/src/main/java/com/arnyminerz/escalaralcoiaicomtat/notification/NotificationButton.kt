@@ -4,4 +4,8 @@ import android.app.PendingIntent
 import androidx.annotation.DrawableRes
 import com.arnyminerz.escalaralcoiaicomtat.data.TranslatableString
 
-data class NotificationButton(@DrawableRes val icon: Int, val text: TranslatableString, val clickListener: PendingIntent)
+data class NotificationButton(
+    @DrawableRes val icon: Int,
+    val text: TranslatableString,
+    val clickListener: PendingIntent
+)

@@ -7,6 +7,8 @@ import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.*
 import com.arnyminerz.escalaralcoiaicomtat.network.ConnectivityProviderImpl
 
+private const val SLOW_CONNECTION_SPEED = 400 // kbps
+
 interface ConnectivityProvider {
     interface ConnectivityStateListener {
         fun onStateChange(state: NetworkState)
@@ -55,8 +57,7 @@ interface ConnectivityProvider {
             get() = networkCapabilities?.hasTransport(TRANSPORT_ETHERNET) ?: false
 
         val isConnectionFast: Boolean =
-            networkCapabilities?.linkDownstreamBandwidthKbps?.let { it >= 400 }
-                ?: false // Connection is fast with at least 400kbps
+            networkCapabilities?.linkDownstreamBandwidthKbps?.let { it >= SLOW_CONNECTION_SPEED } ?: false
     }
 
     companion object {

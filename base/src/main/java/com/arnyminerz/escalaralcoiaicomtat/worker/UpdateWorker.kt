@@ -27,6 +27,7 @@ class UpdateWorker(appContext: Context, workerParams: WorkerParameters) :
         Timber.d("Getting areas...")
         val areas = loadAreasFromCache(applicationContext)
         var shouldUpdate = false
+        var result = Result.success()
         for (area in areas)
             if (area.updateAvailable()) {
                 shouldUpdate = true
@@ -39,29 +40,30 @@ class UpdateWorker(appContext: Context, workerParams: WorkerParameters) :
                 val cacheFile = IntroActivity.cacheFile(applicationContext)
                 if (!cacheFile.deleteIfExists()) {
                     Timber.e("Could not delete cache file.")
-                    return Result.failure(
+                    result = Result.failure(
                         Data.Builder()
                             .putString(ERROR_NAME_KEY, "delete-failed")
                             .putString(ERROR_MESSAGE_KEY, "Could not delete cache file")
                             .build()
                     )
+                } else {
+                    Timber.d("Downloading new areas...")
+                    DownloadAreasIntroFragment.downloadAreasCache(
+                        applicationContext,
+                        ConnectivityProvider.NetworkState.CONNECTED_NO_WIFI,
+                        null, null
+                    )
+                    Timber.v("New areas downloaded successfully")
                 }
-                Timber.d("Downloading new areas...")
-                DownloadAreasIntroFragment.downloadAreasCache(
-                    applicationContext,
-                    ConnectivityProvider.NetworkState.CONNECTED_NO_WIFI,
-                    null, null
-                )
-                Timber.v("New areas downloaded successfully")
             } catch (e: IOException) {
                 // Could not create data dir
-                return Result.failure(
+                result = Result.failure(
                     Data.Builder()
                         .putString(ERROR_NAME_KEY, "create-failed")
                         .putString(ERROR_MESSAGE_KEY, "Could not create data dir")
                         .build()
                 )
             }
-        return Result.success()
+        return result
     }
 }

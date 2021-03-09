@@ -45,7 +45,6 @@ class ImageLoadParameters {
         return this
     }
 
-
     fun withResultImageScale(scale: Float?): ImageLoadParameters {
         this.resultImageScale = scale
         return this

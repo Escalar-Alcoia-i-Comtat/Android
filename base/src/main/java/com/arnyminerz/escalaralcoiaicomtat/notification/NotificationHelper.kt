@@ -189,7 +189,7 @@ fun updateNotification(
         builder.setProgress(progress.value, progress.max, false)
 
     actions?.let {
-        for(action in it)
+        for (action in it)
             builder.addAction(action.icon, action.text.toString(), action.clickListener)
     }
 

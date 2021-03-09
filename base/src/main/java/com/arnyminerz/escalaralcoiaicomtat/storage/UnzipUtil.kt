@@ -6,11 +6,9 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.zip.ZipInputStream
 
-class UnzipUtil(private val zipFile: File, private val targetLocation: File) {
-    companion object {
-        private const val BUFFER_SIZE = 4096
-    }
+private const val BUFFER_SIZE = 4096
 
+class UnzipUtil(private val zipFile: File, private val targetLocation: File) {
     fun unzip() {
         if (!targetLocation.exists()) {
             targetLocation.mkdir()

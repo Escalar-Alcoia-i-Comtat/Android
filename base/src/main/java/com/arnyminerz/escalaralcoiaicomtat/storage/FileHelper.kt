@@ -8,6 +8,8 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 
+const val KBYTE = 1024
+
 fun filesDir(context: Context): File = context.filesDir
 fun dataDir(context: Context): File = File(filesDir(context), "data")
 
@@ -18,7 +20,7 @@ fun storeFile(file: File, stream: InputStream) {
     file.parentFile?.mkdirs()
     val output: OutputStream = FileOutputStream(file)
 
-    val data = ByteArray(1024)
+    val data = ByteArray(KBYTE)
     var count: Int
 
     while (stream.read(data).also { count = it } != -1)

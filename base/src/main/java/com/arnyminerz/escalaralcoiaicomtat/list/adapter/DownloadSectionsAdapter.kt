@@ -76,8 +76,7 @@ class DownloadSectionsAdapter(
                         // If the download has already been started
                         // This will never be caught, since sectionDownloadStatus is NOT_DOWNLOADED, but who knows
                         mainActivity.toast(R.string.message_already_downloading)
-                    }
-                else if (section.isDownloaded(mainActivity) == DownloadStatus.DOWNLOADING)
+                    } else if (section.isDownloaded(mainActivity) == DownloadStatus.DOWNLOADING)
                     mainActivity.toast(R.string.message_already_downloading)
             }
             visibility(downloadProgressBar, sectionDownloadStatus == DownloadStatus.DOWNLOADING)
@@ -85,7 +84,9 @@ class DownloadSectionsAdapter(
             visibility(deleteButton, sectionDownloadStatus == DownloadStatus.DOWNLOADED)
             visibility(viewButton, sectionDownloadStatus == DownloadStatus.DOWNLOADED)
 
-            Timber.v("Section is Zone? ${section is Zone} Area? ${section is Area}. Type: ${section.javaClass.simpleName}")
+            Timber.v(
+                "Section is Zone? ${section is Zone} Area? ${section is Area}. Type: ${section.javaClass.simpleName}"
+            )
 
             visibility(
                 toggleButton,

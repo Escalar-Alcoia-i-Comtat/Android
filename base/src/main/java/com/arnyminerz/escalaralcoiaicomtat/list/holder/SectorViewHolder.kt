@@ -18,8 +18,8 @@ class SectorViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val heightTextView: TextView = view.findViewById(R.id.height_textView)
 
     val warningImageView: ImageView = view.findViewById(R.id.alert_imageView)
-    val warningTextView : TextView = view.findViewById(R.id.alert_textView)
-    val warningCardView : CardView = view.findViewById(R.id.alert_cardView)
+    val warningTextView: TextView = view.findViewById(R.id.alert_textView)
+    val warningCardView: CardView = view.findViewById(R.id.alert_cardView)
     val warningNameImageView: ImageView = view.findViewById(R.id.alert_name_imageView)
 
     val toggleImageButton: ImageButton = view.findViewById(R.id.toggle_imageButton)

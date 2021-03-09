@@ -6,7 +6,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 
-class ArtifoEndingPitchViewHolder(view: View): RecyclerView.ViewHolder(view) {
+class ArtifoEndingPitchViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val pitchTextView: TextView = view.findViewById(R.id.pitch_textView)
     val pitchRappelImageView: ImageView = view.findViewById(R.id.pitchRappel_imageView)
     val pitchEndingImageView: ImageView = view.findViewById(R.id.pitchEnding_imageView)
