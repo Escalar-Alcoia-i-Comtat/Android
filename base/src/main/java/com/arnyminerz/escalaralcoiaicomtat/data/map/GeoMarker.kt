@@ -22,7 +22,11 @@ const val ICON_SIZE_MULTIPLIER = .35f
 
 private const val BITMAP_COMPRESSION = 100
 
-private fun extractUUID(position: LatLng, iconSizeMultiplier: Float, windowData: MapObjectWindowData?): String {
+private fun extractUUID(
+    position: LatLng,
+    iconSizeMultiplier: Float,
+    windowData: MapObjectWindowData?
+): String {
     val text = position.latitude.toString() + position.longitude.toString() +
             iconSizeMultiplier.toString() + windowData?.title
     return Base64.encodeToString(text.toByteArray(), Base64.DEFAULT)
@@ -33,10 +37,10 @@ class GeoMarker(
     val position: LatLng,
     id: String? = null,
     var iconSizeMultiplier: Float = ICON_SIZE_MULTIPLIER,
-    val windowData: MapObjectWindowData? = null
+    val windowData: MapObjectWindowData? = null,
+    private var icon: GeoIcon? = null
 ) : Parcelable {
     val id = id ?: extractUUID(position, iconSizeMultiplier, windowData)
-    private var icon: GeoIcon? = null
     private var bitmap: Bitmap? = null
     private var iconLoaded: Boolean = false
 
@@ -49,15 +53,14 @@ class GeoMarker(
                 parcel.readString()!!,
                 parcel.readString()
             )
-        else null
-    ) {
-        icon = parcel.readSerializable() as GeoIcon?
-    }
+        else null,
+        parcel.readParcelable<GeoIcon>(GeoIcon::class.java.classLoader),
+    )
 
     fun withImage(bitmap: Bitmap): GeoMarker {
         Timber.d("Setting image for GeoMarker...")
         this.bitmap = bitmap
-        icon = GeoIcon(id)
+        icon = GeoIconGeneric(id)
         return this
     }
 
@@ -81,7 +84,11 @@ class GeoMarker(
             else {
                 val stream = imgFile.outputStream()
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-                    bitmap!!.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, BITMAP_COMPRESSION, stream)
+                    bitmap!!.compress(
+                        Bitmap.CompressFormat.WEBP_LOSSLESS,
+                        BITMAP_COMPRESSION,
+                        stream
+                    )
                 else
                     bitmap!!.compress(Bitmap.CompressFormat.WEBP, BITMAP_COMPRESSION, stream)
                 stream.close()
@@ -103,7 +110,8 @@ class GeoMarker(
 
         if (icon != null && iconLoaded) {
             Timber.d("Marker $id has an icon named ${icon!!.name}")
-            val iconSize = SETTINGS_MARKER_SIZE_PREF.get(context.sharedPreferences) * iconSizeMultiplier
+            val iconSize =
+                SETTINGS_MARKER_SIZE_PREF.get(context.sharedPreferences) * iconSizeMultiplier
             symbolOptions = symbolOptions
                 .withIconImage(icon!!.name)
                 .withIconSize(iconSize)
@@ -122,6 +130,7 @@ class GeoMarker(
         dest.writeParcelable(position, 0)
         dest.writeString(id)
         dest.writeFloat(iconSizeMultiplier)
+        dest.writeParcelable(icon, 0)
         if (windowData == null)
             dest.writeInt(0)
         else {
@@ -129,7 +138,6 @@ class GeoMarker(
             dest.writeString(windowData.title)
             windowData.message?.let { dest.writeString(it) }
         }
-        icon?.let { dest.writeSerializable(it) }
     }
 
     companion object CREATOR : Parcelable.Creator<GeoMarker> {
@@ -147,7 +155,11 @@ fun Symbol.getWindow(): MapObjectWindowData =
     load(this)
 
 @ExperimentalUnsignedTypes
-fun Collection<GeoMarker>.addToMap(context: Context, style: Style, symbolManager: SymbolManager): List<Symbol> {
+fun Collection<GeoMarker>.addToMap(
+    context: Context,
+    style: Style,
+    symbolManager: SymbolManager
+): List<Symbol> {
     val symbols = arrayListOf<Symbol>()
     for (marker in this) {
         val symbol = marker.addToMap(context, style, symbolManager) ?: continue

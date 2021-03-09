@@ -90,12 +90,13 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
 
         if (intent != null) {
             val markersList = intent.getParcelableArrayExtra(MAP_MARKERS_BUNDLE_EXTRA)
+            if (markersList != null)
+                for (m in markersList){
+                    val marker = m as GeoMarker?
+                    if (marker != null)
+                        markers.add(marker)
+                }
             val geometriesList = intent.getParcelableArrayExtra(MAP_GEOMETRIES_BUNDLE_EXTRA)
-            markersList?.let {
-                for (m in it)
-                    if (m is GeoMarker)
-                        markers.add(m)
-            }
             geometriesList?.let {
                 for (g in it)
                     if (g is GeoGeometry)
