@@ -129,11 +129,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                             Timber.d("Adding zone #${zone.id}. Creating marker...")
                             var marker = GeoMarker(
                                 zoneLocation,
-                                null,
-                                MapObjectWindowData(
-                                    zone.displayName,
-                                    null
-                                )
+                                windowData=MapObjectWindowData(zone.displayName, null)
                             )
                             Timber.d("Setting image...")
                             marker = marker.withImage(ICON_WAYPOINT_ESCALADOR_BLANC)

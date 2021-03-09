@@ -14,7 +14,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import timber.log.Timber
 
-const val ICON_SIZE_MULTIPLIER = .4f
+const val ICON_SIZE_MULTIPLIER = .35f
 
 @Suppress("unused")
 data class GeoMarker(

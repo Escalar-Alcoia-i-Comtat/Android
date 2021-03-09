@@ -274,10 +274,7 @@ class KMLLoader(private val kmlAddress: String?, private val kmzFile: File?) {
                                 Timber.v("New Marker: $title")
                                 val m = GeoMarker(
                                     latLng,
-                                    null,
-                                    if (title != null)
-                                        MapObjectWindowData(title, description)
-                                    else null
+                                    windowData=title?.let { MapObjectWindowData(it, description) }
                                 )
                                 if (iconBitmap != null) {
                                     m.withImage(mapStyle, iconBitmap)

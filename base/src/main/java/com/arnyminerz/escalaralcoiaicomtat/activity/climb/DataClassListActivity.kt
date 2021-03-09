@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 import android.os.Bundle
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
@@ -19,7 +20,9 @@ const val DEFAULT_LON = -0.4799751
 const val DEFAULT_ZOOM = 12.5
 
 @ExperimentalUnsignedTypes
-abstract class DataClassListActivity<T : DataClass<*, *>> : NetworkChangeListenerActivity() {
+abstract class DataClassListActivity<T : DataClass<*, *>>(
+    private val iconSizeMultiplier: Float = ICON_SIZE_MULTIPLIER
+) : NetworkChangeListenerActivity() {
     protected lateinit var binding: LayoutListBinding
     protected lateinit var dataClass: T
     private lateinit var mapHelper: MapHelper
@@ -32,6 +35,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>> : NetworkChangeListene
         setContentView(view)
 
         mapHelper = MapHelper(binding.map)
+            .withIconSizeMultiplier(iconSizeMultiplier)
         mapHelper.onCreate(savedInstanceState)
     }
 
