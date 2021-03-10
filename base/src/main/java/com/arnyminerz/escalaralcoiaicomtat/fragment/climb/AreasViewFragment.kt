@@ -129,7 +129,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                             Timber.d("Adding zone #${zone.id}. Creating marker...")
                             var marker = GeoMarker(
                                 zoneLocation,
-                                windowData=MapObjectWindowData(zone.displayName, null)
+                                windowData = MapObjectWindowData(zone.displayName, null)
                             )
                             Timber.d("Setting image...")
                             marker = marker.withImage(ICON_WAYPOINT_ESCALADOR_BLANC)
@@ -176,7 +176,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             return
 
         if (locationManager == null)
-            locationManager = requireContext().applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
+            locationManager =
+                requireContext().applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
 
         if (PermissionsManager.areLocationPermissionsGranted(requireContext())) {
             Timber.v("Adding location provider listener...")
@@ -202,21 +203,21 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             mapHelper
                 .withControllable(false)
                 .loadMap(requireContext()) { _, map, _ ->
-                Timber.d("Map is ready.")
+                    Timber.d("Map is ready.")
 
-                map.addOnMapClickListener {
-                    Timber.v("Starting MapActivity...")
-                    mapHelper.showMapsActivity(requireContext())
-                    true
-                }
-                mapHelper.addSymbolClickListener {
-                    Timber.v("Starting MapActivity...")
-                    mapHelper.showMapsActivity(requireContext())
-                    true
-                }
+                    map.addOnMapClickListener {
+                        Timber.v("Starting MapActivity...")
+                        mapHelper.showMapsActivity(requireContext())
+                        true
+                    }
+                    mapHelper.addSymbolClickListener {
+                        Timber.v("Starting MapActivity...")
+                        mapHelper.showMapsActivity(requireContext())
+                        true
+                    }
 
-                requestLocationUpdates()
-            }
+                    requestLocationUpdates()
+                }
 
             Timber.d("Initializing area adapter for AreasViewFragment...")
             val adapter = AreaAdapter(requireContext(), areaClickListener)
