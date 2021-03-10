@@ -23,7 +23,8 @@ const val DEFAULT_ZOOM = 12.5
 
 @ExperimentalUnsignedTypes
 abstract class DataClassListActivity<T : DataClass<*, *>>(
-    private val iconSizeMultiplier: Float = ICON_SIZE_MULTIPLIER
+    private val iconSizeMultiplier: Float = ICON_SIZE_MULTIPLIER,
+    private val overrideLoadedMapData: Boolean = false,
 ) : NetworkChangeListenerActivity() {
     protected lateinit var binding: LayoutListBinding
     protected lateinit var dataClass: T
@@ -117,7 +118,9 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                     }
 
                     map.addOnMapClickListener {
-                        mapHelper.showMapsActivity(this@DataClassListActivity, true)
+                        val intent = mapHelper.mapsActivityIntent(this, overrideLoadedMapData)
+                        Timber.v("Starting MapsActivity...")
+                        startActivity(intent)
                         true
                     }
                 }

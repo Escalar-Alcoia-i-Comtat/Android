@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.generic
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcel
 import android.os.Parcelable
 import androidx.core.app.ShareCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -74,4 +75,16 @@ inline fun <reified T> Intent.getExtra(key: IntentExtra<T>, default: T): T {
     return if (result is T)
         result
     else default
+}
+
+/**
+ * Gets the intent's size in bytes
+ * @return The Intent's size in bytes
+ */
+fun Intent.getSize(): Int {
+    val parcel = Parcel.obtain()
+    parcel.writeBundle(extras)
+    val size: Int = parcel.dataSize()
+    parcel.recycle()
+    return size
 }

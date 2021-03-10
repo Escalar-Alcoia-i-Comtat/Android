@@ -132,12 +132,14 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     val zoneLocation = zone.position ?: continue
                     if (zoneLocation.distanceTo(position) <= requiredDistance) {
                         Timber.d("Adding zone #${zone.id}. Creating marker...")
-                        var marker = GeoMarker(
+                        val marker = GeoMarker(
                             zoneLocation,
                             windowData = MapObjectWindowData(zone.displayName, null)
-                        )
-                        Timber.d("Setting image...")
-                        marker = marker.withImage(ICON_WAYPOINT_ESCALADOR_BLANC)
+                        ).apply {
+                            val icon = ICON_WAYPOINT_ESCALADOR_BLANC.toGeoIcon(requireContext())
+                            if (icon != null)
+                                withImage(icon)
+                        }
                         Timber.d("Adding marker to map")
                         mapHelper.add(marker)
                     }
@@ -171,13 +173,15 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 Timber.d("Map is ready.")
 
                 map.addOnMapClickListener {
-                    Timber.v("Starting MapActivity...")
-                    mapHelper.showMapsActivity(requireContext())
+                    val intent = mapHelper.mapsActivityIntent(requireContext())
+                    Timber.v("Starting MapsActivity...")
+                    startActivity(intent)
                     true
                 }
                 mapHelper.addSymbolClickListener {
-                    Timber.v("Starting MapActivity...")
-                    mapHelper.showMapsActivity(requireContext())
+                    val intent = mapHelper.mapsActivityIntent(requireContext())
+                    Timber.v("Starting MapsActivity...")
+                    startActivity(intent)
                     true
                 }
             }

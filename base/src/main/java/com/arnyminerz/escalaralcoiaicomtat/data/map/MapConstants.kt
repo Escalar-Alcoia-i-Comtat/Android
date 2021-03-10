@@ -6,7 +6,7 @@ const val LOCATION_UPDATE_MIN_TIME: Long = 10 * 1000 // 10 seconds
 const val LOCATION_UPDATE_MIN_DIST: Float = 1.5f // 1.5 meters
 
 val ICON_WAYPOINT_ESCALADOR_BLANC =
-    GeoIconDrawable("ic_waypoint_escalador_blanc", R.drawable.ic_waypoint_escalador_blanc)
+    GeoIconConstant("ic_waypoint_escalador_blanc", R.drawable.ic_waypoint_escalador_blanc)
 
 val ICONS = listOf(ICON_WAYPOINT_ESCALADOR_BLANC)
 

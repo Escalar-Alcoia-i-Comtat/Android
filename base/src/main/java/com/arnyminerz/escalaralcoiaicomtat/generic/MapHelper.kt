@@ -93,13 +93,40 @@ class MapHelper(private val mapView: MapView) {
 
     fun onCreate(savedInstanceState: Bundle?) = mapView.onCreate(savedInstanceState)
 
-    fun onStart() = mapView.onStart()
-    fun onResume() = mapView.onResume()
-    fun onPause() = mapView.onPause()
-    fun onStop() = mapView.onStop()
-    fun onSaveInstanceState(outState: Bundle) = mapView.onSaveInstanceState(outState)
-    fun onLowMemory() = mapView.onLowMemory()
-    fun onDestroy() = mapView.onDestroy()
+    fun onStart() {
+        mapView.onStart()
+        Timber.d("onStart()")
+    }
+
+    fun onResume() {
+        mapView.onResume()
+        Timber.d("onResume()")
+    }
+
+    fun onPause() {
+        mapView.onPause()
+        Timber.d("onPause()")
+    }
+
+    fun onStop() {
+        mapView.onStop()
+        Timber.d("onStop()")
+    }
+
+    fun onSaveInstanceState(outState: Bundle) {
+        mapView.onSaveInstanceState(outState)
+        Timber.d("onSaveInstanceState(outState)")
+    }
+
+    fun onLowMemory() {
+        mapView.onLowMemory()
+        Timber.d("onLowMemory()")
+    }
+
+    fun onDestroy() {
+        mapView.onDestroy()
+        Timber.d("onDestroy()")
+    }
 
     fun withStartingPosition(startingPosition: LatLng?, zoom: Double = DEFAULT_ZOOM): MapHelper {
         if (startingPosition != null)
@@ -135,14 +162,16 @@ class MapHelper(private val mapView: MapView) {
         lineManager = LineManager(mapView, map, style)
 
         Timber.d("Configuring SymbolManager...")
-        symbolManager!!.iconAllowOverlap = true
-        symbolManager!!.addClickListener {
-            Timber.d("Clicked symbol!")
-            var anyFalse = false
-            for (list in symbolClickListeners)
-                if (!list(it))
-                    anyFalse = true
-            !anyFalse
+        symbolManager!!.apply {
+            iconAllowOverlap = true
+            addClickListener {
+                Timber.d("Clicked symbol!")
+                var anyFalse = false
+                for (list in symbolClickListeners)
+                    if (!list(it))
+                        anyFalse = true
+                !anyFalse
+            }
         }
         loadDefaultIcons(context)
 
@@ -170,7 +199,7 @@ class MapHelper(private val mapView: MapView) {
         for (icon in ICONS) {
             val drawable = ResourcesCompat.getDrawable(
                 context.resources,
-                icon.icon,
+                icon.drawable,
                 context.theme
             )
             if (drawable == null) {
@@ -195,14 +224,14 @@ class MapHelper(private val mapView: MapView) {
     fun loadMap(
         context: Context,
         style: String = Style.SATELLITE,
-        callback: MapHelper.(mapView: MapView, map: MapboxMap, style: Style) -> Unit
+        callback: (mapView: MapView, map: MapboxMap, style: Style) -> Unit
     ): MapHelper {
         Timber.d("Loading map...")
         mapView.getMapAsync { map ->
             Timber.d("Setting map style...")
             map.setStyle(style) { style ->
                 mapSetup(context, map, style)
-                callback(this, mapView, map, style)
+                callback(mapView, map, style)
             }
         }
 
@@ -219,7 +248,11 @@ class MapHelper(private val mapView: MapView) {
      * @author Arnau Mora
      * @return A MapFeatures object with all the loaded data
      */
-    @Throws(FileNotFoundException::class, NoInternetAccessException::class, MapNotInitializedException::class)
+    @Throws(
+        FileNotFoundException::class,
+        NoInternetAccessException::class,
+        MapNotInitializedException::class
+    )
     @ExperimentalUnsignedTypes
     fun loadKML(
         activity: FragmentActivity,
@@ -252,7 +285,7 @@ class MapHelper(private val mapView: MapView) {
     }
 
     /**
-     * Starts the MapsActivity through the specified context.
+     * Generates an intent for launching the MapsActivity
      * @author Arnau Mora
      * @param context The context to launch from
      * @param overrideLoadedValues If true, the loader markers and geometries will be ignored, and
@@ -262,27 +295,40 @@ class MapHelper(private val mapView: MapView) {
      */
     @Throws(MapAnyDataToLoadException::class)
     @ExperimentalUnsignedTypes
-    fun showMapsActivity(context: Context, overrideLoadedValues: Boolean = false) {
+    fun mapsActivityIntent(context: Context, overrideLoadedValues: Boolean = false): Intent {
         val loadedElements = markers.isNotEmpty() || geometries.isNotEmpty()
 
         if (loadedKMLAddress == null && !loadedElements)
             throw MapAnyDataToLoadException("Map doesn't have any loaded data. You may run loadKML, for example.")
 
-        context.startActivity(
-            Intent(context, MapsActivity::class.java).apply {
-                if (loadedElements && !overrideLoadedValues) {
-                    Timber.v("Passing to MapsActivity with parcelable list.")
-                    Timber.d("  Putting ${markers.size} markers...")
-                    putExtra(MAP_MARKERS_BUNDLE_EXTRA, markers.toTypedArray())
-                    Timber.d("  Putting ${geometries.size} geometries...")
-                    putExtra(MAP_GEOMETRIES_BUNDLE_EXTRA, geometries.toTypedArray())
-                } else {
-                    Timber.d("Passing to MapsActivity with kml address ($loadedKMLAddress).")
-                    putExtra(KML_ADDRESS_BUNDLE_EXTRA, loadedKMLAddress!!)
-                }
-                putExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA, markerSizeMultiplier)
+        Timber.d("Preparing MapsActivity intent...")
+        val elementsIntent = Intent(context, MapsActivity::class.java).apply {
+            Timber.v("Passing to MapsActivity with parcelable list.")
+            val markersCount = markers.size
+            if (markersCount > 0) {
+                Timber.d("  Putting $markersCount markers...")
+                putParcelableArrayListExtra(MAP_MARKERS_BUNDLE_EXTRA, markers)
             }
-        )
+            val geometriesCount = geometries.size
+            if (geometriesCount > 0) {
+                Timber.d("  Putting $geometriesCount geometries...")
+                putParcelableArrayListExtra(MAP_GEOMETRIES_BUNDLE_EXTRA, geometries)
+            }
+            putExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA, markerSizeMultiplier)
+        }
+        val kmlIntent = Intent(context, MapsActivity::class.java).apply {
+            Timber.d("Passing to MapsActivity with kml address ($loadedKMLAddress).")
+            putExtra(KML_ADDRESS_BUNDLE_EXTRA, loadedKMLAddress!!)
+            putExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA, markerSizeMultiplier)
+        }
+        val elementsIntentSize = elementsIntent.getSize()
+        val size = humanReadableByteCountBin(elementsIntentSize.toLong())
+        Timber.d("Elements Intent size: $size")
+        // The size check ensures that TransactionTooLargeException is not thrown
+        return if (loadedElements && !overrideLoadedValues && elementsIntentSize < MBYTE / 2)
+            elementsIntent
+        else
+            kmlIntent
     }
 
     /**
