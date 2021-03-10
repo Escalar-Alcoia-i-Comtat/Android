@@ -137,7 +137,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                             windowData = MapObjectWindowData(zone.displayName, null)
                         )
                         Timber.d("Setting image...")
-                        marker = marker.withImage(ICON_WAYPOINT_ESCALADOR_BLANC)
+                        marker = marker.withImage(resources, ICON_WAYPOINT_ESCALADOR_BLANC)
                         Timber.d("Adding marker to map")
                         mapHelper.add(marker)
                     }
