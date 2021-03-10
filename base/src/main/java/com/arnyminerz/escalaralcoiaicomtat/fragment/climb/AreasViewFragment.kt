@@ -194,10 +194,9 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 requireContext().applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
 
         if (PermissionsManager.areLocationPermissionsGranted(requireContext())) {
-            Timber.v("Adding location provider listener...")
             Timber.d("Requesting location updates...")
             locationManager!!.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
+                LocationManager.NETWORK_PROVIDER,
                 LOCATION_UPDATE_MIN_TIME,
                 LOCATION_UPDATE_MIN_DIST,
                 locationCallback,
