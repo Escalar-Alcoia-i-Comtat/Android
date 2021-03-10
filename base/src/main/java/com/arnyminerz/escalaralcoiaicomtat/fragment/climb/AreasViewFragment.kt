@@ -65,7 +65,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         } else if (!nearbyEnabled) {
             error = true
             Timber.w("Could not update Nearby Zones: Nearby Zones not enabled")
-        }
+        } else
+            requestLocationUpdates()
 
         if (!isResumed) {
             error = true
@@ -162,9 +163,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         mapHelper = MapHelper(binding.mapView)
         mapHelper.onCreate(savedInstanceState)
 
-        Timber.d("Getting nearby zones disable pref...")
-        val nearbyEnabled = !PREF_DISABLE_NEARBY.get(requireContext().sharedPreferences)
-
         Timber.d("Loading map...")
         mapHelper
             .withControllable(false)
@@ -182,9 +180,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     mapHelper.showMapsActivity(requireContext())
                     true
                 }
-
-                if (nearbyEnabled)
-                    requestLocationUpdates()
             }
     }
 
