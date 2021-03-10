@@ -139,9 +139,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
                 }
             }
-        } else {
+        } else
             Timber.w("Could not update Nearby Zones: MapHelper not loaded")
-        }
     }
 
     override fun onAttach(context: Context) {
@@ -158,8 +157,30 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     ): View {
         _binding = FragmentViewAreasBinding.inflate(inflater, container, false)
 
+        Timber.d("Initializing MapHelper...")
         mapHelper = MapHelper(binding.mapView)
         mapHelper.onCreate(savedInstanceState)
+
+        Timber.d("Loading map...")
+        mapHelper
+            .withControllable(false)
+            .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE))
+            .loadMap(requireContext()) { _, map, _ ->
+                Timber.d("Map is ready.")
+
+                map.addOnMapClickListener {
+                    Timber.v("Starting MapActivity...")
+                    mapHelper.showMapsActivity(requireContext())
+                    true
+                }
+                mapHelper.addSymbolClickListener {
+                    Timber.v("Starting MapActivity...")
+                    mapHelper.showMapsActivity(requireContext())
+                    true
+                }
+
+                requestLocationUpdates()
+            }
 
         return binding.root
     }
@@ -192,27 +213,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             Timber.v("Refreshing areas...")
             binding.nearbyZonesCardView.hide()
             binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
-
-            Timber.d("Loading map...")
-            mapHelper
-                .withControllable(false)
-                .move(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), animate = false)
-                .loadMap(requireContext()) { _, map, _ ->
-                    Timber.d("Map is ready.")
-
-                    map.addOnMapClickListener {
-                        Timber.v("Starting MapActivity...")
-                        mapHelper.showMapsActivity(requireContext())
-                        true
-                    }
-                    mapHelper.addSymbolClickListener {
-                        Timber.v("Starting MapActivity...")
-                        mapHelper.showMapsActivity(requireContext())
-                        true
-                    }
-
-                    requestLocationUpdates()
-                }
 
             Timber.d("Initializing area adapter for AreasViewFragment...")
             val adapter = AreaAdapter(requireContext(), areaClickListener)
