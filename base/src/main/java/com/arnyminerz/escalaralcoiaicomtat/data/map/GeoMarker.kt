@@ -45,16 +45,11 @@ class GeoMarker(
     private var iconLoaded: Boolean = false
 
     constructor(parcel: Parcel) : this(
-        parcel.readParcelable<LatLng>(LatLng::class.java.classLoader)!!,
+        parcel.readParcelable(LatLng::class.java.classLoader)!!,
         parcel.readString()!!,
         parcel.readFloat(),
-        if (parcel.readInt() == 1)
-            MapObjectWindowData(
-                parcel.readString()!!,
-                parcel.readString()
-            )
-        else null,
-        parcel.readParcelable<GeoIcon>(GeoIcon::class.java.classLoader),
+        parcel.readParcelable(MapObjectWindowData::class.java.classLoader),
+        parcel.readParcelable(GeoIcon::class.java.classLoader),
     )
 
     fun withImage(bitmap: Bitmap): GeoMarker {
@@ -130,14 +125,8 @@ class GeoMarker(
         dest.writeParcelable(position, 0)
         dest.writeString(id)
         dest.writeFloat(iconSizeMultiplier)
+        dest.writeParcelable(windowData, 0)
         dest.writeParcelable(icon, 0)
-        if (windowData == null)
-            dest.writeInt(0)
-        else {
-            dest.writeInt(1)
-            dest.writeString(windowData.title)
-            windowData.message?.let { dest.writeString(it) }
-        }
     }
 
     companion object CREATOR : Parcelable.Creator<GeoMarker> {
