@@ -31,7 +31,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
@@ -211,7 +210,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     fun refreshAreas() {
         if (context != null && isResumed) {
             Timber.v("Refreshing areas...")
-            binding.nearbyZonesCardView.hide()
             binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
 
             Timber.d("Initializing area adapter for AreasViewFragment...")
