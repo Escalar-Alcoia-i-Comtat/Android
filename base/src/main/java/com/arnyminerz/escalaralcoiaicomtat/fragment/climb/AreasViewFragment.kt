@@ -173,13 +173,15 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 Timber.d("Map is ready.")
 
                 map.addOnMapClickListener {
-                    Timber.v("Starting MapActivity...")
-                    mapHelper.showMapsActivity(requireContext())
+                    val intent = mapHelper.mapsActivityIntent(requireContext())
+                    Timber.v("Starting MapsActivity...")
+                    startActivity(intent)
                     true
                 }
                 mapHelper.addSymbolClickListener {
-                    Timber.v("Starting MapActivity...")
-                    mapHelper.showMapsActivity(requireContext())
+                    val intent = mapHelper.mapsActivityIntent(requireContext())
+                    Timber.v("Starting MapsActivity...")
+                    startActivity(intent)
                     true
                 }
             }

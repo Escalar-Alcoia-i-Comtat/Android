@@ -85,22 +85,16 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
         setContentView(view)
 
         // Hi from march of 2021
+        Timber.v("Getting Mapbox instance...")
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
 
         if (intent != null) {
-            val markersList = intent.getParcelableArrayExtra(MAP_MARKERS_BUNDLE_EXTRA)
-            if (markersList != null)
-                for (m in markersList) {
-                    val marker = m as GeoMarker?
-                    if (marker != null)
-                        markers.add(marker)
-                }
-            val geometriesList = intent.getParcelableArrayExtra(MAP_GEOMETRIES_BUNDLE_EXTRA)
-            geometriesList?.let {
-                for (g in it)
-                    if (g is GeoGeometry)
-                        geometries.add(g)
-            }
+            Timber.d("Getting markers list...")
+            val markersList = intent.getParcelableArrayListExtra<GeoMarker>(MAP_MARKERS_BUNDLE_EXTRA)
+            markersList?.let { markers.addAll(it) }
+            Timber.d("Getting geometries list...")
+            val geometriesList = intent.getParcelableArrayListExtra<GeoGeometry>(MAP_GEOMETRIES_BUNDLE_EXTRA)
+            geometriesList?.let { geometries.addAll(it) }
             Timber.d("Got ${markers.size} markers and ${geometries.size} geometries.")
 
             iconSizeMultiplier =
@@ -110,7 +104,8 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
             zoneName = intent.getExtra(ZONE_NAME_BUNDLE_EXTRA)
             intent.getExtra(KMZ_FILE_BUNDLE_EXTRA)
                 .let { path -> if (path != null) kmzFile = File(path) }
-        }
+        } else
+            Timber.w("Intent is null")
 
         binding.floatingActionButton.setOnClickListener {
             onBackPressed()
@@ -242,37 +237,37 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
 
     override fun onStart() {
         super.onStart()
-        binding.map.onStart()
+        mapHelper.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        binding.map.onResume()
+        mapHelper.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        binding.map.onPause()
+        mapHelper.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        binding.map.onStop()
+        mapHelper.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        binding.map.onSaveInstanceState(outState)
+        mapHelper.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        binding.map.onLowMemory()
+        mapHelper.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.map.onDestroy()
+        mapHelper.onDestroy()
     }
 
     @SuppressLint("MissingPermission")
