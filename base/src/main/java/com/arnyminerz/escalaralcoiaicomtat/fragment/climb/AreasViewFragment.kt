@@ -132,12 +132,14 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     val zoneLocation = zone.position ?: continue
                     if (zoneLocation.distanceTo(position) <= requiredDistance) {
                         Timber.d("Adding zone #${zone.id}. Creating marker...")
-                        var marker = GeoMarker(
+                        val marker = GeoMarker(
                             zoneLocation,
                             windowData = MapObjectWindowData(zone.displayName, null)
-                        )
-                        Timber.d("Setting image...")
-                        marker = marker.withImage(resources, ICON_WAYPOINT_ESCALADOR_BLANC)
+                        ).apply {
+                            val icon = ICON_WAYPOINT_ESCALADOR_BLANC.toGeoIcon(requireContext())
+                            if (icon != null)
+                                withImage(icon)
+                        }
                         Timber.d("Adding marker to map")
                         mapHelper.add(marker)
                     }

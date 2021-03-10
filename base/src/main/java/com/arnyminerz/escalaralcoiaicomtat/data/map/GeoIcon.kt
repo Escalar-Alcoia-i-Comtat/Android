@@ -1,27 +1,21 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.map
 
-import android.content.res.Resources
+import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
+import timber.log.Timber
+
 
 class GeoIcon(val name: String, val icon: Bitmap) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readParcelable(Bitmap::class.java.classLoader)!!
-    )
-
-    constructor(name: String, resources: Resources, @DrawableRes res: Int) : this(
-        name,
-        BitmapFactory.decodeResource(resources, res)
-    )
-
-    constructor(resources: Resources, constant: GeoIconConstant) : this(
-        constant.name,
-        resources,
-        constant.drawable
     )
 
     override fun describeContents(): Int = 0
@@ -42,4 +36,32 @@ class GeoIcon(val name: String, val icon: Bitmap) : Parcelable {
     }
 }
 
-data class GeoIconConstant(val name: String, @DrawableRes val drawable: Int)
+fun drawableToBitmap(drawable: Drawable): Bitmap {
+    if (drawable is BitmapDrawable)
+        return drawable.bitmap
+
+    var width = drawable.intrinsicWidth
+    width = if (width > 0) width else 1
+    var height = drawable.intrinsicHeight
+    height = if (height > 0) height else 1
+
+    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    drawable.setBounds(0, 0, canvas.width, canvas.height)
+    drawable.draw(canvas)
+
+    return bitmap
+}
+
+data class GeoIconConstant(val name: String, @DrawableRes val drawable: Int) {
+    fun toGeoIcon(context: Context): GeoIcon? {
+        Timber.d("Converting GeoIconConstant to GeoIcon...")
+        val drawable = ContextCompat.getDrawable(context, drawable)
+        if (drawable == null) {
+            Timber.w("Could not get drawable!")
+            return null
+        }
+        val bitmap = drawableToBitmap(drawable)
+        return GeoIcon(name, bitmap)
+    }
+}

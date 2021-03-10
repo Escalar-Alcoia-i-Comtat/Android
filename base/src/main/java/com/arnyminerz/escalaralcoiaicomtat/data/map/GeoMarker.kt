@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.map
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.os.Parcel
 import android.os.Parcelable
@@ -38,7 +37,6 @@ class GeoMarker(
     private var icon: GeoIcon? = null
 ) : Parcelable {
     val id = id ?: extractUUID(position, iconSizeMultiplier, windowData)
-    private var bitmap: Bitmap? = null
     private var iconLoaded: Boolean = false
 
     constructor(parcel: Parcel) : this(
@@ -59,16 +57,13 @@ class GeoMarker(
         return this
     }
 
-    fun withImage(resources: Resources, icon: GeoIconConstant): GeoMarker =
-        withImage(GeoIcon(resources, icon))
-
     fun addToMap(context: Context, style: Style, symbolManager: SymbolManager): Symbol? {
         var symbolOptions = SymbolOptions()
             .withLatLng(LatLng(position.latitude, position.longitude))
 
-        if (bitmap != null) {
+        if (icon != null) {
             Timber.d("Adding image to Style...")
-            style.addImage(id, bitmap!!, false)
+            style.addImage(id, icon!!.icon, false)
             iconLoaded = true
         }
 
