@@ -268,21 +268,23 @@ class MapHelper(private val mapView: MapView) {
         if (loadedKMLAddress == null && !loadedElements)
             throw MapAnyDataToLoadException("Map doesn't have any loaded data. You may run loadKML, for example.")
 
-        context.startActivity(
-            Intent(context, MapsActivity::class.java).apply {
-                if (loadedElements && !overrideLoadedValues) {
-                    Timber.v("Passing to MapsActivity with parcelable list.")
-                    Timber.d("  Putting ${markers.size} markers...")
-                    putExtra(MAP_MARKERS_BUNDLE_EXTRA, markers.toTypedArray())
-                    Timber.d("  Putting ${geometries.size} geometries...")
-                    putExtra(MAP_GEOMETRIES_BUNDLE_EXTRA, geometries.toTypedArray())
-                } else {
-                    Timber.d("Passing to MapsActivity with kml address ($loadedKMLAddress).")
-                    putExtra(KML_ADDRESS_BUNDLE_EXTRA, loadedKMLAddress!!)
-                }
-                putExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA, markerSizeMultiplier)
+        Timber.d("Preparing MapsActivity intent...")
+        val intent = Intent(context, MapsActivity::class.java).apply {
+            if (loadedElements && !overrideLoadedValues) {
+                Timber.v("Passing to MapsActivity with parcelable list.")
+                Timber.d("  Putting ${markers.size} markers...")
+                putExtra(MAP_MARKERS_BUNDLE_EXTRA, markers.toTypedArray())
+                Timber.d("  Putting ${geometries.size} geometries...")
+                putExtra(MAP_GEOMETRIES_BUNDLE_EXTRA, geometries.toTypedArray())
+            } else {
+                Timber.d("Passing to MapsActivity with kml address ($loadedKMLAddress).")
+                putExtra(KML_ADDRESS_BUNDLE_EXTRA, loadedKMLAddress!!)
             }
-        )
+            putExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA, markerSizeMultiplier)
+        }
+
+        Timber.d("Launching intent...")
+        context.startActivity(intent)
     }
 
     /**
