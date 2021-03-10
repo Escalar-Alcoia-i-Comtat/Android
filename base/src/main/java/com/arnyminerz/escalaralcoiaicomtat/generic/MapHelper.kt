@@ -47,8 +47,8 @@ val ICONS = listOf(ICON_WAYPOINT_ESCALADOR_BLANC)
 const val MARKER_WINDOW_HIDE_DURATION: Long = 500
 const val MARKER_WINDOW_SHOW_DURATION: Long = 500
 
-const val DEFAULT_LATITUDE = -52.6885
-const val DEFAULT_LONGITUDE = -70.1395
+const val DEFAULT_LATITUDE = 38.7284401
+const val DEFAULT_LONGITUDE = -0.43821
 const val DEFAULT_ZOOM = 2.0
 
 class MapHelper(private val mapView: MapView) {
