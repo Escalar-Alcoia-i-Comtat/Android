@@ -14,7 +14,7 @@ import timber.log.Timber
 
 @ExperimentalUnsignedTypes
 class BarChartHelper private constructor(
-    private val barData: BarData,
+    val barData: BarData,
     private val quarters: ArrayList<String>
 ) {
     companion object {
@@ -93,9 +93,6 @@ class BarChartHelper private constructor(
             return BarChartHelper(BarData(dataSet), gradeQuarters)
         }
     }
-
-    val data: BarData
-        get() = barData
 
     val xFormatter = object : ValueFormatter() {
         override fun getAxisLabel(value: Float, axis: AxisBase?): String =

@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.view
 
 import android.content.Context
+import android.util.TypedValue
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
@@ -108,3 +109,9 @@ fun setTextColor(view: TextView, context: Context, @ColorRes color: Int) {
 @UiThread
 @Suppress("DEPRECATION")
 fun getColor(context: Context, @ColorRes color: Int): Int = ContextCompat.getColor(context, color)
+
+fun getAttribute(context: Context, resId: Int): Int {
+    val typedValue = TypedValue()
+    context.theme.resolveAttribute(resId, typedValue, true)
+    return typedValue.data
+}
