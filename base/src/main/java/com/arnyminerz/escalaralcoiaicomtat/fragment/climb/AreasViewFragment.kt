@@ -22,6 +22,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_DISABLE_NEARBY
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
@@ -40,6 +41,10 @@ const val LOCATION_PERMISSION_REQUEST = 0
 @ExperimentalUnsignedTypes
 class AreasViewFragment : NetworkChangeListenerFragment() {
     private var justAttached = false
+    private val mapInitialized: Boolean
+        get() = this::mapHelper.isInitialized && mapHelper.isLoaded
+    private val nearbyEnabled: Boolean
+        get() = !PREF_DISABLE_NEARBY.get(requireContext().sharedPreferences)
 
     private lateinit var mapHelper: MapHelper
 
@@ -57,6 +62,9 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         if (context == null) {
             error = true
             Timber.w("Could not update Nearby Zones: Not showing fragment (context is null)")
+        } else if (!nearbyEnabled) {
+            error = true
+            Timber.w("Could not update Nearby Zones: Nearby Zones not enabled")
         }
 
         if (!isResumed) {
@@ -78,7 +86,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         return !error
     }
 
-    fun updateNearbyZones(location: Location) {
+    private fun updateNearbyZones(location: Location) {
         if (!nearbyZonesReady())
             return
 
@@ -110,7 +118,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
             binding.nearbyZonesCardView.isClickable = false
 
-            val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences)
+            val requiredDistance =
+                SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences)
 
             mapHelper.clearSymbols()
 
@@ -145,23 +154,16 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             Timber.w("Could not update Nearby Zones: MapHelper not loaded")
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        Mapbox.getInstance(context, getString(R.string.mapbox_access_token))
-        justAttached = true
-    }
-
-    @SuppressLint("MissingPermission")
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentViewAreasBinding.inflate(inflater, container, false)
+    private fun initializeMap(savedInstanceState: Bundle? = null) {
+        if (mapInitialized)
+            return
 
         Timber.d("Initializing MapHelper...")
         mapHelper = MapHelper(binding.mapView)
         mapHelper.onCreate(savedInstanceState)
+
+        Timber.d("Getting nearby zones disable pref...")
+        val nearbyEnabled = !PREF_DISABLE_NEARBY.get(requireContext().sharedPreferences)
 
         Timber.d("Loading map...")
         mapHelper
@@ -181,8 +183,26 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     true
                 }
 
-                requestLocationUpdates()
+                if (nearbyEnabled)
+                    requestLocationUpdates()
             }
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        Mapbox.getInstance(context, getString(R.string.mapbox_access_token))
+        justAttached = true
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentViewAreasBinding.inflate(inflater, container, false)
+
+        initializeMap(savedInstanceState)
 
         return binding.root
     }
