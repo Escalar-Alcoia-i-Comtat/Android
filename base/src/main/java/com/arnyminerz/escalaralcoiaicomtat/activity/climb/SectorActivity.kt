@@ -8,6 +8,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
+import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.ARGUMENT_SECTOR
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.SectorFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -25,7 +26,7 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
 
     private val fragments = arrayListOf<Fragment>()
 
-    private lateinit var binding: ActivitySectorBinding
+    lateinit var binding: ActivitySectorBinding
 
     private fun updateTitle() {
         binding.titleTextView.text = sectors[sector].displayName
@@ -71,7 +72,13 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
 
         fragments.clear()
         for (sector in sectors)
-            fragments.add(SectorFragment(sector, binding.sectorViewPager))
+            fragments.add(
+                SectorFragment().apply {
+                    arguments = Bundle().apply {
+                        putParcelable(ARGUMENT_SECTOR, sector)
+                    }
+                }
+            )
 
         Timber.d("Sector index: $sector")
         binding.sectorViewPager.adapter = object : FragmentStateAdapter(this) {
