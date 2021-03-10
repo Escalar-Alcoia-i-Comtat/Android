@@ -9,6 +9,7 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
+import androidx.annotation.UiThread
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -659,6 +660,38 @@ class MapHelper(private val mapView: MapView) {
 
         return MarkerWindow(context, marker, binding)
     }
+
+    /**
+     * Changes the map view visibility
+     * @author Arnau Mora
+     * @since 20210310
+     * @param visible If true, the map will be visible.
+     * @return The MapHelper instance
+     * @see View.visibility
+     */
+    @UiThread
+    fun visibility(visible: Boolean): MapHelper {
+        mapView.visibility(visible)
+        return this
+    }
+
+    /**
+     * Hides the map's UI
+     * @author Arnau Mora
+     * @since 20210310
+     * @see visibility
+     */
+    @UiThread
+    fun hide() = visibility(false)
+
+    /**
+     * Shows the map's UI
+     * @author Arnau Mora
+     * @since 20210310
+     * @see visibility
+     */
+    @UiThread
+    fun show() = visibility(true)
 }
 
 class MapNotInitializedException(message: String) : Exception(message)
