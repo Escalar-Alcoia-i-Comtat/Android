@@ -51,7 +51,7 @@ data class Path @ExperimentalUnsignedTypes constructor(
     val builtBy: String?,
     val rebuiltBy: String?,
     val downloaded: Boolean = false
-) : Serializable, Comparable<Path> {
+) : DataClassImpl, Serializable, Comparable<Path> {
 
     fun hasSafeCount(): Boolean {
         var anyGreaterThanOne = false
