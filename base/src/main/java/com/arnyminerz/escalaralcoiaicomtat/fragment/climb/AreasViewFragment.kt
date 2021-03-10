@@ -18,25 +18,22 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getZones
-import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
-import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_MIN_DIST
-import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_MIN_TIME
-import com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData
+import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_DISABLE_NEARBY
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.ICON_WAYPOINT_ESCALADOR_BLANC
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.geometry.LatLng
 import timber.log.Timber
 
 const val LOCATION_PERMISSION_REQUEST = 0
@@ -44,6 +41,10 @@ const val LOCATION_PERMISSION_REQUEST = 0
 @ExperimentalUnsignedTypes
 class AreasViewFragment : NetworkChangeListenerFragment() {
     private var justAttached = false
+    private val mapInitialized: Boolean
+        get() = this::mapHelper.isInitialized && mapHelper.isLoaded
+    private val nearbyEnabled: Boolean
+        get() = !PREF_DISABLE_NEARBY.get(requireContext().sharedPreferences)
 
     private lateinit var mapHelper: MapHelper
 
@@ -52,18 +53,20 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     private var locationManager: LocationManager? = null
     private var locationListenerAdded = false
 
-    private var counter = 0
-
     private var _binding: FragmentViewAreasBinding? = null
     private val binding get() = _binding!!
 
-    fun updateNearbyZones(location: Location) {
+    private fun nearbyZonesReady(): Boolean {
         var error = false
 
         if (context == null) {
             error = true
             Timber.w("Could not update Nearby Zones: Not showing fragment (context is null)")
-        }
+        } else if (!nearbyEnabled) {
+            error = true
+            Timber.w("Could not update Nearby Zones: Nearby Zones not enabled")
+        } else
+            requestLocationUpdates()
 
         if (!isResumed) {
             error = true
@@ -81,8 +84,13 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         }
 
         visibility(binding.nearbyZonesCardView, !error)
-        if (error)
+        return !error
+    }
+
+    private fun updateNearbyZones(location: Location) {
+        if (!nearbyZonesReady())
             return
+
         Timber.v("Updating nearby zones...")
         val position = location.toLatLng()
 
@@ -107,47 +115,76 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 )
             }
             binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
-        } else {
+        } else if (mapHelper.isLoaded) {
             binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
             binding.nearbyZonesCardView.isClickable = false
-
-            counter = 0
 
             val requiredDistance =
                 SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences)
 
-            if (context != null) {
-                mapHelper.clearSymbols()
+            mapHelper.clearSymbols()
 
-                runAsync {
-                    val zones = AREAS.getZones()
-                    Timber.v("Iterating through ${zones.size} zones.")
-                    Timber.v("Current Location: [${location.latitude},${location.longitude}]")
-                    for (zone in zones) {
-                        val zoneLocation = zone.position ?: continue
-                        if (zoneLocation.distanceTo(position) <= requiredDistance) {
-                            Timber.d("Adding zone #${zone.id}. Creating marker...")
-                            var marker = GeoMarker(
-                                zoneLocation,
-                                windowData=MapObjectWindowData(zone.displayName, null)
-                            )
-                            Timber.d("Setting image...")
-                            marker = marker.withImage(ICON_WAYPOINT_ESCALADOR_BLANC)
-                            Timber.d("Adding marker to map")
-                            mapHelper.add(marker)
+            runAsync {
+                val zones = AREAS.getZones()
+                Timber.v("Iterating through ${zones.size} zones.")
+                Timber.v("Current Location: [${location.latitude},${location.longitude}]")
+                for (zone in zones) {
+                    val zoneLocation = zone.position ?: continue
+                    if (zoneLocation.distanceTo(position) <= requiredDistance) {
+                        Timber.d("Adding zone #${zone.id}. Creating marker...")
+                        val marker = GeoMarker(
+                            zoneLocation,
+                            windowData = MapObjectWindowData(zone.displayName, null)
+                        ).apply {
+                            val icon = ICON_WAYPOINT_ESCALADOR_BLANC.toGeoIcon(requireContext())
+                            if (icon != null)
+                                withImage(icon)
                         }
-                    }
-
-                    Timber.d("Finished adding markers.")
-                    requireActivity().runOnUiThread {
-                        mapHelper.display(requireContext())
-                        mapHelper.center()
-
-                        binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
+                        Timber.d("Adding marker to map")
+                        mapHelper.add(marker)
                     }
                 }
-            } else Timber.w("Could not show nearby zones")
-        }
+
+                Timber.d("Finished adding markers.")
+                requireActivity().runOnUiThread {
+                    mapHelper.display(requireContext())
+                    mapHelper.center()
+
+                    binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
+                }
+            }
+        } else
+            Timber.w("Could not update Nearby Zones: MapHelper not loaded")
+    }
+
+    private fun initializeMap(savedInstanceState: Bundle? = null) {
+        if (mapInitialized)
+            return
+
+        Timber.d("Initializing MapHelper...")
+        mapHelper = MapHelper(binding.mapView)
+        mapHelper.onCreate(savedInstanceState)
+
+        Timber.d("Loading map...")
+        mapHelper
+            .withControllable(false)
+            .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE))
+            .loadMap(requireContext()) { _, map, _ ->
+                Timber.d("Map is ready.")
+
+                map.addOnMapClickListener {
+                    val intent = mapHelper.mapsActivityIntent(requireContext())
+                    Timber.v("Starting MapsActivity...")
+                    startActivity(intent)
+                    true
+                }
+                mapHelper.addSymbolClickListener {
+                    val intent = mapHelper.mapsActivityIntent(requireContext())
+                    Timber.v("Starting MapsActivity...")
+                    startActivity(intent)
+                    true
+                }
+            }
     }
 
     override fun onAttach(context: Context) {
@@ -164,8 +201,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     ): View {
         _binding = FragmentViewAreasBinding.inflate(inflater, container, false)
 
-        mapHelper = MapHelper(binding.mapView)
-        mapHelper.onCreate(savedInstanceState)
+        initializeMap(savedInstanceState)
 
         return binding.root
     }
@@ -176,13 +212,14 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             return
 
         if (locationManager == null)
-            locationManager = requireContext().applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
+            locationManager =
+                requireContext().applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
 
         if (PermissionsManager.areLocationPermissionsGranted(requireContext())) {
-            Timber.v("Adding location provider listener...")
             Timber.d("Requesting location updates...")
+            binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
             locationManager!!.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
+                LocationManager.NETWORK_PROVIDER,
                 LOCATION_UPDATE_MIN_TIME,
                 LOCATION_UPDATE_MIN_DIST,
                 locationCallback,
@@ -195,28 +232,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     fun refreshAreas() {
         if (context != null && isResumed) {
             Timber.v("Refreshing areas...")
-            binding.nearbyZonesCardView.hide()
-            binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
-
-            Timber.d("Loading map...")
-            mapHelper
-                .withControllable(false)
-                .loadMap(requireContext()) { _, map, _ ->
-                Timber.d("Map is ready.")
-
-                map.addOnMapClickListener {
-                    Timber.v("Starting MapActivity...")
-                    mapHelper.showMapsActivity(requireContext())
-                    true
-                }
-                mapHelper.addSymbolClickListener {
-                    Timber.v("Starting MapActivity...")
-                    mapHelper.showMapsActivity(requireContext())
-                    true
-                }
-
-                requestLocationUpdates()
-            }
+            nearbyZonesReady()
 
             Timber.d("Initializing area adapter for AreasViewFragment...")
             val adapter = AreaAdapter(requireContext(), areaClickListener)
@@ -236,10 +252,11 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         this.areaClickListener = areaClickListener
     }
 
-    @SuppressLint("MissingPermission")
     override fun onResume() {
         super.onResume()
 
+        initializeMap()
+        nearbyZonesReady()
         justAttached = false
     }
 
