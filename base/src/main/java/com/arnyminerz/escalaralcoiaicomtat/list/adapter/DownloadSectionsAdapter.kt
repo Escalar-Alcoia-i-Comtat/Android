@@ -49,35 +49,38 @@ class DownloadSectionsAdapter(
             val sectionDownloadStatus = section.isDownloaded(mainActivity)
             val sectionHasDownloadedChildren = section.hasAnyDownloadedChildren(mainActivity)
             downloadButton.setOnClickListener {
-                if (sectionDownloadStatus == DownloadStatus.NOT_DOWNLOADED)
-                    try {
-                        section.download(mainActivity, true, {
-                            mainActivity.toast(R.string.toast_downloading)
-                            downloadProgressBar.isIndeterminate = true
-                            visibility(downloadProgressBar, true)
-                        }, {
-                            visibility(downloadProgressBar, false)
-                            Timber.v("Finished downloading. Updating Downloads Recycler View...")
-                            mainActivity.downloadsFragment.reloadSizeTextView()
-                            notifyDataSetChanged()
-                        }, { progress, max ->
-                            downloadProgressBar.isIndeterminate = false
-                            downloadProgressBar.max = max
-                            downloadProgressBar.progress = progress
-                        }, {
-                            mainActivity.toast(R.string.toast_error_internal)
-                            visibility(downloadProgressBar, false)
-                        })
-                    } catch (ex: FileAlreadyExistsException) {
-                        // If the data is already downloaded
-                        // This will never be caught, since sectionDownloadStatus is NOT_DOWNLOADED, but who knows
-                        mainActivity.toast(R.string.toast_error_already_downloaded)
-                    } catch (ex: AlreadyLoadingException) {
-                        // If the download has already been started
-                        // This will never be caught, since sectionDownloadStatus is NOT_DOWNLOADED, but who knows
+                if (!mainActivity.networkState.hasInternet)
+                    mainActivity.toast(R.string.toast_error_no_internet)
+                else
+                    if (sectionDownloadStatus == DownloadStatus.NOT_DOWNLOADED)
+                        try {
+                            section.download(mainActivity, true, {
+                                mainActivity.toast(R.string.toast_downloading)
+                                downloadProgressBar.isIndeterminate = true
+                                visibility(downloadProgressBar, true)
+                            }, {
+                                visibility(downloadProgressBar, false)
+                                Timber.v("Finished downloading. Updating Downloads Recycler View...")
+                                mainActivity.downloadsFragment.reloadSizeTextView()
+                                notifyDataSetChanged()
+                            }, { progress, max ->
+                                downloadProgressBar.isIndeterminate = false
+                                downloadProgressBar.max = max
+                                downloadProgressBar.progress = progress
+                            }, {
+                                mainActivity.toast(R.string.toast_error_internal)
+                                visibility(downloadProgressBar, false)
+                            })
+                        } catch (ex: FileAlreadyExistsException) {
+                            // If the data is already downloaded
+                            // This will never be caught, since sectionDownloadStatus is NOT_DOWNLOADED, but who knows
+                            mainActivity.toast(R.string.toast_error_already_downloaded)
+                        } catch (ex: AlreadyLoadingException) {
+                            // If the download has already been started
+                            // This will never be caught, since sectionDownloadStatus is NOT_DOWNLOADED, but who knows
+                            mainActivity.toast(R.string.message_already_downloading)
+                        } else if (section.isDownloaded(mainActivity) == DownloadStatus.DOWNLOADING)
                         mainActivity.toast(R.string.message_already_downloading)
-                    } else if (section.isDownloaded(mainActivity) == DownloadStatus.DOWNLOADING)
-                    mainActivity.toast(R.string.message_already_downloading)
             }
             visibility(downloadProgressBar, sectionDownloadStatus == DownloadStatus.DOWNLOADING)
             visibility(downloadButton, sectionDownloadStatus != DownloadStatus.DOWNLOADED)
