@@ -316,11 +316,6 @@ class MapHelper(private val mapView: MapView) {
             }
             putExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA, markerSizeMultiplier)
         }
-        val kmlIntent = Intent(context, MapsActivity::class.java).apply {
-            Timber.d("Passing to MapsActivity with kml address ($loadedKMLAddress).")
-            putExtra(KML_ADDRESS_BUNDLE_EXTRA, loadedKMLAddress!!)
-            putExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA, markerSizeMultiplier)
-        }
         val elementsIntentSize = elementsIntent.getSize()
         val size = humanReadableByteCountBin(elementsIntentSize.toLong())
         Timber.d("Elements Intent size: $size")
@@ -328,7 +323,11 @@ class MapHelper(private val mapView: MapView) {
         return if (loadedElements && !overrideLoadedValues && elementsIntentSize < MBYTE / 2)
             elementsIntent
         else
-            kmlIntent
+            Intent(context, MapsActivity::class.java).apply {
+                Timber.d("Passing to MapsActivity with kml address ($loadedKMLAddress).")
+                putExtra(KML_ADDRESS_BUNDLE_EXTRA, loadedKMLAddress!!)
+                putExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA, markerSizeMultiplier)
+            }
     }
 
     /**
