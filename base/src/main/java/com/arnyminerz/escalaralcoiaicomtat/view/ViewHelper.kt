@@ -1,16 +1,19 @@
 package com.arnyminerz.escalaralcoiaicomtat.view
 
 import android.content.Context
+import android.util.TypedValue
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.ColorRes
+import androidx.annotation.UiThread
 import androidx.core.content.ContextCompat
 import androidx.preference.Preference
 import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.ViewList
 import timber.log.Timber
 
+@UiThread
 fun <T : View?> visibility(
     views: ViewList<T>,
     visible: Boolean,
@@ -20,6 +23,7 @@ fun <T : View?> visibility(
     views.visibility(visible, setGone, debug)
 }
 
+@UiThread
 fun visibility(view: View?, visible: Boolean, setGone: Boolean = true, debug: Boolean = false) {
     if (debug) Timber.d(
         "Setting visibility for ${
@@ -31,16 +35,19 @@ fun visibility(view: View?, visible: Boolean, setGone: Boolean = true, debug: Bo
     view?.visibility = if (visible) View.VISIBLE else if (setGone) View.GONE else View.INVISIBLE
 }
 
+@UiThread
 fun visibility(view: MenuItem, visible: Boolean, debug: Boolean = false) {
     if (debug) Timber.d("Setting visibility for ${view.itemId} to $visible")
     view.isVisible = visible
 }
 
+@UiThread
 fun visibility(view: Preference?, visible: Boolean, debug: Boolean = false) {
     if (debug) Timber.d("Setting visibility for ${view?.key} to $visible")
     view?.isVisible = visible
 }
 
+@UiThread
 fun Context?.visibility(
     view: View?,
     visible: Boolean,
@@ -66,6 +73,7 @@ fun Context?.visibility(
  * @param view The view to check
  * @return True if visible. False if invisible or null
  */
+@UiThread
 fun visibility(view: View?): Boolean {
     return view != null && view.visibility == View.VISIBLE
 }
@@ -73,26 +81,37 @@ fun visibility(view: View?): Boolean {
 /**
  * Sets the visibility of the view
  * @author ArnyminerZ
- * @date 07/09/2020
+ * @since 07/09/2020
  */
 @JvmName("visibility_own")
+@UiThread
 fun View.visibility(visible: Boolean, setGone: Boolean = true, debug: Boolean = false) =
     visibility(this, visible, setGone, debug)
 
 /**
  * Sets the visibility of a view to gone
  */
+@UiThread
 fun View.hide() = visibility(false)
 
 /**
  * Sets the visibility of a view to visible
  */
+@UiThread
 fun View.show() = visibility(true)
 
+@UiThread
 @Suppress("DEPRECATION")
 fun setTextColor(view: TextView, context: Context, @ColorRes color: Int) {
     view.setTextColor(context.resources.getColor(color, context.theme))
 }
 
+@UiThread
 @Suppress("DEPRECATION")
 fun getColor(context: Context, @ColorRes color: Int): Int = ContextCompat.getColor(context, color)
+
+fun getAttribute(context: Context, resId: Int): Int {
+    val typedValue = TypedValue()
+    context.theme.resolveAttribute(resId, typedValue, true)
+    return typedValue.data
+}

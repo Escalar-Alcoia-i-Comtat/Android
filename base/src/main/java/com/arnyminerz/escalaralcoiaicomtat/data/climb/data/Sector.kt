@@ -14,6 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
 import com.arnyminerz.escalaralcoiaicomtat.view.BarChartHelper
+import com.arnyminerz.escalaralcoiaicomtat.view.getAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.Description
@@ -134,7 +135,7 @@ data class Sector constructor(
     fun loadChart(context: Context, chart: BarChart) {
         val chartHelper = BarChartHelper.fromPaths(context, children)
         with(chart) {
-            data = chartHelper.data
+            data = chartHelper.barData
             setFitBars(false)
             setNoDataText(context.getString(R.string.error_chart_no_data))
             setDrawGridBackground(false)
@@ -145,26 +146,24 @@ data class Sector constructor(
             isDoubleTapToZoomEnabled = false
             isHighlightPerTapEnabled = false
             isHighlightPerDragEnabled = false
-        }
+            legend.isEnabled = false
 
-        val xAxis = chart.xAxis
-        xAxis.granularity = 1f
-        xAxis.valueFormatter = chartHelper.xFormatter
-        xAxis.position = XAxis.XAxisPosition.BOTTOM
-
-        chartHelper.removeStyles(chart.axisLeft)
-        chartHelper.removeStyles(chart.axisRight)
-
-        val legend = chart.legend
-        legend.isEnabled = false
-
-        with(chart) {
-            setDrawGridBackground(false)
-            setDrawBorders(false)
             description = with(Description()) {
                 text = ""
                 this
             }
+
+            val valueTextColor = getAttribute(context, R.attr.text_dark)
+            xAxis.apply {
+                granularity = 1f
+                valueFormatter = chartHelper.xFormatter
+                position = XAxis.XAxisPosition.BOTTOM
+                textColor = valueTextColor
+            }
+            chartHelper.barData.setValueTextColor(valueTextColor)
+
+            chartHelper.removeStyles(axisLeft)
+            chartHelper.removeStyles(axisRight)
 
             invalidate()
         }

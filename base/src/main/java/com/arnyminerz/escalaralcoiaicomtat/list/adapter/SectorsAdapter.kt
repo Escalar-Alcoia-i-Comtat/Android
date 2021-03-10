@@ -95,50 +95,59 @@ class SectorsAdapter(
             refreshDownloadImage(sector, downloadImageButton, downloadProgressBar)
 
             downloadImageButton.setOnClickListener {
-                when (sector.isDownloaded(dataClassListActivity)) {
-                    DownloadStatus.NOT_DOWNLOADED ->
-                        try {
-                            sector.download(dataClassListActivity, false, {
-                                // start
-                                Timber.v("Started downloading \"${sector.displayName}\"")
-                                dataClassListActivity.runOnUiThread {
-                                    visibility(downloadProgressBar, true)
-                                    downloadProgressBar.isIndeterminate = true
-                                    downloadImageButton.setImageResource(R.drawable.download_outline)
-                                }
-                            }, {
-                                visibility(downloadProgressBar, false)
-                                refreshDownloadImage(
-                                    sector,
-                                    downloadImageButton,
-                                    downloadProgressBar
+                if (!dataClassListActivity.networkState.hasInternet)
+                    dataClassListActivity.toast(R.string.toast_error_no_internet)
+                else
+                    when (sector.isDownloaded(dataClassListActivity)) {
+                        DownloadStatus.NOT_DOWNLOADED ->
+                            try {
+                                sector.download(dataClassListActivity, false, {
+                                    // start
+                                    Timber.v("Started downloading \"${sector.displayName}\"")
+                                    dataClassListActivity.runOnUiThread {
+                                        visibility(downloadProgressBar, true)
+                                        downloadProgressBar.isIndeterminate = true
+                                        downloadImageButton.setImageResource(R.drawable.download_outline)
+                                    }
+                                }, {
+                                    visibility(downloadProgressBar, false)
+                                    refreshDownloadImage(
+                                        sector,
+                                        downloadImageButton,
+                                        downloadProgressBar
+                                    )
+                                }, { progress, max ->
+                                    downloadProgressBar.isIndeterminate = false
+                                    downloadProgressBar.max = max
+                                    downloadProgressBar.progress = progress
+                                }, {
+                                    toast(dataClassListActivity, R.string.toast_error_internal)
+                                    visibility(downloadProgressBar, false)
+                                })
+                            } catch (error: FileAlreadyExistsException) {
+                                Timber.e(error, "Could not download!")
+                                toast(
+                                    dataClassListActivity,
+                                    R.string.toast_error_already_downloaded
                                 )
-                            }, { progress, max ->
-                                downloadProgressBar.isIndeterminate = false
-                                downloadProgressBar.max = max
-                                downloadProgressBar.progress = progress
-                            }, {
-                                toast(dataClassListActivity, R.string.toast_error_internal)
-                                visibility(downloadProgressBar, false)
-                            })
-                        } catch (error: FileAlreadyExistsException) {
-                            Timber.e(error, "Could not download!")
-                            toast(dataClassListActivity, R.string.toast_error_already_downloaded)
 
-                            visibility(holder.downloadProgressBar, false)
-                            downloadImageButton.setImageResource(R.drawable.download)
-                        } catch (error: AlreadyLoadingException) {
-                            Timber.w("Already downloading!")
-                            toast(dataClassListActivity, R.string.toast_error_already_downloading)
+                                visibility(holder.downloadProgressBar, false)
+                                downloadImageButton.setImageResource(R.drawable.download)
+                            } catch (error: AlreadyLoadingException) {
+                                Timber.w("Already downloading!")
+                                toast(
+                                    dataClassListActivity,
+                                    R.string.toast_error_already_downloading
+                                )
+                            }
+                        DownloadStatus.DOWNLOADING -> dataClassListActivity.toast(R.string.toast_downloading)
+                        DownloadStatus.DOWNLOADED -> DownloadDialog(
+                            dataClassListActivity,
+                            sector
+                        ).show {
+                            refreshDownloadImage(sector, downloadImageButton, downloadProgressBar)
                         }
-                    DownloadStatus.DOWNLOADING -> dataClassListActivity.toast(R.string.toast_downloading)
-                    DownloadStatus.DOWNLOADED -> DownloadDialog(
-                        dataClassListActivity,
-                        sector
-                    ).show {
-                        refreshDownloadImage(sector, downloadImageButton, downloadProgressBar)
                     }
-                }
             }
         }
     }

@@ -77,50 +77,53 @@ class ZoneAdapter(
         else visibility(holder.mapImageButton, false)
 
         holder.downloadImageButton.setOnClickListener {
-            when (zone.isDownloaded(dataClassListActivity)) {
-                DownloadStatus.NOT_DOWNLOADED ->
-                    try {
-                        zone.download(dataClassListActivity, true, {
-                            dataClassListActivity.runOnUiThread {
-                                holder.downloadImageButton.setImageResource(R.drawable.download_outline)
-                                holder.progressBar.isIndeterminate = true
-                                visibility(holder.progressBar, true)
-                            }
-                        }, {
-                            dataClassListActivity.runOnUiThread {
+            if (!dataClassListActivity.networkState.hasInternet)
+                dataClassListActivity.toast(R.string.toast_error_no_internet)
+            else
+                when (zone.isDownloaded(dataClassListActivity)) {
+                    DownloadStatus.NOT_DOWNLOADED ->
+                        try {
+                            zone.download(dataClassListActivity, true, {
+                                dataClassListActivity.runOnUiThread {
+                                    holder.downloadImageButton.setImageResource(R.drawable.download_outline)
+                                    holder.progressBar.isIndeterminate = true
+                                    visibility(holder.progressBar, true)
+                                }
+                            }, {
+                                dataClassListActivity.runOnUiThread {
+                                    visibility(holder.progressBar, false)
+                                    updateImageRes(holder, zone)
+                                }
+                            }, { progress, max ->
+                                holder.progressBar.apply {
+                                    isIndeterminate = false
+                                    this.max = max
+                                    this.progress = progress
+                                }
+                            }, {
+                                toast(dataClassListActivity, R.string.toast_error_internal)
                                 visibility(holder.progressBar, false)
-                                updateImageRes(holder, zone)
-                            }
-                        }, { progress, max ->
-                            holder.progressBar.apply {
-                                isIndeterminate = false
-                                this.max = max
-                                this.progress = progress
-                            }
-                        }, {
-                            toast(dataClassListActivity, R.string.toast_error_internal)
-                            visibility(holder.progressBar, false)
-                        })
-                    } catch (error: FileAlreadyExistsException) {
-                        Timber.w(error, "Zone already downloaded!")
-                        toast(dataClassListActivity, R.string.toast_error_already_downloaded)
+                            })
+                        } catch (error: FileAlreadyExistsException) {
+                            Timber.w(error, "Zone already downloaded!")
+                            toast(dataClassListActivity, R.string.toast_error_already_downloaded)
 
-                        visibility(holder.progressBar, false)
-                        holder.downloadImageButton.setImageResource(R.drawable.download)
-                    } catch (error: NoInternetAccessException) {
-                        dataClassListActivity.toast(R.string.toast_error_no_internet)
-                    } catch (error: AlreadyLoadingException) {
-                        Timber.w("Already downloading!")
-                        toast(dataClassListActivity, R.string.toast_error_already_downloading)
+                            visibility(holder.progressBar, false)
+                            holder.downloadImageButton.setImageResource(R.drawable.download)
+                        } catch (error: NoInternetAccessException) {
+                            dataClassListActivity.toast(R.string.toast_error_no_internet)
+                        } catch (error: AlreadyLoadingException) {
+                            Timber.w("Already downloading!")
+                            toast(dataClassListActivity, R.string.toast_error_already_downloading)
+                        }
+                    DownloadStatus.DOWNLOADING -> dataClassListActivity.toast(R.string.message_already_downloading)
+                    else -> DownloadDialog(
+                        dataClassListActivity,
+                        zone
+                    ).show {
+                        updateImageRes(holder, zone)
                     }
-                DownloadStatus.DOWNLOADING -> dataClassListActivity.toast(R.string.message_already_downloading)
-                else -> DownloadDialog(
-                    dataClassListActivity,
-                    zone
-                ).show {
-                    updateImageRes(holder, zone)
                 }
-            }
         }
         updateImageRes(holder, zone)
     }
