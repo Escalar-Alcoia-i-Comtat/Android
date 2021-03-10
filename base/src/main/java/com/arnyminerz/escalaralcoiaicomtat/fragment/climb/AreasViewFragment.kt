@@ -26,10 +26,8 @@ import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.ICON_WAYPOINT_ESCALADOR_BLANC
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
-import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -37,6 +35,7 @@ import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.geometry.LatLng
 import timber.log.Timber
 
 const val LOCATION_PERMISSION_REQUEST = 0
@@ -202,6 +201,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             Timber.d("Loading map...")
             mapHelper
                 .withControllable(false)
+                .move(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), animate = false)
                 .loadMap(requireContext()) { _, map, _ ->
                     Timber.d("Map is ready.")
 
