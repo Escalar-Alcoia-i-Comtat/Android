@@ -121,11 +121,15 @@ class MapHelper(private val mapView: MapView) {
         return this
     }
 
+    /**
+     * Updates the controllable status of the map
+     * @author Arnau Mora
+     * @param controllable If gestures over the map should be enabled
+     */
     fun withControllable(controllable: Boolean): MapHelper {
+        allGesturesEnabled = controllable
         if (map != null)
-            map?.uiSettings?.setAllGesturesEnabled(controllable)
-        else
-            allGesturesEnabled = controllable
+            map?.uiSettings?.setAllGesturesEnabled(allGesturesEnabled)
         return this
     }
 
@@ -165,6 +169,14 @@ class MapHelper(private val mapView: MapView) {
         )
     }
 
+    /**
+     * Loads the icons defined in ICONS into the map
+     * @param context The context to call from
+     * @see ICONS
+     * @author Arnau Mora
+     * @throws MapNotInitializedException When the map has not been initialized yet
+     */
+    @Throws(MapNotInitializedException::class)
     private fun loadDefaultIcons(context: Context) {
         if (style == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
@@ -184,14 +196,26 @@ class MapHelper(private val mapView: MapView) {
         }
     }
 
+    /**
+     * Initializes the map
+     * @author Arnau Mora
+     * @param context The context to call from
+     * @param style A Mapbox map style to set
+     * @param callback What to call when the map gets loaded
+     * @see MapHelper
+     * @see MapView
+     * @see MapboxMap
+     * @see Style
+     */
     fun loadMap(
         context: Context,
+        style: String = Style.SATELLITE,
         callback: MapHelper.(mapView: MapView, map: MapboxMap, style: Style) -> Unit
     ): MapHelper {
         Timber.d("Loading map...")
         mapView.getMapAsync { map ->
             Timber.d("Setting map style...")
-            map.setStyle(Style.SATELLITE) { style ->
+            map.setStyle(style) { style ->
                 mapSetup(context, map, style)
                 callback(this, mapView, map, style)
             }
@@ -210,7 +234,7 @@ class MapHelper(private val mapView: MapView) {
      * @author Arnau Mora
      * @return A MapFeatures object with all the loaded data
      */
-    @Throws(FileNotFoundException::class, NoInternetAccessException::class)
+    @Throws(FileNotFoundException::class, NoInternetAccessException::class, MapNotInitializedException::class)
     @ExperimentalUnsignedTypes
     fun loadKML(
         activity: FragmentActivity,
@@ -242,6 +266,16 @@ class MapHelper(private val mapView: MapView) {
         return MapFeatures(result.markers, result.polylines, result.polygons)
     }
 
+    /**
+     * Starts the MapsActivity through the specified context.
+     * @author Arnau Mora
+     * @param context The context to launch from
+     * @param overrideLoadedValues If true, the loader markers and geometries will be ignored, and
+     * the KML address will be passed to MapsActivity.
+     * @throws MapAnyDataToLoadException When no KML address has been loaded
+     * @see MapsActivity
+     */
+    @Throws(MapAnyDataToLoadException::class)
     @ExperimentalUnsignedTypes
     fun showMapsActivity(context: Context, overrideLoadedValues: Boolean = false) {
         if (loadedKMLAddress == null)
@@ -271,8 +305,11 @@ class MapHelper(private val mapView: MapView) {
      * @param zoom The target zoomo
      * @param animate If the movement should be animated
      * @author Arnau Mora
+     * @see LatLng
+     * @throws MapNotInitializedException If the map has not been initialized
      */
-    fun move(position: LatLng, zoom: Double, animate: Boolean = true) {
+    @Throws(MapNotInitializedException::class)
+    fun move(position: LatLng, zoom: Double = DEFAULT_ZOOM, animate: Boolean = true) {
         if (map == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
@@ -292,8 +329,12 @@ class MapHelper(private val mapView: MapView) {
      * @param update The movement to make
      * @param animate If the movement should be animated
      * @author Arnau Mora
+     * @see CameraUpdate
+     * @see CameraUpdateFactory
+     * @throws MapNotInitializedException If the map has not been initialized
      */
-    private fun move(update: CameraUpdate, animate: Boolean = true) {
+    @Throws(MapNotInitializedException::class)
+    fun move(update: CameraUpdate, animate: Boolean = true) {
         if (map == null)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
@@ -313,9 +354,10 @@ class MapHelper(private val mapView: MapView) {
      * @see RenderMode
      * @see PermissionsManager
      * @throws MissingPermissionException If the location permission is not granted
+     * @throws MapNotInitializedException If the map has not been initialized
      */
     @SuppressLint("MissingPermission")
-    @Throws(MissingPermissionException::class)
+    @Throws(MissingPermissionException::class, MapNotInitializedException::class)
     fun enableLocationComponent(
         context: Context,
         cameraMode: Int = CameraMode.TRACKING,
