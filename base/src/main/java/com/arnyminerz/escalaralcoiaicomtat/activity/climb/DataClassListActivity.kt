@@ -89,6 +89,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         if (!mapLoaded && hasInternet) {
             Timber.v("Loading map...")
             mapHelper
+                .show()
                 .withStartingPosition(LatLng(DEFAULT_LAT, DEFAULT_LON), DEFAULT_ZOOM)
                 .withControllable(false)
                 .loadMap(this) { _, map, _ ->
@@ -124,6 +125,9 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                         true
                     }
                 }
+        } else if (!hasInternet) {
+            binding.loadingLayout.hide()
+            mapHelper.hide()
         }
     }
 }
