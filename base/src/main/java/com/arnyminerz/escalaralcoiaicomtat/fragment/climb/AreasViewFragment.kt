@@ -253,10 +253,11 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         this.areaClickListener = areaClickListener
     }
 
-    @SuppressLint("MissingPermission")
     override fun onResume() {
         super.onResume()
 
+        initializeMap()
+        nearbyZonesReady()
         justAttached = false
     }
 
