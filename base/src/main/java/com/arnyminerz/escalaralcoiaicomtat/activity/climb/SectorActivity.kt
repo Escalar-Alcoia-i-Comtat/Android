@@ -4,14 +4,12 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.SectorFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
@@ -69,7 +67,7 @@ class SectorActivity : NetworkChangeListenerFragmentActivity() {
         updateTitle()
 
         binding.backImageButton.setOnClickListener { onBackPressed() }
-        binding.noInternetImageView.setOnClickListener { toast(R.string.toast_error_no_internet) }
+        binding.noInternetImageView.setOnClickListener { it.performLongClick() }
 
         fragments.clear()
         for (sector in sectors)
