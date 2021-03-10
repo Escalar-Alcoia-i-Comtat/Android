@@ -170,7 +170,7 @@ class MapHelper(private val mapView: MapView) {
         for (icon in ICONS) {
             val drawable = ResourcesCompat.getDrawable(
                 context.resources,
-                icon.icon,
+                icon.drawable,
                 context.theme
             )
             if (drawable == null) {

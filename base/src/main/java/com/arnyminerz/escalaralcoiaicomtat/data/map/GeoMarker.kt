@@ -1,22 +1,19 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.map
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Base64
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import timber.log.Timber
-import java.io.File
 
 const val ICON_SIZE_MULTIPLIER = .35f
 
@@ -55,7 +52,7 @@ class GeoMarker(
     fun withImage(bitmap: Bitmap): GeoMarker {
         Timber.d("Setting image for GeoMarker...")
         this.bitmap = bitmap
-        icon = GeoIconGeneric(id)
+        icon = GeoIcon(id, bitmap)
         return this
     }
 
@@ -65,40 +62,15 @@ class GeoMarker(
         return this
     }
 
+    fun withImage(resources: Resources, icon: GeoIconConstant): GeoMarker =
+        withImage(GeoIcon(resources, icon))
+
     fun addToMap(context: Context, style: Style, symbolManager: SymbolManager): Symbol? {
         var symbolOptions = SymbolOptions()
             .withLatLng(LatLng(position.latitude, position.longitude))
 
-        val imgFile = File(context.cacheDir, "$id.webp")
         if (bitmap != null) {
             Timber.d("Adding image to Style...")
-            style.addImage(id, bitmap!!, false)
-            Timber.d("Storing image to cache...")
-            if (!imgFile.deleteIfExists())
-                Timber.w("Could not delete already existing image file!")
-            else {
-                val stream = imgFile.outputStream()
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-                    bitmap!!.compress(
-                        Bitmap.CompressFormat.WEBP_LOSSLESS,
-                        BITMAP_COMPRESSION,
-                        stream
-                    )
-                else
-                    bitmap!!.compress(Bitmap.CompressFormat.WEBP, BITMAP_COMPRESSION, stream)
-                stream.close()
-                Timber.d("Stored image into $imgFile.")
-            }
-            iconLoaded = true
-        }
-
-        if (icon != null && !iconLoaded && imgFile.exists()) {
-            Timber.d("Found a stored image file. Reading from it...")
-            val options = BitmapFactory.Options().apply {
-                inPreferredConfig = Bitmap.Config.ARGB_8888
-            }
-            val bitmap = BitmapFactory.decodeFile(imgFile.path, options)
-            Timber.d("Adding image to style...")
             style.addImage(id, bitmap!!, false)
             iconLoaded = true
         }

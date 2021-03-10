@@ -1,53 +1,45 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.map
 
+import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 
-abstract class GeoIcon(open val name: String) : Parcelable
-
-data class GeoIconGeneric(override val name: String): GeoIcon(name) {
-    constructor(parcel: Parcel) : this(
-        parcel.readString()!!
-    )
-
-    override fun describeContents(): Int = 0
-
-    override fun writeToParcel(dest: Parcel?, flags: Int) {
-        dest?.writeString(name)
-    }
-
-    companion object CREATOR : Parcelable.Creator<GeoIconGeneric> {
-        override fun createFromParcel(parcel: Parcel): GeoIconGeneric {
-            return GeoIconGeneric(parcel)
-        }
-
-        override fun newArray(size: Int): Array<GeoIconGeneric?> {
-            return arrayOfNulls(size)
-        }
-    }
-}
-
-data class GeoIconDrawable(override val name: String, @DrawableRes val icon: Int) : GeoIcon(name) {
+class GeoIcon(val name: String, val icon: Bitmap) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
-        parcel.readInt()
+        parcel.readParcelable(Bitmap::class.java.classLoader)!!
+    )
+
+    constructor(name: String, resources: Resources, @DrawableRes res: Int) : this(
+        name,
+        BitmapFactory.decodeResource(resources, res)
+    )
+
+    constructor(resources: Resources, constant: GeoIconConstant) : this(
+        constant.name,
+        resources,
+        constant.drawable
     )
 
     override fun describeContents(): Int = 0
 
     override fun writeToParcel(dest: Parcel?, flags: Int) {
         dest?.writeString(name)
-        dest?.writeInt(icon)
+        dest?.writeParcelable(icon, 0)
     }
 
-    companion object CREATOR : Parcelable.Creator<GeoIconDrawable> {
-        override fun createFromParcel(parcel: Parcel): GeoIconDrawable {
-            return GeoIconDrawable(parcel)
+    companion object CREATOR : Parcelable.Creator<GeoIcon> {
+        override fun createFromParcel(parcel: Parcel): GeoIcon {
+            return GeoIcon(parcel)
         }
 
-        override fun newArray(size: Int): Array<GeoIconDrawable?> {
+        override fun newArray(size: Int): Array<GeoIcon?> {
             return arrayOfNulls(size)
         }
     }
 }
+
+data class GeoIconConstant(val name: String, @DrawableRes val drawable: Int)
