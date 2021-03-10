@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.UiThread
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.ViewList
@@ -47,7 +48,6 @@ fun visibility(view: Preference?, visible: Boolean, debug: Boolean = false) {
     view?.isVisible = visible
 }
 
-@UiThread
 fun Context?.visibility(
     view: View?,
     visible: Boolean,
@@ -65,6 +65,13 @@ fun Context?.visibility(
         }
     else com.arnyminerz.escalaralcoiaicomtat.view.visibility(view, visible, setGone, debug)
 }
+
+fun Fragment.visibility(
+    view: View?,
+    visible: Boolean,
+    setGone: Boolean = true,
+    debug: Boolean = false
+) = context.visibility(view, visible, setGone, debug)
 
 /**
  * Checks if a view is visible

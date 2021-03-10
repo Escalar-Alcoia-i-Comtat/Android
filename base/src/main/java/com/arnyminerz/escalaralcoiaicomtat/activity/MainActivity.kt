@@ -103,7 +103,8 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             ExistingPeriodicWorkPolicy.KEEP,
             PeriodicWorkRequestBuilder<UpdateWorker>(
                 1, TimeUnit.HOURS,
-                UPDATE_CHECKER_FLEX_MINUTES, TimeUnit.MINUTES)
+                UPDATE_CHECKER_FLEX_MINUTES, TimeUnit.MINUTES
+            )
                 .setConstraints(
                     Constraints.Builder()
                         .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -324,9 +325,6 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                 AREAS.addAll(areasList)
                 Timber.v("  --- Found ${AREAS.size} areas ---")
 
-                Timber.v("Got areas, setting in map fragment")
-                mapFragment.setAreas(AREAS)
-
                 areasViewFragment.setItemClickListener { holder, position ->
                     binding.loadingLayout.show()
                     Timber.v("Clicked item %s", position)
@@ -357,6 +355,9 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
 
                 loaded = true
                 loading = false
+
+                Timber.v("Got areas, setting in map fragment")
+                mapFragment.loadMapFeatures()
             }
     }
 }

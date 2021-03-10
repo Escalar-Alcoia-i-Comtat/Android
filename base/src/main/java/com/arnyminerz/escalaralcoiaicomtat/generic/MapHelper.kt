@@ -10,6 +10,7 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
 import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -254,6 +255,7 @@ class MapHelper(private val mapView: MapView) {
         NoInternetAccessException::class,
         MapNotInitializedException::class
     )
+    @WorkerThread
     @ExperimentalUnsignedTypes
     fun loadKML(
         activity: FragmentActivity,
@@ -261,11 +263,13 @@ class MapHelper(private val mapView: MapView) {
         networkState: ConnectivityProvider.NetworkState,
         addToMap: Boolean = true
     ): MapFeatures {
-        if (!isLoaded)
+        if (addToMap && !isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+        if (!networkState.hasInternet)
+            throw NoInternetAccessException()
 
-        val loader = KMLLoader(kmlAddress, null)
-        val result = loader.load(activity, map!!, style!!, networkState)
+        Timber.v("Loading KML $kmlAddress...")
+        val result = loadKML(activity, map!!, kmlAddress = kmlAddress)
         if (addToMap)
             activity.runOnUiThread {
                 Timber.v("Loading features...")
@@ -497,6 +501,7 @@ class MapHelper(private val mapView: MapView) {
      * @see Symbol
      * @throws MapNotInitializedException If the map has not been initialized
      */
+    @UiThread
     @Throws(MapNotInitializedException::class)
     fun clearSymbols() {
         if (!isLoaded)
@@ -513,6 +518,7 @@ class MapHelper(private val mapView: MapView) {
      * @see Line
      * @throws MapNotInitializedException If the map has not been initialized
      */
+    @UiThread
     @Throws(MapNotInitializedException::class)
     fun clearLines() {
         if (!isLoaded)
@@ -529,6 +535,7 @@ class MapHelper(private val mapView: MapView) {
      * @see Line
      * @throws MapNotInitializedException If the map has not been initialized
      */
+    @UiThread
     @Throws(MapNotInitializedException::class)
     fun clearFills() {
         if (!isLoaded)
@@ -544,6 +551,7 @@ class MapHelper(private val mapView: MapView) {
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @ExperimentalUnsignedTypes
+    @UiThread
     @Throws(MapNotInitializedException::class)
     fun display(context: Context) {
         if (!isLoaded)
@@ -571,6 +579,7 @@ class MapHelper(private val mapView: MapView) {
      * @param animate If the movement should be animated
      * @throws MapNotInitializedException If the map has not been initialized
      */
+    @UiThread
     @Throws(MapNotInitializedException::class)
     fun center(padding: Int = 11, animate: Boolean = true) {
         if (markers.isEmpty())

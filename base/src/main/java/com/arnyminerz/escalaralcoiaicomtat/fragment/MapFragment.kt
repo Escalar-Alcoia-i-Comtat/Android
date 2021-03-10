@@ -1,14 +1,14 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
-import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
+import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentMapBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
@@ -24,9 +24,13 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import timber.log.Timber
 import java.io.FileNotFoundException
 
+private const val ICON_SIZE_MULTIPLIER = .2f
+
 @ExperimentalUnsignedTypes
 class MapFragment : NetworkChangeListenerFragment() {
     private lateinit var mapHelper: MapHelper
+    private var everCentered = false
+    private var mapLoaded = false
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
@@ -37,22 +41,11 @@ class MapFragment : NetworkChangeListenerFragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMapBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    private val areas = arrayListOf<Area>()
-    private var map: MapboxMap? = null
-    private var markerWindow: MarkerWindow? = null
-
-    fun setAreas(areas: ArrayList<Area>) =
-        this.areas.addAll(areas)
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
         mapHelper = MapHelper(binding.pageMapView)
         mapHelper.onCreate(savedInstanceState)
         mapHelper
-            .withStartingPosition(LatLng(38.7216704, -0.4799751), 12.5)
+            .withIconSizeMultiplier(ICON_SIZE_MULTIPLIER)
+            .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
             .loadMap(requireContext()) { _, map, _ ->
                 this@MapFragment.map = map
 
@@ -65,48 +58,6 @@ class MapFragment : NetworkChangeListenerFragment() {
                     } catch (ex: IllegalStateException) {
                         Timber.w("Tried to check location permission without being attached to a context.")
                     }
-
-                var counter = 0
-                val max = 3
-                val markers = arrayListOf<GeoMarker>()
-                val polygons = arrayListOf<GeoGeometry>()
-                val polylines = arrayListOf<GeoGeometry>()
-
-                runAsync {
-                    for (area in areas) {
-                        if (context == null || !isResumed) break
-
-                        try {
-                            val result =
-                                mapHelper.loadKML(requireActivity(), area.kmlAddress, networkState)
-
-                            Timber.d("Adding features to list...")
-                            markers.addAll(result.markers)
-                            polygons.addAll(result.polygons)
-                            polylines.addAll(result.polylines)
-
-                            Timber.d("Adding features to map...")
-                            counter++
-                            if (counter >= max) {
-                                mapHelper.addMarkers(markers)
-                                mapHelper.addGeometries(polygons.toList())
-                                mapHelper.addGeometries(polylines.toList())
-
-                                mapHelper.display(requireContext())
-                                mapHelper.center()
-                            }
-                        } catch (e: FileNotFoundException) {
-                            Timber.e(e, "Could not load KML")
-                            requireContext().toast(R.string.toast_error_internal)
-                        } catch (e: NoInternetAccessException) {
-                            Timber.e(e, "Could not load KML")
-                            requireContext().toast(R.string.toast_error_internal)
-                        } catch (e: MapNotInitializedException) {
-                            Timber.e(e, "Could not load KML")
-                            requireContext().toast(R.string.toast_error_internal)
-                        }
-                    }
-                }
 
                 mapHelper.addSymbolClickListener {
                     if (SETTINGS_CENTER_MARKER_PREF.get(requireContext().sharedPreferences))
@@ -125,7 +76,11 @@ class MapFragment : NetworkChangeListenerFragment() {
                     true
                 }
             }
+        return binding.root
     }
+
+    private var map: MapboxMap? = null
+    private var markerWindow: MarkerWindow? = null
 
     override fun onStart() {
         super.onStart()
@@ -157,10 +112,18 @@ class MapFragment : NetworkChangeListenerFragment() {
         mapHelper.onDestroy()
     }
 
-    @SuppressLint("MissingPermission")
     override fun onResume() {
         super.onResume()
         mapHelper.onResume()
+
+        runAsync {
+            loadMapFeatures()
+        }
+
+        if (mapHelper.isLoaded && !everCentered) {
+            center()
+            everCentered = true
+        }
     }
 
     override fun onDestroyView() {
@@ -175,6 +138,50 @@ class MapFragment : NetworkChangeListenerFragment() {
         if (isResumed) {
             visibility(binding.pageMapView, hasInternet)
             visibility(binding.mapsNoInternetCardView.noInternetCardView, !hasInternet)
+        }
+    }
+
+    @UiThread
+    private fun center() {
+        Timber.d("Centering map...")
+        mapHelper.display(requireContext())
+        mapHelper.center()
+    }
+
+    @WorkerThread
+    fun loadMapFeatures() {
+        if (mapLoaded)
+            return
+        if (AREAS.size <= 0) {
+            Timber.w("Won't load map features since AREAS is still not initialized.")
+            return
+        }
+        Timber.d("Loading KML for ${AREAS.size} areas...")
+        visibility(binding.progressBar, true)
+        for (area in AREAS)
+            try {
+                val kml = area.kmlAddress
+                Timber.v("Loading KML ($kml) for ${area.displayName}...")
+                val result = mapHelper.loadKML(requireActivity(), kml, networkState, false)
+
+                Timber.d("Adding features to map...")
+                mapHelper.addMarkers(result.markers)
+                mapHelper.addGeometries(result.polygons)
+                mapHelper.addGeometries(result.polylines)
+            } catch (e: FileNotFoundException) {
+                Timber.e(e, "Could not load KML")
+                requireContext().toast(R.string.toast_error_internal)
+            } catch (e: NoInternetAccessException) {
+                Timber.e(e, "Could not load KML")
+                requireContext().toast(R.string.toast_error_internal)
+            } catch (e: MapNotInitializedException) {
+                Timber.e(e, "Could not load KML")
+                requireContext().toast(R.string.toast_error_internal)
+            }
+
+        visibility(binding.progressBar, false)
+        runOnUiThread {
+            center()
         }
     }
 }
