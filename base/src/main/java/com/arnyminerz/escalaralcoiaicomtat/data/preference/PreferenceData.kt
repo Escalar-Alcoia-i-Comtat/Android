@@ -10,7 +10,7 @@ class PreferenceData<T : Any> constructor(val key: String, val default: T) {
 
     @Suppress("UNCHECKED_CAST")
     fun get(sharedPreferences: SharedPreferences?): T =
-        (sharedPreferences?.all?.getOrDefault(key, default) as? T?) ?: default
+        (sharedPreferences?.all?.get(key) as? T?) ?: default
 
     fun put(sharedPreferences: SharedPreferences, value: Any?) {
         with(sharedPreferences.edit()) {
