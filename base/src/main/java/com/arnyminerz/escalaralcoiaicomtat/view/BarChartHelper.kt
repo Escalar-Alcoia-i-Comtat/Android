@@ -10,6 +10,7 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
+import timber.log.Timber
 
 @ExperimentalUnsignedTypes
 class BarChartHelper private constructor(
@@ -62,7 +63,7 @@ class BarChartHelper private constructor(
             val grades = arrayListOf<Pair<Grade, Int>?>(null, null, null, null)
             val gradeQuarters = arrayListOf<String>()
             val gradeColors = arrayListOf<Int>()
-            paths.forEach { path ->
+            for (path in paths)
                 try {
                     val grade = path.grade()
                     val index = barIndex(grade.displayName)
@@ -72,22 +73,20 @@ class BarChartHelper private constructor(
                         else
                             grades[index] = Pair(grade, 1)
                 } catch (ex: NoSuchElementException) {
+                    Timber.w(ex)
                 }
-            }
-            var c = 0
-            for ((g, gr) in grades.withIndex()){
+
+            for ((g, gr) in grades.withIndex()) {
                 if (gr == null) continue
                 val (grade, count) = gr
-                val formatting = Pair(BarEntry(c.toFloat(), count.toFloat()), grade.color())
+                val formatting = Pair(BarEntry(g.toFloat(), count.toFloat()), grade.color())
                 gradeEntries.add(formatting.first)
 
                 gradeQuarters.add(barsList[g].second)
                 gradeColors.add(formatting.second)
-                c++
             }
 
-            val dataSet =
-                BarDataSet(gradeEntries, context.getString(R.string.path_stats_chart_title))
+            val dataSet = BarDataSet(gradeEntries, context.getString(R.string.path_stats_chart_title))
             dataSet.setColors(gradeColors.toIntArray(), context)
             dataSet.valueFormatter = yFormatter
             dataSet.valueTextSize = 14f
