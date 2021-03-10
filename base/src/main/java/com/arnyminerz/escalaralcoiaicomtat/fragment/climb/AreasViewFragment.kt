@@ -18,16 +18,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getZones
-import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
-import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_MIN_DIST
-import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_MIN_TIME
-import com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData
+import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
+import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -53,7 +51,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     private var _binding: FragmentViewAreasBinding? = null
     private val binding get() = _binding!!
 
-    fun updateNearbyZones(location: Location) {
+    private fun nearbyZonesReady(): Boolean {
         var error = false
 
         if (context == null) {
@@ -77,8 +75,13 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         }
 
         visibility(binding.nearbyZonesCardView, !error)
-        if (error)
+        return !error
+    }
+
+    fun updateNearbyZones(location: Location) {
+        if (!nearbyZonesReady())
             return
+
         Timber.v("Updating nearby zones...")
         val position = location.toLatLng()
 
@@ -195,6 +198,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
         if (PermissionsManager.areLocationPermissionsGranted(requireContext())) {
             Timber.d("Requesting location updates...")
+            binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
             locationManager!!.requestLocationUpdates(
                 LocationManager.NETWORK_PROVIDER,
                 LOCATION_UPDATE_MIN_TIME,
@@ -209,7 +213,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     fun refreshAreas() {
         if (context != null && isResumed) {
             Timber.v("Refreshing areas...")
-            binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
+            nearbyZonesReady()
 
             Timber.d("Initializing area adapter for AreasViewFragment...")
             val adapter = AreaAdapter(requireContext(), areaClickListener)
