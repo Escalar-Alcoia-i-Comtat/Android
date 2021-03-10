@@ -157,9 +157,9 @@ class MapHelper(private val mapView: MapView) {
         this.style = style
 
         Timber.d("Loading managers...")
-        symbolManager = SymbolManager(mapView, map, style)
         fillManager = FillManager(mapView, map, style)
         lineManager = LineManager(mapView, map, style)
+        symbolManager = SymbolManager(mapView, map, style)
 
         Timber.d("Configuring SymbolManager...")
         symbolManager!!.apply {
