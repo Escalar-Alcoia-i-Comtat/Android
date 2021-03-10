@@ -145,7 +145,5 @@ dependencies {
 
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 
-    implementation 'com.github.sephiroth74:android-target-tooltip:2.0.4'
-
     implementation 'io.noties.markwon:core:4.6.2'
 }
