@@ -269,16 +269,17 @@ class MapHelper(private val mapView: MapView) {
      * @param context The context to launch from
      * @param overrideLoadedValues If true, the loader markers and geometries will be ignored, and
      * the KML address will be passed to MapsActivity.
-     * @throws MapAnyDataToLoadException When no KML address has been loaded
+     * @throws MapAnyDataToLoadException When no data has been loaded
      * @see MapsActivity
      */
     @Throws(MapAnyDataToLoadException::class)
     @ExperimentalUnsignedTypes
     fun showMapsActivity(context: Context, overrideLoadedValues: Boolean = false) {
-        if (loadedKMLAddress == null)
+        val loadedElements = markers.isNotEmpty() || geometries.isNotEmpty()
+
+        if (loadedKMLAddress == null && !loadedElements)
             throw MapAnyDataToLoadException("Map doesn't have any loaded data. You may run loadKML, for example.")
 
-        val loadedElements = markers.isNotEmpty() || geometries.isNotEmpty()
         context.startActivity(
             Intent(context, MapsActivity::class.java).apply {
                 if (loadedElements && !overrideLoadedValues) {
