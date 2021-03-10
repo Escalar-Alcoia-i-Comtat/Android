@@ -51,8 +51,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     private var locationManager: LocationManager? = null
     private var locationListenerAdded = false
 
-    private var counter = 0
-
     private var _binding: FragmentViewAreasBinding? = null
     private val binding get() = _binding!!
 
@@ -106,46 +104,43 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 )
             }
             binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
-        } else {
+        } else if (mapHelper.isLoaded) {
             binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
             binding.nearbyZonesCardView.isClickable = false
 
-            counter = 0
+            val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences)
 
-            val requiredDistance =
-                SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences)
+            mapHelper.clearSymbols()
 
-            if (context != null) {
-                mapHelper.clearSymbols()
-
-                runAsync {
-                    val zones = AREAS.getZones()
-                    Timber.v("Iterating through ${zones.size} zones.")
-                    Timber.v("Current Location: [${location.latitude},${location.longitude}]")
-                    for (zone in zones) {
-                        val zoneLocation = zone.position ?: continue
-                        if (zoneLocation.distanceTo(position) <= requiredDistance) {
-                            Timber.d("Adding zone #${zone.id}. Creating marker...")
-                            var marker = GeoMarker(
-                                zoneLocation,
-                                windowData = MapObjectWindowData(zone.displayName, null)
-                            )
-                            Timber.d("Setting image...")
-                            marker = marker.withImage(ICON_WAYPOINT_ESCALADOR_BLANC)
-                            Timber.d("Adding marker to map")
-                            mapHelper.add(marker)
-                        }
-                    }
-
-                    Timber.d("Finished adding markers.")
-                    requireActivity().runOnUiThread {
-                        mapHelper.display(requireContext())
-                        mapHelper.center()
-
-                        binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
+            runAsync {
+                val zones = AREAS.getZones()
+                Timber.v("Iterating through ${zones.size} zones.")
+                Timber.v("Current Location: [${location.latitude},${location.longitude}]")
+                for (zone in zones) {
+                    val zoneLocation = zone.position ?: continue
+                    if (zoneLocation.distanceTo(position) <= requiredDistance) {
+                        Timber.d("Adding zone #${zone.id}. Creating marker...")
+                        var marker = GeoMarker(
+                            zoneLocation,
+                            windowData = MapObjectWindowData(zone.displayName, null)
+                        )
+                        Timber.d("Setting image...")
+                        marker = marker.withImage(ICON_WAYPOINT_ESCALADOR_BLANC)
+                        Timber.d("Adding marker to map")
+                        mapHelper.add(marker)
                     }
                 }
-            } else Timber.w("Could not show nearby zones")
+
+                Timber.d("Finished adding markers.")
+                requireActivity().runOnUiThread {
+                    mapHelper.display(requireContext())
+                    mapHelper.center()
+
+                    binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
+                }
+            }
+        } else {
+            Timber.w("Could not update Nearby Zones: MapHelper not loaded")
         }
     }
 
