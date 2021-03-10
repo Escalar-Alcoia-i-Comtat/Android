@@ -49,14 +49,11 @@ class GeoMarker(
         parcel.readParcelable(GeoIcon::class.java.classLoader),
     )
 
-    fun withImage(bitmap: Bitmap): GeoMarker {
-        Timber.d("Setting image for GeoMarker...")
-        this.bitmap = bitmap
-        icon = GeoIcon(id, bitmap)
-        return this
-    }
+    fun withImage(bitmap: Bitmap): GeoMarker =
+        withImage(GeoIcon(id, bitmap))
 
     fun withImage(icon: GeoIcon): GeoMarker {
+        Timber.d("Setting image for GeoMarker...")
         this.icon = icon
         iconLoaded = true
         return this
