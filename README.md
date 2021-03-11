@@ -5,7 +5,10 @@
 [![Open Issues][issues-badge]][issues]
 [![Pull Requests][pr-badge]][pull-requests]
 
-![Android Build][build-badge]
+[![Android Build][build-badge]][actions]
+
+[![Google Play][googleplay-badge]][play-store]
+[![App Gallery][appgallery-badge]][app-gallery]
 
 This is the official Escalar Alcoià i Comtat's Android App repository, here's the full source code 
 of the app.
@@ -30,13 +33,17 @@ The simplest way of donating some money is through [Github Sponsors][sponsors]. 
 ---
 [sponsors]: https://github.com/sponsors/ArnyminerZ
 [play-store]: https://play.google.com/store/apps/details?id=com.arnyminerz.escalaralcoiaicomtat
+[app-gallery]: https://appgallery.huawei.com/#/app/C103446955
 [issues]: https://github.com/Escalar-Alcoia-i-Comtat/Android/issues
 [pull-requests]: https://github.com/Escalar-Alcoia-i-Comtat/Android/pulls
 [releases]: https://github.com/Escalar-Alcoia-i-Comtat/Android/releases
 [commits]: https://github.com/Escalar-Alcoia-i-Comtat/Android/commits/master
+[actions]: https://github.com/ArnyminerZ/EscalarAlcoiaIComtat-Android/actions
 
 [activity-badge]: https://img.shields.io/github/commit-activity/m/Escalar-Alcoia-i-Comtat/Android?style=for-the-badge
 [commit-badge]: https://img.shields.io/github/last-commit/Escalar-Alcoia-i-Comtat/Android?style=for-the-badge
 [build-badge]: https://img.shields.io/github/workflow/status/Escalar-Alcoia-i-Comtat/Android/Release%20Drafter?style=for-the-badge
 [issues-badge]: https://img.shields.io/github/issues-raw/Escalar-Alcoia-i-Comtat/Android?style=for-the-badge
 [pr-badge]: https://img.shields.io/github/issues-pr-raw/Escalar-Alcoia-i-Comtat/Android?style=for-the-badge
+[googleplay-badge]: https://img.shields.io/static/v1?label=Google%20Play&message=Install&color=blue&style=for-the-badge&logo=google-play
+[appgallery-badge]: https://img.shields.io/static/v1?label=App%20Gallery&message=Install&color=red&style=for-the-badge&logo=huawei
