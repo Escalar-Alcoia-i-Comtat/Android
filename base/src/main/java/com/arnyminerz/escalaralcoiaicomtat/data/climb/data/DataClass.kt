@@ -35,56 +35,56 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import timber.log.Timber
 import java.io.File
-import java.io.Serializable
 import java.util.*
-import kotlin.NoSuchElementException
 
 /**
  * Searches in AREAS and tries to get an intent from them
  */
 @ExperimentalUnsignedTypes
 fun getIntent(context: Context, queryName: String): Intent? {
-    val areas = arrayListOf<Area>()
-    areas.addAll(AREAS)
-
-    Timber.d("Trying to generate intent from \"$queryName\". Searching in ${areas.size} areas.")
-    for ((a, area) in areas.withIndex()) {
+    Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
+    for ((a, area) in AREAS.withIndex()) {
         Timber.d("  Finding in ${area.displayName}. It has ${area.count()} zones.")
-        if (area.displayName.equals(queryName, true))
-            return Intent(context, AreaActivity::class.java).apply {
-                Timber.d("Found Area id ${area.id}!")
-                putExtra(EXTRA_AREA, a)
-            }
-        else if (area.isNotEmpty())
-            for ((z, zone) in area.withIndex()) {
-                Timber.d("    Finding in ${zone.displayName}. It has ${zone.count()} sectors.")
-                if (zone.displayName.equals(queryName, true))
-                    return Intent(context, ZoneActivity::class.java).apply {
-                        Timber.d("Found Zone id ${zone.id}!")
-                        putExtra(EXTRA_AREA, a)
-                        putExtra(EXTRA_ZONE, z)
-                    }
-                else if (zone.isNotEmpty())
-                    for ((s, sector) in zone.withIndex()) {
-                        Timber.d("      Finding in ${sector.displayName}.")
-                        if (sector.displayName.equals(queryName, true))
-                            return Intent(context, SectorActivity::class.java).apply {
-                                Timber.d("Found Sector id ${sector.id}!")
-                                putExtra(EXTRA_AREA, a)
-                                putExtra(EXTRA_ZONE, z)
-                                putExtra(EXTRA_SECTOR, s)
-                            }
-                    }
-            }
+        when {
+            area.displayName.equals(queryName, true) ->
+                return Intent(context, AreaActivity::class.java).apply {
+                    Timber.d("Found Area id ${area.id}!")
+                    putExtra(EXTRA_AREA, a)
+                }
+            area.isNotEmpty() ->
+                for ((z, zone) in area.withIndex()) {
+                    Timber.d("    Finding in ${zone.displayName}. It has ${zone.count()} sectors.")
+                    if (zone.displayName.equals(queryName, true))
+                        return Intent(context, ZoneActivity::class.java).apply {
+                            Timber.d("Found Zone id ${zone.id}!")
+                            putExtra(EXTRA_AREA, a)
+                            putExtra(EXTRA_ZONE, z)
+                        }
+                    else if (zone.isNotEmpty())
+                        for ((s, sector) in zone.withIndex()) {
+                            Timber.d("      Finding in ${sector.displayName}.")
+                            if (sector.displayName.equals(queryName, true))
+                                return Intent(context, SectorActivity::class.java).apply {
+                                    Timber.d("Found Sector id ${sector.id}!")
+                                    putExtra(EXTRA_AREA, a)
+                                    putExtra(EXTRA_ZONE, z)
+                                    putExtra(EXTRA_SECTOR, s)
+                                }
+                        }
+                }
+            else -> Timber.w("Area is empty.")
+        }
     }
     Timber.w("Could not generate intent")
     return null
 }
 
+interface DataClassImpl
+
 @ExperimentalUnsignedTypes
 // A: List type
 // B: Parent Type
-abstract class DataClass<A : Serializable, B : Serializable>(
+abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     open val id: Int,
     open val version: Int,
     open val displayName: String,
@@ -95,7 +95,7 @@ abstract class DataClass<A : Serializable, B : Serializable>(
     @DrawableRes val errorPlaceholderDrawable: Int,
     open val parentId: Int,
     open val namespace: String
-) : Parcelable, Serializable, Iterable<A> {
+) : DataClassImpl, Parcelable, Iterable<A> {
     val children: ArrayList<A> = arrayListOf()
 
     /**
@@ -112,7 +112,7 @@ abstract class DataClass<A : Serializable, B : Serializable>(
         return other.namespace == namespace && other.id == id
     }
 
-    override fun iterator(): Iterator<A> = DataClassIterator(children)
+    override fun iterator(): Iterator<A> = children.iterator()
 
     override fun toString(): String = displayName
 
@@ -456,16 +456,4 @@ abstract class DataClass<A : Serializable, B : Serializable>(
         result = 31 * result + isDownloading.hashCode()
         return result
     }
-}
-
-class DataClassIterator<A : Serializable> (private val children: List<A>) : Iterator<A> {
-    private var i: Int = 0
-    override fun next(): A {
-        i++
-        if (i >= children.size)
-            throw NoSuchElementException()
-        return children[i]
-    }
-
-    override fun hasNext(): Boolean = i + 1 < children.size
 }

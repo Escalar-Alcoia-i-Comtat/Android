@@ -11,7 +11,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.File
-import java.io.Serializable
 import java.util.*
 
 /**
@@ -56,7 +55,7 @@ data class Area(
     override val kmlAddress: String?,
     override val parentId: Int,
     private val downloaded: Boolean = false
-) : DataClass<Zone, Serializable>(
+) : DataClass<Zone, DataClassImpl>(
     id,
     version,
     displayName,

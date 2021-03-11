@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.util.DisplayMetrics
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,5 +33,14 @@ fun runAsync(call: () -> Unit) =
         runCatching(call)
     }
 
-fun mapFloat(x: Float, in_min: Float, in_max: Float, out_min: Float, out_max: Float): Float =
-    (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+/**
+ * Runs the action in the UI thread.
+ * @author Arnau Mora
+ * @since 20210311
+ * @param action The runnable to execute
+ * @see Activity.runOnUiThread
+ * @see Fragment.getActivity
+ * @throws IllegalStateException If not currently associated with an activity or if associated only with a context
+ */
+@Throws(IllegalStateException::class)
+fun Fragment.runOnUiThread(action: Activity.() -> Unit) = requireActivity().runOnUiThread { action(requireActivity()) }
