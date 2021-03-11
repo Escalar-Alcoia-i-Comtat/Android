@@ -36,7 +36,6 @@ import com.bumptech.glide.request.transition.Transition
 import timber.log.Timber
 import java.io.File
 import java.util.*
-import kotlin.NoSuchElementException
 
 /**
  * Searches in AREAS and tries to get an intent from them
@@ -113,7 +112,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         return other.namespace == namespace && other.id == id
     }
 
-    override fun iterator(): Iterator<A> = DataClassIterator(children)
+    override fun iterator(): Iterator<A> = children.iterator()
 
     override fun toString(): String = displayName
 
@@ -457,16 +456,4 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         result = 31 * result + isDownloading.hashCode()
         return result
     }
-}
-
-class DataClassIterator<A : DataClassImpl>(private val children: List<A>) : Iterator<A> {
-    private var i: Int = 0
-    override fun next(): A {
-        i++
-        if (i >= children.size)
-            throw NoSuchElementException()
-        return children[i]
-    }
-
-    override fun hasNext(): Boolean = i + 1 < children.size
 }
