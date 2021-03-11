@@ -89,9 +89,10 @@ class MapHelper(private val mapView: MapView) {
 
     private val symbolClickListeners = arrayListOf<Symbol.() -> Boolean>()
 
+    private var mapSetUp = false
     val isLoaded: Boolean
         get() = symbolManager != null && fillManager != null && lineManager != null &&
-                map != null && style != null && style!!.isFullyLoaded
+                map != null && style != null && style!!.isFullyLoaded && mapSetUp
 
     fun onCreate(savedInstanceState: Bundle?) = mapView.onCreate(savedInstanceState)
 
@@ -182,6 +183,7 @@ class MapHelper(private val mapView: MapView) {
             setAllGesturesEnabled(allGesturesEnabled)
         }
 
+        mapSetUp = true
         move(startingPosition, startingZoom, false)
     }
 
@@ -190,13 +192,8 @@ class MapHelper(private val mapView: MapView) {
      * @param context The context to call from
      * @see ICONS
      * @author Arnau Mora
-     * @throws MapNotInitializedException When the map has not been initialized yet
      */
-    @Throws(MapNotInitializedException::class)
     private fun loadDefaultIcons(context: Context) {
-        if (!isLoaded)
-            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
-
         Timber.d("Loading default icons...")
         for (icon in ICONS) {
             val drawable = ResourcesCompat.getDrawable(

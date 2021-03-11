@@ -39,9 +39,8 @@ fun runAsync(call: () -> Unit) =
  * @since 20210311
  * @param action The runnable to execute
  * @see Activity.runOnUiThread
- * @see Runnable
  * @see Fragment.getActivity
  * @throws IllegalStateException If not currently associated with an activity or if associated only with a context
  */
 @Throws(IllegalStateException::class)
-fun Fragment.runOnUiThread(action: Runnable) = requireActivity().runOnUiThread(action)
+fun Fragment.runOnUiThread(action: Activity.() -> Unit) = requireActivity().runOnUiThread { action(requireActivity()) }
