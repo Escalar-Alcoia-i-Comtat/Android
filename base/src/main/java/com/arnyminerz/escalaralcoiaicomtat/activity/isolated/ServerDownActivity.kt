@@ -19,6 +19,9 @@ class ServerDownActivity : LanguageAppCompatActivity() {
         binding.tryAgainButton.setOnClickListener {
             startActivity(Intent(this, MainActivity::class.java))
         }
+        binding.sendFeedbackButton.setOnClickListener {
+            startActivity(Intent(this, FeedbackActivity::class.java))
+        }
     }
 
     override fun onBackPressed() {
