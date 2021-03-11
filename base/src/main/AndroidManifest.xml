@@ -35,7 +35,7 @@
             android:name=".activity.isolated.FeedbackActivity"
             android:exported="true" >
         </activity>
-        <activity android:name=".activity.ServerDownActivity" />
+        <activity android:name=".activity.isolated.ServerDownActivity" />
         <activity
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait"

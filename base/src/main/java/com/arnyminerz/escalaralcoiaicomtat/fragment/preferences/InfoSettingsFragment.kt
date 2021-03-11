@@ -33,7 +33,7 @@ class InfoSettingsFragment : PreferenceFragmentCompat() {
 
         githubPreference?.setOnPreferenceClickListener {
             startActivity(Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse("https://github.com/Escalar-Alcoia-i-Comtat/Android")
+                data = Uri.parse("https://github.com/ArnyminerZ/EscalarAlcoiaIComtat-Android")
             })
             true
         }
