@@ -19,6 +19,9 @@ android {
 
         resValue "string", "mapbox_access_token", MAPBOX_PUBLIC_TOKEN
         resValue "string", "sentry_dsn", SENTRY_DNS
+        buildConfigField "string", "PARSE_SERVER", PARSE_SERVER
+        buildConfigField "string", "PARSE_KEY", PARSE_KEY
+        buildConfigField "string", "PARSE_APPLICATION_ID", PARSE_APPLICATION_ID
     }
     signingConfigs {
         release {
@@ -135,6 +138,9 @@ dependencies {
     // Sentry
     implementation 'io.sentry:sentry-android:4.3.0'
     implementation 'io.sentry:sentry-android-timber:4.3.0'
+
+    // Parse Platform
+    implementation "com.github.parse-community.Parse-SDK-Android:parse:1.26.0"
 
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
