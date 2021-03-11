@@ -1,7 +1,8 @@
-package com.arnyminerz.escalaralcoiaicomtat.activity
+package com.arnyminerz.escalaralcoiaicomtat.activity.isolated
 
 import android.content.Intent
 import android.os.Bundle
+import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityServerDownBinding
 

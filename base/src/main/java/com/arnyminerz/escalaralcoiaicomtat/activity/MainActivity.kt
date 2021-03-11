@@ -11,6 +11,7 @@ import androidx.core.view.ViewCompat
 import androidx.work.*
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.ServerDownActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL_NO_SECURE
@@ -30,8 +31,6 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.network.ping
 import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChannels
 import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
-import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.worker.UpdateWorker
 import io.sentry.Sentry
