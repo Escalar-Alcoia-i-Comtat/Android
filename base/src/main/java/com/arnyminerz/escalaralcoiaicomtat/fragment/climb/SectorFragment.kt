@@ -8,8 +8,8 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
@@ -26,11 +26,13 @@ import timber.log.Timber
 const val CROSSFADE_DURATION = 50
 const val THUMBNAIL_SIZE = .1f
 
-@ExperimentalUnsignedTypes
-class SectorFragment(private val sector: Sector, private val viewPager: ViewPager2) :
-    NetworkChangeListenerFragment() {
-    private var maximized = false
+const val ARGUMENT_SECTOR = "sector"
 
+@ExperimentalUnsignedTypes
+class SectorFragment : NetworkChangeListenerFragment() {
+    private lateinit var sector: Sector
+
+    private var maximized = false
     private var notMaximizedImageHeight = 0
 
     private var _binding: FragmentSectorBinding? = null
@@ -42,7 +44,9 @@ class SectorFragment(private val sector: Sector, private val viewPager: ViewPage
             else R.drawable.round_flip_to_back_24
         )
 
-        viewPager.isUserInputEnabled = !maximized
+        (activity as? SectorActivity?)?.apply {
+            binding.sectorViewPager.isUserInputEnabled = !maximized
+        }
     }
 
     fun minimize() {
@@ -75,7 +79,12 @@ class SectorFragment(private val sector: Sector, private val viewPager: ViewPage
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSectorBinding.inflate(inflater, container, false)
-        val view = binding.root
+        return binding.root
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        sector = requireArguments().getParcelable(ARGUMENT_SECTOR)!!
 
         binding.sectorTextView.text = sector.displayName
 
@@ -124,8 +133,6 @@ class SectorFragment(private val sector: Sector, private val viewPager: ViewPage
             refreshMaximizeStatus()
         }
         refreshMaximizeStatus()
-
-        return view
     }
 
     override fun onDestroyView() {

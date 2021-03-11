@@ -1,20 +1,21 @@
 package com.arnyminerz.escalaralcoiaicomtat.view
 
 import android.content.Context
+import androidx.collection.arrayMapOf
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Path
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.Grade
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
+import timber.log.Timber
 
 @ExperimentalUnsignedTypes
 class BarChartHelper private constructor(
-    private val barData: BarData,
-    private val quarters: ArrayList<String>
+    val barData: BarData,
+    private val quarters: Map<Float, String>
 ) {
     companion object {
         private val barsList = listOf(
@@ -38,14 +39,12 @@ class BarChartHelper private constructor(
 
         private fun barIndex(grade: String): Int {
             var result = -1
-            if (grade.isNotEmpty()) {
+            if (grade.isNotEmpty())
                 for ((b, bar) in barsList.withIndex())
-                    for (gr in bar.first)
-                        if (grade[0] == gr) {
-                            result = b
-                            break
-                        }
-            }
+                    if (bar.first.contains(grade[0])) {
+                        result = b
+                        break
+                    }
 
             return result
         }
@@ -59,31 +58,34 @@ class BarChartHelper private constructor(
 
         fun fromPaths(context: Context, paths: Collection<Path>): BarChartHelper {
             val gradeEntries = arrayListOf<BarEntry>()
-            val grades = arrayListOf<Pair<Grade, Int>?>(null, null, null, null)
-            val gradeQuarters = arrayListOf<String>()
+            val grades = arrayMapOf<Int, Pair<Int, Int>>() // Color, Count
+            val gradeQuarters = arrayMapOf<Float, String>()
             val gradeColors = arrayListOf<Int>()
-            paths.forEach { path ->
+            for (path in paths)
                 try {
                     val grade = path.grade()
                     val index = barIndex(grade.displayName)
-                    if (index >= 0)
-                        if (grades[index] != null)
-                            grades[index] = Pair(grade, (grades[index]?.second ?: 0) + 1)
-                        else
-                            grades[index] = Pair(grade, 1)
+                    if (index >= 0) {
+                        Timber.d("Adding grade \"${grade.displayName}\" at $index")
+                        grades[index] = Pair(
+                            grade.color(),
+                            (grades[index]?.second ?: 0) + 1
+                        )
+                    } else
+                        Timber.w("Could not load bar index")
                 } catch (ex: NoSuchElementException) {
+                    Timber.w(ex)
                 }
-            }
-            var c = 0
-            for ((g, gr) in grades.withIndex()){
-                if (gr == null) continue
-                val (grade, count) = gr
-                val formatting = Pair(BarEntry(c.toFloat(), count.toFloat()), grade.color())
-                gradeEntries.add(formatting.first)
 
-                gradeQuarters.add(barsList[g].second)
-                gradeColors.add(formatting.second)
-                c++
+            for (b in grades.keys) {
+                val (gradeColor, count) = grades[b]!!
+                val f = b.toFloat()
+                Timber.d("Processing bar entry #$f")
+                val entry = BarEntry(f, count.toFloat())
+                gradeEntries.add(entry)
+
+                gradeQuarters[f] = barsList[b].second
+                gradeColors.add(gradeColor)
             }
 
             val dataSet =
@@ -95,16 +97,12 @@ class BarChartHelper private constructor(
         }
     }
 
-    val data: BarData
-        get() = barData
-
     val xFormatter = object : ValueFormatter() {
         override fun getAxisLabel(value: Float, axis: AxisBase?): String =
-            try {
-                quarters[value.toInt()]
-            } catch (_: java.lang.IndexOutOfBoundsException) {
-                "N/A"
-            }
+                quarters.getOrElse(value) {
+                    Timber.w("Could not get value at ${value.toInt()} for quarters.")
+                    "N/A"
+                }
 
         override fun getBarLabel(barEntry: BarEntry): String =
             barEntry.x.toInt().toString()

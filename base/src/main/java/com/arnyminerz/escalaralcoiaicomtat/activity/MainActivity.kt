@@ -24,10 +24,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.SettingsFragmentManager
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.AreasViewFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFragment.Companion.SettingsPage
-import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
-import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.network.ping
@@ -103,7 +100,8 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             ExistingPeriodicWorkPolicy.KEEP,
             PeriodicWorkRequestBuilder<UpdateWorker>(
                 1, TimeUnit.HOURS,
-                UPDATE_CHECKER_FLEX_MINUTES, TimeUnit.MINUTES)
+                UPDATE_CHECKER_FLEX_MINUTES, TimeUnit.MINUTES
+            )
                 .setConstraints(
                     Constraints.Builder()
                         .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -118,11 +116,11 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         return true
     }
 
-    private val areasViewFragment = AreasViewFragment()
-
-    private val mapFragment = MapFragment()
-    val downloadsFragment = DownloadsFragment()
-    private val settingsFragment = SettingsFragmentManager()
+    private lateinit var areasViewFragment: AreasViewFragment
+    private lateinit var mapFragment: MapFragment
+    lateinit var downloadsFragment: DownloadsFragment
+        private set
+    private lateinit var settingsFragment: SettingsFragmentManager
 
     var adapter: MainPagerAdapter? = null
     private lateinit var binding: ActivityMainBinding
@@ -172,6 +170,11 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         setSupportActionBar(binding.bottomAppBar)
 
         if (!prepareApp()) return
+
+        areasViewFragment = AreasViewFragment()
+        mapFragment = MapFragment()
+        downloadsFragment = DownloadsFragment()
+        settingsFragment = SettingsFragmentManager()
 
         binding.mainViewPager.adapter = MainPagerAdapter(
             this,
@@ -323,9 +326,6 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                 Timber.v("  Importing to collection...")
                 AREAS.addAll(areasList)
                 Timber.v("  --- Found ${AREAS.size} areas ---")
-
-                Timber.v("Got areas, setting in map fragment")
-                mapFragment.setAreas(AREAS)
 
                 areasViewFragment.setItemClickListener { holder, position ->
                     binding.loadingLayout.show()
