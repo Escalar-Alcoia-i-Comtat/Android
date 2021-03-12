@@ -1,6 +1,8 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.types
 
 import android.content.Context
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.google.android.material.chip.Chip
@@ -11,15 +13,13 @@ const val MORNING_INDEX = 1
 const val AFTERNOON_INDEX = 2
 const val NO_SUN_INDEX = 3
 
-enum class SunTime(val value: Int) {
+enum class SunTime(val value: Int) : Parcelable {
     AllDay(ALL_DAY_INDEX),
     Morning(MORNING_INDEX),
     Afternoon(AFTERNOON_INDEX),
     NoSun(NO_SUN_INDEX);
 
-    override fun toString(): String {
-        return value.toString()
-    }
+    override fun toString(): String = value.toString()
 
     fun appendChip(context: Context, sunChip: Chip) {
         val resources = context.resources
@@ -46,9 +46,23 @@ enum class SunTime(val value: Int) {
         }
     }
 
-    companion object {
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeInt(value)
+    }
+
+    override fun describeContents(): Int = 0
+
+    companion object CREATOR : Parcelable.Creator<SunTime> {
         private val sunTimes = arrayListOf(AllDay, Morning, Afternoon, NoSun)
 
         fun find(value: Int): SunTime = sunTimes[value]
+
+        override fun createFromParcel(parcel: Parcel): SunTime {
+            return find(parcel.readInt())
+        }
+
+        override fun newArray(size: Int): Array<SunTime?> {
+            return arrayOfNulls(size)
+        }
     }
 }

@@ -1,44 +1,33 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 
-import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
-import com.arnyminerz.escalaralcoiaicomtat.generic.jsonArrayFromFile
-import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
-import org.json.JSONObject
-import timber.log.Timber
-import java.io.File
+import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
+import com.parse.ParseObject
+import com.parse.ParseQuery
 import java.util.*
 
 /**
  * Loads all the areas available in the server.
- * @param context The context to call from
  * @return A collection of areas
  */
+@WorkerThread
 @ExperimentalUnsignedTypes
-fun loadAreasFromCache(context: Context): Collection<Area> {
+fun loadAreasFromCache(): Collection<Area> {
     val areas = arrayListOf<Area>()
 
-    val storageDataDir = context.filesDir
-    val areasDataFile = File(storageDataDir, "cache.json")
-    if (!areasDataFile.exists())
-        Timber.e("Areas data file doesn't exist!")
-    else {
-        Timber.d("Loading areas from JSON file...")
+    val query = ParseQuery.getQuery<ParseObject>("Path")
+    query.addAscendingOrder("sector")
+    query.addAscendingOrder("sketchId")
+    val results = query.find()
 
-        val areasJSON = jsonArrayFromFile(areasDataFile).sort("display_name")
-        val toLoad = areasJSON.length()
-        Timber.d("  Will load $toLoad areas.")
-        if (toLoad > 0)
-            for (a in 0 until toLoad) {
-                val json = areasJSON.getJSONObject(a)
-                val area = Area.fromDB(json)
-                Timber.d("  Adding area $a")
-                areas.add(area)
-            }
+    AREAS.clear()
+    for (pathData in results) {
+
     }
 
     return areas
@@ -46,63 +35,58 @@ fun loadAreasFromCache(context: Context): Collection<Area> {
 
 @Suppress("UNCHECKED_CAST")
 @ExperimentalUnsignedTypes
-data class Area(
-    override val id: Int,
-    override val version: Int,
+class Area(
+    override val objectId: String,
     override val displayName: String,
     override val timestamp: Date?,
     val image: String,
     override val kmlAddress: String?,
-    override val parentId: Int,
     private val downloaded: Boolean = false
 ) : DataClass<Zone, DataClassImpl>(
-    id,
-    version,
+    objectId,
     displayName,
     timestamp,
     image,
     kmlAddress,
     R.drawable.ic_wide_placeholder,
     R.drawable.ic_wide_placeholder,
-    parentId,
     NAMESPACE
 ) {
     val transitionName
-        get() = id.toString() + displayName.replace(" ", "_")
+        get() = objectId + displayName.replace(" ", "_")
 
     constructor(parcel: Parcel) : this(
-        parcel.readInt(),
-        parcel.readInt(),
+        parcel.readString()!!,
         parcel.readString()!!,
         parcel.readString().toTimestamp(),
         parcel.readString()!!,
-        parcel.readString(),
-        parcel.readInt()
+        parcel.readString()
     ) {
         parcel.readList(children, Zone::class.java.classLoader)
     }
 
-    constructor(json: JSONObject) : this(
-        json.getInt("id"),
-        json.getInt("version", 0),
-        json.getString("display_name"),
-        json.getTimestampSafe("timestamp"),
-        json.getString("image"),
-        json.getStringSafe("kml_address"),
-        -1
-    ) {
-        val area = fromDB(json)
-        this.children.addAll(area.children)
-    }
+    /**
+     * Creates a new area from the data of a ParseObject.
+     * Note: This doesn't add children
+     * @author Arnau Mora
+     * @since 20210312
+     * @param parseObject The object to get data from. It must be of class Area
+     * @see ParseObject
+     */
+    constructor(parseObject: ParseObject) : this(
+        parseObject.getString("objectId")!!,
+        parseObject.getString("displayName")!!,
+        parseObject.getDate("updatedAt"),
+        parseObject.getString("image")!!,
+        parseObject.getString("kmlAddress")
+    )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(id)
-        parcel.writeInt(version)
+        parcel.writeString(objectId)
         parcel.writeString(displayName)
         parcel.writeString(timestamp?.let { TIMESTAMP_FORMAT.format(timestamp) })
         parcel.writeString(image)
         parcel.writeString(kmlAddress)
-        parcel.writeInt(parentId)
         parcel.writeList(children)
     }
 
@@ -114,34 +98,7 @@ data class Area(
         override fun createFromParcel(parcel: Parcel): Area = Area(parcel)
         override fun newArray(size: Int): Array<Area?> = arrayOfNulls(size)
 
-        fun fromDB(json: JSONObject): Area {
-            val area = Area(
-                json.getInt("id"),
-                json.getInt("version", 0),
-                json.getString("display_name"),
-                null,
-                json.getString("image"),
-                json.getString("kml_address"),
-                -1
-            )
-            if (json.has("zones")) {
-                val zones = json.getJSONArray("zones")
-                Timber.v("Area has zones, adding them. Count: ${zones.length()}")
-                for (z in 0 until zones.length()) {
-                    val zone = zones.getJSONObject(z)
-                    area.addZone(Zone.fromDB(zone))
-                }
-            }
-            return area
-        }
-
-        fun fromId(id: Int): Area {
-            val json = jsonFromUrl("$EXTENDED_API_URL/area/$id")
-
-            return fromDB(json)
-        }
-
-        const val NAMESPACE = "area"
+        const val NAMESPACE = "Area"
     }
 }
 

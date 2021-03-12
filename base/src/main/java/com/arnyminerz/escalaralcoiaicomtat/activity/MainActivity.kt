@@ -34,7 +34,7 @@ import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.arnyminerz.escalaralcoiaicomtat.worker.UpdateWorker
+import com.parse.ParseConfig
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import io.sentry.android.core.SentryAndroid
@@ -43,7 +43,6 @@ import timber.log.Timber
 import timber.log.Timber.DebugTree
 import java.io.File
 import java.net.URL
-import java.util.concurrent.TimeUnit
 
 val EXTRA_AREA = IntentExtra<Int>("area")
 val EXTRA_ZONE = IntentExtra<Int>("zone")
@@ -95,23 +94,15 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             createNotificationChannels()
 
-        Timber.v("Initializing update checker...")
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            UPDATE_CHECKER_WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
-            PeriodicWorkRequestBuilder<UpdateWorker>(
-                1, TimeUnit.HOURS,
-                UPDATE_CHECKER_FLEX_MINUTES, TimeUnit.MINUTES
-            )
-                .setConstraints(
-                    Constraints.Builder()
-                        .setRequiredNetworkType(NetworkType.CONNECTED)
-                        .setRequiresBatteryNotLow(true)
-                        .build()
-                )
-                .addTag(UPDATE_CHECKER_TAG)
-                .build()
-        )
+        Timber.v("Getting config...")
+        ParseConfig.getInBackground { cnf, e ->
+            var config = cnf
+            if (e != null)
+                config = ParseConfig.getCurrentConfig()
+
+            val test = config.getString("testing_param")
+            toast(this, test)
+        }
 
         Timber.v("Finished preparing App...")
         return true
@@ -321,7 +312,7 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                 visibility(binding.mainLoadingProgressBar, true)
 
                 Timber.v("Loading areas...")
-                val areasList = loadAreasFromCache(this)
+                val areasList = loadAreasFromCache()
                 Timber.v("  Clearing AREAS collection...")
                 AREAS.clear()
                 Timber.v("  Importing to collection...")

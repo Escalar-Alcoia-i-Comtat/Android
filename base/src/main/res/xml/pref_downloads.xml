@@ -19,24 +19,9 @@
             android:title="@string/pref_down_roaming_title"
             android:summary="@string/pref_down_roaming_sum" />
 
-    </PreferenceCategory>
-
-    <PreferenceCategory app:title="@string/pref_down_cat_data">
-
-        <SwitchPreference
-            app:key="pref_data_auto_update"
-            android:title="@string/pref_down_automatic_data_updates_title"
-            android:summary="@string/pref_down_automatic_data_updates_sum" />
-
-        <Preference
-            app:key="pref_download_data"
-            android:title="@string/pref_down_data_update_title"
-            android:summary="@string/pref_down_data_update_sum" />
-
         <Preference
             app:key="pref_download_downloads"
             android:title="@string/pref_down_downloads_update_title"
             android:summary="@string/pref_down_downloads_update_sum" />
-
     </PreferenceCategory>
 </PreferenceScreen>

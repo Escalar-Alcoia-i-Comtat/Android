@@ -145,7 +145,7 @@ class ZoneAdapter(
                     Intent(dataClassListActivity, MapsActivity::class.java)
                         .putExtra(
                             KMZ_FILE_BUNDLE_EXTRA,
-                            File(filesDir(dataClassListActivity), "data/zone_${zone.id}.kmz").path
+                            File(filesDir(dataClassListActivity), "data/zone_${zone.objectId}.kmz").path
                         )
                         .putExtra(ZONE_NAME_BUNDLE_EXTRA, zone.displayName)
                 )

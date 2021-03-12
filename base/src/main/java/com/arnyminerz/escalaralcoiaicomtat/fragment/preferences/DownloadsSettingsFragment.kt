@@ -6,7 +6,6 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.UPDATE_CACHE
 import com.arnyminerz.escalaralcoiaicomtat.activity.UPDATE_IMAGES
 import com.arnyminerz.escalaralcoiaicomtat.activity.UpdatingActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
@@ -17,11 +16,9 @@ class DownloadsSettingsFragment : PreferenceFragmentCompat() {
 
     private var mobileDataDownloadPref: SwitchPreference? = null
     private var roamingDownloadPref: SwitchPreference? = null
-    private var downloadDataPref: Preference? = null
     private var downloadDownloadsPref: Preference? = null
 
     private var downloadsAutoUpdatePref: SwitchPreference? = null
-    private var dataAutoUpdatePref: SwitchPreference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.pref_downloads, rootKey)
@@ -41,17 +38,6 @@ class DownloadsSettingsFragment : PreferenceFragmentCompat() {
         roamingDownloadPref?.setOnPreferenceClickListener { p ->
             val pref = p as SwitchPreference
             SETTINGS_ROAMING_DOWNLOAD_PREF.put(requireContext().sharedPreferences, pref.isChecked)
-
-            true
-        }
-
-        downloadDataPref = findPreference("pref_download_data")
-        downloadDataPref?.setOnPreferenceClickListener {
-            startActivity(
-                Intent(requireContext(), UpdatingActivity::class.java).apply {
-                    putExtra(UPDATE_CACHE, true)
-                }
-            )
 
             true
         }
@@ -76,16 +62,6 @@ class DownloadsSettingsFragment : PreferenceFragmentCompat() {
 
             true
         }
-
-        dataAutoUpdatePref = findPreference("pref_data_auto_update")
-        dataAutoUpdatePref?.isChecked =
-            AUTOMATIC_DATA_UPDATE_PREF.get(requireContext().sharedPreferences)
-        dataAutoUpdatePref?.setOnPreferenceClickListener { p ->
-            val pref = p as SwitchPreference
-            AUTOMATIC_DATA_UPDATE_PREF.put(requireContext().sharedPreferences, pref.isChecked)
-
-            true
-        }
     }
 
     override fun onResume() {
@@ -101,8 +77,5 @@ class DownloadsSettingsFragment : PreferenceFragmentCompat() {
             downloadsAutoUpdatePref ?: findPreference("pref_download_auto_update")
         downloadsAutoUpdatePref?.isChecked =
             AUTOMATIC_DOWNLOADS_UPDATE_PREF.get(requireContext().sharedPreferences)
-
-        dataAutoUpdatePref = dataAutoUpdatePref ?: findPreference("pref_data_auto_update")
-        dataAutoUpdatePref?.isChecked = AUTOMATIC_DATA_UPDATE_PREF.get(requireContext().sharedPreferences)
     }
 }

@@ -25,7 +25,6 @@ val SETTINGS_PREVIEW_SCALE_PREF = PreferenceData("preview_scale", PREVIEW_SCALE_
 val SETTINGS_MOBILE_DOWNLOAD_PREF = PreferenceData("mobile_download", true)
 val SETTINGS_ROAMING_DOWNLOAD_PREF = PreferenceData("roaming_download", false)
 val AUTOMATIC_DOWNLOADS_UPDATE_PREF = PreferenceData("automatic_downloads_update", false)
-val AUTOMATIC_DATA_UPDATE_PREF = PreferenceData("automatic_data_update", true)
 val PREF_DISABLE_NEARBY = PreferenceData("NearbyZonesDisable", false)
 val PREF_SHOWN_INTRO = PreferenceData("ShownIntro", false)
 

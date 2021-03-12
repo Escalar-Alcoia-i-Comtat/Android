@@ -131,7 +131,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 for (zone in zones) {
                     val zoneLocation = zone.position ?: continue
                     if (zoneLocation.distanceTo(position) <= requiredDistance) {
-                        Timber.d("Adding zone #${zone.id}. Creating marker...")
+                        Timber.d("Adding zone #${zone.objectId}. Creating marker...")
                         val marker = GeoMarker(
                             zoneLocation,
                             windowData = MapObjectWindowData(zone.displayName, null)

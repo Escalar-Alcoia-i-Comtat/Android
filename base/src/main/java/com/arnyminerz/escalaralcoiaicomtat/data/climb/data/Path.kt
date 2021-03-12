@@ -11,11 +11,9 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getStringSafe
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import org.json.JSONObject
-import java.io.Serializable
+import com.parse.ParseObject
 import java.util.*
 import kotlin.NoSuchElementException
-import kotlin.collections.ArrayList
 
 enum class CompletedType(val index: Int) {
     FIRST(0),
@@ -34,11 +32,9 @@ enum class CompletedType(val index: Int) {
     }
 }
 
-@ExperimentalUnsignedTypes
-data class Path @ExperimentalUnsignedTypes constructor(
-    val id: Int,
+data class Path (
+    val objectId: String,
     val timestamp: Date?,
-    val sectorId: Int,
     val sketchId: Int,
     val displayName: String,
     val grades: Grade.GradesList,
@@ -51,14 +47,80 @@ data class Path @ExperimentalUnsignedTypes constructor(
     val builtBy: String?,
     val rebuiltBy: String?,
     val downloaded: Boolean = false
-) : DataClassImpl, Serializable, Comparable<Path> {
+) : DataClassImpl, Comparable<Path> {
+    /**
+     * Creates a new sector from the data of a ParseObject.
+     * Note: This doesn't add children
+     * @author Arnau Mora
+     * @since 20210312
+     * @param parseObject The object to get data from. It must be of class Sector
+     * @see ParseObject
+     */
+    constructor(parseObject: ParseObject) : this(
+        parseObject.getString("objectId")!!,
+        parseObject.getDate("updatedAt"),
+        parseObject.getInt("sketchId"),
+        parseObject.getString("displayName")!!,
+        Grade.listFromStrings(parseObject.getString("grade")!!.split(' ')),
+        arrayListOf(*parseObject.getList<Int>("height")!!.toTypedArray()),
+        arrayListOf(),
+        arrayListOf(),
+        FixedSafesData(
+            parseObject.getInt("stringCount"),
+            parseObject.getInt("paraboltCount"),
+            parseObject.getInt("spitCount"),
+            parseObject.getInt("tensorCount"),
+            parseObject.getInt("pitonCount"),
+            parseObject.getInt("burilCount")
+        ),
+        RequiredSafesData(
+            parseObject.getBoolean("lanyardRequired"),
+            parseObject.getBoolean("crackerRequired"),
+            parseObject.getBoolean("friendRequired"),
+            parseObject.getBoolean("stripsRequired"),
+            parseObject.getBoolean("pitonRequired"),
+            parseObject.getBoolean("nailRequired")
+        ),
+        parseObject.getString("description"),
+        parseObject.getString("builtBy"),
+        parseObject.getList<String>("rebuiltBy")?.joinToString(separator = ", ")
+    ) {
+        // endings, pitches
+        val endingsList = parseObject.getList<ParseObject>("ending")
+        endingsList?.let {
+            for (ending in it)
+                endings.add(EndingType.find(ending.getString("name")))
+        }
+        val endingArtifo = parseObject.getString("endingArtifo")
+        endingArtifo?.let {
+            val artifos = it.replace("\r", "").split("\n")
+            for (artifo in artifos)
+                Pitch.fromEndingDataString(artifo)?.let { it1 -> pitches.add(it1) }
+        }
+    }
+
+    constructor(parcel: Parcel) : this(
+        parcel.readString()!!,
+        parcel.readString().toTimestamp(),
+        parcel.readInt(),
+        parcel.readString()!!,
+        Grade.GradesList(),
+        arrayListOf(),
+        arrayListOf(),
+        arrayListOf(),
+        parcel.readParcelable<FixedSafesData>(FixedSafesData::class.java.classLoader)!!,
+        parcel.readParcelable<RequiredSafesData>(RequiredSafesData::class.java.classLoader)!!,
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString()
+    )
 
     fun hasSafeCount(): Boolean {
         var anyGreaterThanOne = false
 
         for (c in 0 until fixedSafesData.count())
             fixedSafesData[c].let { data ->
-                if (data.count > 1u)
+                if (data.count > 1)
                     anyGreaterThanOne = true
             }
 
@@ -69,18 +131,18 @@ data class Path @ExperimentalUnsignedTypes constructor(
         return displayName
     }
 
-    override fun compareTo(other: Path): Int {
-        return when {
+    override fun compareTo(other: Path): Int =
+        when {
             sketchId > other.sketchId -> 1
             sketchId < other.sketchId -> -1
             else -> 0
         }
-    }
 
     @Throws(NoInternetAccessException::class)
     fun isBlocked(networkState: ConnectivityProvider.NetworkState): BlockingType {
+        // TODO: Move to Parse
         if (networkState.hasInternet) {
-            val json = jsonFromUrl("$EXTENDED_API_URL/path/$id")
+            val json = jsonFromUrl("$EXTENDED_API_URL/path/$objectId")
             val blocked = json.getStringSafe("blocked")
 
             return BlockingType.find(blocked)
@@ -93,40 +155,28 @@ data class Path @ExperimentalUnsignedTypes constructor(
     fun grade(): Grade =
         if (grades.size > 0) grades.first() else throw NoSuchElementException("Grades list is empty")
 
-    @ExperimentalUnsignedTypes
-    companion object CREATOR : Parcelable.Creator<Zone> {
-        override fun createFromParcel(parcel: Parcel): Zone = Zone(parcel)
-        override fun newArray(size: Int): Array<Zone?> = arrayOfNulls(size)
-
-        fun fromDB(json: JSONObject): Path {
-            val showDescription =
-                if (json.has("show_description")) json.getInt("show_description") == 1 else false
-            return Path(
-                json.getInt("id"),
-                json.getString("timestamp").toTimestamp(),
-                json.getInt("sector_id"),
-                json.getInt("sketch_id"),
-                json.getString("display_name"),
-                if (json.has("grade")) Grade.fromDB(json.getString("grade")) else Grade.gradesListOf(),
-                json.getStringSafe("height")?.let {
-                    val list = ArrayList<Int>()
-                    if (it.contains("\n"))
-                        for (ln in it
-                            .replace("\r", "")
-                            .split("\n"))
-                            list.add(ln.toInt())
-                    else if (it.toLowerCase(Locale.getDefault()) != "null" && it.isNotEmpty())
-                        list.add(it.toInt())
-                    list
-                } ?: arrayListOf(),
-                if (json.has("ending")) EndingType.fromDB(json.getString("ending")) else arrayListOf(),
-                Pitch.fromDB(json.getString("ending_artifo")),
-                FixedSafesData.fromDB(json),
-                RequiredSafesData.fromDB(json),
-                if (showDescription) json.getString("description") else null,
-                if (showDescription) json.getString("built_by") else null,
-                if (showDescription) json.getString("rebuilt_by") else null
-            )
+    override fun describeContents(): Int = 0
+    override fun writeToParcel(dest: Parcel?, flags: Int) {
+        dest?.apply {
+            writeString(objectId)
+            writeSerializable(timestamp)
+            writeInt(sketchId)
+            writeString(displayName)
+            writeList(grades)
+            writeList(heights)
+            writeList(endings)
+            writeList(pitches)
+            writeParcelable(fixedSafesData, 0)
+            writeParcelable(requiredSafesData, 0)
+            writeString(description)
+            writeString(builtBy)
+            writeString(rebuiltBy)
         }
+    }
+
+    @ExperimentalUnsignedTypes
+    companion object CREATOR : Parcelable.Creator<Path> {
+        override fun createFromParcel(parcel: Parcel): Path = Path(parcel)
+        override fun newArray(size: Int): Array<Path?> = arrayOfNulls(size)
     }
 }

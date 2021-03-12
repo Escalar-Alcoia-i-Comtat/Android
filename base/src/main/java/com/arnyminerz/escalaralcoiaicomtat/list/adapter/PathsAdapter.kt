@@ -43,9 +43,10 @@ const val ROTATION_B = 180f
 const val ROTATION_PIVOT_X = 0.5f
 const val ROTATION_PIVOT_Y = 0.5f
 
+const val ANIMATION_DURATION = 300L
+
 const val SMALL_CARD_HEIGHT = 57f
 
-@ExperimentalUnsignedTypes
 class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Activity) :
     RecyclerView.Adapter<SectorViewHolder>() {
     private val toggled = arrayListOf<Boolean>()
@@ -212,7 +213,7 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
                 Animation.RELATIVE_TO_SELF,
                 ROTATION_PIVOT_Y
             )
-            rotate.duration = 300
+            rotate.duration = ANIMATION_DURATION
             rotate.interpolator = LinearInterpolator()
             rotate.isFillEnabled = true
             rotate.fillAfter = true
@@ -222,12 +223,12 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
             updateToggleStatus(cardView, toggled)
         }
 
-        holder.toggleImageButton.rotation = if (toggled[position]) 180F else 0F
+        holder.toggleImageButton.rotation = if (toggled[position]) ROTATION_B else ROTATION_A
         updateToggleStatus(holder.cardView, toggled[position])
 
         holder.safesChipGroup.removeAllViews()
 
-        if (path.fixedSafesData.sum() > 0u)
+        if (path.fixedSafesData.sum() > 0)
             if (!path.hasSafeCount())
                 addChip(
                     R.string.safe_strings,
@@ -302,7 +303,7 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
     @ExperimentalUnsignedTypes
     private fun addChip(
         @StringRes string: Int?,
-        count: UInt?,
+        count: Int?,
         chipData: ChipData,
         path: Path
     ) {
@@ -317,7 +318,7 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
     @ExperimentalUnsignedTypes
     private fun addChip(
         string: String?,
-        count: UInt?,
+        count: Int?,
         chipData: ChipData,
         path: Path
     ) {

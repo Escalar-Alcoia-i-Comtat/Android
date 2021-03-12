@@ -1,10 +1,9 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 
+import android.os.Parcel
+import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getBooleanFromString
-import org.json.JSONObject
 
-@ExperimentalUnsignedTypes
 data class RequiredSafesData(
     val lanyardRequired: Boolean,
     val crackerRequired: Boolean,
@@ -13,18 +12,14 @@ data class RequiredSafesData(
     val pitonRequired: Boolean,
     val nailRequired: Boolean
 ) : SafesData {
-    companion object {
-        fun fromDB(obj: JSONObject): RequiredSafesData {
-            return RequiredSafesData(
-                obj.getBooleanFromString("lanyard_required"),
-                obj.getBooleanFromString("cracker_required"),
-                obj.getBooleanFromString("friend_required"),
-                obj.getBooleanFromString("strips_required"),
-                obj.getBooleanFromString("piton_required"),
-                obj.getBooleanFromString("nail_required")
-            )
-        }
-    }
+    constructor(parcel: Parcel) : this(
+        parcel.readByte() != 0.toByte(),
+        parcel.readByte() != 0.toByte(),
+        parcel.readByte() != 0.toByte(),
+        parcel.readByte() != 0.toByte(),
+        parcel.readByte() != 0.toByte(),
+        parcel.readByte() != 0.toByte()
+    )
 
     override fun toJSONString(): String {
         return "{" +
@@ -38,7 +33,7 @@ data class RequiredSafesData(
     }
 
     override fun count(): Int = 6
-    override fun sum(): UInt = 0u
+    override fun sum(): Int = 0
 
     @kotlin.jvm.Throws(ArrayIndexOutOfBoundsException::class)
     override operator fun get(index: Int): SafeCountData =
@@ -77,4 +72,22 @@ data class RequiredSafesData(
 
     fun any(): Boolean = lanyardRequired || crackerRequired || friendRequired || stripsRequired ||
             pitonRequired || nailRequired
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeByte(if (lanyardRequired) 1 else 0)
+        parcel.writeByte(if (crackerRequired) 1 else 0)
+        parcel.writeByte(if (friendRequired) 1 else 0)
+        parcel.writeByte(if (stripsRequired) 1 else 0)
+        parcel.writeByte(if (pitonRequired) 1 else 0)
+        parcel.writeByte(if (nailRequired) 1 else 0)
+    }
+
+    override fun describeContents(): Int = 0
+
+    companion object CREATOR : Parcelable.Creator<RequiredSafesData> {
+        override fun createFromParcel(parcel: Parcel): RequiredSafesData =
+            RequiredSafesData(parcel)
+
+        override fun newArray(size: Int): Array<RequiredSafesData?> = arrayOfNulls(size)
+    }
 }

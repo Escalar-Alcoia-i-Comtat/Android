@@ -24,7 +24,6 @@ enum class EquipmentAdapterType {
     }
 }
 
-@ExperimentalUnsignedTypes
 class EquipmentAdapter(
     private val context: Context,
     private val safes: SafesData,
@@ -43,7 +42,7 @@ class EquipmentAdapter(
         showableSafes.clear()
         for (s in 0 until safes.count()) {
             val safe = safes[s]
-            if (safe != null && safe.count > 0u) {
+            if (safe != null && safe.count > 0) {
                 showableSafes.add(safe)
                 Timber.v("  Added $safe")
             }
@@ -55,14 +54,14 @@ class EquipmentAdapter(
     override fun onBindViewHolder(holder: PathEquipmentViewHolder, position: Int) {
         val safe = showableSafes[position]
 
-        if (safe.count > 0u || (safes is RequiredSafesData && (safes.any()))) {
+        if (safe.count > 0 || (safes is RequiredSafesData && (safes.any()))) {
             val color = ContextCompat.getColorStateList(context, equipmentType.getColor())
 
             holder.textView.text =
                 if (equipmentType == EquipmentAdapterType.REQUIRED) context.getString(safe.displayName)
                 else {
                     var str = context.getString(safe.displayName, safe.count)
-                    if (safe.count == 1u)
+                    if (safe.count == 1)
                         str = str.replace(str.split(" ").first(), "")
                     str
                 }
