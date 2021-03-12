@@ -19,9 +19,9 @@ android {
 
         resValue "string", "mapbox_access_token", MAPBOX_PUBLIC_TOKEN
         resValue "string", "sentry_dsn", SENTRY_DNS
-        buildConfigField "string", "PARSE_SERVER", PARSE_SERVER
-        buildConfigField "string", "PARSE_KEY", PARSE_KEY
-        buildConfigField "string", "PARSE_APPLICATION_ID", PARSE_APPLICATION_ID
+        buildConfigField "String", "PARSE_SERVER", "\"" + PARSE_SERVER + "\""
+        buildConfigField "String", "PARSE_KEY", "\"" + PARSE_KEY + "\""
+        buildConfigField "String", "PARSE_APPLICATION_ID", "\"" + PARSE_APPLICATION_ID + "\""
     }
     signingConfigs {
         release {
