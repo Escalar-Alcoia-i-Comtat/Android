@@ -26,7 +26,6 @@ import com.parse.ParseObject
 import timber.log.Timber
 import java.util.*
 
-@ExperimentalUnsignedTypes
 data class Sector constructor(
     override val objectId: String,
     override val displayName: String,
@@ -55,7 +54,7 @@ data class Sector constructor(
      * @see ParseObject
      */
     constructor(parseObject: ParseObject) : this(
-        parseObject.getString("objectId")!!,
+        parseObject.objectId,
         parseObject.getString("displayName")!!,
         parseObject.getDate("updatedAt"),
         SunTime.find(parseObject.getInt("sunTime")),

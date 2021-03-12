@@ -34,7 +34,7 @@ class AreaAdapter(
         if (AREAS.size < position)
             throw InvalidClassException("Current position is not a valid area")
 
-        val area = AREAS[position]
+        val area = AREAS.valueAt(position)
         Timber.v("Showing area #$position in RecyclerView")
 
         ViewCompat.setTransitionName(holder.titleTextView, area.transitionName)

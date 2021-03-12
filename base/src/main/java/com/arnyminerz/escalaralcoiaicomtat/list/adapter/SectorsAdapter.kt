@@ -31,14 +31,14 @@ private const val IMAGE_THUMBNAIL_SIZE = 0.1f
 @ExperimentalUnsignedTypes
 class SectorsAdapter(
     private val dataClassListActivity: DataClassListActivity<*>,
-    area: Int,
-    zone: Int,
+    areaId: String,
+    zoneId: String,
     listener: ((viewHolder: SectorsViewHolder, index: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<SectorsViewHolder>() {
     private var onItemSelected: ((viewHolder: SectorsViewHolder, index: Int) -> Unit)? =
         listener
 
-    private val sectors = AREAS[area][zone].children
+    private val sectors = AREAS[areaId]!![zoneId].children
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SectorsViewHolder =
         SectorsViewHolder(

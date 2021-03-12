@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.collection.arrayMapOf
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -44,9 +45,9 @@ import timber.log.Timber.DebugTree
 import java.io.File
 import java.net.URL
 
-val EXTRA_AREA = IntentExtra<Int>("area")
-val EXTRA_ZONE = IntentExtra<Int>("zone")
-val EXTRA_SECTOR = IntentExtra<Int>("sector")
+val EXTRA_AREA = IntentExtra<String>("area")
+val EXTRA_ZONE = IntentExtra<String>("zone")
+val EXTRA_SECTOR = IntentExtra<String>("sector")
 
 val EXTRA_ZONE_TRANSITION_NAME = IntentExtra<String>("zone_transition")
 val EXTRA_AREA_TRANSITION_NAME = IntentExtra<String>("area_transition")
@@ -61,8 +62,7 @@ const val UPDATE_CHECKER_WORK_NAME = "update_checker"
 const val UPDATE_CHECKER_TAG = "update"
 const val UPDATE_CHECKER_FLEX_MINUTES: Long = 15
 
-@ExperimentalUnsignedTypes
-val AREAS = arrayListOf<Area>()
+val AREAS = arrayMapOf<String, Area>()
 
 var serverAvailable = false
     private set
@@ -312,18 +312,14 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                 visibility(binding.mainLoadingProgressBar, true)
 
                 Timber.v("Loading areas...")
-                val areasList = loadAreasFromCache()
-                Timber.v("  Clearing AREAS collection...")
-                AREAS.clear()
-                Timber.v("  Importing to collection...")
-                AREAS.addAll(areasList)
+                loadAreasFromCache()
                 Timber.v("  --- Found ${AREAS.size} areas ---")
 
                 areasViewFragment.setItemClickListener { holder, position ->
                     binding.loadingLayout.show()
                     Timber.v("Clicked item %s", position)
                     val intent = Intent(this, AreaActivity()::class.java)
-                        .putExtra(EXTRA_AREA, position)
+                        .putExtra(EXTRA_AREA, AREAS.valueAt(position)!!.objectId)
 
                     val optionsBundle =
                         ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->

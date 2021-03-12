@@ -156,7 +156,7 @@ class MapFragment : NetworkChangeListenerFragment() {
         mapLoading = true
         runAsync {
             Timber.v("Loading map...")
-            for (area in AREAS)
+            for (area in AREAS.values)
                 try {
                     val kml = area.kmlAddress
                     Timber.v("Loading KML ($kml) for ${area.displayName}...")

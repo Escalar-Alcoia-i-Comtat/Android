@@ -46,32 +46,32 @@ import java.util.*
 @ExperimentalUnsignedTypes
 fun getIntent(context: Context, queryName: String): Intent? {
     Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
-    for ((a, area) in AREAS.withIndex()) {
+    for (area in AREAS.values) {
         Timber.d("  Finding in ${area.displayName}. It has ${area.count()} zones.")
         when {
             area.displayName.equals(queryName, true) ->
                 return Intent(context, AreaActivity::class.java).apply {
                     Timber.d("Found Area id ${area.objectId}!")
-                    putExtra(EXTRA_AREA, a)
+                    putExtra(EXTRA_AREA, area.objectId)
                 }
             area.isNotEmpty() ->
-                for ((z, zone) in area.withIndex()) {
+                for (zone in area) {
                     Timber.d("    Finding in ${zone.displayName}. It has ${zone.count()} sectors.")
                     if (zone.displayName.equals(queryName, true))
                         return Intent(context, ZoneActivity::class.java).apply {
                             Timber.d("Found Zone id ${zone.objectId}!")
-                            putExtra(EXTRA_AREA, a)
-                            putExtra(EXTRA_ZONE, z)
+                            putExtra(EXTRA_AREA, area.objectId)
+                            putExtra(EXTRA_ZONE, zone.objectId)
                         }
                     else if (zone.isNotEmpty())
-                        for ((s, sector) in zone.withIndex()) {
+                        for (sector in zone) {
                             Timber.d("      Finding in ${sector.displayName}.")
                             if (sector.displayName.equals(queryName, true))
                                 return Intent(context, SectorActivity::class.java).apply {
                                     Timber.d("Found Sector id ${sector.objectId}!")
-                                    putExtra(EXTRA_AREA, a)
-                                    putExtra(EXTRA_ZONE, z)
-                                    putExtra(EXTRA_SECTOR, s)
+                                    putExtra(EXTRA_AREA, area.objectId)
+                                    putExtra(EXTRA_ZONE, zone.objectId)
+                                    putExtra(EXTRA_SECTOR, sector.objectId)
                                 }
                         }
                 }
@@ -82,13 +82,12 @@ fun getIntent(context: Context, queryName: String): Intent? {
     return null
 }
 
-interface DataClassImpl: Parcelable
+abstract class DataClassImpl (open val objectId: String) : Parcelable
 
-@ExperimentalUnsignedTypes
 // A: List type
 // B: Parent Type
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
-    open val objectId: String,
+    override val objectId: String,
     open val displayName: String,
     open val timestamp: Date?,
     open val imageUrl: String,
@@ -96,7 +95,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     @DrawableRes val placeholderDrawable: Int,
     @DrawableRes val errorPlaceholderDrawable: Int,
     open val namespace: String
-) : DataClassImpl, Iterable<A> {
+) : DataClassImpl(objectId), Iterable<A> {
     val children: ArrayList<A> = arrayListOf()
 
     /**
@@ -106,6 +105,26 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         private set
 
     operator fun get(index: Int): A = children[index]
+
+    /**
+     * Gets an object based on objectId
+     * @author Arnau Mora
+     * @since 20210312
+     * @param objectId The id to find
+     * @return The found dataclass
+     * @see children
+     * @throws IllegalStateException If the children's list is empty
+     * @throws IndexOutOfBoundsException If the objectId was not found
+     */
+    @Throws(IllegalStateException::class, IndexOutOfBoundsException::class)
+    operator fun get(objectId: String): A {
+        if (children.isEmpty())
+            throw IllegalStateException("Children is empty")
+        for (child in children)
+            if (child.objectId == objectId)
+                return child
+        throw IndexOutOfBoundsException("Could not find $objectId in children.")
+    }
 
     override fun equals(other: Any?): Boolean {
         if (other !is DataClass<*, *>)
@@ -174,7 +193,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     imageFile.storeBitmap(bitmap)
 
                     var counter = 1 // Starts at 1 for representing self, that just downloaded
-                    val targetCounter = fullCount().toInt()
+                    val targetCounter = fullCount()
                     if (children.size > 0 && children.first() is DataClass<*, *>)
                         for (child in children)
                             (child as? DataClass<*, *>)?.download(context, overwrite, null, {
@@ -303,7 +322,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @date 2020/09/11
      * @return The amount of children the data class has
      */
-    fun count(): UInt = children.size.toUInt()
+    fun count(): Int = children.size
 
     /**
      * Returns the amount of children the data class has, as well as all the children
@@ -311,8 +330,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @date 2020/09/11
      * @return The amount of children the data class has, as well as all the children
      */
-    fun fullCount(): UInt { // Counts all the children also
-        var counter = 1u // Starts at 1 for counting self
+    fun fullCount(): Int { // Counts all the children also
+        var counter = 1 // Starts at 1 for counting self
 
         for (me in this)
             if (me is DataClass<*, *>)

@@ -125,7 +125,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             binding.progressTextView.setText(R.string.update_progress_downloading_new_cache)
             binding.progressBar.isIndeterminate = true
 
-            for (area in AREAS) {
+            for (area in AREAS.values) {
                 if (area.isDownloaded(this) == DownloadStatus.DOWNLOADED)
                     iterateUpdate(area)
                 else for (zone in area)

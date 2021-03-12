@@ -11,7 +11,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getStringSafe
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import com.parse.ParseObject
 import java.util.*
 import kotlin.NoSuchElementException
 
@@ -32,8 +31,8 @@ enum class CompletedType(val index: Int) {
     }
 }
 
-data class Path (
-    val objectId: String,
+data class Path(
+    override val objectId: String,
     val timestamp: Date?,
     val sketchId: Int,
     val displayName: String,
@@ -47,58 +46,7 @@ data class Path (
     val builtBy: String?,
     val rebuiltBy: String?,
     val downloaded: Boolean = false
-) : DataClassImpl, Comparable<Path> {
-    /**
-     * Creates a new sector from the data of a ParseObject.
-     * Note: This doesn't add children
-     * @author Arnau Mora
-     * @since 20210312
-     * @param parseObject The object to get data from. It must be of class Sector
-     * @see ParseObject
-     */
-    constructor(parseObject: ParseObject) : this(
-        parseObject.getString("objectId")!!,
-        parseObject.getDate("updatedAt"),
-        parseObject.getInt("sketchId"),
-        parseObject.getString("displayName")!!,
-        Grade.listFromStrings(parseObject.getString("grade")!!.split(' ')),
-        arrayListOf(*parseObject.getList<Int>("height")!!.toTypedArray()),
-        arrayListOf(),
-        arrayListOf(),
-        FixedSafesData(
-            parseObject.getInt("stringCount"),
-            parseObject.getInt("paraboltCount"),
-            parseObject.getInt("spitCount"),
-            parseObject.getInt("tensorCount"),
-            parseObject.getInt("pitonCount"),
-            parseObject.getInt("burilCount")
-        ),
-        RequiredSafesData(
-            parseObject.getBoolean("lanyardRequired"),
-            parseObject.getBoolean("crackerRequired"),
-            parseObject.getBoolean("friendRequired"),
-            parseObject.getBoolean("stripsRequired"),
-            parseObject.getBoolean("pitonRequired"),
-            parseObject.getBoolean("nailRequired")
-        ),
-        parseObject.getString("description"),
-        parseObject.getString("builtBy"),
-        parseObject.getList<String>("rebuiltBy")?.joinToString(separator = ", ")
-    ) {
-        // endings, pitches
-        val endingsList = parseObject.getList<ParseObject>("ending")
-        endingsList?.let {
-            for (ending in it)
-                endings.add(EndingType.find(ending.getString("name")))
-        }
-        val endingArtifo = parseObject.getString("endingArtifo")
-        endingArtifo?.let {
-            val artifos = it.replace("\r", "").split("\n")
-            for (artifo in artifos)
-                Pitch.fromEndingDataString(artifo)?.let { it1 -> pitches.add(it1) }
-        }
-    }
-
+) : DataClassImpl(objectId), Comparable<Path> {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString().toTimestamp(),

@@ -11,7 +11,6 @@ import com.parse.ParseObject
 import java.util.*
 
 @Suppress("UNCHECKED_CAST")
-@ExperimentalUnsignedTypes
 data class Zone(
     override val objectId: String,
     override val displayName: String,
@@ -52,7 +51,7 @@ data class Zone(
      * @see ParseObject
      */
     constructor(parseObject: ParseObject) : this(
-        parseObject.getString("objectId")!!,
+        parseObject.objectId,
         parseObject.getString("displayName")!!,
         parseObject.getDate("updatedAt"),
         parseObject.getString("image")!!,

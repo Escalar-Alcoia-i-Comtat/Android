@@ -27,7 +27,7 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
     private var loaded = false
     private var loading = false
 
-    private var areaIndex: Int = -1
+    private lateinit var areaId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,13 +40,14 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
             return
         }
 
-        areaIndex = intent.getExtra(EXTRA_AREA, -1)
-        if (areaIndex < 0) {
+        intent.getExtra(EXTRA_AREA)?.let {
+            areaId = it
+        } ?: run {
             Timber.e("Area is null")
             onBackPressed()
             return
         }
-        dataClass = AREAS[areaIndex]
+        dataClass = AREAS[areaId]!!
 
         val transitionName = intent.getExtra(EXTRA_AREA_TRANSITION_NAME)
 
@@ -84,8 +85,8 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
                         Timber.v("Clicked item $position")
                         val intent =
                             Intent(this@AreaActivity, ZoneActivity()::class.java)
-                                .putExtra(EXTRA_AREA, areaIndex)
-                                .putExtra(EXTRA_ZONE, position)
+                                .putExtra(EXTRA_AREA, areaId)
+                                .putExtra(EXTRA_ZONE, AREAS[areaId]!![position].objectId)
 
                         val optionsBundle =
                             ViewCompat.getTransitionName(holder.titleTextView)

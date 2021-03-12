@@ -2,8 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.animation.AnimationUtils
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
@@ -25,8 +23,8 @@ class ZoneActivity : DataClassListActivity<Zone>() {
     private var justAttached = false
     private var loaded = false
 
-    private var zoneIndex = -1
-    private var areaIndex = -1
+    private lateinit var areaId: String
+    private lateinit var zoneId: String
 
     private var savedInstanceState: Bundle? = null
 
@@ -42,14 +40,16 @@ class ZoneActivity : DataClassListActivity<Zone>() {
             return
         }
 
-        areaIndex = intent.getExtra(EXTRA_AREA, -1)
-        zoneIndex = intent.getExtra(EXTRA_ZONE, -1)
-        if (areaIndex < 0 || zoneIndex < 0) {
+        val areaIdExtra = intent.getExtra(EXTRA_AREA)
+        val zoneIdExtra = intent.getExtra(EXTRA_ZONE)
+        if (areaIdExtra == null || zoneIdExtra == null) {
             Timber.e("Area or Zone index wasn't specified")
             onBackPressed()
             return
         }
-        dataClass = AREAS[areaIndex][zoneIndex]
+        areaId = areaIdExtra
+        zoneId = zoneIdExtra
+        dataClass = AREAS[areaId]!![zoneId]
 
         val transitionName = intent.getExtra(EXTRA_ZONE_TRANSITION_NAME)
 
@@ -83,31 +83,30 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                 binding.recyclerView.adapter =
                     SectorsAdapter(
                         this,
-                        areaIndex, zoneIndex
+                        areaId, zoneId
                     ) { viewHolder, index ->
                         binding.loadingLayout.show()
-                        Handler(Looper.getMainLooper()).post {
-                            Timber.v("Clicked item $index")
-                            val trn =
-                                ViewCompat.getTransitionName(viewHolder.titleTextView)
-                                    .toString()
-                            Timber.v("Transition name: $trn")
-                            val intent =
-                                Intent(
-                                    this@ZoneActivity,
-                                    SectorActivity()::class.java
-                                )
-                                    .putExtra(EXTRA_AREA, areaIndex)
-                                    .putExtra(EXTRA_ZONE, zoneIndex)
-                                    .putExtra(EXTRA_SECTOR, index)
-                                    .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
-                            val options =
-                                ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                    this@ZoneActivity, viewHolder.titleTextView, trn
-                                )
 
-                            startActivity(intent, options.toBundle())
-                        }
+                        Timber.v("Clicked item $index")
+                        val trn =
+                            ViewCompat.getTransitionName(viewHolder.titleTextView)
+                                .toString()
+                        Timber.v("Transition name: $trn")
+                        val intent =
+                            Intent(
+                                this@ZoneActivity,
+                                SectorActivity()::class.java
+                            )
+                                .putExtra(EXTRA_AREA, areaId)
+                                .putExtra(EXTRA_ZONE, zoneId)
+                                .putExtra(EXTRA_SECTOR, AREAS[areaId]!![zoneId][index].objectId)
+                                .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
+                        val options =
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                this@ZoneActivity, viewHolder.titleTextView, trn
+                            )
+
+                        startActivity(intent, options.toBundle())
                     }
 
                 loaded = true
