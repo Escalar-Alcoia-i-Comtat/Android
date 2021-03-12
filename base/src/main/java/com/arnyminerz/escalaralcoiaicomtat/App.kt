@@ -12,6 +12,7 @@ class App : Application() {
                 .applicationId(BuildConfig.PARSE_APPLICATION_ID) // if defined
                 .clientKey(BuildConfig.PARSE_KEY)
                 .server(BuildConfig.PARSE_SERVER)
+                .enableLocalDataStore()
                 .build()
         )
     }
