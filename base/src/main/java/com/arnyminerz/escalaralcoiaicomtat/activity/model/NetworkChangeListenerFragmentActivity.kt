@@ -3,7 +3,6 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.model
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider.NetworkState
 
-@ExperimentalUnsignedTypes
 abstract class NetworkChangeListenerFragmentActivity : LanguageAppCompatActivity(),
     ConnectivityProvider.ConnectivityStateListener, NetworkChangeListenerActivityInterface {
 

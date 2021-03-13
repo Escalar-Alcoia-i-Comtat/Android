@@ -17,7 +17,6 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import timber.log.Timber
 
-@ExperimentalUnsignedTypes
 class ZoneActivity : DataClassListActivity<Zone>() {
 
     private var justAttached = false

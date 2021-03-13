@@ -28,7 +28,6 @@ private const val IMAGE_LOAD_TRANSITION_TIME = 50
 private const val IMAGE_THUMBNAIL_SIZE = 0.1f
 
 @Suppress("unused")
-@ExperimentalUnsignedTypes
 class SectorsAdapter(
     private val dataClassListActivity: DataClassListActivity<*>,
     areaId: String,

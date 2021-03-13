@@ -21,7 +21,6 @@ const val DEFAULT_LAT = 38.7216704
 const val DEFAULT_LON = -0.4799751
 const val DEFAULT_ZOOM = 12.5
 
-@ExperimentalUnsignedTypes
 abstract class DataClassListActivity<T : DataClass<*, *>>(
     private val iconSizeMultiplier: Float = ICON_SIZE_MULTIPLIER,
     private val overrideLoadedMapData: Boolean = false,

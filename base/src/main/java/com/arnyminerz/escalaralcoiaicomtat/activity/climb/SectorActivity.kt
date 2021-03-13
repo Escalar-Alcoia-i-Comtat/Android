@@ -16,7 +16,6 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
 
-@ExperimentalUnsignedTypes
 class SectorActivity : NetworkChangeListenerFragmentActivity() {
     private var transitionName: String? = null
 

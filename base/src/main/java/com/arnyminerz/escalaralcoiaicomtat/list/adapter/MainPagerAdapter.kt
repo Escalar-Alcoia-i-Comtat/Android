@@ -6,7 +6,6 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import timber.log.Timber
 
-@ExperimentalUnsignedTypes
 class MainPagerAdapter(
     fa: FragmentActivity,
     val items: HashMap<Int, NetworkChangeListenerFragment>

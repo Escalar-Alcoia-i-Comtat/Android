@@ -28,7 +28,6 @@ val AUTOMATIC_DOWNLOADS_UPDATE_PREF = PreferenceData("automatic_downloads_update
 val PREF_DISABLE_NEARBY = PreferenceData("NearbyZonesDisable", false)
 val PREF_SHOWN_INTRO = PreferenceData("ShownIntro", false)
 
-@ExperimentalUnsignedTypes
 class MainSettingsFragment : NetworkChangeListenerPreferenceFragment() {
     companion object {
         enum class SettingsPage(val height: Int) {

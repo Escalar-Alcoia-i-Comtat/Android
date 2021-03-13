@@ -253,7 +253,6 @@ class MapHelper(private val mapView: MapView) {
         MapNotInitializedException::class
     )
     @WorkerThread
-    @ExperimentalUnsignedTypes
     fun loadKML(
         activity: FragmentActivity,
         kmlAddress: String?,
@@ -296,7 +295,6 @@ class MapHelper(private val mapView: MapView) {
      * @see MapsActivity
      */
     @Throws(MapAnyDataToLoadException::class)
-    @ExperimentalUnsignedTypes
     fun mapsActivityIntent(context: Context, overrideLoadedValues: Boolean = false): Intent {
         val loadedElements = markers.isNotEmpty() || geometries.isNotEmpty()
 
@@ -547,7 +545,6 @@ class MapHelper(private val mapView: MapView) {
      * @param context The context to call from
      * @throws MapNotInitializedException If the map has not been initialized
      */
-    @ExperimentalUnsignedTypes
     @UiThread
     @Throws(MapNotInitializedException::class)
     fun display(context: Context) {
@@ -612,7 +609,6 @@ class MapHelper(private val mapView: MapView) {
         }
     }
 
-    @ExperimentalUnsignedTypes
     fun infoCard(
         context: Context,
         marker: Symbol,

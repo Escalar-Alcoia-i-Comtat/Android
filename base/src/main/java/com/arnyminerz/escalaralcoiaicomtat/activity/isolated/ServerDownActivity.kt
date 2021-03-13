@@ -6,7 +6,6 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityServerDownBinding
 
-@ExperimentalUnsignedTypes
 class ServerDownActivity : LanguageAppCompatActivity() {
     private lateinit var binding: ActivityServerDownBinding
 

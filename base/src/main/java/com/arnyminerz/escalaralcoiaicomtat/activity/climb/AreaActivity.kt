@@ -20,7 +20,6 @@ import timber.log.Timber
 
 private const val ICON_SIZE_MULTIPLIER = .2f
 
-@ExperimentalUnsignedTypes
 class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
 
     private var justAttached = false

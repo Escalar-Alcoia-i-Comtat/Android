@@ -25,7 +25,6 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
 import java.io.File
 
-@ExperimentalUnsignedTypes
 class ZoneAdapter(
     private val zones: ArrayList<Zone>,
     private val dataClassListActivity: DataClassListActivity<*>,

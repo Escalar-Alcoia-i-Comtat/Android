@@ -54,7 +54,6 @@ const val MAP_GEOMETRIES_BUNDLE_EXTRA = "Geometries"
 val ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA = IntentExtra<Float>("IconSize")
 val ZONE_NAME_BUNDLE_EXTRA = IntentExtra<String>("ZneNm")
 
-@ExperimentalUnsignedTypes
 class MapsActivity : NetworkChangeListenerFragmentActivity() {
 
     private var zoneName: String? = null

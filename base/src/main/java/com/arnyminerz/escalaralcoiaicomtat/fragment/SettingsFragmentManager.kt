@@ -13,7 +13,6 @@ import timber.log.Timber
 const val SETTINGS_HEIGHT_MAIN = 0
 const val SETTINGS_HEIGHT_UPPER = 1
 
-@ExperimentalUnsignedTypes
 class SettingsFragmentManager : NetworkChangeListenerFragment() {
     var height = 0
         private set

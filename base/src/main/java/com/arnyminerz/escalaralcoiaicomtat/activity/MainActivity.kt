@@ -18,7 +18,6 @@ import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL_NO_SECURE
 import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.loadAreasFromCache
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.DownloadsFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.MapFragment
@@ -67,7 +66,6 @@ val AREAS = arrayMapOf<String, Area>()
 var serverAvailable = false
     private set
 
-@ExperimentalUnsignedTypes
 class MainActivity : NetworkChangeListenerFragmentActivity() {
 
     private fun prepareApp(): Boolean {
@@ -86,6 +84,11 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             startActivity(Intent(this, IntroActivity::class.java))
             return false
         } else Timber.v("  Won't show intro.")
+
+        if (AREAS.size <= 0) {
+            startActivity(Intent(this, LoadingActivity::class.java))
+            return false
+        }
 
         Timber.v("Data folder path: %s", filesDir(this).path)
 
@@ -117,8 +120,6 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
     var adapter: MainPagerAdapter? = null
     private lateinit var binding: ActivityMainBinding
 
-    private var loaded = false
-    private var loading = false
     private var skipLoad = false
 
     private var menu: Menu? = null
@@ -188,6 +189,28 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             binding.mainViewPager.currentItem = TAB_ITEM_HOME
 
             updateBottomAppBar()
+        }
+
+        Timber.v("  --- Found ${AREAS.size} areas ---")
+
+        areasViewFragment.setItemClickListener { holder, position ->
+            binding.loadingLayout.show()
+            Timber.v("Clicked item %s", position)
+            val intent = Intent(this, AreaActivity()::class.java)
+                .putExtra(EXTRA_AREA, AREAS.valueAt(position)!!.objectId)
+
+            val optionsBundle =
+                ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->
+                    intent.putExtra(EXTRA_AREA_TRANSITION_NAME, transitionName)
+
+                    ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        this,
+                        findViewById(R.id.title_textView),
+                        transitionName
+                    ).toBundle()
+                } ?: Bundle.EMPTY
+
+            startActivity(intent, optionsBundle)
         }
     }
 
@@ -305,44 +328,5 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             }
         } else
             Timber.v("Didn't check for server connection since Internet is not available")
-
-        if (!loaded && !loading) {
-            loading = true
-            visibility(binding.mainLoadingProgressBar, true)
-
-            Timber.v("Loading areas...")
-            loadAreasFromCache {
-                Timber.v("  --- Found ${AREAS.size} areas ---")
-
-                areasViewFragment.setItemClickListener { holder, position ->
-                    binding.loadingLayout.show()
-                    Timber.v("Clicked item %s", position)
-                    val intent = Intent(this, AreaActivity()::class.java)
-                        .putExtra(EXTRA_AREA, AREAS.valueAt(position)!!.objectId)
-
-                    val optionsBundle =
-                        ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->
-                            intent.putExtra(EXTRA_AREA_TRANSITION_NAME, transitionName)
-
-                            ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                this,
-                                findViewById(R.id.title_textView),
-                                transitionName
-                            ).toBundle()
-                        } ?: Bundle.EMPTY
-
-                    startActivity(intent, optionsBundle)
-                }
-
-                Timber.v("Refreshing areas...")
-                areasViewFragment.refreshAreas()
-                Timber.v("Finished loading areas, hiding progress bar and showing frameLayout.")
-                visibility(binding.mainLoadingProgressBar, false)
-                visibility(binding.mainFrameLayout, true)
-
-                loaded = true
-                loading = false
-            }
-        }
     }
 }

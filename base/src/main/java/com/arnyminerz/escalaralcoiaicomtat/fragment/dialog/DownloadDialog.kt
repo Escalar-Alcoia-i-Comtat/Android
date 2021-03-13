@@ -11,7 +11,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber
 
-@ExperimentalUnsignedTypes
 class DownloadDialog(private val context: Context, private val data: DataClass<*, *>) {
     fun show(deleteCallback: (() -> Unit)? = null) {
         val date = data.downloadDate(context)

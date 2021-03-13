@@ -13,7 +13,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.sizeString
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.DownloadSectionsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 
-@ExperimentalUnsignedTypes
 class DownloadsFragment : NetworkChangeListenerFragment() {
     private var _binding: FragmentDownloadsBinding? = null
     private val binding get() = _binding!!

@@ -28,7 +28,6 @@ const val THUMBNAIL_SIZE = .1f
 
 const val ARGUMENT_SECTOR = "sector"
 
-@ExperimentalUnsignedTypes
 class SectorFragment : NetworkChangeListenerFragment() {
     private lateinit var sector: Sector
 

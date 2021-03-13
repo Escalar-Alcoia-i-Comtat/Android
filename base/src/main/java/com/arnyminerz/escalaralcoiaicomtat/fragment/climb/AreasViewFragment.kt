@@ -38,7 +38,6 @@ import timber.log.Timber
 
 const val LOCATION_PERMISSION_REQUEST = 0
 
-@ExperimentalUnsignedTypes
 class AreasViewFragment : NetworkChangeListenerFragment() {
     private var justAttached = false
     private val mapInitialized: Boolean
@@ -193,7 +192,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         justAttached = true
     }
 
-    @SuppressLint("MissingPermission")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -204,6 +202,11 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         initializeMap(savedInstanceState)
 
         return binding.root
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        refreshAreas()
     }
 
     @SuppressLint("MissingPermission")
@@ -230,22 +233,20 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     }
 
     fun refreshAreas() {
-        if (context != null && isResumed) {
-            Timber.v("Refreshing areas...")
-            nearbyZonesReady()
+        Timber.v("Refreshing areas...")
+        nearbyZonesReady()
 
-            Timber.d("Initializing area adapter for AreasViewFragment...")
-            val adapter = AreaAdapter(requireContext(), areaClickListener)
+        Timber.d("Initializing area adapter for AreasViewFragment...")
+        val adapter = AreaAdapter(requireContext(), areaClickListener)
 
-            binding.areasRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-            if (justAttached)
-                binding.areasRecyclerView.layoutAnimation =
-                    AnimationUtils.loadLayoutAnimation(
-                        requireContext(),
-                        R.anim.item_fall_animator
-                    )
-            binding.areasRecyclerView.adapter = adapter
-        } else Timber.w("Context is null or AreasViewFragment isn't resumed")
+        binding.areasRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        if (justAttached)
+            binding.areasRecyclerView.layoutAnimation =
+                AnimationUtils.loadLayoutAnimation(
+                    requireContext(),
+                    R.anim.item_fall_animator
+                )
+        binding.areasRecyclerView.adapter = adapter
     }
 
     fun setItemClickListener(areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?) {

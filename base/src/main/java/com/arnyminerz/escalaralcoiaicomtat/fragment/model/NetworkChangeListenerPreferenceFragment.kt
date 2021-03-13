@@ -6,7 +6,6 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerA
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider.NetworkState
 
-@ExperimentalUnsignedTypes
 abstract class NetworkChangeListenerPreferenceFragment : PreferenceFragmentCompat(),
     ConnectivityProvider.ConnectivityStateListener, NetworkChangeListenerActivityInterface {
 

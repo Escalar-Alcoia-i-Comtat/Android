@@ -14,7 +14,6 @@ import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import timber.log.Timber
 import java.io.InvalidClassException
 
-@ExperimentalUnsignedTypes
 class AreaAdapter(
     private val context: Context,
     private var clickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null

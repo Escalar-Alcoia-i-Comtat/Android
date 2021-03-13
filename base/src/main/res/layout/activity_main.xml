@@ -46,16 +46,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ProgressBar
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:id="@+id/mainLoadingProgressBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="?attr/actionBarSize"
-        android:indeterminate="true"
-        android:progressTint="#FFFFFF" />
-
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/mainViewPager"
         android:layout_width="match_parent"
@@ -66,8 +56,7 @@
         android:id="@+id/mainFrameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:animateLayoutChanges="true"
-        android:visibility="gone" />
+        android:animateLayoutChanges="true" />
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottomAppBar"

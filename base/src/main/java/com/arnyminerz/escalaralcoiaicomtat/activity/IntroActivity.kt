@@ -26,8 +26,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.google.android.material.button.MaterialButton
 import timber.log.Timber
 
-
-@ExperimentalUnsignedTypes
 class IntroActivity : NetworkChangeListenerActivity() {
     companion object {
         var shouldChange = false

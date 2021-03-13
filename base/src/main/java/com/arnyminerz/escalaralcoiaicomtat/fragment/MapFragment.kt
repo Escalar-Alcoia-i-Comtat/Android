@@ -26,7 +26,6 @@ import java.io.FileNotFoundException
 
 private const val ICON_SIZE_MULTIPLIER = .2f
 
-@ExperimentalUnsignedTypes
 class MapFragment : NetworkChangeListenerFragment() {
     lateinit var mapHelper: MapHelper
     var mapLoaded = false
