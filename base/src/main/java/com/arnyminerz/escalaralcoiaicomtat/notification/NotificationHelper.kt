@@ -5,6 +5,7 @@ package com.arnyminerz.escalaralcoiaicomtat.notification
 import android.app.PendingIntent
 import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.collection.arrayMapOf
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -144,7 +145,20 @@ class Notification private constructor(private val builder: Builder) {
         }
 
         /**
-         * Sets the the message of the notification
+         * Sets the title of the notification from a resource
+         * @author Arnau Mora
+         * @since 20210313
+         * @param titleRes The resource string of the title of the notification
+         * @param arguments Arguments for filling the title
+         * @return The Builder instance
+         */
+        fun withTitle(@StringRes titleRes: Int, vararg arguments: Any): Builder {
+            this.title = context.getString(titleRes, arguments)
+            return this
+        }
+
+        /**
+         * Sets the message of the notification
          * @author Arnau Mora
          * @since 20210313
          * @param text The message of the notification
@@ -152,6 +166,19 @@ class Notification private constructor(private val builder: Builder) {
          */
         fun withText(text: String): Builder {
             this.text = text
+            return this
+        }
+
+        /**
+         * Sets the message of the notification from a resource
+         * @author Arnau Mora
+         * @since 20210313
+         * @param messageRes The resource string of the message of the notification
+         * @param arguments Arguments for filling the message
+         * @return The Builder instance
+         */
+        fun withText(@StringRes messageRes: Int, vararg arguments: Any): Builder {
+            this.text = context.getString(messageRes, arguments)
             return this
         }
 
@@ -164,6 +191,19 @@ class Notification private constructor(private val builder: Builder) {
          */
         fun withInfoText(info: String): Builder {
             this.info = info
+            return this
+        }
+
+        /**
+         * Sets the info text of the notification from a resource
+         * @author Arnau Mora
+         * @since 20210313
+         * @param textRes The resource string of the info text of the notification
+         * @param arguments Arguments for filling the info text
+         * @return The Builder instance
+         */
+        fun withInfoText(@StringRes textRes: Int, vararg arguments: Any): Builder {
+            this.info = context.getString(textRes, arguments)
             return this
         }
 
