@@ -77,7 +77,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             Timber.w("Could not update Nearby Zones: Location manager is null")
         }
 
-        if (AREAS.isEmpty()) {
+        if (AREAS.isEmpty) {
             error = true
             Timber.w("Could not update Nearby Zones: AREAS is empty")
         }
@@ -232,7 +232,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         } else Timber.w("Location listener not added since permission is not granted")
     }
 
-    fun refreshAreas() {
+    private fun refreshAreas() {
         Timber.v("Refreshing areas...")
         nearbyZonesReady()
 

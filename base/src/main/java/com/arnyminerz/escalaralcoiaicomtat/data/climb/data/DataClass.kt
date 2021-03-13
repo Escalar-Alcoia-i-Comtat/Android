@@ -149,7 +149,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     open val namespace: String,
     open val childrenNamespace: String
 ) : DataClassImpl(objectId), Iterable<A> {
-    protected val pin = "${DATA_FIX_LABEL}_${Area.NAMESPACE}_${this.objectId}"
+    protected val pin = "${DATA_FIX_LABEL}_${Area.NAMESPACE}_${objectId}"
 
     protected val innerChildren = arrayListOf<A>()
 
@@ -276,7 +276,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
                     var counter = 1 // Starts at 1 for representing self, that just downloaded
                     val targetCounter = fullCount()
-                    if (children.size > 0 && children.first() is DataClass<*, *>)
+                    if (children.isNotEmpty() && children.first() is DataClass<*, *>)
                         for (child in children)
                             (child as? DataClass<*, *>)?.download(context, overwrite, null, {
                                 counter++

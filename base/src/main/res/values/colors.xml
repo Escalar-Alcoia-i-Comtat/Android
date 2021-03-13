@@ -4,8 +4,6 @@
     <color name="colorPrimaryDark">@color/colorPrimary</color>
     <color name="colorAccent">#9da226</color>
 
-    <color name="dark_background_color">#303030</color>
-
     <color name="bg_color">#f5f5f5</color>
     <color name="bg_color_dark">#202020</color>
 

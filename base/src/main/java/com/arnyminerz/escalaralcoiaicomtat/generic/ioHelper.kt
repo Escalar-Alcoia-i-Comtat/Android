@@ -54,7 +54,7 @@ private const val KBYTE_D = 1024.0
 private const val FOURTY = 40
 private const val TEN = 10
 private const val POINTER = 0xfffccccccccccccL
-fun humanReadableByteCountBin(bytes: Long, locale: Locale = Locale.getDefault()): String? {
+fun humanReadableByteCountBin(bytes: Long, locale: Locale = Locale.getDefault()): String {
     val absB = if (bytes == Long.MIN_VALUE) Long.MAX_VALUE else abs(bytes)
     if (absB < KBYTE)
         return "$bytes B"
