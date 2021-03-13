@@ -52,8 +52,8 @@ class Notification private constructor(private val builder: Builder) {
                     notificationBuilder.setProgress(0, 0, true)
                 else
                     notificationBuilder.setProgress(value, max, false)
-                notificationBuilder.setOngoing(true)
-            } ?: run { notificationBuilder.setOngoing(false) }
+            }
+            notificationBuilder.setOngoing(persistent)
 
             for (action in actions)
                 notificationBuilder.addAction(
@@ -94,6 +94,7 @@ class Notification private constructor(private val builder: Builder) {
         var text: String? = null
         var info: String? = null
         var longText: String? = null
+        var persistent: Boolean = false
         var intent: PendingIntent? = null
         var progress: ValueMax<Int>? = null
         val actions: ArrayList<NotificationButton> = arrayListOf()
@@ -245,8 +246,9 @@ class Notification private constructor(private val builder: Builder) {
          * @param progress The progress of the notification
          * @return The Builder instance
          */
-        fun withProgress(progress: ValueMax<Int>): Builder {
+        fun withProgress(progress: ValueMax<Int>, persistent: Boolean = true): Builder {
             this.progress = progress
+            setPersistent(persistent)
             return this
         }
 
@@ -261,8 +263,8 @@ class Notification private constructor(private val builder: Builder) {
          * @throws IllegalStateException When progress is greater than max
          */
         @Throws(IllegalStateException::class)
-        fun withProgress(progress: Int, max: Int): Builder =
-            withProgress(ValueMax(progress, max))
+        fun withProgress(progress: Int, max: Int, persistent: Boolean = true): Builder =
+            withProgress(ValueMax(progress, max), persistent)
 
         /**
          * Adds a button to the notification
@@ -297,6 +299,18 @@ class Notification private constructor(private val builder: Builder) {
          */
         fun addActions(buttons: Collection<NotificationButton>): Builder {
             actions.addAll(buttons)
+            return this
+        }
+
+        /**
+         * Sets if the notification should be removable by the user
+         * @author Arnau Mora
+         * @since 20210313
+         * @param persistent If the notification should be non-removable by the user
+         * @return The Builder instance
+         */
+        fun setPersistent(persistent: Boolean = true): Builder {
+            this.persistent = persistent
             return this
         }
 
