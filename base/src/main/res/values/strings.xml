@@ -74,6 +74,8 @@
     <string name="status_failed">failed</string>
     <string name="status_blocked">blocked</string>
     <string name="status_cancelled">Cancelled</string>
+    <string name="status_downloading">Downloading…</string>
+    <string name="status_storing">Storing…</string>
     <string name="status_loading_progress">Loading %d/%d</string>
 
     <string name="dialog_permission_title">Permission Required!</string>

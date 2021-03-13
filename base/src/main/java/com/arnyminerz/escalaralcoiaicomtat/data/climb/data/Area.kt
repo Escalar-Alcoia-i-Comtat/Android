@@ -49,7 +49,7 @@ fun loadAreasFromCache(progressCallback: (current: Int, total: Int) -> Unit, cal
     // Data will be fetched in packs of PATHS_BATCH_SIZE
     AREAS.clear()
     query.limit = PATHS_BATCH_SIZE
-    query.fromLocalDatastore().findInBackground().continueWithTask { task ->
+    query.fromPin(DATA_FIX_LABEL).findInBackground().continueWithTask { task ->
         val error = task.error
         val objects = task.result
         if (error != null) {
@@ -62,6 +62,7 @@ fun loadAreasFromCache(progressCallback: (current: Int, total: Int) -> Unit, cal
             Timber.w("No stored data found. Fetching from network.")
             return@continueWithTask query.fromNetwork().findInBackground()
         }
+        Timber.d("Loading from pin...")
         return@continueWithTask task
     }.continueWithTask { task ->
         val objects = task.result
@@ -187,7 +188,8 @@ fun loadAreasFromCache(progressCallback: (current: Int, total: Int) -> Unit, cal
             progressCallback(p, objects.size)
         }
         Timber.v("Pinning...")
-        ParseObject.pinAllInBackground(objects) { error ->
+        progressCallback(0, -1)
+        ParseObject.pinAllInBackground(DATA_FIX_LABEL, objects) { error ->
             if (error != null)
                 Timber.w(error, "Could not pin data!")
             else {
