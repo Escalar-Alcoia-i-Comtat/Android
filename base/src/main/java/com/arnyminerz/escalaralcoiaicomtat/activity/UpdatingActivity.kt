@@ -8,11 +8,10 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityUpdatingBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
-import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.DownloadAreasIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -23,22 +22,24 @@ import java.io.IOException
 
 private const val ERROR_VIBRATE: Long = 500
 
-val UPDATE_AREA = IntentExtra<Int>("update_area")
-val UPDATE_ZONE = IntentExtra<Int>("update_zone")
-val UPDATE_SECTOR = IntentExtra<Int>("update_sector")
+@ExperimentalUnsignedTypes
+val UPDATE_AREA = IntentExtra<Area>("update_area")
 
-val UPDATE_CACHE = IntentExtra<Boolean>("update_cache")
+@ExperimentalUnsignedTypes
+val UPDATE_ZONE = IntentExtra<Zone>("update_zone")
+
+@ExperimentalUnsignedTypes
+val UPDATE_SECTOR = IntentExtra<Sector>("update_sector")
+
 val UPDATE_IMAGES = IntentExtra<Boolean>("update_images")
 
 val QUIET_UPDATE = IntentExtra<Boolean>("quiet_update")
 
 @ExperimentalUnsignedTypes
 class UpdatingActivity : NetworkChangeListenerActivity() {
-    private var updateArea: Int? = null // Sets the area id to update (re-download images)
-    private var updateZone: Int? = null // Sets the zone id to update (re-download images)
-    private var updateSector: Int? = null // Sets the sector id to update (re-download images)
-    private var updateCache: Boolean? =
-        null // If this is true, the cache.json file will be re-downloaded
+    private var updateArea: Area? = null // Sets the area id to update (re-download images)
+    private var updateZone: Zone? = null // Sets the zone id to update (re-download images)
+    private var updateSector: Sector? = null // Sets the sector id to update (re-download images)
     private var updateDownloads: Boolean? =
         null // If this is true, all the downloaded images will be downloaded again
 
@@ -64,12 +65,8 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
         updateArea = intent.getExtra(UPDATE_AREA)
         updateZone = intent.getExtra(UPDATE_ZONE)
         updateSector = intent.getExtra(UPDATE_SECTOR)
-        updateCache = intent.getExtra(UPDATE_CACHE)
         updateDownloads = intent.getExtra(UPDATE_IMAGES)
         quietUpdate = intent.getExtra(QUIET_UPDATE) ?: false
-
-        if (updateDownloads == true)
-            updateCache = true // If downloads should be updated, updateCache also should be ran
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
@@ -100,56 +97,20 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
     }
 
     private fun runActions() {
-        if (updateCache == true) { // Cache should be re-downloaded
-            Timber.v("Has to update cache.json")
-
-            val cacheFile = IntroActivity.cacheFile(this) // First delete the cache file
-            binding.progressTextView.setText(R.string.update_progress_deleting_old_cache)
-            Timber.v("Deleting the cache file")
-            cacheFile.deleteIfExists()
-
-            Timber.v("Downloading newest data...")
-            binding.progressTextView.setText(R.string.update_progress_downloading_new_cache)
-            binding.progressBar.isIndeterminate = true
-            runOnUiThread {
-                try {
-                    DownloadAreasIntroFragment.downloadAreasCache(this, networkState, null, null)
-                    // On finished
-                    Timber.v("  Device data updated!")
-
-                    // if (updateDownloads == true) {
-                    // TODO: Update downloads
-                    // }
-                } catch (e: IOException) {
-                    vibrate(this, ERROR_VIBRATE)
-                    visibility(binding.progressBar, false, setGone = false)
-                    binding.updatingTextView.setText(R.string.update_progress_error)
-                    binding.progressTextView.setText(R.string.toast_error_internal)
-                }
-            }
-        }
-
         if (updateArea != null || updateZone != null || updateSector != null) { // Cache should be re-downloaded
             Timber.v("Has to update - updateArea:$updateArea updateZone:$updateZone updateSector:$updateSector")
-
-            val cacheFile = IntroActivity.cacheFile(this)
-            binding.progressTextView.setText(R.string.update_progress_deleting_old_cache)
-            Timber.v("Deleting the cache file")
-            cacheFile.deleteIfExists()
 
             Timber.v("Downloading newest data...")
             binding.progressTextView.setText(R.string.update_progress_downloading_new_cache)
             binding.progressBar.isIndeterminate = true
             try {
                 runAsync {
-                    DownloadAreasIntroFragment.downloadAreasCache(this, networkState, null, null)
-
                     if (updateArea != null) // Update area
-                        iterateUpdate(Area.fromId(updateArea!!))
+                        iterateUpdate(updateArea!!)
                     if (updateZone != null) // Update zone
-                        iterateUpdate(Zone.fromId(updateZone!!))
+                        iterateUpdate(updateZone!!)
                     if (updateSector != null) // Update sector
-                        iterateUpdate(Sector.fromId(updateSector!!))
+                        iterateUpdate(updateSector!!)
                 }
             } catch (e: IOException) {
                 vibrate(this, ERROR_VIBRATE)
@@ -158,6 +119,22 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
                 binding.progressTextView.setText(R.string.toast_error_internal)
             }
             return
+        }
+        if (updateDownloads == true) {
+            Timber.v("Updating downloads...")
+            binding.progressTextView.setText(R.string.update_progress_downloading_new_cache)
+            binding.progressBar.isIndeterminate = true
+
+            for (area in AREAS.values) {
+                if (area.isDownloaded(this) == DownloadStatus.DOWNLOADED)
+                    iterateUpdate(area)
+                else for (zone in area)
+                    if (zone.isDownloaded(this) == DownloadStatus.DOWNLOADED)
+                        iterateUpdate(zone)
+                    else for (sector in zone)
+                        if (sector.isDownloaded(this) == DownloadStatus.DOWNLOADED)
+                            iterateUpdate(sector)
+            }
         }
 
         onBackPressed()

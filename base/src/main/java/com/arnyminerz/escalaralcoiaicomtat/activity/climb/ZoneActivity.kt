@@ -2,8 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.animation.AnimationUtils
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
@@ -12,21 +10,24 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
+import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.SectorsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.show
+import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber
 
-@ExperimentalUnsignedTypes
+var errorNotStored: Boolean = false
+
 class ZoneActivity : DataClassListActivity<Zone>() {
 
     private var justAttached = false
     private var loaded = false
 
-    private var zoneIndex = -1
-    private var areaIndex = -1
+    private lateinit var areaId: String
+    private lateinit var zoneId: String
 
     private var savedInstanceState: Bundle? = null
 
@@ -42,14 +43,16 @@ class ZoneActivity : DataClassListActivity<Zone>() {
             return
         }
 
-        areaIndex = intent.getExtra(EXTRA_AREA, -1)
-        zoneIndex = intent.getExtra(EXTRA_ZONE, -1)
-        if (areaIndex < 0 || zoneIndex < 0) {
+        val areaIdExtra = intent.getExtra(EXTRA_AREA)
+        val zoneIdExtra = intent.getExtra(EXTRA_ZONE)
+        if (areaIdExtra == null || zoneIdExtra == null) {
             Timber.e("Area or Zone index wasn't specified")
             onBackPressed()
             return
         }
-        dataClass = AREAS[areaIndex][zoneIndex]
+        areaId = areaIdExtra
+        zoneId = zoneIdExtra
+        dataClass = AREAS[areaId]!![zoneId]
 
         val transitionName = intent.getExtra(EXTRA_ZONE_TRANSITION_NAME)
 
@@ -63,6 +66,14 @@ class ZoneActivity : DataClassListActivity<Zone>() {
         super.onResume()
         loaded = false
         justAttached = false
+
+        if (errorNotStored) {
+            Timber.w("errorNotStored")
+            Snackbar
+                .make(binding.root, R.string.toast_error_no_internet, Snackbar.LENGTH_SHORT)
+                .show()
+            errorNotStored = false
+        }
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
@@ -83,31 +94,30 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                 binding.recyclerView.adapter =
                     SectorsAdapter(
                         this,
-                        areaIndex, zoneIndex
+                        areaId, zoneId
                     ) { viewHolder, index ->
                         binding.loadingLayout.show()
-                        Handler(Looper.getMainLooper()).post {
-                            Timber.v("Clicked item $index")
-                            val trn =
-                                ViewCompat.getTransitionName(viewHolder.titleTextView)
-                                    .toString()
-                            Timber.v("Transition name: $trn")
-                            val intent =
-                                Intent(
-                                    this@ZoneActivity,
-                                    SectorActivity()::class.java
-                                )
-                                    .putExtra(EXTRA_AREA, areaIndex)
-                                    .putExtra(EXTRA_ZONE, zoneIndex)
-                                    .putExtra(EXTRA_SECTOR, index)
-                                    .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
-                            val options =
-                                ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                    this@ZoneActivity, viewHolder.titleTextView, trn
-                                )
 
-                            startActivity(intent, options.toBundle())
-                        }
+                        Timber.v("Clicked item $index")
+                        val trn =
+                            ViewCompat.getTransitionName(viewHolder.titleTextView)
+                                .toString()
+                        Timber.v("Transition name: $trn")
+                        val intent =
+                            Intent(
+                                this@ZoneActivity,
+                                SectorActivity()::class.java
+                            )
+                                .putExtra(EXTRA_AREA, areaId)
+                                .putExtra(EXTRA_ZONE, zoneId)
+                                .putExtra(EXTRA_SECTOR, AREAS[areaId]!![zoneId][index].objectId)
+                                .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
+                        val options =
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                this@ZoneActivity, viewHolder.titleTextView, trn
+                            )
+
+                        startActivity(intent, options.toBundle())
                     }
 
                 loaded = true
@@ -116,7 +126,8 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                 Timber.v(
                     "An AlreadyLoadingException has been thrown while loading the zones in ZoneActivity."
                 ) // Let's just warn the debugger this is controlled
+            } catch (_: NoInternetAccessException) {
             } else
-            Timber.d("Already loaded!")
+                Timber.d("Already loaded!")
     }
 }

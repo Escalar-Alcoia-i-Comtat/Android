@@ -28,7 +28,6 @@ const val THUMBNAIL_SIZE = .1f
 
 const val ARGUMENT_SECTOR = "sector"
 
-@ExperimentalUnsignedTypes
 class SectorFragment : NetworkChangeListenerFragment() {
     private lateinit var sector: Sector
 
@@ -141,8 +140,6 @@ class SectorFragment : NetworkChangeListenerFragment() {
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        super.onStateChange(state)
-
         if (isResumed && view != null)
             loadImage()
     }

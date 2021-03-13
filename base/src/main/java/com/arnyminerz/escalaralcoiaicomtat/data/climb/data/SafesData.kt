@@ -1,9 +1,8 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 
-import java.io.Serializable
+import android.os.Parcelable
 
-@ExperimentalUnsignedTypes
-interface SafesData : Serializable {
+interface SafesData : Parcelable {
     /**
      * @return The amount of parameters there are
      */
@@ -13,7 +12,7 @@ interface SafesData : Serializable {
      * May not apply if using booleans
      * @return The total count of safes
      */
-    fun sum(): UInt
+    fun sum(): Int
 
     operator fun get(index: Int): SafeCountData?
 

@@ -12,7 +12,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.button.MaterialButton
 import timber.log.Timber
 
-@ExperimentalUnsignedTypes
 class BottomPermissionAskerFragment(
     val activity: Activity,
     private val permissions: Array<String>,

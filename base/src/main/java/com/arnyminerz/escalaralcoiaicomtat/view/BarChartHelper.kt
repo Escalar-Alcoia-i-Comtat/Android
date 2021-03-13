@@ -12,7 +12,6 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
 import timber.log.Timber
 
-@ExperimentalUnsignedTypes
 class BarChartHelper private constructor(
     val barData: BarData,
     private val quarters: Map<Float, String>

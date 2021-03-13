@@ -12,40 +12,28 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityIntroBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.BetaIntroFragment
-import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.DownloadAreasIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.MainIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.StorageIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.StorageIntroFragment.Companion.STORAGE_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_SHOWN_INTRO
 import com.arnyminerz.escalaralcoiaicomtat.generic.isPermissionGranted
-import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.google.android.material.button.MaterialButton
 import timber.log.Timber
-import java.io.File
 
-
-@ExperimentalUnsignedTypes
-class IntroActivity : NetworkChangeListenerActivity() {
+class IntroActivity : LanguageAppCompatActivity() {
     companion object {
         var shouldChange = false
-
-        fun cacheFile(context: Context) = File(context.filesDir, "cache.json")
-
-        fun hasDownloaded(context: Context): Boolean = cacheFile(context).exists()
 
         fun shouldShow(context: Context): IntroShowReason {
             var result: IntroShowReason? = null
             if (!context.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE))
                 result = IntroShowReason.STORAGE_PERMISSION
-            if (!hasDownloaded(context))
-                result = IntroShowReason.DOWNLOAD
             if (!PREF_SHOWN_INTRO.get(context.sharedPreferences))
                 result = IntroShowReason.PREF_FALSE
             return result ?: IntroShowReason.OK
@@ -159,22 +147,6 @@ class IntroActivity : NetworkChangeListenerActivity() {
         }
     }
 
-    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        super.onStateChange(state)
-
-        if (state.hasInternet && binding.viewPager.currentItem ==
-            adapterViewPager!!.fragments.indexOf(adapterViewPager!!.downloadIntroFragment)
-        )
-            if (!DownloadAreasIntroFragment.loading)
-                runAsync {
-                    DownloadAreasIntroFragment.downloadAreasCache(
-                        this,
-                        findViewById(R.id.intro_download_spinner),
-                        findViewById(R.id.internetWaiting_layout)
-                    )
-                }
-    }
-
     @Suppress("MemberVisibilityCanBePrivate")
     class IntroPagerAdapter(fragmentManager: FragmentManager, context: Context) :
         FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
@@ -183,7 +155,6 @@ class IntroActivity : NetworkChangeListenerActivity() {
         val mainIntroFragment = MainIntroFragment()
         val betaIntroFragment = BetaIntroFragment()
         val storageIntroFragment = StorageIntroFragment()
-        val downloadIntroFragment = DownloadAreasIntroFragment()
 
         init {
             fragments.add(mainIntroFragment)
@@ -191,8 +162,6 @@ class IntroActivity : NetworkChangeListenerActivity() {
                 fragments.add(betaIntroFragment)
             if (!context.isPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE))
                 fragments.add(storageIntroFragment)
-            if (!hasDownloaded(context))
-                fragments.add(downloadIntroFragment)
         }
 
         override fun getCount() = fragments.size

@@ -68,7 +68,6 @@ data class GeoGeometry(
     }
 }
 
-@ExperimentalUnsignedTypes
 fun Collection<GeoGeometry>.addToMap(
     fillManager: FillManager,
     lineManager: LineManager

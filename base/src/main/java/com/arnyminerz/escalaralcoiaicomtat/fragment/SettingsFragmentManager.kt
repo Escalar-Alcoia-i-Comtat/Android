@@ -4,8 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.*
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFragment.Companion.SettingsPage
 import timber.log.Timber
@@ -13,8 +13,7 @@ import timber.log.Timber
 const val SETTINGS_HEIGHT_MAIN = 0
 const val SETTINGS_HEIGHT_UPPER = 1
 
-@ExperimentalUnsignedTypes
-class SettingsFragmentManager : NetworkChangeListenerFragment() {
+class SettingsFragmentManager : Fragment() {
     var height = 0
         private set
 

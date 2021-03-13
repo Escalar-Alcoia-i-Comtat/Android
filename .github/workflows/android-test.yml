@@ -19,6 +19,9 @@ jobs:
           echo 'SIGNING_KEYSTORE_PASSWORD="${{ secrets.SIGNING_KEYSTORE_PASSWORD }}"' >> base/secure.gradle
           echo 'SIGNING_KEY_ALIAS="${{ secrets.SIGNING_KEY_ALIAS }}"' >> base/secure.gradle
           echo 'SIGNING_KEY_PASSWORD="${{ secrets.SIGNING_KEY_PASSWORD }}"' >> base/secure.gradle
+          echo 'PARSE_SERVER="${{ secrets.PARSE_SERVER }}"' >> base/secure.gradle
+          echo 'PARSE_KEY="${{ secrets.PARSE_KEY }}"' >> base/secure.gradle
+          echo 'PARSE_APPLICATION_ID="${{ secrets.PARSE_APPLICATION_ID }}"' >> base/secure.gradle
           echo '}' >> base/secure.gradle
       - name: Prepare sentry.properties
         run: |

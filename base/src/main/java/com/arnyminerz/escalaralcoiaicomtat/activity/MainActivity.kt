@@ -5,19 +5,15 @@ import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.collection.arrayMapOf
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.work.*
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.ServerDownActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
-import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
-import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL_NO_SECURE
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.loadAreasFromCache
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.DownloadsFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.MapFragment
@@ -25,29 +21,28 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.SettingsFragmentManager
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.AreasViewFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFragment.Companion.SettingsPage
-import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.network.ping
 import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChannels
 import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.arnyminerz.escalaralcoiaicomtat.worker.UpdateWorker
-import io.sentry.Sentry
+import com.parse.ParseConfig
 import io.sentry.SentryLevel
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.timber.SentryTimberIntegration
 import timber.log.Timber
 import timber.log.Timber.DebugTree
 import java.io.File
-import java.net.URL
-import java.util.concurrent.TimeUnit
 
-val EXTRA_AREA = IntentExtra<Int>("area")
-val EXTRA_ZONE = IntentExtra<Int>("zone")
-val EXTRA_SECTOR = IntentExtra<Int>("sector")
+val EXTRA_AREA = IntentExtra<String>("area")
+val EXTRA_ZONE = IntentExtra<String>("zone")
+val EXTRA_SECTOR = IntentExtra<String>("sector")
 
 val EXTRA_ZONE_TRANSITION_NAME = IntentExtra<String>("zone_transition")
 val EXTRA_AREA_TRANSITION_NAME = IntentExtra<String>("area_transition")
@@ -62,14 +57,12 @@ const val UPDATE_CHECKER_WORK_NAME = "update_checker"
 const val UPDATE_CHECKER_TAG = "update"
 const val UPDATE_CHECKER_FLEX_MINUTES: Long = 15
 
-@ExperimentalUnsignedTypes
-val AREAS = arrayListOf<Area>()
+val AREAS = arrayMapOf<String, Area>()
 
 var serverAvailable = false
     private set
 
-@ExperimentalUnsignedTypes
-class MainActivity : NetworkChangeListenerFragmentActivity() {
+class MainActivity : NetworkChangeListenerActivity() {
 
     private fun prepareApp(): Boolean {
         Timber.v("Preparing App...")
@@ -88,6 +81,11 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             return false
         } else Timber.v("  Won't show intro.")
 
+        if (AREAS.size <= 0) {
+            startActivity(Intent(this, LoadingActivity::class.java))
+            return false
+        }
+
         Timber.v("Data folder path: %s", filesDir(this).path)
 
         File(cacheDir, "update.apk").deleteIfExists()
@@ -95,23 +93,15 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             createNotificationChannels()
 
-        Timber.v("Initializing update checker...")
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            UPDATE_CHECKER_WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
-            PeriodicWorkRequestBuilder<UpdateWorker>(
-                1, TimeUnit.HOURS,
-                UPDATE_CHECKER_FLEX_MINUTES, TimeUnit.MINUTES
-            )
-                .setConstraints(
-                    Constraints.Builder()
-                        .setRequiredNetworkType(NetworkType.CONNECTED)
-                        .setRequiresBatteryNotLow(true)
-                        .build()
-                )
-                .addTag(UPDATE_CHECKER_TAG)
-                .build()
-        )
+        Timber.v("Getting config...")
+        ParseConfig.getInBackground { cnf, e ->
+            var config = cnf
+            if (e != null)
+                config = ParseConfig.getCurrentConfig()
+
+            val test = config.getString("testing_param")
+            toast(this, test)
+        }
 
         Timber.v("Finished preparing App...")
         return true
@@ -126,8 +116,6 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
     var adapter: MainPagerAdapter? = null
     private lateinit var binding: ActivityMainBinding
 
-    private var loaded = false
-    private var loading = false
     private var skipLoad = false
 
     private var menu: Menu? = null
@@ -197,6 +185,28 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
             binding.mainViewPager.currentItem = TAB_ITEM_HOME
 
             updateBottomAppBar()
+        }
+
+        Timber.v("  --- Found ${AREAS.size} areas ---")
+
+        areasViewFragment.setItemClickListener { holder, position ->
+            binding.loadingLayout.show()
+            Timber.v("Clicked item %s", position)
+            val intent = Intent(this, AreaActivity()::class.java)
+                .putExtra(EXTRA_AREA, AREAS.valueAt(position)!!.objectId)
+
+            val optionsBundle =
+                ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->
+                    intent.putExtra(EXTRA_AREA_TRANSITION_NAME, transitionName)
+
+                    ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        this,
+                        findViewById(R.id.title_textView),
+                        transitionName
+                    ).toBundle()
+                } ?: Bundle.EMPTY
+
+            startActivity(intent, optionsBundle)
         }
     }
 
@@ -288,76 +298,5 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         val hasInternet = state.hasInternet
         Timber.v("Connectivity status Updated! Has Internet: %s", hasInternet)
         binding.loadingLayout.hide()
-
-        if (state.hasInternet && !serverAvailable) {
-            runAsync {
-                val canReachRecureServer = URL(EXTENDED_API_URL).ping()
-                val canReachServer = URL(EXTENDED_API_URL_NO_SECURE).ping()
-                when {
-                    canReachRecureServer -> {
-                        Timber.v("Reached arnyminerz.com")
-                        serverAvailable = true
-                    }
-                    canReachServer -> {
-                        Timber.w("Misconfigured SSL in API. Please, check! Working at insecure address.")
-                        Sentry.captureMessage(
-                            "Misconfigured SSL in API. Please, check! Working at insecure address.",
-                            SentryLevel.WARNING
-                        )
-                        serverAvailable = true
-                    }
-                    else -> {
-                        Timber.e("Could not ping $EXTENDED_API_URL. Tried through http and https.")
-                        startActivity(Intent(this@MainActivity, ServerDownActivity::class.java))
-                    }
-                }
-            }
-        } else
-            Timber.v("Didn't check for server connection since Internet is not available")
-
-        if (!loaded && !loading)
-            runAsync {
-                loading = true
-                visibility(binding.mainLoadingProgressBar, true)
-
-                Timber.v("Loading areas...")
-                val areasList = loadAreasFromCache(this)
-                Timber.v("  Clearing AREAS collection...")
-                AREAS.clear()
-                Timber.v("  Importing to collection...")
-                AREAS.addAll(areasList)
-                Timber.v("  --- Found ${AREAS.size} areas ---")
-
-                areasViewFragment.setItemClickListener { holder, position ->
-                    binding.loadingLayout.show()
-                    Timber.v("Clicked item %s", position)
-                    val intent = Intent(this, AreaActivity()::class.java)
-                        .putExtra(EXTRA_AREA, position)
-
-                    val optionsBundle =
-                        ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->
-                            intent.putExtra(EXTRA_AREA_TRANSITION_NAME, transitionName)
-
-                            ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                this,
-                                findViewById(R.id.title_textView),
-                                transitionName
-                            ).toBundle()
-                        } ?: Bundle.EMPTY
-
-                    startActivity(intent, optionsBundle)
-                }
-
-                runOnUiThread {
-                    Timber.v("Refreshing areas...")
-                    areasViewFragment.refreshAreas()
-                    Timber.v("Finished loading areas, hiding progress bar and showing frameLayout.")
-                    visibility(binding.mainLoadingProgressBar, false)
-                    visibility(binding.mainFrameLayout, true)
-                }
-
-                loaded = true
-                loading = false
-            }
     }
 }

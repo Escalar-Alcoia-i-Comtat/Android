@@ -107,7 +107,6 @@ class GeoMarker(
 fun Symbol.getWindow(): MapObjectWindowData =
     load(this)
 
-@ExperimentalUnsignedTypes
 fun Collection<GeoMarker>.addToMap(
     context: Context,
     style: Style,

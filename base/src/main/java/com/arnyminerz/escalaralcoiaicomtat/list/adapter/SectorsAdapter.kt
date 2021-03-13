@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
+import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
@@ -28,17 +29,16 @@ private const val IMAGE_LOAD_TRANSITION_TIME = 50
 private const val IMAGE_THUMBNAIL_SIZE = 0.1f
 
 @Suppress("unused")
-@ExperimentalUnsignedTypes
 class SectorsAdapter(
     private val dataClassListActivity: DataClassListActivity<*>,
-    area: Int,
-    zone: Int,
+    areaId: String,
+    zoneId: String,
     listener: ((viewHolder: SectorsViewHolder, index: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<SectorsViewHolder>() {
     private var onItemSelected: ((viewHolder: SectorsViewHolder, index: Int) -> Unit)? =
         listener
 
-    private val sectors = AREAS[area][zone].children
+    private val sectors = AREAS[areaId]!![zoneId].children
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SectorsViewHolder =
         SectorsViewHolder(
@@ -95,7 +95,7 @@ class SectorsAdapter(
             refreshDownloadImage(sector, downloadImageButton, downloadProgressBar)
 
             downloadImageButton.setOnClickListener {
-                if (!dataClassListActivity.networkState.hasInternet)
+                if (!appNetworkState.hasInternet)
                     dataClassListActivity.toast(R.string.toast_error_no_internet)
                 else
                     when (sector.isDownloaded(dataClassListActivity)) {

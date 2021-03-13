@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
@@ -26,9 +27,8 @@ import java.io.FileNotFoundException
 
 private const val ICON_SIZE_MULTIPLIER = .2f
 
-@ExperimentalUnsignedTypes
 class MapFragment : NetworkChangeListenerFragment() {
-    lateinit var mapHelper: MapHelper
+    private lateinit var mapHelper: MapHelper
     var mapLoaded = false
     var mapLoading = false
 
@@ -133,7 +133,6 @@ class MapFragment : NetworkChangeListenerFragment() {
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        super.onStateChange(state)
         Timber.v("onStateChange($state)")
         val hasInternet = state.hasInternet
 
@@ -149,18 +148,18 @@ class MapFragment : NetworkChangeListenerFragment() {
             Timber.v("Skipping map load ($mapLoaded, $mapLoading, ${mapHelper.isLoaded}).")
             return
         }
-        if (!networkState.hasInternet) {
+        if (!appNetworkState.hasInternet) {
             Timber.v("Skipping map load: No Internet connection")
             return
         }
         mapLoading = true
         runAsync {
             Timber.v("Loading map...")
-            for (area in AREAS)
+            for (area in AREAS.values)
                 try {
                     val kml = area.kmlAddress
                     Timber.v("Loading KML ($kml) for ${area.displayName}...")
-                    mapHelper.loadKML(requireActivity(), kml, networkState, false).apply {
+                    mapHelper.loadKML(requireActivity(), kml, false).apply {
                         Timber.d("Adding features to map...")
                         mapHelper.addMarkers(markers)
                         mapHelper.addGeometries(polygons)

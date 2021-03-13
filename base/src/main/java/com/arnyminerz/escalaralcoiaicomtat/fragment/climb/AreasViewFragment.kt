@@ -38,7 +38,6 @@ import timber.log.Timber
 
 const val LOCATION_PERMISSION_REQUEST = 0
 
-@ExperimentalUnsignedTypes
 class AreasViewFragment : NetworkChangeListenerFragment() {
     private var justAttached = false
     private val mapInitialized: Boolean
@@ -78,7 +77,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             Timber.w("Could not update Nearby Zones: Location manager is null")
         }
 
-        if (AREAS.isEmpty()) {
+        if (AREAS.isEmpty) {
             error = true
             Timber.w("Could not update Nearby Zones: AREAS is empty")
         }
@@ -131,7 +130,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 for (zone in zones) {
                     val zoneLocation = zone.position ?: continue
                     if (zoneLocation.distanceTo(position) <= requiredDistance) {
-                        Timber.d("Adding zone #${zone.id}. Creating marker...")
+                        Timber.d("Adding zone #${zone.objectId}. Creating marker...")
                         val marker = GeoMarker(
                             zoneLocation,
                             windowData = MapObjectWindowData(zone.displayName, null)
@@ -193,7 +192,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         justAttached = true
     }
 
-    @SuppressLint("MissingPermission")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -204,6 +202,11 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         initializeMap(savedInstanceState)
 
         return binding.root
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        refreshAreas()
     }
 
     @SuppressLint("MissingPermission")
@@ -229,23 +232,21 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         } else Timber.w("Location listener not added since permission is not granted")
     }
 
-    fun refreshAreas() {
-        if (context != null && isResumed) {
-            Timber.v("Refreshing areas...")
-            nearbyZonesReady()
+    private fun refreshAreas() {
+        Timber.v("Refreshing areas...")
+        nearbyZonesReady()
 
-            Timber.d("Initializing area adapter for AreasViewFragment...")
-            val adapter = AreaAdapter(requireContext(), areaClickListener)
+        Timber.d("Initializing area adapter for AreasViewFragment...")
+        val adapter = AreaAdapter(requireContext(), areaClickListener)
 
-            binding.areasRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-            if (justAttached)
-                binding.areasRecyclerView.layoutAnimation =
-                    AnimationUtils.loadLayoutAnimation(
-                        requireContext(),
-                        R.anim.item_fall_animator
-                    )
-            binding.areasRecyclerView.adapter = adapter
-        } else Timber.w("Context is null or AreasViewFragment isn't resumed")
+        binding.areasRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        if (justAttached)
+            binding.areasRecyclerView.layoutAnimation =
+                AnimationUtils.loadLayoutAnimation(
+                    requireContext(),
+                    R.anim.item_fall_animator
+                )
+        binding.areasRecyclerView.adapter = adapter
     }
 
     fun setItemClickListener(areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?) {
@@ -266,7 +267,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        super.onStateChange(state)
         if (!isResumed) return
 
         visibility(binding.areasNoInternetCardView.noInternetCardView, !state.hasInternet)

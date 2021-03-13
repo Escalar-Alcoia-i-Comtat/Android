@@ -1,49 +1,29 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 
+import android.os.Parcel
+import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getInt
-import org.json.JSONException
-import org.json.JSONObject
 
-@ExperimentalUnsignedTypes
 data class FixedSafesData(
-    val stringCount: UInt,
-    val paraboltCount: UInt,
-    val spitCount: UInt,
-    val tensorCount: UInt,
-    val pitonCount: UInt,
-    val burilCount: UInt
+    val stringCount: Int,
+    val paraboltCount: Int,
+    val spitCount: Int,
+    val tensorCount: Int,
+    val pitonCount: Int,
+    val burilCount: Int
 ) : SafesData {
-    companion object {
-        @Throws(JSONException::class)
-        fun fromJSON(json: JSONObject): FixedSafesData {
-            return FixedSafesData(
-                json.getInt("string_count", 0).toUInt(),
-                json.getInt("parabolt_count", 0).toUInt(),
-                json.getInt("spit_count", 0).toUInt(),
-                json.getInt("tensor_count", 0).toUInt(),
-                json.getInt("piton_count", 0).toUInt(),
-                json.getInt("buril_count", 0).toUInt()
-            )
-        }
-
-        fun fromDB(obj: JSONObject): FixedSafesData {
-            return FixedSafesData(
-                obj.getInt("string_count", 0).toUInt(),
-                obj.getInt("parabolt_count", 0).toUInt(),
-                obj.getInt("spit_count", 0).toUInt(),
-                obj.getInt("tensor_count", 0).toUInt(),
-                obj.getInt("piton_count", 0).toUInt(),
-                obj.getInt("buril_count", 0).toUInt()
-            )
-        }
-    }
+    constructor(parcel: Parcel) : this(
+        parcel.readInt(),
+        parcel.readInt(),
+        parcel.readInt(),
+        parcel.readInt(),
+        parcel.readInt(),
+        parcel.readInt()
+    )
 
     override fun count(): Int = 5
 
-    override fun sum(): UInt {
-        return paraboltCount + spitCount + tensorCount + pitonCount + burilCount
-    }
+    override fun sum(): Int = paraboltCount + spitCount + tensorCount + pitonCount + burilCount
 
     @kotlin.jvm.Throws(ArrayIndexOutOfBoundsException::class)
     override operator fun get(index: Int): SafeCountData =
@@ -84,5 +64,22 @@ data class FixedSafesData(
                 "\"piton_count\":\"$pitonCount\"," +
                 "\"buril_count\":\"$burilCount\"" +
                 "}"
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeInt(stringCount)
+        parcel.writeInt(paraboltCount)
+        parcel.writeInt(spitCount)
+        parcel.writeInt(tensorCount)
+        parcel.writeInt(pitonCount)
+        parcel.writeInt(burilCount)
+    }
+
+    override fun describeContents(): Int = 0
+
+    companion object CREATOR : Parcelable.Creator<FixedSafesData> {
+        override fun createFromParcel(parcel: Parcel): FixedSafesData = FixedSafesData(parcel)
+
+        override fun newArray(size: Int): Array<FixedSafesData?> = arrayOfNulls(size)
     }
 }

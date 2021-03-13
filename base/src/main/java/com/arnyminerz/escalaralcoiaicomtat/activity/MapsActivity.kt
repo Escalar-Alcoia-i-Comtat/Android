@@ -12,7 +12,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
@@ -23,7 +23,6 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.android.gestures.MoveGestureDetector
@@ -54,8 +53,7 @@ const val MAP_GEOMETRIES_BUNDLE_EXTRA = "Geometries"
 val ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA = IntentExtra<Float>("IconSize")
 val ZONE_NAME_BUNDLE_EXTRA = IntentExtra<String>("ZneNm")
 
-@ExperimentalUnsignedTypes
-class MapsActivity : NetworkChangeListenerFragmentActivity() {
+class MapsActivity : LanguageAppCompatActivity() {
 
     private var zoneName: String? = null
     private var kmlAddress: String? = null
@@ -167,7 +165,7 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
             .loadMap(this) { _, map, _ ->
                 runAsync {
                     if (kmlAddress != null || kmzFile != null)
-                        loadData(networkState)
+                        loadData()
 
                     runOnUiThread {
                         visibility(binding.dialogMapMarker.mapInfoCardView, false)
@@ -507,8 +505,8 @@ class MapsActivity : NetworkChangeListenerFragmentActivity() {
         }
     }
 
-    private fun loadData(networkState: ConnectivityProvider.NetworkState): MapFeatures {
+    private fun loadData(): MapFeatures {
         Timber.v("Loading KML...")
-        return mapHelper.loadKML(this, kmlAddress, networkState)
+        return mapHelper.loadKML(this, kmlAddress)
     }
 }

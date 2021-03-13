@@ -8,11 +8,14 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.view.View
 import android.widget.TextView
+import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
+import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.SunTime
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
-import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
+import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.arnyminerz.escalaralcoiaicomtat.view.BarChartHelper
 import com.arnyminerz.escalaralcoiaicomtat.view.getAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -22,54 +25,52 @@ import com.github.mikephil.charting.components.XAxis
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mapbox.mapboxsdk.geometry.LatLng
-import org.json.JSONObject
+import com.parse.ParseObject
+import com.parse.ParseQuery
 import timber.log.Timber
 import java.util.*
 
-@ExperimentalUnsignedTypes
 data class Sector constructor(
-    override val id: Int,
-    override val version: Int,
+    override val objectId: String,
     override val displayName: String,
     override val timestamp: Date?,
     val sunTime: SunTime,
     val kidsApt: Boolean,
     val walkingTime: Int,
     val location: LatLng?,
-    override val imageUrl: String,
-    override val parentId: Int
+    override val imageUrl: String
 ) : DataClass<Path, Zone>(
-    id,
-    version,
+    objectId,
     displayName,
     timestamp,
     imageUrl,
     null,
     R.drawable.ic_wide_placeholder,
     R.drawable.ic_wide_placeholder,
-    parentId,
-    NAMESPACE
+    NAMESPACE,
+    Path.NAMESPACE
 ) {
-
-    constructor(json: JSONObject) : this(
-        json.getInt("id"), // id
-        json.getInt("version", 0), // version
-        json.getString("display_name"), // displayName
-        json.getTimestampSafe("timestamp"), // timestamp
-        SunTime.find(json.getInt("sun_time")), // sunTime
-        json.getBooleanFromString("kids_apt"), // kidsApt
-        json.getInt("walking_time"), // walkingTime
-        json.getLatLngSafe("location"),
-        json.getString("image"),
-        json.getInt("climbing_zone")
-    ) {
-        val sector = fromDB(json)
-        this.children.addAll(sector.children)
-    }
+    /**
+     * Creates a new sector from the data of a ParseObject.
+     * Note: This doesn't add children
+     * @author Arnau Mora
+     * @since 20210312
+     * @param parseObject The object to get data from. It must be of class Sector
+     * @see ParseObject
+     */
+    constructor(parseObject: ParseObject) : this(
+        parseObject.objectId,
+        parseObject.getString("displayName")!!.fixTildes(),
+        parseObject.updatedAt,
+        SunTime.find(parseObject.getInt("sunTime")),
+        parseObject.getBoolean("kidsApt"),
+        parseObject.getInt("walkingTime"),
+        parseObject.getParseGeoPoint("location").toLatLng(),
+        parseObject.getString("image")!!
+    )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(id)
-        parcel.writeInt(version)
+        parcel.writeString(objectId)
         parcel.writeString(displayName)
         parcel.writeString(timestamp?.let { TIMESTAMP_FORMAT.format(timestamp) })
         parcel.writeInt(sunTime.value)
@@ -80,13 +81,11 @@ data class Sector constructor(
         parcel.writeInt(walkingTime)
         parcel.writeParcelable(location, 0)
         parcel.writeString(imageUrl)
-        parcel.writeInt(parentId)
-        parcel.writeList(children)
+        parcel.writeList(innerChildren)
     }
 
     constructor(parcel: Parcel) : this(
-        parcel.readInt(), // Id
-        parcel.readInt(), // Version
+        parcel.readString()!!, // objectId
         parcel.readString()!!, // Display Name
         parcel.readString().toTimestamp(), // Timestamp
         SunTime.find(parcel.readInt()), // Sun Time
@@ -94,9 +93,28 @@ data class Sector constructor(
         parcel.readInt(), // Walking Time
         parcel.readParcelable<LatLng?>(LatLng::class.java.classLoader),
         parcel.readString()!!, // Image Url
-        parcel.readInt() // Parent Id
     ) {
-        parcel.readList(children, Path::class.java.classLoader)
+        parcel.readList(innerChildren, Path::class.java.classLoader)
+    }
+
+    @WorkerThread
+    override fun loadChildren(): List<Path> {
+        val key = namespace.toLowerCase(Locale.getDefault())
+        Timber.d("Loading elements from \"$childrenNamespace\", where $key=$objectId")
+
+        val parentQuery = ParseQuery.getQuery<ParseObject>(namespace)
+        parentQuery.whereEqualTo("objectId", objectId)
+
+        val query = ParseQuery.getQuery<ParseObject>(childrenNamespace)
+        query.addAscendingOrder("sketchId")
+        query.whereMatchesQuery(key, parentQuery)
+
+        val loads = query.fetchPinOrNetwork(appNetworkState, pin, true)
+        Timber.d("Got ${loads.size} elements.")
+        val result = arrayListOf<Path>()
+        for (load in loads)
+            result.add(Path(load))
+        return result
     }
 
     override fun describeContents(): Int = 0
@@ -173,36 +191,6 @@ data class Sector constructor(
         override fun createFromParcel(parcel: Parcel): Sector = Sector(parcel)
         override fun newArray(size: Int): Array<Sector?> = arrayOfNulls(size)
 
-        fun fromDB(json: JSONObject): Sector {
-            val sector = Sector(
-                json.getInt("id"),
-                json.getInt("version", 0),
-                json.getString("display_name"),
-                json.getTimestampSafe("timestamp"),
-                SunTime.find(json.getInt("sun_time")),
-                json.getBooleanFromString("kids_apt"),
-                json.getInt("walking_time"),
-                json.getLatLngSafe("location"),
-                json.getString("image"),
-                json.getInt("climbing_zone")
-            )
-            if (json.has("paths")) {
-                val paths = json.getJSONArray("paths")
-                Timber.v("Sector has paths, adding them. Count: ${paths.length()}")
-                for (p in 0 until paths.length()) {
-                    val path = paths.getJSONObject(p)
-                    sector.children.add(Path.fromDB(path))
-                }
-            }
-            return sector
-        }
-
-        fun fromId(id: Int): Sector {
-            val json = jsonFromUrl("$EXTENDED_API_URL/sector/$id")
-
-            return fromDB(json)
-        }
-
-        const val NAMESPACE = "sector"
+        const val NAMESPACE = "Sector"
     }
 }

@@ -14,7 +14,6 @@ import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import timber.log.Timber
 import java.io.InvalidClassException
 
-@ExperimentalUnsignedTypes
 class AreaAdapter(
     private val context: Context,
     private var clickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null
@@ -34,7 +33,7 @@ class AreaAdapter(
         if (AREAS.size < position)
             throw InvalidClassException("Current position is not a valid area")
 
-        val area = AREAS[position]
+        val area = AREAS.valueAt(position)
         Timber.v("Showing area #$position in RecyclerView")
 
         ViewCompat.setTransitionName(holder.titleTextView, area.transitionName)

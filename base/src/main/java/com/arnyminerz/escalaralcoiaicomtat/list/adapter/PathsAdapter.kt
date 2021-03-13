@@ -18,8 +18,7 @@ import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
+import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.Grade
@@ -29,7 +28,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.setTextColor
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -43,16 +41,17 @@ const val ROTATION_B = 180f
 const val ROTATION_PIVOT_X = 0.5f
 const val ROTATION_PIVOT_Y = 0.5f
 
+const val ANIMATION_DURATION = 300L
+
 const val SMALL_CARD_HEIGHT = 57f
 
-@ExperimentalUnsignedTypes
-class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Activity) :
+class PathsAdapter(private val paths: List<Path>, private val activity: Activity) :
     RecyclerView.Adapter<SectorViewHolder>() {
     private val toggled = arrayListOf<Boolean>()
 
     init {
         val pathsSize = paths.size
-        if (pathsSize > 0) paths.sort()
+        // if (pathsSize > 0) paths.sort()
         Timber.d("Created with %d paths", pathsSize)
         (0 until pathsSize).forEach { _ -> toggled.add(false) }
     }
@@ -101,19 +100,11 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
             }
 
         Timber.v("Getting network state...")
-        val networkState = when (activity) {
-            is SectorActivity -> activity.networkState
-            is MainActivity -> activity.networkState
-            else -> {
-                Timber.w("Could not fetch network state. Set to NOT_CONNECTED")
-                ConnectivityProvider.NetworkState.NOT_CONNECTED
-            }
-        }
-        if (!networkState.hasInternet)
+        if (!appNetworkState.hasInternet)
             runAsync {
                 try {
                     Timber.v("Checking if blocked...")
-                    val blocked = path.isBlocked(networkState)
+                    val blocked = path.isBlocked()
 
                     activity.runOnUiThread {
                         Timber.d("Binding ViewHolder for path $position: ${path.displayName}. Blocked: $blocked")
@@ -212,7 +203,7 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
                 Animation.RELATIVE_TO_SELF,
                 ROTATION_PIVOT_Y
             )
-            rotate.duration = 300
+            rotate.duration = ANIMATION_DURATION
             rotate.interpolator = LinearInterpolator()
             rotate.isFillEnabled = true
             rotate.fillAfter = true
@@ -222,12 +213,12 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
             updateToggleStatus(cardView, toggled)
         }
 
-        holder.toggleImageButton.rotation = if (toggled[position]) 180F else 0F
+        holder.toggleImageButton.rotation = if (toggled[position]) ROTATION_B else ROTATION_A
         updateToggleStatus(holder.cardView, toggled[position])
 
         holder.safesChipGroup.removeAllViews()
 
-        if (path.fixedSafesData.sum() > 0u)
+        if (path.fixedSafesData.sum() > 0)
             if (!path.hasSafeCount())
                 addChip(
                     R.string.safe_strings,
@@ -302,7 +293,7 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
     @ExperimentalUnsignedTypes
     private fun addChip(
         @StringRes string: Int?,
-        count: UInt?,
+        count: Int?,
         chipData: ChipData,
         path: Path
     ) {
@@ -317,7 +308,7 @@ class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Act
     @ExperimentalUnsignedTypes
     private fun addChip(
         string: String?,
-        count: UInt?,
+        count: Int?,
         chipData: ChipData,
         path: Path
     ) {

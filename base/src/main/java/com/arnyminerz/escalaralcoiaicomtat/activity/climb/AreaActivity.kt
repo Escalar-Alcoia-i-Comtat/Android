@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
+import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.ZoneAdapter
@@ -20,14 +21,13 @@ import timber.log.Timber
 
 private const val ICON_SIZE_MULTIPLIER = .2f
 
-@ExperimentalUnsignedTypes
 class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
 
     private var justAttached = false
     private var loaded = false
     private var loading = false
 
-    private var areaIndex: Int = -1
+    private lateinit var areaId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,13 +40,14 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
             return
         }
 
-        areaIndex = intent.getExtra(EXTRA_AREA, -1)
-        if (areaIndex < 0) {
+        intent.getExtra(EXTRA_AREA)?.let {
+            areaId = it
+        } ?: run {
             Timber.e("Area is null")
             onBackPressed()
             return
         }
-        dataClass = AREAS[areaIndex]
+        dataClass = AREAS[areaId]!!
 
         val transitionName = intent.getExtra(EXTRA_AREA_TRANSITION_NAME)
 
@@ -68,43 +69,46 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
 
         if (!loaded && !isDestroyed && !loading) {
             loading = true
-            val zones = dataClass.children
+            try {
+                val zones = dataClass.children
 
-            binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
-            if (justAttached)
-                binding.recyclerView.layoutAnimation =
-                    AnimationUtils.loadLayoutAnimation(
-                        this@AreaActivity,
-                        R.anim.item_enter_left_animator
-                    )
-            binding.recyclerView.adapter =
-                ZoneAdapter(zones, this) { _, holder, position ->
-                    binding.loadingLayout.show()
-                    Handler(Looper.getMainLooper()).post {
-                        Timber.v("Clicked item $position")
-                        val intent =
-                            Intent(this@AreaActivity, ZoneActivity()::class.java)
-                                .putExtra(EXTRA_AREA, areaIndex)
-                                .putExtra(EXTRA_ZONE, position)
+                binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
+                if (justAttached)
+                    binding.recyclerView.layoutAnimation =
+                        AnimationUtils.loadLayoutAnimation(
+                            this@AreaActivity,
+                            R.anim.item_enter_left_animator
+                        )
+                binding.recyclerView.adapter =
+                    ZoneAdapter(zones, this) { _, holder, position ->
+                        binding.loadingLayout.show()
+                        Handler(Looper.getMainLooper()).post {
+                            Timber.v("Clicked item $position")
+                            val intent =
+                                Intent(this@AreaActivity, ZoneActivity()::class.java)
+                                    .putExtra(EXTRA_AREA, areaId)
+                                    .putExtra(EXTRA_ZONE, AREAS[areaId]!![position].objectId)
 
-                        val optionsBundle =
-                            ViewCompat.getTransitionName(holder.titleTextView)
-                                ?.let { transitionName ->
-                                    intent.putExtra(EXTRA_ZONE_TRANSITION_NAME, transitionName)
+                            val optionsBundle =
+                                ViewCompat.getTransitionName(holder.titleTextView)
+                                    ?.let { transitionName ->
+                                        intent.putExtra(EXTRA_ZONE_TRANSITION_NAME, transitionName)
 
-                                    ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                        this,
-                                        holder.titleTextView,
-                                        transitionName
-                                    ).toBundle()
-                                } ?: Bundle.EMPTY
+                                        ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                            this,
+                                            holder.titleTextView,
+                                            transitionName
+                                        ).toBundle()
+                                    } ?: Bundle.EMPTY
 
-                        startActivity(intent, optionsBundle)
+                            startActivity(intent, optionsBundle)
+                        }
                     }
-                }
-
-            loaded = true
-            loading = false
+                loaded = true
+            } catch (_: NoInternetAccessException) {
+            } finally {
+                loading = false
+            }
         }
     }
 }

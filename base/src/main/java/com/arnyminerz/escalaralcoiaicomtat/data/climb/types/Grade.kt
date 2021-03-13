@@ -65,7 +65,7 @@ class Grade(val displayName: String) : Serializable {
             return lst
         }
 
-        fun listFromStrings(strings: ArrayList<String>): GradesList {
+        fun listFromStrings(strings: Collection<String>): GradesList {
             val grades = gradesListOf()
             for (string in strings)
                 with(Grade(string)) {

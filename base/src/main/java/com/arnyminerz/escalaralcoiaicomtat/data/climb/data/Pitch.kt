@@ -18,24 +18,12 @@ data class Pitch(
 
             if (split.size < 2) return null
 
-            val inclination = PitchEndingOrientation.find(split[0]) ?: return null
-            val descent = PitchEndingRappel.find(split[1]) ?: return null
-
-            return Pitch(PitchEndingData(inclination, descent))
-        }
-
-        fun fromDB(obj: String): ArrayList<Pitch> {
-            val list = arrayListOf<Pitch>()
-
-            if (obj.contains("/\r|\n/".toRegex()))
-                for (ln in obj
-                    .replace("/\r/g".toRegex(), "")
-                    .split("\n"))
-                    fromEndingDataString(ln)?.let { list.add(it) }
+            val inclination = PitchEndingOrientation.find(split[0])
+            val descent = PitchEndingRappel.find(split[1])
+            return if (inclination == null || descent == null)
+                null
             else
-                fromEndingDataString(obj)?.let { list.add(it) }
-
-            return list
+                Pitch(PitchEndingData(inclination, descent))
         }
     }
 

@@ -15,13 +15,13 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.*
+import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogMapMarkerBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.MissingPermissionException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.Glide
@@ -43,7 +43,6 @@ import java.io.FileNotFoundException
 
 class MapHelper(private val mapView: MapView) {
     companion object {
-        @ExperimentalUnsignedTypes
         fun getTarget(context: Context, marker: Symbol): Intent? {
             Timber.d("Getting marker's title...")
             val title = marker.getWindow().title
@@ -253,16 +252,14 @@ class MapHelper(private val mapView: MapView) {
         MapNotInitializedException::class
     )
     @WorkerThread
-    @ExperimentalUnsignedTypes
     fun loadKML(
         activity: FragmentActivity,
         kmlAddress: String?,
-        networkState: ConnectivityProvider.NetworkState,
         addToMap: Boolean = true
     ): MapFeatures {
         if (addToMap && !isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
-        if (!networkState.hasInternet)
+        if (!appNetworkState.hasInternet)
             throw NoInternetAccessException()
 
         Timber.v("Loading KML $kmlAddress...")
@@ -296,7 +293,6 @@ class MapHelper(private val mapView: MapView) {
      * @see MapsActivity
      */
     @Throws(MapAnyDataToLoadException::class)
-    @ExperimentalUnsignedTypes
     fun mapsActivityIntent(context: Context, overrideLoadedValues: Boolean = false): Intent {
         val loadedElements = markers.isNotEmpty() || geometries.isNotEmpty()
 
@@ -547,7 +543,6 @@ class MapHelper(private val mapView: MapView) {
      * @param context The context to call from
      * @throws MapNotInitializedException If the map has not been initialized
      */
-    @ExperimentalUnsignedTypes
     @UiThread
     @Throws(MapNotInitializedException::class)
     fun display(context: Context) {
@@ -612,7 +607,6 @@ class MapHelper(private val mapView: MapView) {
         }
     }
 
-    @ExperimentalUnsignedTypes
     fun infoCard(
         context: Context,
         marker: Symbol,

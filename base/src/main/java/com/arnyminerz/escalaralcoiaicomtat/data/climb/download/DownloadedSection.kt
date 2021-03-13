@@ -21,7 +21,6 @@ private const val ROTATION_B = -90f
 private const val TOGGLE_ANIMATION_DURATION: Long = 300
 
 @Suppress("UNCHECKED_CAST")
-@ExperimentalUnsignedTypes
 // This must be Serializable and not DataClass because A at DataClass can't be specified as DataClass
 data class DownloadedSection(val section: DataClass<*, *>) {
     /**
@@ -41,7 +40,7 @@ data class DownloadedSection(val section: DataClass<*, *>) {
             Timber.v("Loading downloads...")
             val list = arrayListOf<DownloadedSection>()
 
-            for (area in AREAS)
+            for (area in AREAS.values)
                 list.addAll(area.downloadedSectionList())
 
             return list

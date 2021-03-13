@@ -9,6 +9,7 @@ import android.os.Parcelable
 import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.annotation.DrawableRes
+import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_SECTOR
@@ -16,11 +17,13 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
-import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
-import com.arnyminerz.escalaralcoiaicomtat.exception.*
+import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
+import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
+import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
@@ -33,6 +36,9 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
+import com.parse.ParseException
+import com.parse.ParseObject
+import com.parse.ParseQuery
 import timber.log.Timber
 import java.io.File
 import java.util.*
@@ -43,32 +49,32 @@ import java.util.*
 @ExperimentalUnsignedTypes
 fun getIntent(context: Context, queryName: String): Intent? {
     Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
-    for ((a, area) in AREAS.withIndex()) {
+    for (area in AREAS.values) {
         Timber.d("  Finding in ${area.displayName}. It has ${area.count()} zones.")
         when {
             area.displayName.equals(queryName, true) ->
                 return Intent(context, AreaActivity::class.java).apply {
-                    Timber.d("Found Area id ${area.id}!")
-                    putExtra(EXTRA_AREA, a)
+                    Timber.d("Found Area id ${area.objectId}!")
+                    putExtra(EXTRA_AREA, area.objectId)
                 }
             area.isNotEmpty() ->
-                for ((z, zone) in area.withIndex()) {
+                for (zone in area) {
                     Timber.d("    Finding in ${zone.displayName}. It has ${zone.count()} sectors.")
                     if (zone.displayName.equals(queryName, true))
                         return Intent(context, ZoneActivity::class.java).apply {
-                            Timber.d("Found Zone id ${zone.id}!")
-                            putExtra(EXTRA_AREA, a)
-                            putExtra(EXTRA_ZONE, z)
+                            Timber.d("Found Zone id ${zone.objectId}!")
+                            putExtra(EXTRA_AREA, area.objectId)
+                            putExtra(EXTRA_ZONE, zone.objectId)
                         }
                     else if (zone.isNotEmpty())
-                        for ((s, sector) in zone.withIndex()) {
+                        for (sector in zone) {
                             Timber.d("      Finding in ${sector.displayName}.")
                             if (sector.displayName.equals(queryName, true))
                                 return Intent(context, SectorActivity::class.java).apply {
-                                    Timber.d("Found Sector id ${sector.id}!")
-                                    putExtra(EXTRA_AREA, a)
-                                    putExtra(EXTRA_ZONE, z)
-                                    putExtra(EXTRA_SECTOR, s)
+                                    Timber.d("Found Sector id ${sector.objectId}!")
+                                    putExtra(EXTRA_AREA, area.objectId)
+                                    putExtra(EXTRA_ZONE, zone.objectId)
+                                    putExtra(EXTRA_SECTOR, sector.objectId)
                                 }
                         }
                 }
@@ -79,24 +85,123 @@ fun getIntent(context: Context, queryName: String): Intent? {
     return null
 }
 
-interface DataClassImpl
+fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
+    label: String,
+    callback: (objects: List<A>, error: Exception?) -> Unit
+) {
+    fromPin(label).findInBackground().continueWithTask { task ->
+        val error = task.error
+        val objects = task.result
+        if (error != null) {
+            if (error is ParseException && error.code == ParseException.CACHE_MISS) {
+                Timber.w("No stored data found. Fetching from network.")
+                return@continueWithTask fromNetwork().findInBackground()
+            } else Timber.e(error, "Could not fetch data.")
+        }
+        if (objects.size <= 0) {
+            Timber.w("No stored data found. Fetching from network.")
+            return@continueWithTask fromNetwork().findInBackground()
+        }
+        Timber.d("Loading from pin...")
+        return@continueWithTask task
+    }.continueWithTask { task ->
+        callback(task.result, task.error)
+        return@continueWithTask task
+    }
+}
 
-@ExperimentalUnsignedTypes
+/**
+ * Fetches a pin from the Datastore, or if it's not stored, from the network.
+ * @param state The current network state
+ * @param label The label to fetch
+ */
+@Throws(NoInternetAccessException::class)
+fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
+    state: ConnectivityProvider.NetworkState, label: String, shouldPin: Boolean = false
+): List<ParseObject> {
+    val result = arrayListOf<ParseObject>()
+    limit = PATHS_BATCH_SIZE
+    fromPin(label).findInBackground().continueWithTask { task ->
+        var resultTask = task
+        val error = task.error
+        val objects = task.result
+        if (error != null) {
+            if (error is ParseException && error.code == ParseException.CACHE_MISS) {
+                Timber.w("No stored data found. Fetching from network.")
+                resultTask = fromNetwork().findInBackground()
+            } else Timber.e(error, "Could not fetch data.")
+        }
+        if (objects.size <= 0) {
+            Timber.w("The stored data's size is not greater than 0. Fetching from network.")
+            resultTask = fromNetwork().findInBackground()
+        }
+        if (resultTask != task && !state.hasInternet) {
+            Timber.w("Device doesn't have an Internet connection, and there's no cached data")
+            throw NoInternetAccessException(
+                "Device doesn't have an Internet connection, and there's no cached data"
+            )
+        }
+        return@continueWithTask resultTask
+    }.continueWithTask { task ->
+        if (task.error != null) throw task.error
+        result.addAll(task.result)
+        if (shouldPin) {
+            Timber.d("Pinning...")
+            ParseObject.pinAll(label, task.result)
+        }
+        task
+    }.waitForCompletion()
+    return result
+}
+
+abstract class DataClassImpl(open val objectId: String) : Parcelable
+
 // A: List type
 // B: Parent Type
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
-    open val id: Int,
-    open val version: Int,
+    override val objectId: String,
     open val displayName: String,
     open val timestamp: Date?,
     open val imageUrl: String,
     open val kmlAddress: String?,
     @DrawableRes val placeholderDrawable: Int,
     @DrawableRes val errorPlaceholderDrawable: Int,
-    open val parentId: Int,
-    open val namespace: String
-) : DataClassImpl, Parcelable, Iterable<A> {
-    val children: ArrayList<A> = arrayListOf()
+    open val namespace: String,
+    open val childrenNamespace: String
+) : DataClassImpl(objectId), Iterable<A> {
+    protected val pin = "${DATA_FIX_LABEL}_${Area.NAMESPACE}_${objectId}"
+
+    protected val innerChildren = arrayListOf<A>()
+
+    /**
+     * Returns the data classes' children. May fetch them from storage, or return the cached items
+     * @author Arnau Mora
+     * @since 20210313
+     * @throws NoInternetAccessException If no Internet connection is available, and the children are
+     * not stored in storage.
+     */
+    val children: List<A>
+        @WorkerThread
+        @Throws(NoInternetAccessException::class)
+        get() {
+            if (innerChildren.isEmpty())
+                innerChildren.addAll(loadChildren())
+            return innerChildren
+        }
+
+    fun add(item: A) {
+        innerChildren.add(item)
+    }
+
+    fun addAll(vararg items: A) {
+        for (item in items)
+            innerChildren.add(item)
+    }
+
+    fun addAll(items: Iterable<A>) {
+        for (item in items)
+            innerChildren.add(item)
+    }
 
     /**
      * Stores when a download has been started
@@ -106,10 +211,34 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
     operator fun get(index: Int): A = children[index]
 
+    @WorkerThread
+    @Throws(NoInternetAccessException::class)
+    protected abstract fun loadChildren(): List<A>
+
+    /**
+     * Gets an object based on objectId
+     * @author Arnau Mora
+     * @since 20210312
+     * @param objectId The id to find
+     * @return The found dataclass
+     * @see children
+     * @throws IllegalStateException If the children's list is empty
+     * @throws IndexOutOfBoundsException If the objectId was not found
+     */
+    @Throws(IllegalStateException::class, IndexOutOfBoundsException::class)
+    operator fun get(objectId: String): A {
+        if (children.isEmpty())
+            throw IllegalStateException("Children is empty")
+        for (child in children)
+            if (child.objectId == objectId)
+                return child
+        throw IndexOutOfBoundsException("Could not find $objectId in children.")
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other !is DataClass<*, *>)
             return super.equals(other)
-        return other.namespace == namespace && other.id == id
+        return other.namespace == namespace && other.objectId == objectId
     }
 
     override fun iterator(): Iterator<A> = children.iterator()
@@ -138,6 +267,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @throws FileAlreadyExistsException If the data has already been downloaded and overwrite is false
      * @throws AlreadyLoadingException If the content is already being downloaded
      */
+    @WorkerThread
     @Throws(FileAlreadyExistsException::class, AlreadyLoadingException::class)
     fun download(
         context: Context,
@@ -152,7 +282,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             throw FileAlreadyExistsException(imageFile)
 
         Timber.v("Downloading $displayName...")
+        Timber.d("Pinning data...")
+        val query = ParseQuery<ParseObject>(namespace)
+        val obj = query.get(objectId)
+        obj.pin()
 
+        Timber.d("Downloading image...")
         Glide.with(context)
             .asBitmap()
             .load(imageUrl)
@@ -167,8 +302,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     imageFile.storeBitmap(bitmap)
 
                     var counter = 1 // Starts at 1 for representing self, that just downloaded
-                    val targetCounter = fullCount().toInt()
-                    if (children.size > 0 && children.first() is DataClass<*, *>)
+                    val targetCounter = fullCount()
+                    if (children.isNotEmpty() && children.first() is DataClass<*, *>)
                         for (child in children)
                             (child as? DataClass<*, *>)?.download(context, overwrite, null, {
                                 counter++
@@ -176,7 +311,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                                     Timber.v("Completely finished downloading \"$displayName\"")
                                     finishListener?.invoke(imageFile)
                                 } else {
-                                    Timber.d("  Won't call finish listener since counter is still $counter/$targetCounter")
+                                    Timber.d(
+                                        "  Won't call finish listener since counter is still $counter/$targetCounter"
+                                    )
                                     progressUpdater?.invoke(counter, children.size)
                                 }
                             }, { _, _ -> counter++ }, null)
@@ -243,9 +380,16 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @return If the content was deleted successfully. Note: returns true if not downloaded
      */
     fun delete(context: Context): Boolean {
-        val lst = arrayListOf<Boolean>()
+        Timber.v("Deleting $objectId")
         val imgFile = imageFile(context)
-        Timber.v("Deleting \"$imgFile\"")
+        val lst = arrayListOf<Boolean>()
+
+        Timber.d("Unpinning...")
+        val query = ParseQuery<ParseObject>(namespace)
+        val obj = query.get(objectId)
+        obj.unpin()
+
+        Timber.v("Deleting \"$imgFile\"...")
         lst.add(imgFile.deleteIfExists())
         for (child in children)
             (child as? DataClass<*, *>)?.let {
@@ -287,7 +431,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @date 2020/09/11
      * @return The amount of children the data class has
      */
-    fun count(): UInt = children.size.toUInt()
+    fun count(): Int = children.size
 
     /**
      * Returns the amount of children the data class has, as well as all the children
@@ -295,8 +439,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @date 2020/09/11
      * @return The amount of children the data class has, as well as all the children
      */
-    fun fullCount(): UInt { // Counts all the children also
-        var counter = 1u // Starts at 1 for counting self
+    fun fullCount(): Int { // Counts all the children also
+        var counter = 1 // Starts at 1 for counting self
 
         for (me in this)
             if (me is DataClass<*, *>)
@@ -329,32 +473,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     fun isNotEmpty() = !isEmpty()
 
     /**
-     * Checks if an update is available
-     * @author ArnyminerZ
-     * @patch ArnyminerZ 2020/07/06
-     * @patch ArnyminerZ 2021/03/02
-     * @return If an update is available or not
-     * @throws JSONResultException If there's not timestamp in the download
-     * @throws MissingDataException If the download date of the file is null
-     * @throws NoInternetAccessException If there's no Internet connection
-     */
-    @Throws(
-        JSONResultException::class,
-        MissingDataException::class,
-        NoInternetAccessException::class
-    )
-    fun updateAvailable(): Boolean =
-        jsonFromUrl("$EXTENDED_API_URL/update_available/$namespace/$id/?version=$version")
-            .getBoolean("update-available")
-
-    /**
      * Returns the File that represents the image of the DataClass
      * @author Arnau Mora
      * @date 2020/09/10
      * @param context The context to run from
      * @return The path of the image file that can be downloaded
      */
-    fun imageFile(context: Context): File = File(dataDir(context), "$namespace-$id.jpg")
+    fun imageFile(context: Context): File = File(dataDir(context), "$namespace-$objectId.jpg")
 
     /**
      * Loads the image of the Data Class
@@ -443,14 +568,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     override fun hashCode(): Int {
-        var result = id
-        result = 31 * result + version
+        var result = objectId.hashCode()
         result = 31 * result + displayName.hashCode()
         result = 31 * result + (timestamp?.hashCode() ?: 0)
         result = 31 * result + imageUrl.hashCode()
         result = 31 * result + placeholderDrawable
         result = 31 * result + errorPlaceholderDrawable
-        result = 31 * result + parentId
         result = 31 * result + namespace.hashCode()
         result = 31 * result + children.hashCode()
         result = 31 * result + isDownloading.hashCode()

@@ -3,12 +3,12 @@ package com.arnyminerz.escalaralcoiaicomtat.fragment.preferences
 import android.content.Intent
 import android.os.Bundle
 import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.FeedbackActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.PreferenceData
 import com.arnyminerz.escalaralcoiaicomtat.fragment.SETTINGS_HEIGHT_MAIN
 import com.arnyminerz.escalaralcoiaicomtat.fragment.SETTINGS_HEIGHT_UPPER
-import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerPreferenceFragment
 
 private const val GESTURE_SENSIBILITY_DEFAULT = 3
 private const val NEARBY_DISTANCE_DEFAULT = 1000
@@ -25,12 +25,10 @@ val SETTINGS_PREVIEW_SCALE_PREF = PreferenceData("preview_scale", PREVIEW_SCALE_
 val SETTINGS_MOBILE_DOWNLOAD_PREF = PreferenceData("mobile_download", true)
 val SETTINGS_ROAMING_DOWNLOAD_PREF = PreferenceData("roaming_download", false)
 val AUTOMATIC_DOWNLOADS_UPDATE_PREF = PreferenceData("automatic_downloads_update", false)
-val AUTOMATIC_DATA_UPDATE_PREF = PreferenceData("automatic_data_update", true)
 val PREF_DISABLE_NEARBY = PreferenceData("NearbyZonesDisable", false)
 val PREF_SHOWN_INTRO = PreferenceData("ShownIntro", false)
 
-@ExperimentalUnsignedTypes
-class MainSettingsFragment : NetworkChangeListenerPreferenceFragment() {
+class MainSettingsFragment : PreferenceFragmentCompat() {
     companion object {
         enum class SettingsPage(val height: Int) {
             MAIN(SETTINGS_HEIGHT_MAIN),

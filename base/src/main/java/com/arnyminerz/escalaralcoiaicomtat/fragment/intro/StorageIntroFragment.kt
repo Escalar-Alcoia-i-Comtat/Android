@@ -11,7 +11,6 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentIntroStorageBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.isPermissionGranted
 
-@ExperimentalUnsignedTypes
 class StorageIntroFragment : Fragment() {
     companion object {
         const val STORAGE_PERMISSION_REQUEST = 45
