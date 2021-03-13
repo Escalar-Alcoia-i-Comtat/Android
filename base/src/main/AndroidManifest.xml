@@ -34,11 +34,10 @@
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute,LockedOrientationActivity">
         <activity
             android:name=".activity.LoadingActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".activity.isolated.FeedbackActivity"
-            android:exported="true"></activity>
-        <activity android:name=".activity.isolated.ServerDownActivity" />
+            android:exported="true" />
         <activity
             android:name=".activity.MainActivity"
             android:exported="true"
