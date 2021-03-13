@@ -8,7 +8,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.Grade
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.parse.ParseObject
 import java.util.*
 import kotlin.NoSuchElementException
@@ -139,7 +138,7 @@ data class Path(
         }
 
     @Throws(NoInternetAccessException::class)
-    fun isBlocked(networkState: ConnectivityProvider.NetworkState): BlockingType {
+    fun isBlocked(): BlockingType {
         // TODO: Move to Parse
         return BlockingType.UNKNOWN
     }

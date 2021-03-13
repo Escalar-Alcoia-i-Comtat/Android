@@ -18,8 +18,7 @@ import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
+import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.Grade
@@ -29,7 +28,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.setTextColor
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -102,19 +100,11 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
             }
 
         Timber.v("Getting network state...")
-        val networkState = when (activity) {
-            is SectorActivity -> activity.networkState
-            is MainActivity -> activity.networkState
-            else -> {
-                Timber.w("Could not fetch network state. Set to NOT_CONNECTED")
-                ConnectivityProvider.NetworkState.NOT_CONNECTED
-            }
-        }
-        if (!networkState.hasInternet)
+        if (!appNetworkState.hasInternet)
             runAsync {
                 try {
                     Timber.v("Checking if blocked...")
-                    val blocked = path.isBlocked(networkState)
+                    val blocked = path.isBlocked()
 
                     activity.runOnUiThread {
                         Timber.d("Binding ViewHolder for path $position: ${path.displayName}. Blocked: $blocked")

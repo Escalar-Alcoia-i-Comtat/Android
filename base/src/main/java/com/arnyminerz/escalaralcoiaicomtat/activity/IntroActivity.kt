@@ -12,7 +12,7 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityIntroBinding
@@ -26,7 +26,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.google.android.material.button.MaterialButton
 import timber.log.Timber
 
-class IntroActivity : NetworkChangeListenerActivity() {
+class IntroActivity : LanguageAppCompatActivity() {
     companion object {
         var shouldChange = false
 

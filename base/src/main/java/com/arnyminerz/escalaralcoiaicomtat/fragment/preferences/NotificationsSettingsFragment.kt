@@ -11,7 +11,6 @@ import androidx.preference.SwitchPreference
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 
-@ExperimentalUnsignedTypes
 class NotificationsSettingsFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {

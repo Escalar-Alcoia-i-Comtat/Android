@@ -6,6 +6,7 @@ import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
@@ -277,7 +278,7 @@ class Area(
         query.addAscendingOrder("displayName")
         query.whereMatchesQuery(key, parentQuery)
 
-        val loads = query.fetchPinOrNetwork(pin)
+        val loads = query.fetchPinOrNetwork(appNetworkState, pin, true)
         Timber.d("Got ${loads.size} elements.")
         val result = arrayListOf<Zone>()
         for (load in loads)

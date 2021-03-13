@@ -11,7 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
@@ -62,7 +62,7 @@ val AREAS = arrayMapOf<String, Area>()
 var serverAvailable = false
     private set
 
-class MainActivity : NetworkChangeListenerFragmentActivity() {
+class MainActivity : NetworkChangeListenerActivity() {
 
     private fun prepareApp(): Boolean {
         Timber.v("Preparing App...")

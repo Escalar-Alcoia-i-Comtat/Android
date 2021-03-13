@@ -11,6 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.KMZ_FILE_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.ZONE_NAME_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
+import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
@@ -76,7 +77,7 @@ class ZoneAdapter(
         else visibility(holder.mapImageButton, false)
 
         holder.downloadImageButton.setOnClickListener {
-            if (!dataClassListActivity.networkState.hasInternet)
+            if (!appNetworkState.hasInternet)
                 dataClassListActivity.toast(R.string.toast_error_no_internet)
             else
                 when (zone.isDownloaded(dataClassListActivity)) {

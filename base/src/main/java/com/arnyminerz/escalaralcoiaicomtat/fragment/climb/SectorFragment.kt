@@ -140,8 +140,6 @@ class SectorFragment : NetworkChangeListenerFragment() {
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        super.onStateChange(state)
-
         if (isResumed && view != null)
             loadImage()
     }

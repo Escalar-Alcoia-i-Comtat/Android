@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
+import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
@@ -94,7 +95,7 @@ class SectorsAdapter(
             refreshDownloadImage(sector, downloadImageButton, downloadProgressBar)
 
             downloadImageButton.setOnClickListener {
-                if (!dataClassListActivity.networkState.hasInternet)
+                if (!appNetworkState.hasInternet)
                     dataClassListActivity.toast(R.string.toast_error_no_internet)
                 else
                     when (sector.isDownloaded(dataClassListActivity)) {

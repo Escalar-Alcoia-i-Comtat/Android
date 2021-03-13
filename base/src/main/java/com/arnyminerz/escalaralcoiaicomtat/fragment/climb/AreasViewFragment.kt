@@ -267,7 +267,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        super.onStateChange(state)
         if (!isResumed) return
 
         visibility(binding.areasNoInternetCardView.noInternetCardView, !state.hasInternet)

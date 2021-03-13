@@ -14,7 +14,6 @@ import timber.log.Timber
 
 private const val PREVIEW_SCALE_REDUCER = 10f
 
-@ExperimentalUnsignedTypes
 class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragmentCompat() {
     private var sensibilityPreference: SeekBarPreference? = null
     private var markerSizePreference: SeekBarPreference? = null

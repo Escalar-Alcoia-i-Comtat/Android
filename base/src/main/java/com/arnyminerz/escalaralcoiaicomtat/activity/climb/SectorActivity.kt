@@ -6,7 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.activity.*
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.ARGUMENT_SECTOR
@@ -16,7 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
 
-class SectorActivity : NetworkChangeListenerFragmentActivity() {
+class SectorActivity : NetworkChangeListenerActivity() {
     private var transitionName: String? = null
 
     private lateinit var areaId: String

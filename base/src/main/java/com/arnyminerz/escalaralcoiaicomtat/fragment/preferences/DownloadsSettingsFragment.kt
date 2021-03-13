@@ -11,7 +11,6 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.UpdatingActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 
-@ExperimentalUnsignedTypes
 class DownloadsSettingsFragment : PreferenceFragmentCompat() {
 
     private var mobileDataDownloadPref: SwitchPreference? = null

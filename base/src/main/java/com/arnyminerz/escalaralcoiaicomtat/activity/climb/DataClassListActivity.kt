@@ -98,11 +98,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                     if (kmlAddress != null)
                         runAsync {
                             try {
-                                mapHelper.loadKML(
-                                    this@DataClassListActivity,
-                                    kmlAddress,
-                                    state
-                                )
+                                mapHelper.loadKML(this@DataClassListActivity, kmlAddress)
                             } catch (e: NoInternetAccessException) {
                                 Timber.w("Could not load KML since internet connection is not available")
                                 visibility(binding.map, false)

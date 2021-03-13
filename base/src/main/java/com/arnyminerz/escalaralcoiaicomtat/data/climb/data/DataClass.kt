@@ -20,8 +20,10 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
+import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
@@ -108,27 +110,45 @@ fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
     }
 }
 
-fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(label: String): List<ParseObject> {
+/**
+ * Fetches a pin from the Datastore, or if it's not stored, from the network.
+ * @param state The current network state
+ * @param label The label to fetch
+ */
+@Throws(NoInternetAccessException::class)
+fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
+    state: ConnectivityProvider.NetworkState, label: String, shouldPin: Boolean = false
+): List<ParseObject> {
     val result = arrayListOf<ParseObject>()
     limit = PATHS_BATCH_SIZE
     fromPin(label).findInBackground().continueWithTask { task ->
+        var resultTask = task
         val error = task.error
         val objects = task.result
         if (error != null) {
             if (error is ParseException && error.code == ParseException.CACHE_MISS) {
                 Timber.w("No stored data found. Fetching from network.")
-                return@continueWithTask fromNetwork().findInBackground()
+                resultTask = fromNetwork().findInBackground()
             } else Timber.e(error, "Could not fetch data.")
         }
         if (objects.size <= 0) {
-            Timber.w("No stored data found. Fetching from network.")
-            return@continueWithTask fromNetwork().findInBackground()
+            Timber.w("The stored data's size is not greater than 0. Fetching from network.")
+            resultTask = fromNetwork().findInBackground()
         }
-        Timber.d("Loading from pin...")
-        return@continueWithTask task
+        if (resultTask != task && !state.hasInternet) {
+            Timber.w("Device doesn't have an Internet connection, and there's no cached data")
+            throw NoInternetAccessException(
+                "Device doesn't have an Internet connection, and there's no cached data"
+            )
+        }
+        return@continueWithTask resultTask
     }.continueWithTask { task ->
         if (task.error != null) throw task.error
         result.addAll(task.result)
+        if (shouldPin) {
+            Timber.d("Pinning...")
+            ParseObject.pinAll(label, task.result)
+        }
         task
     }.waitForCompletion()
     return result
@@ -153,8 +173,16 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
     protected val innerChildren = arrayListOf<A>()
 
+    /**
+     * Returns the data classes' children. May fetch them from storage, or return the cached items
+     * @author Arnau Mora
+     * @since 20210313
+     * @throws NoInternetAccessException If no Internet connection is available, and the children are
+     * not stored in storage.
+     */
     val children: List<A>
         @WorkerThread
+        @Throws(NoInternetAccessException::class)
         get() {
             if (innerChildren.isEmpty()) {
                 val newChildren = loadChildren()
