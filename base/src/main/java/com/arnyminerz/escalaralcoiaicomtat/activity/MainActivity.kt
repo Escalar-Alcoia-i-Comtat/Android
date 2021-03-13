@@ -44,6 +44,8 @@ val EXTRA_AREA = IntentExtra<String>("area")
 val EXTRA_ZONE = IntentExtra<String>("zone")
 val EXTRA_SECTOR = IntentExtra<String>("sector")
 
+val EXTRA_POSITION = IntentExtra<Int>("position")
+
 val EXTRA_ZONE_TRANSITION_NAME = IntentExtra<String>("zone_transition")
 val EXTRA_AREA_TRANSITION_NAME = IntentExtra<String>("area_transition")
 val EXTRA_SECTOR_TRANSITION_NAME = IntentExtra<String>("sector_transition")
