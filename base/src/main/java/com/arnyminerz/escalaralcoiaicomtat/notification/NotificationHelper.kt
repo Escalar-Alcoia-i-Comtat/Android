@@ -81,6 +81,7 @@ class Notification private constructor(private val builder: Builder) {
      * @since 20210313
      */
     fun destroy() {
+        hide()
         builders.remove(builder.id)
     }
 
