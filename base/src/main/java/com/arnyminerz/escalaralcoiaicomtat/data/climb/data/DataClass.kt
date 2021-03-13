@@ -288,22 +288,19 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to run from.
      * @param overwrite If the new data should overwrite the old one
      * @param quality The quality in which do the codification
-     * @return The tag of the worker
+     * @return A LiveData object with the download work info
      *
      * @throws IllegalArgumentException If the specified quality is out of bounds
      */
-    @WorkerThread
     @Throws(IllegalArgumentException::class)
     fun download(
         context: Context,
         overwrite: Boolean = true,
         quality: Int = 100
-    ): String {
+    ): LiveData<WorkInfo> {
         if (quality < DOWNLOAD_QUALITY_MIN || quality > DOWNLOAD_QUALITY_MAX)
             throw IllegalArgumentException("Quality must be between 1 and 100")
-        val tag = generateUUID()
-        DownloadWorker.schedule(context, tag, DownloadData(this, overwrite, quality))
-        return tag
+        return DownloadWorker.schedule(context, pin, DownloadData(this, overwrite, quality))
     }
 
     /**
