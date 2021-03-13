@@ -10,12 +10,16 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
+import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.SectorsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.show
+import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber
+
+var errorNotStored: Boolean = false
 
 class ZoneActivity : DataClassListActivity<Zone>() {
 
@@ -62,6 +66,14 @@ class ZoneActivity : DataClassListActivity<Zone>() {
         super.onResume()
         loaded = false
         justAttached = false
+
+        if (errorNotStored) {
+            Timber.w("errorNotStored")
+            Snackbar
+                .make(binding.root, R.string.toast_error_no_internet, Snackbar.LENGTH_SHORT)
+                .show()
+            errorNotStored = false
+        }
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
@@ -114,7 +126,8 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                 Timber.v(
                     "An AlreadyLoadingException has been thrown while loading the zones in ZoneActivity."
                 ) // Let's just warn the debugger this is controlled
+            } catch (_: NoInternetAccessException) {
             } else
-            Timber.d("Already loaded!")
+                Timber.d("Already loaded!")
     }
 }

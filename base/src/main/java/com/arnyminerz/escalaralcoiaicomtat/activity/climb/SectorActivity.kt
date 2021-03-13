@@ -9,6 +9,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
+import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.ARGUMENT_SECTOR
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.SectorFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
@@ -55,25 +56,32 @@ class SectorActivity : NetworkChangeListenerActivity() {
 
         val areaIdExtra = intent.getExtra(EXTRA_AREA)
         val zoneIdExtra = intent.getExtra(EXTRA_ZONE)
-        val sectorIdExtra = intent.getExtra(EXTRA_SECTOR)
         if (areaIdExtra == null || zoneIdExtra == null) {
-            Timber.e("Area or Zone index wasn't specified")
-            onBackPressed()
-            return
+            return goBack()
         } else {
             areaId = areaIdExtra
             zoneId = zoneIdExtra
             Timber.d("Loading sectors from area $areaId, zone $zoneId...")
         }
-        if (savedInstanceState != null)
-            sectorId = savedInstanceState.getString(EXTRA_SECTOR.key, sectorId)
-        sectorId = if (sectorIdExtra == null) {
-            Timber.v("Sector Id not passed. Loading the first one...")
-            AREAS[areaId]!![zoneId].children[0].objectId
-        } else sectorIdExtra
+        sectorId = savedInstanceState?.getString(EXTRA_SECTOR.key, sectorId)
+            ?: intent.getExtra(EXTRA_SECTOR)
+            ?: try {
+                Timber.v("Sector Id not passed. Loading the first one...")
+                AREAS[areaId]!![zoneId].children[0].objectId
+            } catch (_: NoInternetAccessException) {
+                return goBack()
+            }
         sectors.clear()
-        for (sector in AREAS[areaId]!![zoneId])
-            sectors[sector.objectId] = sector
+        try {
+            val sectors = AREAS[areaId]!![zoneId]
+            for (sector in sectors)
+                if (sector.isNotEmpty())
+                    this.sectors[sector.objectId] = sector
+        } catch (_: NoInternetAccessException) {
+            return goBack()
+        }
+        if (sectors.isEmpty)
+            return goBack()
 
         transitionName = intent.getExtra(EXTRA_SECTOR_TRANSITION_NAME)
         if (transitionName == null)
@@ -108,7 +116,7 @@ class SectorActivity : NetworkChangeListenerActivity() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 Timber.d("Selected page #$position")
-                sectorId = sectors.values.toList()[position].objectId
+                sectorId = sectors.values.toList()[position]!!.objectId
 
                 for (fragment in fragments)
                     (fragment as SectorFragment).minimize()
@@ -131,5 +139,11 @@ class SectorActivity : NetworkChangeListenerActivity() {
         val hasInternet = state.hasInternet
         Timber.v("Has internet? $hasInternet")
         visibility(binding.noInternetImageView, !hasInternet)
+    }
+
+    private fun goBack() {
+        Timber.e("No loaded data for activity")
+        errorNotStored = true
+        onBackPressed()
     }
 }

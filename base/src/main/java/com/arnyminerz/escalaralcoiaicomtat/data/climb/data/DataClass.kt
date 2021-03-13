@@ -184,10 +184,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         @WorkerThread
         @Throws(NoInternetAccessException::class)
         get() {
-            if (innerChildren.isEmpty()) {
-                val newChildren = loadChildren()
-                innerChildren.addAll(newChildren)
-            }
+            if (innerChildren.isEmpty())
+                innerChildren.addAll(loadChildren())
             return innerChildren
         }
 
@@ -214,6 +212,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     operator fun get(index: Int): A = children[index]
 
     @WorkerThread
+    @Throws(NoInternetAccessException::class)
     protected abstract fun loadChildren(): List<A>
 
     /**
