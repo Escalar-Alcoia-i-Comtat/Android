@@ -47,13 +47,13 @@ const val ANIMATION_DURATION = 300L
 
 const val SMALL_CARD_HEIGHT = 57f
 
-class PathsAdapter(private val paths: ArrayList<Path>, private val activity: Activity) :
+class PathsAdapter(private val paths: List<Path>, private val activity: Activity) :
     RecyclerView.Adapter<SectorViewHolder>() {
     private val toggled = arrayListOf<Boolean>()
 
     init {
         val pathsSize = paths.size
-        if (pathsSize > 0) paths.sort()
+        // if (pathsSize > 0) paths.sort()
         Timber.d("Created with %d paths", pathsSize)
         (0 until pathsSize).forEach { _ -> toggled.add(false) }
     }

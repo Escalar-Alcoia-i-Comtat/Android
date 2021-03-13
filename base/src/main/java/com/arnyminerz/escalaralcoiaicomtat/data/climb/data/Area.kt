@@ -3,10 +3,9 @@ package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.MainThread
+import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.EndingType
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.Grade
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
@@ -43,29 +42,47 @@ private fun log(msg: String, vararg arguments: Any) =
 @Throws(ParseException::class)
 fun loadAreasFromCache(progressCallback: (current: Int, total: Int) -> Unit, callback: () -> Unit) {
     Timber.d("Querying paths...")
-    val query = ParseQuery.getQuery<ParseObject>("Path")
+    val query = ParseQuery.getQuery<ParseObject>("Area")
+    query.addAscendingOrder("displayName")
+    AREAS.clear()
+    query.limit = PATHS_BATCH_SIZE
+    query.fetchPinOrNetwork(DATA_FIX_LABEL) { objects, error ->
+        if (error != null) {
+            Timber.e(error, "Could not fetch")
+            return@fetchPinOrNetwork
+        }
+
+        Timber.d("Got ${objects.size} areas. Processing...")
+        progressCallback(0, objects.size)
+        for ((a, areaData) in objects.withIndex()) {
+            val area = Area(areaData)
+            AREAS[area.objectId] = area
+            progressCallback(a, objects.size)
+        }
+
+        Timber.v("Pinning...")
+        progressCallback(0, -1)
+        ParseObject.pinAllInBackground(DATA_FIX_LABEL, objects) { err ->
+            if (err != null)
+                Timber.w(err, "Could not pin data!")
+            else {
+                Timber.v("Pinned data.")
+                callback()
+            }
+        }
+    }
+    /*val query = ParseQuery.getQuery<ParseObject>("Path")
     query.addAscendingOrder("sketchId")
 
     // Data will be fetched in packs of PATHS_BATCH_SIZE
     AREAS.clear()
     query.limit = PATHS_BATCH_SIZE
-    query.fromPin(DATA_FIX_LABEL).findInBackground().continueWithTask { task ->
-        val error = task.error
-        val objects = task.result
+    query.fetchPinOrNetwork(DATA_FIX_LABEL) { objects, error ->
         if (error != null) {
-            if (error is ParseException && error.code == ParseException.CACHE_MISS) {
-                Timber.w("No stored data found. Fetching from network.")
-                return@continueWithTask query.fromNetwork().findInBackground()
-            } else Timber.e(error, "Could not fetch data.")
+            Timber.e(error, "Could not fetch")
+            return@fetchPinOrNetwork
         }
-        if (objects.size <= 0) {
-            Timber.w("No stored data found. Fetching from network.")
-            return@continueWithTask query.fromNetwork().findInBackground()
-        }
-        Timber.d("Loading from pin...")
-        return@continueWithTask task
-    }.continueWithTask { task ->
-        val objects = task.result
+
         Timber.d("Got ${objects.size} paths. Processing...")
         log("Calling callback with progress 0")
         progressCallback(0, objects.size)
@@ -175,13 +192,13 @@ fun loadAreasFromCache(progressCallback: (current: Int, total: Int) -> Unit, cal
             when {
                 areaTarget == null -> AREAS[areaId] = Area(areaData)
                 zoneTarget == null -> {
-                    AREAS[areaId]!!.addZone(Zone(zoneData))
+                    AREAS[areaId]!!.add(Zone(zoneData))
                 }
                 sectorTarget == null -> {
-                    AREAS[areaId]!![zoneId].addSector(Sector(sectorData))
+                    AREAS[areaId]!![zoneId].add(Sector(sectorData))
                 }
                 else -> {
-                    AREAS[areaId]!![zoneId!!][sectorId!!].children.add(path)
+                    AREAS[areaId]!![zoneId!!][sectorId!!].add(path)
                 }
             }
 
@@ -189,16 +206,15 @@ fun loadAreasFromCache(progressCallback: (current: Int, total: Int) -> Unit, cal
         }
         Timber.v("Pinning...")
         progressCallback(0, -1)
-        ParseObject.pinAllInBackground(DATA_FIX_LABEL, objects) { error ->
-            if (error != null)
-                Timber.w(error, "Could not pin data!")
+        ParseObject.pinAllInBackground(DATA_FIX_LABEL, objects) { err ->
+            if (err != null)
+                Timber.w(err, "Could not pin data!")
             else {
                 Timber.v("Pinned data.")
                 callback()
             }
         }
-        task
-    }
+    }*/
 }
 
 @Suppress("UNCHECKED_CAST")
@@ -217,7 +233,8 @@ class Area(
     kmlAddress,
     R.drawable.ic_wide_placeholder,
     R.drawable.ic_wide_placeholder,
-    NAMESPACE
+    NAMESPACE,
+    Zone.NAMESPACE
 ) {
     val transitionName
         get() = objectId + displayName.replace(" ", "_")
@@ -248,18 +265,36 @@ class Area(
         parseObject.getString("kmlAddress")?.fixTildes()
     )
 
+    @WorkerThread
+    override fun loadChildren(): List<Zone> {
+        val key = namespace.toLowerCase(Locale.getDefault())
+        Timber.d("Loading elements from \"$childrenNamespace\", where $key=$objectId")
+
+        val parentQuery = ParseQuery.getQuery<ParseObject>(namespace)
+        parentQuery.whereEqualTo("objectId", objectId)
+
+        val query = ParseQuery.getQuery<ParseObject>(childrenNamespace)
+        query.addAscendingOrder("displayName")
+        query.whereMatchesQuery(key, parentQuery)
+
+        val loads = query.fetchPinOrNetwork(pin)
+        Timber.d("Got ${loads.size} elements.")
+        val result = arrayListOf<Zone>()
+        for (load in loads)
+            result.add(Zone(load))
+        return result
+    }
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(objectId)
         parcel.writeString(displayName)
         parcel.writeString(timestamp?.let { TIMESTAMP_FORMAT.format(timestamp) })
         parcel.writeString(image)
         parcel.writeString(kmlAddress)
-        parcel.writeList(children)
+        parcel.writeList(innerChildren)
     }
 
     override fun describeContents(): Int = 0
-
-    fun addZone(zone: Zone) = children.add(zone)
 
     companion object CREATOR : Parcelable.Creator<Area> {
         override fun createFromParcel(parcel: Parcel): Area = Area(parcel)

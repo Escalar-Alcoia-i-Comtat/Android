@@ -9,8 +9,10 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.Grade
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getStringSafe
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
+import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.parse.ParseObject
 import java.util.*
 import kotlin.NoSuchElementException
 
@@ -62,6 +64,59 @@ data class Path(
         parcel.readString(),
         parcel.readString()
     )
+
+    constructor(parseObject: ParseObject) : this(
+        parseObject.objectId,
+        parseObject.updatedAt,
+        (parseObject.getString("sketchId")?.fixTildes() ?: "0").toInt(),
+        parseObject.getString("displayName")!!.fixTildes(),
+        Grade.GradesList(),
+        arrayListOf(),
+        arrayListOf(),
+        arrayListOf(),
+        FixedSafesData(
+            parseObject.getInt("stringCount"),
+            parseObject.getInt("paraboltCount"),
+            parseObject.getInt("spitCount"),
+            parseObject.getInt("tensorCount"),
+            parseObject.getInt("pitonCount"),
+            parseObject.getInt("burilCount")
+        ),
+        RequiredSafesData(
+            parseObject.getBoolean("lanyardRequired"),
+            parseObject.getBoolean("crackerRequired"),
+            parseObject.getBoolean("friendRequired"),
+            parseObject.getBoolean("stripsRequired"),
+            parseObject.getBoolean("pitonRequired"),
+            parseObject.getBoolean("nailRequired")
+        ),
+        parseObject.getString("description")?.fixTildes(),
+        parseObject.getString("builtBy")?.fixTildes(),
+        parseObject.getList<String>("rebuiltBy")?.joinToString(separator = ", ")
+    ) {
+        heights.addAll(parseObject.getList("height")!!)
+
+        val gradeValue = parseObject.getString("grade")!!.fixTildes()
+        val gradeValues = gradeValue.split(" ")
+        grades.addAll(Grade.listFromStrings(gradeValues))
+
+        val endingsList = parseObject.getList<ParseObject>("ending")
+        if (endingsList != null)
+            for (e in endingsList) {
+                val ending = e.fetchIfNeeded<ParseObject>()
+                val endingName = ending.getString("name")?.fixTildes()
+                val endingType = EndingType.find(endingName)
+                endings.add(endingType)
+            }
+
+        val endingArtifo = parseObject.getString("endingArtifo")?.fixTildes()
+        endingArtifo?.let {
+            val artifos = it.replace("\r", "").split("\n")
+            for (artifo in artifos)
+                Pitch.fromEndingDataString(artifo)
+                    ?.let { artifoEnding -> pitches.add(artifoEnding) }
+        }
+    }
 
     fun hasSafeCount(): Boolean {
         var anyGreaterThanOne = false
@@ -122,9 +177,10 @@ data class Path(
         }
     }
 
-    @ExperimentalUnsignedTypes
     companion object CREATOR : Parcelable.Creator<Path> {
         override fun createFromParcel(parcel: Parcel): Path = Path(parcel)
         override fun newArray(size: Int): Array<Path?> = arrayOfNulls(size)
+
+        const val NAMESPACE = "Path"
     }
 }

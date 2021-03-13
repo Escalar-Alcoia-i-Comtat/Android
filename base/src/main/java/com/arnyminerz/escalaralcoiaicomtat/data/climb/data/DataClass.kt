@@ -34,6 +34,7 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
+import com.parse.ParseException
 import com.parse.ParseObject
 import com.parse.ParseQuery
 import timber.log.Timber
@@ -82,7 +83,58 @@ fun getIntent(context: Context, queryName: String): Intent? {
     return null
 }
 
-abstract class DataClassImpl (open val objectId: String) : Parcelable
+fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
+    label: String,
+    callback: (objects: List<A>, error: Exception?) -> Unit
+) {
+    fromPin(label).findInBackground().continueWithTask { task ->
+        val error = task.error
+        val objects = task.result
+        if (error != null) {
+            if (error is ParseException && error.code == ParseException.CACHE_MISS) {
+                Timber.w("No stored data found. Fetching from network.")
+                return@continueWithTask fromNetwork().findInBackground()
+            } else Timber.e(error, "Could not fetch data.")
+        }
+        if (objects.size <= 0) {
+            Timber.w("No stored data found. Fetching from network.")
+            return@continueWithTask fromNetwork().findInBackground()
+        }
+        Timber.d("Loading from pin...")
+        return@continueWithTask task
+    }.continueWithTask { task ->
+        callback(task.result, task.error)
+        return@continueWithTask task
+    }
+}
+
+fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(label: String): List<ParseObject> {
+    val result = arrayListOf<ParseObject>()
+    limit = PATHS_BATCH_SIZE
+    fromPin(label).findInBackground().continueWithTask { task ->
+        val error = task.error
+        val objects = task.result
+        if (error != null) {
+            if (error is ParseException && error.code == ParseException.CACHE_MISS) {
+                Timber.w("No stored data found. Fetching from network.")
+                return@continueWithTask fromNetwork().findInBackground()
+            } else Timber.e(error, "Could not fetch data.")
+        }
+        if (objects.size <= 0) {
+            Timber.w("No stored data found. Fetching from network.")
+            return@continueWithTask fromNetwork().findInBackground()
+        }
+        Timber.d("Loading from pin...")
+        return@continueWithTask task
+    }.continueWithTask { task ->
+        if (task.error != null) throw task.error
+        result.addAll(task.result)
+        task
+    }.waitForCompletion()
+    return result
+}
+
+abstract class DataClassImpl(open val objectId: String) : Parcelable
 
 // A: List type
 // B: Parent Type
@@ -94,9 +146,36 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     open val kmlAddress: String?,
     @DrawableRes val placeholderDrawable: Int,
     @DrawableRes val errorPlaceholderDrawable: Int,
-    open val namespace: String
+    open val namespace: String,
+    open val childrenNamespace: String
 ) : DataClassImpl(objectId), Iterable<A> {
-    val children: ArrayList<A> = arrayListOf()
+    protected val pin = "${DATA_FIX_LABEL}_${Area.NAMESPACE}_${this.objectId}"
+
+    protected val innerChildren = arrayListOf<A>()
+
+    val children: List<A>
+        @WorkerThread
+        get() {
+            if (innerChildren.isEmpty()) {
+                val newChildren = loadChildren()
+                innerChildren.addAll(newChildren)
+            }
+            return innerChildren
+        }
+
+    fun add(item: A) {
+        innerChildren.add(item)
+    }
+
+    fun addAll(vararg items: A) {
+        for (item in items)
+            innerChildren.add(item)
+    }
+
+    fun addAll(items: Iterable<A>) {
+        for (item in items)
+            innerChildren.add(item)
+    }
 
     /**
      * Stores when a download has been started
@@ -105,6 +184,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         private set
 
     operator fun get(index: Int): A = children[index]
+
+    @WorkerThread
+    protected abstract fun loadChildren(): List<A>
 
     /**
      * Gets an object based on objectId

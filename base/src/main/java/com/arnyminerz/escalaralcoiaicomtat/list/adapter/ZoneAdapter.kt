@@ -26,7 +26,7 @@ import timber.log.Timber
 import java.io.File
 
 class ZoneAdapter(
-    private val zones: ArrayList<Zone>,
+    private val zones: List<Zone>,
     private val dataClassListActivity: DataClassListActivity<*>,
     listener: ((zone: Zone, viewHolder: ZonesViewHolder, index: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<ZonesViewHolder>() {

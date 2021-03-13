@@ -8,6 +8,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.view.View
 import android.widget.TextView
+import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
@@ -24,6 +25,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.parse.ParseObject
+import com.parse.ParseQuery
 import timber.log.Timber
 import java.util.*
 
@@ -44,7 +46,8 @@ data class Sector constructor(
     null,
     R.drawable.ic_wide_placeholder,
     R.drawable.ic_wide_placeholder,
-    NAMESPACE
+    NAMESPACE,
+    Path.NAMESPACE
 ) {
     /**
      * Creates a new sector from the data of a ParseObject.
@@ -77,7 +80,7 @@ data class Sector constructor(
         parcel.writeInt(walkingTime)
         parcel.writeParcelable(location, 0)
         parcel.writeString(imageUrl)
-        parcel.writeList(children)
+        parcel.writeList(innerChildren)
     }
 
     constructor(parcel: Parcel) : this(
@@ -90,7 +93,27 @@ data class Sector constructor(
         parcel.readParcelable<LatLng?>(LatLng::class.java.classLoader),
         parcel.readString()!!, // Image Url
     ) {
-        parcel.readList(children, Path::class.java.classLoader)
+        parcel.readList(innerChildren, Path::class.java.classLoader)
+    }
+
+    @WorkerThread
+    override fun loadChildren(): List<Path> {
+        val key = namespace.toLowerCase(Locale.getDefault())
+        Timber.d("Loading elements from \"$childrenNamespace\", where $key=$objectId")
+
+        val parentQuery = ParseQuery.getQuery<ParseObject>(namespace)
+        parentQuery.whereEqualTo("objectId", objectId)
+
+        val query = ParseQuery.getQuery<ParseObject>(childrenNamespace)
+        query.addAscendingOrder("sketchId")
+        query.whereMatchesQuery(key, parentQuery)
+
+        val loads = query.fetchPinOrNetwork(pin)
+        Timber.d("Got ${loads.size} elements.")
+        val result = arrayListOf<Path>()
+        for (load in loads)
+            result.add(Path(load))
+        return result
     }
 
     override fun describeContents(): Int = 0

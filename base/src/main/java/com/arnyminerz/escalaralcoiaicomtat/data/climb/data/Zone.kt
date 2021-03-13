@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
@@ -9,6 +10,8 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.parse.ParseObject
+import com.parse.ParseQuery
+import timber.log.Timber
 import java.util.*
 
 @Suppress("UNCHECKED_CAST")
@@ -28,7 +31,8 @@ data class Zone(
     kmlAddress,
     R.drawable.ic_tall_placeholder,
     R.drawable.ic_tall_placeholder,
-    NAMESPACE
+    NAMESPACE,
+    Sector.NAMESPACE
 ) {
     val transitionName = objectId + displayName.replace(" ", "_")
 
@@ -60,6 +64,26 @@ data class Zone(
         parseObject.getParseGeoPoint("location").toLatLng()
     )
 
+    @WorkerThread
+    override fun loadChildren(): List<Sector> {
+        val key = namespace.toLowerCase(Locale.getDefault())
+        Timber.d("Loading elements from \"$childrenNamespace\", where $key=$objectId")
+
+        val parentQuery = ParseQuery.getQuery<ParseObject>(namespace)
+        parentQuery.whereEqualTo("objectId", objectId)
+
+        val query = ParseQuery.getQuery<ParseObject>(childrenNamespace)
+        query.addAscendingOrder("displayName")
+        query.whereMatchesQuery(key, parentQuery)
+
+        val loads = query.fetchPinOrNetwork(pin)
+        Timber.d("Got ${loads.size} elements.")
+        val result = arrayListOf<Sector>()
+        for (load in loads)
+            result.add(Sector(load))
+        return result
+    }
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(objectId)
         parcel.writeString(displayName)
@@ -72,10 +96,6 @@ data class Zone(
     }
 
     override fun describeContents(): Int = 0
-
-    fun addSector(sector: Sector) {
-        children.add(sector)
-    }
 
     companion object CREATOR : Parcelable.Creator<Zone> {
         override fun createFromParcel(parcel: Parcel): Zone = Zone(parcel)
