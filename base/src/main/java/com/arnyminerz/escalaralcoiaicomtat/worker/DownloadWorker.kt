@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.worker
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import androidx.lifecycle.LiveData
 import androidx.work.*
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
@@ -184,7 +185,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
          * @see ERROR_NOT_FOUND
          * @see ERROR_UNPIN
          */
-        fun schedule(context: Context, tag: String, data: DownloadData): Operation {
+        fun schedule(context: Context, tag: String, data: DownloadData): LiveData<WorkInfo> {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
@@ -203,9 +204,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 )
                 .build()
 
-            return WorkManager
+            val workManager = WorkManager
                 .getInstance(context)
-                .enqueue(request)
+            workManager.enqueue(request)
+
+            return workManager.getWorkInfoByIdLiveData(request.id)
         }
     }
 }
