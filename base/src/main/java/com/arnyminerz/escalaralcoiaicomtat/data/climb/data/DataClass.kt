@@ -173,6 +173,12 @@ fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
     return result
 }
 
+enum class DataClasses(val namespace: String) {
+    AREA(Area.NAMESPACE),
+    ZONE(Zone.NAMESPACE),
+    SECTOR(Sector.NAMESPACE)
+}
+
 abstract class DataClassImpl(open val objectId: String) : Parcelable
 
 // A: List type
