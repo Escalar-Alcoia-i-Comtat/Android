@@ -21,6 +21,9 @@ import com.parse.ParseQuery
 import timber.log.Timber
 import java.io.File
 
+const val DOWNLOAD_QUALITY_MIN = 1
+const val DOWNLOAD_QUALITY_MAX = 100
+
 const val DOWNLOAD_DISPLAY_NAME = "display_name"
 const val DOWNLOAD_NAMESPACE = "namespace"
 const val DOWNLOAD_ID = "id"
@@ -193,7 +196,9 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                     workDataOf(
                         DOWNLOAD_NAMESPACE to data.type.namespace,
                         DOWNLOAD_ID to data.id,
-                        DOWNLOAD_DISPLAY_NAME to data.tempDisplayName
+                        DOWNLOAD_DISPLAY_NAME to data.tempDisplayName,
+                        DOWNLOAD_OVERWRITE to data.overwrite,
+                        DOWNLOAD_QUALITY to data.quality
                     )
                 )
                 .build()

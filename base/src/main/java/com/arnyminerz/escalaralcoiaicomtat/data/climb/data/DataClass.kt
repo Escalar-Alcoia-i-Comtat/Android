@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -20,7 +19,6 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
-import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
@@ -29,13 +27,15 @@ import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.view.apply
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MAX
+import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MIN
+import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData
+import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadWorker
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
-import com.bumptech.glide.request.transition.Transition
 import com.parse.ParseException
 import com.parse.ParseObject
 import com.parse.ParseQuery
@@ -265,81 +265,26 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     /**
      * Downloads the image data of the DataClass.
      * @author Arnau Mora
-     * @date 2020/09/10
+     * @since 20210313
      * @param context The context to run from.
      * @param overwrite If the new data should overwrite the old one
-     * @param startListener This will be called when the download starts.
-     * @param finishListener This will be called when the download finishes.
-     * @param loadFailedListener This will be called when an error occurs during the download.
+     * @param quality The quality in which do the codification
+     * @return The tag of the worker
      *
-     * @throws FileAlreadyExistsException If the data has already been downloaded and overwrite is false
-     * @throws AlreadyLoadingException If the content is already being downloaded
+     * @throws IllegalArgumentException If the specified quality is out of bounds
      */
     @WorkerThread
-    @Throws(FileAlreadyExistsException::class, AlreadyLoadingException::class)
+    @Throws(IllegalArgumentException::class)
     fun download(
         context: Context,
-        overwrite: Boolean = false,
-        startListener: (() -> Unit)?,
-        finishListener: ((imageFile: File) -> Unit)?,
-        progressUpdater: ((progress: Int, max: Int) -> Unit)?,
-        loadFailedListener: (() -> Unit)?
-    ) {
-        // TODO: A worker should be used
-        val imageFile = imageFile(context)
-        if (imageFile.exists() && !overwrite)
-            throw FileAlreadyExistsException(imageFile)
-
-        Timber.v("Downloading $displayName...")
-        Timber.d("Pinning data...")
-        val query = ParseQuery<ParseObject>(namespace)
-        val obj = query.get(objectId)
-        obj.pin()
-
-        Timber.d("Downloading image...")
-        Glide.with(context)
-            .asBitmap()
-            .load(imageUrl)
-            .into(object : CustomTarget<Bitmap>() {
-                override fun onLoadStarted(placeholder: Drawable?) {
-                    super.onLoadStarted(placeholder)
-                    startListener?.invoke()
-                }
-
-                override fun onResourceReady(bitmap: Bitmap, transition: Transition<in Bitmap>?) {
-                    Timber.v("Downloaded \"$displayName\"!")
-                    imageFile.storeBitmap(bitmap)
-
-                    var counter = 1 // Starts at 1 for representing self, that just downloaded
-                    val targetCounter = fullCount()
-                    if (children.isNotEmpty() && children.first() is DataClass<*, *>)
-                        for (child in children)
-                            (child as? DataClass<*, *>)?.download(context, overwrite, null, {
-                                counter++
-                                if (counter >= targetCounter) {
-                                    Timber.v("Completely finished downloading \"$displayName\"")
-                                    finishListener?.invoke(imageFile)
-                                } else {
-                                    Timber.d(
-                                        "  Won't call finish listener since counter is still $counter/$targetCounter"
-                                    )
-                                    progressUpdater?.invoke(counter, children.size)
-                                }
-                            }, { _, _ -> counter++ }, null)
-                    else {
-                        Timber.v("Completely finished downloading \"$displayName\"")
-                        finishListener?.invoke(imageFile)
-                    }
-                }
-
-                override fun onLoadCleared(placeholder: Drawable?) {}
-
-                override fun onLoadFailed(errorDrawable: Drawable?) {
-                    super.onLoadFailed(errorDrawable)
-                    Timber.v("Completely finished downloading \"$displayName\"")
-                    loadFailedListener?.invoke()
-                }
-            })
+        overwrite: Boolean = true,
+        quality: Int = 100
+    ): String {
+        if (quality < DOWNLOAD_QUALITY_MIN || quality > DOWNLOAD_QUALITY_MAX)
+            throw IllegalArgumentException("Quality must be between 1 and 100")
+        val tag = generateUUID()
+        DownloadWorker.schedule(context, tag, DownloadData(this, overwrite, quality))
+        return tag
     }
 
     /**
@@ -488,7 +433,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to run from
      * @return The path of the image file that can be downloaded
      */
-    fun imageFile(context: Context): File = File(dataDir(context), "$namespace-$objectId.jpg")
+    fun imageFile(context: Context): File = File(dataDir(context), "$namespace-$objectId.webp")
 
     /**
      * Loads the image of the Data Class
