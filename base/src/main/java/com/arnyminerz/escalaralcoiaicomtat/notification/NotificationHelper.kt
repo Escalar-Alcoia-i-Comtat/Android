@@ -126,7 +126,7 @@ class Notification private constructor(private val builder: Builder) {
          * @param icon The drawable icon id of the notification
          * @return The Builder instance
          */
-        fun withChannelId(@DrawableRes icon: Int): Builder {
+        fun withIcon(@DrawableRes icon: Int): Builder {
             this.icon = icon
             return this
         }
