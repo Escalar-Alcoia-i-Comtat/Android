@@ -306,13 +306,12 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         } else
             Timber.v("Didn't check for server connection since Internet is not available")
 
-        if (!loaded && !loading)
-            runAsync {
-                loading = true
-                visibility(binding.mainLoadingProgressBar, true)
+        if (!loaded && !loading) {
+            loading = true
+            visibility(binding.mainLoadingProgressBar, true)
 
-                Timber.v("Loading areas...")
-                loadAreasFromCache()
+            Timber.v("Loading areas...")
+            loadAreasFromCache {
                 Timber.v("  --- Found ${AREAS.size} areas ---")
 
                 areasViewFragment.setItemClickListener { holder, position ->
@@ -335,16 +334,15 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
                     startActivity(intent, optionsBundle)
                 }
 
-                runOnUiThread {
-                    Timber.v("Refreshing areas...")
-                    areasViewFragment.refreshAreas()
-                    Timber.v("Finished loading areas, hiding progress bar and showing frameLayout.")
-                    visibility(binding.mainLoadingProgressBar, false)
-                    visibility(binding.mainFrameLayout, true)
-                }
+                Timber.v("Refreshing areas...")
+                areasViewFragment.refreshAreas()
+                Timber.v("Finished loading areas, hiding progress bar and showing frameLayout.")
+                visibility(binding.mainLoadingProgressBar, false)
+                visibility(binding.mainFrameLayout, true)
 
                 loaded = true
                 loading = false
             }
+        }
     }
 }

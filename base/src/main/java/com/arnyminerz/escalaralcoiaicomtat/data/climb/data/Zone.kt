@@ -6,6 +6,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
+import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.parse.ParseObject
 import java.util.*
@@ -52,10 +53,10 @@ data class Zone(
      */
     constructor(parseObject: ParseObject) : this(
         parseObject.objectId,
-        parseObject.getString("displayName")!!,
-        parseObject.getDate("updatedAt"),
-        parseObject.getString("image")!!,
-        parseObject.getString("kmlAddress")!!,
+        parseObject.getString("displayName")!!.fixTildes(),
+        parseObject.updatedAt,
+        parseObject.getString("image")!!.fixTildes(),
+        parseObject.getString("kmlAddress")!!.fixTildes(),
         parseObject.getParseGeoPoint("location").toLatLng()
     )
 

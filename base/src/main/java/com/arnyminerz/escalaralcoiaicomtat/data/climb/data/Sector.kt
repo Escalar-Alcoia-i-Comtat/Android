@@ -13,6 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
+import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.arnyminerz.escalaralcoiaicomtat.view.BarChartHelper
 import com.arnyminerz.escalaralcoiaicomtat.view.getAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -55,8 +56,8 @@ data class Sector constructor(
      */
     constructor(parseObject: ParseObject) : this(
         parseObject.objectId,
-        parseObject.getString("displayName")!!,
-        parseObject.getDate("updatedAt"),
+        parseObject.getString("displayName")!!.fixTildes(),
+        parseObject.updatedAt,
         SunTime.find(parseObject.getInt("sunTime")),
         parseObject.getBoolean("kidsApt"),
         parseObject.getInt("walkingTime"),
