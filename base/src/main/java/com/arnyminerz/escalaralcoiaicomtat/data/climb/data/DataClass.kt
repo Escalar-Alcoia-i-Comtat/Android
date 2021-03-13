@@ -39,6 +39,7 @@ import com.bumptech.glide.request.transition.Transition
 import com.parse.ParseException
 import com.parse.ParseObject
 import com.parse.ParseQuery
+import com.parse.boltsinternal.Task
 import timber.log.Timber
 import java.io.File
 import java.util.*
@@ -87,27 +88,43 @@ fun getIntent(context: Context, queryName: String): Intent? {
 
 fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
     label: String,
-    callback: (objects: List<A>, error: Exception?) -> Unit
-) {
-    fromPin(label).findInBackground().continueWithTask { task ->
-        val error = task.error
-        val objects = task.result
-        if (error != null) {
-            if (error is ParseException && error.code == ParseException.CACHE_MISS) {
-                Timber.w("No stored data found. Fetching from network.")
-                return@continueWithTask fromNetwork().findInBackground()
-            } else Timber.e(error, "Could not fetch data.")
-        }
-        if (objects.size <= 0) {
+    shouldPin: Boolean = false,
+    callback: ((objects: List<A>, error: Exception?) -> Unit)? = null
+): Task<List<A>> = fromPin(label).findInBackground().continueWithTask { task ->
+    val error = task.error
+    val objects = task.result
+    if (error != null) {
+        if (error is ParseException && error.code == ParseException.CACHE_MISS) {
             Timber.w("No stored data found. Fetching from network.")
             return@continueWithTask fromNetwork().findInBackground()
-        }
-        Timber.d("Loading from pin...")
-        return@continueWithTask task
-    }.continueWithTask { task ->
-        callback(task.result, task.error)
-        return@continueWithTask task
+        } else Timber.e(error, "Could not fetch data.")
     }
+    if (objects.size <= 0) {
+        Timber.w("No stored data found. Fetching from network.")
+        return@continueWithTask fromNetwork().findInBackground()
+    }
+    Timber.d("Loading from pin...")
+    return@continueWithTask task
+}.continueWithTask { task ->
+    callback?.invoke(task.result, task.error)
+    if (shouldPin) {
+        Timber.d("Pinning...")
+        ParseObject.pinAll(label, task.result)
+    }
+    return@continueWithTask task
+}
+
+@WorkerThread
+fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetworkSync(
+    label: String,
+    shouldPin: Boolean = false
+): List<A> {
+    val list = arrayListOf<A>()
+    fetchPinOrNetwork(label, shouldPin) { result, error ->
+        error?.let { throw it }
+        list.addAll(result)
+    }.waitForCompletion()
+    return list
 }
 
 /**
@@ -117,7 +134,9 @@ fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
  */
 @Throws(NoInternetAccessException::class)
 fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
-    state: ConnectivityProvider.NetworkState, label: String, shouldPin: Boolean = false
+    state: ConnectivityProvider.NetworkState,
+    label: String,
+    shouldPin: Boolean = false
 ): List<ParseObject> {
     val result = arrayListOf<ParseObject>()
     limit = PATHS_BATCH_SIZE
@@ -277,6 +296,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         progressUpdater: ((progress: Int, max: Int) -> Unit)?,
         loadFailedListener: (() -> Unit)?
     ) {
+        // TODO: A worker should be used
         val imageFile = imageFile(context)
         if (imageFile.exists() && !overwrite)
             throw FileAlreadyExistsException(imageFile)
