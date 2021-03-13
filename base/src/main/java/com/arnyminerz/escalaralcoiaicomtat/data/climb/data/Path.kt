@@ -2,15 +2,12 @@ package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.Grade
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getStringSafe
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
-import com.arnyminerz.escalaralcoiaicomtat.generic.jsonFromUrl
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.parse.ParseObject
 import java.util.*
@@ -144,13 +141,7 @@ data class Path(
     @Throws(NoInternetAccessException::class)
     fun isBlocked(networkState: ConnectivityProvider.NetworkState): BlockingType {
         // TODO: Move to Parse
-        if (networkState.hasInternet) {
-            val json = jsonFromUrl("$EXTENDED_API_URL/path/$objectId")
-            val blocked = json.getStringSafe("blocked")
-
-            return BlockingType.find(blocked)
-        } else
-            throw NoInternetAccessException()
+        return BlockingType.UNKNOWN
     }
 
     fun hasInfo(): Boolean = description != null || builtBy != null

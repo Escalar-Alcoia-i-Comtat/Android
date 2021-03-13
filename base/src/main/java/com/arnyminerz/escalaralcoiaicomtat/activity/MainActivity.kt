@@ -9,13 +9,9 @@ import androidx.collection.arrayMapOf
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.work.*
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.ServerDownActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerFragmentActivity
-import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
-import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL_NO_SECURE
 import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
@@ -25,24 +21,24 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.SettingsFragmentManager
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.AreasViewFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFragment.Companion.SettingsPage
-import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.network.ping
 import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChannels
 import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.parse.ParseConfig
-import io.sentry.Sentry
 import io.sentry.SentryLevel
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.timber.SentryTimberIntegration
 import timber.log.Timber
 import timber.log.Timber.DebugTree
 import java.io.File
-import java.net.URL
 
 val EXTRA_AREA = IntentExtra<String>("area")
 val EXTRA_ZONE = IntentExtra<String>("zone")
@@ -302,31 +298,5 @@ class MainActivity : NetworkChangeListenerFragmentActivity() {
         val hasInternet = state.hasInternet
         Timber.v("Connectivity status Updated! Has Internet: %s", hasInternet)
         binding.loadingLayout.hide()
-
-        if (state.hasInternet && !serverAvailable) {
-            runAsync {
-                val canReachRecureServer = URL(EXTENDED_API_URL).ping()
-                val canReachServer = URL(EXTENDED_API_URL_NO_SECURE).ping()
-                when {
-                    canReachRecureServer -> {
-                        Timber.v("Reached arnyminerz.com")
-                        serverAvailable = true
-                    }
-                    canReachServer -> {
-                        Timber.w("Misconfigured SSL in API. Please, check! Working at insecure address.")
-                        Sentry.captureMessage(
-                            "Misconfigured SSL in API. Please, check! Working at insecure address.",
-                            SentryLevel.WARNING
-                        )
-                        serverAvailable = true
-                    }
-                    else -> {
-                        Timber.e("Could not ping $EXTENDED_API_URL. Tried through http and https.")
-                        startActivity(Intent(this@MainActivity, ServerDownActivity::class.java))
-                    }
-                }
-            }
-        } else
-            Timber.v("Didn't check for server connection since Internet is not available")
     }
 }

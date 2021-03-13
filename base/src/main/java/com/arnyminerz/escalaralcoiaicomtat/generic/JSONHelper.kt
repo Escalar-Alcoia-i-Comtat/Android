@@ -1,8 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
 import android.os.Build
-import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL
-import com.arnyminerz.escalaralcoiaicomtat.async.EXTENDED_API_URL_NO_SECURE
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -68,14 +66,7 @@ fun jsonFromUrl(url: String): JSONObject =
     } catch (e: IOException) {
         Timber.w(e, "Could not get JSON from %s", url)
         jsonFromUrl(
-            URL(
-                if (url.contains(EXTENDED_API_URL))
-                    url.replace(
-                        EXTENDED_API_URL,
-                        EXTENDED_API_URL_NO_SECURE
-                    )
-                else url.replace("https", "http")
-            )
+            URL(url.replace("https", "http"))
         ) // Replace the https address with the http one
     }
 
@@ -96,14 +87,7 @@ fun jsonArrayFromURL(url: String): JSONArray =
         jsonArrayFromURL(URL(url))
     } catch (e: IOException) {
         jsonArrayFromURL(
-            URL(
-                if (url.contains(EXTENDED_API_URL))
-                    url.replace(
-                        EXTENDED_API_URL,
-                        EXTENDED_API_URL_NO_SECURE
-                    )
-                else url.replace("https", "http")
-            )
+            URL(url.replace("https", "http"))
         ) // Replace the https address with the http one
     }
 
