@@ -17,13 +17,13 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
+import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
@@ -86,6 +86,17 @@ fun getIntent(context: Context, queryName: String): Intent? {
     return null
 }
 
+/**
+ * Fetches data asyncronously from datastore, or from network if not available
+ * @author Arnau Mora
+ * @since 20210313
+ * @param label The label to search in datastore
+ * @param shouldPin If the data should be stored in datastore when loaded
+ * @param callback What to call when completed
+ * @return The loading task
+ * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
+ */
+@Throws(NoInternetAccessException::class)
 fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
     label: String,
     shouldPin: Boolean = false,
@@ -96,11 +107,19 @@ fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
     if (error != null) {
         if (error is ParseException && error.code == ParseException.CACHE_MISS) {
             Timber.w("No stored data found. Fetching from network.")
+            if (!appNetworkState.hasInternet) {
+                Timber.w("No Internet connection is available, and there's no stored data")
+                throw NoInternetAccessException("No Internet connection is available, and there's no stored data")
+            }
             return@continueWithTask fromNetwork().findInBackground()
         } else Timber.e(error, "Could not fetch data.")
     }
     if (objects.size <= 0) {
         Timber.w("No stored data found. Fetching from network.")
+        if (!appNetworkState.hasInternet) {
+            Timber.w("No Internet connection is available, and there's no stored data")
+            throw NoInternetAccessException("No Internet connection is available, and there's no stored data")
+        }
         return@continueWithTask fromNetwork().findInBackground()
     }
     Timber.d("Loading from pin...")
@@ -114,6 +133,16 @@ fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
     return@continueWithTask task
 }
 
+/**
+ * Fetches data syncronously from datastore, or from network if not available
+ * @author Arnau Mora
+ * @since 20210313
+ * @param label The label to search in datastore
+ * @param shouldPin If the data should be stored in datastore when loaded
+ * @return The fetch result
+ * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
+ */
+@Throws(NoInternetAccessException::class)
 @WorkerThread
 fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetworkSync(
     label: String,
@@ -125,52 +154,6 @@ fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetworkSync(
         list.addAll(result)
     }.waitForCompletion()
     return list
-}
-
-/**
- * Fetches a pin from the Datastore, or if it's not stored, from the network.
- * @param state The current network state
- * @param label The label to fetch
- */
-@Throws(NoInternetAccessException::class)
-fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
-    state: ConnectivityProvider.NetworkState,
-    label: String,
-    shouldPin: Boolean = false
-): List<ParseObject> {
-    val result = arrayListOf<ParseObject>()
-    limit = PATHS_BATCH_SIZE
-    fromPin(label).findInBackground().continueWithTask { task ->
-        var resultTask = task
-        val error = task.error
-        val objects = task.result
-        if (error != null) {
-            if (error is ParseException && error.code == ParseException.CACHE_MISS) {
-                Timber.w("No stored data found. Fetching from network.")
-                resultTask = fromNetwork().findInBackground()
-            } else Timber.e(error, "Could not fetch data.")
-        }
-        if (objects.size <= 0) {
-            Timber.w("The stored data's size is not greater than 0. Fetching from network.")
-            resultTask = fromNetwork().findInBackground()
-        }
-        if (resultTask != task && !state.hasInternet) {
-            Timber.w("Device doesn't have an Internet connection, and there's no cached data")
-            throw NoInternetAccessException(
-                "Device doesn't have an Internet connection, and there's no cached data"
-            )
-        }
-        return@continueWithTask resultTask
-    }.continueWithTask { task ->
-        if (task.error != null) throw task.error
-        result.addAll(task.result)
-        if (shouldPin) {
-            Timber.d("Pinning...")
-            ParseObject.pinAll(label, task.result)
-        }
-        task
-    }.waitForCompletion()
-    return result
 }
 
 enum class DataClasses(val namespace: String) {

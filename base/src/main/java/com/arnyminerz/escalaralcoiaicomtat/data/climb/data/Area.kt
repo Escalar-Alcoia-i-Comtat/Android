@@ -2,15 +2,16 @@ package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 
 import android.os.Parcel
 import android.os.Parcelable
-import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
+import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
-import com.parse.*
+import com.parse.ParseException
+import com.parse.ParseObject
+import com.parse.ParseQuery
 import timber.log.Timber
 import java.util.*
 
@@ -38,20 +39,18 @@ private fun log(msg: String, vararg arguments: Any) =
  * @see PATHS_BATCH_SIZE
  * @return A collection of areas
  * @throws ParseException If there's an error while fetching from parse
+ * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
  */
-@MainThread
-@Throws(ParseException::class)
+@WorkerThread
+@Throws(ParseException::class, NoInternetAccessException::class)
 fun loadAreasFromCache(progressCallback: (current: Int, total: Int) -> Unit, callback: () -> Unit) {
     Timber.d("Querying paths...")
-    val query = ParseQuery.getQuery<ParseObject>("Area")
-    query.addAscendingOrder("displayName")
-    AREAS.clear()
-    query.limit = PATHS_BATCH_SIZE
-    query.fetchPinOrNetwork(DATA_FIX_LABEL) { objects, error ->
-        if (error != null) {
-            Timber.e(error, "Could not fetch")
-            return@fetchPinOrNetwork
-        }
+    try {
+        val query = ParseQuery.getQuery<ParseObject>("Area")
+        query.addAscendingOrder("displayName")
+        AREAS.clear()
+        query.limit = PATHS_BATCH_SIZE
+        val objects = query.fetchPinOrNetworkSync(DATA_FIX_LABEL)
 
         Timber.d("Got ${objects.size} areas. Processing...")
         progressCallback(0, objects.size)
@@ -71,6 +70,12 @@ fun loadAreasFromCache(progressCallback: (current: Int, total: Int) -> Unit, cal
                 callback()
             }
         }
+    } catch (e: NoInternetAccessException) {
+        Timber.w(e, "Could not load areas.")
+        throw e
+    } catch (e: ParseException) {
+        Timber.w(e, "Could not load areas.")
+        throw e
     }
 }
 
@@ -134,7 +139,7 @@ class Area(
         query.addAscendingOrder("displayName")
         query.whereMatchesQuery(key, parentQuery)
 
-        val loads = query.fetchPinOrNetwork(appNetworkState, pin, true)
+        val loads = query.fetchPinOrNetworkSync(pin, true)
         Timber.d("Got ${loads.size} elements.")
         val result = arrayListOf<Zone>()
         for (load in loads)

@@ -10,7 +10,6 @@ import android.view.View
 import android.widget.TextView
 import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
@@ -109,7 +108,7 @@ data class Sector constructor(
         query.addAscendingOrder("sketchId")
         query.whereMatchesQuery(key, parentQuery)
 
-        val loads = query.fetchPinOrNetwork(appNetworkState, pin, true)
+        val loads = query.fetchPinOrNetworkSync(pin, true)
         Timber.d("Got ${loads.size} elements.")
         val result = arrayListOf<Path>()
         for (load in loads)
