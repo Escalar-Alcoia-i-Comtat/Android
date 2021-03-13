@@ -9,6 +9,9 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.annotation.DrawableRes
 import androidx.annotation.WorkerThread
+import androidx.lifecycle.LiveData
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_SECTOR
@@ -212,10 +215,26 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
-     * Stores when a download has been started
+     * Checks if the DataClass is being downloaded
+     * @author Arnau Mora
+     * @since 20210313
+     * @param context The context to check from
+     * @return If the DataClass is being downloaded
      */
-    var isDownloading = false
-        private set
+    @WorkerThread
+    fun isDownloading(context: Context): Boolean {
+        val workManager = WorkManager.getInstance(context)
+        val workInfos = workManager.getWorkInfosByTag(pin).get()
+        if (workInfos.isEmpty())
+            return false
+        var anyRunning = false
+        for (workInfo in workInfos)
+            when (workInfo.state) {
+                WorkInfo.State.ENQUEUED, WorkInfo.State.RUNNING -> anyRunning = true
+                else -> continue
+            }
+        return anyRunning
+    }
 
     operator fun get(index: Int): A = children[index]
 
@@ -290,14 +309,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     /**
      * Checks if the Data Class is downloaded
      * @author Arnau Mora
-     * @date 2020/09/11
+     * @since 20210313
      * @param context The context to run from
      * @return a matching DownloadStatus representing the Data Class' download status
      */
     fun isDownloaded(context: Context): DownloadStatus {
         var result: DownloadStatus? = null
         when {
-            isDownloading -> result = DownloadStatus.DOWNLOADING
+            isDownloading(context) -> result = DownloadStatus.DOWNLOADING
             else -> {
                 val imageFileExists = imageFile(context).exists()
                 if (!imageFileExists)
@@ -308,7 +327,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                             result = DownloadStatus.NOT_DOWNLOADED
             }
         }
-        return result ?: DownloadStatus.DOWNLOADED
+        return result ?: DownloadStatus.NOT_DOWNLOADED
     }
 
     /**
@@ -530,7 +549,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         result = 31 * result + errorPlaceholderDrawable
         result = 31 * result + namespace.hashCode()
         result = 31 * result + children.hashCode()
-        result = 31 * result + isDownloading.hashCode()
         return result
     }
 }
