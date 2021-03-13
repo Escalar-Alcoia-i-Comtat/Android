@@ -166,6 +166,9 @@
     <string name="notification_channel_new_update_name">New update available</string>
     <string name="notification_channel_new_update_desc">This will tell you when a new update is available, and will help you downloading it.</string>
 
+    <string name="notification_download_progress_title">Downloading…</string>
+    <string name="notification_download_progress_message">Downloading %s</string>
+
     <string name="no_internet_title">You have no Internet access</string>
     <string name="no_internet_message">You can access the downloaded content, or try again.</string>
 
