@@ -74,8 +74,14 @@ class Notification private constructor(private val builder: Builder) {
             .cancel(builder.id)
     }
 
+    /**
+     * Removes the current instance from the notifications registry. It won't be able to be
+     * fetched from its id.
+     * @author Arnau Mora
+     * @since 20210313
+     */
     fun destroy() {
-
+        builders.remove(builder.id)
     }
 
     class Builder(val context: Context) {
