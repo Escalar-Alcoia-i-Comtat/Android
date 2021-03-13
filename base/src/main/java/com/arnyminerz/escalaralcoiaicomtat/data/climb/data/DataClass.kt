@@ -162,7 +162,16 @@ fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetworkSync(
 enum class DataClasses(val namespace: String) {
     AREA(Area.NAMESPACE),
     ZONE(Zone.NAMESPACE),
-    SECTOR(Sector.NAMESPACE)
+    SECTOR(Sector.NAMESPACE);
+
+    companion object {
+        fun find(namespace: String): DataClasses? {
+            for (c in values())
+                if (c.namespace == namespace)
+                    return c
+            return null
+        }
+    }
 }
 
 abstract class DataClassImpl(open val objectId: String) : Parcelable

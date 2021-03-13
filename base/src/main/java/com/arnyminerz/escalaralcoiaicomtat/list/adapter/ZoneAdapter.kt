@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.KML_ADDRESS_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.activity.KMZ_FILE_BUNDLE_EXTRA
@@ -14,8 +15,6 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
 import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
-import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
-import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
@@ -81,41 +80,26 @@ class ZoneAdapter(
                 dataClassListActivity.toast(R.string.toast_error_no_internet)
             else
                 when (zone.isDownloaded(dataClassListActivity)) {
-                    DownloadStatus.NOT_DOWNLOADED ->
-                        try {
-                            zone.download(dataClassListActivity, true, {
-                                dataClassListActivity.runOnUiThread {
-                                    holder.downloadImageButton.setImageResource(R.drawable.download_outline)
-                                    holder.progressBar.isIndeterminate = true
-                                    visibility(holder.progressBar, true)
+                    DownloadStatus.NOT_DOWNLOADED -> {
+                        zone.download(dataClassListActivity)
+                        val result = zone.download(dataClassListActivity)
+                        result.observe(dataClassListActivity) { workInfo ->
+                            val state = workInfo.state
+                            val data = workInfo.outputData
+                            Timber.v("Current download status: ${workInfo.state}")
+                            when (state) {
+                                WorkInfo.State.FAILED -> {
+                                    toast(dataClassListActivity, R.string.toast_error_internal)
+                                    visibility(holder.progressBar, false)
+                                    Timber.w("Download failed! Error: ${data.getString("error")}")
                                 }
-                            }, {
-                                dataClassListActivity.runOnUiThread {
+                                WorkInfo.State.SUCCEEDED -> {
                                     visibility(holder.progressBar, false)
                                     updateImageRes(holder, zone)
                                 }
-                            }, { progress, max ->
-                                holder.progressBar.apply {
-                                    isIndeterminate = false
-                                    this.max = max
-                                    this.progress = progress
-                                }
-                            }, {
-                                toast(dataClassListActivity, R.string.toast_error_internal)
-                                visibility(holder.progressBar, false)
-                            })
-                        } catch (error: FileAlreadyExistsException) {
-                            Timber.w(error, "Zone already downloaded!")
-                            toast(dataClassListActivity, R.string.toast_error_already_downloaded)
-
-                            visibility(holder.progressBar, false)
-                            holder.downloadImageButton.setImageResource(R.drawable.download)
-                        } catch (error: NoInternetAccessException) {
-                            dataClassListActivity.toast(R.string.toast_error_no_internet)
-                        } catch (error: AlreadyLoadingException) {
-                            Timber.w("Already downloading!")
-                            toast(dataClassListActivity, R.string.toast_error_already_downloading)
+                            }
                         }
+                    }
                     DownloadStatus.DOWNLOADING -> dataClassListActivity.toast(R.string.message_already_downloading)
                     else -> DownloadDialog(
                         dataClassListActivity,

@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
@@ -14,7 +15,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
-import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
@@ -52,33 +52,27 @@ class DownloadSectionsAdapter(
             downloadButton.setOnClickListener {
                 if (!appNetworkState.hasInternet)
                     mainActivity.toast(R.string.toast_error_no_internet)
-                else if (sectionDownloadStatus == DownloadStatus.NOT_DOWNLOADED)
-                    try {
-                        section.download(mainActivity, true, {
-                            mainActivity.toast(R.string.toast_downloading)
-                            downloadProgressBar.isIndeterminate = true
-                            visibility(downloadProgressBar, true)
-                        }, {
-                            visibility(downloadProgressBar, false)
-                            Timber.v("Finished downloading. Updating Downloads Recycler View...")
-                            mainActivity.downloadsFragment.reloadSizeTextView()
-                            notifyDataSetChanged()
-                        }, { progress, max ->
-                            downloadProgressBar.isIndeterminate = false
-                            downloadProgressBar.max = max
-                            downloadProgressBar.progress = progress
-                        }, {
-                            mainActivity.toast(R.string.toast_error_internal)
-                            visibility(downloadProgressBar, false)
-                        })
-                    } catch (ex: FileAlreadyExistsException) {
-                        // If the data is already downloaded
-                        // This will never be caught, since sectionDownloadStatus is NOT_DOWNLOADED, but who knows
-                        mainActivity.toast(R.string.toast_error_already_downloaded)
-                    } catch (ex: AlreadyLoadingException) {
-                        // If the download has already been started
-                        // This will never be caught, since sectionDownloadStatus is NOT_DOWNLOADED, but who knows
-                        mainActivity.toast(R.string.message_already_downloading)
+                else if (sectionDownloadStatus == DownloadStatus.NOT_DOWNLOADED) {
+                        val result = section.download(mainActivity)
+                        result.observe(mainActivity) { workInfo ->
+                            val state = workInfo.state
+                            val data = workInfo.outputData
+                            Timber.v("Current download status: ${workInfo.state}")
+                            when (state) {
+                                WorkInfo.State.FAILED -> {
+                                    mainActivity.toast(R.string.toast_error_internal)
+                                    visibility(downloadProgressBar, false)
+                                    Timber.w("Download failed! Error: ${data.getString("error")}")
+                                }
+                                WorkInfo.State.SUCCEEDED -> {
+                                    visibility(downloadProgressBar, false)
+                                    Timber.v("Finished downloading. Updating Downloads Recycler View...")
+                                    mainActivity.downloadsFragment.reloadSizeTextView()
+                                    notifyDataSetChanged()
+                                }
+                                else -> downloadProgressBar.isIndeterminate = true
+                            }
+                        }
                     } else if (section.isDownloaded(mainActivity) == DownloadStatus.DOWNLOADING)
                     mainActivity.toast(R.string.message_already_downloading)
             }

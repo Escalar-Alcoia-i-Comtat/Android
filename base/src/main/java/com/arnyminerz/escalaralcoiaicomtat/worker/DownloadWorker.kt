@@ -93,7 +93,7 @@ private constructor(
         overwrite: Boolean = OVERWRITE_DEFAULT,
         quality: Int = QUALITY_DEFAULT
     ) : this(
-        DataClasses.valueOf(dataClass.namespace),
+        DataClasses.find(dataClass.namespace)!!,
         dataClass.objectId,
         dataClass.displayName,
         overwrite,
