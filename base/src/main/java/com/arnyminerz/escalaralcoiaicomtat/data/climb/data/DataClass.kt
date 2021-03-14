@@ -233,7 +233,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     open val namespace: String,
     open val childrenNamespace: String
 ) : DataClassImpl(objectId), Iterable<A> {
-    protected val pin = "${DATA_FIX_LABEL}_${Area.NAMESPACE}_${objectId}"
+    protected val pin: String
+        get() = "${DATA_FIX_LABEL}_${Area.NAMESPACE}_$objectId"
 
     protected val innerChildren = arrayListOf<A>()
 
