@@ -24,7 +24,6 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFrag
 import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChannels
@@ -32,7 +31,6 @@ import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.parse.ParseConfig
 import io.sentry.SentryLevel
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.timber.SentryTimberIntegration
@@ -94,16 +92,6 @@ class MainActivity : NetworkChangeListenerActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             createNotificationChannels()
-
-        Timber.v("Getting config...")
-        ParseConfig.getInBackground { cnf, e ->
-            var config = cnf
-            if (e != null)
-                config = ParseConfig.getCurrentConfig()
-
-            val test = config.getString("testing_param")
-            toast(this, test)
-        }
 
         Timber.v("Finished preparing App...")
         return true
