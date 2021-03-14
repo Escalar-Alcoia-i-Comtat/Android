@@ -122,28 +122,27 @@ class SectorActivity : NetworkChangeListenerActivity() {
 
             Timber.d("Initializing fragments...")
             fragments.clear()
-            for (sector in 0 until count)
+            for (i in 0 until count)
                 fragments.add(
                     SectorFragment().apply {
                         arguments = Bundle().apply {
                             putString(ARGUMENT_AREA_ID, areaId)
                             putString(ARGUMENT_ZONE_ID, zoneId)
-                            putInt(ARGUMENT_SECTOR_INDEX, sector)
+                            putInt(ARGUMENT_SECTOR_INDEX, i)
                         }
                     }
                 )
             Timber.v("Initializing view pager...")
-            Timber.d("  Setting adapter...")
-            binding.sectorViewPager.adapter = object : FragmentStateAdapter(this) {
-                override fun getItemCount(): Int = count
+            Timber.d("  Initializing adapter for ${fragments.size} pages...")
+            val adapter = object : FragmentStateAdapter(this) {
+                override fun getItemCount(): Int = fragments.size
                 override fun createFragment(position: Int): Fragment {
                     Timber.d("Creating fragment #$position")
                     return fragments[position]
                 }
             }
-            Timber.d("  Registering change callback...")
-            binding.sectorViewPager.registerOnPageChangeCallback(object :
-                ViewPager2.OnPageChangeCallback() {
+            Timber.d("  Initializing page change callback...")
+            val callback = object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
                     Timber.d("Selected page #$position")
@@ -154,7 +153,11 @@ class SectorActivity : NetworkChangeListenerActivity() {
 
                     fragments[position].load()
                 }
-            })
+            }
+            Timber.d("  Setting adapter...")
+            binding.sectorViewPager.adapter = adapter
+            Timber.d("  Registering callback...")
+            binding.sectorViewPager.registerOnPageChangeCallback(callback)
             // If there's an stored positon, load it
             Timber.d("  Setting position")
             val defaultPosition = savedInstanceState?.getInt(EXTRA_POSITION.key)
