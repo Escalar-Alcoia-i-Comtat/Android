@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.os.Bundle
+import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -32,7 +33,7 @@ class SectorActivity : NetworkChangeListenerActivity() {
     private lateinit var areaId: String
     private lateinit var zoneId: String
 
-    private val fragments = arrayListOf<Fragment>()
+    private val fragments = arrayListOf<SectorFragment>()
 
     private lateinit var binding: ActivitySectorBinding
 
@@ -42,6 +43,7 @@ class SectorActivity : NetworkChangeListenerActivity() {
      * @since 20210314
      * @param newTitle The new title to set
      */
+    @UiThread
     fun updateTitle(newTitle: String? = null) {
         if (newTitle == null)
             binding.titleTextView.hide()
@@ -58,8 +60,20 @@ class SectorActivity : NetworkChangeListenerActivity() {
      * @since 20210314
      * @param enabled If true, the view pager would be able to slide
      */
+    @UiThread
     fun userInputEnabled(enabled: Boolean) {
         binding.sectorViewPager.isUserInputEnabled = enabled
+    }
+
+    /**
+     * Sets the loading status of the activity
+     * @author Arnau Mora
+     * @since 20210314
+     * @param loading If the activity should be loading
+     */
+    @UiThread
+    fun setLoading(loading: Boolean) {
+        binding.loadingLayout.visibility(loading)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -132,10 +146,11 @@ class SectorActivity : NetworkChangeListenerActivity() {
                     super.onPageSelected(position)
                     Timber.d("Selected page #$position")
 
+                    // Minimize all fragments
                     for (fragment in fragments)
-                        (fragment as? SectorFragment)?.minimize()
+                        fragment.minimize()
 
-                    updateTitle()
+                    fragments[position].load()
                 }
             })
             // If there's an stored positon, load it
@@ -144,7 +159,10 @@ class SectorActivity : NetworkChangeListenerActivity() {
                     savedInstanceState.getInt(EXTRA_POSITION.key),
                     false
                 )
-            binding.loadingLayout.hide()
+            fragments[binding.sectorViewPager.currentItem].load()
+
+            Timber.d("Load completed, hiding loading layout")
+            setLoading(false)
         }
     }
 
