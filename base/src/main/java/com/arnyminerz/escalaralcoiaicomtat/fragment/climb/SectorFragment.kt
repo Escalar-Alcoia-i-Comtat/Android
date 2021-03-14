@@ -103,8 +103,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        if (isResumed && view != null && loaded)
-            loadImage()
+        if (isResumed && view != null)
+            load()
     }
 
     /**
@@ -113,8 +113,12 @@ class SectorFragment : NetworkChangeListenerFragment() {
      * @since 20210314
      */
     fun load() {
+        if (!this::zoneId.isInitialized)
+            return Timber.w("Could not load since class is not initialized")
+
         if (loaded) {
             sectorActivity?.updateTitle(sector.displayName)
+            loadImage()
             return
         }
 
@@ -122,6 +126,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
         sectorActivity?.setLoading(true)
         sector = AREAS[areaId]!![zoneId][sectorIndex]
 
+        sectorActivity?.updateTitle(sector.displayName)
         binding.sectorTextView.text = sector.displayName
 
         val size = getDisplaySize(requireActivity())

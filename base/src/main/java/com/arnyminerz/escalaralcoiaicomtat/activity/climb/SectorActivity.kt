@@ -132,41 +132,43 @@ class SectorActivity : NetworkChangeListenerActivity() {
                         }
                     }
                 )
-            Timber.v("Initializing view pager...")
-            Timber.d("  Initializing adapter for ${fragments.size} pages...")
-            val adapter = object : FragmentStateAdapter(this) {
-                override fun getItemCount(): Int = fragments.size
-                override fun createFragment(position: Int): Fragment {
-                    Timber.d("Creating fragment #$position")
-                    return fragments[position]
+            runOnUiThread {
+                Timber.v("Initializing view pager...")
+                Timber.d("  Initializing adapter for ${fragments.size} pages...")
+                val adapter = object : FragmentStateAdapter(this) {
+                    override fun getItemCount(): Int = fragments.size
+                    override fun createFragment(position: Int): Fragment {
+                        Timber.d("Creating fragment #$position")
+                        return fragments[position]
+                    }
                 }
-            }
-            Timber.d("  Initializing page change callback...")
-            val callback = object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    super.onPageSelected(position)
-                    Timber.d("Selected page #$position")
+                Timber.d("  Initializing page change callback...")
+                val callback = object : ViewPager2.OnPageChangeCallback() {
+                    override fun onPageSelected(position: Int) {
+                        super.onPageSelected(position)
+                        Timber.d("Selected page #$position")
 
-                    // Minimize all fragments
-                    for (fragment in fragments)
-                        fragment.minimize()
+                        // Minimize all fragments
+                        for (fragment in fragments)
+                            fragment.minimize()
 
-                    fragments[position].load()
+                        fragments[position].load()
+                    }
                 }
-            }
-            Timber.d("  Setting adapter...")
-            binding.sectorViewPager.adapter = adapter
-            Timber.d("  Registering callback...")
-            binding.sectorViewPager.registerOnPageChangeCallback(callback)
-            // If there's an stored positon, load it
-            Timber.d("  Setting position")
-            val defaultPosition = savedInstanceState?.getInt(EXTRA_POSITION.key)
-                ?: intent.getExtra(EXTRA_SECTOR_INDEX, 0)
-            binding.sectorViewPager.setCurrentItem(defaultPosition, false)
-            fragments[defaultPosition].load()
+                Timber.d("  Setting adapter...")
+                binding.sectorViewPager.adapter = adapter
+                Timber.d("  Registering callback...")
+                binding.sectorViewPager.registerOnPageChangeCallback(callback)
+                // If there's an stored positon, load it
+                Timber.d("  Setting position")
+                val defaultPosition = savedInstanceState?.getInt(EXTRA_POSITION.key)
+                    ?: intent.getExtra(EXTRA_SECTOR_INDEX, 0)
+                binding.sectorViewPager.setCurrentItem(defaultPosition, false)
+                fragments[defaultPosition].load()
 
-            Timber.d("Load completed, hiding loading layout")
-            setLoading(false)
+                Timber.d("Load completed, hiding loading layout")
+                setLoading(false)
+            }
         }
     }
 
