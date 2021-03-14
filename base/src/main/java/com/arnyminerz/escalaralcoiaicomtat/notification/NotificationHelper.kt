@@ -161,10 +161,8 @@ class Notification private constructor(private val builder: Builder) {
          * @param arguments Arguments for filling the title
          * @return The Builder instance
          */
-        fun withTitle(@StringRes titleRes: Int, vararg arguments: Any): Builder {
-            this.title = context.getString(titleRes, arguments)
-            return this
-        }
+        fun withTitle(@StringRes titleRes: Int, vararg arguments: Any): Builder =
+            withTitle(context.getString(titleRes, arguments))
 
         /**
          * Sets the message of the notification
@@ -186,10 +184,8 @@ class Notification private constructor(private val builder: Builder) {
          * @param arguments Arguments for filling the message
          * @return The Builder instance
          */
-        fun withText(@StringRes messageRes: Int, vararg arguments: Any): Builder {
-            this.text = context.getString(messageRes, arguments)
-            return this
-        }
+        fun withText(@StringRes messageRes: Int, vararg arguments: Any): Builder =
+            withText(context.getString(messageRes, arguments))
 
         /**
          * Sets the info message of the notification
@@ -211,10 +207,8 @@ class Notification private constructor(private val builder: Builder) {
          * @param arguments Arguments for filling the info text
          * @return The Builder instance
          */
-        fun withInfoText(@StringRes textRes: Int, vararg arguments: Any): Builder {
-            this.info = context.getString(textRes, arguments)
-            return this
-        }
+        fun withInfoText(@StringRes textRes: Int, vararg arguments: Any): Builder =
+            withInfoText(context.getString(textRes, arguments))
 
         /**
          * Sets the text of the notification when it's expanded
