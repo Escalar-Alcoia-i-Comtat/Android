@@ -1,20 +1,27 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.os.Bundle
-import androidx.collection.arrayMapOf
+import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.count
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
-import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
-import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.ARGUMENT_SECTOR
+import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.ARGUMENT_AREA_ID
+import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.ARGUMENT_SECTOR_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.ARGUMENT_ZONE_ID
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.SectorFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.parse.ParseObject
+import com.parse.ParseQuery
 import timber.log.Timber
 
 class SectorActivity : NetworkChangeListenerActivity() {
@@ -22,23 +29,49 @@ class SectorActivity : NetworkChangeListenerActivity() {
 
     private lateinit var areaId: String
     private lateinit var zoneId: String
-    private lateinit var sectorId: String
-    private val sectorIndex: Int
-        get() {
-            for ((s, sector) in AREAS[areaId]!![zoneId].withIndex())
-                if (sector.objectId == sectorId)
-                    return s
-            return -1
+
+    private val fragments = arrayListOf<SectorFragment>()
+
+    private lateinit var binding: ActivitySectorBinding
+
+    /**
+     * Updates the Activity's title
+     * @author Arnau Mora
+     * @since 20210314
+     * @param newTitle The new title to set
+     */
+    @UiThread
+    fun updateTitle(newTitle: String? = null) {
+        if (newTitle == null)
+            binding.titleTextView.hide()
+        else {
+            binding.titleTextView.text = newTitle
+            binding.titleTextView.transitionName = transitionName
+            binding.titleTextView.show()
         }
-    val sectors = arrayMapOf<String, Sector>()
+    }
 
-    private val fragments = arrayListOf<Fragment>()
+    /**
+     * Sets whether or not the slider can be controlled
+     * @author Arnau Mora
+     * @since 20210314
+     * @param enabled If true, the view pager would be able to slide
+     */
+    @UiThread
+    fun userInputEnabled(enabled: Boolean) {
+        binding.sectorViewPager.isUserInputEnabled = enabled
+    }
 
-    lateinit var binding: ActivitySectorBinding
-
-    private fun updateTitle() {
-        binding.titleTextView.text = sectors[sectorId]?.displayName
-        binding.titleTextView.transitionName = transitionName
+    /**
+     * Sets the loading status of the activity
+     * @author Arnau Mora
+     * @since 20210314
+     * @param loading If the activity should be loading
+     */
+    @UiThread
+    fun setLoading(loading: Boolean) {
+        binding.loadingLayout.visibility(loading)
+        binding.titleTextView.visibility(loading)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,25 +96,6 @@ class SectorActivity : NetworkChangeListenerActivity() {
             zoneId = zoneIdExtra
             Timber.d("Loading sectors from area $areaId, zone $zoneId...")
         }
-        sectorId = savedInstanceState?.getString(EXTRA_SECTOR.key, sectorId)
-            ?: intent.getExtra(EXTRA_SECTOR)
-            ?: try {
-                Timber.v("Sector Id not passed. Loading the first one...")
-                AREAS[areaId]!![zoneId].children[0].objectId
-            } catch (_: NoInternetAccessException) {
-                return goBack()
-            }
-        sectors.clear()
-        try {
-            val sectors = AREAS[areaId]!![zoneId]
-            for (sector in sectors)
-                if (sector.isNotEmpty())
-                    this.sectors[sector.objectId] = sector
-        } catch (_: NoInternetAccessException) {
-            return goBack()
-        }
-        if (sectors.isEmpty)
-            return goBack()
 
         transitionName = intent.getExtra(EXTRA_SECTOR_TRANSITION_NAME)
         if (transitionName == null)
@@ -93,42 +107,75 @@ class SectorActivity : NetworkChangeListenerActivity() {
         binding.backImageButton.setOnClickListener { onBackPressed() }
         binding.noInternetImageView.setOnClickListener { it.performLongClick() }
 
-        fragments.clear()
-        for (sector in sectors.values)
-            fragments.add(
-                SectorFragment().apply {
-                    arguments = Bundle().apply {
-                        putParcelable(ARGUMENT_SECTOR, sector)
+        val parentQuery = ParseQuery.getQuery<ParseObject>(Zone.NAMESPACE)
+        parentQuery.whereEqualTo("objectId", zoneId)
+
+        val query = ParseQuery.getQuery<ParseObject>(Sector.NAMESPACE)
+        query.addAscendingOrder("displayName")
+        query.whereMatchesQuery("zone", parentQuery)
+        Timber.v("Counting sectors in zone $zoneId")
+        query.count { count, error ->
+            if (error != null)
+                throw error
+
+            Timber.v("There are $count sectors.")
+
+            Timber.d("Initializing fragments...")
+            fragments.clear()
+            for (i in 0 until count)
+                fragments.add(
+                    SectorFragment().apply {
+                        arguments = Bundle().apply {
+                            putString(ARGUMENT_AREA_ID, areaId)
+                            putString(ARGUMENT_ZONE_ID, zoneId)
+                            putInt(ARGUMENT_SECTOR_INDEX, i)
+                        }
+                    }
+                )
+            runOnUiThread {
+                Timber.v("Initializing view pager...")
+                Timber.d("  Initializing adapter for ${fragments.size} pages...")
+                val adapter = object : FragmentStateAdapter(this) {
+                    override fun getItemCount(): Int = fragments.size
+                    override fun createFragment(position: Int): Fragment {
+                        Timber.d("Creating fragment #$position")
+                        return fragments[position]
                     }
                 }
-            )
+                Timber.d("  Initializing page change callback...")
+                val callback = object : ViewPager2.OnPageChangeCallback() {
+                    override fun onPageSelected(position: Int) {
+                        super.onPageSelected(position)
+                        Timber.d("Selected page #$position")
 
-        Timber.d("Sector ID: $sectorId")
-        binding.sectorViewPager.adapter = object : FragmentStateAdapter(this) {
-            override fun getItemCount(): Int = sectors.size
-            override fun createFragment(position: Int): Fragment {
-                Timber.d("Creating fragment #$position")
-                return fragments[position]
+                        // Minimize all fragments
+                        for (fragment in fragments)
+                            fragment.minimize()
+
+                        fragments[position].load()
+                    }
+                }
+                Timber.d("  Setting adapter...")
+                binding.sectorViewPager.adapter = adapter
+                Timber.d("  Registering callback...")
+                binding.sectorViewPager.registerOnPageChangeCallback(callback)
+                // If there's an stored positon, load it
+                Timber.d("  Setting position")
+                val defaultPosition = savedInstanceState?.getInt(EXTRA_POSITION.key)
+                    ?: intent.getExtra(EXTRA_SECTOR_INDEX, 0)
+                binding.sectorViewPager.setCurrentItem(defaultPosition, false)
+                fragments[defaultPosition].load()
+
+                Timber.d("Load completed, hiding loading layout")
+                setLoading(false)
             }
         }
-        binding.sectorViewPager.registerOnPageChangeCallback(object :
-            ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                Timber.d("Selected page #$position")
-                sectorId = sectors.values.toList()[position]!!.objectId
-
-                for (fragment in fragments)
-                    (fragment as SectorFragment).minimize()
-
-                updateTitle()
-            }
-        })
-        binding.sectorViewPager.setCurrentItem(sectorIndex, false)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString(EXTRA_SECTOR.key, sectorId)
+        outState.putString(EXTRA_AREA.key, areaId)
+        outState.putString(EXTRA_ZONE.key, zoneId)
+        outState.putInt(EXTRA_POSITION.key, binding.sectorViewPager.currentItem)
         super.onSaveInstanceState(outState)
     }
 

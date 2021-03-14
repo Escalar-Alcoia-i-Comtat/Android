@@ -9,6 +9,7 @@ import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
@@ -17,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.getDisplaySize
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.PathsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
@@ -26,16 +28,25 @@ import timber.log.Timber
 const val CROSSFADE_DURATION = 50
 const val THUMBNAIL_SIZE = .1f
 
-const val ARGUMENT_SECTOR = "sector"
+const val ARGUMENT_AREA_ID = "area_id"
+const val ARGUMENT_ZONE_ID = "zone_id"
+const val ARGUMENT_SECTOR_INDEX = "sector_index"
 
 class SectorFragment : NetworkChangeListenerFragment() {
+    private lateinit var areaId: String
+    private lateinit var zoneId: String
+    private var sectorIndex: Int = -1
     private lateinit var sector: Sector
 
+    private var loaded = false
     private var maximized = false
     private var notMaximizedImageHeight = 0
 
     private var _binding: FragmentSectorBinding? = null
     private val binding get() = _binding!!
+
+    private val sectorActivity: SectorActivity?
+        get() = (activity as? SectorActivity?)
 
     private fun refreshMaximizeStatus() {
         binding.sizeChangeFab.setImageResource(
@@ -43,9 +54,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             else R.drawable.round_flip_to_back_24
         )
 
-        (activity as? SectorActivity?)?.apply {
-            binding.sectorViewPager.isUserInputEnabled = !maximized
-        }
+        sectorActivity?.userInputEnabled(!maximized)
     }
 
     fun minimize() {
@@ -83,8 +92,41 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        sector = requireArguments().getParcelable(ARGUMENT_SECTOR)!!
+        areaId = requireArguments().getString(ARGUMENT_AREA_ID)!!
+        zoneId = requireArguments().getString(ARGUMENT_ZONE_ID)!!
+        sectorIndex = requireArguments().getInt(ARGUMENT_SECTOR_INDEX)
+    }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
+        if (isResumed && view != null)
+            load()
+    }
+
+    /**
+     * Loads the sector data.
+     * @author Arnau Mora
+     * @since 20210314
+     */
+    fun load() {
+        if (!this::zoneId.isInitialized)
+            return Timber.w("Could not load since class is not initialized")
+
+        if (loaded) {
+            sectorActivity?.updateTitle(sector.displayName)
+            loadImage()
+            return
+        }
+
+        Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
+        sectorActivity?.setLoading(true)
+        sector = AREAS[areaId]!![zoneId][sectorIndex]
+
+        sectorActivity?.updateTitle(sector.displayName)
         binding.sectorTextView.text = sector.displayName
 
         val size = getDisplaySize(requireActivity())
@@ -112,9 +154,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
             // Load chart
             sector.loadChart(context, binding.sectorBarChart)
-        } else {
+        } else
             Timber.e("Could not start loading sectors since context is null")
-        }
 
         binding.sizeChangeFab.setOnClickListener {
             maximized = !maximized
@@ -131,16 +172,10 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
             refreshMaximizeStatus()
         }
+        binding.dataScrollView.show()
         refreshMaximizeStatus()
-    }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        if (isResumed && view != null)
-            loadImage()
+        sectorActivity?.setLoading(false)
+        loaded = true
     }
 }

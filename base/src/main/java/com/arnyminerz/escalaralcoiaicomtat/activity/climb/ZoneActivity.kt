@@ -104,17 +104,14 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                                 .toString()
                         Timber.v("Transition name: $trn")
                         val intent =
-                            Intent(
-                                this@ZoneActivity,
-                                SectorActivity()::class.java
-                            )
+                            Intent(this, SectorActivity()::class.java)
                                 .putExtra(EXTRA_AREA, areaId)
                                 .putExtra(EXTRA_ZONE, zoneId)
-                                .putExtra(EXTRA_SECTOR, AREAS[areaId]!![zoneId][index].objectId)
+                                .putExtra(EXTRA_SECTOR_INDEX, index)
                                 .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
                         val options =
                             ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                this@ZoneActivity, viewHolder.titleTextView, trn
+                                this, viewHolder.titleTextView, trn
                             )
 
                         startActivity(intent, options.toBundle())

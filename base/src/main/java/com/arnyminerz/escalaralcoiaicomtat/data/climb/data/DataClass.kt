@@ -4,41 +4,42 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.annotation.DrawableRes
 import androidx.annotation.WorkerThread
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_AREA
-import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_SECTOR
-import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_ZONE
+import androidx.lifecycle.LiveData
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
+import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
-import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.view.apply
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MAX
+import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MIN
+import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData
+import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadWorker
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
-import com.bumptech.glide.request.transition.Transition
 import com.parse.ParseException
 import com.parse.ParseObject
 import com.parse.ParseQuery
+import com.parse.boltsinternal.Task
 import timber.log.Timber
 import java.io.File
 import java.util.*
@@ -67,14 +68,14 @@ fun getIntent(context: Context, queryName: String): Intent? {
                             putExtra(EXTRA_ZONE, zone.objectId)
                         }
                     else if (zone.isNotEmpty())
-                        for (sector in zone) {
+                        for ((s, sector) in zone.withIndex()) {
                             Timber.d("      Finding in ${sector.displayName}.")
                             if (sector.displayName.equals(queryName, true))
                                 return Intent(context, SectorActivity::class.java).apply {
-                                    Timber.d("Found Sector id ${sector.objectId}!")
+                                    Timber.d("Found Sector id ${sector.objectId} at $s!")
                                     putExtra(EXTRA_AREA, area.objectId)
                                     putExtra(EXTRA_ZONE, zone.objectId)
-                                    putExtra(EXTRA_SECTOR, sector.objectId)
+                                    putExtra(EXTRA_SECTOR_INDEX, s)
                                 }
                         }
                 }
@@ -85,73 +86,136 @@ fun getIntent(context: Context, queryName: String): Intent? {
     return null
 }
 
-fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
-    label: String,
-    callback: (objects: List<A>, error: Exception?) -> Unit
-) {
-    fromPin(label).findInBackground().continueWithTask { task ->
-        val error = task.error
-        val objects = task.result
-        if (error != null) {
-            if (error is ParseException && error.code == ParseException.CACHE_MISS) {
-                Timber.w("No stored data found. Fetching from network.")
-                return@continueWithTask fromNetwork().findInBackground()
-            } else Timber.e(error, "Could not fetch data.")
-        }
-        if (objects.size <= 0) {
-            Timber.w("No stored data found. Fetching from network.")
-            return@continueWithTask fromNetwork().findInBackground()
-        }
-        Timber.d("Loading from pin...")
-        return@continueWithTask task
-    }.continueWithTask { task ->
-        callback(task.result, task.error)
-        return@continueWithTask task
-    }
-}
-
 /**
- * Fetches a pin from the Datastore, or if it's not stored, from the network.
- * @param state The current network state
- * @param label The label to fetch
+ * Fetches data asyncronously from datastore, or from network if not available
+ * @author Arnau Mora
+ * @since 20210313
+ * @param label The label to search in datastore
+ * @param shouldPin If the data should be stored in datastore when loaded
+ * @param callback What to call when completed
+ * @return The loading task
+ * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
  */
 @Throws(NoInternetAccessException::class)
 fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
-    state: ConnectivityProvider.NetworkState, label: String, shouldPin: Boolean = false
-): List<ParseObject> {
-    val result = arrayListOf<ParseObject>()
-    limit = PATHS_BATCH_SIZE
-    fromPin(label).findInBackground().continueWithTask { task ->
-        var resultTask = task
-        val error = task.error
-        val objects = task.result
-        if (error != null) {
-            if (error is ParseException && error.code == ParseException.CACHE_MISS) {
-                Timber.w("No stored data found. Fetching from network.")
-                resultTask = fromNetwork().findInBackground()
-            } else Timber.e(error, "Could not fetch data.")
+    label: String,
+    shouldPin: Boolean = false,
+    callback: ((objects: List<A>, error: Exception?) -> Unit)? = null
+): Task<List<A>> = fromPin(label).findInBackground().continueWithTask { task ->
+    val error = task.error
+    val objects = task.result
+    if (error != null) {
+        if (error is ParseException && error.code == ParseException.CACHE_MISS) {
+            Timber.w("No stored data found. Fetching from network.")
+            if (!appNetworkState.hasInternet) {
+                Timber.w("No Internet connection is available, and there's no stored data")
+                throw NoInternetAccessException("No Internet connection is available, and there's no stored data")
+            }
+            return@continueWithTask fromNetwork().findInBackground()
+        } else Timber.e(error, "Could not fetch data.")
+    }
+    if (objects.size <= 0) {
+        Timber.w("No stored data found. Fetching from network.")
+        if (!appNetworkState.hasInternet) {
+            Timber.w("No Internet connection is available, and there's no stored data")
+            throw NoInternetAccessException("No Internet connection is available, and there's no stored data")
         }
-        if (objects.size <= 0) {
-            Timber.w("The stored data's size is not greater than 0. Fetching from network.")
-            resultTask = fromNetwork().findInBackground()
-        }
-        if (resultTask != task && !state.hasInternet) {
-            Timber.w("Device doesn't have an Internet connection, and there's no cached data")
-            throw NoInternetAccessException(
-                "Device doesn't have an Internet connection, and there's no cached data"
-            )
-        }
-        return@continueWithTask resultTask
-    }.continueWithTask { task ->
-        if (task.error != null) throw task.error
-        result.addAll(task.result)
-        if (shouldPin) {
-            Timber.d("Pinning...")
-            ParseObject.pinAll(label, task.result)
-        }
-        task
+        return@continueWithTask fromNetwork().findInBackground()
+    }
+    Timber.d("Loading from pin...")
+    return@continueWithTask task
+}.continueWithTask { task ->
+    callback?.invoke(task.result, task.error)
+    if (shouldPin) {
+        Timber.d("Pinning...")
+        ParseObject.pinAll(label, task.result)
+    }
+    return@continueWithTask task
+}
+
+/**
+ * Fetches data syncronously from datastore, or from network if not available
+ * @author Arnau Mora
+ * @since 20210313
+ * @param label The label to search in datastore
+ * @param shouldPin If the data should be stored in datastore when loaded
+ * @return The fetch result
+ * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
+ */
+@Throws(NoInternetAccessException::class)
+@WorkerThread
+fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetworkSync(
+    label: String,
+    shouldPin: Boolean = false
+): List<A> {
+    val list = arrayListOf<A>()
+    fetchPinOrNetwork(label, shouldPin) { result, error ->
+        error?.let { throw it }
+        list.addAll(result)
+    }.waitForCompletion()
+    return list
+}
+
+/**
+ * Counts the amount of objects there are in a query
+ * @author Arnau Mora
+ * @since 20210314
+ * @param callback What to call when completed
+ * @return The loading task
+ * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
+ */
+@Throws(NoInternetAccessException::class)
+fun <A : ParseObject> ParseQuery<A>.count(
+    callback: ((count: Int, error: Exception?) -> Unit)? = null
+): Task<Int> = countInBackground().continueWithTask { task ->
+    val error = task.error
+    if (error != null) {
+        if (error is ParseException && error.code == ParseException.CACHE_MISS) {
+            Timber.w("No stored data found. Fetching from network.")
+            if (!appNetworkState.hasInternet) {
+                Timber.w("No Internet connection is available, and there's no stored data")
+                throw NoInternetAccessException("No Internet connection is available, and there's no stored data")
+            }
+            return@continueWithTask fromNetwork().countInBackground()
+        } else Timber.e(error, "Could not fetch data.")
+    }
+    return@continueWithTask task
+}.continueWithTask { task ->
+    callback?.invoke(task.result, task.error)
+    return@continueWithTask task
+}
+
+/**
+ * Counts the amount of objects there are in a query syncronously
+ * @author Arnau Mora
+ * @since 20210313
+ * @return The count
+ * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
+ */
+@Throws(NoInternetAccessException::class)
+@WorkerThread
+fun <A : ParseObject> ParseQuery<A>.countSync(): Int {
+    var result = -1
+    count { count, error ->
+        error?.let { throw it }
+        result = count
     }.waitForCompletion()
     return result
+}
+
+enum class DataClasses(val namespace: String) {
+    AREA(Area.NAMESPACE),
+    ZONE(Zone.NAMESPACE),
+    SECTOR(Sector.NAMESPACE);
+
+    companion object {
+        fun find(namespace: String): DataClasses? {
+            for (c in values())
+                if (c.namespace == namespace)
+                    return c
+            return null
+        }
+    }
 }
 
 abstract class DataClassImpl(open val objectId: String) : Parcelable
@@ -169,7 +233,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     open val namespace: String,
     open val childrenNamespace: String
 ) : DataClassImpl(objectId), Iterable<A> {
-    protected val pin = "${DATA_FIX_LABEL}_${Area.NAMESPACE}_${objectId}"
+    protected val pin: String
+        get() = "${DATA_FIX_LABEL}_${Area.NAMESPACE}_$objectId"
 
     protected val innerChildren = arrayListOf<A>()
 
@@ -204,10 +269,26 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
-     * Stores when a download has been started
+     * Checks if the DataClass is being downloaded
+     * @author Arnau Mora
+     * @since 20210313
+     * @param context The context to check from
+     * @return If the DataClass is being downloaded
      */
-    var isDownloading = false
-        private set
+    @WorkerThread
+    fun isDownloading(context: Context): Boolean {
+        val workManager = WorkManager.getInstance(context)
+        val workInfos = workManager.getWorkInfosByTag(pin).get()
+        if (workInfos.isEmpty())
+            return false
+        var anyRunning = false
+        for (workInfo in workInfos)
+            when (workInfo.state) {
+                WorkInfo.State.ENQUEUED, WorkInfo.State.RUNNING -> anyRunning = true
+                else -> continue
+            }
+        return anyRunning
+    }
 
     operator fun get(index: Int): A = children[index]
 
@@ -257,101 +338,50 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     /**
      * Downloads the image data of the DataClass.
      * @author Arnau Mora
-     * @date 2020/09/10
+     * @since 20210313
      * @param context The context to run from.
      * @param overwrite If the new data should overwrite the old one
-     * @param startListener This will be called when the download starts.
-     * @param finishListener This will be called when the download finishes.
-     * @param loadFailedListener This will be called when an error occurs during the download.
+     * @param quality The quality in which do the codification
+     * @return A LiveData object with the download work info
      *
-     * @throws FileAlreadyExistsException If the data has already been downloaded and overwrite is false
-     * @throws AlreadyLoadingException If the content is already being downloaded
+     * @throws IllegalArgumentException If the specified quality is out of bounds
      */
-    @WorkerThread
-    @Throws(FileAlreadyExistsException::class, AlreadyLoadingException::class)
+    @Throws(IllegalArgumentException::class)
     fun download(
         context: Context,
-        overwrite: Boolean = false,
-        startListener: (() -> Unit)?,
-        finishListener: ((imageFile: File) -> Unit)?,
-        progressUpdater: ((progress: Int, max: Int) -> Unit)?,
-        loadFailedListener: (() -> Unit)?
-    ) {
-        val imageFile = imageFile(context)
-        if (imageFile.exists() && !overwrite)
-            throw FileAlreadyExistsException(imageFile)
-
-        Timber.v("Downloading $displayName...")
-        Timber.d("Pinning data...")
-        val query = ParseQuery<ParseObject>(namespace)
-        val obj = query.get(objectId)
-        obj.pin()
-
-        Timber.d("Downloading image...")
-        Glide.with(context)
-            .asBitmap()
-            .load(imageUrl)
-            .into(object : CustomTarget<Bitmap>() {
-                override fun onLoadStarted(placeholder: Drawable?) {
-                    super.onLoadStarted(placeholder)
-                    startListener?.invoke()
-                }
-
-                override fun onResourceReady(bitmap: Bitmap, transition: Transition<in Bitmap>?) {
-                    Timber.v("Downloaded \"$displayName\"!")
-                    imageFile.storeBitmap(bitmap)
-
-                    var counter = 1 // Starts at 1 for representing self, that just downloaded
-                    val targetCounter = fullCount()
-                    if (children.isNotEmpty() && children.first() is DataClass<*, *>)
-                        for (child in children)
-                            (child as? DataClass<*, *>)?.download(context, overwrite, null, {
-                                counter++
-                                if (counter >= targetCounter) {
-                                    Timber.v("Completely finished downloading \"$displayName\"")
-                                    finishListener?.invoke(imageFile)
-                                } else {
-                                    Timber.d(
-                                        "  Won't call finish listener since counter is still $counter/$targetCounter"
-                                    )
-                                    progressUpdater?.invoke(counter, children.size)
-                                }
-                            }, { _, _ -> counter++ }, null)
-                    else {
-                        Timber.v("Completely finished downloading \"$displayName\"")
-                        finishListener?.invoke(imageFile)
-                    }
-                }
-
-                override fun onLoadCleared(placeholder: Drawable?) {}
-
-                override fun onLoadFailed(errorDrawable: Drawable?) {
-                    super.onLoadFailed(errorDrawable)
-                    Timber.v("Completely finished downloading \"$displayName\"")
-                    loadFailedListener?.invoke()
-                }
-            })
+        overwrite: Boolean = true,
+        quality: Int = 100
+    ): LiveData<WorkInfo> {
+        if (quality < DOWNLOAD_QUALITY_MIN || quality > DOWNLOAD_QUALITY_MAX)
+            throw IllegalArgumentException("Quality must be between 1 and 100")
+        return DownloadWorker.schedule(context, pin, DownloadData(this, overwrite, quality))
     }
 
     /**
      * Checks if the Data Class is downloaded
      * @author Arnau Mora
-     * @date 2020/09/11
+     * @since 20210313
      * @param context The context to run from
      * @return a matching DownloadStatus representing the Data Class' download status
      */
     fun isDownloaded(context: Context): DownloadStatus {
+        Timber.d("$namespace:$objectId Checking if downloaded")
         var result: DownloadStatus? = null
         when {
-            isDownloading -> result = DownloadStatus.DOWNLOADING
+            isDownloading(context) -> result = DownloadStatus.DOWNLOADING
             else -> {
-                val imageFileExists = imageFile(context).exists()
-                if (!imageFileExists)
+                val imageFile = imageFile(context)
+                val imageFileExists = imageFile.exists()
+                if (!imageFileExists) {
+                    Timber.d("$namespace:$objectId Image file ($imageFile) doesn't exist")
                     result = DownloadStatus.NOT_DOWNLOADED
-                else for (child in children)
-                    if (child is DataClass<*, *>)
-                        if (!child.isDownloaded(context))
+                } else for (child in children)
+                    if (child is DataClass<*, *>) {
+                        if (!child.isDownloaded(context)) {
+                            Timber.d("There's a non-downloaded children (${child.namespace}:${child.objectId})")
                             result = DownloadStatus.NOT_DOWNLOADED
+                        }
+                    } else Timber.d("$namespace:$objectId Child is not DataClass")
             }
         }
         return result ?: DownloadStatus.DOWNLOADED
@@ -479,7 +509,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to run from
      * @return The path of the image file that can be downloaded
      */
-    fun imageFile(context: Context): File = File(dataDir(context), "$namespace-$objectId.jpg")
+    fun imageFile(context: Context): File = File(dataDir(context), "$namespace-$objectId.webp")
 
     /**
      * Loads the image of the Data Class
@@ -576,7 +606,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         result = 31 * result + errorPlaceholderDrawable
         result = 31 * result + namespace.hashCode()
         result = 31 * result + children.hashCode()
-        result = 31 * result + isDownloading.hashCode()
         return result
     }
 }

@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.view
 
+import android.app.Activity
 import android.content.Context
 import android.util.TypedValue
 import android.view.MenuItem
@@ -25,7 +26,13 @@ fun <T : View?> visibility(
 }
 
 @UiThread
-fun visibility(view: View?, visible: Boolean, setGone: Boolean = true, debug: Boolean = false) {
+fun visibility(
+    view: View?,
+    visible: Boolean,
+    setGone: Boolean = true,
+    debug: Boolean = false,
+    clearAnimation: Boolean = true
+) {
     if (debug) Timber.d(
         "Setting visibility for ${
             view?.context?.resources?.getResourceEntryName(
@@ -33,6 +40,8 @@ fun visibility(view: View?, visible: Boolean, setGone: Boolean = true, debug: Bo
             )
         } to $visible"
     )
+    if (clearAnimation)
+        view?.clearAnimation()
     view?.visibility = if (visible) View.VISIBLE else if (setGone) View.GONE else View.INVISIBLE
 }
 
@@ -52,7 +61,8 @@ fun Context?.visibility(
     view: View?,
     visible: Boolean,
     setGone: Boolean = true,
-    debug: Boolean = false
+    debug: Boolean = false,
+    clearAnimation: Boolean = true
 ) {
     if (this != null)
         this.onUiThread {
@@ -60,18 +70,40 @@ fun Context?.visibility(
                 view,
                 visible,
                 setGone,
-                debug
+                debug,
+                clearAnimation
             )
         }
-    else com.arnyminerz.escalaralcoiaicomtat.view.visibility(view, visible, setGone, debug)
+    else com.arnyminerz.escalaralcoiaicomtat.view.visibility(view, visible, setGone, debug, clearAnimation)
+}
+
+fun Activity?.visibility(
+    view: View?,
+    visible: Boolean,
+    setGone: Boolean = true,
+    debug: Boolean = false,
+    clearAnimation: Boolean = true
+) {
+    if (this != null)
+        this.runOnUiThread {
+            com.arnyminerz.escalaralcoiaicomtat.view.visibility(
+                view,
+                visible,
+                setGone,
+                debug,
+                clearAnimation
+            )
+        }
+    else com.arnyminerz.escalaralcoiaicomtat.view.visibility(view, visible, setGone, debug, clearAnimation)
 }
 
 fun Fragment.visibility(
     view: View?,
     visible: Boolean,
     setGone: Boolean = true,
-    debug: Boolean = false
-) = context.visibility(view, visible, setGone, debug)
+    debug: Boolean = false,
+    clearAnimation: Boolean = true
+) = context.visibility(view, visible, setGone, debug, clearAnimation)
 
 /**
  * Checks if a view is visible
@@ -92,8 +124,8 @@ fun visibility(view: View?): Boolean {
  */
 @JvmName("visibility_own")
 @UiThread
-fun View.visibility(visible: Boolean, setGone: Boolean = true, debug: Boolean = false) =
-    visibility(this, visible, setGone, debug)
+fun View.visibility(visible: Boolean, setGone: Boolean = true, debug: Boolean = false, clearAnimation: Boolean = true) =
+    visibility(this, visible, setGone, debug, clearAnimation)
 
 /**
  * Sets the visibility of a view to gone

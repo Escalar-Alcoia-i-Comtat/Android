@@ -54,8 +54,10 @@
         app:layout_constraintTop_toBottomOf="@id/sector_titleBar" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/data_scrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -2,22 +2,23 @@ package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
 
 import android.os.Parcel
 import android.os.Parcelable
-import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
+import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
-import com.parse.*
+import com.parse.ParseException
+import com.parse.ParseObject
+import com.parse.ParseQuery
 import timber.log.Timber
 import java.util.*
 
 private const val DEBUG = false
 
 const val DATA_FIX_LABEL = "climbData"
-const val PATHS_BATCH_SIZE = 1000
+const val MAX_BATCH_SIZE = 1000
 
 private fun find(list: List<DataClassImpl>, objectId: String): Int {
     for ((i, item) in list.withIndex())
@@ -35,23 +36,21 @@ private fun log(msg: String, vararg arguments: Any) =
  * Loads all the areas available in the server.
  * @author Arnau Mora
  * @since 20210313
- * @see PATHS_BATCH_SIZE
+ * @see MAX_BATCH_SIZE
  * @return A collection of areas
  * @throws ParseException If there's an error while fetching from parse
+ * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
  */
-@MainThread
-@Throws(ParseException::class)
+@WorkerThread
+@Throws(ParseException::class, NoInternetAccessException::class)
 fun loadAreasFromCache(progressCallback: (current: Int, total: Int) -> Unit, callback: () -> Unit) {
     Timber.d("Querying paths...")
-    val query = ParseQuery.getQuery<ParseObject>("Area")
-    query.addAscendingOrder("displayName")
-    AREAS.clear()
-    query.limit = PATHS_BATCH_SIZE
-    query.fetchPinOrNetwork(DATA_FIX_LABEL) { objects, error ->
-        if (error != null) {
-            Timber.e(error, "Could not fetch")
-            return@fetchPinOrNetwork
-        }
+    try {
+        val query = ParseQuery.getQuery<ParseObject>("Area")
+        query.addAscendingOrder("displayName")
+        AREAS.clear()
+        query.limit = MAX_BATCH_SIZE
+        val objects = query.fetchPinOrNetworkSync(DATA_FIX_LABEL)
 
         Timber.d("Got ${objects.size} areas. Processing...")
         progressCallback(0, objects.size)
@@ -71,151 +70,13 @@ fun loadAreasFromCache(progressCallback: (current: Int, total: Int) -> Unit, cal
                 callback()
             }
         }
+    } catch (e: NoInternetAccessException) {
+        Timber.w(e, "Could not load areas.")
+        throw e
+    } catch (e: ParseException) {
+        Timber.w(e, "Could not load areas.")
+        throw e
     }
-    /*val query = ParseQuery.getQuery<ParseObject>("Path")
-    query.addAscendingOrder("sketchId")
-
-    // Data will be fetched in packs of PATHS_BATCH_SIZE
-    AREAS.clear()
-    query.limit = PATHS_BATCH_SIZE
-    query.fetchPinOrNetwork(DATA_FIX_LABEL) { objects, error ->
-        if (error != null) {
-            Timber.e(error, "Could not fetch")
-            return@fetchPinOrNetwork
-        }
-
-        Timber.d("Got ${objects.size} paths. Processing...")
-        log("Calling callback with progress 0")
-        progressCallback(0, objects.size)
-        log("Iterating paths...")
-        for ((p, pathData) in objects.withIndex()) {
-            log("Loading height list...")
-            val heights = arrayListOf<Int>()
-            heights.addAll(pathData.getList("height")!!)
-
-            log("Loading grades list...")
-            val gradeValue = pathData.getString("grade")!!.fixTildes()
-            val gradeValues = gradeValue.split(" ")
-            val grades = Grade.listFromStrings(gradeValues)
-
-            log("Loading ending list...")
-            val endings = arrayListOf<EndingType>()
-            val endingsList = pathData.getList<ParseObject>("ending")
-            if (endingsList != null)
-                for (e in endingsList) {
-                    val ending = e.fetchIfNeeded<ParseObject>()
-                    val endingName = ending.getString("name")?.fixTildes()
-                    val endingType = EndingType.find(endingName)
-                    endings.add(endingType)
-                }
-
-            log("Loading pitches list...")
-            val pitches = arrayListOf<Pitch>()
-            val endingArtifo = pathData.getString("endingArtifo")?.fixTildes()
-            endingArtifo?.let {
-                val artifos = it.replace("\r", "").split("\n")
-                for (artifo in artifos)
-                    Pitch.fromEndingDataString(artifo)
-                        ?.let { artifoEnding -> pitches.add(artifoEnding) }
-            }
-
-            log("Loading rebuilder...")
-            val rebuiltBy = pathData.getList<String>("rebuiltBy")?.joinToString(separator = ", ")
-
-            log("Loading data...")
-            val objectId = pathData.objectId
-            val updatedAt = pathData.updatedAt
-            val sketchId = (pathData.getString("sketchId")?.fixTildes() ?: "0").toInt()
-            val displayName = pathData.getString("displayName")!!.fixTildes()
-            val description = pathData.getString("description")?.fixTildes()
-            val builtBy = pathData.getString("builtBy")?.fixTildes()
-
-            val stringCount = pathData.getInt("stringCount")
-            val paraboltCount = pathData.getInt("paraboltCount")
-            val spitCount = pathData.getInt("spitCount")
-            val tensorCount = pathData.getInt("tensorCount")
-            val pitonCount = pathData.getInt("pitonCount")
-            val burilCount = pathData.getInt("burilCount")
-            val fixedSafesData = FixedSafesData(
-                stringCount,
-                paraboltCount,
-                spitCount,
-                tensorCount,
-                pitonCount,
-                burilCount
-            )
-
-            val lanyardRequired = pathData.getBoolean("lanyardRequired")
-            val crackerRequired = pathData.getBoolean("crackerRequired")
-            val friendRequired = pathData.getBoolean("friendRequired")
-            val stripsRequired = pathData.getBoolean("stripsRequired")
-            val pitonRequired = pathData.getBoolean("pitonRequired")
-            val nailRequired = pathData.getBoolean("nailRequired")
-            val requiredSafesData = RequiredSafesData(
-                lanyardRequired,
-                crackerRequired,
-                friendRequired,
-                stripsRequired,
-                pitonRequired,
-                nailRequired
-            )
-
-            log("Instantiating path...")
-            val path = Path(
-                objectId, updatedAt, sketchId, displayName, grades, heights,
-                endings, pitches, fixedSafesData, requiredSafesData,
-                description, builtBy, rebuiltBy
-            )
-
-            log("Fetching data...")
-            val sectorData = pathData.getParseObject("sector")?.fetchIfNeeded<ParseObject>()!!
-            val sectorId = sectorData.objectId
-            val zoneData = sectorData.getParseObject("zone")!!.fetchIfNeeded<ParseObject>()
-            val zoneId = zoneData.objectId
-            val areaData = zoneData.getParseObject("area")!!.fetchIfNeeded<ParseObject>()
-            val areaId = areaData.objectId
-            val areaTarget = AREAS[areaId]
-            val zoneTarget = try {
-                areaTarget?.get(zoneId)
-            } catch (_: IllegalStateException) {
-                null
-            } catch (_: IndexOutOfBoundsException) {
-                null
-            }
-            val sectorTarget = try {
-                zoneTarget?.get(sectorId)
-            } catch (_: IllegalStateException) {
-                null
-            } catch (_: IndexOutOfBoundsException) {
-                null
-            }
-            log("Building areas...")
-            when {
-                areaTarget == null -> AREAS[areaId] = Area(areaData)
-                zoneTarget == null -> {
-                    AREAS[areaId]!!.add(Zone(zoneData))
-                }
-                sectorTarget == null -> {
-                    AREAS[areaId]!![zoneId].add(Sector(sectorData))
-                }
-                else -> {
-                    AREAS[areaId]!![zoneId!!][sectorId!!].add(path)
-                }
-            }
-
-            progressCallback(p, objects.size)
-        }
-        Timber.v("Pinning...")
-        progressCallback(0, -1)
-        ParseObject.pinAllInBackground(DATA_FIX_LABEL, objects) { err ->
-            if (err != null)
-                Timber.w(err, "Could not pin data!")
-            else {
-                Timber.v("Pinned data.")
-                callback()
-            }
-        }
-    }*/
 }
 
 @Suppress("UNCHECKED_CAST")
@@ -278,7 +139,7 @@ class Area(
         query.addAscendingOrder("displayName")
         query.whereMatchesQuery(key, parentQuery)
 
-        val loads = query.fetchPinOrNetwork(appNetworkState, pin, true)
+        val loads = query.fetchPinOrNetworkSync(pin, true)
         Timber.d("Got ${loads.size} elements.")
         val result = arrayListOf<Zone>()
         for (load in loads)

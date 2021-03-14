@@ -70,6 +70,7 @@
     <string name="status_downloading">Downloading…</string>
     <string name="status_storing">Storing…</string>
     <string name="status_loading_progress">Loading %d/%d</string>
+    <string name="status_no_internet">No Internet Connection</string>
 
     <string name="dialog_permission_title">Permission Required!</string>
     <string name="dialog_permission_message">The functionality you are trying to use requires the %s permission. Please grant it, or refuse to use that.</string>
@@ -164,6 +165,9 @@
     <string name="notification_channel_task_completed_desc">This will notify you whenever a task in background has been completed.</string>
     <string name="notification_channel_new_update_name">New update available</string>
     <string name="notification_channel_new_update_desc">This will tell you when a new update is available, and will help you downloading it.</string>
+
+    <string name="notification_download_progress_title">Downloading…</string>
+    <string name="notification_download_progress_message">Downloading %s</string>
 
     <string name="no_internet_title">You have no Internet access</string>
     <string name="no_internet_message">You can access the downloaded content, or try again.</string>
