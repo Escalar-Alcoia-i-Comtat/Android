@@ -5,10 +5,7 @@ import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_AREA
-import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_POSITION
-import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_SECTOR_TRANSITION_NAME
-import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
@@ -74,6 +71,7 @@ class SectorActivity : NetworkChangeListenerActivity() {
     @UiThread
     fun setLoading(loading: Boolean) {
         binding.loadingLayout.visibility(loading)
+        binding.titleTextView.visibility(loading)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -122,6 +120,7 @@ class SectorActivity : NetworkChangeListenerActivity() {
 
             Timber.v("There are $count sectors.")
 
+            Timber.d("Initializing fragments...")
             fragments.clear()
             for (sector in 0 until count)
                 fragments.add(
@@ -133,6 +132,8 @@ class SectorActivity : NetworkChangeListenerActivity() {
                         }
                     }
                 )
+            Timber.v("Initializing view pager...")
+            Timber.d("  Setting adapter...")
             binding.sectorViewPager.adapter = object : FragmentStateAdapter(this) {
                 override fun getItemCount(): Int = count
                 override fun createFragment(position: Int): Fragment {
@@ -140,6 +141,7 @@ class SectorActivity : NetworkChangeListenerActivity() {
                     return fragments[position]
                 }
             }
+            Timber.d("  Registering change callback...")
             binding.sectorViewPager.registerOnPageChangeCallback(object :
                 ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
@@ -154,12 +156,11 @@ class SectorActivity : NetworkChangeListenerActivity() {
                 }
             })
             // If there's an stored positon, load it
-            if (savedInstanceState != null)
-                binding.sectorViewPager.setCurrentItem(
-                    savedInstanceState.getInt(EXTRA_POSITION.key),
-                    false
-                )
-            fragments[binding.sectorViewPager.currentItem].load()
+            Timber.d("  Setting position")
+            val defaultPosition = savedInstanceState?.getInt(EXTRA_POSITION.key)
+                ?: intent.getExtra(EXTRA_SECTOR_INDEX, 0)
+            binding.sectorViewPager.setCurrentItem(defaultPosition, false)
+            fragments[defaultPosition].load()
 
             Timber.d("Load completed, hiding loading layout")
             setLoading(false)

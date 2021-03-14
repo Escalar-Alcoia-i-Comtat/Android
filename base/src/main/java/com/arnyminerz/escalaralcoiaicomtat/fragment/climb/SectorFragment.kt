@@ -118,6 +118,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             return
         }
 
+        Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
         sectorActivity?.setLoading(true)
         sector = AREAS[areaId]!![zoneId][sectorIndex]
 

@@ -12,10 +12,7 @@ import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_AREA
-import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_SECTOR
-import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
@@ -71,14 +68,14 @@ fun getIntent(context: Context, queryName: String): Intent? {
                             putExtra(EXTRA_ZONE, zone.objectId)
                         }
                     else if (zone.isNotEmpty())
-                        for (sector in zone) {
+                        for ((s, sector) in zone.withIndex()) {
                             Timber.d("      Finding in ${sector.displayName}.")
                             if (sector.displayName.equals(queryName, true))
                                 return Intent(context, SectorActivity::class.java).apply {
-                                    Timber.d("Found Sector id ${sector.objectId}!")
+                                    Timber.d("Found Sector id ${sector.objectId} at $s!")
                                     putExtra(EXTRA_AREA, area.objectId)
                                     putExtra(EXTRA_ZONE, zone.objectId)
-                                    putExtra(EXTRA_SECTOR, sector.objectId)
+                                    putExtra(EXTRA_SECTOR_INDEX, s)
                                 }
                         }
                 }
