@@ -9,6 +9,7 @@ import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
@@ -26,7 +27,9 @@ import timber.log.Timber
 const val CROSSFADE_DURATION = 50
 const val THUMBNAIL_SIZE = .1f
 
-const val ARGUMENT_SECTOR = "sector"
+const val ARGUMENT_AREA_ID = "area_id"
+const val ARGUMENT_ZONE_ID = "zone_id"
+const val ARGUMENT_SECTOR_INDEX = "sector_index"
 
 class SectorFragment : NetworkChangeListenerFragment() {
     private lateinit var sector: Sector
@@ -43,9 +46,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             else R.drawable.round_flip_to_back_24
         )
 
-        (activity as? SectorActivity?)?.apply {
-            binding.sectorViewPager.isUserInputEnabled = !maximized
-        }
+        (activity as? SectorActivity?)?.userInputEnabled(!maximized)
     }
 
     fun minimize() {
@@ -83,7 +84,11 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        sector = requireArguments().getParcelable(ARGUMENT_SECTOR)!!
+        val areaId = requireArguments().getString(ARGUMENT_AREA_ID)
+        val zoneId = requireArguments().getString(ARGUMENT_ZONE_ID)
+        val sectorIndex = requireArguments().getInt(ARGUMENT_SECTOR_INDEX)
+
+        sector = AREAS[areaId]!![zoneId!!][sectorIndex]
 
         binding.sectorTextView.text = sector.displayName
 
