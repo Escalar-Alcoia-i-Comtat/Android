@@ -26,42 +26,43 @@ private val builders = arrayMapOf<Int, Notification.Builder>()
 class Notification private constructor(private val builder: Builder) {
     fun edit(): Builder = builder
 
-    fun show() {
-        with(builder) {
-            val notificationBuilder = NotificationCompat.Builder(context, channelId!!)
-            icon?.let { notificationBuilder.setSmallIcon(it) }
-            title?.let { notificationBuilder.setContentTitle(it) }
-            text?.let { notificationBuilder.setContentText(it) }
-            info?.let { notificationBuilder.setContentInfo(it) }
-            longText?.let {
-                notificationBuilder.setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .setBigContentTitle(it)
-                        .bigText(it)
-                )
-            } ?: text?.let {
-                notificationBuilder.setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .setBigContentTitle(it)
-                        .bigText(it)
-                )
-            }
-            intent?.let { notificationBuilder.setContentIntent(it) }
-            progress?.let { value, max ->
-                if (value < 0)
-                    notificationBuilder.setProgress(0, 0, true)
-                else
-                    notificationBuilder.setProgress(value, max, false)
-            }
-            notificationBuilder.setOngoing(persistent)
-
-            for (action in actions)
-                notificationBuilder.addAction(
-                    action.icon,
-                    action.text.toString(),
-                    action.clickListener
-                )
+    fun show() = with(builder) {
+        val notificationBuilder = NotificationCompat.Builder(context, channelId!!)
+        icon?.let { notificationBuilder.setSmallIcon(it) }
+        title?.let { notificationBuilder.setContentTitle(it) }
+        text?.let { notificationBuilder.setContentText(it) }
+        info?.let { notificationBuilder.setContentInfo(it) }
+        longText?.let {
+            notificationBuilder.setStyle(
+                NotificationCompat.BigTextStyle()
+                    .setBigContentTitle(it)
+                    .bigText(it)
+            )
+        } ?: text?.let {
+            notificationBuilder.setStyle(
+                NotificationCompat.BigTextStyle()
+                    .setBigContentTitle(it)
+                    .bigText(it)
+            )
         }
+        intent?.let { notificationBuilder.setContentIntent(it) }
+        progress?.let { value, max ->
+            if (value < 0)
+                notificationBuilder.setProgress(0, 0, true)
+            else
+                notificationBuilder.setProgress(value, max, false)
+        }
+        notificationBuilder.setOngoing(persistent)
+
+        for (action in actions)
+            notificationBuilder.addAction(
+                action.icon,
+                action.text.toString(),
+                action.clickListener
+            )
+
+        NotificationManagerCompat.from(builder.context)
+            .notify(builder.id, notificationBuilder.build())
     }
 
     /**
