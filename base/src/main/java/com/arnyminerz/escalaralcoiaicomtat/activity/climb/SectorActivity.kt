@@ -52,6 +52,16 @@ class SectorActivity : NetworkChangeListenerActivity() {
         }
     }
 
+    /**
+     * Sets whether or not the slider can be controlled
+     * @author Arnau Mora
+     * @since 20210314
+     * @param enabled If true, the view pager would be able to slide
+     */
+    fun userInputEnabled(enabled: Boolean) {
+        binding.sectorViewPager.isUserInputEnabled = enabled
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySectorBinding.inflate(layoutInflater)
