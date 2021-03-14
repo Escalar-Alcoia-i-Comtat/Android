@@ -364,20 +364,26 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @return a matching DownloadStatus representing the Data Class' download status
      */
     fun isDownloaded(context: Context): DownloadStatus {
+        Timber.d("$namespace:$objectId Checking if downloaded")
         var result: DownloadStatus? = null
         when {
             isDownloading(context) -> result = DownloadStatus.DOWNLOADING
             else -> {
-                val imageFileExists = imageFile(context).exists()
-                if (!imageFileExists)
+                val imageFile = imageFile(context)
+                val imageFileExists = imageFile.exists()
+                if (!imageFileExists) {
+                    Timber.d("$namespace:$objectId Image file ($imageFile) doesn't exist")
                     result = DownloadStatus.NOT_DOWNLOADED
-                else for (child in children)
-                    if (child is DataClass<*, *>)
-                        if (!child.isDownloaded(context))
+                } else for (child in children)
+                    if (child is DataClass<*, *>) {
+                        if (!child.isDownloaded(context)) {
+                            Timber.d("There's a non-downloaded children (${child.namespace}:${child.objectId})")
                             result = DownloadStatus.NOT_DOWNLOADED
+                        }
+                    } else Timber.d("$namespace:$objectId Child is not DataClass")
             }
         }
-        return result ?: DownloadStatus.NOT_DOWNLOADED
+        return result ?: DownloadStatus.DOWNLOADED
     }
 
     /**
