@@ -81,7 +81,6 @@ class ZoneAdapter(
             else
                 when (zone.isDownloaded(dataClassListActivity)) {
                     DownloadStatus.NOT_DOWNLOADED -> {
-                        zone.download(dataClassListActivity)
                         val result = zone.download(dataClassListActivity)
                         result.observe(dataClassListActivity) { workInfo ->
                             val state = workInfo.state
@@ -92,6 +91,10 @@ class ZoneAdapter(
                                     toast(dataClassListActivity, R.string.toast_error_internal)
                                     visibility(holder.progressBar, false)
                                     Timber.w("Download failed! Error: ${data.getString("error")}")
+                                }
+                                WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED -> {
+                                    visibility(holder.progressBar, true)
+                                    updateImageRes(holder, zone)
                                 }
                                 WorkInfo.State.SUCCEEDED -> {
                                     visibility(holder.progressBar, false)
