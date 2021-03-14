@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.view
 
+import android.app.Activity
 import android.content.Context
 import android.util.TypedValue
 import android.view.MenuItem
@@ -65,6 +66,26 @@ fun Context?.visibility(
 ) {
     if (this != null)
         this.onUiThread {
+            com.arnyminerz.escalaralcoiaicomtat.view.visibility(
+                view,
+                visible,
+                setGone,
+                debug,
+                clearAnimation
+            )
+        }
+    else com.arnyminerz.escalaralcoiaicomtat.view.visibility(view, visible, setGone, debug, clearAnimation)
+}
+
+fun Activity?.visibility(
+    view: View?,
+    visible: Boolean,
+    setGone: Boolean = true,
+    debug: Boolean = false,
+    clearAnimation: Boolean = true
+) {
+    if (this != null)
+        this.runOnUiThread {
             com.arnyminerz.escalaralcoiaicomtat.view.visibility(
                 view,
                 visible,
