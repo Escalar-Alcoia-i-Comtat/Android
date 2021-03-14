@@ -6,10 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.work.*
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DATA_FIX_LABEL
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClasses
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.fetchPinOrNetworkSync
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSLESS_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.storeToFile
@@ -21,6 +18,7 @@ import com.parse.ParseObject
 import com.parse.ParseQuery
 import timber.log.Timber
 import java.io.File
+import java.util.*
 
 const val DOWNLOAD_QUALITY_MIN = 1
 const val DOWNLOAD_QUALITY_MAX = 100
@@ -103,68 +101,102 @@ private constructor(
 
 class DownloadWorker private constructor(appContext: Context, workerParams: WorkerParameters) :
     Worker(appContext, workerParams) {
-    override fun doWork(): Result {
-        // Get all data
-        val namespace = inputData.getString(DOWNLOAD_NAMESPACE)
-        val id = inputData.getString(DOWNLOAD_ID)
-        val displayName = inputData.getString(DOWNLOAD_DISPLAY_NAME)
-        val overwrite = inputData.getBoolean(DOWNLOAD_OVERWRITE, OVERWRITE_DEFAULT)
-        val quality = inputData.getInt(DOWNLOAD_OVERWRITE, QUALITY_DEFAULT)
-
-        // Check if any required data is missing
-        if (namespace == null || id == null || displayName == null)
-            return failure(ERROR_MISSING_DATA)
-
-        Timber.v("Downloading $id from $namespace...")
-
-        // Build the notification
-        val notificationBuilder = Notification.Builder(applicationContext)
-            .withChannelId(DOWNLOAD_PROGRESS_CHANNEL_ID)
-            .withIcon(R.drawable.ic_notifications)
-            .withTitle(R.string.notification_download_progress_title)
-            .withText(R.string.notification_download_progress_message, displayName)
-        val notification = notificationBuilder.build()
-        notification.show() // Show the notification
-
-        val pin = "${DATA_FIX_LABEL}_${namespace}_$id"
+    private fun download(
+        objectID: String,
+        namespace: String,
+        overwrite: Boolean,
+        quality: Int,
+        query: ParseQuery<*>?
+    ): Pair<ParseQuery<*>?, Result?> {
+        val pin = "${DATA_FIX_LABEL}_${namespace}_$objectID"
 
         // Remove old data
         try {
             ParseObject.unpinAll(pin)
         } catch (e: ParseException) {
-            return failure(ERROR_UNPIN)
+            return null to failure(ERROR_UNPIN)
         }
 
         // Fetch the data
-        Timber.d("Fetching data from server...")
-        val query = ParseQuery.getQuery<ParseObject>(namespace)
-        query.limit = 1
-        query.whereEqualTo("objectId", id)
-        val result = query.fetchPinOrNetworkSync(pin, true) // Make sure to pin it
-        if (result.isEmpty()) // Object not found
-            return failure(ERROR_ALREADY_DOWNLOADED)
+        Timber.d("Fetching data from server ($namespace)...")
+        val fetchQuery = ParseQuery.getQuery<ParseObject>(namespace)
+        fetchQuery.limit = MAX_BATCH_SIZE
+        if (query != null) {
+            Timber.d("Downloading ${query.className}...")
+            val parameter = query.className.toLowerCase(Locale.getDefault())
+            Timber.d("  Should match $parameter at $namespace")
+            fetchQuery.whereMatchesQuery(parameter, query)
+        } else fetchQuery.whereEqualTo("objectId", objectID)
+        val result = fetchQuery.fetchPinOrNetworkSync(pin, true) // Make sure to pin it
+        if (result.isEmpty()) { // Object not found
+            Timber.d("Result list is empty.")
+            return null to failure(ERROR_ALREADY_DOWNLOADED)
+        }
 
         // Get the fetched data
-        val data = result[0]
-        val objectId = data.objectId
-        val image = data.getString("image")!!
-        // This is the image file
-        val imageFile = File(dataDir(applicationContext), "$namespace-$objectId.webp")
+        Timber.d("Fetched ${result.size} elements")
+        for (data in result) {
+            val objectId = data.objectId
+            val image = data.getString("image")!!
+            // This is the image file
+            val imageFile = File(dataDir(applicationContext), "$namespace-$objectId.webp")
 
-        if (imageFile.exists() && !overwrite)
-            return failure(ERROR_ALREADY_DOWNLOADED)
-        if (!imageFile.deleteIfExists())
-            return failure(ERROR_DELETE_OLD)
+            if (imageFile.exists() && !overwrite)
+                return null to failure(ERROR_ALREADY_DOWNLOADED)
+            if (!imageFile.deleteIfExists())
+                return null to failure(ERROR_DELETE_OLD)
 
-        Timber.d("Downloading image ($image)...")
-        val stream = download(image)
-        val bitmap = BitmapFactory.decodeStream(stream)
-        bitmap.storeToFile(imageFile, format = WEBP_LOSSLESS_LEGACY, quality = quality)
+            Timber.d("Downloading image ($image)...")
+            val stream = download(image)
+            val bitmap = BitmapFactory.decodeStream(stream)
+            bitmap.storeToFile(imageFile, format = WEBP_LOSSLESS_LEGACY, quality = quality)
+        }
 
-        Timber.v("Finished downloading $displayName")
-        notification.destroy()
+        return fetchQuery to null
+    }
 
-        return Result.success()
+    override fun doWork(): Result {
+        // Get all data
+        val namespace = inputData.getString(DOWNLOAD_NAMESPACE)
+        val objectID = inputData.getString(DOWNLOAD_ID)
+        val displayName = inputData.getString(DOWNLOAD_DISPLAY_NAME)
+        val overwrite = inputData.getBoolean(DOWNLOAD_OVERWRITE, OVERWRITE_DEFAULT)
+        val quality = inputData.getInt(DOWNLOAD_OVERWRITE, QUALITY_DEFAULT)
+
+        // Check if any required data is missing
+        return if (namespace == null || objectID == null || displayName == null)
+            failure(ERROR_MISSING_DATA)
+        else {
+            Timber.v("Downloading $objectID from $namespace...")
+
+            // Build the notification
+            val notificationBuilder = Notification.Builder(applicationContext)
+                .withChannelId(DOWNLOAD_PROGRESS_CHANNEL_ID)
+                .withIcon(R.drawable.ic_notifications)
+                .withTitle(R.string.notification_download_progress_title)
+                .withText(R.string.notification_download_progress_message, displayName)
+            val notification = notificationBuilder.build()
+            notification.show() // Show the notification
+
+            val currentDownload = download(objectID, namespace, overwrite, quality, null)
+            val query = currentDownload.first
+            val result = currentDownload.second
+            if (result != null)
+                return result
+
+            if (namespace == Zone.NAMESPACE)
+                if (query == null) {
+                    Timber.w("Cannot get Zone's children since query is null")
+                } else {
+                    Timber.d("Downloading Zone's children...")
+                    download(objectID, Sector.NAMESPACE, overwrite, quality, query)
+                }
+
+            Timber.v("Finished downloading $displayName")
+            notification.destroy()
+
+            Result.success()
+        }
     }
 
     companion object {

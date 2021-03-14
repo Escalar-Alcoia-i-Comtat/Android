@@ -18,7 +18,7 @@ import java.util.*
 private const val DEBUG = false
 
 const val DATA_FIX_LABEL = "climbData"
-const val PATHS_BATCH_SIZE = 1000
+const val MAX_BATCH_SIZE = 1000
 
 private fun find(list: List<DataClassImpl>, objectId: String): Int {
     for ((i, item) in list.withIndex())
@@ -36,7 +36,7 @@ private fun log(msg: String, vararg arguments: Any) =
  * Loads all the areas available in the server.
  * @author Arnau Mora
  * @since 20210313
- * @see PATHS_BATCH_SIZE
+ * @see MAX_BATCH_SIZE
  * @return A collection of areas
  * @throws ParseException If there's an error while fetching from parse
  * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
@@ -49,7 +49,7 @@ fun loadAreasFromCache(progressCallback: (current: Int, total: Int) -> Unit, cal
         val query = ParseQuery.getQuery<ParseObject>("Area")
         query.addAscendingOrder("displayName")
         AREAS.clear()
-        query.limit = PATHS_BATCH_SIZE
+        query.limit = MAX_BATCH_SIZE
         val objects = query.fetchPinOrNetworkSync(DATA_FIX_LABEL)
 
         Timber.d("Got ${objects.size} areas. Processing...")
