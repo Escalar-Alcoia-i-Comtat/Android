@@ -27,7 +27,6 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import org.w3c.dom.Document
@@ -196,7 +195,7 @@ class MapsActivity : LanguageAppCompatActivity() {
 
                         mapHelper.addSymbolClickListener {
                             if (SETTINGS_CENTER_MARKER_PREF.get(sharedPreferences))
-                                map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+                                mapHelper.move(latLng)
                             markerWindow?.hide()
                             val window = getWindow()
                             val title = window.title
