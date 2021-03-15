@@ -50,7 +50,7 @@
                 android:letterSpacing="0.08"
                 android:text="@string/placeholder"
                 android:textColor="@color/bg_color"
-                android:textSize="20sp"
+                android:textSize="17sp"
                 android:textStyle="bold"
                 android:background="@color/image_card_label_bg"
                 app:layout_constraintBottom_toBottomOf="@+id/area_imageView"
