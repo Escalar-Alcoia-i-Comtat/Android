@@ -28,6 +28,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
 
     private lateinit var areaId: String
     private lateinit var zoneId: String
+    private var position = 0
 
     private var savedInstanceState: Bundle? = null
 
@@ -55,6 +56,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
         dataClass = AREAS[areaId]!![zoneId]
 
         val transitionName = intent.getExtra(EXTRA_ZONE_TRANSITION_NAME)
+        position = intent.getExtra(EXTRA_POSITION, 0)
 
         binding.titleTextView.text = dataClass.displayName
         binding.titleTextView.transitionName = transitionName
@@ -84,38 +86,40 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                 val sectors = dataClass.children
                 Timber.v("Got ${sectors.size} sectors.")
 
-                binding.recyclerView.layoutManager = LinearLayoutManager(this)
-                if (justAttached)
-                    binding.recyclerView.layoutAnimation =
-                        AnimationUtils.loadLayoutAnimation(
-                            this,
-                            R.anim.item_enter_left_animator
-                        )
-                binding.recyclerView.adapter =
-                    SectorsAdapter(
-                        this,
-                        areaId, zoneId
-                    ) { viewHolder, index ->
-                        binding.loadingLayout.show()
-
-                        Timber.v("Clicked item $index")
-                        val trn =
-                            ViewCompat.getTransitionName(viewHolder.titleTextView)
-                                .toString()
-                        Timber.v("Transition name: $trn")
-                        val intent =
-                            Intent(this, SectorActivity()::class.java)
-                                .putExtra(EXTRA_AREA, areaId)
-                                .putExtra(EXTRA_ZONE, zoneId)
-                                .putExtra(EXTRA_SECTOR_INDEX, index)
-                                .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
-                        val options =
-                            ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                this, viewHolder.titleTextView, trn
+                binding.recyclerView.let { r ->
+                    r.layoutManager = LinearLayoutManager(this)
+                    if (justAttached)
+                        binding.recyclerView.layoutAnimation =
+                            AnimationUtils.loadLayoutAnimation(
+                                this,
+                                R.anim.item_enter_left_animator
                             )
+                    r.adapter =
+                        SectorsAdapter(
+                            this,
+                            areaId, zoneId
+                        ) { viewHolder, index ->
+                            binding.loadingLayout.show()
 
-                        startActivity(intent, options.toBundle())
-                    }
+                            Timber.v("Clicked item $index")
+                            val trn =
+                                ViewCompat.getTransitionName(viewHolder.titleTextView)
+                                    .toString()
+                            Timber.v("Transition name: $trn")
+                            val intent =
+                                Intent(this, SectorActivity()::class.java)
+                                    .putExtra(EXTRA_AREA, areaId)
+                                    .putExtra(EXTRA_ZONE, zoneId)
+                                    .putExtra(EXTRA_SECTOR_INDEX, index)
+                                    .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
+                            val options =
+                                ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                    this, viewHolder.titleTextView, trn
+                                )
+
+                            startActivity(intent, options.toBundle())
+                        }
+                }
 
                 loaded = true
             } catch (_: AlreadyLoadingException) {
@@ -125,6 +129,6 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                 ) // Let's just warn the debugger this is controlled
             } catch (_: NoInternetAccessException) {
             } else
-                Timber.d("Already loaded!")
+            Timber.d("Already loaded!")
     }
 }
