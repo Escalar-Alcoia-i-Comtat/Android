@@ -48,7 +48,6 @@
                 android:paddingRight="16dp"
                 android:paddingBottom="12dp"
                 android:paddingTop="12dp"
-                android:fontFamily="@font/dosis_extrabold"
                 android:letterSpacing="0.08"
                 android:text="@string/placeholder"
                 android:textColor="@color/bg_color"
