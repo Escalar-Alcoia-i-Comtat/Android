@@ -16,5 +16,6 @@
         <item name="overlay_color">@color/loading_overlay_dark</item>
 
         <item name="android:windowContentTransitions">true</item>
+        <item name="fontFamily">@font/cabin</item>
     </style>
 </resources>
