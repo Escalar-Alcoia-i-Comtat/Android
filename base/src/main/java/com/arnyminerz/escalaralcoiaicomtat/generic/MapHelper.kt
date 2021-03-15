@@ -348,16 +348,16 @@ class MapHelper(private val mapView: MapView) {
      * @return The instance
      */
     @Throws(MapNotInitializedException::class)
-    fun move(position: LatLng, zoom: Double = DEFAULT_ZOOM, animate: Boolean = true): MapHelper {
+    fun move(position: LatLng? = null, zoom: Double? = null, animate: Boolean = true): MapHelper {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
         return move(
             CameraUpdateFactory.newCameraPosition(
-                CameraPosition.Builder()
-                    .target(position)
-                    .zoom(zoom)
-                    .build()
+                CameraPosition.Builder().apply {
+                    position?.let { target(it) }
+                    zoom?.let { zoom(it) }
+                }.build()
             ),
             animate
         )
