@@ -16,7 +16,7 @@ data class SafeCountData(
         parcel.readInt()
     )
 
-    constructor(required: Boolean, @StringRes displayName: Int, @DrawableRes image: Int):
+    constructor(required: Boolean, @StringRes displayName: Int, @DrawableRes image: Int) :
             this(if (required) 1 else 0, displayName, image)
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {

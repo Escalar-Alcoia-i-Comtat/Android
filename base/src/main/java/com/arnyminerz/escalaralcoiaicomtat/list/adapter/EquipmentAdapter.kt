@@ -40,13 +40,11 @@ class EquipmentAdapter(
     override fun getItemCount(): Int {
         Timber.v("Calculating showable safes")
         showableSafes.clear()
-        for (s in 0 until safes.count()) {
-            val safe = safes[s]
-            if (safe != null && safe.count > 0) {
+        for (safe in safes)
+            if (safe.count > 0) {
                 showableSafes.add(safe)
                 Timber.v("  Added $safe")
             }
-        }
         Timber.v("There are ${showableSafes.size} showable safes")
         return showableSafes.size
     }

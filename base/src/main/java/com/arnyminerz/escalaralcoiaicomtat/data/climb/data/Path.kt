@@ -122,8 +122,8 @@ data class Path(
      * @return If the path has safes count.
      */
     fun hasSafeCount(): Boolean {
-        for (c in 0 until fixedSafesData.count())
-            if (fixedSafesData[c].count > 2)
+        for ((_, value) in fixedSafesData)
+            if (value > 1)
                 return true
 
         return false
