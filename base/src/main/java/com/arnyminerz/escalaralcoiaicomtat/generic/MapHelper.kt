@@ -5,11 +5,13 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.Parcelable
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewManager
-import android.view.animation.Animation
+import android.view.animation.AccelerateInterpolator
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -740,21 +742,14 @@ class MapHelper(private val mapView: MapView) {
 
             Timber.v("Hiding MarkerWindow")
             val anim = AnimationUtils.loadAnimation(activity, R.anim.exit_bottom)
+            anim.interpolator = AccelerateInterpolator()
             anim.duration = MARKER_WINDOW_HIDE_DURATION
-            anim.setAnimationListener(object : Animation.AnimationListener {
-                override fun onAnimationRepeat(animation: Animation?) {}
-
-                override fun onAnimationEnd(animation: Animation?) {
-                    Timber.d("Finished animation")
-                    cardView.hide()
-                    (cardView.parent as ViewManager).removeView(cardView)
-                    destroyed = true
-                }
-
-                override fun onAnimationStart(animation: Animation?) {
-                    view.show()
-                }
-            })
+            Handler(Looper.getMainLooper()).postDelayed({
+                Timber.d("Finished animation")
+                cardView.hide()
+                (cardView.parent as ViewManager).removeView(cardView)
+                destroyed = true
+            }, MARKER_WINDOW_HIDE_DURATION)
             cardView.startAnimation(anim)
         }
     }
