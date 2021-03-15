@@ -113,6 +113,7 @@ data class Sector constructor(
         val result = arrayListOf<Path>()
         for (load in loads)
             result.add(Path(load))
+        result.sort()
         return result
     }
 
