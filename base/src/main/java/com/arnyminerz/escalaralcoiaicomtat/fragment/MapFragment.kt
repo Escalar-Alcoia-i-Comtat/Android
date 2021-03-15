@@ -74,8 +74,9 @@ class MapFragment : NetworkChangeListenerFragment() {
                     if (SETTINGS_CENTER_MARKER_PREF.get(requireContext().sharedPreferences))
                         map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
 
-                    context?.let {
-                        markerWindow = mapHelper.infoCard(it, this, binding.dialogMapMarker)
+                    markerWindow?.hide()
+                    activity?.let {
+                        markerWindow = mapHelper.infoCard(it, this, binding.root)
                     }
 
                     true

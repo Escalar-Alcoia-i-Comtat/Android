@@ -206,7 +206,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                                 markerWindow = mapHelper.infoCard(
                                     this@MapsActivity,
                                     this,
-                                    binding.dialogMapMarker
+                                    view
                                 )
 
                                 true

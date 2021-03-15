@@ -1,16 +1,22 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
+import android.view.ViewGroup
+import android.view.ViewManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.cardview.widget.CardView
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -18,13 +24,14 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
-import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogMapMarkerBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.MissingPermissionException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.Glide
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdate
@@ -607,58 +614,76 @@ class MapHelper(private val mapView: MapView) {
         }
     }
 
+    /**
+     * Shows an info card showing the contents of a marker
+     * @author Arnau Mora
+     * @since 20210315
+     * @param activity The activity that is currently running
+     * @param marker The marker to show the info for
+     * @param rootView The activity's root view
+     * @return The created window
+     */
     fun infoCard(
-        context: Context,
+        activity: Activity,
         marker: Symbol,
-        binding: DialogMapMarkerBinding
+        rootView: ViewGroup
     ): MarkerWindow {
         val latLng = marker.latLng
 
-        val anim = AnimationUtils.loadAnimation(context, R.anim.enter_bottom)
+        val view = activity.layoutInflater.inflate(R.layout.dialog_map_marker, rootView)
+        val cardView = view.findViewById<CardView>(R.id.mapInfoCardView)
+        val titleTextView = view.findViewById<TextView>(R.id.map_info_textView)
+        val descriptionTextView = view.findViewById<TextView>(R.id.mapDescTextView)
+        val imageView = view.findViewById<ImageView>(R.id.mapInfoImageView)
+        val enterButton = view.findViewById<FloatingActionButton>(R.id.fab_enter)
+        val mapButton = view.findViewById<FloatingActionButton>(R.id.fab_maps)
+        val buttonsLayout = view.findViewById<LinearLayout>(R.id.actions_layout)
+
+        val anim = AnimationUtils.loadAnimation(activity, R.anim.enter_bottom)
         anim.duration = MARKER_WINDOW_SHOW_DURATION
-        binding.mapInfoCardView.show()
-        binding.mapInfoCardView.startAnimation(anim)
+        cardView.show()
+        cardView.startAnimation(anim)
 
         val window = marker.getWindow()
         val title = window.title
         val description = window.message
-        val activityIntent = getTarget(context, marker) // Info Window Data Class
+        val activityIntent = getTarget(activity, marker) // Info Window Data Class
 
         Timber.v("Marker title: $title")
         Timber.v("Marker description: $description")
 
-        binding.mapInfoTextView.text = title
+        titleTextView.text = title
 
         val imageUrl = getImageUrl(description)
         if (imageUrl == null)
-            binding.mapDescTextView.text = description
+            descriptionTextView.text = description
         else
-            Glide.with(context)
+            Glide.with(activity)
                 .load(imageUrl)
-                .into(binding.mapInfoImageView)
+                .into(imageView)
 
-        visibility(binding.fabEnter, activityIntent != null)
-        visibility(binding.mapInfoImageView, imageUrl != null)
-        visibility(binding.mapDescTextView, imageUrl == null)
+        visibility(enterButton, activityIntent != null)
+        visibility(imageView, imageUrl != null)
+        visibility(descriptionTextView, imageUrl == null)
 
         val gmmIntentUri = latLng.toUri(true, title)
         val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-        binding.fabMaps.visibility(true)
-        binding.fabMaps.setOnClickListener {
-            context.startActivity(mapIntent)
+        mapButton.visibility(true)
+        mapButton.setOnClickListener {
+            activity.startActivity(mapIntent)
         }
 
         if (activityIntent != null)
-            binding.fabEnter.setOnClickListener {
+            enterButton.setOnClickListener {
                 Timber.v("Launching intent...")
-                context.startActivity(activityIntent)
+                activity.startActivity(activityIntent)
             }
 
-        binding.actionsLayout.orientation =
+        buttonsLayout.orientation =
             if (imageUrl != null) LinearLayout.VERTICAL
             else LinearLayout.HORIZONTAL
 
-        return MarkerWindow(context, marker, binding)
+        return MarkerWindow(activity, marker, rootView, cardView)
     }
 
     /**
@@ -699,22 +724,24 @@ class MapAnyDataToLoadException(message: String) : Exception(message)
 data class MarkerWindow(
     val context: Context,
     val marker: Symbol,
-    val binding: DialogMapMarkerBinding
-)
+    val parentView: ViewManager,
+    val view: View
+) {
+    fun hide() {
+        val anim = AnimationUtils.loadAnimation(context, R.anim.exit_bottom)
+        anim.duration = MARKER_WINDOW_HIDE_DURATION
+        anim.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationRepeat(animation: Animation?) {}
 
-fun MarkerWindow.hide() {
-    val anim = AnimationUtils.loadAnimation(context, R.anim.exit_bottom)
-    anim.duration = MARKER_WINDOW_HIDE_DURATION
-    anim.setAnimationListener(object : Animation.AnimationListener {
-        override fun onAnimationRepeat(animation: Animation?) {}
+            override fun onAnimationEnd(animation: Animation?) {
+                view.hide()
+                parentView.removeView(view)
+            }
 
-        override fun onAnimationEnd(animation: Animation?) {
-            binding.mapInfoCardView.visibility = View.GONE
-        }
-
-        override fun onAnimationStart(animation: Animation?) {
-            binding.mapInfoCardView.visibility = View.VISIBLE
-        }
-    })
-    binding.mapInfoCardView.startAnimation(anim)
+            override fun onAnimationStart(animation: Animation?) {
+                view.show()
+            }
+        })
+        view.startAnimation(anim)
+    }
 }
