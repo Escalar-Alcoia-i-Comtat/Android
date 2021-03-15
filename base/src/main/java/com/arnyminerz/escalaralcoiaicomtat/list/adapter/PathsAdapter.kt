@@ -132,18 +132,21 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
 
         holder.difficultyTextView.maxLines = 1
 
+        val shouldShowHeight = path.heights.isNotEmpty() && path.heights[0] > 0
         val heightFull =
-            if (path.heights.size > 0)
+            if (shouldShowHeight)
                 String.format(
                     activity.getString(R.string.sector_height),
                     path.heights[0]
                 ) else null
         val heightOther =
-            if (path.heights.size > 1) path.heights.toStringLineJumping(
-                1,
-                LinePattern(activity, R.string.sector_height)
-            ) else null
+            if (shouldShowHeight && path.heights.size > 1)
+                path.heights.toStringLineJumping(
+                    1,
+                    LinePattern(activity, R.string.sector_height)
+                ) else null
         holder.heightTextView.text = heightFull
+        visibility(holder.heightTextView, shouldShowHeight)
 
         holder.idTextView.text = path.sketchId.toString()
         holder.toggleImageButton.setOnClickListener { toggleImageButton ->
