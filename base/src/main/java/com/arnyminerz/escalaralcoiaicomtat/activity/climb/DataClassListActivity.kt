@@ -1,8 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
+import android.os.Build
 import android.os.Bundle
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
+import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
@@ -11,6 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -42,6 +45,9 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         mapHelper = MapHelper(binding.map)
             .withIconSizeMultiplier(iconSizeMultiplier)
         mapHelper.onCreate(savedInstanceState)
+
+        binding.statusImageView.setOnClickListener { it.performLongClick() }
+        updateIcon()
     }
 
     override fun onStart() {
@@ -85,6 +91,8 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         val hasInternet = state.hasInternet
         visibility(binding.noInternetCard.noInternetCardView, !hasInternet)
 
+        updateIcon()
+
         if (!mapLoaded && hasInternet) {
             Timber.v("Loading map...")
             mapHelper
@@ -123,6 +131,23 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         } else if (!hasInternet) {
             binding.loadingLayout.hide()
             mapHelper.hide()
+        }
+    }
+
+    private fun updateIcon() {
+        binding.statusImageView.let { i ->
+            if (this::dataClass.isInitialized && dataClass.downloadStatus(this).isDownloaded()) {
+                i.setImageResource(R.drawable.cloud_check)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    i.tooltipText = getString(R.string.status_downloaded)
+                i.show()
+            } else if (!appNetworkState.hasInternet) {
+                i.setImageResource(R.drawable.ic_round_signal_cellular_off_24)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    i.tooltipText = getString(R.string.status_no_internet)
+                i.show()
+            } else
+                i.hide(setGone = false)
         }
     }
 }
