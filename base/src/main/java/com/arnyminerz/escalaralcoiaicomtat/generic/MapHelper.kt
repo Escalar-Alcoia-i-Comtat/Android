@@ -379,7 +379,7 @@ class MapHelper(private val mapView: MapView) {
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
         if (animate)
-            map?.animateCamera(update)
+            map?.easeCamera(update)
         else
             map?.moveCamera(update)
         return this
