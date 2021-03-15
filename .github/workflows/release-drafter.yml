@@ -16,8 +16,6 @@ jobs:
       - name: Create release
         uses: release-drafter/release-drafter@v5
         id: create_release
-        with:
-          publish: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up JDK 15
