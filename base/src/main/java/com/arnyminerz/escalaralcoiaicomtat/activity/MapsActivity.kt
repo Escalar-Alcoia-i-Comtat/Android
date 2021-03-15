@@ -168,8 +168,6 @@ class MapsActivity : LanguageAppCompatActivity() {
                         loadData()
 
                     runOnUiThread {
-                        visibility(binding.dialogMapMarker.mapInfoCardView, false)
-
                         Timber.v("Loading current location")
                         tryToShowCurrentLocation()
 
