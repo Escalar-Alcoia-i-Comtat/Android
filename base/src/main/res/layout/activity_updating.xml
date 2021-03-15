@@ -22,7 +22,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:fontFamily="@font/dosis_extrabold"
         android:text="@string/status_updating"
         android:textSize="30sp"
         android:textColor="?attr/text_dark"

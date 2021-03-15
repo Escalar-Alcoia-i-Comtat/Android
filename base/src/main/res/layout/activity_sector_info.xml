@@ -10,7 +10,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:fontFamily="@font/dosis_extrabold"
         android:text="@string/sector_info_title"
         android:textColor="?attr/text_dark"
         android:textSize="22sp"

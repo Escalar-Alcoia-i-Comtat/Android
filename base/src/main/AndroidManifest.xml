@@ -76,9 +76,6 @@
             android:screenOrientation="portrait" />
 
         <meta-data
-            android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
-        <meta-data
             android:name="io.sentry.dsn"
             android:value="@string/sentry_dsn" />
         <meta-data
