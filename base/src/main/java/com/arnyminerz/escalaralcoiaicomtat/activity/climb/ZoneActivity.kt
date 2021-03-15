@@ -30,11 +30,8 @@ class ZoneActivity : DataClassListActivity<Zone>() {
     private lateinit var zoneId: String
     private var position = 0
 
-    private var savedInstanceState: Bundle? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        this.savedInstanceState = savedInstanceState
         justAttached = true
 
         val extras = intent.extras
