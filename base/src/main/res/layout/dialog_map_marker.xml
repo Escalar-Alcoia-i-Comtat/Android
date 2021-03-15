@@ -65,6 +65,7 @@
             android:text="@string/placeholder"
             android:textColor="?attr/text_dark"
             android:textSize="26sp"
+            android:ellipsize="end"
             app:layout_constraintEnd_toStartOf="@+id/actions_layout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
