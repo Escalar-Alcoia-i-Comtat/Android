@@ -27,6 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -80,6 +81,11 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         if (AREAS.isEmpty) {
             error = true
             Timber.w("Could not update Nearby Zones: AREAS is empty")
+        }
+
+        if (!mapHelper.isLoaded) {
+            error = true
+            Timber.w("Could not update Nearby Zones: MapHelper is not loaded")
         }
 
         visibility(binding.nearbyZonesCardView, !error)
@@ -145,8 +151,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 }
 
                 Timber.d("Finished adding markers.")
-                requireActivity().runOnUiThread {
-                    mapHelper.display(requireContext())
+                runOnUiThread {
+                    mapHelper.display(this)
                     mapHelper.center()
 
                     binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
