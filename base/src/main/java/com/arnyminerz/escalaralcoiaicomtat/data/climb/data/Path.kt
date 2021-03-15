@@ -143,7 +143,14 @@ data class Path(
         return BlockingType.UNKNOWN
     }
 
-    fun hasInfo(): Boolean = description != null || builtBy != null
+    /**
+     * Checks if the Path has a description or built by information
+     * @author Arnau Mora
+     * @since 20210316
+     * @return True if the path has information
+     */
+    fun hasInfo(): Boolean =
+        (description != null && description.isNotBlank()) || (builtBy != null && builtBy.isNotBlank())
 
     fun grade(): Grade =
         if (grades.size > 0) grades.first() else throw NoSuchElementException("Grades list is empty")
