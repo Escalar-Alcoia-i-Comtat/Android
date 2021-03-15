@@ -197,6 +197,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                         mapHelper.addSymbolClickListener {
                             if (SETTINGS_CENTER_MARKER_PREF.get(sharedPreferences))
                                 map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+                            markerWindow?.hide()
                             val window = getWindow()
                             val title = window.title
 
