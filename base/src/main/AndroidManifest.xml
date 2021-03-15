@@ -59,9 +59,6 @@
             android:name=".activity.climb.SectorActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.SectorInfoActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activity.isolated.StorageActivity"
             android:screenOrientation="portrait" />
         <activity
