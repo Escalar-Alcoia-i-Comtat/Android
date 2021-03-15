@@ -65,6 +65,10 @@
   description: When code cleanup is done
   color: c1e050
 
+- name: gui
+  description: When code cleanup is done
+  color: 57A639
+
 - name: major
   description: Major changes. Used for release bump
   color: 16970B
