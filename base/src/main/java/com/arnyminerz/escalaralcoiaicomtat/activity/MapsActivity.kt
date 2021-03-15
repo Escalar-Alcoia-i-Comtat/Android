@@ -64,7 +64,7 @@ class MapsActivity : LanguageAppCompatActivity() {
 
     private lateinit var mapHelper: MapHelper
 
-    private var markerWindow: MarkerWindow? = null
+    private var markerWindow: MapHelper.MarkerWindow? = null
     private var markerName: String? = null
 
     private var showingPolyline: GeoGeometry? = null

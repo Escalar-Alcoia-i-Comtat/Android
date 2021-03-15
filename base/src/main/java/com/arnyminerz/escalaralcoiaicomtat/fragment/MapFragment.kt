@@ -45,7 +45,7 @@ class MapFragment : NetworkChangeListenerFragment() {
     }
 
     private var map: MapboxMap? = null
-    private var markerWindow: MarkerWindow? = null
+    private var markerWindow: MapHelper.MarkerWindow? = null
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)

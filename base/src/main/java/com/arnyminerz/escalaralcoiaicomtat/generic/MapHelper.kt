@@ -57,7 +57,7 @@ class MapHelper(private val mapView: MapView) {
             return getIntent(context, title)
         }
 
-        private fun getImageUrl(description: String?): String? {
+        fun getImageUrl(description: String?): String? {
             if (description == null || description.isEmpty()) return null
 
             if (description.startsWith("<img")) {
@@ -627,64 +627,8 @@ class MapHelper(private val mapView: MapView) {
         activity: Activity,
         marker: Symbol,
         rootView: ViewGroup
-    ): MarkerWindow {
-        val latLng = marker.latLng
-
-        val view = activity.layoutInflater.inflate(R.layout.dialog_map_marker, rootView, false)
-        val cardView = view.findViewById<CardView>(R.id.mapInfoCardView)
-        val titleTextView = view.findViewById<TextView>(R.id.map_info_textView)
-        val descriptionTextView = view.findViewById<TextView>(R.id.mapDescTextView)
-        val imageView = view.findViewById<ImageView>(R.id.mapInfoImageView)
-        val enterButton = view.findViewById<FloatingActionButton>(R.id.fab_enter)
-        val mapButton = view.findViewById<FloatingActionButton>(R.id.fab_maps)
-        val buttonsLayout = view.findViewById<LinearLayout>(R.id.actions_layout)
-
-        val anim = AnimationUtils.loadAnimation(activity, R.anim.enter_bottom)
-        anim.duration = MARKER_WINDOW_SHOW_DURATION
-        cardView.show()
-        cardView.startAnimation(anim)
-
-        val window = marker.getWindow()
-        val title = window.title
-        val description = window.message
-        val activityIntent = getTarget(activity, marker) // Info Window Data Class
-
-        Timber.v("Marker title: $title")
-        Timber.v("Marker description: $description")
-
-        titleTextView.text = title
-
-        val imageUrl = getImageUrl(description)
-        if (imageUrl == null)
-            descriptionTextView.text = description
-        else
-            Glide.with(activity)
-                .load(imageUrl)
-                .into(imageView)
-
-        visibility(enterButton, activityIntent != null)
-        visibility(imageView, imageUrl != null)
-        visibility(descriptionTextView, imageUrl == null)
-
-        val gmmIntentUri = latLng.toUri(true, title)
-        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-        mapButton.visibility(true)
-        mapButton.setOnClickListener {
-            activity.startActivity(mapIntent)
-        }
-
-        if (activityIntent != null)
-            enterButton.setOnClickListener {
-                Timber.v("Launching intent...")
-                activity.startActivity(activityIntent)
-            }
-
-        buttonsLayout.orientation =
-            if (imageUrl != null) LinearLayout.VERTICAL
-            else LinearLayout.HORIZONTAL
-
-        return MarkerWindow(activity, marker, rootView, view, cardView)
-    }
+    ): MarkerWindow =
+        MarkerWindow(activity, marker, rootView)
 
     /**
      * Changes the map view visibility
@@ -717,52 +661,104 @@ class MapHelper(private val mapView: MapView) {
      */
     @UiThread
     fun show() = visibility(true)
+
+    inner class MarkerWindow
+    @UiThread constructor(
+        private val activity: Activity,
+        marker: Symbol,
+        rootView: ViewGroup
+    ) {
+        private var destroyed = false
+
+        private var view: View =
+            activity.layoutInflater.inflate(R.layout.dialog_map_marker, rootView, false)
+        private var cardView: CardView = view.findViewById(R.id.mapInfoCardView)
+        private var titleTextView: TextView = view.findViewById(R.id.map_info_textView)
+        private var descriptionTextView: TextView = view.findViewById(R.id.mapDescTextView)
+        private var imageView: ImageView = view.findViewById(R.id.mapInfoImageView)
+        private var enterButton: FloatingActionButton = view.findViewById(R.id.fab_enter)
+        private var mapButton: FloatingActionButton = view.findViewById(R.id.fab_maps)
+        private var buttonsLayout: LinearLayout = view.findViewById(R.id.actions_layout)
+
+        init {
+            val anim = AnimationUtils.loadAnimation(activity, R.anim.enter_bottom)
+            anim.duration = MARKER_WINDOW_SHOW_DURATION
+            cardView.show()
+            cardView.startAnimation(anim)
+
+            val window = marker.getWindow()
+            val title = window.title
+            val description = window.message
+            val activityIntent = getTarget(activity, marker) // Info Window Data Class
+
+            Timber.v("Marker title: $title")
+            Timber.v("Marker description: $description")
+
+            titleTextView.text = title
+
+            val imageUrl = getImageUrl(description)
+            if (imageUrl == null)
+                descriptionTextView.text = description
+            else
+                Glide.with(activity)
+                    .load(imageUrl)
+                    .into(imageView)
+
+            visibility(enterButton, activityIntent != null)
+            visibility(imageView, imageUrl != null)
+            visibility(descriptionTextView, imageUrl == null)
+
+            val gmmIntentUri = marker.latLng.toUri(true, title)
+            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+            mapButton.visibility(true)
+            mapButton.setOnClickListener {
+                activity.startActivity(mapIntent)
+            }
+
+            if (activityIntent != null)
+                enterButton.setOnClickListener {
+                    Timber.v("Launching intent...")
+                    activity.startActivity(activityIntent)
+                }
+
+            buttonsLayout.orientation =
+                if (imageUrl != null) LinearLayout.VERTICAL
+                else LinearLayout.HORIZONTAL
+
+            rootView.addView(cardView, view.layoutParams)
+        }
+
+        /**
+         * Hides the window
+         * @author Arnau Mora
+         * @since 20210315
+         * @throws IllegalStateException If the method is called when the card has already been destroyed
+         */
+        fun hide() {
+            if (destroyed)
+                throw IllegalStateException("The card has already been destroyed")
+
+            Timber.v("Hiding MarkerWindow")
+            val anim = AnimationUtils.loadAnimation(activity, R.anim.exit_bottom)
+            anim.duration = MARKER_WINDOW_HIDE_DURATION
+            anim.setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationRepeat(animation: Animation?) {}
+
+                override fun onAnimationEnd(animation: Animation?) {
+                    Timber.d("Finished animation")
+                    cardView.hide()
+                    (cardView.parent as ViewManager).removeView(cardView)
+                    destroyed = true
+                }
+
+                override fun onAnimationStart(animation: Animation?) {
+                    view.show()
+                }
+            })
+            cardView.startAnimation(anim)
+        }
+    }
 }
 
 class MapNotInitializedException(message: String) : Exception(message)
 class MapAnyDataToLoadException(message: String) : Exception(message)
-
-data class MarkerWindow
-@UiThread
-constructor(
-    private val context: Context,
-    private val marker: Symbol,
-    private val viewManager: ViewManager,
-    private val parentView: View,
-    private val view: View
-) {
-    private var destroyed = false
-    init {
-        viewManager.addView(view, parentView.layoutParams)
-    }
-
-    /**
-     * Hides the window
-     * @author Arnau Mora
-     * @since 20210315
-     * @throws IllegalStateException If the method is called when the card has already been destroyed
-     */
-    fun hide() {
-        if (destroyed)
-            throw IllegalStateException("The card has already been destroyed")
-
-        Timber.v("Hiding MarkerWindow")
-        val anim = AnimationUtils.loadAnimation(context, R.anim.exit_bottom)
-        anim.duration = MARKER_WINDOW_HIDE_DURATION
-        anim.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationRepeat(animation: Animation?) {}
-
-            override fun onAnimationEnd(animation: Animation?) {
-                Timber.d("Finished animation")
-                view.hide()
-                (view as ViewManager).removeView(view)
-                destroyed = true
-            }
-
-            override fun onAnimationStart(animation: Animation?) {
-                view.show()
-            }
-        })
-        view.startAnimation(anim)
-    }
-}
