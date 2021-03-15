@@ -358,13 +358,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
-     * Checks if the Data Class is downloaded
+     * Gets the DownloadStatus of the DataClass
      * @author Arnau Mora
      * @since 20210313
      * @param context The context to run from
      * @return a matching DownloadStatus representing the Data Class' download status
      */
-    fun isDownloaded(context: Context): DownloadStatus {
+    fun downloadStatus(context: Context): DownloadStatus {
         Timber.d("$namespace:$objectId Checking if downloaded")
         var result: DownloadStatus? = null
         when {
@@ -377,7 +377,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     result = DownloadStatus.NOT_DOWNLOADED
                 } else for (child in children)
                     if (child is DataClass<*, *>) {
-                        if (!child.isDownloaded(context)) {
+                        if (!child.downloadStatus(context)) {
                             Timber.d("There's a non-downloaded children (${child.namespace}:${child.objectId})")
                             result = DownloadStatus.NOT_DOWNLOADED
                         }
@@ -397,7 +397,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     fun hasAnyDownloadedChildren(context: Context): Boolean {
         for (child in children)
-            if (child is DataClass<*, *> && child.isDownloaded(context) == DownloadStatus.DOWNLOADED)
+            if (child is DataClass<*, *> && child.downloadStatus(context) == DownloadStatus.DOWNLOADED)
                 return true
         return false
     }

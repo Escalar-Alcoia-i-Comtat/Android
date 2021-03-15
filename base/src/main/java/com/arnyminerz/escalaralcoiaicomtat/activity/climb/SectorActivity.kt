@@ -5,8 +5,10 @@ import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.*
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
+import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.count
@@ -16,7 +18,6 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.ARGUMENT_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.ARGUMENT_ZONE_ID
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.SectorFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -24,7 +25,7 @@ import com.parse.ParseObject
 import com.parse.ParseQuery
 import timber.log.Timber
 
-class SectorActivity : NetworkChangeListenerActivity() {
+class SectorActivity : LanguageAppCompatActivity() {
     private var transitionName: String? = null
 
     private lateinit var areaId: String
@@ -41,13 +42,23 @@ class SectorActivity : NetworkChangeListenerActivity() {
      * @param newTitle The new title to set
      */
     @UiThread
-    fun updateTitle(newTitle: String? = null) {
+    fun updateTitle(newTitle: String? = null, isDownloaded: Boolean = false) {
         if (newTitle == null)
             binding.titleTextView.hide()
         else {
             binding.titleTextView.text = newTitle
             binding.titleTextView.transitionName = transitionName
             binding.titleTextView.show()
+        }
+        binding.statusImageView.apply {
+            if (isDownloaded) {
+                setImageResource(R.drawable.cloud_check)
+                show()
+            } else if (!appNetworkState.hasInternet) {
+                setImageResource(R.drawable.ic_round_signal_cellular_off_24)
+                show()
+            } else
+                hide()
         }
     }
 
@@ -105,7 +116,7 @@ class SectorActivity : NetworkChangeListenerActivity() {
         updateTitle()
 
         binding.backImageButton.setOnClickListener { onBackPressed() }
-        binding.noInternetImageView.setOnClickListener { it.performLongClick() }
+        binding.statusImageView.setOnClickListener { if (!appNetworkState.hasInternet) it.performLongClick() }
 
         val parentQuery = ParseQuery.getQuery<ParseObject>(Zone.NAMESPACE)
         parentQuery.whereEqualTo("objectId", zoneId)
@@ -177,15 +188,6 @@ class SectorActivity : NetworkChangeListenerActivity() {
         outState.putString(EXTRA_ZONE.key, zoneId)
         outState.putInt(EXTRA_POSITION.key, binding.sectorViewPager.currentItem)
         super.onSaveInstanceState(outState)
-    }
-
-    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        if (!this::binding.isInitialized)
-            return Timber.e("Binding not initialized")
-
-        val hasInternet = state.hasInternet
-        Timber.v("Has internet? $hasInternet")
-        visibility(binding.noInternetImageView, !hasInternet)
     }
 
     private fun goBack() {

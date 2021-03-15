@@ -39,6 +39,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
     private lateinit var sector: Sector
 
     private var loaded = false
+    private var isDownloaded = false
     private var maximized = false
     private var notMaximizedImageHeight = 0
 
@@ -117,7 +118,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             return Timber.w("Could not load since class is not initialized")
 
         if (loaded) {
-            sectorActivity?.updateTitle(sector.displayName)
+            sectorActivity?.updateTitle(sector.displayName, isDownloaded)
             loadImage()
             return
         }
@@ -126,6 +127,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
         sectorActivity?.setLoading(true)
         sector = AREAS[areaId]!![zoneId][sectorIndex]
 
+        isDownloaded = sector.downloadStatus(requireContext()).isDownloaded()
         sectorActivity?.updateTitle(sector.displayName)
         binding.sectorTextView.text = sector.displayName
 
@@ -134,6 +136,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
         binding.sectorImageViewLayout.layoutParams.height = notMaximizedImageHeight
         binding.sectorImageViewLayout.requestLayout()
 
+        sectorActivity?.updateTitle(sector.displayName, isDownloaded)
         loadImage()
 
         if (context != null) {

@@ -127,13 +127,13 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             binding.progressBar.isIndeterminate = true
 
             for (area in AREAS.values) {
-                if (area.isDownloaded(this) == DownloadStatus.DOWNLOADED)
+                if (area.downloadStatus(this) == DownloadStatus.DOWNLOADED)
                     iterateUpdate(area)
                 else for (zone in area)
-                    if (zone.isDownloaded(this) == DownloadStatus.DOWNLOADED)
+                    if (zone.downloadStatus(this) == DownloadStatus.DOWNLOADED)
                         iterateUpdate(zone)
                     else for (sector in zone)
-                        if (sector.isDownloaded(this) == DownloadStatus.DOWNLOADED)
+                        if (sector.downloadStatus(this) == DownloadStatus.DOWNLOADED)
                             iterateUpdate(sector)
             }
         }

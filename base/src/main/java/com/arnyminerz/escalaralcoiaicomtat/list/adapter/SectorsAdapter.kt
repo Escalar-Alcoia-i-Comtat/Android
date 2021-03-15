@@ -98,7 +98,7 @@ class SectorsAdapter(
                 if (!appNetworkState.hasInternet)
                     dataClassListActivity.toast(R.string.toast_error_no_internet)
                 else
-                    when (sector.isDownloaded(dataClassListActivity)) {
+                    when (sector.downloadStatus(dataClassListActivity)) {
                         DownloadStatus.NOT_DOWNLOADED -> {
                             val result = sector.download(dataClassListActivity)
                             result.observe(dataClassListActivity) { workInfo ->
@@ -140,7 +140,7 @@ class SectorsAdapter(
         downloadImagebutton: ImageButton,
         downloadProgressbar: ProgressBar
     ) {
-        when (sector.isDownloaded(dataClassListActivity)) {
+        when (sector.downloadStatus(dataClassListActivity)) {
             DownloadStatus.NOT_DOWNLOADED -> downloadImagebutton.setImageResource(R.drawable.download)
             DownloadStatus.DOWNLOADING -> {
                 downloadImagebutton.setImageResource(R.drawable.download_outline)
