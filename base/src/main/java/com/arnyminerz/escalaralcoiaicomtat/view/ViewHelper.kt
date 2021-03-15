@@ -131,7 +131,7 @@ fun View.visibility(visible: Boolean, setGone: Boolean = true, debug: Boolean = 
  * Sets the visibility of a view to gone
  */
 @UiThread
-fun View.hide() = visibility(false)
+fun View.hide(setGone: Boolean = true) = visibility(false, setGone = setGone)
 
 /**
  * Sets the visibility of a view to visible

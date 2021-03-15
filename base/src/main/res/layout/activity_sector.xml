@@ -96,15 +96,16 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/noInternetImageView"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:id="@+id/statusImageView"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_margin="12dp"
         android:background="@drawable/transparent"
         android:contentDescription="@string/image_desc_no_internet"
-        android:src="@drawable/ic_round_signal_wifi_off_24"
+        android:src="@drawable/ic_round_signal_cellular_off_24"
         android:tooltipText="@string/image_desc_no_internet"
         android:translationZ="10dp"
+        app:tint="@color/bg_color"
         app:layout_constraintBottom_toBottomOf="@+id/cardView4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

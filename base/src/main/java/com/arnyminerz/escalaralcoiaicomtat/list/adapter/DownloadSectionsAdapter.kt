@@ -47,7 +47,7 @@ class DownloadSectionsAdapter(
 
             visibility(progressBar, true)
 
-            val sectionDownloadStatus = section.isDownloaded(mainActivity)
+            val sectionDownloadStatus = section.downloadStatus(mainActivity)
             val sectionHasDownloadedChildren = section.hasAnyDownloadedChildren(mainActivity)
             downloadButton.setOnClickListener {
                 if (!appNetworkState.hasInternet)
@@ -73,7 +73,7 @@ class DownloadSectionsAdapter(
                                 else -> downloadProgressBar.isIndeterminate = true
                             }
                         }
-                    } else if (section.isDownloaded(mainActivity) == DownloadStatus.DOWNLOADING)
+                    } else if (section.downloadStatus(mainActivity) == DownloadStatus.DOWNLOADING)
                     mainActivity.toast(R.string.message_already_downloading)
             }
             visibility(downloadProgressBar, sectionDownloadStatus == DownloadStatus.DOWNLOADING)
