@@ -466,7 +466,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                     mapHelper.move(position, CURRENT_LOCATION_DEFAULT_ZOOM)
                     binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_fixed_24)
                 } else {
-                    Timber.e("No known location!")
+                    Timber.w("No known location!")
                     binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
                 }
             }
