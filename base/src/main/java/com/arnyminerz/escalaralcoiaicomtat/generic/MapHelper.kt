@@ -630,7 +630,7 @@ class MapHelper(private val mapView: MapView) {
     ): MarkerWindow {
         val latLng = marker.latLng
 
-        val view = activity.layoutInflater.inflate(R.layout.dialog_map_marker, rootView)
+        val view = activity.layoutInflater.inflate(R.layout.dialog_map_marker, rootView, false)
         val cardView = view.findViewById<CardView>(R.id.mapInfoCardView)
         val titleTextView = view.findViewById<TextView>(R.id.map_info_textView)
         val descriptionTextView = view.findViewById<TextView>(R.id.mapDescTextView)
@@ -683,7 +683,7 @@ class MapHelper(private val mapView: MapView) {
             if (imageUrl != null) LinearLayout.VERTICAL
             else LinearLayout.HORIZONTAL
 
-        return MarkerWindow(activity, marker, rootView, cardView)
+        return MarkerWindow(activity, marker, rootView, view, cardView)
     }
 
     /**
@@ -721,21 +721,42 @@ class MapHelper(private val mapView: MapView) {
 
 class MapNotInitializedException(message: String) : Exception(message)
 class MapAnyDataToLoadException(message: String) : Exception(message)
-data class MarkerWindow(
-    val context: Context,
-    val marker: Symbol,
-    val parentView: ViewManager,
-    val view: View
+
+data class MarkerWindow
+@UiThread
+constructor(
+    private val context: Context,
+    private val marker: Symbol,
+    private val viewManager: ViewManager,
+    private val parentView: View,
+    private val view: View
 ) {
+    private var destroyed = false
+    init {
+        viewManager.addView(view, parentView.layoutParams)
+    }
+
+    /**
+     * Hides the window
+     * @author Arnau Mora
+     * @since 20210315
+     * @throws IllegalStateException If the method is called when the card has already been destroyed
+     */
     fun hide() {
+        if (destroyed)
+            throw IllegalStateException("The card has already been destroyed")
+
+        Timber.v("Hiding MarkerWindow")
         val anim = AnimationUtils.loadAnimation(context, R.anim.exit_bottom)
         anim.duration = MARKER_WINDOW_HIDE_DURATION
         anim.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationRepeat(animation: Animation?) {}
 
             override fun onAnimationEnd(animation: Animation?) {
+                Timber.d("Finished animation")
                 view.hide()
-                parentView.removeView(view)
+                (view as ViewManager).removeView(view)
+                destroyed = true
             }
 
             override fun onAnimationStart(animation: Animation?) {
