@@ -245,4 +245,8 @@
     <string name="status_downloading">Baixant…</string>
     <string name="status_storing">Desant…</string>
     <string name="status_loading_progress">Carregant %d/%d</string>
+    <string name="status_downloaded">Baixat</string>
+    <string name="status_no_internet">Sense Connexió a Internet</string>
+    <string name="notification_download_progress_title">Baixant…</string>
+    <string name="notification_download_progress_message">Baixant %s</string>
 </resources>

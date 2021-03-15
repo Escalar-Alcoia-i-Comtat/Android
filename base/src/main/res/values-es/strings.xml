@@ -246,4 +246,8 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="status_downloading">Descargando…</string>
     <string name="status_storing">Guardando…</string>
     <string name="status_loading_progress">Cargando %d/%d</string>
+    <string name="status_downloaded">Descargado</string>
+    <string name="status_no_internet">Sin conexión a Internet</string>
+    <string name="notification_download_progress_title">Descargando…</string>
+    <string name="notification_download_progress_message">Descargando %s</string>
 </resources>
