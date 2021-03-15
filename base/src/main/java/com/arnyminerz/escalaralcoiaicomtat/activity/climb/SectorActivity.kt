@@ -121,7 +121,7 @@ class SectorActivity : LanguageAppCompatActivity() {
         updateTitle()
 
         binding.backImageButton.setOnClickListener { onBackPressed() }
-        binding.statusImageView.setOnClickListener { if (!appNetworkState.hasInternet) it.performLongClick() }
+        binding.statusImageView.setOnClickListener { it.performLongClick() }
 
         val parentQuery = ParseQuery.getQuery<ParseObject>(Zone.NAMESPACE)
         parentQuery.whereEqualTo("objectId", zoneId)
