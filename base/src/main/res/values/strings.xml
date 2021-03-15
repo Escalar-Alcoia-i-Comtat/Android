@@ -59,6 +59,7 @@
     <string name="status_null" translatable="false">-</string>
     <string name="status_null_double" translatable="false">--</string>
     <string name="status_not_downloaded">Not downloaded</string>
+    <string name="status_downloaded">Downloaded</string>
     <string name="status_permission_granted">Permission Granted</string>
     <string name="status_not_running">not Running</string>
     <string name="status_running">Running</string>

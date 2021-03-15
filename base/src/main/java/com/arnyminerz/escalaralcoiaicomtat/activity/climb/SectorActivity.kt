@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
+import android.os.Build
 import android.os.Bundle
 import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
@@ -53,9 +54,13 @@ class SectorActivity : LanguageAppCompatActivity() {
         binding.statusImageView.apply {
             if (isDownloaded) {
                 setImageResource(R.drawable.cloud_check)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    tooltipText = getString(R.string.status_downloaded)
                 show()
             } else if (!appNetworkState.hasInternet) {
                 setImageResource(R.drawable.ic_round_signal_cellular_off_24)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    tooltipText = getString(R.string.status_no_internet)
                 show()
             } else
                 hide()
