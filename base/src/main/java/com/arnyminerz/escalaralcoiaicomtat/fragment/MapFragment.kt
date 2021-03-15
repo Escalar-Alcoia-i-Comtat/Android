@@ -45,7 +45,7 @@ class MapFragment : NetworkChangeListenerFragment() {
     }
 
     private var map: MapboxMap? = null
-    private var markerWindow: MarkerWindow? = null
+    private var markerWindow: MapHelper.MarkerWindow? = null
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -74,8 +74,9 @@ class MapFragment : NetworkChangeListenerFragment() {
                     if (SETTINGS_CENTER_MARKER_PREF.get(requireContext().sharedPreferences))
                         map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
 
-                    context?.let {
-                        markerWindow = mapHelper.infoCard(it, this, binding.dialogMapMarker)
+                    markerWindow?.hide()
+                    activity?.let {
+                        markerWindow = mapHelper.infoCard(it, this, binding.root)
                     }
 
                     true

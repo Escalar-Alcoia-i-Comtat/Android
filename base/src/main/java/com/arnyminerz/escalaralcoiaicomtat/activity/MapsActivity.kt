@@ -27,7 +27,6 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import org.w3c.dom.Document
@@ -64,7 +63,7 @@ class MapsActivity : LanguageAppCompatActivity() {
 
     private lateinit var mapHelper: MapHelper
 
-    private var markerWindow: MarkerWindow? = null
+    private var markerWindow: MapHelper.MarkerWindow? = null
     private var markerName: String? = null
 
     private var showingPolyline: GeoGeometry? = null
@@ -168,8 +167,6 @@ class MapsActivity : LanguageAppCompatActivity() {
                         loadData()
 
                     runOnUiThread {
-                        visibility(binding.dialogMapMarker.mapInfoCardView, false)
-
                         Timber.v("Loading current location")
                         tryToShowCurrentLocation()
 
@@ -198,7 +195,8 @@ class MapsActivity : LanguageAppCompatActivity() {
 
                         mapHelper.addSymbolClickListener {
                             if (SETTINGS_CENTER_MARKER_PREF.get(sharedPreferences))
-                                map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+                                mapHelper.move(latLng)
+                            markerWindow?.hide()
                             val window = getWindow()
                             val title = window.title
 
@@ -206,7 +204,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                                 markerWindow = mapHelper.infoCard(
                                     this@MapsActivity,
                                     this,
-                                    binding.dialogMapMarker
+                                    view
                                 )
 
                                 true

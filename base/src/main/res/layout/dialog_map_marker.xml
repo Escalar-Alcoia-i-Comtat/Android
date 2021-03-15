@@ -6,10 +6,14 @@
     android:id="@+id/mapInfoCardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_gravity="bottom|end"
     app:cardCornerRadius="5dp"
     app:cardElevation="4dp"
     app:cardPreventCornerOverlap="true"
-    app:cardUseCompatPadding="true">
+    app:cardUseCompatPadding="true"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -61,6 +65,7 @@
             android:text="@string/placeholder"
             android:textColor="?attr/text_dark"
             android:textSize="26sp"
+            android:ellipsize="end"
             app:layout_constraintEnd_toStartOf="@+id/actions_layout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
