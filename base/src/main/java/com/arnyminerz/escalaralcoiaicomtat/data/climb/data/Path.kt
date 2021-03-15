@@ -11,7 +11,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.parse.ParseObject
 import java.util.*
 import kotlin.NoSuchElementException
-import kotlin.collections.ArrayList
 
 enum class CompletedType(val index: Int) {
     FIRST(0),
@@ -174,30 +173,4 @@ data class Path(
 
         const val NAMESPACE = "Path"
     }
-}
-
-/**
- * Sorts the collection based on sketchId
- * @author Arnau Mora
- * @since 20210315
- */
-fun MutableCollection<Path>.sort(): MutableCollection<Path> {
-    val newCollection = ArrayList<Path>()
-    val list = arrayListOf<Any>()
-    list.addAll(this)
-
-    Collections.sort(list, object : Comparator<Any> {
-        override fun compare(a: Any, b: Any): Int {
-            if (a !is Path || b !is Path)
-                return -1
-
-            val sketchId1 = a.sketchId
-            val sketchId2 = b.sketchId
-            return sketchId1.compareTo(sketchId2)
-        }
-    })
-    for (i in newCollection)
-        newCollection.add(i)
-
-    return newCollection
 }

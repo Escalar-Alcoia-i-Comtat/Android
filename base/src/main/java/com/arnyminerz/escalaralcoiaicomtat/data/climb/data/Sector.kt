@@ -113,7 +113,7 @@ data class Sector constructor(
         val result = arrayListOf<Path>()
         for (load in loads)
             result.add(Path(load))
-        result.sort()
+        result.sortBy { it.sketchId }
         return result
     }
 
