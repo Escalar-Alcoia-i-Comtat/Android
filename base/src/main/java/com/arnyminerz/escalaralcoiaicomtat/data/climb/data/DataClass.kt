@@ -233,7 +233,10 @@ enum class DataClasses(val namespace: String) {
     }
 }
 
-abstract class DataClassImpl(open val objectId: String) : Parcelable
+abstract class DataClassImpl(open val objectId: String, open val namespace: String) : Parcelable {
+    protected val pin: String
+        get() = "${DATA_FIX_LABEL}_${namespace}_$objectId"
+}
 
 // A: List type
 // B: Parent Type
@@ -245,12 +248,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     open val kmlAddress: String?,
     @DrawableRes val placeholderDrawable: Int,
     @DrawableRes val errorPlaceholderDrawable: Int,
-    open val namespace: String,
+    override val namespace: String,
     open val childrenNamespace: String
-) : DataClassImpl(objectId), Iterable<A> {
-    protected val pin: String
-        get() = "${DATA_FIX_LABEL}_${Area.NAMESPACE}_$objectId"
-
+) : DataClassImpl(objectId, namespace), Iterable<A> {
     protected val innerChildren = arrayListOf<A>()
 
     /**
