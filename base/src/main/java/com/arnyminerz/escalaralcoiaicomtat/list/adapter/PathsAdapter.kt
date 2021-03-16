@@ -18,11 +18,9 @@ import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.Grade
-import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
@@ -99,30 +97,25 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                     Timber.e("Could not create dialog")
             }
 
-        Timber.v("Getting network state...")
-        if (!appNetworkState.hasInternet)
-            runAsync {
-                try {
-                    Timber.v("Checking if blocked...")
-                    val blocked = path.isBlocked()
+        runAsync {
+            Timber.v("Checking if blocked...")
+            val blocked = path.isBlocked()
+            Timber.d("Path ${path.objectId} block status: $blocked")
 
-                    activity.runOnUiThread {
-                        Timber.d("Binding ViewHolder for path $position: ${path.displayName}. Blocked: $blocked")
+            activity.runOnUiThread {
+                Timber.d("Binding ViewHolder for path $position: ${path.displayName}. Blocked: $blocked")
 
-                        val anyBlocking = blocked != BlockingType.UNKNOWN
-                        if (anyBlocking) {
-                            setTextColor(holder.titleTextView, activity, R.color.grade_red)
-                            holder.warningTextView.text =
-                                activity.resources.getStringArray(R.array.path_warnings)[blocked.index]
-                        }
-                        visibility(holder.warningImageView, anyBlocking)
-                        visibility(holder.warningCardView, anyBlocking)
-                        visibility(holder.warningNameImageView, anyBlocking)
-                    }
-                } catch (_: NoInternetAccessException) {
-                    Timber.w("Could not check if the path is blocked. No Internet.")
+                val anyBlocking = blocked != BlockingType.UNKNOWN
+                if (anyBlocking) {
+                    setTextColor(holder.titleTextView, activity, R.color.grade_red)
+                    holder.warningTextView.text =
+                        activity.resources.getStringArray(R.array.path_warnings)[blocked.index]
                 }
+                visibility(holder.warningImageView, anyBlocking)
+                visibility(holder.warningCardView, anyBlocking)
+                visibility(holder.warningNameImageView, anyBlocking)
             }
+        }
 
         holder.titleTextView.text = path.displayName
         holder.difficultyTextView.setText(
