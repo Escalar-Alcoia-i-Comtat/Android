@@ -11,7 +11,7 @@ data class FixedSafesData(
     val tensorCount: Int,
     val pitonCount: Int,
     val burilCount: Int
-) : SafesData {
+) : SafesData() {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
         parcel.readInt(),
@@ -21,13 +21,8 @@ data class FixedSafesData(
         parcel.readInt()
     )
 
-    override fun count(): Int = 5
-
-    override fun sum(): Int = paraboltCount + spitCount + tensorCount + pitonCount + burilCount
-
-    @kotlin.jvm.Throws(ArrayIndexOutOfBoundsException::class)
-    override operator fun get(index: Int): SafeCountData =
-        arrayOf(
+    override fun list(): List<SafeCountData> =
+        listOf(
             SafeCountData(
                 paraboltCount,
                 R.string.safe_parabolt,
@@ -53,7 +48,7 @@ data class FixedSafesData(
                 R.string.safe_buril,
                 R.drawable.ic_buril
             )
-        )[index]
+        )
 
     override fun toJSONString(): String {
         return "{" +

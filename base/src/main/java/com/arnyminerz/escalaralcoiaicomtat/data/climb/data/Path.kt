@@ -114,21 +114,22 @@ data class Path(
         }
     }
 
+    /**
+     * Checks if the Path has safe count. This doesn't include the safe types marked with a 1, since
+     * the 1 is used to mark as "undetermined amount".
+     * @author Arnau Mora
+     * @since 20210316
+     * @return If the path has safes count.
+     */
     fun hasSafeCount(): Boolean {
-        var anyGreaterThanOne = false
+        for ((_, value) in fixedSafesData)
+            if (value > 1)
+                return true
 
-        for (c in 0 until fixedSafesData.count())
-            fixedSafesData[c].let { data ->
-                if (data.count > 1)
-                    anyGreaterThanOne = true
-            }
-
-        return anyGreaterThanOne
+        return false
     }
 
-    override fun toString(): String {
-        return displayName
-    }
+    override fun toString(): String = displayName
 
     override fun compareTo(other: Path): Int =
         when {

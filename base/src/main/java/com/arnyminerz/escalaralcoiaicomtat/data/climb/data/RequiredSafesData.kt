@@ -11,7 +11,7 @@ data class RequiredSafesData(
     val stripsRequired: Boolean,
     val pitonRequired: Boolean,
     val nailRequired: Boolean
-) : SafesData {
+) : SafesData() {
     constructor(parcel: Parcel) : this(
         parcel.readByte() != 0.toByte(),
         parcel.readByte() != 0.toByte(),
@@ -32,12 +32,8 @@ data class RequiredSafesData(
                 "}"
     }
 
-    override fun count(): Int = 6
-    override fun sum(): Int = 0
-
-    @kotlin.jvm.Throws(ArrayIndexOutOfBoundsException::class)
-    override operator fun get(index: Int): SafeCountData =
-        arrayOf(
+    override fun list(): List<SafeCountData> =
+        listOf(
             SafeCountData(
                 lanyardRequired,
                 R.string.safe_lanyard,
@@ -68,7 +64,7 @@ data class RequiredSafesData(
                 R.string.safe_nail,
                 R.drawable.ic_ungla
             )
-        )[index]
+        )
 
     fun any(): Boolean = lanyardRequired || crackerRequired || friendRequired || stripsRequired ||
             pitonRequired || nailRequired
