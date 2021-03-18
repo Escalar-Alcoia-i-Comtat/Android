@@ -30,22 +30,24 @@ class Notification private constructor(private val builder: Builder) {
     fun show() = with(builder) {
         val notificationBuilder = NotificationCompat.Builder(context, channelId!!)
         notificationBuilder.setSmallIcon(icon!!)
-        title?.let { notificationBuilder.setContentTitle(it) }
-        text?.let { notificationBuilder.setContentText(it) }
-        info?.let { notificationBuilder.setContentInfo(it) }
-        longText?.let {
+        if (title != null)
+            notificationBuilder.setContentTitle(title)
+        if (text != null)
+            notificationBuilder.setContentText(text)
+        if (info != null)
+            notificationBuilder.setContentInfo(info)
+        if (longText != null)
             notificationBuilder.setStyle(
                 NotificationCompat.BigTextStyle()
-                    .setBigContentTitle(it)
-                    .bigText(it)
+                    .setBigContentTitle(title)
+                    .bigText(longText)
             )
-        } ?: text?.let {
+        else if (text != null)
             notificationBuilder.setStyle(
                 NotificationCompat.BigTextStyle()
-                    .setBigContentTitle(it)
-                    .bigText(it)
+                    .bigText(text)
             )
-        }
+
         intent?.let { notificationBuilder.setContentIntent(it) }
         progress?.let { value, max ->
             if (value < 0)
