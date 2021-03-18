@@ -10,6 +10,7 @@ import androidx.collection.arrayMapOf
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.arnyminerz.escalaralcoiaicomtat.exception.notification.NullChannelIdException
+import com.arnyminerz.escalaralcoiaicomtat.exception.notification.NullIconException
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
 
 private fun generateNotificationId(): Int {
@@ -28,7 +29,7 @@ class Notification private constructor(private val builder: Builder) {
 
     fun show() = with(builder) {
         val notificationBuilder = NotificationCompat.Builder(context, channelId!!)
-        icon?.let { notificationBuilder.setSmallIcon(it) }
+        notificationBuilder.setSmallIcon(icon!!)
         title?.let { notificationBuilder.setContentTitle(it) }
         text?.let { notificationBuilder.setContentText(it) }
         info?.let { notificationBuilder.setContentInfo(it) }
@@ -317,13 +318,21 @@ class Notification private constructor(private val builder: Builder) {
          * @return The built notification
          * @throws IllegalStateException If the notification id already exists
          * @throws NullChannelIdException If the channel id is null
+         * @throws NullIconException If the icon has not been specified
          */
-        @Throws(IllegalStateException::class, NullChannelIdException::class)
+        @Throws(IllegalStateException::class, NullChannelIdException::class, NullIconException::class)
         fun build(): Notification {
+            var exception: Exception? = null
             if (channelId == null)
-                throw NullChannelIdException()
+                exception = NullChannelIdException()
+            if (icon == null)
+                exception = NullIconException("The icon has not been set")
             if (builders.containsKey(id))
-                throw IllegalStateException("The specified notification id is already registered")
+                exception = IllegalStateException("The specified notification id is already registered")
+
+            if (exception != null)
+                throw exception
+
             return Notification(this)
         }
     }
