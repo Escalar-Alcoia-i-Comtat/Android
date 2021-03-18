@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -26,9 +27,11 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
+import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotOpenStreamException
 import com.arnyminerz.escalaralcoiaicomtat.exception.MissingPermissionException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -101,6 +104,9 @@ class MapHelper(private val mapView: MapView) {
     val isLoaded: Boolean
         get() = symbolManager != null && fillManager != null && lineManager != null &&
                 map != null && style != null && style!!.isFullyLoaded && mapSetUp
+
+    val kmlAddress: String?
+        get() = loadedKMLAddress
 
     fun onCreate(savedInstanceState: Bundle?) = mapView.onCreate(savedInstanceState)
 
@@ -614,6 +620,62 @@ class MapHelper(private val mapView: MapView) {
                 ), animate
             )
         }
+    }
+
+    /**
+     * Stores the map's features into a GPX file
+     * @author Arnau Mora
+     * @since 20210318
+     * @param context The context to run from
+     * @param uri The uri to store at
+     * @param title The title of the GPX
+     *
+     * @throws FileNotFoundException If the uri could not be openned
+     */
+    @Throws(FileNotFoundException::class)
+    fun storeGPX(context: Context, uri: Uri, title: String = "Escalar Alcoià i Comtat") {
+        val contentResolver = context.contentResolver
+        val stream = contentResolver.openOutputStream(uri) ?: throw CouldNotOpenStreamException()
+        val description = context.getString(R.string.attr_gpx)
+
+        Timber.v("  Storing GPX data...")
+        stream.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>")
+        stream.write("<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" creator=\"EscalarAlcoiaIComtat-App\" version=\"1.1\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">")
+        stream.write("<metadata>")
+        stream.write("<link href=\"https://escalaralcoiaicomtat.centrexcursionistalcoi.org/\">")
+        stream.write("<text>Escalar Alcoià i Comtat</text>")
+        stream.write("</link>")
+        stream.write("<name><![CDATA[ $title ]]></name>")
+        stream.write("<desc><![CDATA[ $description ]]></desc>")
+        stream.write("</metadata>")
+        stream.write("<trk>")
+        stream.write("<name><![CDATA[ $title ]]></name>")
+        stream.write("<desc><![CDATA[ $description ]]></desc>")
+        for (geometry in geometries) {
+            stream.write("<trkseg>")
+            for ((p, point) in geometry.points.withIndex()) {
+                stream.write("<trkpt lat=\"${point.latitude}\" lon=\"${point.longitude}\">")
+                stream.write("<ele>0</ele>")
+                stream.write("<name>$p</name>")
+                stream.write("</trkpt>")
+            }
+            stream.write("</trkseg>")
+        }
+        stream.write("</trk>")
+        for (marker in markers) {
+            val pos = marker.position
+            val lat = pos.latitude
+            val lon = pos.longitude
+            val window = marker.windowData
+            stream.write("<wpt lat=\"$lat\" lon=\"$lon\">")
+            if (window != null) {
+                stream.write("<name>${window.title}</name>")
+                if (window.message != null)
+                    stream.write("<desc>${window.message}</name>")
+            }
+            stream.write("</wpt>")
+        }
+        stream.write("</gpx>")
     }
 
     /**
