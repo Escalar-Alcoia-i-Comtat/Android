@@ -672,7 +672,7 @@ class MapHelper(private val mapView: MapView) {
                 stream.write("<name>${window.title}</name>")
                 if (window.message != null) {
                     val message = window.message!!
-                        .replace("<br>","<br/>")
+                        .replace("<br>", "<br/>")
                     stream.write("<desc>${message}</desc>")
                 }
             }
