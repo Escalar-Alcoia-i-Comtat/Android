@@ -12,7 +12,7 @@ private const val BUFFER = 2048
  * @author Arnau Mora
  * @since 20210318
  * @param file The source file
- * @param target The target file
+ * @param targetStream The target file's output stream
  *
  * @throws NullPointerException If the entry name is null
  * @throws IllegalArgumentException If the entry name is longer than 0xFFFF byte
@@ -28,13 +28,11 @@ private const val BUFFER = 2048
     ZipException::class,
     IOException::class
 )
-fun zipFile(file: File, target: File) {
+fun zipFile(file: File, targetStream: OutputStream) {
     val origin: BufferedInputStream
-    val dest: FileOutputStream
     var zipOutput: ZipOutputStream? = null
     try {
-        dest = target.outputStream()
-        zipOutput = ZipOutputStream(dest.buffered(BUFFER))
+        zipOutput = ZipOutputStream(targetStream.buffered(BUFFER))
         if (file.isDirectory)
             zipSubFolder(zipOutput, file, file.parent!!.length)
         else {
