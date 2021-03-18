@@ -32,6 +32,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.exception.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
+import com.arnyminerz.escalaralcoiaicomtat.storage.zipFile
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -716,6 +717,7 @@ class MapHelper(private val mapView: MapView) {
         val dir = File.createTempFile("maphelper_", null, context.cacheDir)
         if (!dir.mkdirs())
             throw CouldNotCreateDirException("There was an error while creating the temp dir")
+        val kmlFile = File(dir, "doc.kml")
         val imagesDir = File(dir, "images")
         val icons = arrayMapOf<String, String>()
         val placemarksBuilder = StringBuilder()
@@ -758,7 +760,7 @@ class MapHelper(private val mapView: MapView) {
                         "</Placemark>"
             )
         }
-        stream.apply {
+        kmlFile.outputStream().apply {
             Timber.d("Writing output stream...")
             write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
             write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">")
@@ -795,12 +797,15 @@ class MapHelper(private val mapView: MapView) {
                 else
                     "<name/>"
             )
-            for (marker in markers)
-                write("</Folder>")
+            write(placemarksBuilder.toString())
+            write("</Folder>")
 
             write("</Document>")
             write("</kml>")
         }
+        Timber.d("Compressing KMZ...")
+        zipFile(dir, stream)
+        Timber.d("Complete!")
     }
 
     /**
