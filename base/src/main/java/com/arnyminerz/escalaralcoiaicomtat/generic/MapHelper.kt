@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -20,6 +21,7 @@ import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.cardview.widget.CardView
+import androidx.collection.arrayMapOf
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -27,9 +29,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
-import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotOpenStreamException
-import com.arnyminerz.escalaralcoiaicomtat.exception.MissingPermissionException
-import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
+import com.arnyminerz.escalaralcoiaicomtat.exception.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
@@ -51,6 +51,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.annotation.*
 import timber.log.Timber
+import java.io.File
 import java.io.FileNotFoundException
 
 class MapHelper(private val mapView: MapView) {
@@ -679,6 +680,127 @@ class MapHelper(private val mapView: MapView) {
             stream.write("</wpt>")
         }
         stream.write("</gpx>")
+    }
+
+    /**
+     * Stores the map's features into a KMZ file
+     * @author Arnau Mora
+     * @since 20210318
+     * @param context The context to run from
+     * @param uri The uri to store at
+     * @param name The name of the document
+     * @param description The description of the document
+     * @param imageCompressionQuality The compression quality for the icons
+     *
+     * @throws FileNotFoundException If the uri could not be openned
+     * @throws CouldNotOpenStreamException If the uri's stream could not be openned
+     * @throws CouldNotCreateDirException If there was an error creating a dir
+     * @throws
+     */
+    @Throws(
+        FileNotFoundException::class,
+        CouldNotOpenStreamException::class,
+        CouldNotCreateDirException::class
+    )
+    fun storeKMZ(
+        context: Context,
+        uri: Uri,
+        name: String? = null,
+        description: String? = null,
+        imageCompressionQuality: Int = 100
+    ) {
+        val contentResolver = context.contentResolver
+        val stream = contentResolver.openOutputStream(uri) ?: throw CouldNotOpenStreamException()
+        Timber.v("Storing KMZ...")
+        Timber.d("Creating temp dir...")
+        val dir = File.createTempFile("maphelper_", null, context.cacheDir)
+        if (!dir.mkdirs())
+            throw CouldNotCreateDirException("There was an error while creating the temp dir")
+        val imagesDir = File(dir, "images")
+        val icons = arrayMapOf<String, String>()
+        val placemarksBuilder = StringBuilder()
+        for (marker in markers) {
+            val icon = marker.icon
+            val window = marker.windowData
+            val position = marker.position
+            val id = generateUUID()
+            var iconId: String? = null
+            if (icon != null) {
+                Timber.d("Storing icon image for ${marker.id}")
+                iconId = marker.id
+                val iconFileName = "$iconId.png"
+                val iconFile = File(imagesDir, iconFileName)
+                val iconFileOutputStream = iconFile.outputStream()
+                if (!icon.icon.compress(
+                        Bitmap.CompressFormat.PNG,
+                        imageCompressionQuality,
+                        iconFileOutputStream
+                    )
+                )
+                    throw CouldNotCompressImageException("The marker's icon could not be compressed")
+                if (!icons.containsKey(iconId))
+                    icons[iconId] = iconFileName
+            }
+            val title = window?.title ?: id
+            val message = window?.message ?: id
+            val lat = position.latitude
+            val lon = position.longitude
+            placemarksBuilder.append(
+                "<Placemark>" +
+                        "<name>$title</name>" +
+                        "<description><![CDATA[$message]]></description>" +
+                        "<styleUrl>#$iconId</styleUrl>" +
+                        "<Point>" +
+                        "<coordinates>" +
+                        "$lat,$lon" +
+                        "</coordinates>" +
+                        "</Point>" +
+                        "</Placemark>"
+            )
+        }
+        stream.apply {
+            Timber.d("Writing output stream...")
+            write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+            write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">")
+            write("<Document>")
+            write(
+                if (name != null)
+                    "<name>$name</name>"
+                else
+                    "<name/>"
+            )
+            write(
+                if (description != null)
+                    "<description>$description</description>"
+                else
+                    "<description/>"
+            )
+
+            Timber.d("Generating styles...")
+            for (id in icons.keys) {
+                val fileName = icons[id]
+                write("<Style id=\"$id\">")
+                write("<IconStyle>")
+                write("<scale>1.0</scale>")
+                write("<Icon><href>images/$fileName</href></Icon>")
+                write("</IconStyle>")
+                write("</Style>")
+            }
+
+            Timber.d("Generating folder...")
+            write("<Folder>")
+            write(
+                if (name != null)
+                    "<name>$name</name>"
+                else
+                    "<name/>"
+            )
+            for (marker in markers)
+                write("</Folder>")
+
+            write("</Document>")
+            write("</kml>")
+        }
     }
 
     /**

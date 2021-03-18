@@ -34,9 +34,11 @@ class GeoMarker(
     id: String? = null,
     var iconSizeMultiplier: Float = ICON_SIZE_MULTIPLIER,
     val windowData: MapObjectWindowData? = null,
-    private var icon: GeoIcon? = null
+    icon: GeoIcon? = null
 ) : Parcelable {
     val id = id ?: extractUUID(position, iconSizeMultiplier, windowData)
+    var icon: GeoIcon? = icon
+        private set
     private var iconLoaded: Boolean = false
 
     constructor(parcel: Parcel) : this(
