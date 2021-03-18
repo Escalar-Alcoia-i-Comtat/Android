@@ -53,6 +53,8 @@
     <string name="action_continue">Continue</string>
     <string name="action_send">Send</string>
     <string name="action_send_feedback">Send feedback</string>
+    <string name="action_export_kmz">Export KMZ</string>
+    <string name="action_export_gpx">Export GPX</string>
 
     <string name="status_updating">Updating…</string>
     <string name="status_loading">Loading…</string>
@@ -169,6 +171,8 @@
 
     <string name="notification_download_progress_title">Downloading…</string>
     <string name="notification_download_progress_message">Downloading %s</string>
+    <string name="notification_gpx_stored_title">GPX Stored correctly</string>
+    <string name="notification_gpx_stored_message">Press to open</string>
 
     <string name="no_internet_title">You have no Internet access</string>
     <string name="no_internet_message">You can access the downloaded content, or try again.</string>
@@ -281,4 +285,6 @@
     <string name="update_progress_internet_waiting">Waiting for Internet connection…</string>
     <string name="update_progress_downloading_new_cache">Downloading new data…</string>
     <string name="update_progress_error">Error!</string>
+
+    <string name="attr_gpx">This GPX has been providen by Escalar Alcoià i Comtat. Download the app from https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
 </resources>
