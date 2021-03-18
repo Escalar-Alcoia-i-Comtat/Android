@@ -57,7 +57,7 @@
             app:backgroundTint="@color/colorAccent"
             app:borderWidth="0dp"
             app:fabSize="mini"
-            app:srcCompat="@drawable/download"
+            app:srcCompat="@drawable/ic_baseline_save_alt_24"
             app:tint="@color/white"
             tools:ignore="UnusedAttribute" />
     </LinearLayout>
