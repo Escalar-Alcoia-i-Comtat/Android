@@ -4,6 +4,7 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
+import android.webkit.MimeTypeMap
 import java.io.File
 import java.text.CharacterIterator
 import java.text.StringCharacterIterator
@@ -107,4 +108,17 @@ fun Uri.fileName(context: Context): String? {
         }
     }
     return null
+}
+
+/**
+ * Gets the extension of the uri, based on its mime type
+ * @author Arnau Mora
+ * @since 20210318
+ * @param context The context to call from
+ * @return The file extension for the uri
+ */
+fun Uri.extension(context: Context): String? {
+    val cr = context.contentResolver
+    val mime = MimeTypeMap.getSingleton()
+    return mime.getExtensionFromMimeType(cr.getType(this))
 }
