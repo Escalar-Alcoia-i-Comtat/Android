@@ -154,14 +154,19 @@ data class Path(
         Timber.v("Checking if $objectId is blocked...")
         val pin = pin + "_blocked"
         return try {
+            Timber.d("Creating ParseQuery for Path...")
             val query = ParseQuery<ParseObject>("Path")
             query.limit = 1
             query.whereEqualTo("objectId", objectId)
+            Timber.d("Fetching pin $pin")
             val l = query.fetchPinOrNetworkSync(pin, shouldPin = false, timeout = BLOCKED_TIMEOUT)
             if (l.isNotEmpty()) {
+                Timber.d("Path found! Getting blocked...")
                 val path = l[0]
-                val blocked = path.getParseObject("blocked")!!
+                val blocked = path.getParseObject("blocked")!!.fetch<ParseObject>()
+                Timber.d("Getting name...")
                 val blockedName = blocked.getString("name")
+                Timber.d("Got block status: $blockedName")
                 BlockingType.find(blockedName)
             } else
                 BlockingType.UNKNOWN
