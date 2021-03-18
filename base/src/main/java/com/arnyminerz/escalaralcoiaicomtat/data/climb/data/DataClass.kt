@@ -43,6 +43,8 @@ import com.parse.boltsinternal.Task
 import timber.log.Timber
 import java.io.File
 import java.util.*
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 /**
  * Searches in AREAS and tries to get an intent from them
@@ -139,20 +141,27 @@ fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
  * @since 20210313
  * @param label The label to search in datastore
  * @param shouldPin If the data should be stored in datastore when loaded
+ * @param timeout The maximum amount of time that the task should take
  * @return The fetch result
  * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
+ * @throws TimeoutException If timeout passed before finishing the task
  */
-@Throws(NoInternetAccessException::class)
+@Throws(NoInternetAccessException::class, TimeoutException::class)
 @WorkerThread
 fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetworkSync(
     label: String,
-    shouldPin: Boolean = false
+    shouldPin: Boolean = false,
+    timeout: Pair<Long, TimeUnit>? = null
 ): List<A> {
     val list = arrayListOf<A>()
-    fetchPinOrNetwork(label, shouldPin) { result, error ->
+    val task = fetchPinOrNetwork(label, shouldPin) { result, error ->
         error?.let { throw it }
         list.addAll(result)
-    }.waitForCompletion()
+    }
+    if (timeout != null && !task.waitForCompletion(timeout.first, timeout.second))
+        throw TimeoutException("The task was not completed in less than ${timeout.first} ${timeout.second.name}")
+    else
+        task.waitForCompletion()
     return list
 }
 
@@ -189,17 +198,23 @@ fun <A : ParseObject> ParseQuery<A>.count(
  * Counts the amount of objects there are in a query syncronously
  * @author Arnau Mora
  * @since 20210313
+ * @param timeout The maximum amount of time that the task should take
  * @return The count
  * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
+ * @throws TimeoutException If timeout passed before finishing the task
  */
-@Throws(NoInternetAccessException::class)
+@Throws(NoInternetAccessException::class, TimeoutException::class)
 @WorkerThread
-fun <A : ParseObject> ParseQuery<A>.countSync(): Int {
+fun <A : ParseObject> ParseQuery<A>.countSync(timeout: Pair<Long, TimeUnit>? = null): Int {
     var result = -1
-    count { count, error ->
+    val task = count { count, error ->
         error?.let { throw it }
         result = count
-    }.waitForCompletion()
+    }
+    if (timeout != null && !task.waitForCompletion(timeout.first, timeout.second))
+        throw TimeoutException("The task was not completed in less than ${timeout.first} ${timeout.second.name}")
+    else
+        task.waitForCompletion()
     return result
 }
 
@@ -218,7 +233,10 @@ enum class DataClasses(val namespace: String) {
     }
 }
 
-abstract class DataClassImpl(open val objectId: String) : Parcelable
+abstract class DataClassImpl(open val objectId: String, open val namespace: String) : Parcelable {
+    protected val pin: String
+        get() = "${DATA_FIX_LABEL}_${namespace}_$objectId"
+}
 
 // A: List type
 // B: Parent Type
@@ -230,12 +248,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     open val kmlAddress: String?,
     @DrawableRes val placeholderDrawable: Int,
     @DrawableRes val errorPlaceholderDrawable: Int,
-    open val namespace: String,
+    override val namespace: String,
     open val childrenNamespace: String
-) : DataClassImpl(objectId), Iterable<A> {
-    protected val pin: String
-        get() = "${DATA_FIX_LABEL}_${Area.NAMESPACE}_$objectId"
-
+) : DataClassImpl(objectId, namespace), Iterable<A> {
     protected val innerChildren = arrayListOf<A>()
 
     /**
