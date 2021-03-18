@@ -1,10 +1,15 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
+import android.content.Context
+import android.database.Cursor
+import android.net.Uri
+import android.provider.MediaStore
 import java.io.File
 import java.text.CharacterIterator
 import java.text.StringCharacterIterator
 import java.util.*
 import kotlin.math.abs
+
 
 fun deleteDir(dir: File?): Boolean {
     if (dir == null || !dir.exists())
@@ -74,4 +79,32 @@ fun humanReadableByteCountBin(bytes: Long, locale: Locale = Locale.getDefault())
 
 fun File.size(): Long = if (isDirectory) dirSize(this) else length()
 
-fun File.sizeString(): String? = humanReadableByteCountBin(size())
+fun File.sizeString(): String = humanReadableByteCountBin(size())
+
+/**
+ * Gets the file name from an Uri
+ * @author Arnau Mora
+ * @since 20210318
+ * @param context The context to call from
+ * @return The file name, or null if it could not be gotten
+ */
+fun Uri.fileName(context: Context): String? {
+    if (scheme.equals("file")) {
+        return lastPathSegment
+    } else {
+        var cursor: Cursor? = null
+        try {
+            cursor = context.contentResolver.query(
+                this, arrayOf(
+                    MediaStore.Images.ImageColumns.DISPLAY_NAME
+                ), null, null, null
+            )
+            if (cursor != null && cursor.moveToFirst()) {
+                return cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DISPLAY_NAME))
+            }
+        } finally {
+            cursor?.close()
+        }
+    }
+    return null
+}
