@@ -122,3 +122,15 @@ fun Uri.extension(context: Context): String? {
     val mime = MimeTypeMap.getSingleton()
     return mime.getExtensionFromMimeType(cr.getType(this))
 }
+
+/**
+ * Gets the mime type of the uri
+ * @author Arnau Mora
+ * @since 20210318
+ * @param context The context to call from
+ * @return The mime type of the uri
+ */
+fun Uri.mime(context: Context): String? {
+    val cr = context.contentResolver
+    return cr.getType(this)
+}
