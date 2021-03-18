@@ -670,8 +670,11 @@ class MapHelper(private val mapView: MapView) {
             stream.write("<wpt lat=\"$lat\" lon=\"$lon\">")
             if (window != null) {
                 stream.write("<name>${window.title}</name>")
-                if (window.message != null)
-                    stream.write("<desc>${window.message}</name>")
+                if (window.message != null) {
+                    val message = window.message!!
+                        .replace("<br>","<br/>")
+                    stream.write("<desc>${message}</desc>")
+                }
             }
             stream.write("</wpt>")
         }
