@@ -626,6 +626,8 @@ class MapHelper(private val mapView: MapView) {
 
     /**
      * Creates a new symbol with the SymbolManager
+     * @author Arnau Mora
+     * @since 20210319
      * @param options The symbol to add's options
      * @throws MapNotInitializedException If the map has not been initialized
      * @return The created symbol
@@ -636,6 +638,23 @@ class MapHelper(private val mapView: MapView) {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
         return symbolManager!!.create(options)
+    }
+
+    /**
+     * Adds an image to the style of the map
+     * @author Arnau Mora
+     * @since 20210319
+     * @param name The name of the image
+     * @param bitmap The image
+     * @param sdf The flag indicating image is an SDF or template image
+     * @throws MapNotInitializedException If the map has not been initialized
+     */
+    @UiThread
+    @Throws(MapNotInitializedException::class)
+    fun addImage(name: String, bitmap: Bitmap, sdf: Boolean = false) {
+        if (!isLoaded)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+        style!!.addImage(name, bitmap, sdf)
     }
 
     /**
