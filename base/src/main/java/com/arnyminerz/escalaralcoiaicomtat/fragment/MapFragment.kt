@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -47,6 +48,7 @@ class MapFragment : NetworkChangeListenerFragment() {
     private var map: MapboxMap? = null
     private var markerWindow: MapHelper.MarkerWindow? = null
 
+    @SuppressLint("MissingPermission")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         Timber.d("onActivityCreated()")
@@ -62,12 +64,18 @@ class MapFragment : NetworkChangeListenerFragment() {
 
                 if (context != null)
                     try {
-                        if (PermissionsManager.areLocationPermissionsGranted(requireContext()))
+                        val permissionGranted = try {
+                            PermissionsManager.areLocationPermissionsGranted(requireContext())
+                        } catch (ex: IllegalStateException) {
+                            Timber.w("Tried to check location permission without being attached to a context.")
+                            false
+                        }
+                        if (permissionGranted)
                             mapHelper.enableLocationComponent(requireContext())
                         else
                             Timber.w("User hasn't granted the location permission. Marker won't be enabled.")
                     } catch (ex: IllegalStateException) {
-                        Timber.w("Tried to check location permission without being attached to a context.")
+                        Timber.w("Tried to enable location component that is already enabled")
                     }
 
                 mapHelper.addSymbolClickListener {

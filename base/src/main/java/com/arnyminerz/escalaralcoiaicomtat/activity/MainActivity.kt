@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -270,6 +271,7 @@ class MainActivity : NetworkChangeListenerActivity() {
         updateBottomAppBar()
     }
 
+    @SuppressLint("MissingPermission")
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -277,7 +279,7 @@ class MainActivity : NetworkChangeListenerActivity() {
     ) {
         Timber.v("Got permissions result. Code: %s", requestCode)
         when (requestCode) {
-            LOCATION_PERMISSION_REQUEST -> areasViewFragment.requestLocationUpdates()
+            LOCATION_PERMISSION_REQUEST -> areasViewFragment.mapHelper.enableLocationComponent(this)
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }

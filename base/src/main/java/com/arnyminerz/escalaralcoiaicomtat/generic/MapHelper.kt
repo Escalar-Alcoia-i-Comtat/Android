@@ -1,10 +1,12 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -18,6 +20,7 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.cardview.widget.CardView
@@ -30,6 +33,8 @@ import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.exception.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.includeAll
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
 import com.arnyminerz.escalaralcoiaicomtat.storage.zipFile
@@ -38,6 +43,7 @@ import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdate
@@ -45,6 +51,7 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
+import com.mapbox.mapboxsdk.location.LocationUpdate
 import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapView
@@ -89,6 +96,32 @@ class MapHelper(private val mapView: MapView) {
     private var lineManager: LineManager? = null
 
     private var loadedKMLAddress: String? = null
+
+    private lateinit var locationEngine: LocationEngine
+    var lastKnownLocation: LatLng? = null
+        private set
+    private val locationUpdateCallbacks = arrayListOf<(location: Location) -> Unit>()
+    private val locationUpdateCallback = object : LocationEngineCallback<LocationEngineResult> {
+        override fun onSuccess(result: LocationEngineResult?) {
+            if (result == null)
+                Timber.w("Could not update current location since result is null")
+            else {
+                val loc = result.lastLocation
+                Timber.v("Got new location: $loc")
+                lastKnownLocation = loc?.toLatLng()
+                map?.locationComponent?.forceLocationUpdate(
+                    LocationUpdate.Builder().location(loc).build()
+                )
+                if (loc != null)
+                    for (callback in locationUpdateCallbacks)
+                        callback(loc)
+            }
+        }
+
+        override fun onFailure(exception: java.lang.Exception) {
+            Timber.w(exception, "Could not update current location.")
+        }
+    }
 
     private var startingPosition: LatLng = LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
     private var startingZoom: Double = DEFAULT_ZOOM
@@ -146,6 +179,8 @@ class MapHelper(private val mapView: MapView) {
     }
 
     fun onDestroy() {
+        if (this::locationEngine.isInitialized)
+            locationEngine.removeLocationUpdates(locationUpdateCallback)
         mapView.onDestroy()
         Timber.d("onDestroy()")
     }
@@ -407,8 +442,12 @@ class MapHelper(private val mapView: MapView) {
      * @see PermissionsManager
      * @throws MissingPermissionException If the location permission is not granted
      * @throws MapNotInitializedException If the map has not been initialized
+     * @throws IllegalStateException If the listener has already been enabled
      */
     @SuppressLint("MissingPermission")
+    @RequiresPermission(
+        anyOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION]
+    )
     @Throws(MissingPermissionException::class, MapNotInitializedException::class)
     fun enableLocationComponent(
         context: Context,
@@ -421,14 +460,69 @@ class MapHelper(private val mapView: MapView) {
         if (!PermissionsManager.areLocationPermissionsGranted(context))
             throw MissingPermissionException("Location permission not granted")
 
+        if (this::locationEngine.isInitialized)
+            throw IllegalStateException("Location component already enabled")
+
+        locationEngine = LocationEngineProvider.getBestLocationEngine(context)
+        val locationEngineRequest = LocationEngineRequest.Builder(LOCATION_UPDATE_INTERVAL_MILLIS)
+            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+            .setMaxWaitTime(LOCATION_UPDATE_MIN_TIME)
+            .setDisplacement(LOCATION_UPDATE_MIN_DIST)
+            .build()
+        locationEngine.requestLocationUpdates(
+            locationEngineRequest,
+            locationUpdateCallback,
+            Looper.getMainLooper()
+        )
+
         map!!.locationComponent.apply {
             activateLocationComponent(
-                LocationComponentActivationOptions.builder(context, style!!).build()
+                LocationComponentActivationOptions.builder(context, style!!)
+                    .useDefaultLocationEngine(false)
+                    .build()
             )
             isLocationComponentEnabled = true
             this.cameraMode = cameraMode
             this.renderMode = renderMode
         }
+        Timber.i("Enabled location component for MapHelper")
+    }
+
+    /**
+     * Adds a new location update callback
+     * @author Arnau Mora
+     * @since 20210319
+     * @param callback What to run when location is updated
+     */
+    fun addLocationUpdateCallback(callback: (location: Location) -> Unit) =
+        locationUpdateCallbacks.add(callback)
+
+    @SuppressLint("MissingPermission")
+    fun getLocation(callback: (location: Location?, error: Exception?) -> Unit) =
+        locationEngine.getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
+            override fun onSuccess(result: LocationEngineResult?) {
+                lastKnownLocation = result?.lastLocation?.toLatLng()
+                callback(result?.lastLocation, null)
+            }
+
+            override fun onFailure(exception: java.lang.Exception) {
+                callback(null, exception)
+            }
+        })
+
+    /**
+     * Changes the map's tracking camera mode
+     * @author Arnau Mora
+     * @since 20210319
+     * @param cameraMode The new Camera Mode
+     * @see CameraMode
+     * @throws MapNotInitializedException If the map has not been initialized
+     */
+    @Throws(MapNotInitializedException::class)
+    fun track(cameraMode: Int = CameraMode.TRACKING) {
+        if (!isLoaded)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+        map!!.locationComponent.cameraMode = cameraMode
     }
 
     /**
@@ -593,7 +687,7 @@ class MapHelper(private val mapView: MapView) {
      */
     @UiThread
     @Throws(MapNotInitializedException::class)
-    fun center(padding: Int = 11, animate: Boolean = true) {
+    fun center(padding: Int = 11, animate: Boolean = true, includeCurrentLocation: Boolean = true) {
         if (markers.isEmpty())
             return
 
@@ -607,24 +701,34 @@ class MapHelper(private val mapView: MapView) {
         for (geometry in geometries)
             points.addAll(geometry.points)
 
-        if (markers.size == 1)
-            move(
-                CameraUpdateFactory.newCameraPosition(
-                    CameraPosition.Builder().target(markers.first().position).build()
-                )
-            )
-        else {
-            val boundsBuilder = LatLngBounds.Builder()
-            for (marker in markers)
-                boundsBuilder.include(marker.position)
+        if (includeCurrentLocation)
+            if (lastKnownLocation != null) {
+                Timber.d("Including current location ($lastKnownLocation)")
+                points.add(lastKnownLocation!!)
+            } else
+                Timber.d("Could not include current location since it's null")
 
-            move(
-                CameraUpdateFactory.newLatLngBounds(
-                    boundsBuilder.build(),
-                    padding
-                ), animate
-            )
-        }
+        if (points.isNotEmpty())
+            if (points.size == 1)
+                move(
+                    CameraUpdateFactory.newCameraPosition(
+                        CameraPosition.Builder()
+                            .target(markers.first().position)
+                            .zoom(DEFAULT_ZOOM)
+                            .build()
+                    )
+                )
+            else {
+                val boundsBuilder = LatLngBounds.Builder()
+                boundsBuilder.includeAll(points)
+
+                move(
+                    CameraUpdateFactory.newLatLngBounds(
+                        boundsBuilder.build(),
+                        padding
+                    ), animate
+                )
+            }
     }
 
     /**
@@ -732,7 +836,7 @@ class MapHelper(private val mapView: MapView) {
                 if (window.message != null) {
                     val message = window.message!!
                         .replace("<br>", "<br/>")
-                    stream.write("<desc>${message}</desc>")
+                    stream.write("<desc>$message</desc>")
                 }
             }
             stream.write("</wpt>")

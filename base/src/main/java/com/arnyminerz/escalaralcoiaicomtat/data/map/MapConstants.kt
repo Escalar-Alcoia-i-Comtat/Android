@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.data.map
 
 import com.arnyminerz.escalaralcoiaicomtat.R
 
+const val LOCATION_UPDATE_INTERVAL_MILLIS = 1000L // 1 second
 const val LOCATION_UPDATE_MIN_TIME: Long = 10 * 1000 // 10 seconds
 const val LOCATION_UPDATE_MIN_DIST: Float = 1.5f // 1.5 meters
 

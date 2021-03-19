@@ -11,6 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
 
 class LoadingActivity : NetworkChangeListenerActivity() {
@@ -53,9 +54,9 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                             binding.progressTextView.text =
                                 getString(R.string.status_loading_progress, progress, max)
                         } else {
-                            binding.progressBar.hide()
+                            visibility(binding.progressBar, false)
                             binding.progressBar.isIndeterminate = true
-                            binding.progressBar.show()
+                            visibility(binding.progressBar, true)
                             binding.progressTextView.setText(R.string.status_storing)
                         }
                     }

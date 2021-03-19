@@ -6,8 +6,6 @@ import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationManager
 import android.os.Bundle
 import android.view.View
 import android.widget.PopupMenu
@@ -20,7 +18,6 @@ import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAskerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -47,6 +44,7 @@ const val MAP_MARKERS_BUNDLE_EXTRA = "Markers"
 const val MAP_GEOMETRIES_BUNDLE_EXTRA = "Geometries"
 val ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA = IntentExtra<Float>("IconSize")
 val ZONE_NAME_BUNDLE_EXTRA = IntentExtra<String>("ZneNm")
+val CENTER_CURRENT_LOCATION_EXTRA = IntentExtra<Boolean>("CenterLocation")
 
 const val MIME_TYPE_KML = "application/vnd.google-earth.kml+xml"
 const val MIME_TYPE_KMZ = "application/vnd.google-earth.kmz"
@@ -66,11 +64,7 @@ class MapsActivity : LanguageAppCompatActivity() {
 
     private var showingPolyline: GeoGeometry? = null
 
-    private var movingCamera: Boolean = false
-
     private lateinit var binding: ActivityMapsBinding
-
-    private var locationManager: LocationManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,6 +80,7 @@ class MapsActivity : LanguageAppCompatActivity() {
 
         var kmlAddress: String? = null
         var kmzFile: File? = null
+        var centerCurrentLocation = false
         if (intent != null) {
             Timber.d("Getting markers list...")
             val markersList =
@@ -104,6 +99,7 @@ class MapsActivity : LanguageAppCompatActivity() {
             zoneName = intent.getExtra(ZONE_NAME_BUNDLE_EXTRA)
             intent.getExtra(KMZ_FILE_BUNDLE_EXTRA)
                 .let { path -> if (path != null) kmzFile = File(path) }
+            centerCurrentLocation = intent.getExtra(CENTER_CURRENT_LOCATION_EXTRA, false)
         } else
             Timber.w("Intent is null")
 
@@ -173,7 +169,7 @@ class MapsActivity : LanguageAppCompatActivity() {
 
                         map.addOnMoveListener(object : MapboxMap.OnMoveListener {
                             override fun onMoveBegin(detector: MoveGestureDetector) {
-                                if (lastKnownLocation != null)
+                                if (mapHelper.lastKnownLocation != null)
                                     binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
                             }
 
@@ -218,8 +214,13 @@ class MapsActivity : LanguageAppCompatActivity() {
                         mapHelper.addMarkers(markers)
                         mapHelper.addGeometries(geometries)
 
-                        mapHelper.display(this@MapsActivity)
-                        mapHelper.center(MAP_LOAD_PADDING)
+                        mapHelper.getLocation { _, _ ->
+                            mapHelper.display(this@MapsActivity)
+                            mapHelper.center(
+                                MAP_LOAD_PADDING,
+                                includeCurrentLocation = centerCurrentLocation
+                            )
+                        }
 
                         binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
                     }
@@ -274,7 +275,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) &&
                     PermissionsManager.areLocationPermissionsGranted(this)
                 )
-                    mapHelper.enableLocationComponent(this, cameraMode = CameraMode.NONE)
+                    tryToShowCurrentLocation()
                 else {
                     toast(R.string.toast_location_not_shown)
                     vibrate(this, VIBRATION)
@@ -379,56 +380,27 @@ class MapsActivity : LanguageAppCompatActivity() {
             )
             return false
         } else {
-            if (locationManager == null)
-                locationManager =
-                    applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
+            try {
+                mapHelper.enableLocationComponent(this, cameraMode = CameraMode.NONE)
 
-            mapHelper.enableLocationComponent(this, cameraMode = CameraMode.NONE)
-
-            binding.fabCurrentLocation.setOnClickListener {
-                if (lastKnownLocation != null) {
-                    val position = lastKnownLocation!!.toLatLng()
-                    Timber.d("Moving camera to current location ($position)...")
-                    movingCamera = true
-                    mapHelper.move(position, CURRENT_LOCATION_DEFAULT_ZOOM)
-                    binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_fixed_24)
-                } else {
-                    Timber.w("No known location!")
-                    binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
+                binding.fabCurrentLocation.setOnClickListener {
+                    val loc = mapHelper.lastKnownLocation
+                    if (loc != null) {
+                        Timber.d("Moving camera to current location ($loc)...")
+                        mapHelper.track()
+                        binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_fixed_24)
+                    } else {
+                        Timber.w("No known location!")
+                        binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
+                    }
                 }
+
+                binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
+            } catch (e: IllegalStateException) {
+                Timber.d("Location component already enabled")
             }
-
-            binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
-
-            getDeviceLocation()
 
             return true
-        }
-    }
-
-    private var lastKnownLocation: Location? = null
-
-    private fun getDeviceLocation() {
-        /*
-         * Get the best and most recent location of the device, which may be null in rare
-         * cases when a location is not available.
-         */
-        if (locationManager == null)
-            return Timber.w("Location Manager not initialized")
-
-        try {
-            if (PermissionsManager.areLocationPermissionsGranted(this)) {
-                val locationResult =
-                    locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                        ?: return Timber.w("Could not get last known location")
-                Timber.v("Adding complete listener")
-                lastKnownLocation = locationResult
-                Timber.d("Got new location: $lastKnownLocation")
-                binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
-            }
-        } catch (e: SecurityException) {
-            Timber.e(e, "Exception:")
-            binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
         }
     }
 }
