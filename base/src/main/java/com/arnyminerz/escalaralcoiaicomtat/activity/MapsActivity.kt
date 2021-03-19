@@ -28,6 +28,7 @@ import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.parse.ParseAnalytics
 import timber.log.Timber
 import java.io.File
 
@@ -76,6 +77,8 @@ class MapsActivity : LanguageAppCompatActivity() {
         binding = ActivityMapsBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
+        ParseAnalytics.trackAppOpenedInBackground(intent)
 
         // Hi from march of 2021
         Timber.v("Getting Mapbox instance...")

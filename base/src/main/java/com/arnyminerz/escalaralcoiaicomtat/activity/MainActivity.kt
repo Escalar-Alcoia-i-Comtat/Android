@@ -31,6 +31,7 @@ import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.parse.ParseAnalytics
 import io.sentry.SentryLevel
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.timber.SentryTimberIntegration
@@ -149,6 +150,8 @@ class MainActivity : NetworkChangeListenerActivity() {
         setSupportActionBar(binding.bottomAppBar)
 
         if (!prepareApp()) return
+
+        ParseAnalytics.trackAppOpenedInBackground(intent)
 
         areasViewFragment = AreasViewFragment()
         mapFragment = MapFragment()

@@ -17,6 +17,7 @@ import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.parse.ParseAnalytics
 import timber.log.Timber
 import java.io.FileNotFoundException
 
@@ -41,6 +42,8 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         binding = LayoutListBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
+        ParseAnalytics.trackAppOpenedInBackground(intent)
 
         mapHelper = MapHelper(binding.map)
             .withIconSizeMultiplier(iconSizeMultiplier)
