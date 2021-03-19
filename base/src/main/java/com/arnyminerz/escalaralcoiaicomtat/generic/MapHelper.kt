@@ -98,7 +98,8 @@ class MapHelper(private val mapView: MapView) {
     private var loadedKMLAddress: String? = null
 
     private lateinit var locationEngine: LocationEngine
-    private var lastKnownLocation: LatLng? = null
+    var lastKnownLocation: LatLng? = null
+        private set
     private val locationUpdateCallbacks = arrayListOf<(location: Location) -> Unit>()
     private val locationUpdateCallback = object : LocationEngineCallback<LocationEngineResult> {
         override fun onSuccess(result: LocationEngineResult?) {
@@ -495,6 +496,21 @@ class MapHelper(private val mapView: MapView) {
      */
     fun addLocationUpdateCallback(callback: (location: Location) -> Unit) =
         locationUpdateCallbacks.add(callback)
+
+    /**
+     * Changes the map's tracking camera mode
+     * @author Arnau Mora
+     * @since 20210319
+     * @param cameraMode The new Camera Mode
+     * @see CameraMode
+     * @throws MapNotInitializedException If the map has not been initialized
+     */
+    @Throws(MapNotInitializedException::class)
+    fun track(cameraMode: Int = CameraMode.TRACKING) {
+        if (!isLoaded)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+        map!!.locationComponent.cameraMode = cameraMode
+    }
 
     /**
      * Adds a click listener for a symbol
