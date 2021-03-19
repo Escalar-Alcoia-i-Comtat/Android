@@ -8,9 +8,12 @@ import android.graphics.drawable.Drawable
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
+import androidx.collection.arrayMapOf
 import androidx.core.content.ContextCompat
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import timber.log.Timber
 
+val addedIcons = arrayMapOf<MapHelper, String>()
 
 class GeoIcon(val name: String, val icon: Bitmap) : Parcelable {
     constructor(parcel: Parcel) : this(

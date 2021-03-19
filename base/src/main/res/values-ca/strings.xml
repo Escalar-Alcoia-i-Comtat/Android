@@ -249,4 +249,9 @@
     <string name="status_no_internet">Sense Connexió a Internet</string>
     <string name="notification_download_progress_title">Baixant…</string>
     <string name="notification_download_progress_message">Baixant %s</string>
+    <string name="action_export_kmz">Exportar KMZ</string>
+    <string name="action_export_gpx">Exportar GPX</string>
+    <string name="notification_gpx_stored_title">GPX desat correctament</string>
+    <string name="notification_gpx_stored_message">Toca per a obrir</string>
+    <string name="attr_gpx">Este GPX ha sigut oferit per Escalar Alcoià i Comtat. Baixa l\'app des de https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
 </resources>

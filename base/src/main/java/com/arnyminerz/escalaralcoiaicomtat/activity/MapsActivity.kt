@@ -3,17 +3,16 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
-import android.os.Build
 import android.os.Bundle
 import android.view.View
-import androidx.core.content.ContextCompat
+import android.widget.PopupMenu
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
-import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMapsBinding
@@ -22,19 +21,15 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAsker
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import org.w3c.dom.Document
-import org.w3c.dom.Element
 import timber.log.Timber
 import java.io.File
-import java.io.IOException
-import javax.xml.parsers.DocumentBuilderFactory
 
 private const val CURRENT_LOCATION_DEFAULT_ZOOM = 17.0
 private const val MAP_LOAD_PADDING = 50
@@ -52,13 +47,15 @@ const val MAP_GEOMETRIES_BUNDLE_EXTRA = "Geometries"
 val ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA = IntentExtra<Float>("IconSize")
 val ZONE_NAME_BUNDLE_EXTRA = IntentExtra<String>("ZneNm")
 
+val MIME_TYPE_KML = "application/vnd.google-earth.kml+xml"
+val MIME_TYPE_KMZ = "application/vnd.google-earth.kmz"
+val MIME_TYPE_GPX = "application/gpx+xml"
+
 class MapsActivity : LanguageAppCompatActivity() {
 
     private var zoneName: String? = null
-    private var kmlAddress: String? = null
     private var markers = arrayListOf<GeoMarker>()
     private var geometries = arrayListOf<GeoGeometry>()
-    private var kmzFile: File? = null
     private var iconSizeMultiplier = ICON_SIZE_MULTIPLIER
 
     private lateinit var mapHelper: MapHelper
@@ -67,7 +64,6 @@ class MapsActivity : LanguageAppCompatActivity() {
     private var markerName: String? = null
 
     private var showingPolyline: GeoGeometry? = null
-    private var downloadGPXMarker: GeoMarker? = null
 
     private var movingCamera: Boolean = false
 
@@ -85,12 +81,16 @@ class MapsActivity : LanguageAppCompatActivity() {
         Timber.v("Getting Mapbox instance...")
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
 
+        var kmlAddress: String? = null
+        var kmzFile: File? = null
         if (intent != null) {
             Timber.d("Getting markers list...")
-            val markersList = intent.getParcelableArrayListExtra<GeoMarker>(MAP_MARKERS_BUNDLE_EXTRA)
+            val markersList =
+                intent.getParcelableArrayListExtra<GeoMarker>(MAP_MARKERS_BUNDLE_EXTRA)
             markersList?.let { markers.addAll(it) }
             Timber.d("Getting geometries list...")
-            val geometriesList = intent.getParcelableArrayListExtra<GeoGeometry>(MAP_GEOMETRIES_BUNDLE_EXTRA)
+            val geometriesList =
+                intent.getParcelableArrayListExtra<GeoGeometry>(MAP_GEOMETRIES_BUNDLE_EXTRA)
             geometriesList?.let { geometries.addAll(it) }
             Timber.d("Got ${markers.size} markers and ${geometries.size} geometries.")
 
@@ -110,52 +110,43 @@ class MapsActivity : LanguageAppCompatActivity() {
 
         binding.mapDownloadedImageView.visibility = View.GONE
 
-        if (kmlAddress != null)
-            binding.fabDownload.setOnClickListener {
-                if (kmlAddress == null) return@setOnClickListener
-
-                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                    // Filter to only show results that can be "opened", such as
-                    // a file (as opposed to a list of contacts or timezones).
-                    addCategory(Intent.CATEGORY_OPENABLE)
-
-                    // Create a file with the requested MIME type.
-                    type = "application/vnd.google-earth.kmz"
-                    putExtra(
-                        Intent.EXTRA_TITLE,
-                        (kmlAddress!!.split("/").last().split(".")[0]).replace("%20", " ")
-                    )
+        binding.fabDownload.setOnClickListener {
+            val popup = PopupMenu(this, it)
+            popup.menuInflater.inflate(R.menu.menu_map_download, popup.menu)
+            popup.setOnMenuItemClickListener { item ->
+                var mime: String? = null
+                var extension: String? = null
+                when (item.itemId) {
+                    R.id.export_kmz -> {
+                        mime = MIME_TYPE_KMZ
+                        extension = "kmz"
+                    }
+                    R.id.export_gpx -> {
+                        mime = MIME_TYPE_GPX
+                        extension = "gpx"
+                    }
+                    else -> Timber.w("Unkown item clicked")
                 }
-                startActivityForResult(intent, FOLDER_ACCESS_PERMISSION_REQUEST_CODE)
-            }
-        if (kmzFile != null) {
-            binding.fabDownload.setImageDrawable(
-                ContextCompat.getDrawable(
-                    this,
-                    R.drawable.content_save_move
-                )
-            )
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                binding.fabDownload.tooltipText = getString(R.string.action_store)
-            binding.fabDownload.setOnClickListener {
-                if (kmzFile == null) return@setOnClickListener
+                if (mime != null) {
+                    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        // Filter to only show results that can be "opened", such as
+                        // a file (as opposed to a list of contacts or timezones).
+                        addCategory(Intent.CATEGORY_OPENABLE)
 
-                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                    // Filter to only show results that can be "opened", such as
-                    // a file (as opposed to a list of contacts or timezones).
-                    addCategory(Intent.CATEGORY_OPENABLE)
-
-                    // Create a file with the requested MIME type.
-                    type = "application/vnd.google-earth.kmz"
-                    putExtra(
-                        Intent.EXTRA_TITLE,
-                        zoneName ?: kmzFile!!.path.split("/").last().split(".").first()
-                    )
-                }
-                startActivityForResult(intent, FOLDER_ACCESS_PERMISSION_REQUEST_CODE)
+                        // Create a file with the requested MIME type.
+                        type = mime
+                        putExtra(
+                            Intent.EXTRA_TITLE,
+                            "*.$extension"
+                        )
+                    }
+                    startActivityForResult(intent, FOLDER_ACCESS_PERMISSION_REQUEST_CODE)
+                    true
+                } else
+                    false
             }
+            popup.show()
         }
-        visibility(binding.fabDownload, kmlAddress != null || kmzFile != null)
 
         mapHelper = MapHelper(binding.map)
         mapHelper.onCreate(savedInstanceState)
@@ -163,8 +154,10 @@ class MapsActivity : LanguageAppCompatActivity() {
             .withIconSizeMultiplier(iconSizeMultiplier)
             .loadMap(this) { _, map, _ ->
                 runAsync {
-                    if (kmlAddress != null || kmzFile != null)
-                        loadData()
+                    if (kmlAddress != null) {
+                        Timber.v("Loading KML...")
+                        mapHelper.loadKML(this, kmlAddress)
+                    }
 
                     runOnUiThread {
                         Timber.v("Loading current location")
@@ -298,124 +291,57 @@ class MapsActivity : LanguageAppCompatActivity() {
             // provided to this method as a parameter.
             // Pull that URI using resultData.getData().
             data?.data?.also { uri ->
-                Timber.i("Uri: $uri")
+                val mime = uri.mime(this)
+                Timber.i("Uri: $uri. File name: ${uri.fileName(this)}. Mime: $mime")
 
-                when {
-                    downloadGPXMarker != null -> {
-                        toast(R.string.toast_storing_gpx)
-                        val stream = contentResolver.openOutputStream(uri)
-                        if (stream == null) {
-                            toast(R.string.toast_error_internal)
-                            return
-                        }
-                        try {
-                            Timber.v("  Storing GPX data...")
-                            stream.write("<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" creator=\"EscalarAlcoiaIComtat-App\" version=\"1.1\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">")
-                            stream.write("<metadata>")
-                            stream.write("<name><![CDATA[ ${downloadGPXMarker?.windowData?.title} ]]></name>")
-                            stream.write("<desc><![CDATA[ ${downloadGPXMarker?.windowData?.message} ]]></desc>")
-                            stream.write("</metadata>")
-                            stream.write("<trk>")
-                            stream.write("<name><![CDATA[ ${downloadGPXMarker?.windowData?.title} ]]></name>")
-                            stream.write("<desc><![CDATA[ ${downloadGPXMarker?.windowData?.message} ]]></desc>")
-                            stream.write("<trkseg>")
-                            for ((c, point) in showingPolyline!!.points.withIndex()) {
-                                stream.write("<trkpt lat=\"${point.latitude}\" lon=\"${point.longitude}\">")
-                                stream.write("<ele>0</ele>")
-                                stream.write("<name>$c</name>")
-                                stream.write("</trkpt>")
-                            }
-                            stream.write("</trkseg>")
-                            stream.write("</trk>")
-                            stream.write("</gpx>")
-
-                            runOnUiThread { toast(R.string.toast_stored_gpx) }
-                        } catch (e: IOException) {
-                            Timber.e(e, "Could not store GPX: ")
-                            runOnUiThread {
-                                toast(R.string.toast_error_internal)
-                            }
-                        } finally {
-                            stream.close()
-                            downloadGPXMarker = null
-                        }
+                when (mime) {
+                    MIME_TYPE_GPX -> {
+                        mapHelper.storeGPX(this, uri)
+                        val notificationBuilder = Notification.Builder(this)
+                            .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
+                            .withTitle(R.string.notification_gpx_stored_title)
+                            .withText(R.string.notification_gpx_stored_message)
+                            .withIcon(R.drawable.ic_notifications)
+                            .withIntent(
+                                PendingIntent.getActivity(
+                                    this,
+                                    0,
+                                    Intent().apply {
+                                        action = Intent.ACTION_VIEW
+                                        setDataAndType(uri, mime)
+                                    },
+                                    PendingIntent.FLAG_IMMUTABLE
+                                )
+                            )
+                        Timber.d("Notification title: ${notificationBuilder.title}")
+                        val notification = notificationBuilder.build()
+                        notification.show()
+                        toast(R.string.toast_stored_gpx)
                     }
-                    kmlAddress != null -> {
-                        toast(R.string.toast_downloading)
-                        val stream = contentResolver.openOutputStream(uri)
-                        if (stream == null) {
-                            toast(R.string.toast_error_internal)
-                            return
-                        }
-                        runAsync {
-                            try {
-                                val kmlStream = download(kmlAddress!!)
-
-                                fun storeKMZ(href: String) {
-                                    val kmzStream = download(href)
-                                    stream.write(kmzStream.readBytes())
-                                    Timber.v("Stored KMZ!")
-                                    runOnUiThread {
-                                        toast(R.string.toast_download_complete)
-                                    }
-                                }
-
-                                if (kmlAddress!!.endsWith("kmz")) {
-                                    Timber.d("Address is KMZ, downloading...")
-                                    storeKMZ(kmlAddress!!)
-                                } else if (kmlAddress!!.endsWith("kml")) {
-                                    Timber.d("Address is KML, getting address...")
-                                    val kmlDoc: Document? =
-                                        DocumentBuilderFactory.newInstance().newDocumentBuilder()
-                                            .parse(kmlStream)
-                                    val hrefL = kmlDoc?.getElementsByTagName("href")
-                                    if (hrefL != null) {
-                                        val href = (hrefL.item(0) as Element)
-                                            .textContent?.replace("http://", "https://")
-                                            ?.replace("forcekml=1&", "")
-                                            ?.replace("<![CDATA[", "")
-                                            ?.replace("]]", "")
-                                        if (href != null) {
-                                            Timber.d("Address loaded. Downloading...")
-                                            storeKMZ(href)
-                                        } else Timber.v("KMZ Address href is null")
-                                    } else {
-                                        Timber.e("Could not find KMZ Address")
-                                    }
-                                } else
-                                    Timber.e("Unknown kml type")
-
-                                runOnUiThread { toast(R.string.toast_download_complete) }
-                            } catch (e: IOException) {
-                                Timber.e(e, "Could not store GPX: ")
-                                runOnUiThread { toast(R.string.toast_error_internal) }
-                            } finally {
-                                stream.close()
-                            }
-                        }
+                    MIME_TYPE_KMZ -> {
+                        mapHelper.storeKMZ(this, uri)
+                        val notificationBuilder = Notification.Builder(this)
+                            .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
+                            .withTitle(R.string.notification_kmz_stored_title)
+                            .withText(R.string.notification_kmz_stored_message)
+                            .withIcon(R.drawable.ic_notifications)
+                            .withIntent(
+                                PendingIntent.getActivity(
+                                    this,
+                                    0,
+                                    Intent().apply {
+                                        action = Intent.ACTION_VIEW
+                                        setDataAndType(uri, mime)
+                                    },
+                                    PendingIntent.FLAG_IMMUTABLE
+                                )
+                            )
+                        Timber.d("Notification title: ${notificationBuilder.title}")
+                        val notification = notificationBuilder.build()
+                        notification.show()
+                        toast(R.string.toast_stored_kmz)
                     }
-                    kmzFile != null -> {
-                        toast(R.string.toast_downloading)
-                        val stream = contentResolver.openOutputStream(uri)
-                        if (stream == null) {
-                            toast(R.string.toast_error_internal)
-                            return
-                        }
-                        runAsync {
-                            try {
-                                val kmzStream = kmzFile!!.inputStream()
-
-                                stream.write(kmzStream.readBytes())
-
-                                runOnUiThread { toast(R.string.toast_stored_kmz) }
-                            } catch (e: IOException) {
-                                Timber.e(e, "Could not store GPX:")
-                                runOnUiThread { toast(R.string.toast_error_internal) }
-                            } finally {
-                                stream.close()
-                            }
-                        }
-                    }
+                    else -> Timber.w("Got unkown mime: $mime")
                 }
             }
         }
@@ -501,10 +427,5 @@ class MapsActivity : LanguageAppCompatActivity() {
             Timber.e(e, "Exception:")
             binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
         }
-    }
-
-    private fun loadData(): MapFeatures {
-        Timber.v("Loading KML...")
-        return mapHelper.loadKML(this, kmlAddress)
     }
 }
