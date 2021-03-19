@@ -7,10 +7,9 @@ import android.os.Parcelable
 import android.util.Base64
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import timber.log.Timber
 
@@ -49,8 +48,8 @@ class GeoMarker(
         parcel.readParcelable(GeoIcon::class.java.classLoader),
     )
 
-    fun withImage(bitmap: Bitmap): GeoMarker =
-        withImage(GeoIcon(id, bitmap))
+    fun withImage(bitmap: Bitmap, id: String? = null): GeoMarker =
+        withImage(GeoIcon(id ?: this.id, bitmap))
 
     fun withImage(icon: GeoIcon): GeoMarker {
         Timber.d("Setting image for GeoMarker...")
@@ -59,13 +58,14 @@ class GeoMarker(
         return this
     }
 
-    fun addToMap(context: Context, style: Style, symbolManager: SymbolManager): Symbol? {
+    fun addToMap(context: Context, mapHelper: MapHelper): Symbol? {
         var symbolOptions = SymbolOptions()
             .withLatLng(LatLng(position.latitude, position.longitude))
 
         if (icon != null) {
             Timber.d("Adding image to Style...")
-            style.addImage(id, icon!!.icon, false)
+            if (!mapHelper.addImage(id, icon!!.icon, false))
+                Timber.d("The image has already been added")
             iconLoaded = true
         }
 
@@ -82,7 +82,7 @@ class GeoMarker(
         if (windowData != null)
             symbolOptions.withData(windowData.data())
 
-        return symbolManager.create(symbolOptions)
+        return mapHelper.createSymbol(symbolOptions)
     }
 
     override fun describeContents(): Int = 0
@@ -111,12 +111,11 @@ fun Symbol.getWindow(): MapObjectWindowData =
 
 fun Collection<GeoMarker>.addToMap(
     context: Context,
-    style: Style,
-    symbolManager: SymbolManager
+    mapHelper: MapHelper,
 ): List<Symbol> {
     val symbols = arrayListOf<Symbol>()
     for (marker in this) {
-        val symbol = marker.addToMap(context, style, symbolManager) ?: continue
+        val symbol = marker.addToMap(context, mapHelper) ?: continue
         symbols.add(symbol)
     }
     return symbols.toList()
