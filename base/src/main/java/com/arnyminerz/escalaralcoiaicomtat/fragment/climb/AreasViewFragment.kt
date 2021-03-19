@@ -97,7 +97,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     }
 
     private fun updateNearbyZones(location: Location) {
-        if (nearbyZonesReady().isEmpty())
+        if (nearbyZonesReady().isNotEmpty())
             return
 
         Timber.v("Updating nearby zones...")
@@ -157,7 +157,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 Timber.d("Finished adding markers.")
                 runOnUiThread {
                     mapHelper.display(this)
-                    mapHelper.center()
+                    mapHelper.center(includeCurrentLocation = true)
 
                     binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
                 }
@@ -238,8 +238,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
     private fun refreshAreas() {
         Timber.v("Refreshing areas...")
-        nearbyZonesReady()
-
         Timber.d("Initializing area adapter for AreasViewFragment...")
         val adapter = AreaAdapter(requireContext(), areaClickListener)
 
@@ -261,7 +259,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         super.onResume()
 
         initializeMap()
-        nearbyZonesReady()
         justAttached = false
     }
 
