@@ -634,7 +634,6 @@ class MapHelper(private val mapView: MapView) {
      * @throws MapNotInitializedException If the map has not been initialized
      * @return The created symbol
      */
-    @UiThread
     @Throws(MapNotInitializedException::class)
     fun createSymbol(options: SymbolOptions): Symbol {
         if (!isLoaded)
@@ -652,7 +651,6 @@ class MapHelper(private val mapView: MapView) {
      * @return If the image was added. If false, the image has already been added
      * @throws MapNotInitializedException If the map has not been initialized
      */
-    @UiThread
     @Throws(MapNotInitializedException::class)
     fun addImage(name: String, bitmap: Bitmap, sdf: Boolean = false): Boolean {
         if (!isLoaded)
@@ -664,6 +662,18 @@ class MapHelper(private val mapView: MapView) {
             true
         }
     }
+
+    /**
+     * Adds an image to the style of the map
+     * @author Arnau Mora
+     * @since 20210319
+     * @param geoIcon The icon to add
+     * @return If the image was added. If false, the image has already been added
+     * @throws MapNotInitializedException If the map has not been initialized
+     */
+    @Throws(MapNotInitializedException::class)
+    fun addImage(geoIcon: GeoIcon): Boolean =
+        addImage(geoIcon.name, geoIcon.icon, false)
 
     /**
      * Stores the map's features into a GPX file

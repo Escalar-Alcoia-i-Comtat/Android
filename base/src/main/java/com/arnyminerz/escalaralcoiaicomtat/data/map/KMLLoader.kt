@@ -222,6 +222,8 @@ fun loadKML(
                 }
                 if (styleMap != null && styleMapNormal == null)
                     Timber.w("  Normal style map not found!! Id: $styleId-normal")
+                else
+                    Timber.w("  Style ID: $styleId")
 
                 val iconStyle = style?.getElementByTagName("IconStyle")
                     ?: styleMapNormal?.getElementByTagName("IconStyle")
@@ -266,25 +268,23 @@ fun loadKML(
                     if (latLngD != null) {
                         val latLng = LatLng(latLngD[1].toDouble(), latLngD[0].toDouble())
 
-                        context.onUiThread {
-                            Timber.v("New Marker: $title")
-                            val m = GeoMarker(
-                                latLng,
-                                windowData = title?.let {
-                                    MapObjectWindowData(
-                                        it,
-                                        description
-                                    )
-                                }
-                            )
-                            if (iconBitmap != null) {
-                                m.withImage(iconBitmap)
-                                Timber.v("Marker has image!")
+                        Timber.v("New Marker: $title")
+                        val m = GeoMarker(
+                            latLng,
+                            windowData = title?.let {
+                                MapObjectWindowData(
+                                    it,
+                                    description
+                                )
                             }
-                            result.markers.add(m)
-
-                            addedPoints.add(latLng)
+                        )
+                        if (iconBitmap != null) {
+                            m.withImage(iconBitmap, styleId)
+                            Timber.v("Marker has image!")
                         }
+                        result.markers.add(m)
+
+                        addedPoints.add(latLng)
                     }
                 } else if (placemark.hasChildNode("Polygon")) { // Polygon
                     val polygon = placemark.getElementByTagName("Polygon")

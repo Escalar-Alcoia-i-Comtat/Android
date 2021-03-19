@@ -38,7 +38,6 @@ class GeoMarker(
     val id = id ?: extractUUID(position, iconSizeMultiplier, windowData)
     var icon: GeoIcon? = icon
         private set
-    private var iconLoaded: Boolean = false
 
     constructor(parcel: Parcel) : this(
         parcel.readParcelable(LatLng::class.java.classLoader)!!,
@@ -54,22 +53,20 @@ class GeoMarker(
     fun withImage(icon: GeoIcon): GeoMarker {
         Timber.d("Setting image for GeoMarker...")
         this.icon = icon
-        iconLoaded = true
         return this
     }
 
-    fun addToMap(context: Context, mapHelper: MapHelper): Symbol? {
+    fun addToMap(context: Context, mapHelper: MapHelper): Symbol {
         var symbolOptions = SymbolOptions()
             .withLatLng(LatLng(position.latitude, position.longitude))
 
         if (icon != null) {
             Timber.d("Adding image to Style...")
-            if (!mapHelper.addImage(id, icon!!.icon, false))
+            if (!mapHelper.addImage(icon!!))
                 Timber.d("The image has already been added")
-            iconLoaded = true
         }
 
-        if (icon != null && iconLoaded) {
+        if (icon != null) {
             Timber.d("Marker $id has an icon named ${icon!!.name}")
             val iconSize =
                 SETTINGS_MARKER_SIZE_PREF.get(context.sharedPreferences) * iconSizeMultiplier
