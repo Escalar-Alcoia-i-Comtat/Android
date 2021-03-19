@@ -255,4 +255,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="notification_gpx_stored_title">GPX guardado correctamente</string>
     <string name="notification_gpx_stored_message">Toca para abrir</string>
     <string name="attr_gpx">Este GPX ha sido ofrecido por Escalar Alcoià i Comtat. Descarga la app desde https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
+    <string name="notification_kmz_stored_title">KMZ Guardado correctamente</string>
+    <string name="notification_kmz_stored_message">Toca para abrir</string>
 </resources>

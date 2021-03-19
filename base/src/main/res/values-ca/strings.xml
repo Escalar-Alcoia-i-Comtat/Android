@@ -254,4 +254,6 @@
     <string name="notification_gpx_stored_title">GPX desat correctament</string>
     <string name="notification_gpx_stored_message">Toca per a obrir</string>
     <string name="attr_gpx">Este GPX ha sigut oferit per Escalar Alcoià i Comtat. Baixa l\'app des de https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
+    <string name="notification_kmz_stored_title">KMZ Desat correctament</string>
+    <string name="notification_kmz_stored_message">Toca per a obrir</string>
 </resources>
