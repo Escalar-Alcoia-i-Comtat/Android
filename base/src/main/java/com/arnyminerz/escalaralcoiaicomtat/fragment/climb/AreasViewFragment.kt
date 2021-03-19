@@ -13,6 +13,7 @@ import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.activity.CENTER_CURRENT_LOCATION_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getZones
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
@@ -20,11 +21,8 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_DISABLE_NEARBY
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.generic.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
-import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
-import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -192,21 +190,10 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 }
 
                 map.addOnMapClickListener {
-                    try {
-                        val intent = mapHelper.mapsActivityIntent(requireContext())
-                        Timber.v("Starting MapsActivity...")
-                        startActivity(intent)
-                        true
-                    } catch (e: MapAnyDataToLoadException) {
-                        Timber.w("Clicked on nearby zones map and any data has been loaded")
-                        false
-                    }
+                    nearbyZonesClick()
                 }
                 mapHelper.addSymbolClickListener {
-                    val intent = mapHelper.mapsActivityIntent(requireContext())
-                    Timber.v("Starting MapsActivity...")
-                    startActivity(intent)
-                    true
+                    nearbyZonesClick()
                 }
 
                 nearbyZonesReady()
@@ -235,6 +222,18 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         super.onActivityCreated(savedInstanceState)
         refreshAreas()
     }
+
+    private fun nearbyZonesClick(): Boolean =
+        try {
+            val intent = mapHelper.mapsActivityIntent(requireContext())
+                .putExtra(CENTER_CURRENT_LOCATION_EXTRA, true)
+            Timber.v("Starting MapsActivity...")
+            startActivity(intent)
+            true
+        } catch (e: MapAnyDataToLoadException) {
+            Timber.w("Clicked on nearby zones map and any data has been loaded")
+            false
+        }
 
     private fun refreshAreas() {
         Timber.v("Refreshing areas...")

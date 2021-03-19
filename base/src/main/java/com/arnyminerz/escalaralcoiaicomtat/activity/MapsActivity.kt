@@ -47,7 +47,7 @@ const val MAP_MARKERS_BUNDLE_EXTRA = "Markers"
 const val MAP_GEOMETRIES_BUNDLE_EXTRA = "Geometries"
 val ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA = IntentExtra<Float>("IconSize")
 val ZONE_NAME_BUNDLE_EXTRA = IntentExtra<String>("ZneNm")
-val CENTER_CURRENT_LOCATION_EXTRA = IntentExtra<String>("CenterLocation")
+val CENTER_CURRENT_LOCATION_EXTRA = IntentExtra<Boolean>("CenterLocation")
 
 const val MIME_TYPE_KML = "application/vnd.google-earth.kml+xml"
 const val MIME_TYPE_KMZ = "application/vnd.google-earth.kmz"
@@ -87,6 +87,7 @@ class MapsActivity : LanguageAppCompatActivity() {
 
         var kmlAddress: String? = null
         var kmzFile: File? = null
+        var centerCurrentLocation: Boolean = false
         if (intent != null) {
             Timber.d("Getting markers list...")
             val markersList =
@@ -105,6 +106,7 @@ class MapsActivity : LanguageAppCompatActivity() {
             zoneName = intent.getExtra(ZONE_NAME_BUNDLE_EXTRA)
             intent.getExtra(KMZ_FILE_BUNDLE_EXTRA)
                 .let { path -> if (path != null) kmzFile = File(path) }
+            centerCurrentLocation = intent.getExtra(CENTER_CURRENT_LOCATION_EXTRA, false)
         } else
             Timber.w("Intent is null")
 
@@ -220,7 +222,10 @@ class MapsActivity : LanguageAppCompatActivity() {
                         mapHelper.addGeometries(geometries)
 
                         mapHelper.display(this@MapsActivity)
-                        mapHelper.center(MAP_LOAD_PADDING)
+                        mapHelper.center(
+                            MAP_LOAD_PADDING,
+                            includeCurrentLocation = centerCurrentLocation
+                        )
 
                         binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
                     }
