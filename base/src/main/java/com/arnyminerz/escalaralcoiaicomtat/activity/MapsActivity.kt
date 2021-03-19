@@ -48,9 +48,9 @@ const val MAP_GEOMETRIES_BUNDLE_EXTRA = "Geometries"
 val ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA = IntentExtra<Float>("IconSize")
 val ZONE_NAME_BUNDLE_EXTRA = IntentExtra<String>("ZneNm")
 
-val MIME_TYPE_KML = "application/vnd.google-earth.kml+xml"
-val MIME_TYPE_KMZ = "application/vnd.google-earth.kmz"
-val MIME_TYPE_GPX = "application/gpx+xml"
+const val MIME_TYPE_KML = "application/vnd.google-earth.kml+xml"
+const val MIME_TYPE_KMZ = "application/vnd.google-earth.kmz"
+const val MIME_TYPE_GPX = "application/gpx+xml"
 
 class MapsActivity : LanguageAppCompatActivity() {
 

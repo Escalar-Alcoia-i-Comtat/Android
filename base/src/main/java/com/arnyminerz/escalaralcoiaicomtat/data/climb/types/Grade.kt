@@ -102,8 +102,8 @@ class Grade(val displayName: String) : Serializable {
 
     fun toJSON(): String = "{ \"displayName\":\"$displayName\" }"
 
-    fun color(): Int = with(startingColorCombinations) {
-        for (combination in this)
+    fun color(): Int {
+        for (combination in startingColorCombinations)
             if (displayName[0] == combination.first)
                 return combination.second
 
