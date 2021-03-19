@@ -33,6 +33,7 @@ import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.exception.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.includeAll
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
@@ -105,6 +106,7 @@ class MapHelper(private val mapView: MapView) {
                 Timber.w("Could not update current location since result is null")
             else {
                 val loc = result.lastLocation
+                Timber.v("Got new location: $loc")
                 lastKnownLocation = loc?.toLatLng()
                 map?.locationComponent?.forceLocationUpdate(
                     LocationUpdate.Builder().location(loc).build()
@@ -670,27 +672,34 @@ class MapHelper(private val mapView: MapView) {
         for (geometry in geometries)
             points.addAll(geometry.points)
 
-        if (includeCurrentLocation && lastKnownLocation != null)
-            points.add(lastKnownLocation!!)
+        if (includeCurrentLocation)
+            if (lastKnownLocation != null) {
+                Timber.d("Including current location ($lastKnownLocation)")
+                points.add(lastKnownLocation!!)
+            } else
+                Timber.d("Could not include current location since it's null")
 
-        if (markers.size == 1)
-            move(
-                CameraUpdateFactory.newCameraPosition(
-                    CameraPosition.Builder().target(markers.first().position).build()
+        if (points.isNotEmpty())
+            if (points.size == 1)
+                move(
+                    CameraUpdateFactory.newCameraPosition(
+                        CameraPosition.Builder()
+                            .target(markers.first().position)
+                            .zoom(DEFAULT_ZOOM)
+                            .build()
+                    )
                 )
-            )
-        else {
-            val boundsBuilder = LatLngBounds.Builder()
-            for (marker in markers)
-                boundsBuilder.include(marker.position)
+            else {
+                val boundsBuilder = LatLngBounds.Builder()
+                boundsBuilder.includeAll(points)
 
-            move(
-                CameraUpdateFactory.newLatLngBounds(
-                    boundsBuilder.build(),
-                    padding
-                ), animate
-            )
-        }
+                move(
+                    CameraUpdateFactory.newLatLngBounds(
+                        boundsBuilder.build(),
+                        padding
+                    ), animate
+                )
+            }
     }
 
     /**
