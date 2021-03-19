@@ -781,20 +781,22 @@ class MapHelper(private val mapView: MapView) {
             val id = generateUUID()
             var iconId: String? = null
             if (icon != null) {
-                iconId = marker.id
+                iconId = marker.icon!!.name
                 Timber.d("Storing icon image for $iconId")
                 val iconFileName = "$iconId.png"
                 val iconFile = File(imagesDir, iconFileName)
-                val iconFileOutputStream = iconFile.outputStream()
-                if (!icon.icon.compress(
-                        Bitmap.CompressFormat.PNG,
-                        imageCompressionQuality,
-                        iconFileOutputStream
+                if (!iconFile.exists()) {
+                    val iconFileOutputStream = iconFile.outputStream()
+                    if (!icon.icon.compress(
+                            Bitmap.CompressFormat.PNG,
+                            imageCompressionQuality,
+                            iconFileOutputStream
+                        )
                     )
-                )
-                    throw CouldNotCompressImageException("The marker's icon could not be compressed")
-                if (!icons.containsKey(iconId))
-                    icons[iconId] = iconFileName
+                        throw CouldNotCompressImageException("The marker's icon could not be compressed")
+                    if (!icons.containsKey(iconId))
+                        icons[iconId] = iconFileName
+                }
             }
             val title = window?.title ?: id
             val message = window?.message ?: id
