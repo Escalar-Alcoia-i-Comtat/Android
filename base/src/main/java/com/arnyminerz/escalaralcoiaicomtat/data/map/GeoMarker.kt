@@ -112,7 +112,7 @@ fun Collection<GeoMarker>.addToMap(
 ): List<Symbol> {
     val symbols = arrayListOf<Symbol>()
     for (marker in this) {
-        val symbol = marker.addToMap(context, mapHelper) ?: continue
+        val symbol = marker.addToMap(context, mapHelper)
         symbols.add(symbol)
     }
     return symbols.toList()

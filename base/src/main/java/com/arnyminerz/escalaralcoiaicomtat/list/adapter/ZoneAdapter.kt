@@ -85,7 +85,6 @@ class ZoneAdapter(
                         result.observe(dataClassListActivity) { workInfo ->
                             val state = workInfo.state
                             val data = workInfo.outputData
-                            Timber.v("Current download status: ${workInfo.state}")
                             when (state) {
                                 WorkInfo.State.FAILED -> {
                                     toast(dataClassListActivity, R.string.toast_error_internal)
@@ -93,13 +92,16 @@ class ZoneAdapter(
                                     Timber.w("Download failed! Error: ${data.getString("error")}")
                                 }
                                 WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED -> {
+                                    Timber.v("Download running...")
                                     visibility(holder.progressBar, true)
                                     updateImageRes(holder, zone)
                                 }
                                 WorkInfo.State.SUCCEEDED -> {
+                                    Timber.v("Download complete!")
                                     visibility(holder.progressBar, false)
                                     updateImageRes(holder, zone)
                                 }
+                                else -> Timber.v("Current download status: ${workInfo.state}")
                             }
                         }
                     }
