@@ -59,7 +59,7 @@ private fun zipSubFolder(zipOutput: ZipOutputStream, folder: File, basePathLengt
     try {
         for (file in files) {
             if (file.isDirectory)
-                zipSubFolder(zipOutput, folder, basePathLength)
+                zipSubFolder(zipOutput, file, basePathLength)
             else {
                 val data = ByteArray(BUFFER)
                 val unmodifiedFilePath = file.path
