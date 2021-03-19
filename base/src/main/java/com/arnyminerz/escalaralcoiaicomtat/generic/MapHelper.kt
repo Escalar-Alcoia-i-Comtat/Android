@@ -578,7 +578,7 @@ class MapHelper(private val mapView: MapView) {
             fill?.let { fills.add(it) }
         }
 
-        val symbols = markers.addToMap(context, style!!, symbolManager!!)
+        val symbols = markers.addToMap(context, this)
         this.symbols.addAll(symbols)
     }
 
@@ -622,6 +622,20 @@ class MapHelper(private val mapView: MapView) {
                 ), animate
             )
         }
+    }
+
+    /**
+     * Creates a new symbol with the SymbolManager
+     * @param options The symbol to add's options
+     * @throws MapNotInitializedException If the map has not been initialized
+     * @return The created symbol
+     */
+    @UiThread
+    @Throws(MapNotInitializedException::class)
+    fun createSymbol(options: SymbolOptions): Symbol {
+        if (!isLoaded)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+        return symbolManager!!.create(options)
     }
 
     /**
@@ -714,11 +728,13 @@ class MapHelper(private val mapView: MapView) {
         val stream = contentResolver.openOutputStream(uri) ?: throw CouldNotOpenStreamException()
         Timber.v("Storing KMZ...")
         Timber.d("Creating temp dir...")
-        val dir = File.createTempFile("maphelper_", null, context.cacheDir)
+        val dir = File(context.cacheDir, "maphelper_" + generateUUID())
         if (!dir.mkdirs())
-            throw CouldNotCreateDirException("There was an error while creating the temp dir")
+            throw CouldNotCreateDirException("There was an error while creating the temp dir ($dir)")
         val kmlFile = File(dir, "doc.kml")
         val imagesDir = File(dir, "images")
+        if (!imagesDir.mkdirs())
+            throw CouldNotCreateDirException("There was an error while creating the images dir ($imagesDir)")
         val icons = arrayMapOf<String, String>()
         val placemarksBuilder = StringBuilder()
         for (marker in markers) {
@@ -728,8 +744,8 @@ class MapHelper(private val mapView: MapView) {
             val id = generateUUID()
             var iconId: String? = null
             if (icon != null) {
-                Timber.d("Storing icon image for ${marker.id}")
                 iconId = marker.id
+                Timber.d("Storing icon image for $iconId")
                 val iconFileName = "$iconId.png"
                 val iconFile = File(imagesDir, iconFileName)
                 val iconFileOutputStream = iconFile.outputStream()
