@@ -497,6 +497,19 @@ class MapHelper(private val mapView: MapView) {
     fun addLocationUpdateCallback(callback: (location: Location) -> Unit) =
         locationUpdateCallbacks.add(callback)
 
+    @SuppressLint("MissingPermission")
+    fun getLocation(callback: (location: Location?, error: Exception?) -> Unit) =
+        locationEngine.getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
+            override fun onSuccess(result: LocationEngineResult?) {
+                lastKnownLocation = result?.lastLocation?.toLatLng()
+                callback(result?.lastLocation, null)
+            }
+
+            override fun onFailure(exception: java.lang.Exception) {
+                callback(null, exception)
+            }
+        })
+
     /**
      * Changes the map's tracking camera mode
      * @author Arnau Mora
@@ -823,7 +836,7 @@ class MapHelper(private val mapView: MapView) {
                 if (window.message != null) {
                     val message = window.message!!
                         .replace("<br>", "<br/>")
-                    stream.write("<desc>${message}</desc>")
+                    stream.write("<desc>$message</desc>")
                 }
             }
             stream.write("</wpt>")
