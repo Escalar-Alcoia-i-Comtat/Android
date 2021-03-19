@@ -23,20 +23,13 @@ import java.io.IOException
 
 private const val ERROR_VIBRATE: Long = 500
 
-@ExperimentalUnsignedTypes
 val UPDATE_AREA = IntentExtra<Area>("update_area")
-
-@ExperimentalUnsignedTypes
 val UPDATE_ZONE = IntentExtra<Zone>("update_zone")
-
-@ExperimentalUnsignedTypes
 val UPDATE_SECTOR = IntentExtra<Sector>("update_sector")
-
 val UPDATE_IMAGES = IntentExtra<Boolean>("update_images")
 
 val QUIET_UPDATE = IntentExtra<Boolean>("quiet_update")
 
-@ExperimentalUnsignedTypes
 class UpdatingActivity : NetworkChangeListenerActivity() {
     private var updateArea: Area? = null // Sets the area id to update (re-download images)
     private var updateZone: Zone? = null // Sets the zone id to update (re-download images)

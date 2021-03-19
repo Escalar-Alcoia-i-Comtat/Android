@@ -9,11 +9,13 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 
+@Suppress("DEPRECATION")
 val WEBP_LOSSLESS_LEGACY: CompressFormat
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
         CompressFormat.WEBP_LOSSLESS
     else CompressFormat.WEBP
 
+@Suppress("DEPRECATION")
 val WEBP_LOSSY_LEGACY: CompressFormat
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
         CompressFormat.WEBP_LOSSY

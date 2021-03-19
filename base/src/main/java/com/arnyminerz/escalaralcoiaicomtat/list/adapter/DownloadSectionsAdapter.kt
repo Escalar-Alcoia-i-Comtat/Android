@@ -25,7 +25,6 @@ import timber.log.Timber
 
 const val TOGGLED_CARD_HEIGHT = 96f
 
-@ExperimentalUnsignedTypes
 class DownloadSectionsAdapter(
     private val downloadedSections: ArrayList<DownloadedSection>,
     private val mainActivity: MainActivity

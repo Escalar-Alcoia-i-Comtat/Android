@@ -49,7 +49,6 @@ import java.util.concurrent.TimeoutException
 /**
  * Searches in AREAS and tries to get an intent from them
  */
-@ExperimentalUnsignedTypes
 fun getIntent(context: Context, queryName: String): Intent? {
     Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
     for (area in AREAS.values) {
