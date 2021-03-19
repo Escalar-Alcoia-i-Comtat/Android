@@ -6,6 +6,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityFeedbackBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.parse.ParseAnalytics
 import io.sentry.Sentry
 import io.sentry.UserFeedback
 
@@ -17,6 +18,8 @@ class FeedbackActivity : LanguageAppCompatActivity() {
         binding = ActivityFeedbackBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
+        ParseAnalytics.trackAppOpenedInBackground(intent)
 
         binding.sendFab.setOnClickListener {
             with(binding) {

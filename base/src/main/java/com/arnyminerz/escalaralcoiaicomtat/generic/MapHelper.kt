@@ -51,6 +51,7 @@ import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.annotation.*
+import com.parse.ParseAnalytics
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
@@ -687,6 +688,11 @@ class MapHelper(private val mapView: MapView) {
      */
     @Throws(FileNotFoundException::class)
     fun storeGPX(context: Context, uri: Uri, title: String = "Escalar Alcoià i Comtat") {
+        ParseAnalytics.trackEventInBackground(
+            "storeGPX",
+            hashMapOf("uri" to uri.toString(), "fileName" to uri.fileName(context))
+        )
+
         val contentResolver = context.contentResolver
         val stream = contentResolver.openOutputStream(uri) ?: throw CouldNotOpenStreamException()
         val description = context.getString(R.string.attr_gpx)
@@ -761,6 +767,11 @@ class MapHelper(private val mapView: MapView) {
         description: String? = null,
         imageCompressionQuality: Int = 100
     ) {
+        ParseAnalytics.trackEventInBackground(
+            "storeKMZ",
+            hashMapOf("uri" to uri.toString(), "fileName" to uri.fileName(context))
+        )
+
         val contentResolver = context.contentResolver
         val stream = contentResolver.openOutputStream(uri) ?: throw CouldNotOpenStreamException()
         Timber.v("Storing KMZ...")
@@ -825,15 +836,17 @@ class MapHelper(private val mapView: MapView) {
             val id = generateUUID()
             val window = geometry.windowData
 
-            stylesBuilder.append("<Style id=\"$id\">" +
-                    "<LineStyle>" +
-                    "<color>${geometry.style.strokeColor?.replace("#", "")}</color>" +
-                    "<width>${geometry.style.lineWidth}</width>" +
-                    "</LineStyle>" +
-                    "<PolyStyle>" +
-                    "<color>${geometry.style.strokeColor?.replace("#", "")}</color>" +
-                    "</PolyStyle>" +
-                    "</Style>")
+            stylesBuilder.append(
+                "<Style id=\"$id\">" +
+                        "<LineStyle>" +
+                        "<color>${geometry.style.strokeColor?.replace("#", "")}</color>" +
+                        "<width>${geometry.style.lineWidth}</width>" +
+                        "</LineStyle>" +
+                        "<PolyStyle>" +
+                        "<color>${geometry.style.strokeColor?.replace("#", "")}</color>" +
+                        "</PolyStyle>" +
+                        "</Style>"
+            )
 
             if (geometry.closedShape) {
                 // This is a polygon
@@ -842,18 +855,22 @@ class MapHelper(private val mapView: MapView) {
                     polygonBuilder.append("<name><![CDATA[${window.title}]]></name>")
                     polygonBuilder.append("<description><![CDATA[${window.message}]]></description>")
                 }
-                polygonBuilder.append("<styleUrl>#$id</styleUrl>" +
-                        "<Polygon>" +
-                        "<altitudeMode>absolute</altitudeMode>" +
-                        "<outerBoundaryIs>" +
-                        "<LinearRing>" +
-                        "<coordinates>")
+                polygonBuilder.append(
+                    "<styleUrl>#$id</styleUrl>" +
+                            "<Polygon>" +
+                            "<altitudeMode>absolute</altitudeMode>" +
+                            "<outerBoundaryIs>" +
+                            "<LinearRing>" +
+                            "<coordinates>"
+                )
                 for (point in geometry.points)
                     polygonBuilder.appendLine("${point.longitude},${point.latitude},${point.altitude}")
-                polygonBuilder.append("</coordinates>" +
-                        "</LinearRing>" +
-                        "</outerBoundaryIs>" +
-                        "</Polygon>")
+                polygonBuilder.append(
+                    "</coordinates>" +
+                            "</LinearRing>" +
+                            "</outerBoundaryIs>" +
+                            "</Polygon>"
+                )
                 polygonBuilder.append("</Placemark>")
             } else {
                 // This is a line
@@ -862,14 +879,18 @@ class MapHelper(private val mapView: MapView) {
                     linesBuilder.append("<name><![CDATA[${window.title}]]></name>")
                     linesBuilder.append("<description><![CDATA[${window.message}]]></description>")
                 }
-                linesBuilder.append("<styleUrl>#$id</styleUrl>" +
-                        "<LineString>" +
-                        "<altitudeMode>absolute</altitudeMode>" +
-                        "<coordinates>")
+                linesBuilder.append(
+                    "<styleUrl>#$id</styleUrl>" +
+                            "<LineString>" +
+                            "<altitudeMode>absolute</altitudeMode>" +
+                            "<coordinates>"
+                )
                 for (point in geometry.points)
                     linesBuilder.appendLine("${point.longitude},${point.latitude},${point.altitude}")
-                linesBuilder.append("</coordinates>" +
-                        "</LineString>")
+                linesBuilder.append(
+                    "</coordinates>" +
+                            "</LineString>"
+                )
                 linesBuilder.append("</Placemark>")
             }
         }
