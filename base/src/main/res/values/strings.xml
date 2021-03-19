@@ -173,6 +173,8 @@
     <string name="notification_download_progress_message">Downloading %s</string>
     <string name="notification_gpx_stored_title">GPX Stored correctly</string>
     <string name="notification_gpx_stored_message">Press to open</string>
+    <string name="notification_kmz_stored_title">KMZ Stored correctly</string>
+    <string name="notification_kmz_stored_message">Press to open</string>
 
     <string name="no_internet_title">You have no Internet access</string>
     <string name="no_internet_message">You can access the downloaded content, or try again.</string>

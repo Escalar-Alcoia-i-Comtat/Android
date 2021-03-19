@@ -318,6 +318,29 @@ class MapsActivity : LanguageAppCompatActivity() {
                         notification.show()
                         toast(R.string.toast_stored_gpx)
                     }
+                    MIME_TYPE_KMZ -> {
+                        mapHelper.storeKMZ(this, uri)
+                        val notificationBuilder = Notification.Builder(this)
+                            .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
+                            .withTitle(R.string.notification_kmz_stored_title)
+                            .withText(R.string.notification_kmz_stored_message)
+                            .withIcon(R.drawable.ic_notifications)
+                            .withIntent(
+                                PendingIntent.getActivity(
+                                    this,
+                                    0,
+                                    Intent().apply {
+                                        action = Intent.ACTION_VIEW
+                                        setDataAndType(uri, mime)
+                                    },
+                                    PendingIntent.FLAG_IMMUTABLE
+                                )
+                            )
+                        Timber.d("Notification title: ${notificationBuilder.title}")
+                        val notification = notificationBuilder.build()
+                        notification.show()
+                        toast(R.string.toast_stored_kmz)
+                    }
                     else -> Timber.w("Got unkown mime: $mime")
                 }
             }
