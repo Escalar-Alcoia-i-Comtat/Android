@@ -100,6 +100,8 @@ class MapHelper(private val mapView: MapView) {
     private val lines = arrayListOf<Line>()
     private val fills = arrayListOf<Fill>()
 
+    private val addedImages = arrayListOf<String>()
+
     private val symbolClickListeners = arrayListOf<Symbol.() -> Boolean>()
 
     private var mapSetUp = false
@@ -647,14 +649,20 @@ class MapHelper(private val mapView: MapView) {
      * @param name The name of the image
      * @param bitmap The image
      * @param sdf The flag indicating image is an SDF or template image
+     * @return If the image was added. If false, the image has already been added
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @UiThread
     @Throws(MapNotInitializedException::class)
-    fun addImage(name: String, bitmap: Bitmap, sdf: Boolean = false) {
+    fun addImage(name: String, bitmap: Bitmap, sdf: Boolean = false): Boolean {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
-        style!!.addImage(name, bitmap, sdf)
+        return if (addedImages.contains(name))
+            false
+        else {
+            style!!.addImage(name, bitmap, sdf)
+            true
+        }
     }
 
     /**
