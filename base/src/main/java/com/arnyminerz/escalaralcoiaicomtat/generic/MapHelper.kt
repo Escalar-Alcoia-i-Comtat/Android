@@ -772,6 +772,7 @@ class MapHelper(private val mapView: MapView) {
         val imagesDir = File(dir, "images")
         if (!imagesDir.mkdirs())
             throw CouldNotCreateDirException("There was an error while creating the images dir ($imagesDir)")
+
         val icons = arrayMapOf<String, String>()
         val placemarksBuilder = StringBuilder()
         for (marker in markers) {
@@ -805,7 +806,7 @@ class MapHelper(private val mapView: MapView) {
             val alt = position.altitude
             placemarksBuilder.append(
                 "<Placemark>" +
-                        "<name>$title</name>" +
+                        "<name><![CDATA[$title]]></name>" +
                         "<description><![CDATA[$message]]></description>" +
                         "<styleUrl>#$iconId</styleUrl>" +
                         "<Point>" +
@@ -816,6 +817,63 @@ class MapHelper(private val mapView: MapView) {
                         "</Placemark>"
             )
         }
+
+        val stylesBuilder = StringBuilder()
+        val linesBuilder = StringBuilder()
+        val polygonBuilder = StringBuilder()
+        for (geometry in geometries) {
+            val id = generateUUID()
+            val window = geometry.windowData
+
+            stylesBuilder.append("<Style id=\"$id\">" +
+                    "<LineStyle>" +
+                    "<color>${geometry.style.strokeColor?.replace("#", "")}</color>" +
+                    "<width>${geometry.style.lineWidth}</width>" +
+                    "</LineStyle>" +
+                    "<PolyStyle>" +
+                    "<color>${geometry.style.strokeColor?.replace("#", "")}</color>" +
+                    "</PolyStyle>" +
+                    "</Style>")
+
+            if (geometry.closedShape) {
+                // This is a polygon
+                polygonBuilder.append("<Placemark>")
+                if (window != null) {
+                    polygonBuilder.append("<name><![CDATA[${window.title}]]></name>")
+                    polygonBuilder.append("<description><![CDATA[${window.message}]]></description>")
+                }
+                polygonBuilder.append("<styleUrl>#$id</styleUrl>" +
+                        "<Polygon>" +
+                        "<altitudeMode>absolute</altitudeMode>" +
+                        "<outerBoundaryIs>" +
+                        "<LinearRing>" +
+                        "<coordinates>")
+                for (point in geometry.points)
+                    polygonBuilder.appendLine("${point.longitude},${point.latitude},${point.altitude}")
+                polygonBuilder.append("</coordinates>" +
+                        "</LinearRing>" +
+                        "</outerBoundaryIs>" +
+                        "</Polygon>")
+                polygonBuilder.append("</Placemark>")
+            } else {
+                // This is a line
+                linesBuilder.append("<Placemark>")
+                if (window != null) {
+                    linesBuilder.append("<name><![CDATA[${window.title}]]></name>")
+                    linesBuilder.append("<description><![CDATA[${window.message}]]></description>")
+                }
+                linesBuilder.append("<styleUrl>#$id</styleUrl>" +
+                        "<LineString>" +
+                        "<altitudeMode>absolute</altitudeMode>" +
+                        "<coordinates>")
+                for (point in geometry.points)
+                    linesBuilder.appendLine("${point.longitude},${point.latitude},${point.altitude}")
+                linesBuilder.append("</coordinates>" +
+                        "</LineString>")
+                linesBuilder.append("</Placemark>")
+            }
+        }
+
         kmlFile.outputStream().apply {
             Timber.d("Writing output stream...")
             write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
@@ -844,6 +902,7 @@ class MapHelper(private val mapView: MapView) {
                 write("</IconStyle>")
                 write("</Style>")
             }
+            write(stylesBuilder.toString())
 
             Timber.d("Generating folder...")
             write("<Folder>")
@@ -854,6 +913,8 @@ class MapHelper(private val mapView: MapView) {
                     "<name/>"
             )
             write(placemarksBuilder.toString())
+            write(linesBuilder.toString())
+            write(polygonBuilder.toString())
             write("</Folder>")
 
             write("</Document>")
