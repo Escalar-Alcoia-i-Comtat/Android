@@ -800,6 +800,7 @@ class MapHelper(private val mapView: MapView) {
             val message = window?.message ?: id
             val lat = position.latitude
             val lon = position.longitude
+            val alt = position.altitude
             placemarksBuilder.append(
                 "<Placemark>" +
                         "<name>$title</name>" +
@@ -807,7 +808,7 @@ class MapHelper(private val mapView: MapView) {
                         "<styleUrl>#$iconId</styleUrl>" +
                         "<Point>" +
                         "<coordinates>" +
-                        "$lat,$lon" +
+                        "$lon,$lat,$alt" +
                         "</coordinates>" +
                         "</Point>" +
                         "</Placemark>"
