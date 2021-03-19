@@ -39,7 +39,6 @@
     <string name="action_ok">"Ok"</string>
     <string name="action_grant">"Permitir"</string>
     <string name="action_back">"Volver "</string>
-    <string name="action_store">"Guardar al dispositivo"</string>
     <string name="action_open_maps">"Abrir Google Maps"</string>
     <string name="action_clear_cache">"Limpiar Cache"</string>
     <string name="action_clear_storage">"Limpiar almacenamiento"</string>
@@ -109,8 +108,6 @@
     <string name="toast_error_internal">"Ha ocurrido un error interno"</string>
     <string name="toast_error_no_internet">"Acceso a Internet no detectado "</string>
     <string name="toast_location_not_shown">"No se mostrará la posición actual"</string>
-    <string name="toast_download_complete">"Descarga Completa!"</string>
-    <string name="toast_storing_gpx">"Guardando GPX…"</string>
     <string name="toast_stored_gpx">"GPX guardado"</string>
     <string name="toast_stored_kmz">"KMZ guardado!"</string>
     <string name="toast_downloading">"Descargando…"</string>
@@ -172,7 +169,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="notification_channel_task_completed_name">Tarea completada</string>
     <string name="notification_channel_task_completed_desc">Te notificaremos en el momento se complete una tarea en segundo plano</string>
     <string name="toast_permission_required">Se requiere el permiso</string>
-    <string name="sector_info_title">Información del Sector</string>
     <string name="item_map">Mapa</string>
     <string name="item_downloads">Descargas</string>
     <string name="item_settings">Configuración</string>
@@ -194,7 +190,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="path_warning_rope_length">Esta vía es bastante larga, ve con cuidado con la cuerta que usas.</string>
     <string name="item_share">Compartir</string>
     <string name="image_desc_maximize_minimize_img">Maximizar o minimizar imagen</string>
-    <string name="toast_error_already_downloaded">Ya se ha descargado!</string>
     <string name="dialog_uses_storage_msg">Ocupa: %s</string>
     <string name="update_progress_internet_waiting">Esperando a una conexión a Internet…</string>
     <string name="update_progress_downloading_new_cache">Descargando los datos nuevos</string>
@@ -242,7 +237,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="pref_info_cat_services">Servicios</string>
     <string name="pref_info_service_updates_title">Comprobador de actualizaciones</string>
     <string name="pref_info_service_updates_sum">El servicio que busca nuevas actualizaciones está ahora mismo %1$s</string>
-    <string name="toast_error_already_downloading">Ya se está descargando!</string>
     <string name="status_downloading">Descargando…</string>
     <string name="status_storing">Guardando…</string>
     <string name="status_loading_progress">Cargando %d/%d</string>

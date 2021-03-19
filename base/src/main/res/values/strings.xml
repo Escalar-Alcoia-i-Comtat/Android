@@ -42,7 +42,6 @@
     <string name="action_grant">Grant</string>
     <string name="action_grant_permission">Grant Permission</string>
     <string name="action_back">Go Back</string>
-    <string name="action_store">Store to device</string>
     <string name="action_open_maps">Open Google Maps</string>
     <string name="action_clear_cache">Clear Cache</string>
     <string name="action_clear_storage">Clear Storage</string>
@@ -189,15 +188,11 @@
     <string name="toast_error_internal">An internal error occurred</string>
     <string name="toast_error_no_internet">No Internet Access detected</string>
     <string name="toast_location_not_shown">Current location won\'t be shown</string>
-    <string name="toast_download_complete">Download Complete!</string>
-    <string name="toast_storing_gpx">Storing GPX…</string>
     <string name="toast_stored_gpx">GPX stored!</string>
     <string name="toast_stored_kmz">KMZ stored!</string>
     <string name="toast_downloading">Downloading…</string>
     <string name="toast_clear_ok">Cleared correctly</string>
     <string name="toast_permission_required">This permission is required</string>
-    <string name="toast_error_already_downloaded">Already downloaded!</string>
-    <string name="toast_error_already_downloading">Already downloading!</string>
     <string name="toast_message_sent">Message sent!</string>
 
     <string name="path_warning_dry">This path has some safes getting dry. This may be because some kind of chemical safe has been using for the safes. This should be active for 2 days more or less.</string>
@@ -227,8 +222,6 @@
     <string name="feedback_email_help">This is confidential, and won\'t be shared with anyone. It will be used only for user registration, and if you want, to contact you about your report.</string>
     <string name="feedback_message">Message</string>
     <string name="feedback_dont_contact">Don\'t contact me</string>
-
-    <string name="sector_info_title">Sector Information</string>
 
     <string name="item_map">Map</string>
     <string name="item_downloads">Downloads</string>
