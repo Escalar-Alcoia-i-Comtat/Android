@@ -47,6 +47,7 @@ const val MAP_MARKERS_BUNDLE_EXTRA = "Markers"
 const val MAP_GEOMETRIES_BUNDLE_EXTRA = "Geometries"
 val ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA = IntentExtra<Float>("IconSize")
 val ZONE_NAME_BUNDLE_EXTRA = IntentExtra<String>("ZneNm")
+val CENTER_CURRENT_LOCATION_EXTRA = IntentExtra<String>("CenterLocation")
 
 const val MIME_TYPE_KML = "application/vnd.google-earth.kml+xml"
 const val MIME_TYPE_KMZ = "application/vnd.google-earth.kmz"

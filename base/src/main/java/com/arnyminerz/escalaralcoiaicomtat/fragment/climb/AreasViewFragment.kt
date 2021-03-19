@@ -3,12 +3,8 @@ package com.arnyminerz.escalaralcoiaicomtat.fragment.climb
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Context.LOCATION_SERVICE
 import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.os.Bundle
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,6 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_DISABLE_NEARBY
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
@@ -39,6 +36,16 @@ import timber.log.Timber
 
 const val LOCATION_PERMISSION_REQUEST = 0
 
+enum class NearbyZonesError(val message: String) {
+    NEARBY_ZONES_NOT_INITIALIZED("MapHelper is not initialized"),
+    NEARBY_ZONES_NOT_LOADED("MapHelper is not loaded"),
+    NEARBY_ZONES_CONTEXT("Not showing fragment (context is null)"),
+    NEARBY_ZONES_NOT_ENABLED("Nearby Zones not enabled"),
+    NEARBY_ZONES_PERMISSION("Location permission not granted"),
+    NEARBY_ZONES_RESUMED("Not showing fragment (not resumed)"),
+    NEARBY_ZONES_EMPTY("AREAS is empty")
+}
+
 class AreasViewFragment : NetworkChangeListenerFragment() {
     private var justAttached = false
     private val mapInitialized: Boolean
@@ -46,54 +53,51 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     private val nearbyEnabled: Boolean
         get() = !PREF_DISABLE_NEARBY.get(requireContext().sharedPreferences)
 
-    private lateinit var mapHelper: MapHelper
+    internal lateinit var mapHelper: MapHelper
 
     private var areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null
-
-    private var locationManager: LocationManager? = null
-    private var locationListenerAdded = false
 
     private var _binding: FragmentViewAreasBinding? = null
     private val binding get() = _binding!!
 
-    private fun nearbyZonesReady(): Boolean {
-        var error = false
+    @SuppressLint("MissingPermission")
+    private fun nearbyZonesReady(): List<NearbyZonesError> {
+        val errors = arrayListOf<NearbyZonesError>()
 
-        if (context == null) {
-            error = true
-            Timber.w("Could not update Nearby Zones: Not showing fragment (context is null)")
-        } else if (!nearbyEnabled) {
-            error = true
-            Timber.w("Could not update Nearby Zones: Nearby Zones not enabled")
-        } else
-            requestLocationUpdates()
+        if (!this::mapHelper.isInitialized)
+            errors.add(NearbyZonesError.NEARBY_ZONES_NOT_INITIALIZED)
+        else if (!mapHelper.isLoaded)
+            errors.add(NearbyZonesError.NEARBY_ZONES_NOT_LOADED)
+        else {
+            if (context == null)
+                errors.add(NearbyZonesError.NEARBY_ZONES_CONTEXT)
+            else if (!nearbyEnabled)
+                errors.add(NearbyZonesError.NEARBY_ZONES_NOT_ENABLED)
+            else if (PermissionsManager.areLocationPermissionsGranted(requireContext()))
+                try {
+                    mapHelper.enableLocationComponent(requireContext())
+                } catch (ex: IllegalStateException) {
+                    Timber.w("Tried to enable location component that is already enabled")
+                }
+            else errors.add(NearbyZonesError.NEARBY_ZONES_PERMISSION)
 
-        if (!isResumed) {
-            error = true
-            Timber.w("Could not update Nearby Zones: Not showing fragment (not resumed)")
+            if (!isResumed)
+                errors.add(NearbyZonesError.NEARBY_ZONES_RESUMED)
+
+            if (AREAS.isEmpty)
+                errors.add(NearbyZonesError.NEARBY_ZONES_EMPTY)
         }
 
-        if (locationManager == null) {
-            error = true
-            Timber.w("Could not update Nearby Zones: Location manager is null")
-        }
+        if (errors.isNotEmpty())
+            for (msg in errors)
+                Timber.w("Could not update Nearby Zones ($msg): ${msg.message}")
 
-        if (AREAS.isEmpty) {
-            error = true
-            Timber.w("Could not update Nearby Zones: AREAS is empty")
-        }
-
-        if (!mapHelper.isLoaded) {
-            error = true
-            Timber.w("Could not update Nearby Zones: MapHelper is not loaded")
-        }
-
-        visibility(binding.nearbyZonesCardView, !error)
-        return !error
+        visibility(binding.nearbyZonesCardView, errors.isEmpty())
+        return errors
     }
 
     private fun updateNearbyZones(location: Location) {
-        if (!nearbyZonesReady())
+        if (nearbyZonesReady().isEmpty())
             return
 
         Timber.v("Updating nearby zones...")
@@ -101,9 +105,9 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
         binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
 
-        val hasLocationPermission = if (context != null)
-            PermissionsManager.areLocationPermissionsGranted(requireContext())
-        else false
+        val hasLocationPermission =
+            context?.let { PermissionsManager.areLocationPermissionsGranted(requireContext()) }
+                ?: false
         visibility(binding.mapView, hasLocationPermission)
         visibility(binding.nearbyZonesPermissionMessage, !hasLocationPermission)
 
@@ -177,11 +181,26 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             .loadMap(requireContext()) { _, map, _ ->
                 Timber.d("Map is ready.")
 
+                mapHelper.addLocationUpdateCallback { location ->
+                    Timber.v("Got new location: [${location.latitude}, ${location.longitude}]")
+
+                    updateNearbyZones(location)
+
+                    binding.nearbyZonesTitle.setOnClickListener {
+                        updateNearbyZones(location)
+                    }
+                }
+
                 map.addOnMapClickListener {
-                    val intent = mapHelper.mapsActivityIntent(requireContext())
-                    Timber.v("Starting MapsActivity...")
-                    startActivity(intent)
-                    true
+                    try {
+                        val intent = mapHelper.mapsActivityIntent(requireContext())
+                        Timber.v("Starting MapsActivity...")
+                        startActivity(intent)
+                        true
+                    } catch (e: MapAnyDataToLoadException) {
+                        Timber.w("Clicked on nearby zones map and any data has been loaded")
+                        false
+                    }
                 }
                 mapHelper.addSymbolClickListener {
                     val intent = mapHelper.mapsActivityIntent(requireContext())
@@ -189,6 +208,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     startActivity(intent)
                     true
                 }
+
+                nearbyZonesReady()
             }
     }
 
@@ -213,29 +234,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         refreshAreas()
-    }
-
-    @SuppressLint("MissingPermission")
-    fun requestLocationUpdates() {
-        if (locationListenerAdded)
-            return
-
-        if (locationManager == null)
-            locationManager =
-                requireContext().applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
-
-        if (PermissionsManager.areLocationPermissionsGranted(requireContext())) {
-            Timber.d("Requesting location updates...")
-            binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
-            locationManager!!.requestLocationUpdates(
-                LocationManager.NETWORK_PROVIDER,
-                LOCATION_UPDATE_MIN_TIME,
-                LOCATION_UPDATE_MIN_DIST,
-                locationCallback,
-                Looper.getMainLooper()
-            )
-            locationListenerAdded = true
-        } else Timber.w("Location listener not added since permission is not granted")
     }
 
     private fun refreshAreas() {
@@ -276,15 +274,5 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         if (!isResumed) return
 
         visibility(binding.areasNoInternetCardView.noInternetCardView, !state.hasInternet)
-    }
-
-    private val locationCallback = LocationListener { location ->
-        Timber.v("Got new location: [${location.latitude}, ${location.longitude}]")
-
-        updateNearbyZones(location)
-
-        binding.nearbyZonesTitle.setOnClickListener {
-            updateNearbyZones(location)
-        }
     }
 }
