@@ -28,18 +28,22 @@ private const val BUFFER = 2048
     ZipException::class,
     IOException::class
 )
-fun zipFile(file: File, targetStream: OutputStream) {
+fun zipFile(file: File, targetStream: OutputStream, includeSelf: Boolean) {
     val origin: BufferedInputStream
     var zipOutput: ZipOutputStream? = null
     try {
         zipOutput = ZipOutputStream(targetStream.buffered(BUFFER))
         if (file.isDirectory)
-            zipSubFolder(zipOutput, file, file.parent!!.length)
+            zipSubFolder(
+                zipOutput,
+                file,
+                if (includeSelf) file.parent!!.length else file.path.length + 1
+            )
         else {
             val data = ByteArray(BUFFER)
             val fi = file.inputStream()
             origin = fi.buffered(BUFFER)
-            val entry = ZipEntry(getLastPathComponent(file.path))
+            val entry = ZipEntry(if (includeSelf) getLastPathComponent(file.path) else "")
             entry.time = file.lastModified()
             zipOutput.putNextEntry(entry)
             var count = origin.read(data, 0, BUFFER)
@@ -63,9 +67,9 @@ private fun zipSubFolder(zipOutput: ZipOutputStream, folder: File, basePathLengt
             else {
                 val data = ByteArray(BUFFER)
                 val unmodifiedFilePath = file.path
-                val relativePath = unmodifiedFilePath.substring(basePathLength)
                 val fi = FileInputStream(unmodifiedFilePath)
                 origin = fi.buffered(BUFFER)
+                val relativePath = unmodifiedFilePath.substring(basePathLength)
                 val entry = ZipEntry(relativePath)
                 entry.time = file.lastModified()
                 zipOutput.putNextEntry(entry)

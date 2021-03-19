@@ -857,7 +857,7 @@ class MapHelper(private val mapView: MapView) {
             write("</kml>")
         }
         Timber.d("Compressing KMZ...")
-        zipFile(dir, stream)
+        zipFile(dir, stream, false)
         Timber.d("Complete!")
     }
 
