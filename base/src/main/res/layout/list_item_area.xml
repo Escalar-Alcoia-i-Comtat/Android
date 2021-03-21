@@ -53,6 +53,7 @@
                 android:textSize="17sp"
                 android:textStyle="bold"
                 android:background="@color/image_card_label_bg"
+                android:textAlignment="center"
                 app:layout_constraintBottom_toBottomOf="@+id/area_imageView"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />

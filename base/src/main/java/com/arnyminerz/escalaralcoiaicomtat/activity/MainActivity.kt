@@ -4,12 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
+import android.widget.PopupMenu
 import androidx.collection.arrayMapOf
 import androidx.core.app.ActivityOptionsCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
@@ -54,6 +53,7 @@ const val TAB_ITEM_HOME = 0
 const val TAB_ITEM_MAP = 1
 const val TAB_ITEM_DOWNLOADS = 2
 const val TAB_ITEM_SETTINGS = 3
+const val TAB_ITEM_EXTRA = -1
 
 const val UPDATE_CHECKER_WORK_NAME = "update_checker"
 const val UPDATE_CHECKER_TAG = "update"
@@ -110,34 +110,72 @@ class MainActivity : NetworkChangeListenerActivity() {
 
     private var skipLoad = false
 
-    private var menu: Menu? = null
-    private val menuMapIcon: MenuItem?
-        get() = menu?.getItem(0)
-    private val menuDownloadsIcon: MenuItem?
-        get() = menu?.getItem(1)
-
     private fun updateBottomAppBar() {
         Timber.d("Updating bottom app bar...")
         val position = binding.mainViewPager.currentItem
-        binding.bottomAppBar.navigationIcon =
-            ContextCompat.getDrawable(
-                this,
-                if (position == TAB_ITEM_HOME) R.drawable.round_explore_24 else R.drawable.ic_outline_explore_24
-            )
-        menuMapIcon?.setIcon(
-            ContextCompat.getDrawable(
-                this,
-                if (position == TAB_ITEM_MAP) R.drawable.ic_round_map_24 else R.drawable.ic_outline_map_24
-            )
-        ) ?: Timber.w("menuMapIcon is null")
-        menuDownloadsIcon?.setIcon(
-            ContextCompat.getDrawable(
-                this,
-                if (position == TAB_ITEM_DOWNLOADS)
-                    R.drawable.ic_round_cloud_download_24
-                else R.drawable.ic_outline_cloud_download_24
-            )
-        ) ?: Timber.w("menuDownloadsIcon is null")
+        binding.actionExploreImage.setImageResource(
+            if (position == TAB_ITEM_HOME) R.drawable.round_explore_24
+            else R.drawable.ic_outline_explore_24
+        )
+        visibility(binding.actionExploreText, position == TAB_ITEM_HOME)
+        binding.actionMapImage.setImageResource(
+            if (position == TAB_ITEM_MAP) R.drawable.ic_round_map_24
+            else R.drawable.ic_outline_map_24
+        )
+        visibility(binding.actionMapText, position == TAB_ITEM_MAP)
+        binding.actionDownloadsImage.setImageResource(
+            if (position == TAB_ITEM_DOWNLOADS) R.drawable.ic_round_cloud_download_24
+            else R.drawable.ic_outline_cloud_download_24
+        )
+        visibility(binding.actionDownloadsText, position == TAB_ITEM_DOWNLOADS)
+
+        binding.mainViewPager.isUserInputEnabled =
+            position == TAB_ITEM_HOME || position == TAB_ITEM_DOWNLOADS
+    }
+
+    /**
+     * @author Arnau Mora
+     * @since 20210321
+     * @param position The position to navigate to
+     */
+    private fun navigate(position: Int) {
+        if (position == TAB_ITEM_EXTRA)
+            PopupMenu(this, binding.actionExtra).apply {
+                menuInflater.inflate(R.menu.menu_main_extra, menu)
+                setOnMenuItemClickListener { item ->
+                    when (item.itemId) {
+                        R.id.settings -> {
+                            binding.mainViewPager.currentItem = TAB_ITEM_SETTINGS
+                            true
+                        }
+                        R.id.share -> {
+                            startActivity(
+                                Intent.createChooser(
+                                    Intent(Intent.ACTION_SEND).setType("text/plain")
+                                        .putExtra(
+                                            Intent.EXTRA_TEXT,
+                                            getString(R.string.share_text)
+                                        ),
+                                    getString(R.string.action_share_with)
+                                )
+                            )
+                            true
+                        }
+                        else -> false
+                    }
+                }
+                show()
+            }
+        else {
+            if (!visibility(binding.mainViewPager)) {
+                visibility(binding.mainViewPager, true)
+                visibility(binding.mainFrameLayout, false)
+            }
+
+            binding.mainViewPager.setCurrentItem(position, true)
+
+            updateBottomAppBar()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -168,18 +206,17 @@ class MainActivity : NetworkChangeListenerActivity() {
                 TAB_ITEM_SETTINGS to settingsFragment
             )
         )
-        binding.mainViewPager.isUserInputEnabled = false
-
-        binding.bottomAppBar.setNavigationOnClickListener {
-            if (!visibility(binding.mainViewPager)) {
-                visibility(binding.mainViewPager, true)
-                visibility(binding.mainFrameLayout, false)
+        binding.mainViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                updateBottomAppBar()
             }
+        })
 
-            binding.mainViewPager.currentItem = TAB_ITEM_HOME
-
-            updateBottomAppBar()
-        }
+        binding.actionExplore.setOnClickListener { navigate(TAB_ITEM_HOME) }
+        binding.actionMap.setOnClickListener { navigate(TAB_ITEM_MAP) }
+        binding.actionDownloads.setOnClickListener { navigate(TAB_ITEM_DOWNLOADS) }
+        binding.actionExtra.setOnClickListener { navigate(TAB_ITEM_EXTRA) }
 
         Timber.v("  --- Found ${AREAS.size} areas ---")
 
@@ -202,50 +239,8 @@ class MainActivity : NetworkChangeListenerActivity() {
 
             startActivity(intent, optionsBundle)
         }
-    }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        this.menu = menu
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (!visibility(binding.mainViewPager)) {
-            visibility(binding.mainViewPager, true)
-            visibility(binding.mainFrameLayout, false)
-        }
-
-        val result = when (item.itemId) {
-            R.id.action_1 -> {
-                binding.mainViewPager.currentItem = TAB_ITEM_MAP
-                true
-            }
-            R.id.action_2 -> {
-                binding.mainViewPager.currentItem = TAB_ITEM_DOWNLOADS
-                true
-            }
-            R.id.settings -> {
-                binding.mainViewPager.currentItem = TAB_ITEM_SETTINGS
-                true
-            }
-            R.id.share -> {
-                startActivity(
-                    Intent.createChooser(
-                        Intent(Intent.ACTION_SEND).setType("text/plain")
-                            .putExtra(
-                                Intent.EXTRA_TEXT,
-                                getString(R.string.share_text)
-                            ),
-                        getString(R.string.action_share_with)
-                    )
-                )
-                true
-            }
-            else -> false
-        }
         updateBottomAppBar()
-        return result
     }
 
     override fun onBackPressed() {

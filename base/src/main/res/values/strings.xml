@@ -54,6 +54,7 @@
     <string name="action_send_feedback">Send feedback</string>
     <string name="action_export_kmz">Export KMZ</string>
     <string name="action_export_gpx">Export GPX</string>
+    <string name="action_login">Log In</string>
 
     <string name="status_updating">Updating…</string>
     <string name="status_loading">Loading…</string>
@@ -223,6 +224,7 @@
     <string name="feedback_message">Message</string>
     <string name="feedback_dont_contact">Don\'t contact me</string>
 
+    <string name="item_explore">Explore</string>
     <string name="item_map">Map</string>
     <string name="item_downloads">Downloads</string>
     <string name="item_settings">Settings</string>
