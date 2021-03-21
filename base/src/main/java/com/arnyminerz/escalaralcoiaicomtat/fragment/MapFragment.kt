@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
@@ -16,8 +15,13 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentMapBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapNotInitializedException
+import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory

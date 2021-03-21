@@ -6,7 +6,6 @@ import android.os.Bundle
 import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.loadAreasFromCache
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
@@ -14,6 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChannels
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import io.sentry.SentryLevel
 import io.sentry.android.core.SentryAndroid

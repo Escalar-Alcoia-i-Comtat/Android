@@ -7,9 +7,12 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.*
+import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_AREA
+import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_POSITION
+import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_SECTOR_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_SECTOR_TRANSITION_NAME
+import com.arnyminerz.escalaralcoiaicomtat.activity.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.count
@@ -19,6 +22,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.ARGUMENT_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.ARGUMENT_ZONE_ID
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.SectorFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility

@@ -4,7 +4,6 @@ import android.os.Build
 import android.os.Bundle
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
@@ -12,6 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility

@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
@@ -19,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.DownloadSectionViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber

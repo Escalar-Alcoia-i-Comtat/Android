@@ -1,7 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.model
 
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkProvider
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkProvider
 
 abstract class NetworkChangeListenerActivity : LanguageAppCompatActivity(),
     ConnectivityProvider.ConnectivityStateListener {

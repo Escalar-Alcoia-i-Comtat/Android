@@ -1,8 +1,8 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.model
 
 import androidx.preference.PreferenceFragmentCompat
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkProvider
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkProvider
 
 abstract class NetworkChangeListenerPreferenceFragment : PreferenceFragmentCompat(),
     ConnectivityProvider.ConnectivityStateListener {

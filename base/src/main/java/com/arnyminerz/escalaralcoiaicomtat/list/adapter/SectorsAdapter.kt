@@ -9,7 +9,6 @@ import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
@@ -17,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_PREVIEW_SCALE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorsViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility

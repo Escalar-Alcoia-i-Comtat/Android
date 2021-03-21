@@ -16,12 +16,12 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters

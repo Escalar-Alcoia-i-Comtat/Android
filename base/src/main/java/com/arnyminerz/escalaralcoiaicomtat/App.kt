@@ -2,15 +2,11 @@ package com.arnyminerz.escalaralcoiaicomtat
 
 import android.app.Application
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkProvider
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.parse.Parse
 import com.parse.Parse.Configuration
 import timber.log.Timber
-
-var appNetworkState: ConnectivityProvider.NetworkState =
-    ConnectivityProvider.NetworkState.NOT_CONNECTED
-    private set
-
-lateinit var appNetworkProvider: ConnectivityProvider
 
 class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     private val provider: ConnectivityProvider

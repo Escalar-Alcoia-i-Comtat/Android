@@ -12,7 +12,6 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.KMZ_FILE_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.ZONE_NAME_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
@@ -20,6 +19,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.ZonesViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
