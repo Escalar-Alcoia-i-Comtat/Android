@@ -6,6 +6,7 @@ import android.util.TypedValue
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import androidx.annotation.AttrRes
 import androidx.annotation.ColorRes
 import androidx.annotation.UiThread
 import androidx.core.content.ContextCompat
@@ -148,6 +149,23 @@ fun setTextColor(view: TextView, context: Context, @ColorRes color: Int) {
 @UiThread
 @Suppress("DEPRECATION")
 fun getColor(context: Context, @ColorRes color: Int): Int = ContextCompat.getColor(context, color)
+
+/**
+ * Gets a color stored in attribute
+ * @author Arnau Mora
+ * @since 20210321
+ * @param context The context to get from
+ * @param attributeRes The attribute to get
+ * @return The loaded color
+ */
+fun getColorFromAttribute(context: Context, @AttrRes attributeRes: Int): Int {
+    val theme = context.theme
+    val resources = context.resources
+    val typedValue = TypedValue()
+    theme.resolveAttribute(attributeRes, typedValue, true)
+    val colorRes = typedValue.resourceId
+    return resources.getColor(colorRes, theme)
+}
 
 fun getAttribute(context: Context, resId: Int): Int {
     val typedValue = TypedValue()
