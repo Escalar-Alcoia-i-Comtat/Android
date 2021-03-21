@@ -40,7 +40,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             )
         }
 
-        val showIntro = IntroActivity.shouldShow(this)
+        val showIntro = IntroActivity.shouldShow()
         if (showIntro != IntroShowReason.OK) {
             Timber.w("  Showing intro! Reason: ${showIntro.msg}")
             finish()
