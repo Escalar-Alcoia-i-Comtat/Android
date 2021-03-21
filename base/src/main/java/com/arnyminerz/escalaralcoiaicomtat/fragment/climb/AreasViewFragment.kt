@@ -97,7 +97,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
      * @since 20210321
      * @param location The current location, if null, no markers will be added.
      */
-    private fun updateNearbyZones(location: Location? = null) {
+    fun updateNearbyZones(location: Location? = null) {
         val nearbyZonesErrors = nearbyZonesReady()
         if (nearbyZonesErrors.isNotEmpty()) {
             Timber.i("Nearby Zones errors: $nearbyZonesErrors")
