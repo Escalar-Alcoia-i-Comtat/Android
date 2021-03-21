@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.widget.PopupMenu
 import androidx.collection.arrayMapOf
@@ -11,8 +10,7 @@ import androidx.core.view.ViewCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.DownloadsFragment
@@ -22,22 +20,12 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.AreasViewFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFragment.Companion.SettingsPage
 import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChannels
-import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.parse.ParseAnalytics
-import io.sentry.SentryLevel
-import io.sentry.android.core.SentryAndroid
-import io.sentry.android.timber.SentryTimberIntegration
 import timber.log.Timber
-import timber.log.Timber.DebugTree
-import java.io.File
 
 val EXTRA_AREA = IntentExtra<String>("area")
 val EXTRA_ZONE = IntentExtra<String>("zone")
@@ -61,52 +49,7 @@ const val UPDATE_CHECKER_FLEX_MINUTES: Long = 15
 
 val AREAS = arrayMapOf<String, Area>()
 
-var serverAvailable = false
-    private set
-
-class MainActivity : NetworkChangeListenerActivity() {
-
-    /**
-     * Prepares the app and runs some initial tests to see if the content should be loaded or other
-     * actions should be executed.
-     * @author Arnau Mora
-     * @since 20210321
-     * @return If the content should be started loading.
-     */
-    private fun prepareApp(): Boolean {
-        var error = false
-        Timber.v("Preparing App...")
-        Timber.v("Instantiating Sentry")
-        SentryAndroid.init(this) { options ->
-            options.addIntegration(
-                SentryTimberIntegration(SentryLevel.ERROR, SentryLevel.INFO)
-            )
-        }
-
-        val showIntro = IntroActivity.shouldShow(this)
-        if (showIntro != IntroShowReason.OK) {
-            Timber.w("  Showing intro! Reason: ${showIntro.msg}")
-            skipLoad = true
-            startActivity(Intent(this, IntroActivity::class.java))
-            error = true
-        } else
-            Timber.v("  Won't show intro.")
-
-        if (AREAS.size <= 0) {
-            startActivity(Intent(this, LoadingActivity::class.java))
-            error = true
-        }
-
-        Timber.v("Data folder path: %s", filesDir(this).path)
-
-        File(cacheDir, "update.apk").deleteIfExists()
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            createNotificationChannels()
-
-        Timber.v("Finished preparing App...")
-        return !error
-    }
+class MainActivity : LanguageAppCompatActivity() {
 
     private lateinit var areasViewFragment: AreasViewFragment
     private lateinit var mapFragment: MapFragment
@@ -116,8 +59,6 @@ class MainActivity : NetworkChangeListenerActivity() {
 
     var adapter: MainPagerAdapter? = null
     private lateinit var binding: ActivityMainBinding
-
-    private var skipLoad = false
 
     private fun updateBottomAppBar() {
         Timber.d("Updating bottom app bar...")
@@ -189,15 +130,10 @@ class MainActivity : NetworkChangeListenerActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Timber.plant(DebugTree())
-        Timber.v("Planted Timber.")
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
         setSupportActionBar(binding.bottomAppBar)
-
-        if (!prepareApp()) return
 
         ParseAnalytics.trackAppOpenedInBackground(intent)
 
@@ -287,16 +223,5 @@ class MainActivity : NetworkChangeListenerActivity() {
             LOCATION_PERMISSION_REQUEST -> areasViewFragment.mapHelper.enableLocationComponent(this)
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
-    }
-
-    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        if (skipLoad) {
-            Timber.w("Skipped onStateChange since skipLoad is true.")
-            return
-        }
-
-        val hasInternet = state.hasInternet
-        Timber.v("Connectivity status Updated! Has Internet: %s", hasInternet)
-        binding.loadingLayout.hide()
     }
 }

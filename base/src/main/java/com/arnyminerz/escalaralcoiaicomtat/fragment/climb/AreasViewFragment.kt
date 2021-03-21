@@ -15,14 +15,22 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.CENTER_CURRENT_LOCATION_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getZones
-import com.arnyminerz.escalaralcoiaicomtat.data.map.*
+import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
+import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
+import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
+import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_WAYPOINT_ESCALADOR_BLANC
+import com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData
 import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_DISABLE_NEARBY
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -76,8 +84,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     mapHelper.enableLocationComponent(requireContext())
                 } catch (ex: IllegalStateException) {
                     Timber.w("Tried to enable location component that is already enabled")
-                }
-            else errors.add(NearbyZonesError.NEARBY_ZONES_PERMISSION)
+                } else errors.add(NearbyZonesError.NEARBY_ZONES_PERMISSION)
 
             if (!isResumed)
                 errors.add(NearbyZonesError.NEARBY_ZONES_RESUMED)

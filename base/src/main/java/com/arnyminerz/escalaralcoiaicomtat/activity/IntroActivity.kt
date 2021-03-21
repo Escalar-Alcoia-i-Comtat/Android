@@ -115,9 +115,9 @@ class IntroActivity : LanguageAppCompatActivity() {
             }
 
         if (position + 1 >= adapterViewPager!!.fragments.size) {
-            Timber.v("Finished showing intro pages. Loading MainActivity")
+            Timber.v("Finished showing intro pages. Loading LoadingActivity")
             PREF_SHOWN_INTRO.put(sharedPreferences, true)
-            startActivity(Intent(this, MainActivity()::class.java))
+            startActivity(Intent(this, LoadingActivity()::class.java))
         } else {
             if (binding.viewPager.currentItem == adapterViewPager!!.fragments.size - 2)
                 binding.introNextFAB.setImageResource(R.drawable.round_check_24)
