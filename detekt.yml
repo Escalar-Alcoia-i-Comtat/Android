@@ -4,8 +4,6 @@ formatting:
   autoCorrect: true
   MultiLineIfElse:
     active: false
-  NoWildcardImports:
-    active: false
 
 complexity:
   LongMethod:
