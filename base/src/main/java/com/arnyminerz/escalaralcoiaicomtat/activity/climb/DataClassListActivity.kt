@@ -11,6 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
@@ -124,10 +125,15 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                     }
 
                     map.addOnMapClickListener {
-                        val intent = mapHelper.mapsActivityIntent(this, overrideLoadedMapData)
-                        Timber.v("Starting MapsActivity...")
-                        startActivity(intent)
-                        true
+                        try {
+                            val intent = mapHelper.mapsActivityIntent(this, overrideLoadedMapData)
+                            Timber.v("Starting MapsActivity...")
+                            startActivity(intent)
+                            true
+                        } catch (e: MapAnyDataToLoadException) {
+                            Timber.w("Clicked on map and any data has been loaded")
+                            false
+                        }
                     }
                 }
         } else if (!hasInternet) {
