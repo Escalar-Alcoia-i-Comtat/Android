@@ -10,27 +10,41 @@
 [![Google Play][googleplay-badge]][play-store]
 [![App Gallery][appgallery-badge]][app-gallery]
 
-This is the official Escalar Alcoià i Comtat's Android App repository, here's the full source code 
+This is the official Escalar Alcoià i Comtat's Android App repository, here's the full source code
 of the app.
 
 All the credentials are hidden, and embed in the build Pipeline.
 
 ## Play Store ##
+
 The app is available at the Play Store. You can access it [here][play-store].
 
 ## Issues ##
-Whatever problem that is detected by the community can be reported directly to [Github Issues][issues].
+
+Whatever problem that is detected by the community can be reported directly
+to [Github Issues][issues].
+
+## Documentation ##
+
+You can find the javadoc files at [Github Pages][pages]
 
 ## Build ##
-The recommended installation method is always Play Store, but if you want to try the latest 
+
+The recommended installation method is always Play Store, but if you want to try the latest
 functionalities before than anyone, you can check Github's [Releases][releases] page.
 
 ## Donations ##
-We are really pleased to receive donations from the people that want to. It's not mandatory, but since we have put a lot of hours in the app, we really love that people love our work.
 
-The simplest way of donating some money is through [Github Sponsors][sponsors]. You can access it from the link specified, or through the repository's button.
+We are really pleased to receive donations from the people that want to. It's not mandatory, but
+since we have put a lot of hours in the app, we really love that people love our work.
+
+The simplest way of donating some money is through [Github Sponsors][sponsors]. You can access it
+from the link specified, or through the repository's button.
 
 ---
+
+[pages]: https://arnyminerz.github.io/EscalarAlcoiaIComtat-Android/base/
+
 [sponsors]: https://github.com/sponsors/ArnyminerZ
 [play-store]: https://play.google.com/store/apps/details?id=com.arnyminerz.escalaralcoiaicomtat
 [app-gallery]: https://appgallery.huawei.com/#/app/C103446955
