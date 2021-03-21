@@ -143,7 +143,7 @@ fun View.hide(setGone: Boolean = true) = visibility(false, setGone = setGone)
 @UiThread
 @Deprecated(
     "Avoid using show and hide functions to avoid problems with async visibility change calls.",
-    ReplaceWith("visibility(true, setGone = setGone)")
+    ReplaceWith("visibility(true)")
 )
 fun View.show() = visibility(true)
 

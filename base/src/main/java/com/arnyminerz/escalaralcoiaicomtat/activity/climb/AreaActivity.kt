@@ -20,7 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_POSITION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_TRANSITION_NAME
-import com.arnyminerz.escalaralcoiaicomtat.view.show
+import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
 
 class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
@@ -91,7 +91,7 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
                             )
                     adapter =
                         ZoneAdapter(zones, this@AreaActivity) { _, holder, position ->
-                            binding.loadingLayout.show()
+                            binding.loadingLayout.visibility(true)
                             runOnUiThread {
                                 Timber.v("Clicked item $position")
                                 val intent =
