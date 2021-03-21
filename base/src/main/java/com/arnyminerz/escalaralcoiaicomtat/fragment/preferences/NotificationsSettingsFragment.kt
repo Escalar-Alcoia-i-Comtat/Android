@@ -9,7 +9,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
+import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 
 class NotificationsSettingsFragment : PreferenceFragmentCompat() {
 
@@ -18,10 +18,10 @@ class NotificationsSettingsFragment : PreferenceFragmentCompat() {
 
         val alertEnableSwitch: SwitchPreference? = findPreference("pref_alert_enable")
         alertEnableSwitch?.isChecked =
-            SETTINGS_ALERT_PREF.get(requireContext().sharedPreferences)
+            SETTINGS_ALERT_PREF.get(sharedPreferences)
         alertEnableSwitch?.setOnPreferenceClickListener { p ->
             val pref = p as SwitchPreference
-            SETTINGS_ALERT_PREF.put(requireContext().sharedPreferences, pref.isChecked)
+            SETTINGS_ALERT_PREF.put(sharedPreferences, pref.isChecked)
 
             true
         }

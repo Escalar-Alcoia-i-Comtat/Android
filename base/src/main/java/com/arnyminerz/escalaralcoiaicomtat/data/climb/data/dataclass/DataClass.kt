@@ -1,10 +1,9 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.data
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass
 
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.os.Parcelable
 import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.annotation.DrawableRes
@@ -12,16 +11,20 @@ import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.arnyminerz.escalaralcoiaicomtat.activity.*
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
-import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.allTrue
+import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
+import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
@@ -36,206 +39,11 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.parse.ParseException
 import com.parse.ParseObject
 import com.parse.ParseQuery
-import com.parse.boltsinternal.Task
 import timber.log.Timber
 import java.io.File
-import java.util.*
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
-
-/**
- * Searches in AREAS and tries to get an intent from them
- */
-fun getIntent(context: Context, queryName: String): Intent? {
-    Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
-    for (area in AREAS.values) {
-        Timber.d("  Finding in ${area.displayName}. It has ${area.count()} zones.")
-        when {
-            area.displayName.equals(queryName, true) ->
-                return Intent(context, AreaActivity::class.java).apply {
-                    Timber.d("Found Area id ${area.objectId}!")
-                    putExtra(EXTRA_AREA, area.objectId)
-                }
-            area.isNotEmpty() ->
-                for (zone in area) {
-                    Timber.d("    Finding in ${zone.displayName}. It has ${zone.count()} sectors.")
-                    if (zone.displayName.equals(queryName, true))
-                        return Intent(context, ZoneActivity::class.java).apply {
-                            Timber.d("Found Zone id ${zone.objectId}!")
-                            putExtra(EXTRA_AREA, area.objectId)
-                            putExtra(EXTRA_ZONE, zone.objectId)
-                        }
-                    else if (zone.isNotEmpty())
-                        for ((s, sector) in zone.withIndex()) {
-                            Timber.d("      Finding in ${sector.displayName}.")
-                            if (sector.displayName.equals(queryName, true))
-                                return Intent(context, SectorActivity::class.java).apply {
-                                    Timber.d("Found Sector id ${sector.objectId} at $s!")
-                                    putExtra(EXTRA_AREA, area.objectId)
-                                    putExtra(EXTRA_ZONE, zone.objectId)
-                                    putExtra(EXTRA_SECTOR_INDEX, s)
-                                }
-                        }
-                }
-            else -> Timber.w("Area is empty.")
-        }
-    }
-    Timber.w("Could not generate intent")
-    return null
-}
-
-/**
- * Fetches data asyncronously from datastore, or from network if not available
- * @author Arnau Mora
- * @since 20210313
- * @param label The label to search in datastore
- * @param shouldPin If the data should be stored in datastore when loaded
- * @param callback What to call when completed
- * @return The loading task
- * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
- */
-@Throws(NoInternetAccessException::class)
-fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetwork(
-    label: String,
-    shouldPin: Boolean = false,
-    callback: ((objects: List<A>, error: Exception?) -> Unit)? = null
-): Task<List<A>> = fromPin(label).findInBackground().continueWithTask { task ->
-    val error = task.error
-    val objects = task.result
-    if (error != null) {
-        if (error is ParseException && error.code == ParseException.CACHE_MISS) {
-            Timber.w("No stored data found. Fetching from network.")
-            if (!appNetworkState.hasInternet) {
-                Timber.w("No Internet connection is available, and there's no stored data")
-                throw NoInternetAccessException("No Internet connection is available, and there's no stored data")
-            }
-            return@continueWithTask fromNetwork().findInBackground()
-        } else Timber.e(error, "Could not fetch data.")
-    }
-    if (objects.size <= 0) {
-        Timber.w("No stored data found. Fetching from network.")
-        if (!appNetworkState.hasInternet) {
-            Timber.w("No Internet connection is available, and there's no stored data")
-            throw NoInternetAccessException("No Internet connection is available, and there's no stored data")
-        }
-        return@continueWithTask fromNetwork().findInBackground()
-    }
-    Timber.d("Loading from pin...")
-    return@continueWithTask task
-}.continueWithTask { task ->
-    callback?.invoke(task.result, task.error)
-    if (shouldPin) {
-        Timber.d("Pinning...")
-        ParseObject.pinAll(label, task.result)
-    }
-    return@continueWithTask task
-}
-
-/**
- * Fetches data syncronously from datastore, or from network if not available
- * @author Arnau Mora
- * @since 20210313
- * @param label The label to search in datastore
- * @param shouldPin If the data should be stored in datastore when loaded
- * @param timeout The maximum amount of time that the task should take
- * @return The fetch result
- * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
- * @throws TimeoutException If timeout passed before finishing the task
- */
-@Throws(NoInternetAccessException::class, TimeoutException::class)
-@WorkerThread
-fun <A : ParseObject> ParseQuery<A>.fetchPinOrNetworkSync(
-    label: String,
-    shouldPin: Boolean = false,
-    timeout: Pair<Long, TimeUnit>? = null
-): List<A> {
-    val list = arrayListOf<A>()
-    val task = fetchPinOrNetwork(label, shouldPin) { result, error ->
-        error?.let { throw it }
-        list.addAll(result)
-    }
-    if (timeout != null && !task.waitForCompletion(timeout.first, timeout.second))
-        throw TimeoutException("The task was not completed in less than ${timeout.first} ${timeout.second.name}")
-    else
-        task.waitForCompletion()
-    return list
-}
-
-/**
- * Counts the amount of objects there are in a query
- * @author Arnau Mora
- * @since 20210314
- * @param callback What to call when completed
- * @return The loading task
- * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
- */
-@Throws(NoInternetAccessException::class)
-fun <A : ParseObject> ParseQuery<A>.count(
-    callback: ((count: Int, error: Exception?) -> Unit)? = null
-): Task<Int> = countInBackground().continueWithTask { task ->
-    val error = task.error
-    if (error != null) {
-        if (error is ParseException && error.code == ParseException.CACHE_MISS) {
-            Timber.w("No stored data found. Fetching from network.")
-            if (!appNetworkState.hasInternet) {
-                Timber.w("No Internet connection is available, and there's no stored data")
-                throw NoInternetAccessException("No Internet connection is available, and there's no stored data")
-            }
-            return@continueWithTask fromNetwork().countInBackground()
-        } else Timber.e(error, "Could not fetch data.")
-    }
-    return@continueWithTask task
-}.continueWithTask { task ->
-    callback?.invoke(task.result, task.error)
-    return@continueWithTask task
-}
-
-/**
- * Counts the amount of objects there are in a query syncronously
- * @author Arnau Mora
- * @since 20210313
- * @param timeout The maximum amount of time that the task should take
- * @return The count
- * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
- * @throws TimeoutException If timeout passed before finishing the task
- */
-@Throws(NoInternetAccessException::class, TimeoutException::class)
-@WorkerThread
-fun <A : ParseObject> ParseQuery<A>.countSync(timeout: Pair<Long, TimeUnit>? = null): Int {
-    var result = -1
-    val task = count { count, error ->
-        error?.let { throw it }
-        result = count
-    }
-    if (timeout != null && !task.waitForCompletion(timeout.first, timeout.second))
-        throw TimeoutException("The task was not completed in less than ${timeout.first} ${timeout.second.name}")
-    else
-        task.waitForCompletion()
-    return result
-}
-
-enum class DataClasses(val namespace: String) {
-    AREA(Area.NAMESPACE),
-    ZONE(Zone.NAMESPACE),
-    SECTOR(Sector.NAMESPACE);
-
-    companion object {
-        fun find(namespace: String): DataClasses? {
-            for (c in values())
-                if (c.namespace == namespace)
-                    return c
-            return null
-        }
-    }
-}
-
-abstract class DataClassImpl(open val objectId: String, open val namespace: String) : Parcelable {
-    protected val pin: String
-        get() = "${DATA_FIX_LABEL}_${namespace}_$objectId"
-}
+import java.util.Date
 
 // A: List type
 // B: Parent Type
@@ -250,6 +58,49 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     override val namespace: String,
     open val childrenNamespace: String
 ) : DataClassImpl(objectId, namespace), Iterable<A> {
+    companion object {
+        /**
+         * Searches in AREAS and tries to get an intent from them
+         */
+        fun getIntent(context: Context, queryName: String): Intent? {
+            Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
+            for (area in AREAS.values) {
+                Timber.d("  Finding in ${area.displayName}. It has ${area.count()} zones.")
+                when {
+                    area.displayName.equals(queryName, true) ->
+                        return Intent(context, AreaActivity::class.java).apply {
+                            Timber.d("Found Area id ${area.objectId}!")
+                            putExtra(EXTRA_AREA, area.objectId)
+                        }
+                    area.isNotEmpty() ->
+                        for (zone in area) {
+                            Timber.d("    Finding in ${zone.displayName}. It has ${zone.count()} sectors.")
+                            if (zone.displayName.equals(queryName, true))
+                                return Intent(context, ZoneActivity::class.java).apply {
+                                    Timber.d("Found Zone id ${zone.objectId}!")
+                                    putExtra(EXTRA_AREA, area.objectId)
+                                    putExtra(EXTRA_ZONE, zone.objectId)
+                                }
+                            else if (zone.isNotEmpty())
+                                for ((s, sector) in zone.withIndex()) {
+                                    Timber.d("      Finding in ${sector.displayName}.")
+                                    if (sector.displayName.equals(queryName, true))
+                                        return Intent(context, SectorActivity::class.java).apply {
+                                            Timber.d("Found Sector id ${sector.objectId} at $s!")
+                                            putExtra(EXTRA_AREA, area.objectId)
+                                            putExtra(EXTRA_ZONE, zone.objectId)
+                                            putExtra(EXTRA_SECTOR_INDEX, s)
+                                        }
+                                }
+                        }
+                    else -> Timber.w("Area is empty.")
+                }
+            }
+            Timber.w("Could not generate intent")
+            return null
+        }
+    }
+
     protected val innerChildren = arrayListOf<A>()
 
     /**

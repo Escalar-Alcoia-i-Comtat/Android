@@ -1,17 +1,16 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.types
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector
 
 import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.shared.AFTERNOON_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.shared.ALL_DAY_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.shared.MORNING_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.shared.NO_SUN_INDEX
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-
-const val ALL_DAY_INDEX = 0
-const val MORNING_INDEX = 1
-const val AFTERNOON_INDEX = 2
-const val NO_SUN_INDEX = 3
 
 enum class SunTime(val value: Int) : Parcelable {
     AllDay(ALL_DAY_INDEX),

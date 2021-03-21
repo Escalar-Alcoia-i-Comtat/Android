@@ -17,3 +17,10 @@ const val MARKER_WINDOW_SHOW_DURATION: Long = 500
 const val DEFAULT_LATITUDE = 38.7284401
 const val DEFAULT_LONGITUDE = -0.43821
 const val DEFAULT_ZOOM = 12.0
+
+const val ICON_SIZE_MULTIPLIER = .2f
+const val LINE_WIDTH_MULTIPLIER = .5f
+const val CURRENT_LOCATION_DEFAULT_ZOOM = 17.0
+const val MAP_LOAD_PADDING = 50
+
+const val WINDOW_DATA_KEY = "window_data"

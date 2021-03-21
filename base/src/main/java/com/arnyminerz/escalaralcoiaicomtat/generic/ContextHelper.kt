@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
+import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.PackageManager
@@ -10,10 +11,10 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_LANGUAGE_PREF
+import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import timber.log.Timber
-import java.util.*
+import java.util.Locale
 
 fun Context.toast(text: String, duration: Int = Toast.LENGTH_SHORT) =
     Toast.makeText(this, text, duration).show()
@@ -21,10 +22,14 @@ fun Context.toast(text: String, duration: Int = Toast.LENGTH_SHORT) =
 fun Context.toast(@StringRes text: Int, duration: Int = Toast.LENGTH_SHORT) =
     Toast.makeText(this, text, duration).show()
 
-fun Context.onUiThread(call: (context: Context) -> Unit) =
-    Handler(Looper.getMainLooper()).post {
-        call(this)
-    }
+fun Context.onUiThread(call: (context: Context) -> Unit) {
+    if (this is Activity)
+        runOnUiThread { call(this) }
+    else
+        Handler(Looper.getMainLooper()).post {
+            call(this)
+        }
+}
 
 fun toast(context: Context?, @StringRes text: Int) =
     context?.onUiThread { it.toast(text) }
@@ -37,7 +42,6 @@ class ContextUtils(base: Context) : ContextWrapper(base)
 fun loadLocale(context: Context): ContextWrapper {
     Timber.v("Loading app language...")
     val resources = context.resources
-    val sharedPreferences = context.sharedPreferences
     val appLanguagesValues = resources.getStringArray(R.array.app_languages_values)
     val langPref = SETTINGS_LANGUAGE_PREF.get(sharedPreferences)
     val newLang = appLanguagesValues[langPref]

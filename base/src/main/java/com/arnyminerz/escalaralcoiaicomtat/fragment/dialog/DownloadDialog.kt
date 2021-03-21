@@ -2,14 +2,14 @@ package com.arnyminerz.escalaralcoiaicomtat.fragment.dialog
 
 import android.content.Context
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
-import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber
+import java.util.concurrent.CompletableFuture.runAsync
 
 class DownloadDialog(private val context: Context, private val data: DataClass<*, *>) {
     fun show(deleteCallback: (() -> Unit)? = null) {

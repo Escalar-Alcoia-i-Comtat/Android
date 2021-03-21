@@ -3,18 +3,23 @@
 apply from: './base/secure.gradle'
 
 buildscript {
+    ext {
+        dokkaAndroidVersion = '0.9.16'
+    }
+
     repositories {
         google()
         mavenCentral()
         maven { url 'https://maven.fabric.io/public' }
         maven { url 'https://jitpack.io' }
         maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
-        maven { url "https://repo.eclipse.org/content/repositories/paho-snapshots/" }
+        maven { url 'https://dl.bintray.com/kotlin/dokka' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.0-alpha10'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.31'
         classpath 'com.google.gms:google-services:4.3.5'
+        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokkaAndroidVersion"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

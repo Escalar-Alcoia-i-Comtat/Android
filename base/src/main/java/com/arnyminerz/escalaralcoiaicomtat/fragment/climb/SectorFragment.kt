@@ -9,14 +9,19 @@ import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.getDisplaySize
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.PathsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_AREA_ID
+import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_SECTOR_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_ZONE_ID
+import com.arnyminerz.escalaralcoiaicomtat.shared.CROSSFADE_DURATION
+import com.arnyminerz.escalaralcoiaicomtat.shared.THUMBNAIL_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -24,13 +29,6 @@ import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import timber.log.Timber
-
-const val CROSSFADE_DURATION = 50
-const val THUMBNAIL_SIZE = .1f
-
-const val ARGUMENT_AREA_ID = "area_id"
-const val ARGUMENT_ZONE_ID = "zone_id"
-const val ARGUMENT_SECTOR_INDEX = "sector_index"
 
 class SectorFragment : NetworkChangeListenerFragment() {
     private lateinit var areaId: String

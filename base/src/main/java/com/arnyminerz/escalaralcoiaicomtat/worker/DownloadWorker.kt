@@ -3,22 +3,35 @@ package com.arnyminerz.escalaralcoiaicomtat.worker
 import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.lifecycle.LiveData
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.Worker
+import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.connection.parse.fetchPinOrNetworkSync
 import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.*
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClasses
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSLESS_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.storeToFile
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
+import com.arnyminerz.escalaralcoiaicomtat.shared.DATA_FIX_LABEL
+import com.arnyminerz.escalaralcoiaicomtat.shared.MAX_BATCH_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.parse.ParseException
 import com.parse.ParseObject
 import com.parse.ParseQuery
 import timber.log.Timber
 import java.io.File
-import java.util.*
+import java.util.Locale
 
 const val DOWNLOAD_QUALITY_MIN = 1
 const val DOWNLOAD_QUALITY_MAX = 100

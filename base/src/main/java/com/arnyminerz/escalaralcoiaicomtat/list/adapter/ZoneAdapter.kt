@@ -7,23 +7,23 @@ import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.KML_ADDRESS_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.activity.KMZ_FILE_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.ZONE_NAME_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.ZonesViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KML_ADDRESS
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_NAME
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
 import java.io.File
+import java.util.concurrent.CompletableFuture.runAsync
 
 class ZoneAdapter(
     private val zones: List<Zone>,
@@ -133,16 +133,19 @@ class ZoneAdapter(
                 dataClassListActivity.startActivity(
                     Intent(dataClassListActivity, MapsActivity::class.java)
                         .putExtra(
-                            KMZ_FILE_BUNDLE_EXTRA,
-                            File(filesDir(dataClassListActivity), "data/zone_${zone.objectId}.kmz").path
+                            EXTRA_KMZ_FILE,
+                            File(
+                                filesDir(dataClassListActivity),
+                                "data/zone_${zone.objectId}.kmz"
+                            ).path
                         )
-                        .putExtra(ZONE_NAME_BUNDLE_EXTRA, zone.displayName)
+                        .putExtra(EXTRA_ZONE_NAME, zone.displayName)
                 )
             zone.kmlAddress != null ->
                 dataClassListActivity.startActivity(
                     Intent(dataClassListActivity, MapsActivity::class.java)
                         .putExtra(
-                            KML_ADDRESS_BUNDLE_EXTRA,
+                            EXTRA_KML_ADDRESS,
                             zone.kmlAddress
                         )
                 )

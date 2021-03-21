@@ -6,10 +6,15 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.preference.*
+import androidx.preference.EditTextPreference
+import androidx.preference.ListPreference
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SeekBarPreference
+import androidx.preference.SwitchPreference
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
-import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
+import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
+import com.arnyminerz.escalaralcoiaicomtat.shared.PREVIEW_SCALE_PREFERENCE_MULTIPLIER
+import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import timber.log.Timber
 
 private const val PREVIEW_SCALE_REDUCER = 10f
@@ -30,7 +35,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
 
         sensibilityPreference = findPreference("pref_swipe_sensibility")
         sensibilityPreference?.setOnPreferenceChangeListener { _, value ->
-            SETTINGS_GESTURE_SENSIBILITY_PREF.put(requireContext().sharedPreferences, value as Int)
+            SETTINGS_GESTURE_SENSIBILITY_PREF.put(sharedPreferences, value as Int)
             true
         }
 
@@ -41,8 +46,8 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
             if (languages != null) {
                 val langIndex = languages.indexOf(newValue)
                 Timber.d("Language index: $langIndex")
-                SETTINGS_LANGUAGE_PREF.put(requireContext().sharedPreferences, langIndex)
-                when (SETTINGS_LANGUAGE_PREF.get(requireContext().sharedPreferences)) {
+                SETTINGS_LANGUAGE_PREF.put(sharedPreferences, langIndex)
+                when (SETTINGS_LANGUAGE_PREF.get(sharedPreferences)) {
                     0 -> // English
                         Timber.d("Set English")
                     1 -> // Catalan
@@ -69,7 +74,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                PREF_DISABLE_NEARBY.put(requireContext().sharedPreferences, !(value as Boolean))
+                PREF_DISABLE_NEARBY.put(sharedPreferences, !(value as Boolean))
                 true
             } else {
                 ActivityCompat.requestPermissions(
@@ -78,7 +83,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION
                     ),
-                    LOCATION_PERMISSION_REQUEST
+                    LOCATION_PERMISSION_REQUEST_CODE
                 )
 
                 false
@@ -87,26 +92,26 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
 
         nearbyDistance = findPreference("pref_nearby_distance")
         nearbyDistance?.setOnPreferenceChangeListener { _, value ->
-            SETTINGS_NEARBY_DISTANCE_PREF.put(requireContext().sharedPreferences, (value as String).toInt())
+            SETTINGS_NEARBY_DISTANCE_PREF.put(sharedPreferences, (value as String).toInt())
             true
         }
 
         markerSizePreference = findPreference("pref_marker_size")
         markerSizePreference?.setOnPreferenceChangeListener { _, value ->
-            SETTINGS_MARKER_SIZE_PREF.put(requireContext().sharedPreferences, value as Int)
+            SETTINGS_MARKER_SIZE_PREF.put(sharedPreferences, value as Int)
             true
         }
 
         centerMarkerPreference = findPreference("pref_move_marker")
         centerMarkerPreference?.setOnPreferenceChangeListener { _, value ->
-            SETTINGS_CENTER_MARKER_PREF.put(requireContext().sharedPreferences, value as Boolean)
+            SETTINGS_CENTER_MARKER_PREF.put(sharedPreferences, value as Boolean)
             true
         }
 
         previewScalePreference = findPreference("pref_preview_scale")
         previewScalePreference?.setOnPreferenceChangeListener { _, value ->
             SETTINGS_PREVIEW_SCALE_PREF.put(
-                requireContext().sharedPreferences,
+                sharedPreferences,
                 (value as Int).toFloat() / PREVIEW_SCALE_REDUCER
             )
             true
@@ -116,24 +121,24 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
     override fun onResume() {
         super.onResume()
 
-        sensibilityPreference?.value = SETTINGS_GESTURE_SENSIBILITY_PREF.get(requireContext().sharedPreferences)
+        sensibilityPreference?.value = SETTINGS_GESTURE_SENSIBILITY_PREF.get(sharedPreferences)
 
         languagePreference?.setValueIndex(
-            SETTINGS_LANGUAGE_PREF.get(requireContext().sharedPreferences)
+            SETTINGS_LANGUAGE_PREF.get(sharedPreferences)
         )
 
-        enableNearby?.isChecked = !(PREF_DISABLE_NEARBY.get(requireContext().sharedPreferences)) &&
+        enableNearby?.isChecked = !(PREF_DISABLE_NEARBY.get(sharedPreferences)) &&
                 (ContextCompat.checkSelfPermission(
                     activity,
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED)
 
-        val nearbyDistancePref = SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences).toString()
+        val nearbyDistancePref = SETTINGS_NEARBY_DISTANCE_PREF.get(sharedPreferences).toString()
         Timber.d("Nearby distance: $nearbyDistancePref")
         nearbyDistance?.text = nearbyDistancePref
 
-        markerSizePreference?.value = SETTINGS_MARKER_SIZE_PREF.get(requireContext().sharedPreferences)
+        markerSizePreference?.value = SETTINGS_MARKER_SIZE_PREF.get(sharedPreferences)
         previewScalePreference?.value =
-            (SETTINGS_PREVIEW_SCALE_PREF.get(requireContext().sharedPreferences) * 10).toInt()
+            (SETTINGS_PREVIEW_SCALE_PREF.get(sharedPreferences) * PREVIEW_SCALE_PREFERENCE_MULTIPLIER).toInt()
     }
 }

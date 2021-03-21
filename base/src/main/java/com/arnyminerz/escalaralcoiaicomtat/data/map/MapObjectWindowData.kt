@@ -9,9 +9,6 @@ import com.google.gson.JsonParser
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol
 import timber.log.Timber
 import java.io.InvalidObjectException
-
-const val WINDOW_DATA_KEY = "window_data"
-
 fun load(symbol: Symbol): MapObjectWindowData {
     val json = symbol.data ?: throw InvalidObjectException("Symbol doesn't have any data")
     if (!json.isJsonObject)

@@ -12,7 +12,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.UPDATE_CHECKER_TAG
+import com.arnyminerz.escalaralcoiaicomtat.shared.UPDATE_CHECKER_TAG
 
 class InfoSettingsFragment : PreferenceFragmentCompat() {
     private var serviceUpdateCheckerPreference: Preference? = null

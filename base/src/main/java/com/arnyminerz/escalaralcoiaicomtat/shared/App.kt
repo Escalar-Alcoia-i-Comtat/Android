@@ -1,16 +1,12 @@
-package com.arnyminerz.escalaralcoiaicomtat
+package com.arnyminerz.escalaralcoiaicomtat.shared
 
 import android.app.Application
+import android.content.Context
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.parse.Parse
 import com.parse.Parse.Configuration
 import timber.log.Timber
-
-var appNetworkState: ConnectivityProvider.NetworkState =
-    ConnectivityProvider.NetworkState.NOT_CONNECTED
-    private set
-
-lateinit var appNetworkProvider: ConnectivityProvider
 
 class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     private val provider: ConnectivityProvider
@@ -26,6 +22,9 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
                 .enableLocalDataStore()
                 .build()
         )
+
+        sharedPreferences =
+            applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
 
         Timber.v("Initializing network provider...")
         appNetworkProvider = ConnectivityProvider.createProvider(this)

@@ -28,22 +28,51 @@ import androidx.collection.arrayMapOf
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.*
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
-import com.arnyminerz.escalaralcoiaicomtat.data.map.*
-import com.arnyminerz.escalaralcoiaicomtat.exception.*
+import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass.Companion.getIntent
+import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
+import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
+import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
+import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
+import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoIcon
+import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
+import com.arnyminerz.escalaralcoiaicomtat.data.map.ICONS
+import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
+import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_INTERVAL_MILLIS
+import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_MIN_DIST
+import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_MIN_TIME
+import com.arnyminerz.escalaralcoiaicomtat.data.map.MARKER_WINDOW_HIDE_DURATION
+import com.arnyminerz.escalaralcoiaicomtat.data.map.MARKER_WINDOW_SHOW_DURATION
+import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
+import com.arnyminerz.escalaralcoiaicomtat.data.map.addToMap
+import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
+import com.arnyminerz.escalaralcoiaicomtat.data.map.loadKML
+import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCompressImageException
+import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCreateDirException
+import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotOpenStreamException
+import com.arnyminerz.escalaralcoiaicomtat.exception.MissingPermissionException
+import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.includeAll
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
+import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KML_ADDRESS
+import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
+import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.storage.zipFile
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.mapbox.android.core.location.*
+import com.mapbox.android.core.location.LocationEngine
+import com.mapbox.android.core.location.LocationEngineCallback
+import com.mapbox.android.core.location.LocationEngineProvider
+import com.mapbox.android.core.location.LocationEngineRequest
+import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdate
@@ -57,7 +86,13 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.plugins.annotation.*
+import com.mapbox.mapboxsdk.plugins.annotation.Fill
+import com.mapbox.mapboxsdk.plugins.annotation.FillManager
+import com.mapbox.mapboxsdk.plugins.annotation.Line
+import com.mapbox.mapboxsdk.plugins.annotation.LineManager
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.parse.ParseAnalytics
 import timber.log.Timber
 import java.io.File
@@ -73,18 +108,20 @@ class MapHelper(private val mapView: MapView) {
         }
 
         fun getImageUrl(description: String?): String? {
-            if (description == null || description.isEmpty()) return null
-
-            if (description.startsWith("<img")) {
-                val linkPos = description.indexOf("https://")
-                val urlFirstPart = description.substring(linkPos) // This takes from the first "
-                return urlFirstPart.substring(
-                    0,
-                    urlFirstPart.indexOf('"')
-                ) // This from the previous to the next
+            var result: String? = null
+            if (description == null || description.isEmpty()) result = null
+            else {
+                if (description.startsWith("<img")) {
+                    val linkPos = description.indexOf("https://")
+                    val urlFirstPart = description.substring(linkPos) // This takes from the first "
+                    result = urlFirstPart.substring(
+                        0,
+                        urlFirstPart.indexOf('"')
+                    ) // This from the previous to the next
+                }
             }
 
-            return null
+            return result
         }
     }
 
@@ -330,7 +367,7 @@ class MapHelper(private val mapView: MapView) {
                     Timber.v("  Loading ${polylines.size} polylines...")
                     addGeometries(polylines)
 
-                    display(activity)
+                    display()
                     center()
                 }
             }
@@ -367,7 +404,7 @@ class MapHelper(private val mapView: MapView) {
                 Timber.d("  Putting $geometriesCount geometries...")
                 putParcelableArrayListExtra(MAP_GEOMETRIES_BUNDLE_EXTRA, geometries)
             }
-            putExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA, markerSizeMultiplier)
+            putExtra(EXTRA_ICON_SIZE_MULTIPLIER, markerSizeMultiplier)
         }
         val elementsIntentSize = elementsIntent.getSize()
         val size = humanReadableByteCountBin(elementsIntentSize.toLong())
@@ -378,8 +415,8 @@ class MapHelper(private val mapView: MapView) {
         else
             Intent(context, MapsActivity::class.java).apply {
                 Timber.d("Passing to MapsActivity with kml address ($loadedKMLAddress).")
-                putExtra(KML_ADDRESS_BUNDLE_EXTRA, loadedKMLAddress!!)
-                putExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA, markerSizeMultiplier)
+                putExtra(EXTRA_KML_ADDRESS, loadedKMLAddress!!)
+                putExtra(EXTRA_ICON_SIZE_MULTIPLIER, markerSizeMultiplier)
             }
     }
 
@@ -654,12 +691,11 @@ class MapHelper(private val mapView: MapView) {
 
     /**
      * Makes effective all the additions to the map through the add methods
-     * @param context The context to call from
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @UiThread
     @Throws(MapNotInitializedException::class)
-    fun display(context: Context) {
+    fun display() {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
@@ -675,7 +711,7 @@ class MapHelper(private val mapView: MapView) {
             fill?.let { fills.add(it) }
         }
 
-        val symbols = markers.addToMap(context, this)
+        val symbols = markers.addToMap(this)
         this.symbols.addAll(symbols)
     }
 

@@ -14,7 +14,6 @@ import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
-import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityIntroBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.BetaIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.MainIntroFragment
@@ -23,6 +22,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.StorageIntroFragment.C
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_SHOWN_INTRO
 import com.arnyminerz.escalaralcoiaicomtat.generic.isPermissionGranted
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.google.android.material.button.MaterialButton
 import timber.log.Timber
 
@@ -34,7 +34,7 @@ class IntroActivity : LanguageAppCompatActivity() {
             var result: IntroShowReason? = null
             if (!context.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE))
                 result = IntroShowReason.STORAGE_PERMISSION
-            if (!PREF_SHOWN_INTRO.get(context.sharedPreferences))
+            if (!PREF_SHOWN_INTRO.get(sharedPreferences))
                 result = IntroShowReason.PREF_FALSE
             return result ?: IntroShowReason.OK
         }
@@ -115,9 +115,9 @@ class IntroActivity : LanguageAppCompatActivity() {
             }
 
         if (position + 1 >= adapterViewPager!!.fragments.size) {
-            Timber.v("Finished showing intro pages. Loading MainActivity")
+            Timber.v("Finished showing intro pages. Loading LoadingActivity")
             PREF_SHOWN_INTRO.put(sharedPreferences, true)
-            startActivity(Intent(this, MainActivity()::class.java))
+            startActivity(Intent(this, LoadingActivity()::class.java))
         } else {
             if (binding.viewPager.currentItem == adapterViewPager!!.fragments.size - 2)
                 binding.introNextFAB.setImageResource(R.drawable.round_check_24)

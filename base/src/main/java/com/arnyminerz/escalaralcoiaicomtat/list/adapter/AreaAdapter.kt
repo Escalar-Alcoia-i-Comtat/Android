@@ -1,21 +1,21 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 
-import android.content.Context
+import android.app.Activity
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_PREVIEW_SCALE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import timber.log.Timber
 import java.io.InvalidClassException
 
 class AreaAdapter(
-    private val context: Context,
+    private val activity: Activity,
     private var clickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<AreaViewHolder>() {
     init {
@@ -26,7 +26,7 @@ class AreaAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         AreaViewHolder(
-            LayoutInflater.from(context).inflate(R.layout.list_item_area, parent, false)
+            LayoutInflater.from(activity).inflate(R.layout.list_item_area, parent, false)
         )
 
     override fun onBindViewHolder(holder: AreaViewHolder, position: Int) {
@@ -45,11 +45,11 @@ class AreaAdapter(
             clickListener?.invoke(holder, position) ?: Timber.w("Any click listener was set!")
         }
         area.asyncLoadImage(
-            context,
+            activity,
             holder.imageView,
             imageLoadParameters =
                 ImageLoadParameters().withThumbnailSize(
-                    SETTINGS_PREVIEW_SCALE_PREF.get(context.sharedPreferences)
+                    SETTINGS_PREVIEW_SCALE_PREF.get(sharedPreferences)
                 )
         )
     }

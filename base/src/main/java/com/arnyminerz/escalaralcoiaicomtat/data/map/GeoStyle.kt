@@ -8,8 +8,6 @@ import com.mapbox.mapboxsdk.plugins.annotation.LineOptions
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.utils.ColorUtils.colorToRgbaString
 
-const val LINE_WIDTH_MULTIPLIER = .5f
-
 data class GeoStyle(
     val fillColor: String?,
     val strokeColor: String?,

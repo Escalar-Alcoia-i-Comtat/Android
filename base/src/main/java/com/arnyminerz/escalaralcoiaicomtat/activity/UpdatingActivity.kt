@@ -5,30 +5,27 @@ import android.os.Bundle
 import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityUpdatingBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
-import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.ERROR_VIBRATE
+import com.arnyminerz.escalaralcoiaicomtat.shared.QUIET_UPDATE
+import com.arnyminerz.escalaralcoiaicomtat.shared.UPDATE_AREA
+import com.arnyminerz.escalaralcoiaicomtat.shared.UPDATE_IMAGES
+import com.arnyminerz.escalaralcoiaicomtat.shared.UPDATE_SECTOR
+import com.arnyminerz.escalaralcoiaicomtat.shared.UPDATE_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber
 import java.io.IOException
-
-private const val ERROR_VIBRATE: Long = 500
-
-val UPDATE_AREA = IntentExtra<Area>("update_area")
-val UPDATE_ZONE = IntentExtra<Zone>("update_zone")
-val UPDATE_SECTOR = IntentExtra<Sector>("update_sector")
-val UPDATE_IMAGES = IntentExtra<Boolean>("update_images")
-
-val QUIET_UPDATE = IntentExtra<Boolean>("quiet_update")
+import java.util.concurrent.CompletableFuture.runAsync
 
 class UpdatingActivity : NetworkChangeListenerActivity() {
     private var updateArea: Area? = null // Sets the area id to update (re-download images)

@@ -12,44 +12,43 @@ import android.view.animation.AnimationUtils
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.activity.CENTER_CURRENT_LOCATION_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getZones
-import com.arnyminerz.escalaralcoiaicomtat.data.map.*
-import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
+import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.data.NearbyZonesError
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area.getZones
+import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
+import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
+import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
+import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_WAYPOINT_ESCALADOR_BLANC
+import com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_DISABLE_NEARBY
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_CENTER_CURRENT_LOCATION
+import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
+import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
 import timber.log.Timber
-
-const val LOCATION_PERMISSION_REQUEST = 0
-
-enum class NearbyZonesError(val message: String) {
-    NEARBY_ZONES_NOT_INITIALIZED("MapHelper is not initialized"),
-    NEARBY_ZONES_NOT_LOADED("MapHelper is not loaded"),
-    NEARBY_ZONES_CONTEXT("Not showing fragment (context is null)"),
-    NEARBY_ZONES_NOT_ENABLED("Nearby Zones not enabled"),
-    NEARBY_ZONES_PERMISSION("Location permission not granted"),
-    NEARBY_ZONES_RESUMED("Not showing fragment (not resumed)"),
-    NEARBY_ZONES_EMPTY("AREAS is empty")
-}
+import java.util.concurrent.CompletableFuture.runAsync
 
 class AreasViewFragment : NetworkChangeListenerFragment() {
     private var justAttached = false
     private val mapInitialized: Boolean
         get() = this::mapHelper.isInitialized && mapHelper.isLoaded
     private val nearbyEnabled: Boolean
-        get() = !PREF_DISABLE_NEARBY.get(requireContext().sharedPreferences)
+        get() = !PREF_DISABLE_NEARBY.get(sharedPreferences)
 
     internal lateinit var mapHelper: MapHelper
 
@@ -76,8 +75,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     mapHelper.enableLocationComponent(requireContext())
                 } catch (ex: IllegalStateException) {
                     Timber.w("Tried to enable location component that is already enabled")
-                }
-            else errors.add(NearbyZonesError.NEARBY_ZONES_PERMISSION)
+                } else errors.add(NearbyZonesError.NEARBY_ZONES_PERMISSION)
 
             if (!isResumed)
                 errors.add(NearbyZonesError.NEARBY_ZONES_RESUMED)
@@ -118,7 +116,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION
                     ),
-                    LOCATION_PERMISSION_REQUEST
+                    LOCATION_PERMISSION_REQUEST_CODE
                 )
             }
             binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
@@ -126,8 +124,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
             binding.nearbyZonesCardView.isClickable = false
 
-            val requiredDistance =
-                SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences)
+            val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get(sharedPreferences)
 
             mapHelper.clearSymbols()
 
@@ -154,7 +151,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
                 Timber.d("Finished adding markers.")
                 runOnUiThread {
-                    mapHelper.display(this)
+                    mapHelper.display()
                     mapHelper.center(includeCurrentLocation = true)
 
                     binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
@@ -220,26 +217,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        refreshAreas()
-    }
-
-    private fun nearbyZonesClick(): Boolean =
-        try {
-            val intent = mapHelper.mapsActivityIntent(requireContext())
-                .putExtra(CENTER_CURRENT_LOCATION_EXTRA, true)
-            Timber.v("Starting MapsActivity...")
-            startActivity(intent)
-            true
-        } catch (e: MapAnyDataToLoadException) {
-            Timber.w("Clicked on nearby zones map and any data has been loaded")
-            false
-        }
-
-    private fun refreshAreas() {
         Timber.v("Refreshing areas...")
         Timber.d("Initializing area adapter for AreasViewFragment...")
-        val adapter = AreaAdapter(requireContext(), areaClickListener)
-
         binding.areasRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         if (justAttached)
             binding.areasRecyclerView.layoutAnimation =
@@ -247,8 +226,21 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     requireContext(),
                     R.anim.item_fall_animator
                 )
-        binding.areasRecyclerView.adapter = adapter
+        binding.areasRecyclerView.adapter = AreaAdapter(requireActivity(), areaClickListener)
+        (requireActivity() as? MainActivity)?.finishedLoading()
     }
+
+    private fun nearbyZonesClick(): Boolean =
+        try {
+            val intent = mapHelper.mapsActivityIntent(requireContext())
+                .putExtra(EXTRA_CENTER_CURRENT_LOCATION, true)
+            Timber.v("Starting MapsActivity...")
+            startActivity(intent)
+            true
+        } catch (e: MapAnyDataToLoadException) {
+            Timber.w("Clicked on nearby zones map and any data has been loaded")
+            false
+        }
 
     fun setItemClickListener(areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?) {
         this.areaClickListener = areaClickListener

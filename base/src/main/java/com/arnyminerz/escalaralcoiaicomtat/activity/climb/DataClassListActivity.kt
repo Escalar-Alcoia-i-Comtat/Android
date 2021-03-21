@@ -4,14 +4,17 @@ import android.os.Build
 import android.os.Bundle
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
-import com.arnyminerz.escalaralcoiaicomtat.appNetworkState
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
+import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
+import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
-import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -20,10 +23,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.parse.ParseAnalytics
 import timber.log.Timber
 import java.io.FileNotFoundException
-
-const val DEFAULT_LAT = 38.7216704
-const val DEFAULT_LON = -0.4799751
-const val DEFAULT_ZOOM = 12.5
+import java.util.concurrent.CompletableFuture.runAsync
 
 abstract class DataClassListActivity<T : DataClass<*, *>>(
     private val iconSizeMultiplier: Float = ICON_SIZE_MULTIPLIER,
@@ -100,7 +100,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
             Timber.v("Loading map...")
             mapHelper
                 .show()
-                .withStartingPosition(LatLng(DEFAULT_LAT, DEFAULT_LON), DEFAULT_ZOOM)
+                .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
                 .withControllable(false)
                 .loadMap(this) { _, map, _ ->
                     mapLoaded = true
@@ -125,10 +125,15 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                     }
 
                     map.addOnMapClickListener {
-                        val intent = mapHelper.mapsActivityIntent(this, overrideLoadedMapData)
-                        Timber.v("Starting MapsActivity...")
-                        startActivity(intent)
-                        true
+                        try {
+                            val intent = mapHelper.mapsActivityIntent(this, overrideLoadedMapData)
+                            Timber.v("Starting MapsActivity...")
+                            startActivity(intent)
+                            true
+                        } catch (e: MapAnyDataToLoadException) {
+                            Timber.w("Clicked on map and any data has been loaded")
+                            false
+                        }
                     }
                 }
         } else if (!hasInternet) {

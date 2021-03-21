@@ -11,15 +11,36 @@ import android.view.View
 import android.widget.PopupMenu
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.map.*
-import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
+import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
+import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
+import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
+import com.arnyminerz.escalaralcoiaicomtat.data.map.MAP_LOAD_PADDING
+import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMapsBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAskerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.generic.fileName
+import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.mime
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_CENTER_CURRENT_LOCATION
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KML_ADDRESS
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_NAME
+import com.arnyminerz.escalaralcoiaicomtat.shared.FOLDER_ACCESS_PERMISSION_REQUEST_CODE
+import com.arnyminerz.escalaralcoiaicomtat.shared.INFO_VIBRATION
+import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
+import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
+import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
+import com.arnyminerz.escalaralcoiaicomtat.shared.MIME_TYPE_GPX
+import com.arnyminerz.escalaralcoiaicomtat.shared.MIME_TYPE_KMZ
+import com.arnyminerz.escalaralcoiaicomtat.shared.PERMISSION_DIALOG_TAG
+import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.Mapbox
@@ -28,27 +49,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.parse.ParseAnalytics
 import timber.log.Timber
 import java.io.File
-
-private const val CURRENT_LOCATION_DEFAULT_ZOOM = 17.0
-private const val MAP_LOAD_PADDING = 50
-private const val VIBRATION: Long = 20
-
-private const val PERMISSION_DIALOG_TAG = "PERM_TAG"
-
-private const val LOCATION_PERMISSION_REQUEST_CODE = 3 // This number was chosen by Dono
-private const val FOLDER_ACCESS_PERMISSION_REQUEST_CODE = 7
-
-val KML_ADDRESS_BUNDLE_EXTRA = IntentExtra<String>("KMLAddr")
-val KMZ_FILE_BUNDLE_EXTRA = IntentExtra<String>("KMZFle")
-const val MAP_MARKERS_BUNDLE_EXTRA = "Markers"
-const val MAP_GEOMETRIES_BUNDLE_EXTRA = "Geometries"
-val ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA = IntentExtra<Float>("IconSize")
-val ZONE_NAME_BUNDLE_EXTRA = IntentExtra<String>("ZneNm")
-val CENTER_CURRENT_LOCATION_EXTRA = IntentExtra<Boolean>("CenterLocation")
-
-const val MIME_TYPE_KML = "application/vnd.google-earth.kml+xml"
-const val MIME_TYPE_KMZ = "application/vnd.google-earth.kmz"
-const val MIME_TYPE_GPX = "application/gpx+xml"
+import java.util.concurrent.CompletableFuture.runAsync
 
 class MapsActivity : LanguageAppCompatActivity() {
 
@@ -93,13 +94,13 @@ class MapsActivity : LanguageAppCompatActivity() {
             Timber.d("Got ${markers.size} markers and ${geometries.size} geometries.")
 
             iconSizeMultiplier =
-                intent.getExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA) ?: ICON_SIZE_MULTIPLIER
+                intent.getExtra(EXTRA_ICON_SIZE_MULTIPLIER) ?: ICON_SIZE_MULTIPLIER
 
-            kmlAddress = intent.getExtra(KML_ADDRESS_BUNDLE_EXTRA)
-            zoneName = intent.getExtra(ZONE_NAME_BUNDLE_EXTRA)
-            intent.getExtra(KMZ_FILE_BUNDLE_EXTRA)
+            kmlAddress = intent.getExtra(EXTRA_KML_ADDRESS)
+            zoneName = intent.getExtra(EXTRA_ZONE_NAME)
+            intent.getExtra(EXTRA_KMZ_FILE)
                 .let { path -> if (path != null) kmzFile = File(path) }
-            centerCurrentLocation = intent.getExtra(CENTER_CURRENT_LOCATION_EXTRA, false)
+            centerCurrentLocation = intent.getExtra(EXTRA_CENTER_CURRENT_LOCATION, false)
         } else
             Timber.w("Intent is null")
 
@@ -215,7 +216,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                         mapHelper.addGeometries(geometries)
 
                         mapHelper.getLocation { _, _ ->
-                            mapHelper.display(this@MapsActivity)
+                            mapHelper.display()
                             mapHelper.center(
                                 MAP_LOAD_PADDING,
                                 includeCurrentLocation = centerCurrentLocation
@@ -278,7 +279,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                     tryToShowCurrentLocation()
                 else {
                     toast(R.string.toast_location_not_shown)
-                    vibrate(this, VIBRATION)
+                    vibrate(this, INFO_VIBRATION)
                 }
                 return
             }
