@@ -46,7 +46,12 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
         intent.getExtra(EXTRA_AREA)?.let {
             areaId = it
         } ?: run {
-            Timber.e("Area is null")
+            Timber.e("Area extra is null")
+            onBackPressed()
+            return
+        }
+        if (!AREAS.containsKey(areaId)) {
+            Timber.e("Area is not loaded in AREAS")
             onBackPressed()
             return
         }
