@@ -54,7 +54,6 @@
     <string name="action_send_feedback">Send feedback</string>
     <string name="action_export_kmz">Export KMZ</string>
     <string name="action_export_gpx">Export GPX</string>
-    <string name="action_login">Log In</string>
 
     <string name="status_updating">Updating…</string>
     <string name="status_loading">Loading…</string>
@@ -259,6 +258,10 @@
     <string name="image_desc_ending_type">Ending type</string>
     <string name="image_desc_storage">Storage icon</string>
     <string name="image_desc_rappel">Rappel</string>
+    <string name="image_desc_nav_explore">Explore areas</string>
+    <string name="image_desc_nav_map">View areas map</string>
+    <string name="image_desc_nav_downloads">View downloads</string>
+    <string name="image_desc_nav_extra">Extra options</string>
 
     <string name="button_desc_view_download">View Download</string>
     <string name="button_desc_download">Download</string>
