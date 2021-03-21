@@ -92,14 +92,14 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="@string/image_desc_nav_explore"
                     app:srcCompat="@drawable/round_explore_24"
-                    app:tint="?attr/actionMenuTextColor" />
+                    app:tint="?attr/colorControlNormal" />
 
                 <TextView
                     android:id="@+id/action_explore_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/item_explore"
-                    android:textColor="?attr/actionMenuTextColor" />
+                    android:textColor="?attr/colorControlNormal" />
             </LinearLayout>
 
             <LinearLayout
@@ -120,14 +120,14 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="@string/image_desc_nav_map"
                     app:srcCompat="@drawable/ic_outline_map_24"
-                    app:tint="?attr/actionMenuTextColor" />
+                    app:tint="?attr/colorControlNormal" />
 
                 <TextView
                     android:id="@+id/action_map_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/item_map"
-                    android:textColor="?attr/actionMenuTextColor" />
+                    android:textColor="?android:attr/colorControlNormal" />
             </LinearLayout>
 
             <LinearLayout
@@ -148,14 +148,14 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="@string/image_desc_nav_downloads"
                     app:srcCompat="@drawable/ic_outline_cloud_download_24"
-                    app:tint="?attr/actionMenuTextColor" />
+                    app:tint="?attr/colorControlNormal" />
 
                 <TextView
                     android:id="@+id/action_downloads_Text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/item_downloads"
-                    android:textColor="?attr/actionMenuTextColor" />
+                    android:textColor="?attr/colorControlNormal" />
             </LinearLayout>
 
             <LinearLayout
@@ -175,7 +175,7 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="@string/image_desc_nav_extra"
                     app:srcCompat="@drawable/ic_round_more_vert_24"
-                    app:tint="?attr/actionMenuTextColor" />
+                    app:tint="?attr/colorControlNormal" />
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.bottomappbar.BottomAppBar>

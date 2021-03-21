@@ -2,10 +2,12 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.widget.PopupMenu
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
@@ -27,6 +29,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_HOME
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_MAP
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_SETTINGS
+import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.parse.ParseAnalytics
@@ -50,16 +53,46 @@ class MainActivity : LanguageAppCompatActivity() {
             if (position == TAB_ITEM_HOME) R.drawable.round_explore_24
             else R.drawable.ic_outline_explore_24
         )
+        ImageViewCompat.setImageTintList(
+            binding.actionExploreImage, ColorStateList.valueOf(
+                getColorFromAttribute(
+                    this,
+                    if (position == TAB_ITEM_HOME) android.R.attr.textColorPrimary
+                    else R.attr.colorControlNormal
+                )
+            )
+        )
+
         visibility(binding.actionExploreText, position == TAB_ITEM_HOME)
         binding.actionMapImage.setImageResource(
             if (position == TAB_ITEM_MAP) R.drawable.ic_round_map_24
             else R.drawable.ic_outline_map_24
         )
+        ImageViewCompat.setImageTintList(
+            binding.actionMapImage, ColorStateList.valueOf(
+                getColorFromAttribute(
+                    this,
+                    if (position == TAB_ITEM_MAP) android.R.attr.textColorPrimary
+                    else R.attr.colorControlNormal
+                )
+            )
+        )
+
         visibility(binding.actionMapText, position == TAB_ITEM_MAP)
         binding.actionDownloadsImage.setImageResource(
             if (position == TAB_ITEM_DOWNLOADS) R.drawable.ic_round_cloud_download_24
             else R.drawable.ic_outline_cloud_download_24
         )
+        ImageViewCompat.setImageTintList(
+            binding.actionDownloadsImage, ColorStateList.valueOf(
+                getColorFromAttribute(
+                    this,
+                    if (position == TAB_ITEM_DOWNLOADS) android.R.attr.textColorPrimary
+                    else R.attr.colorControlNormal
+                )
+            )
+        )
+
         visibility(binding.actionDownloadsText, position == TAB_ITEM_DOWNLOADS)
 
         binding.mainViewPager.isUserInputEnabled =
