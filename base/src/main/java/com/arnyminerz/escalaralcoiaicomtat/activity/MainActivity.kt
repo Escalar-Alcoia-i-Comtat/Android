@@ -66,7 +66,15 @@ var serverAvailable = false
 
 class MainActivity : NetworkChangeListenerActivity() {
 
+    /**
+     * Prepares the app and runs some initial tests to see if the content should be loaded or other
+     * actions should be executed.
+     * @author Arnau Mora
+     * @since 20210321
+     * @return If the content should be started loading.
+     */
     private fun prepareApp(): Boolean {
+        var error = false
         Timber.v("Preparing App...")
         Timber.v("Instantiating Sentry")
         SentryAndroid.init(this) { options ->
@@ -80,12 +88,13 @@ class MainActivity : NetworkChangeListenerActivity() {
             Timber.w("  Showing intro! Reason: ${showIntro.msg}")
             skipLoad = true
             startActivity(Intent(this, IntroActivity::class.java))
-            return false
-        } else Timber.v("  Won't show intro.")
+            error = true
+        } else
+            Timber.v("  Won't show intro.")
 
         if (AREAS.size <= 0) {
             startActivity(Intent(this, LoadingActivity::class.java))
-            return false
+            error = true
         }
 
         Timber.v("Data folder path: %s", filesDir(this).path)
@@ -96,7 +105,7 @@ class MainActivity : NetworkChangeListenerActivity() {
             createNotificationChannels()
 
         Timber.v("Finished preparing App...")
-        return true
+        return !error
     }
 
     private lateinit var areasViewFragment: AreasViewFragment
@@ -206,7 +215,8 @@ class MainActivity : NetworkChangeListenerActivity() {
                 TAB_ITEM_SETTINGS to settingsFragment
             )
         )
-        binding.mainViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+        binding.mainViewPager.registerOnPageChangeCallback(object :
+            ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 updateBottomAppBar()
