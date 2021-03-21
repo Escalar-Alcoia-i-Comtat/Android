@@ -114,9 +114,8 @@ fun Fragment.visibility(
  * @return True if visible. False if invisible or null
  */
 @UiThread
-fun visibility(view: View?): Boolean {
-    return view != null && view.visibility == View.VISIBLE
-}
+fun visibility(view: View?): Boolean =
+    view != null && view.visibility == View.VISIBLE
 
 /**
  * Sets the visibility of the view
@@ -132,12 +131,20 @@ fun View.visibility(visible: Boolean, setGone: Boolean = true, debug: Boolean = 
  * Sets the visibility of a view to gone
  */
 @UiThread
+@Deprecated(
+    "Avoid using show and hide functions to avoid problems with async visibility change calls.",
+    ReplaceWith("visibility(false, setGone = setGone)")
+)
 fun View.hide(setGone: Boolean = true) = visibility(false, setGone = setGone)
 
 /**
  * Sets the visibility of a view to visible
  */
 @UiThread
+@Deprecated(
+    "Avoid using show and hide functions to avoid problems with async visibility change calls.",
+    ReplaceWith("visibility(true, setGone = setGone)")
+)
 fun View.show() = visibility(true)
 
 @UiThread
