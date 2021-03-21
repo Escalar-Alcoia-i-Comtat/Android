@@ -1,6 +1,9 @@
 name: Docs Generator
 
-on: push
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   generate-docs:
