@@ -8,5 +8,5 @@ var appNetworkState: ConnectivityProvider.NetworkState =
 
 lateinit var appNetworkProvider: ConnectivityProvider
 
-private const val PREFERENCES_NAME = "EAICPreferences"
-private var sharedPreferencesStorage: SharedPreferences? = null
+const val PREFERENCES_NAME = "EAICPreferences"
+lateinit var sharedPreferences: SharedPreferences

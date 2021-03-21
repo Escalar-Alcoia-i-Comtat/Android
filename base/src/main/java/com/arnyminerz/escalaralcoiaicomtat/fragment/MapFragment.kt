@@ -10,7 +10,6 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
-import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentMapBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
@@ -22,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
+import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
@@ -83,7 +83,7 @@ class MapFragment : NetworkChangeListenerFragment() {
                     }
 
                 mapHelper.addSymbolClickListener {
-                    if (SETTINGS_CENTER_MARKER_PREF.get(requireContext().sharedPreferences))
+                    if (SETTINGS_CENTER_MARKER_PREF.get(sharedPreferences))
                         map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
 
                     markerWindow?.hide()

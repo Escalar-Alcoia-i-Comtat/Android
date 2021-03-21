@@ -21,7 +21,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_WAYPOINT_ESCALADOR_BLANC
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData
-import com.arnyminerz.escalaralcoiaicomtat.data.preference.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_DISABLE_NEARBY
@@ -35,6 +34,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
@@ -58,7 +58,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     private val mapInitialized: Boolean
         get() = this::mapHelper.isInitialized && mapHelper.isLoaded
     private val nearbyEnabled: Boolean
-        get() = !PREF_DISABLE_NEARBY.get(requireContext().sharedPreferences)
+        get() = !PREF_DISABLE_NEARBY.get(sharedPreferences)
 
     internal lateinit var mapHelper: MapHelper
 
@@ -134,8 +134,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
             binding.nearbyZonesCardView.isClickable = false
 
-            val requiredDistance =
-                SETTINGS_NEARBY_DISTANCE_PREF.get(requireContext().sharedPreferences)
+            val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get(sharedPreferences)
 
             mapHelper.clearSymbols()
 

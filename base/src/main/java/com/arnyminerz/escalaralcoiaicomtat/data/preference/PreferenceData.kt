@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.preference
 
-import android.content.Context
 import android.content.SharedPreferences
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
@@ -39,14 +38,5 @@ fun <T : Any> T?.store(
         true
     } else false
 }
-
-private const val PREFERENCES_NAME = "EAICPreferences"
-private var sharedPreferencesStorage: SharedPreferences? = null
-val Context.sharedPreferences: SharedPreferences
-    get() {
-        if (sharedPreferencesStorage == null)
-            sharedPreferencesStorage = getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-        return sharedPreferencesStorage!!
-    }
 
 class DataTypeNonStorable : Exception("The given data type cannot be stored in settings")
