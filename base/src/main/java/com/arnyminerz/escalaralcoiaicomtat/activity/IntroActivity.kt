@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -39,7 +38,7 @@ class IntroActivity : LanguageAppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        adapterViewPager = IntroPagerAdapter(supportFragmentManager, this)
+        adapterViewPager = IntroPagerAdapter(supportFragmentManager)
         binding.viewPager.adapter = adapterViewPager
 
         binding.introNextFAB.setOnClickListener {
@@ -66,8 +65,7 @@ class IntroActivity : LanguageAppCompatActivity() {
         }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate")
-    class IntroPagerAdapter(fragmentManager: FragmentManager, context: Context) :
+    class IntroPagerAdapter(fragmentManager: FragmentManager) :
         FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
         val fragments = arrayListOf<Fragment>()
 
