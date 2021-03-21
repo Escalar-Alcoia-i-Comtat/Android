@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.activity.CENTER_CURRENT_LOCATION_EXTRA
+import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getZones
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
@@ -227,7 +228,17 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        refreshAreas()
+        Timber.v("Refreshing areas...")
+        Timber.d("Initializing area adapter for AreasViewFragment...")
+        binding.areasRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        if (justAttached)
+            binding.areasRecyclerView.layoutAnimation =
+                AnimationUtils.loadLayoutAnimation(
+                    requireContext(),
+                    R.anim.item_fall_animator
+                )
+        binding.areasRecyclerView.adapter = AreaAdapter(requireActivity(), areaClickListener)
+        (requireActivity() as? MainActivity)?.finishedLoading()
     }
 
     private fun nearbyZonesClick(): Boolean =
@@ -241,21 +252,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             Timber.w("Clicked on nearby zones map and any data has been loaded")
             false
         }
-
-    private fun refreshAreas() {
-        Timber.v("Refreshing areas...")
-        Timber.d("Initializing area adapter for AreasViewFragment...")
-        val adapter = AreaAdapter(requireContext(), areaClickListener)
-
-        binding.areasRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        if (justAttached)
-            binding.areasRecyclerView.layoutAnimation =
-                AnimationUtils.loadLayoutAnimation(
-                    requireContext(),
-                    R.anim.item_fall_animator
-                )
-        binding.areasRecyclerView.adapter = adapter
-    }
 
     fun setItemClickListener(areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?) {
         this.areaClickListener = areaClickListener

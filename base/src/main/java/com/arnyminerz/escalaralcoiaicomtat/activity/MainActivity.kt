@@ -224,4 +224,13 @@ class MainActivity : LanguageAppCompatActivity() {
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
+
+    /**
+     * Informs the activity it has finished loading
+     * @author Arnau Mora
+     * @since 20210321
+     */
+    fun finishedLoading() {
+        visibility(binding.loadingLayout, false)
+    }
 }
