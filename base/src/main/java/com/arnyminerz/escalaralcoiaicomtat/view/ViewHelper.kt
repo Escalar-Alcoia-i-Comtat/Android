@@ -84,19 +84,14 @@ fun Activity?.visibility(
     setGone: Boolean = true,
     debug: Boolean = false,
     clearAnimation: Boolean = true
-) {
-    if (this != null)
-        this.runOnUiThread {
-            com.arnyminerz.escalaralcoiaicomtat.view.visibility(
-                view,
-                visible,
-                setGone,
-                debug,
-                clearAnimation
-            )
-        }
-    else com.arnyminerz.escalaralcoiaicomtat.view.visibility(view, visible, setGone, debug, clearAnimation)
-}
+) =
+    (this as? Context?).visibility(
+        view,
+        visible,
+        setGone,
+        debug,
+        clearAnimation
+    )
 
 fun Fragment.visibility(
     view: View?,
@@ -124,6 +119,10 @@ fun visibility(view: View?): Boolean =
  */
 @JvmName("visibility_own")
 @UiThread
+@Deprecated(
+    "Avoid using direct visibility changes, since those may be called from non-ui threads. Use context-based calls.",
+    ReplaceWith("context.visibility(this, visible, setGone, debug, clearAnimation)")
+)
 fun View.visibility(visible: Boolean, setGone: Boolean = true, debug: Boolean = false, clearAnimation: Boolean = true) =
     visibility(this, visible, setGone, debug, clearAnimation)
 
@@ -132,20 +131,20 @@ fun View.visibility(visible: Boolean, setGone: Boolean = true, debug: Boolean = 
  */
 @UiThread
 @Deprecated(
-    "Avoid using show and hide functions to avoid problems with async visibility change calls.",
-    ReplaceWith("visibility(false, setGone = setGone)")
+    "Avoid using show and hide functions to avoid problems with async visibility change calls. Use context-based calls.",
+    ReplaceWith("context.visibility(false, setGone = setGone)")
 )
-fun View.hide(setGone: Boolean = true) = visibility(false, setGone = setGone)
+fun View.hide(setGone: Boolean = true) = context.visibility(this, false, setGone = setGone)
 
 /**
  * Sets the visibility of a view to visible
  */
 @UiThread
 @Deprecated(
-    "Avoid using show and hide functions to avoid problems with async visibility change calls.",
-    ReplaceWith("visibility(true)")
+    "Avoid using show and hide functions to avoid problems with async visibility change calls. Use context-based calls.",
+    ReplaceWith("context.visibility(true)")
 )
-fun View.show() = visibility(true)
+fun View.show() = context.visibility(this, true)
 
 @UiThread
 @Suppress("DEPRECATION")
