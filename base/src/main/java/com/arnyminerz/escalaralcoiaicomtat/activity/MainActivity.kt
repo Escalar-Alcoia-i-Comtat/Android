@@ -30,8 +30,8 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_HOME
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_MAP
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_SETTINGS
 import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
-import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.mapbox.android.core.permissions.PermissionsManager
 import com.parse.ParseAnalytics
 import timber.log.Timber
 
@@ -183,7 +183,7 @@ class MainActivity : LanguageAppCompatActivity() {
         Timber.v("  --- Found ${AREAS.size} areas ---")
 
         areasViewFragment.setItemClickListener { holder, position ->
-            binding.loadingLayout.show()
+            binding.loadingLayout.visibility(true, setGone = setGone)
             Timber.v("Clicked item %s", position)
             val intent = Intent(this, AreaActivity()::class.java)
                 .putExtra(EXTRA_AREA, AREAS.valueAt(position)!!.objectId)
@@ -236,9 +236,9 @@ class MainActivity : LanguageAppCompatActivity() {
     ) {
         Timber.v("Got permissions result. Code: %s", requestCode)
         when (requestCode) {
-            LOCATION_PERMISSION_REQUEST_CODE -> areasViewFragment.mapHelper.enableLocationComponent(
-                this
-            )
+            LOCATION_PERMISSION_REQUEST_CODE ->
+                if (PermissionsManager.areLocationPermissionsGranted(this))
+                    areasViewFragment.mapHelper.enableLocationComponent(this)
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }

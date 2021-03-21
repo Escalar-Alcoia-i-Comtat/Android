@@ -92,12 +92,20 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         return errors
     }
 
-    private fun updateNearbyZones(location: Location) {
+    /**
+     * Updates the nearby zones card.
+     * @author Arnau Mora
+     * @since 20210321
+     * @param location The current location, if null, no markers will be added.
+     */
+    private fun updateNearbyZones(location: Location? = null) {
         val nearbyZonesErrors = nearbyZonesReady()
         if (nearbyZonesErrors.isNotEmpty()) {
+            Timber.i("Nearby Zones errors: $nearbyZonesErrors")
             // The location permission is not granted. Show permissions message.
             // Having NEARBY_ZONES_PERMISSION also implies that Nearby Zones is enabled.
             if (nearbyZonesErrors.contains(NearbyZonesError.NEARBY_ZONES_PERMISSION)) {
+                Timber.v("The Location permission is not granted")
                 visibility(binding.mapView, false)
                 visibility(binding.nearbyZonesPermissionMessage, true)
                 visibility(binding.nearbyZonesCardView, true)
@@ -118,48 +126,50 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             return
         }
 
-        Timber.v("Updating nearby zones...")
-        val position = location.toLatLng()
+        if (location != null) {
+            Timber.v("Updating nearby zones...")
+            val position = location.toLatLng()
 
-        binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
+            binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
 
-        visibility(binding.mapView, true)
-        visibility(binding.nearbyZonesPermissionMessage, false)
+            visibility(binding.mapView, true)
+            visibility(binding.nearbyZonesPermissionMessage, false)
 
-        binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
-        binding.nearbyZonesCardView.isClickable = false
+            binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
+            binding.nearbyZonesCardView.isClickable = false
 
-        val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get(sharedPreferences)
+            val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get(sharedPreferences)
 
-        mapHelper.clearSymbols()
+            mapHelper.clearSymbols()
 
-        runAsync {
-            val zones = AREAS.getZones()
-            Timber.v("Iterating through ${zones.size} zones.")
-            Timber.v("Current Location: [${location.latitude},${location.longitude}]")
-            for (zone in zones) {
-                val zoneLocation = zone.position ?: continue
-                if (zoneLocation.distanceTo(position) <= requiredDistance) {
-                    Timber.d("Adding zone #${zone.objectId}. Creating marker...")
-                    val marker = GeoMarker(
-                        zoneLocation,
-                        windowData = MapObjectWindowData(zone.displayName, null)
-                    ).apply {
-                        val icon = ICON_WAYPOINT_ESCALADOR_BLANC.toGeoIcon(requireContext())
-                        if (icon != null)
-                            withImage(icon)
+            runAsync {
+                val zones = AREAS.getZones()
+                Timber.v("Iterating through ${zones.size} zones.")
+                Timber.v("Current Location: [${location.latitude},${location.longitude}]")
+                for (zone in zones) {
+                    val zoneLocation = zone.position ?: continue
+                    if (zoneLocation.distanceTo(position) <= requiredDistance) {
+                        Timber.d("Adding zone #${zone.objectId}. Creating marker...")
+                        val marker = GeoMarker(
+                            zoneLocation,
+                            windowData = MapObjectWindowData(zone.displayName, null)
+                        ).apply {
+                            val icon = ICON_WAYPOINT_ESCALADOR_BLANC.toGeoIcon(requireContext())
+                            if (icon != null)
+                                withImage(icon)
+                        }
+                        Timber.d("Adding marker to map")
+                        mapHelper.add(marker)
                     }
-                    Timber.d("Adding marker to map")
-                    mapHelper.add(marker)
                 }
-            }
 
-            Timber.d("Finished adding markers.")
-            runOnUiThread {
-                mapHelper.display()
-                mapHelper.center(includeCurrentLocation = true)
+                Timber.d("Finished adding markers.")
+                runOnUiThread {
+                    mapHelper.display()
+                    mapHelper.center(includeCurrentLocation = true)
 
-                binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
+                    binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
+                }
             }
         }
     }
@@ -196,7 +206,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     nearbyZonesClick()
                 }
 
-                nearbyZonesReady()
+                updateNearbyZones()
             }
     }
 
