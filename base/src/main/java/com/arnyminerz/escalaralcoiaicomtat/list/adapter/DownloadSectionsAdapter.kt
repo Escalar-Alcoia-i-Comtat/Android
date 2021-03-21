@@ -8,12 +8,12 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Sector
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Zone
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass.Companion.getIntent
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast

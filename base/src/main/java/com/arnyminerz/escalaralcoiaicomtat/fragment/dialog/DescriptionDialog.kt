@@ -5,7 +5,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.widget.TextView
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Path
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import io.noties.markwon.Markwon
 

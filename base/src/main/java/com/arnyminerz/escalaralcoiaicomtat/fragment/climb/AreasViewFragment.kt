@@ -12,10 +12,9 @@ import android.view.animation.AnimationUtils
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.activity.CENTER_CURRENT_LOCATION_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getZones
+import com.arnyminerz.escalaralcoiaicomtat.data.NearbyZonesError
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area.getZones
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
@@ -29,29 +28,20 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_CENTER_CURRENT_LOCATION
+import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
 import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
 import timber.log.Timber
-
-const val LOCATION_PERMISSION_REQUEST = 0
-
-enum class NearbyZonesError(val message: String) {
-    NEARBY_ZONES_NOT_INITIALIZED("MapHelper is not initialized"),
-    NEARBY_ZONES_NOT_LOADED("MapHelper is not loaded"),
-    NEARBY_ZONES_CONTEXT("Not showing fragment (context is null)"),
-    NEARBY_ZONES_NOT_ENABLED("Nearby Zones not enabled"),
-    NEARBY_ZONES_PERMISSION("Location permission not granted"),
-    NEARBY_ZONES_RESUMED("Not showing fragment (not resumed)"),
-    NEARBY_ZONES_EMPTY("AREAS is empty")
-}
+import java.util.concurrent.CompletableFuture.runAsync
 
 class AreasViewFragment : NetworkChangeListenerFragment() {
     private var justAttached = false
@@ -126,7 +116,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION
                     ),
-                    LOCATION_PERMISSION_REQUEST
+                    LOCATION_PERMISSION_REQUEST_CODE
                 )
             }
             binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
@@ -161,7 +151,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
                 Timber.d("Finished adding markers.")
                 runOnUiThread {
-                    mapHelper.display(this)
+                    mapHelper.display()
                     mapHelper.center(includeCurrentLocation = true)
 
                     binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
@@ -243,7 +233,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     private fun nearbyZonesClick(): Boolean =
         try {
             val intent = mapHelper.mapsActivityIntent(requireContext())
-                .putExtra(CENTER_CURRENT_LOCATION_EXTRA, true)
+                .putExtra(EXTRA_CENTER_CURRENT_LOCATION, true)
             Timber.v("Starting MapsActivity...")
             startActivity(intent)
             true

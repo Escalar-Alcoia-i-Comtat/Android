@@ -4,50 +4,33 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.PopupMenu
-import androidx.collection.arrayMapOf
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.DownloadsFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.MapFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.SettingsFragmentManager
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.AreasViewFragment
-import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFragment.Companion.SettingsPage
-import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
+import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA_TRANSITION_NAME
+import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
+import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_DOWNLOADS
+import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_EXTRA
+import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_HOME
+import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_MAP
+import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_SETTINGS
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.parse.ParseAnalytics
 import timber.log.Timber
-
-val EXTRA_AREA = IntentExtra<String>("area")
-val EXTRA_ZONE = IntentExtra<String>("zone")
-val EXTRA_SECTOR_INDEX = IntentExtra<Int>("sector_index")
-
-val EXTRA_POSITION = IntentExtra<Int>("position")
-
-val EXTRA_ZONE_TRANSITION_NAME = IntentExtra<String>("zone_transition")
-val EXTRA_AREA_TRANSITION_NAME = IntentExtra<String>("area_transition")
-val EXTRA_SECTOR_TRANSITION_NAME = IntentExtra<String>("sector_transition")
-
-const val TAB_ITEM_HOME = 0
-const val TAB_ITEM_MAP = 1
-const val TAB_ITEM_DOWNLOADS = 2
-const val TAB_ITEM_SETTINGS = 3
-const val TAB_ITEM_EXTRA = -1
-
-const val UPDATE_CHECKER_WORK_NAME = "update_checker"
-const val UPDATE_CHECKER_TAG = "update"
-const val UPDATE_CHECKER_FLEX_MINUTES: Long = 15
-
-val AREAS = arrayMapOf<String, Area>()
 
 class MainActivity : LanguageAppCompatActivity() {
 
@@ -220,7 +203,9 @@ class MainActivity : LanguageAppCompatActivity() {
     ) {
         Timber.v("Got permissions result. Code: %s", requestCode)
         when (requestCode) {
-            LOCATION_PERMISSION_REQUEST -> areasViewFragment.mapHelper.enableLocationComponent(this)
+            LOCATION_PERMISSION_REQUEST_CODE -> areasViewFragment.mapHelper.enableLocationComponent(
+                this
+            )
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }

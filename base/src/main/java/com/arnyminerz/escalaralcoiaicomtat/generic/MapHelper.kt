@@ -28,13 +28,8 @@ import androidx.collection.arrayMapOf
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.activity.ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.activity.KML_ADDRESS_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.activity.MAP_GEOMETRIES_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.activity.MAP_MARKERS_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.getIntent
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass.Companion.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
@@ -61,6 +56,11 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.includeAll
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
+import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KML_ADDRESS
+import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
+import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.storage.zipFile
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
@@ -108,18 +108,20 @@ class MapHelper(private val mapView: MapView) {
         }
 
         fun getImageUrl(description: String?): String? {
-            if (description == null || description.isEmpty()) return null
-
-            if (description.startsWith("<img")) {
-                val linkPos = description.indexOf("https://")
-                val urlFirstPart = description.substring(linkPos) // This takes from the first "
-                return urlFirstPart.substring(
-                    0,
-                    urlFirstPart.indexOf('"')
-                ) // This from the previous to the next
+            var result: String? = null
+            if (description == null || description.isEmpty()) result = null
+            else {
+                if (description.startsWith("<img")) {
+                    val linkPos = description.indexOf("https://")
+                    val urlFirstPart = description.substring(linkPos) // This takes from the first "
+                    result = urlFirstPart.substring(
+                        0,
+                        urlFirstPart.indexOf('"')
+                    ) // This from the previous to the next
+                }
             }
 
-            return null
+            return result
         }
     }
 
@@ -365,7 +367,7 @@ class MapHelper(private val mapView: MapView) {
                     Timber.v("  Loading ${polylines.size} polylines...")
                     addGeometries(polylines)
 
-                    display(activity)
+                    display()
                     center()
                 }
             }
@@ -402,7 +404,7 @@ class MapHelper(private val mapView: MapView) {
                 Timber.d("  Putting $geometriesCount geometries...")
                 putParcelableArrayListExtra(MAP_GEOMETRIES_BUNDLE_EXTRA, geometries)
             }
-            putExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA, markerSizeMultiplier)
+            putExtra(EXTRA_ICON_SIZE_MULTIPLIER, markerSizeMultiplier)
         }
         val elementsIntentSize = elementsIntent.getSize()
         val size = humanReadableByteCountBin(elementsIntentSize.toLong())
@@ -413,8 +415,8 @@ class MapHelper(private val mapView: MapView) {
         else
             Intent(context, MapsActivity::class.java).apply {
                 Timber.d("Passing to MapsActivity with kml address ($loadedKMLAddress).")
-                putExtra(KML_ADDRESS_BUNDLE_EXTRA, loadedKMLAddress!!)
-                putExtra(ICON_SIZE_MULTIPLIER_BUNDLE_EXTRA, markerSizeMultiplier)
+                putExtra(EXTRA_KML_ADDRESS, loadedKMLAddress!!)
+                putExtra(EXTRA_ICON_SIZE_MULTIPLIER, markerSizeMultiplier)
             }
     }
 
@@ -689,12 +691,11 @@ class MapHelper(private val mapView: MapView) {
 
     /**
      * Makes effective all the additions to the map through the add methods
-     * @param context The context to call from
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @UiThread
     @Throws(MapNotInitializedException::class)
-    fun display(context: Context) {
+    fun display() {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
@@ -710,7 +711,7 @@ class MapHelper(private val mapView: MapView) {
             fill?.let { fills.add(it) }
         }
 
-        val symbols = markers.addToMap(context, this)
+        val symbols = markers.addToMap(this)
         this.symbols.addAll(symbols)
     }
 

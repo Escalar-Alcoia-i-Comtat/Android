@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_PREVIEW_SCALE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import timber.log.Timber

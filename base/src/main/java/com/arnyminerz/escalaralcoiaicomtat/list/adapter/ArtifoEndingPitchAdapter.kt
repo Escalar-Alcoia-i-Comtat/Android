@@ -5,8 +5,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Pitch
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.EndingType
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.EndingType
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Pitch
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.ArtifoEndingPitchViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber

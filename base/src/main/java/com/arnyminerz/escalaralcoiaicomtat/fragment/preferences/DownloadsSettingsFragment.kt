@@ -6,9 +6,9 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.UPDATE_IMAGES
 import com.arnyminerz.escalaralcoiaicomtat.activity.UpdatingActivity
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.shared.UPDATE_IMAGES
 import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 
 class DownloadsSettingsFragment : PreferenceFragmentCompat() {

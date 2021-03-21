@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.types
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path
 
 import android.content.Context
 import android.text.Spannable
@@ -185,8 +185,10 @@ class Grade(val displayName: String) : Serializable {
                             )
                             spannable.setSpan(
                                 ForegroundColorSpan(getColor(context, gradeColor(gradePiece))),
-                                charCounter + 3, // Adding 3 for starting after L#
-                                charCounter + 3 + gradePiece.length, // Should be the 3 added before and then -1 for the indexing of length
+                                // Adding 3 for starting after L#
+                                charCounter + 3,
+                                // Should be the 3 added before and then -1 for the indexing of length
+                                charCounter + 3 + gradePiece.length,
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                             )
                         } else {

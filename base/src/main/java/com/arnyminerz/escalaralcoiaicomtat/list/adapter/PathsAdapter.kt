@@ -18,13 +18,12 @@ import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Path
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.BlockingType
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.types.Grade
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.BlockingType
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Grade
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
-import com.arnyminerz.escalaralcoiaicomtat.generic.runAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.setTextColor
@@ -33,6 +32,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber
+import java.util.concurrent.CompletableFuture.runAsync
 
 const val ROTATION_A = 0f
 const val ROTATION_B = 180f

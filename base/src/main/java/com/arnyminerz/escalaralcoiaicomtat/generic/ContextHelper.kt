@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
+import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.PackageManager
@@ -13,7 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_LANGUAGE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import timber.log.Timber
-import java.util.*
+import java.util.Locale
 
 fun Context.toast(text: String, duration: Int = Toast.LENGTH_SHORT) =
     Toast.makeText(this, text, duration).show()
@@ -21,10 +22,14 @@ fun Context.toast(text: String, duration: Int = Toast.LENGTH_SHORT) =
 fun Context.toast(@StringRes text: Int, duration: Int = Toast.LENGTH_SHORT) =
     Toast.makeText(this, text, duration).show()
 
-fun Context.onUiThread(call: (context: Context) -> Unit) =
-    Handler(Looper.getMainLooper()).post {
-        call(this)
-    }
+fun Context.onUiThread(call: (context: Context) -> Unit) {
+    if (this is Activity)
+        runOnUiThread { call(this) }
+    else
+        Handler(Looper.getMainLooper()).post {
+            call(this)
+        }
+}
 
 fun toast(context: Context?, @StringRes text: Int) =
     context?.onUiThread { it.toast(text) }

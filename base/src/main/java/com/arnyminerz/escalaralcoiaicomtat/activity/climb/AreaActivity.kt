@@ -7,17 +7,21 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.*
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.Area
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.ZoneAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA_TRANSITION_NAME
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_POSITION
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import timber.log.Timber
-
-private const val ICON_SIZE_MULTIPLIER = .2f
 
 class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
 

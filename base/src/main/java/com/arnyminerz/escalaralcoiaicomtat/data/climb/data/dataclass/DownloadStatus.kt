@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.types
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass
 
 enum class DownloadStatus {
     NOT_DOWNLOADED, DOWNLOADED, DOWNLOADING;

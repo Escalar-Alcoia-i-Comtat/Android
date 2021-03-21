@@ -12,7 +12,8 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreference
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.LOCATION_PERMISSION_REQUEST
+import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
+import com.arnyminerz.escalaralcoiaicomtat.shared.PREVIEW_SCALE_PREFERENCE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import timber.log.Timber
 
@@ -82,7 +83,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION
                     ),
-                    LOCATION_PERMISSION_REQUEST
+                    LOCATION_PERMISSION_REQUEST_CODE
                 )
 
                 false
@@ -138,6 +139,6 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
 
         markerSizePreference?.value = SETTINGS_MARKER_SIZE_PREF.get(sharedPreferences)
         previewScalePreference?.value =
-            (SETTINGS_PREVIEW_SCALE_PREF.get(sharedPreferences) * 10).toInt()
+            (SETTINGS_PREVIEW_SCALE_PREF.get(sharedPreferences) * PREVIEW_SCALE_PREFERENCE_MULTIPLIER).toInt()
     }
 }

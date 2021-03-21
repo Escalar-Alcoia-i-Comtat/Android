@@ -3,8 +3,12 @@ package com.arnyminerz.escalaralcoiaicomtat.data.map
 import android.os.Parcel
 import android.os.Parcelable
 import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.geometry.LatLngBounds
-import com.mapbox.mapboxsdk.plugins.annotation.*
+import com.mapbox.mapboxsdk.plugins.annotation.Fill
+import com.mapbox.mapboxsdk.plugins.annotation.FillManager
+import com.mapbox.mapboxsdk.plugins.annotation.FillOptions
+import com.mapbox.mapboxsdk.plugins.annotation.Line
+import com.mapbox.mapboxsdk.plugins.annotation.LineManager
+import com.mapbox.mapboxsdk.plugins.annotation.LineOptions
 import timber.log.Timber
 
 data class GeoGeometry(
@@ -76,9 +80,4 @@ fun Collection<GeoGeometry>.addToMap(
     for (marker in this)
         list.add(marker.addToMap(fillManager, lineManager))
     return list.toList()
-}
-
-fun LatLngBounds.Builder.include(points: ArrayList<LatLng>) {
-    for (point in points)
-        include(point)
 }

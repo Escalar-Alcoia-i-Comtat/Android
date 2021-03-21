@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.map
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.os.Parcel
 import android.os.Parcelable
@@ -12,20 +11,6 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import timber.log.Timber
-
-const val ICON_SIZE_MULTIPLIER = .35f
-
-private const val BITMAP_COMPRESSION = 100
-
-private fun extractUUID(
-    position: LatLng,
-    iconSizeMultiplier: Float,
-    windowData: MapObjectWindowData?
-): String {
-    val text = position.latitude.toString() + position.longitude.toString() +
-            iconSizeMultiplier.toString() + windowData?.title
-    return Base64.encodeToString(text.toByteArray(), Base64.DEFAULT)
-}
 
 @Suppress("unused")
 class GeoMarker(
@@ -100,16 +85,23 @@ class GeoMarker(
         override fun newArray(size: Int): Array<GeoMarker?> {
             return arrayOfNulls(size)
         }
+
+        private fun extractUUID(
+            position: LatLng,
+            iconSizeMultiplier: Float,
+            windowData: MapObjectWindowData?
+        ): String {
+            val text = position.latitude.toString() + position.longitude.toString() +
+                    iconSizeMultiplier.toString() + windowData?.title
+            return Base64.encodeToString(text.toByteArray(), Base64.DEFAULT)
+        }
     }
 }
 
 fun Symbol.getWindow(): MapObjectWindowData =
     load(this)
 
-fun Collection<GeoMarker>.addToMap(
-    context: Context,
-    mapHelper: MapHelper,
-): List<Symbol> {
+fun Collection<GeoMarker>.addToMap(mapHelper: MapHelper): List<Symbol> {
     val symbols = arrayListOf<Symbol>()
     for (marker in this) {
         val symbol = marker.addToMap(mapHelper)

@@ -7,9 +7,9 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.RequiredSafesData
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.SafeCountData
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.SafesData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes.SafeCountData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes.SafesData
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.PathEquipmentViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber

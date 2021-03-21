@@ -9,16 +9,14 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
-import com.arnyminerz.escalaralcoiaicomtat.activity.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.TOGGLED_CARD_HEIGHT
+import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.ROTATION_A
+import com.arnyminerz.escalaralcoiaicomtat.shared.ROTATION_B
+import com.arnyminerz.escalaralcoiaicomtat.shared.TOGGLE_ANIMATION_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
-
-private const val ROTATION_A = 90f
-private const val ROTATION_B = -90f
-
-private const val TOGGLE_ANIMATION_DURATION: Long = 300
 
 @Suppress("UNCHECKED_CAST")
 // This must be Serializable and not DataClass because A at DataClass can't be specified as DataClass
