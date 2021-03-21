@@ -120,6 +120,11 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         LOCATION_PERMISSION_REQUEST_CODE
                     )
                 }
+                binding.nearbyZonesCardView.setOnLongClickListener {
+                    PREF_DISABLE_NEARBY.put(true)
+                    updateNearbyZones()
+                    true
+                }
                 binding.nearbyZonesIcon.setImageResource(R.drawable.ic_round_explore_off_24)
             }
             return
