@@ -24,6 +24,8 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.parse.ParseObject
 import com.parse.ParseQuery
@@ -48,25 +50,25 @@ class SectorActivity : LanguageAppCompatActivity() {
     @UiThread
     fun updateTitle(newTitle: String? = null, isDownloaded: Boolean = false) {
         if (newTitle == null)
-            binding.titleTextView.visibility(false)
+            binding.titleTextView.hide()
         else {
             binding.titleTextView.text = newTitle
             binding.titleTextView.transitionName = transitionName
-            binding.titleTextView.visibility(true)
+            binding.titleTextView.show()
         }
         binding.statusImageView.apply {
             if (isDownloaded) {
                 setImageResource(R.drawable.cloud_check)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     tooltipText = getString(R.string.status_downloaded)
-                visibility(true)
+                show()
             } else if (!appNetworkState.hasInternet) {
                 setImageResource(R.drawable.ic_round_signal_cellular_off_24)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     tooltipText = getString(R.string.status_no_internet)
-                visibility(true)
+                show()
             } else
-                visibility(false)
+                hide()
         }
     }
 

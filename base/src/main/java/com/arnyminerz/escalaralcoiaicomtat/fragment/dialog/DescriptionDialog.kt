@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.widget.TextView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import io.noties.markwon.Markwon
 
 @ExperimentalUnsignedTypes
@@ -30,13 +30,13 @@ class DescriptionDialog private constructor(private val context: Context, privat
         val markwon = Markwon.create(context)
         if (path.builtBy != null)
             markwon.setMarkdown(builderTextView, path.builtBy)
-        else builderTextView.visibility(false)
+        else builderTextView.hide()
         if (path.rebuiltBy != null)
             markwon.setMarkdown(rebuilderTextView, path.rebuiltBy)
-        else rebuilderTextView.visibility(false)
+        else rebuilderTextView.hide()
         if (path.description != null)
             markwon.setMarkdown(descriptionTextView, path.description)
-        else descriptionTextView.visibility(false)
+        else descriptionTextView.hide()
 
         dialog.setView(view)
         dialog.show()

@@ -21,7 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_TRANSITION_NAME
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber
 
@@ -103,7 +103,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                             this,
                             areaId, zoneId
                         ) { viewHolder, index ->
-                            binding.loadingLayout.visibility(true)
+                            binding.loadingLayout.show()
 
                             Timber.v("Clicked item $index")
                             val trn =

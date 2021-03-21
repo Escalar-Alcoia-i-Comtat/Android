@@ -23,6 +23,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_ZONE_ID
 import com.arnyminerz.escalaralcoiaicomtat.shared.CROSSFADE_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.THUMBNAIL_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
@@ -172,7 +173,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
             refreshMaximizeStatus()
         }
-        binding.dataScrollView.visibility(true)
+        binding.dataScrollView.show()
         refreshMaximizeStatus()
 
         sectorActivity?.setLoading(false)

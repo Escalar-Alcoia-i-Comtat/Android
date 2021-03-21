@@ -15,6 +15,8 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -60,7 +62,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         super.onResume()
         mapHelper.onResume()
         if (mapLoaded)
-            binding.loadingLayout.visibility(false)
+            binding.loadingLayout.hide()
     }
 
     override fun onPause() {
@@ -114,12 +116,12 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                             } catch (e: FileNotFoundException) {
                                 Timber.w("KMZ file not found")
                             } finally {
-                                binding.loadingLayout.visibility(false)
+                                runOnUiThread { binding.loadingLayout.hide() }
                             }
                         }
                     else {
                         Timber.w("KML was not found")
-                        binding.loadingLayout.visibility(false)
+                        binding.loadingLayout.hide()
                     }
 
                     map.addOnMapClickListener {
@@ -135,7 +137,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                     }
                 }
         } else if (!hasInternet) {
-            binding.loadingLayout.visibility(false)
+            binding.loadingLayout.hide()
             mapHelper.hide()
         }
     }
@@ -146,14 +148,14 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                 i.setImageResource(R.drawable.cloud_check)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     i.tooltipText = getString(R.string.status_downloaded)
-                i.visibility(true)
+                i.show()
             } else if (!appNetworkState.hasInternet) {
                 i.setImageResource(R.drawable.ic_round_signal_cellular_off_24)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     i.tooltipText = getString(R.string.status_no_internet)
-                i.visibility(true)
+                i.show()
             } else
-                i.visibility(false, setGone = false)
+                i.hide(setGone = false)
         }
     }
 }

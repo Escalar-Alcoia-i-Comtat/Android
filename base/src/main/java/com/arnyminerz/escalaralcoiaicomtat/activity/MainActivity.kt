@@ -183,7 +183,7 @@ class MainActivity : LanguageAppCompatActivity() {
         Timber.v("  --- Found ${AREAS.size} areas ---")
 
         areasViewFragment.setItemClickListener { holder, position ->
-            binding.loadingLayout.visibility(true)
+            visibility(binding.loadingLayout, true)
             Timber.v("Clicked item %s", position)
             val intent = Intent(this, AreaActivity()::class.java)
                 .putExtra(EXTRA_AREA, AREAS.valueAt(position)!!.objectId)

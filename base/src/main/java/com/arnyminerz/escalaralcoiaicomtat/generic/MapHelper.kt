@@ -63,6 +63,8 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.storage.zipFile
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -1153,7 +1155,7 @@ class MapHelper(private val mapView: MapView) {
         init {
             val anim = AnimationUtils.loadAnimation(activity, R.anim.enter_bottom)
             anim.duration = MARKER_WINDOW_SHOW_DURATION
-            cardView.visibility(true)
+            cardView.show()
             cardView.startAnimation(anim)
 
             val window = marker.getWindow()
@@ -1214,7 +1216,7 @@ class MapHelper(private val mapView: MapView) {
             anim.duration = MARKER_WINDOW_HIDE_DURATION
             Handler(Looper.getMainLooper()).postDelayed({
                 Timber.d("Finished animation")
-                cardView.visibility(false)
+                cardView.hide()
                 (cardView.parent as ViewManager).removeView(cardView)
                 destroyed = true
             }, MARKER_WINDOW_HIDE_DURATION)

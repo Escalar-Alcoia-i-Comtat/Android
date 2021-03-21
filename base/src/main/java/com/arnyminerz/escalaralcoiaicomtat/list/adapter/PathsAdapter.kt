@@ -25,6 +25,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.*
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.setTextColor
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.chip.Chip
@@ -77,13 +78,13 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
     override fun onBindViewHolder(holder: SectorViewHolder, position: Int) {
         if (position >= paths.size) {
             Timber.e("Position $position is out of the paths' bounds: ${paths.size}. Hiding the card.")
-            holder.cardView.visibility(false)
+            holder.cardView.hide()
             return
         }
         val path = paths[position]
 
-        holder.warningImageView.visibility(false)
-        holder.warningCardView.visibility(false)
+        holder.warningImageView.hide()
+        holder.warningCardView.hide()
 
         val hasInfo = path.hasInfo()
         visibility(holder.infoImageButton, hasInfo)
