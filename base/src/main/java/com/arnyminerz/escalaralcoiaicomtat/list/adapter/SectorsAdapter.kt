@@ -16,9 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorsViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
-import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
@@ -52,7 +50,7 @@ class SectorsAdapter(
     override fun onBindViewHolder(holder: SectorsViewHolder, position: Int) {
         if (position >= sectors.size) {
             Timber.e("Retrieving position $position on sectors with size ${sectors.size}")
-            holder.cardView.hide()
+            holder.cardView.visibility(false)
             return
         }
 
@@ -79,7 +77,7 @@ class SectorsAdapter(
                     )
                     .withThumbnailSize(IMAGE_THUMBNAIL_SIZE)
                     .withResultImageScale(
-                        with(SETTINGS_PREVIEW_SCALE_PREF.get(sharedPreferences)) {
+                        with(SETTINGS_PREVIEW_SCALE_PREF.get()) {
                             Timber.v("Preview scale: $this")
                             this
                         }

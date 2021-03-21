@@ -35,7 +35,6 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_CENTER_CURRENT_LOCATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
-import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
@@ -48,7 +47,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     private val mapInitialized: Boolean
         get() = this::mapHelper.isInitialized && mapHelper.isLoaded
     private val nearbyEnabled: Boolean
-        get() = !PREF_DISABLE_NEARBY.get(sharedPreferences)
+        get() = !PREF_DISABLE_NEARBY.get()
 
     internal lateinit var mapHelper: MapHelper
 
@@ -92,39 +91,58 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         return errors
     }
 
-    private fun updateNearbyZones(location: Location) {
-        if (nearbyZonesReady().isNotEmpty())
-            return
+    /**
+     * Updates the nearby zones card.
+     * @author Arnau Mora
+     * @since 20210321
+     * @param location The current location, if null, no markers will be added.
+     */
+    fun updateNearbyZones(location: Location? = null) {
+        val nearbyZonesErrors = nearbyZonesReady()
+        if (nearbyZonesErrors.isNotEmpty()) {
+            Timber.i("Nearby Zones errors: $nearbyZonesErrors")
+            // The location permission is not granted. Show permissions message.
+            // Having NEARBY_ZONES_PERMISSION also implies that Nearby Zones is enabled.
+            if (nearbyZonesErrors.contains(NearbyZonesError.NEARBY_ZONES_PERMISSION)) {
+                Timber.v("The Location permission is not granted")
+                visibility(binding.mapView, false)
+                visibility(binding.nearbyZonesPermissionMessage, true)
+                visibility(binding.nearbyZonesCardView, true)
 
-        Timber.v("Updating nearby zones...")
-        val position = location.toLatLng()
-
-        binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
-
-        val hasLocationPermission =
-            context?.let { PermissionsManager.areLocationPermissionsGranted(requireContext()) }
-                ?: false
-        visibility(binding.mapView, hasLocationPermission)
-        visibility(binding.nearbyZonesPermissionMessage, !hasLocationPermission)
-
-        if (!hasLocationPermission) {
-            binding.nearbyZonesCardView.isClickable = true
-            binding.nearbyZonesCardView.setOnClickListener {
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    ),
-                    LOCATION_PERMISSION_REQUEST_CODE
-                )
+                binding.nearbyZonesCardView.isClickable = true
+                binding.nearbyZonesCardView.setOnClickListener {
+                    ActivityCompat.requestPermissions(
+                        requireActivity(),
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        ),
+                        LOCATION_PERMISSION_REQUEST_CODE
+                    )
+                }
+                binding.nearbyZonesCardView.setOnLongClickListener {
+                    PREF_DISABLE_NEARBY.put(true)
+                    updateNearbyZones()
+                    true
+                }
+                binding.nearbyZonesIcon.setImageResource(R.drawable.ic_round_explore_off_24)
             }
-            binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
-        } else if (mapHelper.isLoaded) {
+            return
+        }
+
+        if (location != null) {
+            Timber.v("Updating nearby zones...")
+            val position = location.toLatLng()
+
+            binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
+
+            visibility(binding.mapView, true)
+            visibility(binding.nearbyZonesPermissionMessage, false)
+
             binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
             binding.nearbyZonesCardView.isClickable = false
 
-            val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get(sharedPreferences)
+            val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get()
 
             mapHelper.clearSymbols()
 
@@ -157,8 +175,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
                 }
             }
-        } else
-            Timber.w("Could not update Nearby Zones: MapHelper not loaded")
+        }
     }
 
     private fun initializeMap(savedInstanceState: Bundle? = null) {
@@ -193,7 +210,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     nearbyZonesClick()
                 }
 
-                nearbyZonesReady()
+                updateNearbyZones()
             }
     }
 
