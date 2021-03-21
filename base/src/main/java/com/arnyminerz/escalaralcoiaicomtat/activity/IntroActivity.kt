@@ -133,15 +133,14 @@ class IntroActivity : LanguageAppCompatActivity() {
     ) {
         when (requestCode) {
             STORAGE_PERMISSION_REQUEST -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     findViewById<MaterialButton?>(R.id.grant_storage_permission_button)
                         ?.apply {
                             setText(R.string.status_permission_granted)
                             isEnabled = false
                         }
-                } else {
+                else
                     toast(R.string.toast_permission_required)
-                }
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
