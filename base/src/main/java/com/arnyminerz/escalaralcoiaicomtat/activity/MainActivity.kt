@@ -225,6 +225,11 @@ class MainActivity : LanguageAppCompatActivity() {
         }
     }
 
+    override fun onRestart() {
+        super.onRestart()
+        finishedLoading()
+    }
+
     /**
      * Informs the activity it has finished loading
      * @author Arnau Mora
