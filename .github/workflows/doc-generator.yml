@@ -12,8 +12,8 @@ jobs:
           submodules: false
           fetch-depth: 0
       - name: Run dokka 📝
-          id: test
-          run: bash ./gradlew dokka
+        id: test
+        run: bash ./gradlew dokka
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@3.6.2
         with:
