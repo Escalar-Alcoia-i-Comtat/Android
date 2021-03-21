@@ -35,7 +35,6 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_CENTER_CURRENT_LOCATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
-import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
@@ -48,7 +47,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     private val mapInitialized: Boolean
         get() = this::mapHelper.isInitialized && mapHelper.isLoaded
     private val nearbyEnabled: Boolean
-        get() = !PREF_DISABLE_NEARBY.get(sharedPreferences)
+        get() = !PREF_DISABLE_NEARBY.get()
 
     internal lateinit var mapHelper: MapHelper
 
@@ -138,7 +137,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
             binding.nearbyZonesCardView.isClickable = false
 
-            val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get(sharedPreferences)
+            val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get()
 
             mapHelper.clearSymbols()
 

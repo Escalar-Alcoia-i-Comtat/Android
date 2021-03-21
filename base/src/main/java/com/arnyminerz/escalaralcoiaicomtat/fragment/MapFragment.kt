@@ -21,7 +21,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
-import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
@@ -82,7 +81,7 @@ class MapFragment : NetworkChangeListenerFragment() {
                     }
 
                 mapHelper.addSymbolClickListener {
-                    if (SETTINGS_CENTER_MARKER_PREF.get(sharedPreferences))
+                    if (SETTINGS_CENTER_MARKER_PREF.get())
                         map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
 
                     markerWindow?.hide()

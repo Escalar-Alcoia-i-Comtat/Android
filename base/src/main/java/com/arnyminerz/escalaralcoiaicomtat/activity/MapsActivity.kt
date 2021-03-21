@@ -40,7 +40,6 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.MIME_TYPE_GPX
 import com.arnyminerz.escalaralcoiaicomtat.shared.MIME_TYPE_KMZ
 import com.arnyminerz.escalaralcoiaicomtat.shared.PERMISSION_DIALOG_TAG
-import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.Mapbox
@@ -187,7 +186,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                         }
 
                         mapHelper.addSymbolClickListener {
-                            if (SETTINGS_CENTER_MARKER_PREF.get(sharedPreferences))
+                            if (SETTINGS_CENTER_MARKER_PREF.get())
                                 mapHelper.move(latLng)
                             markerWindow?.hide()
                             val window = getWindow()

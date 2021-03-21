@@ -14,7 +14,6 @@ import androidx.preference.SwitchPreference
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
 import com.arnyminerz.escalaralcoiaicomtat.shared.PREVIEW_SCALE_PREFERENCE_MULTIPLIER
-import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import timber.log.Timber
 
 private const val PREVIEW_SCALE_REDUCER = 10f
@@ -35,7 +34,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
 
         sensibilityPreference = findPreference("pref_swipe_sensibility")
         sensibilityPreference?.setOnPreferenceChangeListener { _, value ->
-            SETTINGS_GESTURE_SENSIBILITY_PREF.put(sharedPreferences, value as Int)
+            SETTINGS_GESTURE_SENSIBILITY_PREF.put(value as Int)
             true
         }
 
@@ -46,8 +45,8 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
             if (languages != null) {
                 val langIndex = languages.indexOf(newValue)
                 Timber.d("Language index: $langIndex")
-                SETTINGS_LANGUAGE_PREF.put(sharedPreferences, langIndex)
-                when (SETTINGS_LANGUAGE_PREF.get(sharedPreferences)) {
+                SETTINGS_LANGUAGE_PREF.put(langIndex)
+                when (SETTINGS_LANGUAGE_PREF.get()) {
                     0 -> // English
                         Timber.d("Set English")
                     1 -> // Catalan
@@ -74,7 +73,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                PREF_DISABLE_NEARBY.put(sharedPreferences, !(value as Boolean))
+                PREF_DISABLE_NEARBY.put(!(value as Boolean))
                 true
             } else {
                 ActivityCompat.requestPermissions(
@@ -92,26 +91,25 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
 
         nearbyDistance = findPreference("pref_nearby_distance")
         nearbyDistance?.setOnPreferenceChangeListener { _, value ->
-            SETTINGS_NEARBY_DISTANCE_PREF.put(sharedPreferences, (value as String).toInt())
+            SETTINGS_NEARBY_DISTANCE_PREF.put((value as String).toInt())
             true
         }
 
         markerSizePreference = findPreference("pref_marker_size")
         markerSizePreference?.setOnPreferenceChangeListener { _, value ->
-            SETTINGS_MARKER_SIZE_PREF.put(sharedPreferences, value as Int)
+            SETTINGS_MARKER_SIZE_PREF.put(value as Int)
             true
         }
 
         centerMarkerPreference = findPreference("pref_move_marker")
         centerMarkerPreference?.setOnPreferenceChangeListener { _, value ->
-            SETTINGS_CENTER_MARKER_PREF.put(sharedPreferences, value as Boolean)
+            SETTINGS_CENTER_MARKER_PREF.put(value as Boolean)
             true
         }
 
         previewScalePreference = findPreference("pref_preview_scale")
         previewScalePreference?.setOnPreferenceChangeListener { _, value ->
             SETTINGS_PREVIEW_SCALE_PREF.put(
-                sharedPreferences,
                 (value as Int).toFloat() / PREVIEW_SCALE_REDUCER
             )
             true
@@ -121,24 +119,24 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
     override fun onResume() {
         super.onResume()
 
-        sensibilityPreference?.value = SETTINGS_GESTURE_SENSIBILITY_PREF.get(sharedPreferences)
+        sensibilityPreference?.value = SETTINGS_GESTURE_SENSIBILITY_PREF.get()
 
         languagePreference?.setValueIndex(
-            SETTINGS_LANGUAGE_PREF.get(sharedPreferences)
+            SETTINGS_LANGUAGE_PREF.get()
         )
 
-        enableNearby?.isChecked = !(PREF_DISABLE_NEARBY.get(sharedPreferences)) &&
+        enableNearby?.isChecked = !(PREF_DISABLE_NEARBY.get()) &&
                 (ContextCompat.checkSelfPermission(
                     activity,
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED)
 
-        val nearbyDistancePref = SETTINGS_NEARBY_DISTANCE_PREF.get(sharedPreferences).toString()
+        val nearbyDistancePref = SETTINGS_NEARBY_DISTANCE_PREF.get().toString()
         Timber.d("Nearby distance: $nearbyDistancePref")
         nearbyDistance?.text = nearbyDistancePref
 
-        markerSizePreference?.value = SETTINGS_MARKER_SIZE_PREF.get(sharedPreferences)
+        markerSizePreference?.value = SETTINGS_MARKER_SIZE_PREF.get()
         previewScalePreference?.value =
-            (SETTINGS_PREVIEW_SCALE_PREF.get(sharedPreferences) * PREVIEW_SCALE_PREFERENCE_MULTIPLIER).toInt()
+            (SETTINGS_PREVIEW_SCALE_PREF.get() * PREVIEW_SCALE_PREFERENCE_MULTIPLIER).toInt()
     }
 }
