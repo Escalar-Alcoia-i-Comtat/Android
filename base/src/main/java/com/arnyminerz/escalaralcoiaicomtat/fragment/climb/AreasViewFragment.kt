@@ -95,9 +95,12 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     private fun updateNearbyZones(location: Location) {
         val nearbyZonesErrors = nearbyZonesReady()
         if (nearbyZonesErrors.isNotEmpty()) {
+            // The location permission is not granted. Show permissions message.
+            // Having NEARBY_ZONES_PERMISSION also implies that Nearby Zones is enabled.
             if (nearbyZonesErrors.contains(NearbyZonesError.NEARBY_ZONES_PERMISSION)) {
                 visibility(binding.mapView, false)
                 visibility(binding.nearbyZonesPermissionMessage, true)
+                visibility(binding.nearbyZonesCardView, true)
 
                 binding.nearbyZonesCardView.isClickable = true
                 binding.nearbyZonesCardView.setOnClickListener {
@@ -110,7 +113,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         LOCATION_PERMISSION_REQUEST_CODE
                     )
                 }
-                binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
+                binding.nearbyZonesIcon.setImageResource(R.drawable.ic_round_explore_off_24)
             }
             return
         }
