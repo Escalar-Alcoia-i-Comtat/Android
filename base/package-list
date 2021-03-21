@@ -1,0 +1,110 @@
+$dokka.format:html
+$dokka.linkExtension:html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.connection.parse$count(com.parse.ParseQuery((com.arnyminerz.escalaralcoiaicomtat.connection.parse.count.A)), kotlin.Function2((kotlin.Int, java.lang.Exception, kotlin.Unit)))com.arnyminerz.escalaralcoiaicomtat.connection.parse/com.parse.-parse-query/count.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.connection.parse$countSync(com.parse.ParseQuery((com.arnyminerz.escalaralcoiaicomtat.connection.parse.countSync.A)), kotlin.Pair((kotlin.Long, java.util.concurrent.TimeUnit)))com.arnyminerz.escalaralcoiaicomtat.connection.parse/com.parse.-parse-query/count-sync.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.connection.parse$fetchPinOrNetwork(com.parse.ParseQuery((com.arnyminerz.escalaralcoiaicomtat.connection.parse.fetchPinOrNetwork.A)), kotlin.String, kotlin.Boolean, kotlin.Function2((kotlin.collections.List((com.arnyminerz.escalaralcoiaicomtat.connection.parse.fetchPinOrNetwork.A)), java.lang.Exception, kotlin.Unit)))com.arnyminerz.escalaralcoiaicomtat.connection.parse/com.parse.-parse-query/fetch-pin-or-network.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.connection.parse$fetchPinOrNetworkSync(com.parse.ParseQuery((com.arnyminerz.escalaralcoiaicomtat.connection.parse.fetchPinOrNetworkSync.A)), kotlin.String, kotlin.Boolean, kotlin.Pair((kotlin.Long, java.util.concurrent.TimeUnit)))com.arnyminerz.escalaralcoiaicomtat.connection.parse/com.parse.-parse-query/fetch-pin-or-network-sync.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area$getZones(kotlin.collections.Map((kotlin.String, com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area.Area)))com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area/kotlin.collections.-map/get-zones.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path$toGradesList(kotlin.collections.Collection((com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Grade)))com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path/kotlin.collections.-collection/to-grades-list.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.data.map$addToMap(kotlin.collections.Collection((com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry)), com.mapbox.mapboxsdk.plugins.annotation.FillManager, com.mapbox.mapboxsdk.plugins.annotation.LineManager)com.arnyminerz.escalaralcoiaicomtat.data.map/kotlin.collections.-collection/add-to-map.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.data.map$addToMap(kotlin.collections.Collection((com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker)), com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper)com.arnyminerz.escalaralcoiaicomtat.data.map/kotlin.collections.-collection/add-to-map.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.data.map$apply(com.mapbox.mapboxsdk.plugins.annotation.FillOptions, com.arnyminerz.escalaralcoiaicomtat.data.map.GeoStyle)com.arnyminerz.escalaralcoiaicomtat.data.map/com.mapbox.mapboxsdk.plugins.annotation.-fill-options/apply.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.data.map$apply(com.mapbox.mapboxsdk.plugins.annotation.LineOptions, com.arnyminerz.escalaralcoiaicomtat.data.map.GeoStyle)com.arnyminerz.escalaralcoiaicomtat.data.map/com.mapbox.mapboxsdk.plugins.annotation.-line-options/apply.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.data.map$getWindow(com.mapbox.mapboxsdk.plugins.annotation.Symbol)com.arnyminerz.escalaralcoiaicomtat.data.map/com.mapbox.mapboxsdk.plugins.annotation.-symbol/get-window.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$allTrue(kotlin.collections.Collection((kotlin.Boolean)))com.arnyminerz.escalaralcoiaicomtat.generic/kotlin.collections.-collection/all-true.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$deleteDirAndContents(java.io.File)com.arnyminerz.escalaralcoiaicomtat.generic/java.io.-file/delete-dir-and-contents.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$deleteIfExists(java.io.File)com.arnyminerz.escalaralcoiaicomtat.generic/java.io.-file/delete-if-exists.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$drawable(kotlin.Int, android.content.Context)com.arnyminerz.escalaralcoiaicomtat.generic/kotlin.-int/drawable.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$extension(android.net.Uri, android.content.Context)com.arnyminerz.escalaralcoiaicomtat.generic/android.net.-uri/extension.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$fileName(android.net.Uri, android.content.Context)com.arnyminerz.escalaralcoiaicomtat.generic/android.net.-uri/file-name.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$fixTildes(kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic/kotlin.-string/fix-tildes.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$getExtra(android.content.Intent, com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra((com.arnyminerz.escalaralcoiaicomtat.generic.getExtra.T)))com.arnyminerz.escalaralcoiaicomtat.generic/android.content.-intent/get-extra.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$getExtra(android.content.Intent, com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra((com.arnyminerz.escalaralcoiaicomtat.generic.getExtra.T)), com.arnyminerz.escalaralcoiaicomtat.generic.getExtra.T)com.arnyminerz.escalaralcoiaicomtat.generic/android.content.-intent/get-extra.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$getSize(android.content.Intent)com.arnyminerz.escalaralcoiaicomtat.generic/android.content.-intent/get-size.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$hasExtras(android.content.Intent, kotlin.Array((kotlin.String)))com.arnyminerz.escalaralcoiaicomtat.generic/android.content.-intent/has-extras.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$isPermissionGranted(android.content.Context, kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic/android.content.-context/is-permission-granted.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$mime(android.net.Uri, android.content.Context)com.arnyminerz.escalaralcoiaicomtat.generic/android.net.-uri/mime.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$onUiThread(android.content.Context, kotlin.Function1((android.content.Context, kotlin.Unit)))com.arnyminerz.escalaralcoiaicomtat.generic/android.content.-context/on-ui-thread.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$putExtra(android.content.Intent, com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra((com.arnyminerz.escalaralcoiaicomtat.generic.putExtra.T)), com.arnyminerz.escalaralcoiaicomtat.generic.putExtra.T)com.arnyminerz.escalaralcoiaicomtat.generic/android.content.-intent/put-extra.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$runOnUiThread(androidx.fragment.app.Fragment, kotlin.Function1((android.app.Activity, kotlin.Unit)))com.arnyminerz.escalaralcoiaicomtat.generic/androidx.fragment.app.-fragment/run-on-ui-thread.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$shareString(android.app.Activity, kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic/android.app.-activity/share-string.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$size(java.io.File)com.arnyminerz.escalaralcoiaicomtat.generic/java.io.-file/size.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$sizeString(java.io.File)com.arnyminerz.escalaralcoiaicomtat.generic/java.io.-file/size-string.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$storeBitmap(java.io.File, android.graphics.Bitmap, kotlin.Boolean, kotlin.Boolean, android.graphics.Bitmap.CompressFormat, kotlin.Int)com.arnyminerz.escalaralcoiaicomtat.generic/java.io.-file/store-bitmap.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$storeToFile(android.graphics.Bitmap, java.io.File, kotlin.Boolean, kotlin.Boolean, android.graphics.Bitmap.CompressFormat, kotlin.Int)com.arnyminerz.escalaralcoiaicomtat.generic/android.graphics.-bitmap/store-to-file.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$toast(android.content.Context, kotlin.Int, kotlin.Int)com.arnyminerz.escalaralcoiaicomtat.generic/android.content.-context/toast.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic$toast(android.content.Context, kotlin.String, kotlin.Int)com.arnyminerz.escalaralcoiaicomtat.generic/android.content.-context/toast.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$disable(androidx.preference.Preference)com.arnyminerz.escalaralcoiaicomtat.generic.extension/androidx.preference.-preference/disable.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$enable(androidx.preference.Preference)com.arnyminerz.escalaralcoiaicomtat.generic.extension/androidx.preference.-preference/enable.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$get(org.json.JSONObject, kotlin.String, kotlin.Any)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.json.-j-s-o-n-object/get.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$getBooleanFromString(org.json.JSONObject, kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.json.-j-s-o-n-object/get-boolean-from-string.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$getElementByTagName(org.w3c.dom.Element, kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.w3c.dom.-element/get-element-by-tag-name.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$getElementByTagNameWithAttribute(org.w3c.dom.Element, kotlin.String, kotlin.String, kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.w3c.dom.-element/get-element-by-tag-name-with-attribute.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$getInt(org.json.JSONObject, kotlin.String, kotlin.Int)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.json.-j-s-o-n-object/get-int.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$getJSONArray(org.json.JSONObject, kotlin.String, org.json.JSONArray)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.json.-j-s-o-n-object/get-j-s-o-n-array.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$getJSONArrayOrEmpty(org.json.JSONObject, kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.json.-j-s-o-n-object/get-j-s-o-n-array-or-empty.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$getLatLngSafe(org.json.JSONObject, kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.json.-j-s-o-n-object/get-lat-lng-safe.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$getStringSafe(org.json.JSONObject, kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.json.-j-s-o-n-object/get-string-safe.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$getTimestampSafe(org.json.JSONObject, kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.json.-j-s-o-n-object/get-timestamp-safe.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$hasChildNode(org.w3c.dom.Element, kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.w3c.dom.-element/has-child-node.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$includeAll(com.mapbox.mapboxsdk.geometry.LatLngBounds.Builder, kotlin.collections.Collection((com.mapbox.mapboxsdk.geometry.LatLng)))com.arnyminerz.escalaralcoiaicomtat.generic.extension/com.mapbox.mapboxsdk.geometry.-lat-lng-bounds.-builder/include-all.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$isEmpty(org.json.JSONArray)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.json.-j-s-o-n-array/is-empty.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$join(kotlin.collections.Collection((kotlin.String)), kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic.extension/kotlin.collections.-collection/join.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$sort(org.json.JSONArray, kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.json.-j-s-o-n-array/sort.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$split(java.util.ArrayList((kotlin.String)), kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic.extension/java.util.-array-list/split.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$times(kotlin.Char, kotlin.Int)com.arnyminerz.escalaralcoiaicomtat.generic.extension/kotlin.-char/times.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$toElementList(org.w3c.dom.NodeList)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.w3c.dom.-node-list/to-element-list.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$toJSONStringArray(java.util.ArrayList((kotlin.Any)))com.arnyminerz.escalaralcoiaicomtat.generic.extension/java.util.-array-list/to-j-s-o-n-string-array.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$toLatLng(android.location.Location)com.arnyminerz.escalaralcoiaicomtat.generic.extension/android.location.-location/to-lat-lng.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$toLatLng(com.parse.ParseGeoPoint)com.arnyminerz.escalaralcoiaicomtat.generic.extension/com.parse.-parse-geo-point/to-lat-lng.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$toList(org.w3c.dom.NodeList)com.arnyminerz.escalaralcoiaicomtat.generic.extension/org.w3c.dom.-node-list/to-list.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$toTimestamp(kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic.extension/kotlin.-string/to-timestamp.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$toUri(com.mapbox.mapboxsdk.geometry.LatLng, kotlin.Boolean, kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic.extension/com.mapbox.mapboxsdk.geometry.-lat-lng/to-uri.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic.extension$write(java.io.OutputStream, kotlin.String)com.arnyminerz.escalaralcoiaicomtat.generic.extension/java.io.-output-stream/write.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.network$ping(java.net.URL, kotlin.Int)com.arnyminerz.escalaralcoiaicomtat.network/java.net.-u-r-l/ping.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.notification$createNotificationChannels(android.content.Context)com.arnyminerz.escalaralcoiaicomtat.notification/android.content.-context/create-notification-channels.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.view$apply(com.bumptech.glide.RequestBuilder((android.graphics.Bitmap)), com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters)com.arnyminerz.escalaralcoiaicomtat.view/com.bumptech.glide.-request-builder/apply.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.view$hide(android.view.View, kotlin.Boolean)com.arnyminerz.escalaralcoiaicomtat.view/android.view.-view/hide.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.view$show(android.view.View)com.arnyminerz.escalaralcoiaicomtat.view/android.view.-view/show.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.view$visibility(android.app.Activity, android.view.View, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean)com.arnyminerz.escalaralcoiaicomtat.view/android.app.-activity/visibility.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.view$visibility(android.content.Context, android.view.View, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean)com.arnyminerz.escalaralcoiaicomtat.view/android.content.-context/visibility.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.view$visibility(androidx.fragment.app.Fragment, android.view.View, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean)com.arnyminerz.escalaralcoiaicomtat.view/androidx.fragment.app.-fragment/visibility.html
+com.arnyminerz.escalaralcoiaicomtat.activity
+com.arnyminerz.escalaralcoiaicomtat.activity.climb
+com.arnyminerz.escalaralcoiaicomtat.activity.isolated
+com.arnyminerz.escalaralcoiaicomtat.activity.model
+com.arnyminerz.escalaralcoiaicomtat.connection.parse
+com.arnyminerz.escalaralcoiaicomtat.connection.web
+com.arnyminerz.escalaralcoiaicomtat.data
+com.arnyminerz.escalaralcoiaicomtat.data.climb.data
+com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area
+com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass
+com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path
+com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes
+com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector
+com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone
+com.arnyminerz.escalaralcoiaicomtat.data.climb.download
+com.arnyminerz.escalaralcoiaicomtat.data.map
+com.arnyminerz.escalaralcoiaicomtat.data.preference
+com.arnyminerz.escalaralcoiaicomtat.databinding
+com.arnyminerz.escalaralcoiaicomtat.device
+com.arnyminerz.escalaralcoiaicomtat.exception
+com.arnyminerz.escalaralcoiaicomtat.exception.notification
+com.arnyminerz.escalaralcoiaicomtat.fragment
+com.arnyminerz.escalaralcoiaicomtat.fragment.climb
+com.arnyminerz.escalaralcoiaicomtat.fragment.dialog
+com.arnyminerz.escalaralcoiaicomtat.fragment.intro
+com.arnyminerz.escalaralcoiaicomtat.fragment.model
+com.arnyminerz.escalaralcoiaicomtat.fragment.preferences
+com.arnyminerz.escalaralcoiaicomtat.generic
+com.arnyminerz.escalaralcoiaicomtat.generic.extension
+com.arnyminerz.escalaralcoiaicomtat.list
+com.arnyminerz.escalaralcoiaicomtat.list.adapter
+com.arnyminerz.escalaralcoiaicomtat.list.holder
+com.arnyminerz.escalaralcoiaicomtat.network
+com.arnyminerz.escalaralcoiaicomtat.network.base
+com.arnyminerz.escalaralcoiaicomtat.notification
+com.arnyminerz.escalaralcoiaicomtat.shared
+com.arnyminerz.escalaralcoiaicomtat.storage
+com.arnyminerz.escalaralcoiaicomtat.view
+com.arnyminerz.escalaralcoiaicomtat.worker

@@ -1,0 +1,33 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>fetchPinOrNetworkSync - base</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">base</a>&nbsp;/&nbsp;<a href="../index.html">com.arnyminerz.escalaralcoiaicomtat.connection.parse</a>&nbsp;/&nbsp;<a href="index.html">com.parse.ParseQuery</a>&nbsp;/&nbsp;<a href="./fetch-pin-or-network-sync.html">fetchPinOrNetworkSync</a><br/>
+<br/>
+<h1>fetchPinOrNetworkSync</h1>
+<a name="com.arnyminerz.escalaralcoiaicomtat.connection.parse$fetchPinOrNetworkSync(com.parse.ParseQuery((com.arnyminerz.escalaralcoiaicomtat.connection.parse.fetchPinOrNetworkSync.A)), kotlin.String, kotlin.Boolean, kotlin.Pair((kotlin.Long, java.util.concurrent.TimeUnit)))"></a>
+<code><span class="identifier">@WorkerThread</span> <span class="keyword">fun </span><span class="symbol">&lt;</span><span class="identifier">A</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">ParseObject</span><span class="symbol">&gt;</span> <span class="identifier">ParseQuery</span><span class="symbol">&lt;</span><a href="fetch-pin-or-network-sync.html#A"><span class="identifier">A</span></a><span class="symbol">&gt;</span><span class="symbol">.</span><span class="identifier">fetchPinOrNetworkSync</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.connection.parse$fetchPinOrNetworkSync(com.parse.ParseQuery((com.arnyminerz.escalaralcoiaicomtat.connection.parse.fetchPinOrNetworkSync.A)), kotlin.String, kotlin.Boolean, kotlin.Pair((kotlin.Long, java.util.concurrent.TimeUnit)))/label">label</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.connection.parse$fetchPinOrNetworkSync(com.parse.ParseQuery((com.arnyminerz.escalaralcoiaicomtat.connection.parse.fetchPinOrNetworkSync.A)), kotlin.String, kotlin.Boolean, kotlin.Pair((kotlin.Long, java.util.concurrent.TimeUnit)))/shouldPin">shouldPin</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;false<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.connection.parse$fetchPinOrNetworkSync(com.parse.ParseQuery((com.arnyminerz.escalaralcoiaicomtat.connection.parse.fetchPinOrNetworkSync.A)), kotlin.String, kotlin.Boolean, kotlin.Pair((kotlin.Long, java.util.concurrent.TimeUnit)))/timeout">timeout</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-pair/index.html"><span class="identifier">Pair</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">,</span>&nbsp;<a href="https://developer.android.com/reference/java/util/concurrent/TimeUnit.html"><span class="identifier">TimeUnit</span></a><span class="symbol">&gt;</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html"><span class="identifier">List</span></a><span class="symbol">&lt;</span><a href="fetch-pin-or-network-sync.html#A"><span class="identifier">A</span></a><span class="symbol">&gt;</span></code>
+<p>Fetches data syncronously from datastore, or from network if not available</p>
+<h3>Parameters</h3>
+<p><a name="label"></a>
+<code>label</code> - The label to search in datastore</p>
+<p><a name="shouldPin"></a>
+<code>shouldPin</code> - If the data should be stored in datastore when loaded</p>
+<p><a name="timeout"></a>
+<code>timeout</code> - The maximum amount of time that the task should take</p>
+<h3>Exceptions</h3>
+<p><a name="NoInternetAccessException"></a>
+<code>NoInternetAccessException</code> - If no data is stored, and there's no Internet connection available</p>
+<p><a name="TimeoutException"></a>
+<code>TimeoutException</code> - If timeout passed before finishing the task</p>
+<p><strong>Author</strong><br/>
+Arnau Mora</p>
+<p><strong>Since</strong><br/>
+20210313</p>
+<p><strong>Return</strong><br/>
+The fetch result</p>
+</BODY>
+</HTML>

@@ -1,0 +1,36 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>zipFile - base</title>
+<link rel="stylesheet" href="../../style.css">
+</HEAD>
+<BODY>
+<a href="../index.html">base</a>&nbsp;/&nbsp;<a href="index.html">com.arnyminerz.escalaralcoiaicomtat.storage</a>&nbsp;/&nbsp;<a href="./zip-file.html">zipFile</a><br/>
+<br/>
+<h1>zipFile</h1>
+<a name="com.arnyminerz.escalaralcoiaicomtat.storage$zipFile(java.io.File, java.io.OutputStream, kotlin.Boolean)"></a>
+<code><span class="keyword">fun </span><span class="identifier">zipFile</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.storage$zipFile(java.io.File, java.io.OutputStream, kotlin.Boolean)/file">file</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/java/io/File.html"><span class="identifier">File</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.storage$zipFile(java.io.File, java.io.OutputStream, kotlin.Boolean)/targetStream">targetStream</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/java/io/OutputStream.html"><span class="identifier">OutputStream</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.storage$zipFile(java.io.File, java.io.OutputStream, kotlin.Boolean)/includeSelf">includeSelf</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Compresses a file into a zip file</p>
+<h3>Parameters</h3>
+<p><a name="file"></a>
+<code>file</code> - The source file</p>
+<p><a name="targetStream"></a>
+<code>targetStream</code> - The target file's output stream</p>
+<h3>Exceptions</h3>
+<p><a name="NullPointerException"></a>
+<code>NullPointerException</code> - If the entry name is null</p>
+<p><a name="IllegalArgumentException"></a>
+<code>IllegalArgumentException</code> - If the entry name is longer than 0xFFFF byte</p>
+<p><a name="SecurityException"></a>
+<code>SecurityException</code> - If a security manager exists and its SecurityManager.checkRead(String)
+method denies read access to the file</p>
+<p><a name="ZipException"></a>
+<code>ZipException</code> - If a ZIP format error has occurred</p>
+<p><a name="IOException"></a>
+<code>IOException</code> - If an I/O error has occurre</p>
+<p><strong>Author</strong><br/>
+Arnau Mora</p>
+<p><strong>Since</strong><br/>
+20210318</p>
+</BODY>
+</HTML>

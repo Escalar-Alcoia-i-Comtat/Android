@@ -1,0 +1,77 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>NetworkChangeListenerPreferenceFragment - base</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">base</a>&nbsp;/&nbsp;<a href="../index.html">com.arnyminerz.escalaralcoiaicomtat.fragment.model</a>&nbsp;/&nbsp;<a href="./index.html">NetworkChangeListenerPreferenceFragment</a><br/>
+<br/>
+<h1>NetworkChangeListenerPreferenceFragment</h1>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">NetworkChangeListenerPreferenceFragment</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">PreferenceFragmentCompat</span><span class="symbol">, </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.network.base/-connectivity-provider/-connectivity-state-listener/index.html"><span class="identifier">ConnectivityStateListener</span></a></code>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">NetworkChangeListenerPreferenceFragment</span><span class="symbol">(</span><span class="symbol">)</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="on-pause.html">onPause</a></p>
+</td>
+<td>
+<code><span class="keyword">open</span> <span class="keyword">fun </span><span class="identifier">onPause</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-resume.html">onResume</a></p>
+</td>
+<td>
+<code><span class="keyword">open</span> <span class="keyword">fun </span><span class="identifier">onResume</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Inherited Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="../../com.arnyminerz.escalaralcoiaicomtat.network.base/-connectivity-provider/-connectivity-state-listener/on-state-change.html">onStateChange</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onStateChange</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider.ConnectivityStateListener$onStateChange(com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider.NetworkState)/state">state</span><span class="symbol">:</span>&nbsp;<a href="../../com.arnyminerz.escalaralcoiaicomtat.network.base/-connectivity-provider/-network-state/index.html"><span class="identifier">NetworkState</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Extension Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="../../com.arnyminerz.escalaralcoiaicomtat.generic/androidx.fragment.app.-fragment/run-on-ui-thread.html">runOnUiThread</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">Fragment</span><span class="symbol">.</span><span class="identifier">runOnUiThread</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic$runOnUiThread(androidx.fragment.app.Fragment, kotlin.Function1((android.app.Activity, kotlin.Unit)))/action">action</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">.</span><span class="symbol">(</span><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Runs the action in the UI thread.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../../com.arnyminerz.escalaralcoiaicomtat.view/androidx.fragment.app.-fragment/visibility.html">visibility</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">Fragment</span><span class="symbol">.</span><span class="identifier">visibility</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.view$visibility(androidx.fragment.app.Fragment, android.view.View, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean)/view">view</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/view/View.html"><span class="identifier">View</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.view$visibility(androidx.fragment.app.Fragment, android.view.View, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean)/visible">visible</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.view$visibility(androidx.fragment.app.Fragment, android.view.View, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean)/setGone">setGone</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;true<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.view$visibility(androidx.fragment.app.Fragment, android.view.View, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean)/debug">debug</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;false<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.view$visibility(androidx.fragment.app.Fragment, android.view.View, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean)/clearAnimation">clearAnimation</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;true<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

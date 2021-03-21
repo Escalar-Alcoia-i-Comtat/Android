@@ -1,0 +1,131 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>GeoMarker - base</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">base</a>&nbsp;/&nbsp;<a href="../index.html">com.arnyminerz.escalaralcoiaicomtat.data.map</a>&nbsp;/&nbsp;<a href="./index.html">GeoMarker</a><br/>
+<br/>
+<h1>GeoMarker</h1>
+<code><span class="keyword">class </span><span class="identifier">GeoMarker</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-c-r-e-a-t-o-r/index.html">CREATOR</a></p>
+</td>
+<td>
+<code><span class="keyword">companion</span> <span class="keyword">object </span><span class="identifier">CREATOR</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable/Creator.html"><span class="identifier">Creator</span></a><span class="symbol">&lt;</span><a href="./index.html"><span class="identifier">GeoMarker</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">GeoMarker</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker$<init>(android.os.Parcel)/parcel">parcel</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcel.html"><span class="identifier">Parcel</span></a><span class="symbol">)</span></code><br/>
+<code><span class="identifier">GeoMarker</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker$<init>(com.mapbox.mapboxsdk.geometry.LatLng, kotlin.String, kotlin.Float, com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData, com.arnyminerz.escalaralcoiaicomtat.data.map.GeoIcon)/position">position</span><span class="symbol">:</span>&nbsp;<span class="identifier">LatLng</span><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker$<init>(com.mapbox.mapboxsdk.geometry.LatLng, kotlin.String, kotlin.Float, com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData, com.arnyminerz.escalaralcoiaicomtat.data.map.GeoIcon)/id">id</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker$<init>(com.mapbox.mapboxsdk.geometry.LatLng, kotlin.String, kotlin.Float, com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData, com.arnyminerz.escalaralcoiaicomtat.data.map.GeoIcon)/iconSizeMultiplier">iconSizeMultiplier</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html"><span class="identifier">Float</span></a>&nbsp;<span class="symbol">=</span>&nbsp;ICON_SIZE_MULTIPLIER<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker$<init>(com.mapbox.mapboxsdk.geometry.LatLng, kotlin.String, kotlin.Float, com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData, com.arnyminerz.escalaralcoiaicomtat.data.map.GeoIcon)/windowData">windowData</span><span class="symbol">:</span>&nbsp;<a href="../-map-object-window-data/index.html"><span class="identifier">MapObjectWindowData</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker$<init>(com.mapbox.mapboxsdk.geometry.LatLng, kotlin.String, kotlin.Float, com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData, com.arnyminerz.escalaralcoiaicomtat.data.map.GeoIcon)/icon">icon</span><span class="symbol">:</span>&nbsp;<a href="../-geo-icon/index.html"><span class="identifier">GeoIcon</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="icon.html">icon</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">icon</span><span class="symbol">: </span><a href="../-geo-icon/index.html"><span class="identifier">GeoIcon</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="icon-size-multiplier.html">iconSizeMultiplier</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">iconSizeMultiplier</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html"><span class="identifier">Float</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="id.html">id</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">id</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="position.html">position</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">position</span><span class="symbol">: </span><span class="identifier">LatLng</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="window-data.html">windowData</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">windowData</span><span class="symbol">: </span><a href="../-map-object-window-data/index.html"><span class="identifier">MapObjectWindowData</span></a><span class="symbol">?</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="add-to-map.html">addToMap</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">addToMap</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker$addToMap(com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper)/mapHelper">mapHelper</span><span class="symbol">:</span>&nbsp;<a href="../../com.arnyminerz.escalaralcoiaicomtat.generic/-map-helper/index.html"><span class="identifier">MapHelper</span></a><span class="symbol">)</span><span class="symbol">: </span><span class="identifier">Symbol</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="describe-contents.html">describeContents</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">describeContents</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="with-image.html">withImage</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">withImage</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker$withImage(android.graphics.Bitmap, kotlin.String)/bitmap">bitmap</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/graphics/Bitmap.html"><span class="identifier">Bitmap</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker$withImage(android.graphics.Bitmap, kotlin.String)/id">id</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">GeoMarker</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">withImage</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker$withImage(com.arnyminerz.escalaralcoiaicomtat.data.map.GeoIcon)/icon">icon</span><span class="symbol">:</span>&nbsp;<a href="../-geo-icon/index.html"><span class="identifier">GeoIcon</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">GeoMarker</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="write-to-parcel.html">writeToParcel</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">writeToParcel</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker$writeToParcel(android.os.Parcel, kotlin.Int)/dest">dest</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcel.html"><span class="identifier">Parcel</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker$writeToParcel(android.os.Parcel, kotlin.Int)/flags">flags</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="create-from-parcel.html">createFromParcel</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createFromParcel</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker.CREATOR$createFromParcel(android.os.Parcel)/parcel">parcel</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcel.html"><span class="identifier">Parcel</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">GeoMarker</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="new-array.html">newArray</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">newArray</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker.CREATOR$newArray(kotlin.Int)/size">size</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html"><span class="identifier">Array</span></a><span class="symbol">&lt;</span><a href="./index.html"><span class="identifier">GeoMarker</span></a><span class="symbol">?</span><span class="symbol">&gt;</span></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

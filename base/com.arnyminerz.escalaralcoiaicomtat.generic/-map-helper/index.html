@@ -1,0 +1,417 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>MapHelper - base</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">base</a>&nbsp;/&nbsp;<a href="../index.html">com.arnyminerz.escalaralcoiaicomtat.generic</a>&nbsp;/&nbsp;<a href="./index.html">MapHelper</a><br/>
+<br/>
+<h1>MapHelper</h1>
+<code><span class="keyword">class </span><span class="identifier">MapHelper</span></code>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-marker-window/index.html">MarkerWindow</a></p>
+</td>
+<td>
+<code><span class="keyword">inner</span> <span class="keyword">class </span><span class="identifier">MarkerWindow</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">MapHelper</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$<init>(com.mapbox.mapboxsdk.maps.MapView)/mapView">mapView</span><span class="symbol">:</span>&nbsp;<span class="identifier">MapView</span><span class="symbol">)</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="is-loaded.html">isLoaded</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">isLoaded</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="kml-address.html">kmlAddress</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">kmlAddress</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="last-known-location.html">lastKnownLocation</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">lastKnownLocation</span><span class="symbol">: </span><span class="identifier">LatLng</span><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="style.html">style</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">style</span><span class="symbol">: </span><span class="identifier">Style</span><span class="symbol">?</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="add.html">add</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">add</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$add(android.os.Parcelable)/element">element</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Adds a marker or geometry to the map. If the element type doesn't match any, anything will
+be added.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="add-geometries.html">addGeometries</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">addGeometries</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$addGeometries(kotlin.collections.Collection((com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry)))/geometries">geometries</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-collection/index.html"><span class="identifier">Collection</span></a><span class="symbol">&lt;</span><a href="../../com.arnyminerz.escalaralcoiaicomtat.data.map/-geo-geometry/index.html"><span class="identifier">GeoGeometry</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Adds geometries to the map</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="add-geometry.html">addGeometry</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">addGeometry</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$addGeometry(com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry)/geometry">geometry</span><span class="symbol">:</span>&nbsp;<a href="../../com.arnyminerz.escalaralcoiaicomtat.data.map/-geo-geometry/index.html"><span class="identifier">GeoGeometry</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Adds a geometry to the map</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="add-image.html">addImage</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">addImage</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$addImage(kotlin.String, android.graphics.Bitmap, kotlin.Boolean)/name">name</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$addImage(kotlin.String, android.graphics.Bitmap, kotlin.Boolean)/bitmap">bitmap</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/graphics/Bitmap.html"><span class="identifier">Bitmap</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$addImage(kotlin.String, android.graphics.Bitmap, kotlin.Boolean)/sdf">sdf</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;false<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">addImage</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$addImage(com.arnyminerz.escalaralcoiaicomtat.data.map.GeoIcon)/geoIcon">geoIcon</span><span class="symbol">:</span>&nbsp;<a href="../../com.arnyminerz.escalaralcoiaicomtat.data.map/-geo-icon/index.html"><span class="identifier">GeoIcon</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Adds an image to the style of the map</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="add-location-update-callback.html">addLocationUpdateCallback</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">addLocationUpdateCallback</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$addLocationUpdateCallback(kotlin.Function1((android.location.Location, kotlin.Unit)))/callback">callback</span><span class="symbol">:</span>&nbsp;<span class="symbol">(</span><span class="identifier">location</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/location/Location.html"><span class="identifier">Location</span></a><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a><span class="symbol">)</span><span class="symbol">: </span><span class="identifier">&lt;ERROR CLASS&gt;</span></code>
+<p>Adds a new location update callback</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="add-marker.html">addMarker</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">addMarker</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$addMarker(com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker)/marker">marker</span><span class="symbol">:</span>&nbsp;<a href="../../com.arnyminerz.escalaralcoiaicomtat.data.map/-geo-marker/index.html"><span class="identifier">GeoMarker</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Adds a marker to the map</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="add-markers.html">addMarkers</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">addMarkers</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$addMarkers(kotlin.collections.Collection((com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker)))/markers">markers</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-collection/index.html"><span class="identifier">Collection</span></a><span class="symbol">&lt;</span><a href="../../com.arnyminerz.escalaralcoiaicomtat.data.map/-geo-marker/index.html"><span class="identifier">GeoMarker</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Adds markers to the map</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="add-symbol-click-listener.html">addSymbolClickListener</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">addSymbolClickListener</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$addSymbolClickListener(kotlin.Function1((com.mapbox.mapboxsdk.plugins.annotation.Symbol, kotlin.Boolean)))/call">call</span><span class="symbol">:</span>&nbsp;<span class="identifier">Symbol</span><span class="symbol">.</span><span class="symbol">(</span><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Adds a click listener for a symbol</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="center.html">center</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">center</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$center(kotlin.Int, kotlin.Boolean, kotlin.Boolean)/padding">padding</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;11<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$center(kotlin.Int, kotlin.Boolean, kotlin.Boolean)/animate">animate</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;true<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$center(kotlin.Int, kotlin.Boolean, kotlin.Boolean)/includeCurrentLocation">includeCurrentLocation</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;true<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Centers all the contents into the map window</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="clear-fills.html">clearFills</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">clearFills</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Clears all the lines from the map</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="clear-lines.html">clearLines</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">clearLines</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Clears all the lines from the map</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="clear-symbols.html">clearSymbols</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">clearSymbols</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Clears all the symbols from the map</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-symbol.html">createSymbol</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createSymbol</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$createSymbol(com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions)/options">options</span><span class="symbol">:</span>&nbsp;<span class="identifier">SymbolOptions</span><span class="symbol">)</span><span class="symbol">: </span><span class="identifier">Symbol</span></code>
+<p>Creates a new symbol with the SymbolManager</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="display.html">display</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">display</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Makes effective all the additions to the map through the add methods</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="enable-location-component.html">enableLocationComponent</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">enableLocationComponent</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$enableLocationComponent(android.content.Context, kotlin.Int, kotlin.Int)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$enableLocationComponent(android.content.Context, kotlin.Int, kotlin.Int)/cameraMode">cameraMode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;CameraMode.TRACKING<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$enableLocationComponent(android.content.Context, kotlin.Int, kotlin.Int)/renderMode">renderMode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;RenderMode.COMPASS<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Enables the current location pointer. Requires the location permission to be granted</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="get-location.html">getLocation</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">getLocation</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$getLocation(kotlin.Function2((android.location.Location, java.lang.Exception, kotlin.Unit)))/callback">callback</span><span class="symbol">:</span>&nbsp;<span class="symbol">(</span><span class="identifier">location</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/location/Location.html"><span class="identifier">Location</span></a><span class="symbol">?</span><span class="symbol">,</span>&nbsp;<span class="identifier">error</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/java/lang/Exception.html"><span class="identifier">Exception</span></a><span class="symbol">?</span><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="hide.html">hide</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">hide</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">MapHelper</span></a></code>
+<p>Hides the map's UI</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="info-card.html">infoCard</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">infoCard</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$infoCard(android.app.Activity, com.mapbox.mapboxsdk.plugins.annotation.Symbol, android.view.ViewGroup)/activity">activity</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$infoCard(android.app.Activity, com.mapbox.mapboxsdk.plugins.annotation.Symbol, android.view.ViewGroup)/marker">marker</span><span class="symbol">:</span>&nbsp;<span class="identifier">Symbol</span><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$infoCard(android.app.Activity, com.mapbox.mapboxsdk.plugins.annotation.Symbol, android.view.ViewGroup)/rootView">rootView</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/view/ViewGroup.html"><span class="identifier">ViewGroup</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="-marker-window/index.html"><span class="identifier">MarkerWindow</span></a></code>
+<p>Shows an info card showing the contents of a marker</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="load-k-m-l.html">loadKML</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">loadKML</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$loadKML(androidx.fragment.app.FragmentActivity, kotlin.String, kotlin.Boolean)/activity">activity</span><span class="symbol">:</span>&nbsp;<span class="identifier">FragmentActivity</span><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$loadKML(androidx.fragment.app.FragmentActivity, kotlin.String, kotlin.Boolean)/kmlAddress">kmlAddress</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$loadKML(androidx.fragment.app.FragmentActivity, kotlin.String, kotlin.Boolean)/addToMap">addToMap</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;true<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.data.map/-map-features/index.html"><span class="identifier">MapFeatures</span></a></code>
+<p>Loads the KML address. Should be called asyncronously.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="load-map.html">loadMap</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">loadMap</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$loadMap(android.content.Context, kotlin.String, kotlin.Function3((com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, com.mapbox.mapboxsdk.maps.Style, kotlin.Unit)))/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$loadMap(android.content.Context, kotlin.String, kotlin.Function3((com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, com.mapbox.mapboxsdk.maps.Style, kotlin.Unit)))/style">style</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a>&nbsp;<span class="symbol">=</span>&nbsp;Style.SATELLITE<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$loadMap(android.content.Context, kotlin.String, kotlin.Function3((com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, com.mapbox.mapboxsdk.maps.Style, kotlin.Unit)))/callback">callback</span><span class="symbol">:</span>&nbsp;<span class="symbol">(</span><span class="identifier">mapView</span><span class="symbol">:</span>&nbsp;<span class="identifier">MapView</span><span class="symbol">,</span>&nbsp;<span class="identifier">map</span><span class="symbol">:</span>&nbsp;<span class="identifier">MapboxMap</span><span class="symbol">,</span>&nbsp;<span class="identifier">style</span><span class="symbol">:</span>&nbsp;<span class="identifier">Style</span><span class="symbol">)</span>&nbsp;<span class="symbol">-&gt;</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">MapHelper</span></a></code>
+<p>Initializes the map</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="maps-activity-intent.html">mapsActivityIntent</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">mapsActivityIntent</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$mapsActivityIntent(android.content.Context, kotlin.Boolean)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$mapsActivityIntent(android.content.Context, kotlin.Boolean)/overrideLoadedValues">overrideLoadedValues</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;false<span class="symbol">)</span><span class="symbol">: </span><a href="https://developer.android.com/reference/android/content/Intent.html"><span class="identifier">Intent</span></a></code>
+<p>Generates an intent for launching the MapsActivity</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="move.html">move</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">move</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$move(com.mapbox.mapboxsdk.geometry.LatLng, kotlin.Double, kotlin.Boolean)/position">position</span><span class="symbol">:</span>&nbsp;<span class="identifier">LatLng</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$move(com.mapbox.mapboxsdk.geometry.LatLng, kotlin.Double, kotlin.Boolean)/zoom">zoom</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html"><span class="identifier">Double</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$move(com.mapbox.mapboxsdk.geometry.LatLng, kotlin.Double, kotlin.Boolean)/animate">animate</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;true<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">MapHelper</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">move</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$move(com.mapbox.mapboxsdk.camera.CameraUpdate, kotlin.Boolean)/update">update</span><span class="symbol">:</span>&nbsp;<span class="identifier">CameraUpdate</span><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$move(com.mapbox.mapboxsdk.camera.CameraUpdate, kotlin.Boolean)/animate">animate</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;true<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">MapHelper</span></a></code>
+<p>Moves the camera position</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="on-create.html">onCreate</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onCreate</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$onCreate(android.os.Bundle)/savedInstanceState">savedInstanceState</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Bundle.html"><span class="identifier">Bundle</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-destroy.html">onDestroy</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onDestroy</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-low-memory.html">onLowMemory</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onLowMemory</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-pause.html">onPause</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onPause</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-resume.html">onResume</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onResume</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-save-instance-state.html">onSaveInstanceState</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onSaveInstanceState</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$onSaveInstanceState(android.os.Bundle)/outState">outState</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Bundle.html"><span class="identifier">Bundle</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-start.html">onStart</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onStart</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-stop.html">onStop</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onStop</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="show.html">show</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">show</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">MapHelper</span></a></code>
+<p>Shows the map's UI</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="store-g-p-x.html">storeGPX</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">storeGPX</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$storeGPX(android.content.Context, android.net.Uri, kotlin.String)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$storeGPX(android.content.Context, android.net.Uri, kotlin.String)/uri">uri</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/net/Uri.html"><span class="identifier">Uri</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$storeGPX(android.content.Context, android.net.Uri, kotlin.String)/title">title</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a>&nbsp;<span class="symbol">=</span>&nbsp;"Escalar Alcoià i Comtat"<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Stores the map's features into a GPX file</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="store-k-m-z.html">storeKMZ</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">storeKMZ</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$storeKMZ(android.content.Context, android.net.Uri, kotlin.String, kotlin.String, kotlin.Int)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$storeKMZ(android.content.Context, android.net.Uri, kotlin.String, kotlin.String, kotlin.Int)/uri">uri</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/net/Uri.html"><span class="identifier">Uri</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$storeKMZ(android.content.Context, android.net.Uri, kotlin.String, kotlin.String, kotlin.Int)/name">name</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$storeKMZ(android.content.Context, android.net.Uri, kotlin.String, kotlin.String, kotlin.Int)/description">description</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$storeKMZ(android.content.Context, android.net.Uri, kotlin.String, kotlin.String, kotlin.Int)/imageCompressionQuality">imageCompressionQuality</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;100<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Stores the map's features into a KMZ file</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="track.html">track</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">track</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$track(kotlin.Int)/cameraMode">cameraMode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;CameraMode.TRACKING<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Changes the map's tracking camera mode</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="visibility.html">visibility</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">visibility</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$visibility(kotlin.Boolean)/visible">visible</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">MapHelper</span></a></code>
+<p>Changes the map view visibility</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="with-controllable.html">withControllable</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">withControllable</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$withControllable(kotlin.Boolean)/controllable">controllable</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">MapHelper</span></a></code>
+<p>Updates the controllable status of the map</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="with-icon-size-multiplier.html">withIconSizeMultiplier</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">withIconSizeMultiplier</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$withIconSizeMultiplier(kotlin.Float)/multiplier">multiplier</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html"><span class="identifier">Float</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">MapHelper</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="with-starting-position.html">withStartingPosition</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">withStartingPosition</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$withStartingPosition(com.mapbox.mapboxsdk.geometry.LatLng, kotlin.Double)/startingPosition">startingPosition</span><span class="symbol">:</span>&nbsp;<span class="identifier">LatLng</span><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper$withStartingPosition(com.mapbox.mapboxsdk.geometry.LatLng, kotlin.Double)/zoom">zoom</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html"><span class="identifier">Double</span></a>&nbsp;<span class="symbol">=</span>&nbsp;DEFAULT_ZOOM<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">MapHelper</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="get-image-url.html">getImageUrl</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">getImageUrl</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper.Companion$getImageUrl(kotlin.String)/description">description</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="get-target.html">getTarget</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">getTarget</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper.Companion$getTarget(android.content.Context, com.mapbox.mapboxsdk.plugins.annotation.Symbol)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper.Companion$getTarget(android.content.Context, com.mapbox.mapboxsdk.plugins.annotation.Symbol)/marker">marker</span><span class="symbol">:</span>&nbsp;<span class="identifier">Symbol</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://developer.android.com/reference/android/content/Intent.html"><span class="identifier">Intent</span></a><span class="symbol">?</span></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>
