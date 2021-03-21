@@ -1,17 +1,39 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.preference
 
 import android.content.SharedPreferences
+import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 
-@Suppress("unused", "MemberVisibilityCanBePrivate")
-// May only be String, Boolean, Int, Float and Long
+// Must only be String, Boolean, Int, Float and Long
+/**
+ * Initializes a [PreferenceData] instance.
+ * @author Arnau Mora
+ * @since 20210321
+ * @param T The type of the variable to store. Only can be String, Boolean, Int, Float or Long.
+ * @param key The shared preferences key of the value to store.
+ * @param default The default value to return if there's no stored value in shared preferences.
+ * @see SharedPreferences
+ * @see sharedPreferences
+ */
 class PreferenceData<T : Any> constructor(val key: String, val default: T) {
-    private val d = default
-
+    /**
+     * Gets the [PreferenceData]'s value
+     * @author Arnau Mora
+     * @since 20210321
+     * @return The stored value in preferences
+     */
     @Suppress("UNCHECKED_CAST")
-    fun get(sharedPreferences: SharedPreferences?): T =
-        (sharedPreferences?.all?.get(key) as? T?) ?: default
+    fun get(): T =
+        (sharedPreferences.all?.get(key) as? T?) ?: default
 
-    fun put(sharedPreferences: SharedPreferences, value: Any?) {
+    /**
+     * Stores a value into the [PreferenceData]
+     * @author Arnau Mora
+     * @since 20210321
+     * @param value The value to store
+     * @throws DataTypeNonStorable If the specified type at [T] is not storable.
+     */
+    @Throws(DataTypeNonStorable::class)
+    fun put(value: T?) =
         with(sharedPreferences.edit()) {
             when (value) {
                 is String -> putString(key, value)
@@ -23,20 +45,27 @@ class PreferenceData<T : Any> constructor(val key: String, val default: T) {
             }
             apply()
         }
-    }
 
-    fun isSet(sharedPreferences: SharedPreferences): Boolean =
+    /**
+     * Checks if there's an stored value in the [PreferenceData]
+     * @author Arnau Mora
+     * @since 20210321
+     * @return True if the value is stored, false otherwise
+     */
+    fun isSet(): Boolean =
         sharedPreferences.all?.get(key) == null
 }
 
+/**
+ * Stores a value into a [PreferenceData]
+ * @author Arnau Mora
+ * @since 20210321
+ * @param data The preference storage
+ * @see PreferenceData
+ * @see sharedPreferences
+ */
 fun <T : Any> T?.store(
-    sharedPreferences: SharedPreferences?,
     data: PreferenceData<T>
-): Boolean {
-    return if (sharedPreferences != null) {
-        data.put(sharedPreferences, this)
-        true
-    } else false
-}
+) = data.put(this)
 
 class DataTypeNonStorable : Exception("The given data type cannot be stored in settings")
