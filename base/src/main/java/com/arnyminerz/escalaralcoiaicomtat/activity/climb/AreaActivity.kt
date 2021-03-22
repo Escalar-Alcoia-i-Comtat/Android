@@ -45,7 +45,9 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
 
         intent.getExtra(EXTRA_AREA)?.let {
             areaId = it
-        } ?: run {
+            Timber.d("Area id: $areaId")
+        }
+        if (!this::areaId.isInitialized) {
             Timber.e("Area extra is null")
             onBackPressed()
             return
@@ -56,14 +58,25 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
             return
         }
         dataClass = AREAS[areaId]!!
+        Timber.d("DataClass id: ${dataClass.objectId}")
 
-        val transitionName = intent.getExtra(EXTRA_AREA_TRANSITION_NAME)
-        position = intent.getExtra(EXTRA_POSITION, 0)
+        position = intent.getExtra(
+            EXTRA_POSITION,
+            savedInstanceState?.getInt(EXTRA_POSITION.key, 0) ?: 0
+        )
+        Timber.d("Current position: $position")
 
         binding.titleTextView.text = dataClass.displayName
-        binding.titleTextView.transitionName = transitionName
+        intent.getExtra(EXTRA_AREA_TRANSITION_NAME)?.let {
+            binding.titleTextView.transitionName = it
+        }
 
         binding.backImageButton.setOnClickListener { onBackPressed() }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt(EXTRA_POSITION.key, position)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onResume() {
@@ -102,7 +115,10 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
                                 val optionsBundle =
                                     ViewCompat.getTransitionName(holder.titleTextView)
                                         ?.let { transitionName ->
-                                            intent.putExtra(EXTRA_ZONE_TRANSITION_NAME, transitionName)
+                                            intent.putExtra(
+                                                EXTRA_ZONE_TRANSITION_NAME,
+                                                transitionName
+                                            )
 
                                             ActivityOptionsCompat.makeSceneTransitionAnimation(
                                                 this@AreaActivity,
