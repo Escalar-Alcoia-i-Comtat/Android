@@ -15,7 +15,7 @@ import timber.log.Timber
 class ArtifoPathEndingDialog(
     context: Context,
     private val path: Path
-) : Dialog(context, R.style.ThemeOverlay_App_MaterialAlertDialog) {
+) : Dialog(context, R.style.ThemeOverlay_App_AlertDialog) {
 
     private lateinit var binding: DialogArtifoEndingBinding
 

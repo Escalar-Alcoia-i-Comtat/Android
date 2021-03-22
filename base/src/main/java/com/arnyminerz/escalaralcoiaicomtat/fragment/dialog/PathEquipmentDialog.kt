@@ -18,7 +18,7 @@ class PathEquipmentDialog(
     context: Context,
     private val fixedSafesData: FixedSafesData,
     private val requiredSafesData: RequiredSafesData
-) : Dialog(context, R.style.ThemeOverlay_App_MaterialAlertDialog) {
+) : Dialog(context, R.style.ThemeOverlay_App_AlertDialog) {
     private lateinit var binding: DialogPathEquipmentBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
