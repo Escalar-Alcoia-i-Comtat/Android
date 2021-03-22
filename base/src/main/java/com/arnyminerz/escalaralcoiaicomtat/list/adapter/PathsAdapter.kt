@@ -326,29 +326,28 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
         chip.closeIcon = ContextCompat.getDrawable(activity, R.drawable.round_launch_24)
 
         chip.setOnClickListener {
-            if (chipType == ChipType.ENDING_MULTIPLE) {
-                ArtifoPathEndingDialog(activity, path.endings, path.pitches).show()
-
-                return@setOnClickListener
-            }
-            if (chipType == ChipType.SAFE) {
-                PathEquipmentDialog(activity, path.fixedSafesData, path.requiredSafesData).show()
-
-                return@setOnClickListener
-            }
-
-            MaterialAlertDialogBuilder(activity)
-                .setTitle(activity.getString(R.string.path_chip_safe))
-                .setMessage(
-                    when (chipType) {
-                        ChipType.SAFE -> activity.getString(R.string.path_chip_safe)
-                        ChipType.REQUIRED -> activity.getString(R.string.path_chip_required)
-                        ChipType.ENDING -> activity.getString(R.string.path_chip_ending)
-                        ChipType.ENDING_MULTIPLE -> ""
-                    }
+            when (chipType) {
+                ChipType.ENDING_MULTIPLE -> ArtifoPathEndingDialog(activity, path)
+                ChipType.SAFE -> PathEquipmentDialog(
+                    activity,
+                    path.fixedSafesData,
+                    path.requiredSafesData
                 )
-                .setPositiveButton(R.string.action_ok, null)
-                .show()
+                else -> MaterialAlertDialogBuilder(activity)
+                    .setTitle(activity.getString(R.string.path_chip_safe))
+                    .setMessage(
+                        activity.getString(
+                            if (chipType == ChipType.REQUIRED)
+                                R.string.path_chip_required
+                            else
+                            // We can assume this can only be ENDING, since SAFE and
+                            //   ENDING_MULTIPLE can't happen since they are catched before
+                                R.string.path_chip_ending
+                        )
+                    )
+                    .setPositiveButton(R.string.action_ok, null)
+                    .create()
+            }.show()
         }
         chipGroup.addView(chip)
     }
