@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.Window
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogPathEquipmentBinding
@@ -17,7 +18,7 @@ class PathEquipmentDialog(
     context: Context,
     private val fixedSafesData: FixedSafesData,
     private val requiredSafesData: RequiredSafesData
-) : Dialog(context) {
+) : Dialog(context, R.style.ThemeOverlay_App_AlertDialog) {
     private lateinit var binding: DialogPathEquipmentBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {

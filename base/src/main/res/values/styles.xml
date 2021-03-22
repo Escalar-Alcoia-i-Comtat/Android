@@ -1,6 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <attr name="text_dark" format="color" />
+    <!-- This is the color of the background of the icons in the right of the list_item_artifo_ending items -->
+    <attr name="artifo_ending_badge_color" format="color" />
     <attr name="overlay_color" format="color" />
 
     <!-- Base application theme. -->
@@ -14,10 +16,11 @@
         <item name="android:forceDarkAllowed" tools:targetApi="q">true</item>
 
         <item name="materialAlertDialogTheme">
-            @style/ThemeOverlay.MaterialComponents.MaterialAlertDialog
+            @style/ThemeOverlay.App.MaterialAlertDialog
         </item>
 
         <item name="text_dark">@color/bg_color_dark</item>
+        <item name="artifo_ending_badge_color">@color/artifo_ending_badge_color_light</item>
         <item name="overlay_color">@color/loading_overlay_light</item>
 
         <item name="android:windowContentTransitions">true</item>
@@ -26,6 +29,23 @@
 
     <style name="AppTheme.Intro">
         <item name="android:windowBackground">@color/intro_green</item>
+    </style>
+
+    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="alertDialogStyle">@style/MaterialAlertDialog.App</item>
+    </style>
+
+    <style name="MaterialAlertDialog.App" parent="MaterialAlertDialog.MaterialComponents">
+        <item name="shapeAppearance">@style/ShapeAppearance.App.MediumComponent</item>
+    </style>
+
+    <style name="ShapeAppearance.App.MediumComponent" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/dialog_corner_size</item>
+    </style>
+
+    <style name="ThemeOverlay.App.AlertDialog" parent="ThemeOverlay.MaterialComponents.Dialog">
+        <item name="alertDialogStyle">@style/MaterialAlertDialog.App</item>
     </style>
 
 </resources>

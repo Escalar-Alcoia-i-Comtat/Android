@@ -8,7 +8,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Pitch
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.ArtifoEndingPitchViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import timber.log.Timber
 
 class ArtifoEndingPitchAdapter(
@@ -29,15 +29,19 @@ class ArtifoEndingPitchAdapter(
         val pitch = if (pitches.size > position) pitches[position] else null
         val ending = endings[position]
 
-        if (pitch == null) Timber.e("Pitch is null for index $position!")
+        if (pitch == null) Timber.w("There's no pitch for index $position!")
 
         holder.pitchIdTextView.text =
             context.getString(R.string.path_pitch_id, (position + 1).toString())
         holder.pitchTextView.text =
             pitch?.getDisplayText(context) ?: context.getString(ending.displayName)
         holder.pitchEndingImageView.setImageResource(ending.getImage())
-        if (pitch != null)
-            holder.pitchRappelImageView.setImageResource(pitch.getRappelImage())
-        else visibility(holder.pitchRappelImageView, false, setGone = false)
+        try {
+            holder.pitchRappelImageView.setImageResource(pitch!!.getRappelImage())
+        } catch (_: NullPointerException) {
+            holder.pitchRappelLayout.hide()
+        } catch (_: IllegalStateException) {
+            holder.pitchRappelLayout.hide()
+        }
     }
 }

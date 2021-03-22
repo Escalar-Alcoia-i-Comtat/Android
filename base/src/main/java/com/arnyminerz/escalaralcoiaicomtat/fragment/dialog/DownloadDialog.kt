@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture.runAsync
 class DownloadDialog(private val context: Context, private val data: DataClass<*, *>) {
     fun show(deleteCallback: (() -> Unit)? = null) {
         val date = data.downloadDate(context)
-        MaterialAlertDialogBuilder(context)
+        MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_App_MaterialAlertDialog)
             .setTitle(data.displayName)
             .setMessage(
                 context.getString(
@@ -32,7 +32,7 @@ class DownloadDialog(private val context: Context, private val data: DataClass<*
             )
             .setNeutralButton(R.string.action_delete) { dialog, _ ->
                 dialog.dismiss()
-                MaterialAlertDialogBuilder(context)
+                MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_App_MaterialAlertDialog)
                     .setTitle(R.string.downloads_delete_dialog_title)
                     .setMessage(
                         context.getString(

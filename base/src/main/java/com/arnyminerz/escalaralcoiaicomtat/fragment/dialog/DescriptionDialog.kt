@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.widget.TextView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
+import com.arnyminerz.escalaralcoiaicomtat.list.viewListOf
 import io.noties.markwon.Markwon
 
 @ExperimentalUnsignedTypes
@@ -19,7 +19,7 @@ class DescriptionDialog private constructor(private val context: Context, privat
     }
 
     fun show() {
-        val dialog = AlertDialog.Builder(context)
+        val dialog = AlertDialog.Builder(context, R.style.ThemeOverlay_App_AlertDialog)
         val factory = LayoutInflater.from(context)
         val view = factory.inflate(R.layout.dialog_description, null)
 
@@ -27,16 +27,21 @@ class DescriptionDialog private constructor(private val context: Context, privat
         val rebuilderTextView = view.findViewById<TextView>(R.id.rebuiltBy_textView)
         val descriptionTextView = view.findViewById<TextView>(R.id.description_textView)
 
+        val builderTitleTextView = view.findViewById<TextView>(R.id.builtBy_titleTextView)
+        val rebuilderTitleTextView = view.findViewById<TextView>(R.id.rebuiltBy_titleTextView)
+        val descriptionTitleTextView = view.findViewById<TextView>(R.id.description_titleTextView)
+
         val markwon = Markwon.create(context)
         if (path.builtBy != null)
             markwon.setMarkdown(builderTextView, path.builtBy)
-        else builderTextView.hide()
+        else
+            viewListOf(builderTextView, builderTitleTextView).visibility(false)
         if (path.rebuiltBy != null)
             markwon.setMarkdown(rebuilderTextView, path.rebuiltBy)
-        else rebuilderTextView.hide()
+        else viewListOf(rebuilderTextView, rebuilderTitleTextView).visibility(false)
         if (path.description != null)
             markwon.setMarkdown(descriptionTextView, path.description)
-        else descriptionTextView.hide()
+        else viewListOf(descriptionTextView, descriptionTitleTextView).visibility(false)
 
         dialog.setView(view)
         dialog.show()

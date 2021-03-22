@@ -13,6 +13,7 @@
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog</item>
 
         <item name="text_dark">@color/bg_color</item>
+        <item name="artifo_ending_badge_color">@color/artifo_ending_badge_color_dark</item>
         <item name="overlay_color">@color/loading_overlay_dark</item>
 
         <item name="android:windowContentTransitions">true</item>

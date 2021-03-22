@@ -127,7 +127,7 @@ data class Sector constructor(
         visibility(chip, kidsApt)
         if (kidsApt)
             chip.setOnClickListener {
-                MaterialAlertDialogBuilder(context)
+                MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_App_MaterialAlertDialog)
                     .setTitle(R.string.sector_info_dialog_kids_title)
                     .setMessage(R.string.sector_info_dialog_kids_msg)
                     .setPositiveButton(R.string.action_close) { dialog, _ -> dialog.dismiss() }

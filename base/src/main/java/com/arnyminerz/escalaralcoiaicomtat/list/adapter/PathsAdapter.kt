@@ -21,7 +21,9 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Grade
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.*
+import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.ArtifoPathEndingDialog
+import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DescriptionDialog
+import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.PathEquipmentDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
@@ -41,7 +43,7 @@ const val ROTATION_PIVOT_Y = 0.5f
 
 const val ANIMATION_DURATION = 300L
 
-const val SMALL_CARD_HEIGHT = 57f
+const val SMALL_CARD_HEIGHT = 73f
 
 class PathsAdapter(private val paths: List<Path>, private val activity: Activity) :
     RecyclerView.Adapter<SectorViewHolder>() {
@@ -333,7 +335,10 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                     path.fixedSafesData,
                     path.requiredSafesData
                 )
-                else -> MaterialAlertDialogBuilder(activity)
+                else -> MaterialAlertDialogBuilder(
+                    activity,
+                    R.style.ThemeOverlay_App_MaterialAlertDialog
+                )
                     .setTitle(activity.getString(R.string.path_chip_safe))
                     .setMessage(
                         activity.getString(

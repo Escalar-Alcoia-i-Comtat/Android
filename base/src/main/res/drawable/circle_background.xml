@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:radius="@dimen/artifo_ending_icon_size" />
+    <solid android:color="?attr/artifo_ending_badge_color" />
+    <size
+        android:width="@dimen/artifo_ending_icon_size"
+        android:height="@dimen/artifo_ending_icon_size" />
+</shape>
