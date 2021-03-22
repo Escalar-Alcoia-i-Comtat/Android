@@ -30,10 +30,20 @@ data class Pitch(
 
     fun getDisplayText(context: Context): String {
         return endingData.orientation.toString(context) + " " +
-            endingData.rappel.toString(context)
+                endingData.rappel.toString(context)
     }
 
+    /**
+     * Uses the [endingData] to get a representation image for the artifo ending dialog.
+     * @author Arnau Mora
+     * @since 20210322
+     * @return The drawable res of the image
+     * @throws IllegalStateException When the current [endingData] doesn't match any valid image
+     * @see DrawableRes
+     * @see PitchEndingData
+     */
     @DrawableRes
+    @Throws(IllegalStateException::class)
     fun getRappelImage(): Int {
         return when {
             endingData.rappel == PitchEndingRappel.RAPPEL &&
@@ -66,7 +76,7 @@ data class Pitch(
                     endingData.orientation == PitchEndingOrientation.SHELF ->
                 R.drawable.ic_reunio_neta_repisa
 
-            else -> R.drawable.transparent
+            else -> throw IllegalStateException("Current endingData doesn't match any valid image")
         }
     }
 }
