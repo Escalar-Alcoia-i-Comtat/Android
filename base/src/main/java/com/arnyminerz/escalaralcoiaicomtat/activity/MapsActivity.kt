@@ -21,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAskerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.generic.MapNotInitializedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.fileName
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.mime
@@ -160,7 +161,7 @@ class MapsActivity : LanguageAppCompatActivity() {
 
                     runOnUiThread {
                         Timber.v("Loading current location")
-                        tryToShowCurrentLocation()
+                        val isShowingLocation = tryToShowCurrentLocation()
 
                         map.uiSettings.apply {
                             isCompassEnabled = true
@@ -214,13 +215,19 @@ class MapsActivity : LanguageAppCompatActivity() {
                         mapHelper.addMarkers(markers)
                         mapHelper.addGeometries(geometries)
 
-                        mapHelper.getLocation { _, _ ->
+                        fun finished() {
                             mapHelper.display()
                             mapHelper.center(
                                 MAP_LOAD_PADDING,
                                 includeCurrentLocation = centerCurrentLocation
                             )
                         }
+
+                        if (isShowingLocation)
+                            mapHelper.getLocation { _, _ ->
+                                finished()
+                            }
+                        else finished()
 
                         binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
                     }
@@ -359,6 +366,7 @@ class MapsActivity : LanguageAppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun tryToShowCurrentLocation(): Boolean {
+        var result = false
         if (!PermissionsManager.areLocationPermissionsGranted(this)) {
             binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
             binding.fabCurrentLocation.setOnClickListener {
@@ -378,7 +386,6 @@ class MapsActivity : LanguageAppCompatActivity() {
                 supportFragmentManager,
                 PERMISSION_DIALOG_TAG
             )
-            return false
         } else {
             try {
                 mapHelper.enableLocationComponent(this, cameraMode = CameraMode.NONE)
@@ -396,11 +403,14 @@ class MapsActivity : LanguageAppCompatActivity() {
                 }
 
                 binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
+
+                result = true
             } catch (e: IllegalStateException) {
                 Timber.d("Location component already enabled")
+            } catch (e: MapNotInitializedException) {
+                Timber.w("The map has not been initialized yet.")
             }
-
-            return true
         }
+        return result
     }
 }
