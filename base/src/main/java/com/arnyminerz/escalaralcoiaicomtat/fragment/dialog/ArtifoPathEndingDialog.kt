@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.ViewGroup
 import android.view.Window
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogArtifoEndingBinding
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.ArtifoEndingPitchAdapter
@@ -14,7 +15,7 @@ import timber.log.Timber
 class ArtifoPathEndingDialog(
     context: Context,
     private val path: Path
-) : Dialog(context) {
+) : Dialog(context, R.style.ThemeOverlay_App_MaterialAlertDialog) {
 
     private lateinit var binding: DialogArtifoEndingBinding
 

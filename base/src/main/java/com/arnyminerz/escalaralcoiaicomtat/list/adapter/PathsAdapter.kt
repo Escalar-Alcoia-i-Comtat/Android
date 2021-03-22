@@ -43,7 +43,7 @@ const val ROTATION_PIVOT_Y = 0.5f
 
 const val ANIMATION_DURATION = 300L
 
-const val SMALL_CARD_HEIGHT = 57f
+const val SMALL_CARD_HEIGHT = 73f
 
 class PathsAdapter(private val paths: List<Path>, private val activity: Activity) :
     RecyclerView.Adapter<SectorViewHolder>() {
@@ -335,7 +335,10 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                     path.fixedSafesData,
                     path.requiredSafesData
                 )
-                else -> MaterialAlertDialogBuilder(activity)
+                else -> MaterialAlertDialogBuilder(
+                    activity,
+                    R.style.ThemeOverlay_App_MaterialAlertDialog
+                )
                     .setTitle(activity.getString(R.string.path_chip_safe))
                     .setMessage(
                         activity.getString(

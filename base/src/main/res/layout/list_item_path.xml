@@ -10,17 +10,15 @@
         android:id="@+id/cardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="4dp"
         app:cardCornerRadius="5dp"
-        app:cardElevation="3dp">
+        app:cardElevation="3dp"
+        app:cardUseCompatPadding="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingBottom="8dp">
+            android:layout_height="match_parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/showingLayout"
@@ -99,26 +97,12 @@
                     android:layout_height="24dp"
                     android:layout_marginEnd="8dp"
                     android:background="@android:color/transparent"
+                    android:contentDescription="@string/image_desc_view_more"
                     android:scaleType="fitCenter"
                     android:src="@drawable/round_keyboard_arrow_down_24"
-                    android:contentDescription="@string/image_desc_view_more"
                     app:layout_constraintBottom_toBottomOf="@+id/name_textView"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/name_textView" />
-
-                <ImageButton
-                    android:id="@+id/info_imageButton"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="8dp"
-                    android:background="@android:color/transparent"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/round_info_24"
-                    android:tint="@color/path_description_button_color"
-                    android:contentDescription="@string/image_desc_path_info"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/toggle_imageButton" />
 
                 <ImageView
                     android:id="@+id/alert_name_imageView"
@@ -126,25 +110,41 @@
                     android:layout_height="24dp"
                     android:layout_marginEnd="4dp"
                     android:layout_marginBottom="4dp"
-                    android:visibility="gone"
-                    android:src="@drawable/hazard_warning_96"
                     android:contentDescription="@string/image_desc_warning"
+                    android:src="@drawable/hazard_warning_96"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/difficulty_textView" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/safesChipGroup"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 app:chipSpacingVertical="2dp"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/info_imageButton"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/alert_cardView"
                 app:singleLine="false" />
+
+            <ImageButton
+                android:id="@+id/info_imageButton"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/image_desc_path_info"
+                android:scaleType="fitCenter"
+                android:src="@drawable/round_info_24"
+                android:tint="@color/path_description_button_color"
+                app:layout_constraintBottom_toBottomOf="@+id/safesChipGroup"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/safesChipGroup"
+                app:layout_constraintTop_toTopOf="@+id/safesChipGroup" />
 
             <ImageView
                 android:id="@+id/alert_imageView"
@@ -152,8 +152,8 @@
                 android:layout_height="24dp"
                 android:layout_marginTop="15dp"
                 android:layout_marginEnd="4dp"
-                android:src="@drawable/hazard_warning_96"
                 android:contentDescription="@string/image_desc_warning"
+                android:src="@drawable/hazard_warning_96"
                 app:layout_constraintEnd_toStartOf="@+id/showingLayout"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:visibility="gone" />
@@ -184,9 +184,9 @@
                         android:layout_height="48dp"
                         android:layout_weight="1"
                         android:adjustViewBounds="true"
+                        android:contentDescription="@string/image_desc_warning"
                         android:cropToPadding="false"
                         android:scaleType="fitCenter"
-                        android:contentDescription="@string/image_desc_warning"
                         android:src="@drawable/hazard_warning_96" />
 
                     <TextView

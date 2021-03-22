@@ -128,7 +128,10 @@ class DownloadSectionsAdapter(
                 }
 
                 deleteButton.setOnClickListener {
-                    MaterialAlertDialogBuilder(mainActivity)
+                    MaterialAlertDialogBuilder(
+                        mainActivity,
+                        R.style.ThemeOverlay_App_MaterialAlertDialog
+                    )
                         .setTitle(R.string.downloads_delete_dialog_title)
                         .setMessage(
                             mainActivity.getString(

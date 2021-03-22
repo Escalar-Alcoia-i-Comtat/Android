@@ -37,7 +37,7 @@ enum class SunTime(val value: Int) : Parcelable {
         )
         sunChip.text = suns[value]
         sunChip.setOnClickListener {
-            MaterialAlertDialogBuilder(context)
+            MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_App_MaterialAlertDialog)
                 .setTitle(sunDialogTitles[value])
                 .setMessage(sunDialogMessages[value])
                 .setPositiveButton(R.string.action_close) { dialog, _ -> dialog.dismiss() }

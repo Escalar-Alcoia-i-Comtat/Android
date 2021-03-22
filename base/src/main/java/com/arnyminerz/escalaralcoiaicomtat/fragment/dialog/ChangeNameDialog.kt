@@ -6,6 +6,7 @@ import android.content.DialogInterface
 import android.text.InputType
 import android.widget.EditText
 import androidx.annotation.StringRes
+import com.arnyminerz.escalaralcoiaicomtat.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 @Suppress("unused")
@@ -108,7 +109,8 @@ class ChangeNameDialog(private val context: Context) {
     fun getText(): String? = if (input != null) input!!.text.toString() else null
 
     fun show() {
-        val dialog = MaterialAlertDialogBuilder(context)
+        val dialog =
+            MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_App_MaterialAlertDialog)
         if (title != null) dialog.setTitle(title)
         if (message != null) dialog.setMessage(message)
         if (positiveButton != null) dialog

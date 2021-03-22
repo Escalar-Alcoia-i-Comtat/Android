@@ -19,7 +19,7 @@ class DescriptionDialog private constructor(private val context: Context, privat
     }
 
     fun show() {
-        val dialog = AlertDialog.Builder(context)
+        val dialog = AlertDialog.Builder(context, R.style.ThemeOverlay_App_MaterialAlertDialog)
         val factory = LayoutInflater.from(context)
         val view = factory.inflate(R.layout.dialog_description, null)
 
