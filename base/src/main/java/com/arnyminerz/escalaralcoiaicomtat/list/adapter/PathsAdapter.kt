@@ -21,7 +21,9 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Grade
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.*
+import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.ArtifoPathEndingDialog
+import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DescriptionDialog
+import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.PathEquipmentDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder

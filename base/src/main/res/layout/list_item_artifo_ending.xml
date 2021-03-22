@@ -2,59 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardView3"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="3dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="3dp"
-        app:cardBackgroundColor="@color/dialog_green"
-        app:cardCornerRadius="15dp"
-        app:cardPreventCornerOverlap="true"
-        app:cardUseCompatPadding="false"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/pitchId_textView"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="8dp">
-
-            <ImageView
-                android:id="@+id/pitchRappel_imageView"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_weight="0"
-                android:contentDescription="@string/image_desc_rappel"
-                app:srcCompat="@drawable/circle_red" />
-
-            <TextView
-                android:id="@+id/pitch_textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_weight="1"
-                android:text="@string/placeholder"
-                android:textColor="@color/bg_color_dark"
-                android:textSize="15sp" />
-
-            <ImageView
-                android:id="@+id/pitchEnding_imageView"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_weight="0"
-                android:contentDescription="@string/image_desc_ending_type"
-                app:srcCompat="@drawable/circle_green" />
-
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    android:layout_height="wrap_content"
+    android:padding="4dp">
 
     <TextView
         android:id="@+id/pitchId_textView"
@@ -62,9 +11,60 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="@string/r_placeholder"
-        android:textColor="?attr/text_dark"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/cardView3"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/cardView3" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/pitch_textView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:text="@string/placeholder"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/pitchRappel_layout"
+        app:layout_constraintStart_toEndOf="@+id/pitchId_textView"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/pitchRappel_layout"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/circle_background"
+        android:padding="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/pitchEnding_layout"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/pitchRappel_imageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/image_desc_rappel"
+            app:srcCompat="@drawable/circle_red" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/pitchEnding_layout"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:background="@drawable/circle_background"
+        android:padding="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/pitchEnding_imageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/image_desc_ending_type"
+            app:srcCompat="@drawable/circle_green" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

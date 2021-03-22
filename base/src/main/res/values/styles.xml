@@ -1,6 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <attr name="text_dark" format="color" />
+    <!-- This is the color of the background of the icons in the right of the list_item_artifo_ending items -->
+    <attr name="artifo_ending_badge_color" format="color" />
     <attr name="overlay_color" format="color" />
 
     <!-- Base application theme. -->
@@ -18,6 +20,7 @@
         </item>
 
         <item name="text_dark">@color/bg_color_dark</item>
+        <item name="artifo_ending_badge_color">@color/artifo_ending_badge_color_light</item>
         <item name="overlay_color">@color/loading_overlay_light</item>
 
         <item name="android:windowContentTransitions">true</item>

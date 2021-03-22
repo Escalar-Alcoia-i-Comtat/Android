@@ -7,6 +7,9 @@
     <color name="bg_color">#f5f5f5</color>
     <color name="bg_color_dark">#202020</color>
 
+    <color name="artifo_ending_badge_color_light">#e0e0e0</color>
+    <color name="artifo_ending_badge_color_dark">#aaaaaa</color>
+
     <color name="white">#fff</color>
     <color name="black">#000</color>
 
