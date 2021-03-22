@@ -534,18 +534,30 @@ class MapHelper(private val mapView: MapView) {
     fun addLocationUpdateCallback(callback: (location: Location) -> Unit) =
         locationUpdateCallbacks.add(callback)
 
+    /**
+     * Gets the last location the location engine got.
+     * @author Arnau Mora
+     * @since 20210322
+     * @param callback What to call when the location is gotten.
+     * @throws IllegalStateException When the location engine is not initialized. This may be because
+     * the location is not enabled.
+     */
+    @Throws(IllegalStateException::class)
     @SuppressLint("MissingPermission")
-    fun getLocation(callback: (location: Location?, error: Exception?) -> Unit) =
-        locationEngine.getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
-            override fun onSuccess(result: LocationEngineResult?) {
-                lastKnownLocation = result?.lastLocation?.toLatLng()
-                callback(result?.lastLocation, null)
-            }
+    fun getLocation(callback: (location: Location?, error: Exception?) -> Unit) {
+        if (this::locationEngine.isInitialized)
+            locationEngine.getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
+                override fun onSuccess(result: LocationEngineResult?) {
+                    lastKnownLocation = result?.lastLocation?.toLatLng()
+                    callback(result?.lastLocation, null)
+                }
 
-            override fun onFailure(exception: java.lang.Exception) {
-                callback(null, exception)
-            }
-        })
+                override fun onFailure(exception: java.lang.Exception) {
+                    callback(null, exception)
+                }
+            })
+        else throw IllegalStateException("Location Engine is not initialized.")
+    }
 
     /**
      * Changes the map's tracking camera mode
