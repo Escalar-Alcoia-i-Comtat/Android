@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="dialog_corner_size">32dp</dimen>
+
+    <dimen name="artifo_ending_icon_size">28dp</dimen>
+    <dimen name="artifo_ending_text_size">18sp</dimen>
+</resources>
