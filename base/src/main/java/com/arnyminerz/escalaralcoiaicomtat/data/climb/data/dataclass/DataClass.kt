@@ -37,10 +37,6 @@ import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadWorker
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import com.parse.ParseObject
 import com.parse.ParseQuery
 import timber.log.Timber
@@ -393,7 +389,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         context: Context,
         imageView: ImageView,
         progressBar: ProgressBar? = null,
-        imageLoadParameters: ImageLoadParameters? = null
+        imageLoadParameters: ImageLoadParameters<Bitmap>? = null
     ) {
         if (context is Activity)
             if (context.isDestroyed)
@@ -413,9 +409,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             Timber.d("Getting image from URL ($imageUrl)")
 
             val scale = imageLoadParameters?.resultImageScale ?: 1f
-            /*context.onUiThread {
-                imageView.setImageResource(placeholderDrawable)
-            }*/
 
             Glide.with(context)
                 .asBitmap()
@@ -425,43 +418,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 .fallback(errorPlaceholderDrawable)
                 .fitCenter()
                 .thumbnail(scale)
-                .listener(object : RequestListener<Bitmap> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Bitmap>?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        progressBar?.hide()
-                        /*context.onUiThread {
-                            imageView.setImageResource(errorPlaceholderDrawable)
-                        }*/
-                        Timber.e(
-                            e,
-                            "Could not load image for $namespace#$objectId! Url: $imageUrl"
-                        )
-                        return false
-                    }
-
-                    override fun onResourceReady(
-                        resource: Bitmap?,
-                        model: Any?,
-                        target: Target<Bitmap>?,
-                        dataSource: DataSource?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        Timber.d("Got bitmap, loading on imageView. Namespace: $namespace")
-                        progressBar?.hide()
-                        /*context.onUiThread {
-                            if (resource == null)
-                                Timber.w("Bitmap is null!")
-                            else
-                                imageView.setImageBitmap(resource)
-                        }*/
-
-                        return false
-                    }
-                })
                 .apply(imageLoadParameters)
                 .into(imageView)
         }

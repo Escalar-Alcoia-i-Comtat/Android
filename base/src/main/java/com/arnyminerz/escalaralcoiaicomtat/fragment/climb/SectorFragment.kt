@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.climb
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -67,7 +68,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             requireContext(),
             binding.sectorImageView,
             binding.sectorProgressBar,
-            ImageLoadParameters().apply {
+            ImageLoadParameters<Bitmap>().apply {
                 withTransitionOptions(BitmapTransitionOptions.withCrossFade(CROSSFADE_DURATION))
                 withThumbnailSize(THUMBNAIL_SIZE)
                 withRequestOptions(

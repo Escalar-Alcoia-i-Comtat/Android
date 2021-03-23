@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 
+import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageButton
@@ -63,7 +64,7 @@ class SectorsAdapter(
                 dataClassListActivity,
                 imageView,
                 downloadProgressBar,
-                ImageLoadParameters()
+                ImageLoadParameters<Bitmap>()
                     .withRequestOptions(
                         with(RequestOptions()) {
                             centerCrop()

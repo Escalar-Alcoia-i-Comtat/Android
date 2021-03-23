@@ -1,12 +1,11 @@
 package com.arnyminerz.escalaralcoiaicomtat.view
 
-import android.graphics.Bitmap
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.TransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import timber.log.Timber
 
-fun RequestBuilder<Bitmap>.apply(imageLoadParameters: ImageLoadParameters?): RequestBuilder<Bitmap> {
+fun <T> RequestBuilder<T>.apply(imageLoadParameters: ImageLoadParameters<T>?): RequestBuilder<T> {
     imageLoadParameters?.let { ilp ->
         ilp.requestOptions?.let {
             apply(it)
@@ -24,28 +23,28 @@ fun RequestBuilder<Bitmap>.apply(imageLoadParameters: ImageLoadParameters?): Req
     return this
 }
 
-class ImageLoadParameters {
+class ImageLoadParameters<T> {
     internal var requestOptions: RequestOptions? = null
-    internal var transitionOptions: TransitionOptions<*, in Bitmap>? = null
+    internal var transitionOptions: TransitionOptions<*, T>? = null
     internal var thumbnailSize: Float? = null
     var resultImageScale: Float? = null
 
-    fun withRequestOptions(requestOptions: RequestOptions?): ImageLoadParameters {
+    fun withRequestOptions(requestOptions: RequestOptions?): ImageLoadParameters<T> {
         this.requestOptions = requestOptions
         return this
     }
 
-    fun withTransitionOptions(transitionOptions: TransitionOptions<*, in Bitmap>?): ImageLoadParameters {
+    fun withTransitionOptions(transitionOptions: TransitionOptions<*, T>?): ImageLoadParameters<T> {
         this.transitionOptions = transitionOptions
         return this
     }
 
-    fun withThumbnailSize(thumbnailSize: Float?): ImageLoadParameters {
+    fun withThumbnailSize(thumbnailSize: Float?): ImageLoadParameters<T> {
         this.thumbnailSize = thumbnailSize
         return this
     }
 
-    fun withResultImageScale(scale: Float?): ImageLoadParameters {
+    fun withResultImageScale(scale: Float?): ImageLoadParameters<T> {
         this.resultImageScale = scale
         return this
     }
