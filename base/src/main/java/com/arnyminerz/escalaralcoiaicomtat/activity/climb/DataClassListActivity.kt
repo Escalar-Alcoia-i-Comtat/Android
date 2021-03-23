@@ -32,7 +32,6 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
     protected lateinit var binding: LayoutListBinding
     protected lateinit var dataClass: T
     private lateinit var mapHelper: MapHelper
-    private var mapLoaded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +60,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
     override fun onResume() {
         super.onResume()
         mapHelper.onResume()
-        if (mapLoaded)
+        if (this::mapHelper.isInitialized && mapHelper.isLoaded)
             binding.loadingLayout.hide()
     }
 
@@ -96,14 +95,13 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
 
         updateIcon()
 
-        if (!mapLoaded && hasInternet) {
+        if (this::mapHelper.isInitialized && !mapHelper.isLoaded && hasInternet) {
             Timber.v("Loading map...")
             mapHelper
                 .show()
                 .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
                 .withControllable(false)
                 .loadMap(this) { _, map, _ ->
-                    mapLoaded = true
                     val kmlAddress = dataClass.kmlAddress
 
                     if (kmlAddress != null)
@@ -138,7 +136,8 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                 }
         } else if (!hasInternet) {
             binding.loadingLayout.hide()
-            mapHelper.hide()
+            if (this::mapHelper.isInitialized)
+                mapHelper.hide()
         }
     }
 
