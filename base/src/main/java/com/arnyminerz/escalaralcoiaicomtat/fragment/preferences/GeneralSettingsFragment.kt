@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.preferences
 
 import android.Manifest
-import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.core.app.ActivityCompat
@@ -18,7 +17,7 @@ import timber.log.Timber
 
 private const val PREVIEW_SCALE_REDUCER = 10f
 
-class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragmentCompat() {
+class GeneralSettingsFragment : PreferenceFragmentCompat() {
     private var sensibilityPreference: SeekBarPreference? = null
     private var markerSizePreference: SeekBarPreference? = null
     private var previewScalePreference: SeekBarPreference? = null
@@ -69,7 +68,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
         enableNearby = findPreference("pref_enable_nearby")
         enableNearby?.setOnPreferenceChangeListener { _, value ->
             if (ContextCompat.checkSelfPermission(
-                    activity,
+                    requireActivity(),
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
@@ -77,7 +76,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
                 true
             } else {
                 ActivityCompat.requestPermissions(
-                    activity,
+                    requireActivity(),
                     arrayOf(
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION
@@ -127,7 +126,7 @@ class GeneralSettingsFragment(private val activity: Activity) : PreferenceFragme
 
         enableNearby?.isChecked = !(PREF_DISABLE_NEARBY.get()) &&
                 (ContextCompat.checkSelfPermission(
-                    activity,
+                    requireActivity(),
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED)
 
