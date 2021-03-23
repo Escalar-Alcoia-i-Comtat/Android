@@ -83,39 +83,16 @@ const val ERROR_CREATE_PARENT = "create_parent"
 class DownloadData
 /**
  * Initializes the class with specific parameters
- * @param type The DataClass type, it's used to infer namespace
- * @param id The id to fetch
- * @param tempDisplayName The display name to show in the progress notification
+ * @param dataClass The [DataClass] to download.
  * @param overwrite If the download should be overwritten if already downloaded. Note that if this
  * is false, if the download already exists the task will fail.
  * @param quality The compression quality of the image
  */
-private constructor(
-    val type: DataClasses,
-    val id: String,
-    val tempDisplayName: String,
+constructor(
+    val dataClass: DataClass<*, *>,
     val overwrite: Boolean = DOWNLOAD_OVERWRITE_DEFAULT,
     val quality: Int = DOWNLOAD_QUALITY_DEFAULT
-) {
-    /**
-     * Initializes the class with a DataClass
-     * @param dataClass The DataClass to download.
-     * @param overwrite If the download should be overwritten if already downloaded. Note that if this
-     * is false, if the download already exists the task will fail.
-     * @param quality The compression quality of the image
-     */
-    constructor(
-        dataClass: DataClass<*, *>,
-        overwrite: Boolean = DOWNLOAD_OVERWRITE_DEFAULT,
-        quality: Int = DOWNLOAD_QUALITY_DEFAULT
-    ) : this(
-        DataClasses.find(dataClass.namespace)!!,
-        dataClass.objectId,
-        dataClass.displayName,
-        overwrite,
-        quality
-    )
-}
+)
 
 class DownloadWorker private constructor(appContext: Context, workerParams: WorkerParameters) :
     Worker(appContext, workerParams) {
@@ -305,13 +282,15 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 .setConstraints(constraints)
                 .addTag(tag)
                 .setInputData(
-                    workDataOf(
-                        DOWNLOAD_NAMESPACE to data.type.namespace,
-                        DOWNLOAD_ID to data.id,
-                        DOWNLOAD_DISPLAY_NAME to data.tempDisplayName,
-                        DOWNLOAD_OVERWRITE to data.overwrite,
-                        DOWNLOAD_QUALITY to data.quality
-                    )
+                    with(data) {
+                        workDataOf(
+                            DOWNLOAD_NAMESPACE to dataClass.namespace,
+                            DOWNLOAD_ID to dataClass.objectId,
+                            DOWNLOAD_DISPLAY_NAME to dataClass.displayName,
+                            DOWNLOAD_OVERWRITE to overwrite,
+                            DOWNLOAD_QUALITY to quality
+                        )
+                    }
                 )
                 .build()
 
