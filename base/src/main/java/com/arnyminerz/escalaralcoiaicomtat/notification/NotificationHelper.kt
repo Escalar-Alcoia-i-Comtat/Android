@@ -107,8 +107,7 @@ class Notification private constructor(private val builder: Builder) {
         builders.remove(builder.id)
     }
 
-    class Builder(val context: Context) {
-        var id = generateNotificationId()
+    class Builder(val context: Context, var id: Int = generateNotificationId()) {
         var channelId: String? = null
 
         @DrawableRes
@@ -340,7 +339,11 @@ class Notification private constructor(private val builder: Builder) {
          * @throws NullChannelIdException If the channel id is null
          * @throws NullIconException If the icon has not been specified
          */
-        @Throws(IllegalStateException::class, NullChannelIdException::class, NullIconException::class)
+        @Throws(
+            IllegalStateException::class,
+            NullChannelIdException::class,
+            NullIconException::class
+        )
         fun build(): Notification {
             var exception: Exception? = null
             if (channelId == null)
@@ -348,7 +351,8 @@ class Notification private constructor(private val builder: Builder) {
             if (icon == null)
                 exception = NullIconException("The icon has not been set")
             if (builders.containsKey(id))
-                exception = IllegalStateException("The specified notification id is already registered")
+                exception =
+                    IllegalStateException("The specified notification id is already registered")
 
             if (exception != null)
                 throw exception
