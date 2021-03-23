@@ -4,11 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreference
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.UpdatingActivity
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.shared.UPDATE_IMAGES
+import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MAX
+import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MIN
 
 class DownloadsSettingsFragment : PreferenceFragmentCompat() {
 
@@ -17,6 +20,8 @@ class DownloadsSettingsFragment : PreferenceFragmentCompat() {
     private var downloadDownloadsPref: Preference? = null
 
     private var downloadsAutoUpdatePref: SwitchPreference? = null
+
+    private var downloadQualityPref: SeekBarPreference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.pref_downloads, rootKey)
@@ -58,6 +63,16 @@ class DownloadsSettingsFragment : PreferenceFragmentCompat() {
 
             true
         }
+
+        downloadQualityPref = findPreference("pref_download_quality")
+        downloadQualityPref?.value = DOWNLOADS_QUALITY_PREF.get()
+        downloadQualityPref?.max = DOWNLOAD_QUALITY_MAX
+        downloadQualityPref?.min = DOWNLOAD_QUALITY_MIN
+        downloadQualityPref?.setOnPreferenceChangeListener { _, value ->
+            DOWNLOADS_QUALITY_PREF.put(value as Int)
+
+            true
+        }
     }
 
     override fun onResume() {
@@ -72,5 +87,10 @@ class DownloadsSettingsFragment : PreferenceFragmentCompat() {
         downloadsAutoUpdatePref =
             downloadsAutoUpdatePref ?: findPreference("pref_download_auto_update")
         downloadsAutoUpdatePref?.isChecked = AUTOMATIC_DOWNLOADS_UPDATE_PREF.get()
+
+        downloadQualityPref = downloadQualityPref ?: findPreference("pref_download_quality")
+        downloadQualityPref?.value = DOWNLOADS_QUALITY_PREF.get()
+        downloadQualityPref?.max = DOWNLOAD_QUALITY_MAX
+        downloadQualityPref?.min = DOWNLOAD_QUALITY_MIN
     }
 }

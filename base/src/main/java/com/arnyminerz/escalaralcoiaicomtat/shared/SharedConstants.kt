@@ -89,4 +89,4 @@ const val NO_SUN_INDEX = 3
 
 // Downloads Constants
 const val DOWNLOAD_OVERWRITE_DEFAULT = true
-const val DOWNLOAD_QUALITY_DEFAULT = 100
+const val DOWNLOAD_QUALITY_DEFAULT = 85
