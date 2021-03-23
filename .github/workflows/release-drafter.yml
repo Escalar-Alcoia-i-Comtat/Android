@@ -58,6 +58,7 @@ jobs:
           echo "ext {" >> base/version.gradle
           echo "VERSION_NAME=\"${{ steps.create_release.outputs.tag_name }}\"" >> base/version.gradle
           echo "}" >> base/version.gradle
+          cat base/version.gradle
 
       - name: Build APK
         id: build_apk
