@@ -119,6 +119,40 @@ private constructor(
 
 class DownloadWorker private constructor(appContext: Context, workerParams: WorkerParameters) :
     Worker(appContext, workerParams) {
+    /**
+     * Specifies the downloading notification. For modifying it later.
+     * @since 20210323
+     */
+    private lateinit var notification: Notification
+
+    /**
+     * Creates a new failure Result with some error data.
+     * @author Arnau Mora
+     * @since 20210323
+     * @param error The error name
+     * @return A new failure Result with the set error data with key "error" for outputData.
+     */
+    fun failure(error: String): Pair<ParseQuery<*>?, Result> {
+        if (this::notification.isInitialized)
+            notification.destroy()
+        return null to Result.failure(
+            dataOf(
+                "error" to error
+            )
+        )
+    }
+
+    /**
+     * Downloads an object for using it offline.
+     * @author Arnau Mora
+     * @since 20210323
+     * @param objectID The ID of the object to download
+     * @param namespace The namespace of the object
+     * @param overwrite If the already downloaded content should be overridden
+     * @param quality The compression quality of the downloaded images
+     * @param query If downloading a children, this should be the parent's query.
+     * @return A pair of a nullable [ParseQuery], and a nullable [Result].
+     */
     private fun download(
         objectID: String,
         namespace: String,
@@ -132,7 +166,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         try {
             ParseObject.unpinAll(pin)
         } catch (e: ParseException) {
-            return null to failure(ERROR_UNPIN)
+            return failure(ERROR_UNPIN)
         }
 
         // Fetch the data
@@ -148,7 +182,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val result = fetchQuery.fetchPinOrNetworkSync(pin, true) // Make sure to pin it
         if (result.isEmpty()) { // Object not found
             Timber.d("Result list is empty.")
-            return null to failure(ERROR_ALREADY_DOWNLOADED)
+            return failure(ERROR_ALREADY_DOWNLOADED)
         }
 
         // Get the fetched data
@@ -162,11 +196,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             val imageFile = File(dataDir, filename)
 
             if (imageFile.exists() && !overwrite)
-                return null to failure(ERROR_ALREADY_DOWNLOADED)
+                return failure(ERROR_ALREADY_DOWNLOADED)
             if (!imageFile.deleteIfExists())
-                return null to failure(ERROR_DELETE_OLD)
-            if (!dataDir.mkdirs())
-                return null to failure(ERROR_CREATE_PARENT)
+                return failure(ERROR_DELETE_OLD)
+            if (!dataDir.exists() && !dataDir.mkdirs())
+                return failure(ERROR_CREATE_PARENT)
 
             Timber.d("Downloading image ($image)...")
             val stream = download(image)
@@ -188,7 +222,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
         // Check if any required data is missing
         return if (namespace == null || objectID == null || displayName == null)
-            failure(ERROR_MISSING_DATA)
+            failure(ERROR_MISSING_DATA).second
         else {
             Timber.v("Downloading $objectID from $namespace...")
 
@@ -198,7 +232,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 .withIcon(R.drawable.ic_notifications)
                 .withTitle(R.string.notification_download_progress_title)
                 .withText(R.string.notification_download_progress_message, displayName)
-            val notification = notificationBuilder.build()
+                .setPersistent(true)
+            notification = notificationBuilder.build()
             notification.show() // Show the notification
 
             val currentDownload = download(objectID, namespace, overwrite, quality, null)
