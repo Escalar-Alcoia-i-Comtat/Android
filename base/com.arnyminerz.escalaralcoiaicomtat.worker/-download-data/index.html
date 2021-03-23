@@ -11,12 +11,8 @@
 <code><span class="keyword">class </span><span class="identifier">DownloadData</span></code>
 <p>Initializes the class with specific parameters</p>
 <h3>Parameters</h3>
-<p><a name="type"></a>
-<code>type</code> - The DataClass type, it's used to infer namespace</p>
-<p><a name="id"></a>
-<code>id</code> - The id to fetch</p>
-<p><a name="tempDisplayName"></a>
-<code>tempDisplayName</code> - The display name to show in the progress notification</p>
+<p><a name="dataClass"></a>
+<code>dataClass</code> - The <a href="../../com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass/-data-class/index.html">DataClass</a> to download.</p>
 <p><a name="overwrite"></a>
 <code>overwrite</code> - If the download should be overwritten if already downloaded. Note that if this
 is false, if the download already exists the task will fail.</p>
@@ -30,8 +26,8 @@ is false, if the download already exists the task will fail.</p>
 <p><a href="-init-.html">&lt;init&gt;</a></p>
 </td>
 <td>
-<code><span class="identifier">DownloadData</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData$<init>(com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass((com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClassImpl, )), kotlin.Boolean, kotlin.Int)/dataClass">dataClass</span><span class="symbol">:</span>&nbsp;<a href="../../com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass/-data-class/index.html"><span class="identifier">DataClass</span></a><span class="symbol">&lt;</span><span class="identifier">*</span><span class="symbol">,</span>&nbsp;<span class="identifier">*</span><span class="symbol">&gt;</span><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData$<init>(com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass((com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClassImpl, )), kotlin.Boolean, kotlin.Int)/overwrite">overwrite</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;OVERWRITE_DEFAULT<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData$<init>(com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass((com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClassImpl, )), kotlin.Boolean, kotlin.Int)/quality">quality</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;QUALITY_DEFAULT<span class="symbol">)</span></code>
-<p>Initializes the class with a DataClass</p>
+<code><span class="identifier">DownloadData</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData$<init>(com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass((com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClassImpl, )), kotlin.Boolean, kotlin.Int)/dataClass">dataClass</span><span class="symbol">:</span>&nbsp;<a href="../../com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass/-data-class/index.html"><span class="identifier">DataClass</span></a><span class="symbol">&lt;</span><span class="identifier">*</span><span class="symbol">,</span>&nbsp;<span class="identifier">*</span><span class="symbol">&gt;</span><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData$<init>(com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass((com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClassImpl, )), kotlin.Boolean, kotlin.Int)/overwrite">overwrite</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;DOWNLOAD_OVERWRITE_DEFAULT<span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData$<init>(com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass((com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClassImpl, )), kotlin.Boolean, kotlin.Int)/quality">quality</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;DOWNLOAD_QUALITY_DEFAULT<span class="symbol">)</span></code>
+<p>Initializes the class with specific parameters</p>
 </td>
 </tr>
 </tbody>
@@ -41,11 +37,11 @@ is false, if the download already exists the task will fail.</p>
 <tbody>
 <tr>
 <td>
-<p><a href="id.html">id</a></p>
+<p><a href="data-class.html">dataClass</a></p>
 </td>
 <td>
-<code><span class="keyword">val </span><span class="identifier">id</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code>
-<p>The id to fetch</p>
+<code><span class="keyword">val </span><span class="identifier">dataClass</span><span class="symbol">: </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass/-data-class/index.html"><span class="identifier">DataClass</span></a><span class="symbol">&lt;</span><span class="identifier">*</span><span class="symbol">,</span>&nbsp;<span class="identifier">*</span><span class="symbol">&gt;</span></code>
+<p>The <a href="../../com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass/-data-class/index.html">DataClass</a> to download.</p>
 </td>
 </tr>
 <tr>
@@ -65,24 +61,6 @@ is false, if the download already exists the task will fail.</p>
 <td>
 <code><span class="keyword">val </span><span class="identifier">quality</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code>
 <p>The compression quality of the image</p>
-</td>
-</tr>
-<tr>
-<td>
-<p><a href="temp-display-name.html">tempDisplayName</a></p>
-</td>
-<td>
-<code><span class="keyword">val </span><span class="identifier">tempDisplayName</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code>
-<p>The display name to show in the progress notification</p>
-</td>
-</tr>
-<tr>
-<td>
-<p><a href="type.html">type</a></p>
-</td>
-<td>
-<code><span class="keyword">val </span><span class="identifier">type</span><span class="symbol">: </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass/-data-classes/index.html"><span class="identifier">DataClasses</span></a></code>
-<p>The DataClass type, it's used to infer namespace</p>
 </td>
 </tr>
 </tbody>

@@ -9,6 +9,20 @@
 <br/>
 <h1>Builder</h1>
 <code><span class="keyword">class </span><span class="identifier">Builder</span></code>
+<p>Creates a new instance of the Builder class.</p>
+<h3>Parameters</h3>
+<p><a name="context"></a>
+<code>context</code> - The context to create the notification from</p>
+<p><a name="id"></a>
+<code>id</code> - The id of the notification, or if not set, a new id will be generated.</p>
+<p><strong>Author</strong><br/>
+Arnau Mora</p>
+<p><strong>Since</strong><br/>
+20210323</p>
+<p><strong>See Also</strong><br/>
+<p><a href="#">generateNotificationId</a></p>
+<p><a href="https://developer.android.com/reference/android/content/Context.html">Context</a></p>
+</p>
 <h3>Constructors</h3>
 <table>
 <tbody>
@@ -17,7 +31,9 @@
 <p><a href="-init-.html">&lt;init&gt;</a></p>
 </td>
 <td>
-<code><span class="identifier">Builder</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.notification.Notification.Builder$<init>(android.content.Context)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">)</span></code></td>
+<code><span class="identifier">Builder</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.notification.Notification.Builder$<init>(android.content.Context, kotlin.Int)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.notification.Notification.Builder$<init>(android.content.Context, kotlin.Int)/id">id</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;generateNotificationId()<span class="symbol">)</span></code>
+<p>Creates a new instance of the Builder class.</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -43,7 +59,9 @@
 <p><a href="context.html">context</a></p>
 </td>
 <td>
-<code><span class="keyword">val </span><span class="identifier">context</span><span class="symbol">: </span><a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a></code></td>
+<code><span class="keyword">val </span><span class="identifier">context</span><span class="symbol">: </span><a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a></code>
+<p>The context to create the notification from</p>
+</td>
 </tr>
 <tr>
 <td>
@@ -57,7 +75,9 @@
 <p><a href="id.html">id</a></p>
 </td>
 <td>
-<code><span class="keyword">var </span><span class="identifier">id</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
+<code><span class="keyword">var </span><span class="identifier">id</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code>
+<p>The id of the notification, or if not set, a new id will be generated.</p>
+</td>
 </tr>
 <tr>
 <td>
@@ -143,6 +163,15 @@
 </tr>
 <tr>
 <td>
+<p><a href="build-and-show.html">buildAndShow</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">buildAndShow</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="../index.html"><span class="identifier">Notification</span></a></code>
+<p>Builds the notification, and calls the show method.</p>
+</td>
+</tr>
+<tr>
+<td>
 <p><a href="set-persistent.html">setPersistent</a></p>
 </td>
 <td>
@@ -193,7 +222,7 @@
 <p><a href="with-intent.html">withIntent</a></p>
 </td>
 <td>
-<code><span class="keyword">fun </span><span class="identifier">withIntent</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.notification.Notification.Builder$withIntent(android.app.PendingIntent)/pendingIntent">pendingIntent</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/PendingIntent.html"><span class="identifier">PendingIntent</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Builder</span></a></code>
+<code><span class="keyword">fun </span><span class="identifier">withIntent</span><span class="symbol">(</span><span class="identifier" id="com.arnyminerz.escalaralcoiaicomtat.notification.Notification.Builder$withIntent(android.app.PendingIntent)/pendingIntent">pendingIntent</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/PendingIntent.html"><span class="identifier">PendingIntent</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Builder</span></a></code>
 <p>Sets the action of the notification</p>
 </td>
 </tr>
