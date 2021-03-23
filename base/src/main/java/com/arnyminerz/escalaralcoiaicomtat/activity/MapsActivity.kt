@@ -163,7 +163,7 @@ class MapsActivity : LanguageAppCompatActivity() {
 
                     runOnUiThread {
                         Timber.v("Loading current location")
-                        val isShowingLocation = tryToShowCurrentLocation()
+                        tryToShowCurrentLocation()
 
                         map.uiSettings.apply {
                             isCompassEnabled = true
