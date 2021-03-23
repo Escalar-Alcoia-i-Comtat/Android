@@ -5,7 +5,11 @@ import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.*
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getElementByTagName
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getElementByTagNameWithAttribute
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.hasChildNode
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.newLatLngBounds
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toElementList
 import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.storage.UnzipUtil
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
@@ -18,7 +22,11 @@ import com.mapbox.mapboxsdk.style.layers.Property
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import timber.log.Timber
-import java.io.*
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import javax.xml.parsers.DocumentBuilder
@@ -64,7 +72,7 @@ fun loadKML(
                     download(kmlAddress)
                 } else null
 
-            if (tempDir != null)
+            if (tempDir != null && !tempDir.exists())
                 if (tempDir.mkdirs())
                     Timber.d("Created tempDir")
                 else
