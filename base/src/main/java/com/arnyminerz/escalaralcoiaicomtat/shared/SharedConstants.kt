@@ -57,7 +57,7 @@ const val UPDATE_CHECKER_FLEX_MINUTES: Long = 15
 val AREAS = arrayMapOf<String, Area>()
 
 const val PREVIEW_SCALE_PREFERENCE_MULTIPLIER = 10
-const val THUMBNAIL_SIZE = .1f
+const val SECTOR_THUMBNAIL_SIZE = .8f
 
 const val ERROR_VIBRATE: Long = 500
 const val INFO_VIBRATION: Long = 20
