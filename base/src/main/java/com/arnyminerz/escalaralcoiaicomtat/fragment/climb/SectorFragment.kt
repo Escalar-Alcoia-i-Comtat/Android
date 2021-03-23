@@ -22,7 +22,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_AREA_ID
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_ZONE_ID
 import com.arnyminerz.escalaralcoiaicomtat.shared.CROSSFADE_DURATION
-import com.arnyminerz.escalaralcoiaicomtat.shared.THUMBNAIL_SIZE
+import com.arnyminerz.escalaralcoiaicomtat.shared.SECTOR_THUMBNAIL_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -70,14 +70,15 @@ class SectorFragment : NetworkChangeListenerFragment() {
             binding.sectorProgressBar,
             ImageLoadParameters<Bitmap>().apply {
                 withTransitionOptions(BitmapTransitionOptions.withCrossFade(CROSSFADE_DURATION))
-                withThumbnailSize(THUMBNAIL_SIZE)
+                withThumbnailSize(SECTOR_THUMBNAIL_SIZE)
+                withResultImageScale(1f)
                 withRequestOptions(
-                    with(RequestOptions()) {
-                        fitCenter()
+                    RequestOptions().apply {
+                        centerInside()
                         format(DecodeFormat.PREFER_RGB_565)
-                        this
                     }
                 )
+                setShowPlaceholder(false)
             })
     }
 
