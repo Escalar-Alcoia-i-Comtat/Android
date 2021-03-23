@@ -470,7 +470,7 @@ class MapHelper(private val mapView: MapView) {
 
     /**
      * Enables the current location pointer. Requires the location permission to be granted
-     * @param context The context to call from
+     * @param activity The activity that owns the MapHelper
      * @param cameraMode The camera mode to set
      * @param renderMode The pointer render mode to set
      * @author Arnau Mora
@@ -487,20 +487,20 @@ class MapHelper(private val mapView: MapView) {
     )
     @Throws(MissingPermissionException::class, MapNotInitializedException::class)
     fun enableLocationComponent(
-        context: Context,
+        activity: Activity,
         cameraMode: Int = CameraMode.TRACKING,
         renderMode: Int = RenderMode.COMPASS
     ) {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
-        if (!PermissionsManager.areLocationPermissionsGranted(context))
+        if (!PermissionsManager.areLocationPermissionsGranted(activity))
             throw MissingPermissionException("Location permission not granted")
 
         if (this::locationEngine.isInitialized)
             throw IllegalStateException("Location component already enabled")
 
-        locationEngine = LocationEngineProvider.getBestLocationEngine(context)
+        locationEngine = LocationEngineProvider.getBestLocationEngine(activity)
         val locationEngineRequest = LocationEngineRequest.Builder(LOCATION_UPDATE_INTERVAL_MILLIS)
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .setMaxWaitTime(LOCATION_UPDATE_MIN_TIME)
@@ -509,12 +509,12 @@ class MapHelper(private val mapView: MapView) {
         locationEngine.requestLocationUpdates(
             locationEngineRequest,
             locationUpdateCallback,
-            Looper.getMainLooper()
+            activity.mainLooper
         )
 
         map!!.locationComponent.apply {
             activateLocationComponent(
-                LocationComponentActivationOptions.builder(context, style!!)
+                LocationComponentActivationOptions.builder(activity, style!!)
                     .useDefaultLocationEngine(false)
                     .build()
             )
