@@ -259,7 +259,7 @@ class Notification private constructor(private val builder: Builder) {
          * @param pendingIntent What should be called when the notification is tapped
          * @return The Builder instance
          */
-        fun withIntent(pendingIntent: PendingIntent): Builder {
+        fun withIntent(pendingIntent: PendingIntent?): Builder {
             this.intent = pendingIntent
             return this
         }
