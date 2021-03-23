@@ -107,7 +107,17 @@ class Notification private constructor(private val builder: Builder) {
         builders.remove(builder.id)
     }
 
-    class Builder(val context: Context, var id: Int = generateNotificationId()) {
+    class Builder
+    /**
+     * Creates a new instance of the Builder class.
+     * @author Arnau Mora
+     * @since 20210323
+     * @param context The context to create the notification from
+     * @param id The id of the notification, or if not set, a new id will be generated.
+     * @see generateNotificationId
+     * @see Context
+     */
+    constructor(val context: Context, var id: Int = generateNotificationId()) {
         var channelId: String? = null
 
         @DrawableRes
