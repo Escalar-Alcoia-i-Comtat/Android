@@ -6,8 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.*
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.DownloadsSettingsFragment
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.GeneralSettingsFragment
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.InfoSettingsFragment
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFragment.Companion.SettingsPage
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.NotificationsSettingsFragment
 import timber.log.Timber
 
 const val SETTINGS_HEIGHT_MAIN = 0
@@ -42,7 +46,7 @@ class SettingsFragmentManager : Fragment() {
                     SettingsPage.MAIN -> MainSettingsFragment().listen {
                         loadPage(it, false)
                     }
-                    SettingsPage.GENERAL -> GeneralSettingsFragment(requireActivity())
+                    SettingsPage.GENERAL -> GeneralSettingsFragment()
                     SettingsPage.NOTIFICATIONS -> NotificationsSettingsFragment()
                     SettingsPage.DOWNLOADS -> DownloadsSettingsFragment()
                     SettingsPage.INFO -> InfoSettingsFragment()
