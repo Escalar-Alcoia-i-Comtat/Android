@@ -25,57 +25,75 @@ private fun generateNotificationId(): Int {
 private val builders = arrayMapOf<Int, Notification.Builder>()
 
 class Notification private constructor(private val builder: Builder) {
+    /**
+     * Returns the builder for this notification, for editing its contents.
+     * @author Arnau Mora
+     * @since 20210323
+     * @return The [Notification.Builder] for this notification.
+     * @see Builder
+     */
     fun edit(): Builder = builder
 
-    fun show() = with(builder) {
-        val notificationBuilder = NotificationCompat.Builder(context, channelId!!)
-        notificationBuilder.setSmallIcon(icon!!)
-        if (title != null)
-            notificationBuilder.setContentTitle(title)
-        if (text != null)
-            notificationBuilder.setContentText(text)
-        if (info != null)
-            notificationBuilder.setContentInfo(info)
-        if (longText != null)
-            notificationBuilder.setStyle(
-                NotificationCompat.BigTextStyle()
-                    .setBigContentTitle(title)
-                    .bigText(longText)
-            )
-        else if (text != null)
-            notificationBuilder.setStyle(
-                NotificationCompat.BigTextStyle()
-                    .bigText(text)
-            )
+    /**
+     * Shows the notification.
+     * @author Arnau Mora
+     * @since 20210323
+     * @return The current instance, for chaining functions
+     */
+    fun show(): Notification {
+        with(builder) {
+            val notificationBuilder = NotificationCompat.Builder(context, channelId!!)
+            notificationBuilder.setSmallIcon(icon!!)
+            if (title != null)
+                notificationBuilder.setContentTitle(title)
+            if (text != null)
+                notificationBuilder.setContentText(text)
+            if (info != null)
+                notificationBuilder.setContentInfo(info)
+            if (longText != null)
+                notificationBuilder.setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .setBigContentTitle(title)
+                        .bigText(longText)
+                )
+            else if (text != null)
+                notificationBuilder.setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(text)
+                )
 
-        intent?.let { notificationBuilder.setContentIntent(it) }
-        progress?.let { value, max ->
-            if (value < 0)
-                notificationBuilder.setProgress(0, 0, true)
-            else
-                notificationBuilder.setProgress(value, max, false)
+            intent?.let { notificationBuilder.setContentIntent(it) }
+            progress?.let { value, max ->
+                if (value < 0)
+                    notificationBuilder.setProgress(0, 0, true)
+                else
+                    notificationBuilder.setProgress(value, max, false)
+            }
+            notificationBuilder.setOngoing(persistent)
+
+            for (action in actions)
+                notificationBuilder.addAction(
+                    action.icon,
+                    action.text.toString(),
+                    action.clickListener
+                )
+
+            NotificationManagerCompat.from(builder.context)
+                .notify(builder.id, notificationBuilder.build())
         }
-        notificationBuilder.setOngoing(persistent)
-
-        for (action in actions)
-            notificationBuilder.addAction(
-                action.icon,
-                action.text.toString(),
-                action.clickListener
-            )
-
-        NotificationManagerCompat.from(builder.context)
-            .notify(builder.id, notificationBuilder.build())
+        return this
     }
 
     /**
      * Hides the notification
      * @author Arnau Mora
      * @since 20210313
+     * @return The current instance, for chaining functions
      */
-    fun hide() {
+    fun hide(): Notification {
         NotificationManagerCompat.from(builder.context)
             .cancel(builder.id)
+        return this
     }
 
     /**
