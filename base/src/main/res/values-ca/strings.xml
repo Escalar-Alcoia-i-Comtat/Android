@@ -261,4 +261,6 @@
     <string name="notification_download_progress_info_fetching">Baixant dades…</string>
     <string name="notification_download_progress_info_downloading_image">Baixant imatge…</string>
     <string name="notification_download_progress_info_decoding_image">Decodificant imatge…</string>
+    <string name="notification_download_complete_title">Baixada completa!</string>
+    <string name="notification_download_complete_message">Baixat %s. Toca per a obrir.</string>
 </resources>

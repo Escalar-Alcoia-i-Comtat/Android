@@ -262,4 +262,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="notification_download_progress_info_fetching">Descargando datos…</string>
     <string name="notification_download_progress_info_downloading_image">Descargando imagen…</string>
     <string name="notification_download_progress_info_decoding_image">Decodificando imagen…</string>
+    <string name="notification_download_complete_title">Descarga completa!</string>
+    <string name="notification_download_complete_message">Descargado %s. Toca para abrir.</string>
 </resources>

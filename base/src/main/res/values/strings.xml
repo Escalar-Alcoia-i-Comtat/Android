@@ -172,6 +172,8 @@
 
     <string name="notification_download_progress_title">Downloading…</string>
     <string name="notification_download_progress_message">Downloading %s</string>
+    <string name="notification_download_complete_title">Download complete!</string>
+    <string name="notification_download_complete_message">Downloaded %s. Tap to open.</string>
     <string name="notification_download_progress_info_unpinning">Unpinning…</string>
     <string name="notification_download_progress_info_fetching">Downloading data…</string>
     <string name="notification_download_progress_info_downloading_image">Downloading image…</string>
