@@ -181,6 +181,10 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
         // Fetch the data
         Timber.d("Fetching data from server ($namespace)...")
+        notification
+            .edit()
+            .withInfoText(R.string.notification_download_progress_info_fetching)
+            .buildAndShow()
         val fetchQuery = ParseQuery.getQuery<ParseObject>(namespace)
         fetchQuery.limit = MAX_BATCH_SIZE
         if (query != null) {
@@ -213,8 +217,16 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 return failure(ERROR_CREATE_PARENT)
 
             Timber.d("Downloading image ($image)...")
+            notification
+                .edit()
+                .withInfoText(R.string.notification_download_progress_info_downloading_image)
+                .buildAndShow()
             val stream = download(image)
             Timber.d("Storing image ($imageFile)...")
+            notification
+                .edit()
+                .withInfoText(R.string.notification_download_progress_info_decoding_image)
+                .buildAndShow()
             val bitmap = BitmapFactory.decodeStream(stream)
             bitmap.storeToFile(imageFile, format = WEBP_LOSSLESS_LEGACY, quality = quality)
         }
