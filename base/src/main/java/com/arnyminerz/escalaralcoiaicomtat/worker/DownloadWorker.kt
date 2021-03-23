@@ -239,8 +239,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 .withTitle(R.string.notification_download_progress_title)
                 .withText(R.string.notification_download_progress_message, displayName)
                 .setPersistent(true)
-            notification = notificationBuilder.build()
-            notification.show() // Show the notification
+            notification = notificationBuilder.buildAndShow()
 
             val currentDownload = download(objectID, namespace, overwrite, quality, null)
             val query = currentDownload.first
