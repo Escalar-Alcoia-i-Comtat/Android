@@ -20,7 +20,6 @@ import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
-import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
@@ -37,6 +36,10 @@ import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadWorker
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.parse.ParseObject
 import com.parse.ParseQuery
 import timber.log.Timber
@@ -396,31 +399,48 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 return Timber.e("The activity is destroyed, won't load image.")
 
         progressBar?.show()
+        val scale = imageLoadParameters?.resultImageScale ?: 1f
 
+        var imageLoadRequest = Glide.with(context)
+            .asBitmap()
         val downloadedImageFile = imageFile(context)
-        if (downloadedImageFile.exists()) {
+        imageLoadRequest = if (downloadedImageFile.exists()) {
             Timber.d("Loading area image from storage: ${downloadedImageFile.path}")
-            context.onUiThread {
-                imageView.setImageBitmap(readBitmap(downloadedImageFile))
-                progressBar?.hide()
-                imageView.show()
-            }
+            imageLoadRequest
+                .load(readBitmap(downloadedImageFile))
         } else {
             Timber.d("Getting image from URL ($imageUrl)")
-
-            val scale = imageLoadParameters?.resultImageScale ?: 1f
-
-            Glide.with(context)
-                .asBitmap()
+            imageLoadRequest
                 .load(imageUrl)
-                .placeholder(placeholderDrawable)
-                .error(errorPlaceholderDrawable)
-                .fallback(errorPlaceholderDrawable)
-                .fitCenter()
-                .thumbnail(scale)
-                .apply(imageLoadParameters)
-                .into(imageView)
         }
+        imageLoadRequest.placeholder(placeholderDrawable)
+            .error(errorPlaceholderDrawable)
+            .fallback(errorPlaceholderDrawable)
+            .thumbnail(scale)
+            .apply(imageLoadParameters)
+            .addListener(object : RequestListener<Bitmap> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Bitmap>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    progressBar?.hide()
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Bitmap?,
+                    model: Any?,
+                    target: Target<Bitmap>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    progressBar?.hide()
+                    return false
+                }
+            })
+            .into(imageView)
     }
 
     override fun hashCode(): Int {
