@@ -73,7 +73,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 try {
                     mapHelper.enableLocationComponent(requireContext())
                 } catch (ex: IllegalStateException) {
-                    Timber.w("Tried to enable location component that is already enabled")
+                    errors.add(NearbyZonesError.NEARBY_ZONES_GPS_DISABLED)
                 } else errors.add(NearbyZonesError.NEARBY_ZONES_PERMISSION)
 
             if (!isResumed)
@@ -126,6 +126,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     true
                 }
                 binding.nearbyZonesIcon.setImageResource(R.drawable.ic_round_explore_off_24)
+            } else if (nearbyZonesErrors.contains(NearbyZonesError.NEARBY_ZONES_GPS_DISABLED)) {
+                // TODO: Tell the user to enable the gps
             }
             return
         }

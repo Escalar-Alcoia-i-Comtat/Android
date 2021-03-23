@@ -77,7 +77,8 @@ class MapFragment : NetworkChangeListenerFragment() {
                         else
                             Timber.w("User hasn't granted the location permission. Marker won't be enabled.")
                     } catch (ex: IllegalStateException) {
-                        Timber.w("Tried to enable location component that is already enabled")
+                        Timber.d("GPS not enabled.")
+                        // TODO: Tell the user to enable the gps
                     }
 
                 mapHelper.addSymbolClickListener {

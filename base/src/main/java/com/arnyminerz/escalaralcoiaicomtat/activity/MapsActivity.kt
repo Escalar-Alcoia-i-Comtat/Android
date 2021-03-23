@@ -215,19 +215,11 @@ class MapsActivity : LanguageAppCompatActivity() {
                         mapHelper.addMarkers(markers)
                         mapHelper.addGeometries(geometries)
 
-                        fun finished() {
-                            mapHelper.display()
-                            mapHelper.center(
-                                MAP_LOAD_PADDING,
-                                includeCurrentLocation = centerCurrentLocation
-                            )
-                        }
-
-                        if (isShowingLocation)
-                            mapHelper.getLocation { _, _ ->
-                                finished()
-                            }
-                        else finished()
+                        mapHelper.display()
+                        mapHelper.center(
+                            MAP_LOAD_PADDING,
+                            includeCurrentLocation = centerCurrentLocation
+                        )
 
                         binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
                     }
@@ -406,7 +398,8 @@ class MapsActivity : LanguageAppCompatActivity() {
 
                 result = true
             } catch (e: IllegalStateException) {
-                Timber.d("Location component already enabled")
+                Timber.d("GPS not enabled.")
+                // TODO: Tell the user to enable the gps
             } catch (e: MapNotInitializedException) {
                 Timber.w("The map has not been initialized yet.")
             }
