@@ -69,8 +69,10 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             Timber.v("Getting Parse configuration...")
             try {
                 val config = ParseConfig.get()
+                Timber.d("Got Parse configuration.")
                 APP_UPDATE_MAX_TIME_DAYS =
                     config.getInt("APP_UPDATE_MAX_TIME_DAYS", APP_UPDATE_MAX_TIME_DAYS_DEFAULT)
+                Timber.d("  APP_UPDATE_MAX_TIME_DAYS=$APP_UPDATE_MAX_TIME_DAYS")
             } catch (e: ParseException) {
                 Timber.w("Could not get configuration. Loading defaults...")
                 APP_UPDATE_MAX_TIME_DAYS = APP_UPDATE_MAX_TIME_DAYS_DEFAULT
@@ -80,7 +82,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             val appUpdateManager = AppUpdateManagerFactory.create(this)
             val appUpdateInfoTask = appUpdateManager.appUpdateInfo
             val appUpdateInfo = Tasks.await(appUpdateInfoTask)
-            if (appUpdateInfo.updateAvailability() == UPDATE_AVAILABLE) {
+            val updateAvailability = appUpdateInfo.updateAvailability()
+            if (updateAvailability == UPDATE_AVAILABLE) {
                 Timber.v("There's an update available")
                 val updateSteless = appUpdateInfo.clientVersionStalenessDays()
                 if (updateSteless != null && updateSteless >= APP_UPDATE_MAX_TIME_DAYS) {
@@ -108,7 +111,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                     loading = true
                     return@runAsync
                 } else Timber.w("Flexible update is not allowed")
-            }
+            } else Timber.d("There's no update available. ($updateAvailability)")
 
             Timber.v("Finished preparing App...")
             load()
