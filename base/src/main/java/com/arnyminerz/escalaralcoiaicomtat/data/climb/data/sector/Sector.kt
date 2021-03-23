@@ -150,7 +150,7 @@ data class Sector constructor(
             }
         } else {
             view.isClickable = false
-            Timber.e("Sector doesn't have any location stored")
+            Timber.w("Sector doesn't have any location stored")
         }
     }
 
