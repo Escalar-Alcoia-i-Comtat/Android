@@ -5,6 +5,15 @@ import com.bumptech.glide.TransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import timber.log.Timber
 
+/**
+ * Applies the data from [imageLoadParameters] into the request builder
+ * @author Arnau Mora
+ * @since 20210323
+ * @param imageLoadParameters The parameters to set
+ * @return The [RequestBuilder] instance for chaining calls
+ * @see RequestBuilder
+ * @see ImageLoadParameters
+ */
 fun <T> RequestBuilder<T>.apply(imageLoadParameters: ImageLoadParameters<T>?): RequestBuilder<T> {
     imageLoadParameters?.let { ilp ->
         ilp.requestOptions?.let {
