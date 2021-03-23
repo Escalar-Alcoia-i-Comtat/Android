@@ -264,4 +264,7 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="notification_download_progress_info_decoding_image">Decodificando imagen…</string>
     <string name="notification_download_complete_title">Descarga completa!</string>
     <string name="notification_download_complete_message">Descargado %s. Toca para abrir.</string>
+    <string name="action_enable_location">Habilitar Ubicación</string>
+    <string name="dialog_gps_disabled_title">GPS deshabilitado</string>
+    <string name="dialog_gps_disabled_message">Tienes el proveedor de ubicación desconectado.</string>
 </resources>

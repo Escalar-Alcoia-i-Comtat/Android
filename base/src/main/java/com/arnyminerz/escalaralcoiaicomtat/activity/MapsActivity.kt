@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.widget.PopupMenu
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -41,6 +42,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.MIME_TYPE_GPX
 import com.arnyminerz.escalaralcoiaicomtat.shared.MIME_TYPE_KMZ
 import com.arnyminerz.escalaralcoiaicomtat.shared.PERMISSION_DIALOG_TAG
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.Mapbox
@@ -161,7 +163,7 @@ class MapsActivity : LanguageAppCompatActivity() {
 
                     runOnUiThread {
                         Timber.v("Loading current location")
-                        val isShowingLocation = tryToShowCurrentLocation()
+                        tryToShowCurrentLocation()
 
                         map.uiSettings.apply {
                             isCompassEnabled = true
@@ -215,19 +217,11 @@ class MapsActivity : LanguageAppCompatActivity() {
                         mapHelper.addMarkers(markers)
                         mapHelper.addGeometries(geometries)
 
-                        fun finished() {
-                            mapHelper.display()
-                            mapHelper.center(
-                                MAP_LOAD_PADDING,
-                                includeCurrentLocation = centerCurrentLocation
-                            )
-                        }
-
-                        if (isShowingLocation)
-                            mapHelper.getLocation { _, _ ->
-                                finished()
-                            }
-                        else finished()
+                        mapHelper.display()
+                        mapHelper.center(
+                            MAP_LOAD_PADDING,
+                            includeCurrentLocation = centerCurrentLocation
+                        )
 
                         binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
                     }
@@ -406,7 +400,17 @@ class MapsActivity : LanguageAppCompatActivity() {
 
                 result = true
             } catch (e: IllegalStateException) {
-                Timber.d("Location component already enabled")
+                Timber.d("GPS not enabled.")
+                MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
+                    .setTitle(R.string.dialog_gps_disabled_title)
+                    .setMessage(R.string.dialog_gps_disabled_message)
+                    .setPositiveButton(R.string.action_enable_location) { _, _ ->
+                        startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                    }
+                    .setNegativeButton(R.string.action_cancel) { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
             } catch (e: MapNotInitializedException) {
                 Timber.w("The map has not been initialized yet.")
             }

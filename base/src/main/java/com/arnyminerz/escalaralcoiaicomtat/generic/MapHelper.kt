@@ -7,6 +7,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -38,7 +40,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoIcon
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICONS
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
-import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_INTERVAL_MILLIS
 import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_MIN_DIST
 import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_MIN_TIME
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MARKER_WINDOW_HIDE_DURATION
@@ -68,11 +69,6 @@ import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdate
@@ -134,29 +130,19 @@ class MapHelper(private val mapView: MapView) {
 
     private var loadedKMLAddress: String? = null
 
-    private lateinit var locationEngine: LocationEngine
+    private lateinit var locationManager: LocationManager
     var lastKnownLocation: LatLng? = null
         private set
     private val locationUpdateCallbacks = arrayListOf<(location: Location) -> Unit>()
-    private val locationUpdateCallback = object : LocationEngineCallback<LocationEngineResult> {
-        override fun onSuccess(result: LocationEngineResult?) {
-            if (result == null)
-                Timber.w("Could not update current location since result is null")
-            else {
-                val loc = result.lastLocation
-                Timber.v("Got new location: $loc")
-                lastKnownLocation = loc?.toLatLng()
-                map?.locationComponent?.forceLocationUpdate(
-                    LocationUpdate.Builder().location(loc).build()
-                )
-                if (loc != null)
-                    for (callback in locationUpdateCallbacks)
-                        callback(loc)
-            }
-        }
-
-        override fun onFailure(exception: java.lang.Exception) {
-            Timber.w(exception, "Could not update current location.")
+    private val locationUpdateCallback = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            Timber.v("Got new location: $location")
+            lastKnownLocation = location.toLatLng()
+            map?.locationComponent?.forceLocationUpdate(
+                LocationUpdate.Builder().location(location).build()
+            )
+            for (callback in locationUpdateCallbacks)
+                callback(location)
         }
     }
 
@@ -216,8 +202,8 @@ class MapHelper(private val mapView: MapView) {
     }
 
     fun onDestroy() {
-        if (this::locationEngine.isInitialized)
-            locationEngine.removeLocationUpdates(locationUpdateCallback)
+        if (this::locationManager.isInitialized)
+            locationManager.removeUpdates(locationUpdateCallback)
         mapView.onDestroy()
         Timber.d("onDestroy()")
     }
@@ -470,24 +456,33 @@ class MapHelper(private val mapView: MapView) {
 
     /**
      * Enables the current location pointer. Requires the location permission to be granted
-     * @param context The context to call from
+     * @param context The context to initialize the location component from
+     * @param provider The location provider from [LocationManager] for location updates
      * @param cameraMode The camera mode to set
      * @param renderMode The pointer render mode to set
      * @author Arnau Mora
      * @see CameraMode
      * @see RenderMode
      * @see PermissionsManager
+     * @see LocationManager.GPS_PROVIDER
+     * @see LocationManager.NETWORK_PROVIDER
+     * @see LocationManager.PASSIVE_PROVIDER
      * @throws MissingPermissionException If the location permission is not granted
      * @throws MapNotInitializedException If the map has not been initialized
-     * @throws IllegalStateException If the listener has already been enabled
+     * @throws IllegalStateException If the [provider] is not enabled
      */
     @SuppressLint("MissingPermission")
     @RequiresPermission(
         anyOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION]
     )
-    @Throws(MissingPermissionException::class, MapNotInitializedException::class)
+    @Throws(
+        MissingPermissionException::class,
+        MapNotInitializedException::class,
+        IllegalStateException::class
+    )
     fun enableLocationComponent(
         context: Context,
+        provider: String = LocationManager.GPS_PROVIDER,
         cameraMode: Int = CameraMode.TRACKING,
         renderMode: Int = RenderMode.COMPASS
     ) {
@@ -497,19 +492,21 @@ class MapHelper(private val mapView: MapView) {
         if (!PermissionsManager.areLocationPermissionsGranted(context))
             throw MissingPermissionException("Location permission not granted")
 
-        if (this::locationEngine.isInitialized)
-            throw IllegalStateException("Location component already enabled")
+        if (this::locationManager.isInitialized) {
+            Timber.v("Location component already enabled")
+            return
+        }
 
-        locationEngine = LocationEngineProvider.getBestLocationEngine(context)
-        val locationEngineRequest = LocationEngineRequest.Builder(LOCATION_UPDATE_INTERVAL_MILLIS)
-            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-            .setMaxWaitTime(LOCATION_UPDATE_MIN_TIME)
-            .setDisplacement(LOCATION_UPDATE_MIN_DIST)
-            .build()
-        locationEngine.requestLocationUpdates(
-            locationEngineRequest,
-            locationUpdateCallback,
-            Looper.getMainLooper()
+        locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        if (!locationManager.isProviderEnabled(provider))
+            throw IllegalStateException("The specified provider ($provider) is not enabled.")
+
+        locationManager.requestLocationUpdates(
+            provider,
+            LOCATION_UPDATE_MIN_TIME,
+            LOCATION_UPDATE_MIN_DIST,
+            locationUpdateCallback
         )
 
         map!!.locationComponent.apply {
@@ -538,26 +535,19 @@ class MapHelper(private val mapView: MapView) {
      * Gets the last location the location engine got.
      * @author Arnau Mora
      * @since 20210322
-     * @param callback What to call when the location is gotten.
+     * @param provider The location provider from [LocationManager]
      * @throws IllegalStateException When the location engine is not initialized. This may be because
      * the location is not enabled.
+     * @see LocationManager.GPS_PROVIDER
+     * @see LocationManager.NETWORK_PROVIDER
+     * @see LocationManager.PASSIVE_PROVIDER
      */
     @Throws(IllegalStateException::class)
     @SuppressLint("MissingPermission")
-    fun getLocation(callback: (location: Location?, error: Exception?) -> Unit) {
-        if (this::locationEngine.isInitialized)
-            locationEngine.getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
-                override fun onSuccess(result: LocationEngineResult?) {
-                    lastKnownLocation = result?.lastLocation?.toLatLng()
-                    callback(result?.lastLocation, null)
-                }
-
-                override fun onFailure(exception: java.lang.Exception) {
-                    callback(null, exception)
-                }
-            })
+    fun getLocation(provider: String = LocationManager.GPS_PROVIDER): Location? =
+        if (this::locationManager.isInitialized)
+            locationManager.getLastKnownLocation(provider)
         else throw IllegalStateException("Location Engine is not initialized.")
-    }
 
     /**
      * Changes the map's tracking camera mode

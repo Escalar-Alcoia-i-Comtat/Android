@@ -3,8 +3,10 @@ package com.arnyminerz.escalaralcoiaicomtat.fragment.climb
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.location.Location
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,6 +38,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_CENTER_CURRENT_LOCATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -73,7 +76,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 try {
                     mapHelper.enableLocationComponent(requireContext())
                 } catch (ex: IllegalStateException) {
-                    Timber.w("Tried to enable location component that is already enabled")
+                    errors.add(NearbyZonesError.NEARBY_ZONES_GPS_DISABLED)
                 } else errors.add(NearbyZonesError.NEARBY_ZONES_PERMISSION)
 
             if (!isResumed)
@@ -126,7 +129,20 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     true
                 }
                 binding.nearbyZonesIcon.setImageResource(R.drawable.ic_round_explore_off_24)
-            }
+            } else if (nearbyZonesErrors.contains(NearbyZonesError.NEARBY_ZONES_GPS_DISABLED))
+                MaterialAlertDialogBuilder(
+                    requireContext(),
+                    R.style.ThemeOverlay_App_MaterialAlertDialog
+                )
+                    .setTitle(R.string.dialog_gps_disabled_title)
+                    .setMessage(R.string.dialog_gps_disabled_message)
+                    .setPositiveButton(R.string.action_enable_location) { _, _ ->
+                        startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                    }
+                    .setNegativeButton(R.string.action_cancel) { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
             return
         }
 

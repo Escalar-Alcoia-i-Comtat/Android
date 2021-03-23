@@ -7,5 +7,6 @@ enum class NearbyZonesError(val message: String) {
     NEARBY_ZONES_NOT_ENABLED("Nearby Zones not enabled"),
     NEARBY_ZONES_PERMISSION("Location permission not granted"),
     NEARBY_ZONES_RESUMED("Not showing fragment (not resumed)"),
-    NEARBY_ZONES_EMPTY("AREAS is empty")
+    NEARBY_ZONES_EMPTY("AREAS is empty"),
+    NEARBY_ZONES_GPS_DISABLED("The device's GPS is turned off")
 }

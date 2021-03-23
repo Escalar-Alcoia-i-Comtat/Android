@@ -1,7 +1,9 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +24,7 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -77,7 +80,20 @@ class MapFragment : NetworkChangeListenerFragment() {
                         else
                             Timber.w("User hasn't granted the location permission. Marker won't be enabled.")
                     } catch (ex: IllegalStateException) {
-                        Timber.w("Tried to enable location component that is already enabled")
+                        Timber.d("GPS not enabled.")
+                        MaterialAlertDialogBuilder(
+                            requireContext(),
+                            R.style.ThemeOverlay_App_MaterialAlertDialog
+                        )
+                            .setTitle(R.string.dialog_gps_disabled_title)
+                            .setMessage(R.string.dialog_gps_disabled_message)
+                            .setPositiveButton(R.string.action_enable_location) { _, _ ->
+                                startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                            }
+                            .setNegativeButton(R.string.action_cancel) { dialog, _ ->
+                                dialog.dismiss()
+                            }
+                            .show()
                     }
 
                 mapHelper.addSymbolClickListener {
