@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.worker
 
+import android.app.PendingIntent
 import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.lifecycle.LiveData
@@ -15,12 +16,12 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.connection.parse.fetchPinOrNetworkSync
 import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClasses
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSLESS_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.storeToFile
+import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.shared.DATA_FIX_LABEL
@@ -43,6 +44,9 @@ const val DOWNLOAD_NAMESPACE = "namespace"
 const val DOWNLOAD_ID = "id"
 const val DOWNLOAD_OVERWRITE = "overwrite"
 const val DOWNLOAD_QUALITY = "quality"
+const val DOWNLOAD_INTENT_AREA_ID = "area_id"
+const val DOWNLOAD_INTENT_ZONE_ID = "zone_id"
+const val DOWNLOAD_INTENT_SECTOR_ID = "sector_id"
 
 /**
  * When the DownloadWorker was ran with missing data
@@ -250,6 +254,24 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
             Timber.v("Finished downloading $displayName")
             notification.destroy()
+
+            Timber.v("Showing download finished notification")
+            Notification.Builder(applicationContext)
+                .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
+                .withIcon(R.drawable.ic_notifications)
+                .withTitle(R.string.notification_download_complete_title)
+                .withText(R.string.notification_download_complete_message)
+                .withIntent(
+                    DataClass.getIntent(applicationContext, displayName)?.let { intent ->
+                        PendingIntent.getActivity(
+                            applicationContext,
+                            0,
+                            intent,
+                            PendingIntent.FLAG_IMMUTABLE
+                        )
+                    }
+                )
+                .buildAndShow()
 
             Result.success()
         }
