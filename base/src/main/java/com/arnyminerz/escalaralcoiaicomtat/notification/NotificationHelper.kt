@@ -369,5 +369,22 @@ class Notification private constructor(private val builder: Builder) {
 
             return Notification(this)
         }
+
+        /**
+         * Builds the notification, and calls the show method.
+         * @author Arnau Mora
+         * @since 20210313
+         * @return The built notification
+         * @throws IllegalStateException If the notification id already exists
+         * @throws NullChannelIdException If the channel id is null
+         * @throws NullIconException If the icon has not been specified
+         */
+        @Throws(
+            IllegalStateException::class,
+            NullChannelIdException::class,
+            NullIconException::class
+        )
+        fun buildAndShow(): Notification =
+            build().show()
     }
 }
