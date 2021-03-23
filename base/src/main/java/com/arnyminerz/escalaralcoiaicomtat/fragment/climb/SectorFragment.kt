@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
+import androidx.annotation.UiThread
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
@@ -63,6 +64,12 @@ class SectorFragment : NetworkChangeListenerFragment() {
             refreshMaximizeStatus()
     }
 
+    /**
+     * Load's the sector's image
+     * @author Arnau Mora
+     * @since 20210323
+     */
+    @UiThread
     private fun loadImage() {
         sector.asyncLoadImage(
             requireContext(),
@@ -95,7 +102,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
         super.onActivityCreated(savedInstanceState)
         areaId = requireArguments().getString(ARGUMENT_AREA_ID)!!
         zoneId = requireArguments().getString(ARGUMENT_ZONE_ID)!!
-        sectorIndex = requireArguments().getInt(ARGUMENT_SECTOR_INDEX)
+        sectorIndex = requireArguments().getInt(ARGUMENT_SECTOR_INDEX, 0)
     }
 
     override fun onDestroyView() {
@@ -113,11 +120,12 @@ class SectorFragment : NetworkChangeListenerFragment() {
      * @author Arnau Mora
      * @since 20210314
      */
+    @UiThread
     fun load() {
         if (!this::zoneId.isInitialized)
             return Timber.w("Could not load since class is not initialized")
 
-        if (loaded) {
+        if (loaded && this::sector.isInitialized) {
             sectorActivity?.updateTitle(sector.displayName, isDownloaded)
             loadImage()
             return
