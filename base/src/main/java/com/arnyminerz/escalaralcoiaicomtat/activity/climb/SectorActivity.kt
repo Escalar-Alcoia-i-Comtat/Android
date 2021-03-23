@@ -110,13 +110,12 @@ class SectorActivity : LanguageAppCompatActivity() {
 
         val areaIdExtra = intent.getExtra(EXTRA_AREA)
         val zoneIdExtra = intent.getExtra(EXTRA_ZONE)
-        if (areaIdExtra == null || zoneIdExtra == null) {
+        if (areaIdExtra == null || zoneIdExtra == null)
             return goBack()
-        } else {
-            areaId = areaIdExtra
-            zoneId = zoneIdExtra
-            Timber.d("Loading sectors from area $areaId, zone $zoneId...")
-        }
+
+        areaId = areaIdExtra
+        zoneId = zoneIdExtra
+        Timber.d("Loading sectors from area $areaId, zone $zoneId...")
 
         transitionName = intent.getExtra(EXTRA_SECTOR_TRANSITION_NAME)
         if (transitionName == null)
@@ -194,9 +193,11 @@ class SectorActivity : LanguageAppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString(EXTRA_AREA.key, areaId)
-        outState.putString(EXTRA_ZONE.key, zoneId)
-        outState.putInt(EXTRA_POSITION.key, binding.sectorViewPager.currentItem)
+        if (!errorNotStored) {
+            outState.putString(EXTRA_AREA.key, areaId)
+            outState.putString(EXTRA_ZONE.key, zoneId)
+            outState.putInt(EXTRA_POSITION.key, binding.sectorViewPager.currentItem)
+        }
         super.onSaveInstanceState(outState)
     }
 
