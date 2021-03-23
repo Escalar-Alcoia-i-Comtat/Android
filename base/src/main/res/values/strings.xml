@@ -144,6 +144,8 @@
     <string name="pref_down_automatic_updates_sum">Install updates to the downloads automatically.</string>
     <string name="pref_down_downloads_update_title">Update Downloads</string>
     <string name="pref_down_downloads_update_sum">Re-download all the stored downloads completely. Warning: High data usage!</string>
+    <string name="pref_down_quality_title">Download quality</string>
+    <string name="pref_down_quality_sum">Select the image compression quality of the downloads. If greater, more quality, but also larger files.</string>
 
     <string name="pref_info_cat_app">Application</string>
     <string name="pref_info_cat_source">Source</string>
@@ -170,6 +172,12 @@
 
     <string name="notification_download_progress_title">Downloading…</string>
     <string name="notification_download_progress_message">Downloading %s</string>
+    <string name="notification_download_complete_title">Download complete!</string>
+    <string name="notification_download_complete_message">Downloaded %s. Tap to open.</string>
+    <string name="notification_download_progress_info_unpinning">Unpinning…</string>
+    <string name="notification_download_progress_info_fetching">Downloading data…</string>
+    <string name="notification_download_progress_info_downloading_image">Downloading image…</string>
+    <string name="notification_download_progress_info_decoding_image">Decoding image…</string>
     <string name="notification_gpx_stored_title">GPX Stored correctly</string>
     <string name="notification_gpx_stored_message">Press to open</string>
     <string name="notification_kmz_stored_title">KMZ Stored correctly</string>

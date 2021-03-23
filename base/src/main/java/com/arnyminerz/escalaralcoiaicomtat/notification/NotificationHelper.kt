@@ -25,57 +25,75 @@ private fun generateNotificationId(): Int {
 private val builders = arrayMapOf<Int, Notification.Builder>()
 
 class Notification private constructor(private val builder: Builder) {
+    /**
+     * Returns the builder for this notification, for editing its contents.
+     * @author Arnau Mora
+     * @since 20210323
+     * @return The [Notification.Builder] for this notification.
+     * @see Builder
+     */
     fun edit(): Builder = builder
 
-    fun show() = with(builder) {
-        val notificationBuilder = NotificationCompat.Builder(context, channelId!!)
-        notificationBuilder.setSmallIcon(icon!!)
-        if (title != null)
-            notificationBuilder.setContentTitle(title)
-        if (text != null)
-            notificationBuilder.setContentText(text)
-        if (info != null)
-            notificationBuilder.setContentInfo(info)
-        if (longText != null)
-            notificationBuilder.setStyle(
-                NotificationCompat.BigTextStyle()
-                    .setBigContentTitle(title)
-                    .bigText(longText)
-            )
-        else if (text != null)
-            notificationBuilder.setStyle(
-                NotificationCompat.BigTextStyle()
-                    .bigText(text)
-            )
+    /**
+     * Shows the notification.
+     * @author Arnau Mora
+     * @since 20210323
+     * @return The current instance, for chaining functions
+     */
+    fun show(): Notification {
+        with(builder) {
+            val notificationBuilder = NotificationCompat.Builder(context, channelId!!)
+            notificationBuilder.setSmallIcon(icon!!)
+            if (title != null)
+                notificationBuilder.setContentTitle(title)
+            if (text != null)
+                notificationBuilder.setContentText(text)
+            if (info != null)
+                notificationBuilder.setContentInfo(info)
+            if (longText != null)
+                notificationBuilder.setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .setBigContentTitle(title)
+                        .bigText(longText)
+                )
+            else if (text != null)
+                notificationBuilder.setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(text)
+                )
 
-        intent?.let { notificationBuilder.setContentIntent(it) }
-        progress?.let { value, max ->
-            if (value < 0)
-                notificationBuilder.setProgress(0, 0, true)
-            else
-                notificationBuilder.setProgress(value, max, false)
+            intent?.let { notificationBuilder.setContentIntent(it) }
+            progress?.let { value, max ->
+                if (value < 0)
+                    notificationBuilder.setProgress(0, 0, true)
+                else
+                    notificationBuilder.setProgress(value, max, false)
+            }
+            notificationBuilder.setOngoing(persistent)
+
+            for (action in actions)
+                notificationBuilder.addAction(
+                    action.icon,
+                    action.text.toString(),
+                    action.clickListener
+                )
+
+            NotificationManagerCompat.from(builder.context)
+                .notify(builder.id, notificationBuilder.build())
         }
-        notificationBuilder.setOngoing(persistent)
-
-        for (action in actions)
-            notificationBuilder.addAction(
-                action.icon,
-                action.text.toString(),
-                action.clickListener
-            )
-
-        NotificationManagerCompat.from(builder.context)
-            .notify(builder.id, notificationBuilder.build())
+        return this
     }
 
     /**
      * Hides the notification
      * @author Arnau Mora
      * @since 20210313
+     * @return The current instance, for chaining functions
      */
-    fun hide() {
+    fun hide(): Notification {
         NotificationManagerCompat.from(builder.context)
             .cancel(builder.id)
+        return this
     }
 
     /**
@@ -89,8 +107,17 @@ class Notification private constructor(private val builder: Builder) {
         builders.remove(builder.id)
     }
 
-    class Builder(val context: Context) {
-        var id = generateNotificationId()
+    class Builder
+    /**
+     * Creates a new instance of the Builder class.
+     * @author Arnau Mora
+     * @since 20210323
+     * @param context The context to create the notification from
+     * @param id The id of the notification, or if not set, a new id will be generated.
+     * @see generateNotificationId
+     * @see Context
+     */
+    constructor(val context: Context, var id: Int = generateNotificationId()) {
         var channelId: String? = null
 
         @DrawableRes
@@ -232,7 +259,7 @@ class Notification private constructor(private val builder: Builder) {
          * @param pendingIntent What should be called when the notification is tapped
          * @return The Builder instance
          */
-        fun withIntent(pendingIntent: PendingIntent): Builder {
+        fun withIntent(pendingIntent: PendingIntent?): Builder {
             this.intent = pendingIntent
             return this
         }
@@ -322,7 +349,11 @@ class Notification private constructor(private val builder: Builder) {
          * @throws NullChannelIdException If the channel id is null
          * @throws NullIconException If the icon has not been specified
          */
-        @Throws(IllegalStateException::class, NullChannelIdException::class, NullIconException::class)
+        @Throws(
+            IllegalStateException::class,
+            NullChannelIdException::class,
+            NullIconException::class
+        )
         fun build(): Notification {
             var exception: Exception? = null
             if (channelId == null)
@@ -330,12 +361,30 @@ class Notification private constructor(private val builder: Builder) {
             if (icon == null)
                 exception = NullIconException("The icon has not been set")
             if (builders.containsKey(id))
-                exception = IllegalStateException("The specified notification id is already registered")
+                exception =
+                    IllegalStateException("The specified notification id is already registered")
 
             if (exception != null)
                 throw exception
 
             return Notification(this)
         }
+
+        /**
+         * Builds the notification, and calls the show method.
+         * @author Arnau Mora
+         * @since 20210313
+         * @return The built notification
+         * @throws IllegalStateException If the notification id already exists
+         * @throws NullChannelIdException If the channel id is null
+         * @throws NullIconException If the icon has not been specified
+         */
+        @Throws(
+            IllegalStateException::class,
+            NullChannelIdException::class,
+            NullIconException::class
+        )
+        fun buildAndShow(): Notification =
+            build().show()
     }
 }
