@@ -172,6 +172,7 @@
 
     <string name="notification_download_progress_title">Downloading…</string>
     <string name="notification_download_progress_message">Downloading %s</string>
+    <string name="notification_download_progress_info_unpinning">Unpinning…</string>
     <string name="notification_gpx_stored_title">GPX Stored correctly</string>
     <string name="notification_gpx_stored_message">Press to open</string>
     <string name="notification_kmz_stored_title">KMZ Stored correctly</string>

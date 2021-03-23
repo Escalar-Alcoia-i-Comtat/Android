@@ -256,4 +256,7 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="image_desc_nav_map">Ver mapa de áreas</string>
     <string name="image_desc_nav_downloads">Ver descargas</string>
     <string name="image_desc_nav_extra">Opciones extra</string>
+    <string name="notification_download_progress_info_unpinning">Eliminando…</string>
+    <string name="pref_down_quality_sum">Selecciona la calidad de compresión de las imágenes descargadas. Cuanto más grande, más calidad, pero también archivos más grandes.</string>
+    <string name="pref_down_quality_title">Calidad de descargas</string>
 </resources>

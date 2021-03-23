@@ -170,6 +170,10 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
         // Remove old data
         try {
+            notification
+                .edit()
+                .withInfoText(R.string.notification_download_progress_info_unpinning)
+                .buildAndShow()
             ParseObject.unpinAll(pin)
         } catch (e: ParseException) {
             return failure(ERROR_UNPIN)
