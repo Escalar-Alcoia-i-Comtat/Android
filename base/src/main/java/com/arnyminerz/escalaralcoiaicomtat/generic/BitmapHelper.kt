@@ -9,12 +9,26 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 
+/**
+ * Tries to use the WEB_LOSSLESS codec, if API level is less than R, uses WEBP
+ * @author Arnau Mora
+ * @since 20210323
+ * @see CompressFormat.WEBP_LOSSLESS
+ * @see CompressFormat.WEBP
+ */
 @Suppress("DEPRECATION")
 val WEBP_LOSSLESS_LEGACY: CompressFormat
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
         CompressFormat.WEBP_LOSSLESS
     else CompressFormat.WEBP
 
+/**
+ * Tries to use the WEBP_LOSSY codec, if API level is less than R, uses WEBP
+ * @author Arnau Mora
+ * @since 20210323
+ * @see CompressFormat.WEBP_LOSSY
+ * @see CompressFormat.WEBP
+ */
 @Suppress("DEPRECATION")
 val WEBP_LOSSY_LEGACY: CompressFormat
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
