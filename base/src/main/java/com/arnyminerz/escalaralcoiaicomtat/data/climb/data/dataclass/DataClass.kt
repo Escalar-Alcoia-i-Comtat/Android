@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.annotation.DrawableRes
+import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
@@ -19,7 +20,6 @@ import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
-import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
@@ -29,7 +29,8 @@ import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.view.apply
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData
@@ -386,80 +387,60 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param progressBar The loading progress bar
      * @param imageLoadParameters The parameters to use for loading the image
      */
+    @UiThread
     fun asyncLoadImage(
         context: Context,
         imageView: ImageView,
         progressBar: ProgressBar? = null,
-        imageLoadParameters: ImageLoadParameters? = null
+        imageLoadParameters: ImageLoadParameters<Bitmap>? = null
     ) {
         if (context is Activity)
             if (context.isDestroyed)
                 return Timber.e("The activity is destroyed, won't load image.")
 
-        progressBar?.let { context.visibility(it, true) }
+        progressBar?.show()
+        val scale = imageLoadParameters?.resultImageScale ?: 1f
 
+        var imageLoadRequest = Glide.with(context)
+            .asBitmap()
         val downloadedImageFile = imageFile(context)
-        if (downloadedImageFile.exists()) {
+        imageLoadRequest = if (downloadedImageFile.exists()) {
             Timber.d("Loading area image from storage: ${downloadedImageFile.path}")
-            context.onUiThread {
-                imageView.setImageBitmap(readBitmap(downloadedImageFile))
-                progressBar?.let { context.visibility(it, false) }
-                visibility(imageView, true)
-            }
+            imageLoadRequest
+                .load(readBitmap(downloadedImageFile))
         } else {
             Timber.d("Getting image from URL ($imageUrl)")
-
-            val scale = imageLoadParameters?.resultImageScale ?: 1f
-            context.onUiThread {
-                imageView.setImageResource(placeholderDrawable)
-            }
-
-            Glide.with(context)
-                .asBitmap()
+            imageLoadRequest
                 .load(imageUrl)
-                .placeholder(placeholderDrawable)
-                .error(errorPlaceholderDrawable)
-                .fallback(errorPlaceholderDrawable)
-                .fitCenter()
-                .thumbnail(scale)
-                .listener(object : RequestListener<Bitmap> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Bitmap>?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        context.onUiThread {
-                            imageView.setImageResource(errorPlaceholderDrawable)
-                            visibility(progressBar, false)
-                        }
-                        Timber.e(e, "Could not load image!")
-                        return false
-                    }
-
-                    override fun onResourceReady(
-                        resource: Bitmap?,
-                        model: Any?,
-                        target: Target<Bitmap>?,
-                        dataSource: DataSource?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        Timber.d("Got bitmap, loading on imageView. Namespace: $namespace")
-                        context.onUiThread {
-                            visibility(progressBar, false)
-
-                            if (resource == null)
-                                Timber.e("Bitmap is null!")
-                            else
-                                imageView.setImageBitmap(resource)
-                        }
-
-                        return true
-                    }
-                })
-                .apply(imageLoadParameters)
-                .submit()
         }
+        imageLoadRequest.placeholder(placeholderDrawable)
+            .error(errorPlaceholderDrawable)
+            .fallback(errorPlaceholderDrawable)
+            .thumbnail(scale)
+            .apply(imageLoadParameters)
+            .addListener(object : RequestListener<Bitmap> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Bitmap>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    progressBar?.hide()
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Bitmap?,
+                    model: Any?,
+                    target: Target<Bitmap>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    progressBar?.hide()
+                    return false
+                }
+            })
+            .into(imageView)
     }
 
     override fun hashCode(): Int {

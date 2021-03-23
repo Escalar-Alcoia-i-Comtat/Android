@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 
 import android.app.Activity
+import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
@@ -47,9 +48,9 @@ class AreaAdapter(
             activity,
             holder.imageView,
             imageLoadParameters =
-                ImageLoadParameters().withThumbnailSize(
-                    SETTINGS_PREVIEW_SCALE_PREF.get()
-                )
+            ImageLoadParameters<Bitmap>().withThumbnailSize(
+                SETTINGS_PREVIEW_SCALE_PREF.get()
+            )
         )
     }
 }
