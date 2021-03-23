@@ -6,6 +6,14 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
 
+const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7
+
+/**
+ * The maximum amount of days that will be allowed to the user not having updated the app
+ * before forcing an update.
+ */
+var APP_UPDATE_MAX_TIME_DAYS = APP_UPDATE_MAX_TIME_DAYS_DEFAULT
+
 val EXTRA_AREA = IntentExtra<String>("area")
 val EXTRA_ZONE = IntentExtra<String>("zone")
 val EXTRA_SECTOR_INDEX = IntentExtra<Int>("sector_index")
