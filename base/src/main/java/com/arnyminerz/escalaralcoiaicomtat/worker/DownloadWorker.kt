@@ -152,6 +152,12 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @param quality The compression quality of the downloaded images
      * @param query If downloading a children, this should be the parent's query.
      * @return A pair of a nullable [ParseQuery], and a nullable [Result].
+     *
+     * @see ERROR_MISSING_DATA
+     * @see ERROR_ALREADY_DOWNLOADED
+     * @see ERROR_DELETE_OLD
+     * @see ERROR_NOT_FOUND
+     * @see ERROR_UNPIN
      */
     private fun download(
         objectID: String,
