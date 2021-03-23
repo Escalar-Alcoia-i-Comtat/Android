@@ -41,6 +41,7 @@ jobs:
           echo "defaults.org=${{ secrets.SENTRY_ORGANIZATION }}" >> sentry.properties
           echo "auth.token=${{ secrets.SENTRY_TOKEN }}" >> sentry.properties
 
+          truncate -s 0 base/version.gradle
           echo "ext {" >> base/version.gradle
           echo "VERSION_NAME=\"${{ steps.create_release.outputs.tag_name }}\"" >> base/version.gradle
           echo "}" >> base/version.gradle
