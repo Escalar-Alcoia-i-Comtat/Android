@@ -58,6 +58,7 @@ fun visibility(view: Preference?, visible: Boolean, debug: Boolean = false) {
     view?.isVisible = visible
 }
 
+@UiThread
 fun Context?.visibility(
     view: View?,
     visible: Boolean,
@@ -129,11 +130,13 @@ fun View.visibility(
 /**
  * Sets the visibility of a view to gone
  */
+@UiThread
 fun View.hide(setGone: Boolean = true) = context.visibility(this, false, setGone = setGone)
 
 /**
  * Sets the visibility of a view to visible
  */
+@UiThread
 fun View.show() = context.visibility(this, true)
 
 @UiThread

@@ -114,7 +114,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                             } catch (e: FileNotFoundException) {
                                 Timber.w("KMZ file not found")
                             } finally {
-                                runOnUiThread { binding.loadingLayout.hide() }
+                                binding.loadingLayout.hide()
                             }
                         }
                     else {
