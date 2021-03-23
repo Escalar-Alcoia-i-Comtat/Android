@@ -86,3 +86,7 @@ const val ALL_DAY_INDEX = 0
 const val MORNING_INDEX = 1
 const val AFTERNOON_INDEX = 2
 const val NO_SUN_INDEX = 3
+
+// Downloads Constants
+const val DOWNLOAD_OVERWRITE_DEFAULT = true
+const val DOWNLOAD_QUALITY_DEFAULT = 100

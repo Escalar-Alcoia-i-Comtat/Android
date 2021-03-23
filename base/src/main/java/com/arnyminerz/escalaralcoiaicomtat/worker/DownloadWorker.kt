@@ -24,6 +24,8 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.storeToFile
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.shared.DATA_FIX_LABEL
+import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_OVERWRITE_DEFAULT
+import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.MAX_BATCH_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.parse.ParseException
@@ -41,9 +43,6 @@ const val DOWNLOAD_NAMESPACE = "namespace"
 const val DOWNLOAD_ID = "id"
 const val DOWNLOAD_OVERWRITE = "overwrite"
 const val DOWNLOAD_QUALITY = "quality"
-
-private const val OVERWRITE_DEFAULT = true
-private const val QUALITY_DEFAULT = 100
 
 /**
  * When the DownloadWorker was ran with missing data
@@ -75,6 +74,12 @@ const val ERROR_NOT_FOUND = "not_found"
  */
 const val ERROR_ALREADY_DOWNLOADED = "already_downloaded"
 
+/**
+ * When trying to store an image, and the parent dir could not be created.
+ * @since 20210323
+ */
+const val ERROR_CREATE_PARENT = "create_parent"
+
 class DownloadData
 /**
  * Initializes the class with specific parameters
@@ -89,8 +94,8 @@ private constructor(
     val type: DataClasses,
     val id: String,
     val tempDisplayName: String,
-    val overwrite: Boolean = OVERWRITE_DEFAULT,
-    val quality: Int = QUALITY_DEFAULT
+    val overwrite: Boolean = DOWNLOAD_OVERWRITE_DEFAULT,
+    val quality: Int = DOWNLOAD_QUALITY_DEFAULT
 ) {
     /**
      * Initializes the class with a DataClass
@@ -101,8 +106,8 @@ private constructor(
      */
     constructor(
         dataClass: DataClass<*, *>,
-        overwrite: Boolean = OVERWRITE_DEFAULT,
-        quality: Int = QUALITY_DEFAULT
+        overwrite: Boolean = DOWNLOAD_OVERWRITE_DEFAULT,
+        quality: Int = DOWNLOAD_QUALITY_DEFAULT
     ) : this(
         DataClasses.find(dataClass.namespace)!!,
         dataClass.objectId,
@@ -152,15 +157,20 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             val objectId = data.objectId
             val image = data.getString("image")!!
             // This is the image file
-            val imageFile = File(dataDir(applicationContext), "$namespace-$objectId.webp")
+            val filename = "$namespace-$objectId.webp"
+            val dataDir = dataDir(applicationContext)
+            val imageFile = File(dataDir, filename)
 
             if (imageFile.exists() && !overwrite)
                 return null to failure(ERROR_ALREADY_DOWNLOADED)
             if (!imageFile.deleteIfExists())
                 return null to failure(ERROR_DELETE_OLD)
+            if (!dataDir.mkdirs())
+                return null to failure(ERROR_CREATE_PARENT)
 
             Timber.d("Downloading image ($image)...")
             val stream = download(image)
+            Timber.d("Storing image ($imageFile)...")
             val bitmap = BitmapFactory.decodeStream(stream)
             bitmap.storeToFile(imageFile, format = WEBP_LOSSLESS_LEGACY, quality = quality)
         }
@@ -173,8 +183,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val namespace = inputData.getString(DOWNLOAD_NAMESPACE)
         val objectID = inputData.getString(DOWNLOAD_ID)
         val displayName = inputData.getString(DOWNLOAD_DISPLAY_NAME)
-        val overwrite = inputData.getBoolean(DOWNLOAD_OVERWRITE, OVERWRITE_DEFAULT)
-        val quality = inputData.getInt(DOWNLOAD_OVERWRITE, QUALITY_DEFAULT)
+        val overwrite = inputData.getBoolean(DOWNLOAD_OVERWRITE, DOWNLOAD_OVERWRITE_DEFAULT)
+        val quality = inputData.getInt(DOWNLOAD_OVERWRITE, DOWNLOAD_QUALITY_DEFAULT)
 
         // Check if any required data is missing
         return if (namespace == null || objectID == null || displayName == null)
