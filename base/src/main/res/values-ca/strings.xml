@@ -263,4 +263,7 @@
     <string name="notification_download_progress_info_decoding_image">Decodificant imatge…</string>
     <string name="notification_download_complete_title">Baixada completa!</string>
     <string name="notification_download_complete_message">Baixat %s. Toca per a obrir.</string>
+    <string name="action_enable_location">Habilitar Ubicació</string>
+    <string name="dialog_gps_disabled_title">GPS deshabilitat</string>
+    <string name="dialog_gps_disabled_message">Tens el proveïdor d\'ubiació desconnectat.</string>
 </resources>

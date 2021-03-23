@@ -54,6 +54,7 @@
     <string name="action_send_feedback">Send feedback</string>
     <string name="action_export_kmz">Export KMZ</string>
     <string name="action_export_gpx">Export GPX</string>
+    <string name="action_enable_location">Enable Location</string>
 
     <string name="status_updating">Updating…</string>
     <string name="status_loading">Loading…</string>
@@ -84,6 +85,8 @@
     <string name="dialog_description_rebuilder_title">Rebuilt By</string>
     <string name="dialog_high_data_usage_title">High data usage Alert</string>
     <string name="dialog_high_data_usage_message">You are about to do something that usually requires a high amount of Internet communication, and we have detected that you don\'t have a WiFi connection, are you sure that you want to continue?</string>
+    <string name="dialog_gps_disabled_title">GPS disabled</string>
+    <string name="dialog_gps_disabled_message">You have the device\'s location provider turned off.</string>
 
     <string name="path_ending_plate">Plate</string>
     <string name="path_ending_plate_ring">Plate Ring</string>
