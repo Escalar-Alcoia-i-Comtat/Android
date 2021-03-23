@@ -54,6 +54,7 @@ jobs:
           echo "auth.token=${{ secrets.SENTRY_TOKEN }}" >> sentry.properties
       - name: Prepare Gradle version file
         run: |
+          truncate -s 0 base/version.gradle
           echo "ext {" >> base/version.gradle
           echo "VERSION_NAME=\"${{ steps.create_release.outputs.tag_name }}\"" >> base/version.gradle
           echo "}" >> base/version.gradle
