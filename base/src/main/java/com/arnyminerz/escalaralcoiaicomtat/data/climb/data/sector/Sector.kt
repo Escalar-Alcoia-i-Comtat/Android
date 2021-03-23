@@ -2,21 +2,22 @@ package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
-import android.view.View
 import android.widget.TextView
+import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.connection.parse.fetchPinOrNetworkSync
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.arnyminerz.escalaralcoiaicomtat.view.BarChartHelper
 import com.arnyminerz.escalaralcoiaicomtat.view.getAttribute
@@ -32,6 +33,7 @@ import com.parse.ParseQuery
 import timber.log.Timber
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeoutException
 
 data class Sector constructor(
     override val objectId: String,
@@ -100,7 +102,17 @@ data class Sector constructor(
         parcel.readList(innerChildren, Path::class.java.classLoader)
     }
 
+    /**
+     * Loads the Sector's children Paths
+     * @author Arnau Mora
+     * @since 20210323
+     * @return The loaded Paths list
+     * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
+     * @throws TimeoutException If timeout passed before finishing the task
+     * @see Path
+     */
     @WorkerThread
+    @Throws(NoInternetAccessException::class, TimeoutException::class)
     override fun loadChildren(): List<Path> {
         val key = namespace.toLowerCase(Locale.getDefault())
         Timber.d("Loading elements from \"$childrenNamespace\", where $key=$objectId")
@@ -123,6 +135,15 @@ data class Sector constructor(
 
     override fun describeContents(): Int = 0
 
+    /**
+     * Sets the content for the chip as a kids apt chip.
+     * @author Arnau Mora
+     * @since 20210323
+     * @param context The context to call from
+     * @param chip The chip to update
+     * @see kidsApt
+     */
+    @UiThread
     fun kidsAptChip(context: Context, chip: Chip) {
         visibility(chip, kidsApt)
         if (kidsApt)
@@ -135,25 +156,41 @@ data class Sector constructor(
             }
     }
 
-    fun walkingTimeView(context: Context, view: View) {
-        if (view is TextView)
-            view.text = String.format(view.text.toString(), walkingTime.toString())
+    /**
+     * Updates the walking time [TextView]. Sets the text, and if [location] is not null, sets its
+     * click action to open it into the maps app.
+     * @author Arnau Mora
+     * @since 20210323
+     * @param context The context to call from
+     * @param textView The walking time TextView
+     * @see location
+     * @see LatLng.toUri
+     */
+    @UiThread
+    fun walkingTimeView(context: Context, textView: TextView) {
+        textView.text = String.format(textView.text.toString(), walkingTime.toString())
         if (location != null) {
             val mapIntent = Intent(
                 Intent.ACTION_VIEW,
-                Uri.parse(
-                    "geo:0,0?q=${location.latitude},${location.longitude}($displayName)".replace(" ", "+")
-                )
-            ).setPackage("com.google.android.apps.maps")
-            view.setOnClickListener {
+                location.toUri()
+            )
+            textView.setOnClickListener {
                 context.startActivity(mapIntent)
             }
         } else {
-            view.isClickable = false
+            textView.isClickable = false
             Timber.w("Sector doesn't have any location stored")
         }
     }
 
+    /**
+     * Loads the Sector's chart. Sets all the styles and loads the data from the instance.
+     * @author Arnau Mora
+     * @since 20210323
+     * @param context The context to call from
+     * @param chart The [BarChart] to update
+     */
+    @UiThread
     fun loadChart(context: Context, chart: BarChart) {
         val chartHelper = BarChartHelper.fromPaths(context, children)
         with(chart) {
