@@ -120,24 +120,24 @@ jobs:
           name: AAB Artifact
           path: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
 
-      - name: Upload APK
-        id: upload_apk_asset
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ steps.create_release.outputs.tag_name }}
-          file: ./base/build/outputs/apk/release/EscalarAlcoiaIComtat-release.apk
-          asset_name: EscalarAlcoiaIComtat.apk
-          overwrite: true
-      - name: Upload AAB
-        id: upload_aab_asset
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ steps.create_release.outputs.tag_name }}
-          file: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
-          asset_name: EscalarAlcoiaIComtat.aab
-          overwrite: true
+      #      - name: Upload APK
+      #        id: upload_apk_asset
+      #        uses: svenstaro/upload-release-action@v2
+      #        with:
+      #          repo_token: ${{ secrets.GITHUB_TOKEN }}
+      #          tag: ${{ steps.create_release.outputs.tag_name }}
+      #          file: ./base/build/outputs/apk/release/EscalarAlcoiaIComtat-release.apk
+      #          asset_name: EscalarAlcoiaIComtat.apk
+      #          overwrite: true
+      #      - name: Upload AAB
+      #        id: upload_aab_asset
+      #        uses: svenstaro/upload-release-action@v2
+      #        with:
+      #          repo_token: ${{ secrets.GITHUB_TOKEN }}
+      #          tag: ${{ steps.create_release.outputs.tag_name }}
+      #          file: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
+      #          asset_name: EscalarAlcoiaIComtat.aab
+      #          overwrite: true
 
       - name: Upload to Play Store
         id: upload_play_store
