@@ -110,8 +110,12 @@ class SectorActivity : LanguageAppCompatActivity() {
 
         val areaIdExtra = intent.getExtra(EXTRA_AREA)
         val zoneIdExtra = intent.getExtra(EXTRA_ZONE)
-        if (areaIdExtra == null || zoneIdExtra == null)
-            return goBack()
+        if (areaIdExtra == null || zoneIdExtra == null) {
+            Timber.e("No loaded data for activity")
+            errorNotStored = true
+            onBackPressed()
+            return
+        }
 
         areaId = areaIdExtra
         zoneId = zoneIdExtra
@@ -199,11 +203,5 @@ class SectorActivity : LanguageAppCompatActivity() {
             outState.putInt(EXTRA_POSITION.key, binding.sectorViewPager.currentItem)
         }
         super.onSaveInstanceState(outState)
-    }
-
-    private fun goBack() {
-        Timber.e("No loaded data for activity")
-        errorNotStored = true
-        onBackPressed()
     }
 }
