@@ -23,7 +23,6 @@ import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
 import java.io.File
-import java.util.concurrent.CompletableFuture.runAsync
 
 class ZoneAdapter(
     private val zones: List<Zone>,
@@ -62,13 +61,10 @@ class ZoneAdapter(
 
             onItemSelected?.let { it(zone, holder, position) }
         }
-        runAsync {
-            zone.asyncLoadImage(dataClassListActivity, holder.imageView)
-        }
+        zone.asyncLoadImage(dataClassListActivity, holder.imageView)
 
-        if (zone.downloadStatus(
-                dataClassListActivity
-            ) == DownloadStatus.DOWNLOADED || zone.kmlAddress != null
+        if (zone.downloadStatus(dataClassListActivity) == DownloadStatus.DOWNLOADED ||
+            zone.kmlAddress != null
         )
             holder.mapImageButton.setOnClickListener {
                 showMap(zone)

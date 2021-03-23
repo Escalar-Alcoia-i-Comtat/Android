@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.annotation.DrawableRes
+import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
@@ -29,7 +30,8 @@ import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.view.apply
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData
@@ -386,6 +388,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param progressBar The loading progress bar
      * @param imageLoadParameters The parameters to use for loading the image
      */
+    @UiThread
     fun asyncLoadImage(
         context: Context,
         imageView: ImageView,
@@ -396,23 +399,23 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             if (context.isDestroyed)
                 return Timber.e("The activity is destroyed, won't load image.")
 
-        progressBar?.let { context.visibility(it, true) }
+        progressBar?.show()
 
         val downloadedImageFile = imageFile(context)
         if (downloadedImageFile.exists()) {
             Timber.d("Loading area image from storage: ${downloadedImageFile.path}")
             context.onUiThread {
                 imageView.setImageBitmap(readBitmap(downloadedImageFile))
-                progressBar?.let { context.visibility(it, false) }
-                visibility(imageView, true)
+                progressBar?.hide()
+                imageView.show()
             }
         } else {
             Timber.d("Getting image from URL ($imageUrl)")
 
             val scale = imageLoadParameters?.resultImageScale ?: 1f
-            context.onUiThread {
+            /*context.onUiThread {
                 imageView.setImageResource(placeholderDrawable)
-            }
+            }*/
 
             Glide.with(context)
                 .asBitmap()
@@ -429,10 +432,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         target: Target<Bitmap>?,
                         isFirstResource: Boolean
                     ): Boolean {
-                        context.onUiThread {
+                        progressBar?.hide()
+                        /*context.onUiThread {
                             imageView.setImageResource(errorPlaceholderDrawable)
-                            visibility(progressBar, false)
-                        }
+                        }*/
                         Timber.e(
                             e,
                             "Could not load image for $namespace#$objectId! Url: $imageUrl"
@@ -448,20 +451,19 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         isFirstResource: Boolean
                     ): Boolean {
                         Timber.d("Got bitmap, loading on imageView. Namespace: $namespace")
-                        context.onUiThread {
-                            visibility(progressBar, false)
-
+                        progressBar?.hide()
+                        /*context.onUiThread {
                             if (resource == null)
-                                Timber.e("Bitmap is null!")
+                                Timber.w("Bitmap is null!")
                             else
                                 imageView.setImageBitmap(resource)
-                        }
+                        }*/
 
-                        return true
+                        return false
                     }
                 })
                 .apply(imageLoadParameters)
-                .submit()
+                .into(imageView)
         }
     }
 
