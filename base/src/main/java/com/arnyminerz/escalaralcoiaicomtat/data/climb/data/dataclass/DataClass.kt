@@ -433,7 +433,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                             imageView.setImageResource(errorPlaceholderDrawable)
                             visibility(progressBar, false)
                         }
-                        Timber.e(e, "Could not load image!")
+                        Timber.e(
+                            e,
+                            "Could not load image for $namespace#$objectId! Url: $imageUrl"
+                        )
                         return false
                     }
 
