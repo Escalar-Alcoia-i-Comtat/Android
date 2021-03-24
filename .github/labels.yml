@@ -66,7 +66,7 @@
   color: c1e050
 
 - name: gui
-  description: When code cleanup is done
+  description: When there are updates on the user interface
   color: 57A639
 
 - name: major

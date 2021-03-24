@@ -4,6 +4,9 @@ categories:
   - title: '🚀 Features'
     labels:
       - 'feature'
+  - title: '💻 GUI Updates'
+    labels:
+      - 'gui'
   - title: '🔧 Internal structure enhancement'
     labels:
       - 'enhancement'
