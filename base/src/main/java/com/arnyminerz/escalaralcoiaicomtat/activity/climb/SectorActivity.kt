@@ -9,7 +9,6 @@ import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity.Companion.errorNotStored
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
-import com.arnyminerz.escalaralcoiaicomtat.connection.parse.count
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
@@ -26,10 +25,11 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.parse.ParseException
 import com.parse.ParseObject
 import com.parse.ParseQuery
 import timber.log.Timber
+import java.util.concurrent.CompletableFuture.runAsync
 
 class SectorActivity : LanguageAppCompatActivity() {
     private var transitionName: String? = null
@@ -40,6 +40,13 @@ class SectorActivity : LanguageAppCompatActivity() {
     private val fragments = arrayListOf<SectorFragment>()
 
     private lateinit var binding: ActivitySectorBinding
+
+    /**
+     * Tells if the content has been loaded correctly
+     * @author Arnau Mora
+     * @since 20210324
+     */
+    private var loadComplete = false
 
     /**
      * Updates the Activity's title
@@ -91,8 +98,8 @@ class SectorActivity : LanguageAppCompatActivity() {
      */
     @UiThread
     fun setLoading(loading: Boolean) {
-        binding.loadingLayout.visibility(loading)
-        binding.titleTextView.visibility(loading)
+        com.arnyminerz.escalaralcoiaicomtat.view.visibility(binding.loadingLayout, loading)
+        com.arnyminerz.escalaralcoiaicomtat.view.visibility(binding.titleTextView, !loading)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,23 +109,27 @@ class SectorActivity : LanguageAppCompatActivity() {
         setContentView(view)
 
         val extras = intent.extras
-        if (extras == null) {
-            Timber.e("Extras is null")
+        if (extras == null && savedInstanceState == null) {
+            Timber.e("Extras is null and there's no savedInstanceState")
             onBackPressed()
             return
         }
 
         val areaIdExtra = intent.getExtra(EXTRA_AREA)
         val zoneIdExtra = intent.getExtra(EXTRA_ZONE)
-        if (areaIdExtra == null || zoneIdExtra == null) {
+        val areaIdInstanceState = savedInstanceState?.getString(EXTRA_AREA.key, null)
+        val zoneIdInstanceState = savedInstanceState?.getString(EXTRA_ZONE.key, null)
+        val areaIdBothInvalid = areaIdInstanceState == null && areaIdExtra == null
+        val zoneIdBothInvalid = zoneIdInstanceState == null && zoneIdExtra == null
+        if (areaIdBothInvalid || zoneIdBothInvalid) {
             Timber.e("No loaded data for activity")
             errorNotStored = true
             onBackPressed()
             return
         }
 
-        areaId = areaIdExtra
-        zoneId = zoneIdExtra
+        areaId = areaIdInstanceState ?: areaIdExtra!!
+        zoneId = zoneIdInstanceState ?: zoneIdExtra!!
         Timber.d("Loading sectors from area $areaId, zone $zoneId...")
 
         transitionName = intent.getExtra(EXTRA_SECTOR_TRANSITION_NAME)
@@ -131,73 +142,81 @@ class SectorActivity : LanguageAppCompatActivity() {
         binding.backImageButton.setOnClickListener { onBackPressed() }
         binding.statusImageView.setOnClickListener { it.performLongClick() }
 
-        val parentQuery = ParseQuery.getQuery<ParseObject>(Zone.NAMESPACE)
-        parentQuery.whereEqualTo("objectId", zoneId)
+        runAsync {
+            try {
+                val parentQuery = ParseQuery.getQuery<ParseObject>(Zone.NAMESPACE)
+                parentQuery.whereEqualTo("objectId", zoneId)
+                val query = ParseQuery.getQuery<ParseObject>(Sector.NAMESPACE)
+                query.addAscendingOrder("displayName")
+                query.whereMatchesQuery("zone", parentQuery)
+                Timber.v("Counting sectors in zone $zoneId")
+                val count = query.count()
+                Timber.v("There are $count sectors.")
 
-        val query = ParseQuery.getQuery<ParseObject>(Sector.NAMESPACE)
-        query.addAscendingOrder("displayName")
-        query.whereMatchesQuery("zone", parentQuery)
-        Timber.v("Counting sectors in zone $zoneId")
-        query.count { count, error ->
-            if (error != null)
-                throw error
-
-            Timber.v("There are $count sectors.")
-
-            Timber.d("Initializing fragments...")
-            fragments.clear()
-            for (i in 0 until count)
-                fragments.add(
-                    SectorFragment().apply {
-                        arguments = Bundle().apply {
-                            putString(ARGUMENT_AREA_ID, areaId)
-                            putString(ARGUMENT_ZONE_ID, zoneId)
-                            putInt(ARGUMENT_SECTOR_INDEX, i)
+                Timber.d("Initializing fragments...")
+                fragments.clear()
+                for (i in 0 until count)
+                    fragments.add(
+                        SectorFragment().apply {
+                            arguments = Bundle().apply {
+                                putString(ARGUMENT_AREA_ID, areaId)
+                                putString(ARGUMENT_ZONE_ID, zoneId)
+                                putInt(ARGUMENT_SECTOR_INDEX, i)
+                            }
+                        }
+                    )
+                runOnUiThread {
+                    Timber.v("Initializing view pager...")
+                    Timber.d("  Initializing adapter for ${fragments.size} pages...")
+                    val adapter = object : FragmentStateAdapter(this) {
+                        override fun getItemCount(): Int = fragments.size
+                        override fun createFragment(position: Int): Fragment {
+                            Timber.d("Creating fragment #$position")
+                            return fragments[position]
                         }
                     }
-                )
-            runOnUiThread {
-                Timber.v("Initializing view pager...")
-                Timber.d("  Initializing adapter for ${fragments.size} pages...")
-                val adapter = object : FragmentStateAdapter(this) {
-                    override fun getItemCount(): Int = fragments.size
-                    override fun createFragment(position: Int): Fragment {
-                        Timber.d("Creating fragment #$position")
-                        return fragments[position]
+                    Timber.d("  Initializing page change callback...")
+                    val callback = object : ViewPager2.OnPageChangeCallback() {
+                        override fun onPageSelected(position: Int) {
+                            super.onPageSelected(position)
+                            Timber.d("Selected page #$position")
+
+                            // Minimize all fragments
+                            for (fragment in fragments)
+                                fragment.minimize()
+
+                            fragments[position].load()
+                        }
                     }
+                    Timber.d("  Setting adapter...")
+                    binding.sectorViewPager.adapter = adapter
+                    Timber.d("  Registering callback...")
+                    binding.sectorViewPager.registerOnPageChangeCallback(callback)
+                    // If there's an stored positon, load it
+                    Timber.d("  Setting position")
+                    val defaultPosition = savedInstanceState?.getInt(EXTRA_POSITION.key)
+                        ?: intent.getExtra(EXTRA_SECTOR_INDEX, 0)
+                    binding.sectorViewPager.setCurrentItem(defaultPosition, false)
+                    fragments[defaultPosition].load()
+
+                    loadComplete = true
+                    Timber.d("Load completed, hiding loading layout")
+                    setLoading(false)
                 }
-                Timber.d("  Initializing page change callback...")
-                val callback = object : ViewPager2.OnPageChangeCallback() {
-                    override fun onPageSelected(position: Int) {
-                        super.onPageSelected(position)
-                        Timber.d("Selected page #$position")
-
-                        // Minimize all fragments
-                        for (fragment in fragments)
-                            fragment.minimize()
-
-                        fragments[position].load()
-                    }
-                }
-                Timber.d("  Setting adapter...")
-                binding.sectorViewPager.adapter = adapter
-                Timber.d("  Registering callback...")
-                binding.sectorViewPager.registerOnPageChangeCallback(callback)
-                // If there's an stored positon, load it
-                Timber.d("  Setting position")
-                val defaultPosition = savedInstanceState?.getInt(EXTRA_POSITION.key)
-                    ?: intent.getExtra(EXTRA_SECTOR_INDEX, 0)
-                binding.sectorViewPager.setCurrentItem(defaultPosition, false)
-                fragments[defaultPosition].load()
-
-                Timber.d("Load completed, hiding loading layout")
-                setLoading(false)
+            } catch (e: ParseException) {
+                throw e
             }
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (loadComplete)
+            setLoading(false)
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
-        if (!errorNotStored) {
+        if (this::areaId.isInitialized && this::zoneId.isInitialized) {
             outState.putString(EXTRA_AREA.key, areaId)
             outState.putString(EXTRA_ZONE.key, zoneId)
             outState.putInt(EXTRA_POSITION.key, binding.sectorViewPager.currentItem)

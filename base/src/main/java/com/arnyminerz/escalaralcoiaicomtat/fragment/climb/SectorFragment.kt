@@ -111,7 +111,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        if (isResumed && view != null)
+        if (isResumed)
             load()
     }
 
