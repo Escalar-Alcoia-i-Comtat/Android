@@ -11,6 +11,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreference
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
 import com.arnyminerz.escalaralcoiaicomtat.shared.PREVIEW_SCALE_PREFERENCE_MULTIPLIER
 import timber.log.Timber
@@ -29,8 +30,6 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.pref_general, rootKey)
 
-        onResume()
-
         sensibilityPreference = findPreference("pref_swipe_sensibility")
         sensibilityPreference?.setOnPreferenceChangeListener { _, value ->
             SETTINGS_GESTURE_SENSIBILITY_PREF.put(value as Int)
@@ -38,21 +37,23 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
         }
 
         languagePreference = findPreference("pref_language")
-        languagePreference?.setOnPreferenceChangeListener { _, newValue ->
-            Timber.v("New Language: $newValue")
-            val languages = context?.resources?.getStringArray(R.array.app_languages_values)
-            if (languages != null) {
-                val langIndex = languages.indexOf(newValue)
-                Timber.d("Language index: $langIndex")
-                SETTINGS_LANGUAGE_PREF.put(langIndex)
+        languagePreference?.setOnPreferenceChangeListener { _, value ->
+            val language = value as? String?
+            Timber.v("New Language: $language")
+            if (language != null) {
+                SETTINGS_LANGUAGE_PREF.put(language)
                 when (SETTINGS_LANGUAGE_PREF.get()) {
-                    0 -> // English
+                    "en" -> // English
                         Timber.d("Set English")
-                    1 -> // Catalan
+                    "ca" -> // Catalan
                         Timber.d("Set Catalan")
-                    2 -> // Spanish
+                    "es" -> // Spanish
                         Timber.d("Set Spanish")
-                    else -> Timber.d("Option not handled!")
+                    else -> {
+                        Timber.d("Option not handled!")
+                        toast(requireContext(), R.string.toast_error_language)
+                        return@setOnPreferenceChangeListener false
+                    }
                 }
 
                 with(requireActivity()) {
@@ -61,8 +62,12 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
                     startActivity(intent)
                     overridePendingTransition(0, 0)
                 }
-            } else Timber.d("Language not found!")
-            true
+                true
+            } else {
+                Timber.d("Could not get languages list")
+                toast(requireContext(), R.string.toast_error_language)
+                false
+            }
         }
 
         enableNearby = findPreference("pref_enable_nearby")
@@ -113,14 +118,25 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
             )
             true
         }
+
+        updateFields()
     }
 
     override fun onResume() {
         super.onResume()
 
+        updateFields()
+    }
+
+    /**
+     * Updates all the preferences to match the stored value
+     * @author Arnau Mora
+     * @since 20210324
+     */
+    private fun updateFields() {
         sensibilityPreference?.value = SETTINGS_GESTURE_SENSIBILITY_PREF.get()
 
-        languagePreference?.setValueIndex(
+        languagePreference?.setDefaultValue(
             SETTINGS_LANGUAGE_PREF.get()
         )
 
