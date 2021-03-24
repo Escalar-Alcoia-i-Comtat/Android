@@ -108,11 +108,28 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                         runAsync {
                             try {
                                 mapHelper.loadKML(this@DataClassListActivity, kmlAddress)
+                                binding.map.show()
+
+                                map.addOnMapClickListener {
+                                    try {
+                                        val intent = mapHelper.mapsActivityIntent(
+                                            this,
+                                            overrideLoadedMapData
+                                        )
+                                        Timber.v("Starting MapsActivity...")
+                                        startActivity(intent)
+                                        true
+                                    } catch (e: MapAnyDataToLoadException) {
+                                        Timber.w("Clicked on map and any data has been loaded")
+                                        false
+                                    }
+                                }
                             } catch (e: NoInternetAccessException) {
                                 Timber.w("Could not load KML since internet connection is not available")
-                                visibility(binding.map, false)
+                                binding.map.hide()
                             } catch (e: FileNotFoundException) {
                                 Timber.w("KMZ file not found")
+                                binding.map.hide()
                             } finally {
                                 binding.loadingLayout.hide()
                             }
@@ -120,18 +137,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                     else {
                         Timber.w("KML was not found")
                         binding.loadingLayout.hide()
-                    }
-
-                    map.addOnMapClickListener {
-                        try {
-                            val intent = mapHelper.mapsActivityIntent(this, overrideLoadedMapData)
-                            Timber.v("Starting MapsActivity...")
-                            startActivity(intent)
-                            true
-                        } catch (e: MapAnyDataToLoadException) {
-                            Timber.w("Clicked on map and any data has been loaded")
-                            false
-                        }
+                        binding.map.hide()
                     }
                 }
         } else if (!hasInternet) {
