@@ -123,9 +123,13 @@ fun View.visibility(
     visible: Boolean,
     setGone: Boolean = true,
     debug: Boolean = false,
-    clearAnimation: Boolean = true
+    clearAnimation: Boolean = true,
+    useContext: Boolean = true
 ) =
-    context.visibility(this, visible, setGone, debug, clearAnimation)
+    if (useContext)
+        context.visibility(this, visible, setGone, debug, clearAnimation)
+    else
+        visibility(this, visible, setGone, debug, clearAnimation)
 
 /**
  * Sets the visibility of a view to gone
