@@ -68,6 +68,7 @@ $dokka.location:com.arnyminerz.escalaralcoiaicomtat.view$hide(android.view.View,
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.view$show(android.view.View)com.arnyminerz.escalaralcoiaicomtat.view/android.view.-view/show.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.view$visibility(android.app.Activity, android.view.View, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean)com.arnyminerz.escalaralcoiaicomtat.view/android.app.-activity/visibility.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.view$visibility(android.content.Context, android.view.View, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean)com.arnyminerz.escalaralcoiaicomtat.view/android.content.-context/visibility.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.view$visibility(android.view.View, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean)com.arnyminerz.escalaralcoiaicomtat.view/android.view.-view/visibility.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.view$visibility(androidx.fragment.app.Fragment, android.view.View, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Boolean)com.arnyminerz.escalaralcoiaicomtat.view/androidx.fragment.app.-fragment/visibility.html
 com.arnyminerz.escalaralcoiaicomtat.activity
 com.arnyminerz.escalaralcoiaicomtat.activity.climb
