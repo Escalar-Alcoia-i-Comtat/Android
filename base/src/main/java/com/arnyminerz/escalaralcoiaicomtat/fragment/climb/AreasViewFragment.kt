@@ -194,13 +194,9 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         }
     }
 
-    private fun initializeMap(savedInstanceState: Bundle? = null) {
+    private fun initializeMap() {
         if (mapInitialized)
             return
-
-        Timber.d("Initializing MapHelper...")
-        mapHelper = MapHelper(binding.mapView)
-        mapHelper.onCreate(savedInstanceState)
 
         Timber.d("Loading map...")
         mapHelper
@@ -243,7 +239,10 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     ): View {
         _binding = FragmentViewAreasBinding.inflate(inflater, container, false)
 
-        initializeMap(savedInstanceState)
+        Timber.d("Initializing MapHelper...")
+        mapHelper = MapHelper(binding.mapView)
+        mapHelper.onCreate(savedInstanceState)
+        initializeMap()
 
         return binding.root
     }
@@ -275,8 +274,10 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             false
         }
 
-    fun setItemClickListener(areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?) {
-        this.areaClickListener = areaClickListener
+    override fun onStart() {
+        super.onStart()
+        if (this::mapHelper.isInitialized)
+            mapHelper.onStart()
     }
 
     override fun onResume() {
@@ -284,6 +285,38 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
         initializeMap()
         justAttached = false
+        if (this::mapHelper.isInitialized)
+            mapHelper.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (this::mapHelper.isInitialized)
+            mapHelper.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (this::mapHelper.isInitialized)
+            mapHelper.onStop()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        if (this::mapHelper.isInitialized)
+            mapHelper.onSaveInstanceState(outState)
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        if (this::mapHelper.isInitialized)
+            mapHelper.onLowMemory()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (this::mapHelper.isInitialized)
+            mapHelper.onDestroy()
     }
 
     override fun onDestroyView() {
@@ -295,5 +328,9 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         if (!isResumed) return
 
         visibility(binding.areasNoInternetCardView.noInternetCardView, !state.hasInternet)
+    }
+
+    fun setItemClickListener(areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?) {
+        this.areaClickListener = areaClickListener
     }
 }
