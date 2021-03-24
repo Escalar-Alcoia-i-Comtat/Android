@@ -10,7 +10,6 @@ import android.os.Looper
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
-import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_LANGUAGE_PREF
 import timber.log.Timber
 import java.util.Locale
@@ -41,15 +40,13 @@ class ContextUtils(base: Context) : ContextWrapper(base)
 fun loadLocale(context: Context): ContextWrapper {
     Timber.v("Loading app language...")
     val resources = context.resources
-    val appLanguagesValues = resources.getStringArray(R.array.app_languages_values)
     val langPref = SETTINGS_LANGUAGE_PREF.get()
-    val newLang = appLanguagesValues[langPref]
 
     val config = resources.configuration
-    val localeList = LocaleList(Locale(newLang))
+    val localeList = LocaleList(Locale(langPref))
     config.setLocales(localeList)
 
-    Timber.v("Set app locale to $newLang")
+    Timber.v("Set app locale to $langPref")
     return ContextUtils(context.createConfigurationContext(config))
 }
 

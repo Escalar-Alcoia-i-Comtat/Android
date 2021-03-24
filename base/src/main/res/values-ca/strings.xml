@@ -266,4 +266,5 @@
     <string name="action_enable_location">Habilitar Ubicació</string>
     <string name="dialog_gps_disabled_title">GPS deshabilitat</string>
     <string name="dialog_gps_disabled_message">Tens el proveïdor d\'ubiació desconnectat.</string>
+    <string name="toast_error_language">No s\'ha pogut canviar l\'idioma</string>
 </resources>

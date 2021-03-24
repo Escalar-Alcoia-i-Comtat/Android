@@ -198,6 +198,7 @@
 
     <string name="toast_error_internal">An internal error occurred</string>
     <string name="toast_error_no_internet">No Internet Access detected</string>
+    <string name="toast_error_language">Cannot change language</string>
     <string name="toast_location_not_shown">Current location won\'t be shown</string>
     <string name="toast_stored_gpx">GPX stored!</string>
     <string name="toast_stored_kmz">KMZ stored!</string>

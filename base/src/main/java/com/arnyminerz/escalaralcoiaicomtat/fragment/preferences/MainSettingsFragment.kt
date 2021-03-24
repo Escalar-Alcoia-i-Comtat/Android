@@ -17,8 +17,9 @@ private const val MARKER_SIZE_DEFAULT = 3
 private const val PREVIEW_SCALE_DEFAULT = .5f
 
 val SETTINGS_ALERT_PREF = PreferenceData("alert_pref", true)
-val SETTINGS_GESTURE_SENSIBILITY_PREF = PreferenceData("gest_sens_pref", GESTURE_SENSIBILITY_DEFAULT)
-val SETTINGS_LANGUAGE_PREF = PreferenceData("language_pref", 0)
+val SETTINGS_GESTURE_SENSIBILITY_PREF =
+    PreferenceData("gest_sens_pref", GESTURE_SENSIBILITY_DEFAULT)
+val SETTINGS_LANGUAGE_PREF = PreferenceData("lang_pref", "en")
 val SETTINGS_NEARBY_DISTANCE_PREF = PreferenceData("nearby_distance", NEARBY_DISTANCE_DEFAULT)
 val SETTINGS_MARKER_SIZE_PREF = PreferenceData("marker_size", MARKER_SIZE_DEFAULT)
 val SETTINGS_CENTER_MARKER_PREF = PreferenceData("center_marker", true)
