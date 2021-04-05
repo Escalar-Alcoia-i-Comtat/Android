@@ -270,7 +270,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             Timber.v("Starting MapsActivity...")
             startActivity(intent)
             true
-        } catch (e: MapAnyDataToLoadException) {
+        } catch (_: MapAnyDataToLoadException) {
             Timber.w("Clicked on nearby zones map and any data has been loaded")
             false
         }
