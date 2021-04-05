@@ -9,6 +9,7 @@ import androidx.annotation.StringRes
 import androidx.collection.arrayMapOf
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.exception.notification.NullChannelIdException
 import com.arnyminerz.escalaralcoiaicomtat.exception.notification.NullIconException
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
@@ -403,12 +404,10 @@ class Notification private constructor(private val builder: Builder) {
         val notificationOptions: NotificationOptions
             get() {
                 val builder = NotificationOptions.builder(context)
-                if (icon != null)
-                    builder.smallIconRes(icon!!)
-                if (title != null)
-                    builder.contentTitle(title)
-                if (text != null)
-                    builder.contentText(text)
+                builder.smallIconRes(icon!!)
+                builder.contentTitle(title)
+                builder.contentText(text)
+                builder.returnActivity(MainActivity::class.java.name)
                 return builder.build()
             }
     }
