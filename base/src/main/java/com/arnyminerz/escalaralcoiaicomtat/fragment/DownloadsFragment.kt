@@ -4,14 +4,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentDownloadsBinding
+import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.sizeString
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.DownloadSectionsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
+import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import java.util.concurrent.CompletableFuture.runAsync
 
 class DownloadsFragment : Fragment() {
     private var _binding: FragmentDownloadsBinding? = null
@@ -26,9 +30,18 @@ class DownloadsFragment : Fragment() {
         return binding.root
     }
 
+    /**
+     * Reloads the size TextView with the current [dataDir] size.
+     * @author Arnau Mora
+     * @since 20210406
+     */
+    @MainThread
     fun reloadSizeTextView() {
-        val dataDir = dataDir(requireContext())
-        binding.downloadSizeTextView.text = dataDir.sizeString()
+        runAsync {
+            val dataDir = dataDir(requireContext())
+            val sizeString = dataDir.sizeString()
+            runOnUiThread { binding.downloadSizeTextView.text = sizeString }
+        }
     }
 
     override fun onResume() {
@@ -36,11 +49,16 @@ class DownloadsFragment : Fragment() {
 
         reloadSizeTextView()
 
-        val sections = DownloadedSection.list()
+        runAsync {
+            val sections = DownloadedSection.list()
 
-        binding.downloadsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.downloadsRecyclerView.adapter =
-            DownloadSectionsAdapter(sections, requireActivity() as MainActivity)
+            runOnUiThread {
+                binding.downloadsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+                binding.downloadsRecyclerView.adapter =
+                    DownloadSectionsAdapter(sections, requireActivity() as MainActivity)
+                binding.loadingDownloadsProgressBar.visibility(false)
+            }
+        }
     }
 
     override fun onDestroyView() {
