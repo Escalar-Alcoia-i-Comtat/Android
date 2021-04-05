@@ -26,6 +26,15 @@ private val builders = arrayMapOf<Int, Notification.Builder>()
 
 class Notification private constructor(private val builder: Builder) {
     /**
+     * Returns [android.app.Notification] if the [show] method has been ran, or null if the notification
+     * is not ready.
+     * @author Arnau Mora
+     * @since 20210406
+     */
+    var notification: android.app.Notification? = null
+        private set
+
+    /**
      * Returns the builder for this notification, for editing its contents.
      * @author Arnau Mora
      * @since 20210323
@@ -78,8 +87,10 @@ class Notification private constructor(private val builder: Builder) {
                     action.clickListener
                 )
 
+            notification = notificationBuilder.build()
+
             NotificationManagerCompat.from(builder.context)
-                .notify(builder.id, notificationBuilder.build())
+                .notify(builder.id, notification!!)
         }
         return this
     }
@@ -93,6 +104,7 @@ class Notification private constructor(private val builder: Builder) {
     fun hide(): Notification {
         NotificationManagerCompat.from(builder.context)
             .cancel(builder.id)
+        notification = null
         return this
     }
 
