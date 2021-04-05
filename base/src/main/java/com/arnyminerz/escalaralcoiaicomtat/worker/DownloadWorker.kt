@@ -25,10 +25,20 @@ import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNE
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.shared.DATA_FIX_LABEL
+import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_MARKER_MARGIN
+import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_MARKER_MAX_ZOOM
+import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_MARKER_MIN_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_OVERWRITE_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.MAX_BATCH_SIZE
+import com.arnyminerz.escalaralcoiaicomtat.shared.METERS_PER_LAT_LON_DEGREE
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.geometry.LatLngBounds
+import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition
+import com.mapbox.mapboxsdk.plugins.offline.model.OfflineDownloadOptions
+import com.mapbox.mapboxsdk.plugins.offline.offline.OfflinePlugin
+import com.mapbox.mapboxsdk.plugins.offline.utils.OfflineUtils
 import com.parse.ParseException
 import com.parse.ParseObject
 import com.parse.ParseQuery
@@ -47,6 +57,7 @@ const val DOWNLOAD_QUALITY = "quality"
 const val DOWNLOAD_INTENT_AREA_ID = "area_id"
 const val DOWNLOAD_INTENT_ZONE_ID = "zone_id"
 const val DOWNLOAD_INTENT_SECTOR_ID = "sector_id"
+const val DOWNLOAD_STYLE_URL = "style_url"
 
 /**
  * When the DownloadWorker was ran with missing data
@@ -88,18 +99,27 @@ class DownloadData
 /**
  * Initializes the class with specific parameters
  * @param dataClass The [DataClass] to download.
+ * @param styleUrl The Mapbox Map style url.
  * @param overwrite If the download should be overwritten if already downloaded. Note that if this
  * is false, if the download already exists the task will fail.
  * @param quality The compression quality of the image
  */
 constructor(
     val dataClass: DataClass<*, *>,
+    val styleUrl: String?,
     val overwrite: Boolean = DOWNLOAD_OVERWRITE_DEFAULT,
     val quality: Int = DOWNLOAD_QUALITY_DEFAULT
 )
 
 class DownloadWorker private constructor(appContext: Context, workerParams: WorkerParameters) :
     Worker(appContext, workerParams) {
+    private lateinit var namespace: String
+    private lateinit var objectID: String
+    private lateinit var displayName: String
+    private var overwrite: Boolean = false
+    private var quality: Int = -1
+    private var styleUrl: String? = null
+
     /**
      * Specifies the downloading notification. For modifying it later.
      * @since 20210323
@@ -162,22 +182,14 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * Also updates the notification's info text.
      * @author Arnau Mora
      * @since 20210405
-     * @param namespace The namespace of the object
-     * @param objectID The ID in [namespace] of the object.
      * @param query If there was another query made before, for a parent object, for example.
-     * @param overwrite If the already downloaded content should be overridden
-     * @param quality The compression quality of the downloaded images
      * @return A [Result] that should be used as the [Worker]'s result.
      * @see pin
      * @see MAX_BATCH_SIZE
      * @see ERROR_ALREADY_DOWNLOADED
      */
     private fun fetchData(
-        objectID: String,
-        namespace: String,
-        query: ParseQuery<*>?,
-        overwrite: Boolean,
-        quality: Int
+        query: ParseQuery<*>?
     ): Pair<ParseQuery<*>?, Result?> {
         Timber.d("Fetching data from server ($namespace)...")
         notification
@@ -198,7 +210,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             Timber.d("Result list is empty.")
             failure(ERROR_ALREADY_DOWNLOADED)
         } else
-            processFetchedData(namespace, overwrite, quality, result, fetchQuery)
+            processFetchedData(namespace, overwrite, styleUrl, quality, result, fetchQuery)
     }
 
     /**
@@ -208,6 +220,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @since 20210405
      * @param namespace The namespace of the object
      * @param overwrite If the already downloaded content should be overridden
+     * @param styleUrl The Mapbox Map style url.
      * @param quality The compression quality of the downloaded images
      * @param result The loaded list of [ParseObject]s.
      * @param fetchQuery The [ParseQuery] where [result] was loaded from.
@@ -215,6 +228,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
     private fun processFetchedData(
         namespace: String,
         overwrite: Boolean,
+        styleUrl: String?,
         quality: Int,
         result: List<ParseObject>,
         fetchQuery: ParseQuery<ParseObject>
@@ -251,19 +265,62 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 .buildAndShow()
             val bitmap = BitmapFactory.decodeStream(stream)
             bitmap.storeToFile(imageFile, format = WEBP_LOSSLESS_LEGACY, quality = quality)
+
+            Timber.d("Preparing map region download...")
+            val locationRaw = data.getParseGeoPoint("location")
+            if (styleUrl != null && locationRaw != null)
+                downloadMapRegion(
+                    LatLng(locationRaw.latitude, locationRaw.longitude)
+                )
+            else
+                Timber.d("Won't download map. Style url ($styleUrl) or location ($locationRaw) may be null.")
         }
 
         return fetchQuery to Result.success()
     }
 
     /**
+     * Downloads a region of the map defined by the [location] and a circle around it with a radius
+     * of [DOWNLOAD_MARKER_MARGIN] meters. The conversion to degrees to use with [location], that
+     * is [LatLng] is done through [METERS_PER_LAT_LON_DEGREE].
+     * Also updates the notification to show the info text accordingly.
+     * @author Arnau Mora
+     * @since 20210406
+     * @param location The [LatLng] to download.
+     */
+    private fun downloadMapRegion(
+        location: LatLng
+    ) {
+        Timber.d("Downloading map region...")
+        notification
+            .edit()
+            .withInfoText(R.string.notification_download_progress_info_downloading_map)
+            .buildAndShow()
+        val margin = DOWNLOAD_MARKER_MARGIN / METERS_PER_LAT_LON_DEGREE
+        val displayDensity = applicationContext.resources.displayMetrics.density
+        val definition = OfflineTilePyramidRegionDefinition(
+            styleUrl,
+            LatLngBounds.Builder()
+                .include(LatLng(location.latitude - margin, location.longitude - margin))
+                .include(LatLng(location.latitude + margin, location.longitude + margin))
+                .build(),
+            DOWNLOAD_MARKER_MIN_ZOOM,
+            DOWNLOAD_MARKER_MAX_ZOOM,
+            displayDensity
+        )
+        OfflinePlugin.getInstance(applicationContext).startDownload(
+            OfflineDownloadOptions.builder()
+                .definition(definition)
+                .metadata(OfflineUtils.convertRegionName(pin(namespace, objectID)))
+                .notificationOptions(notification.edit().notificationOptions)
+                .build()
+        )
+    }
+
+    /**
      * Downloads an object for using it offline.
      * @author Arnau Mora
      * @since 20210323
-     * @param objectID The ID of the object to download
-     * @param namespace The namespace of the object
-     * @param overwrite If the already downloaded content should be overridden
-     * @param quality The compression quality of the downloaded images
      * @param query If downloading a children, this should be the parent's query.
      * @return A pair of a nullable [ParseQuery], and a nullable [Result].
      *
@@ -274,10 +331,6 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @see ERROR_UNPIN
      */
     private fun download(
-        objectID: String,
-        namespace: String,
-        overwrite: Boolean,
-        quality: Int,
         query: ParseQuery<*>?
     ): Pair<ParseQuery<*>?, Result?> {
         // Remove old data
@@ -286,7 +339,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             return oldDataRemoved
 
         // Fetch, process and store the data
-        return fetchData(objectID, namespace, query, overwrite, quality)
+        return fetchData(query)
     }
 
     override fun doWork(): Result {
@@ -294,14 +347,18 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val namespace = inputData.getString(DOWNLOAD_NAMESPACE)
         val objectID = inputData.getString(DOWNLOAD_ID)
         val displayName = inputData.getString(DOWNLOAD_DISPLAY_NAME)
-        val overwrite = inputData.getBoolean(DOWNLOAD_OVERWRITE, DOWNLOAD_OVERWRITE_DEFAULT)
-        val quality = inputData.getInt(DOWNLOAD_OVERWRITE, DOWNLOAD_QUALITY_DEFAULT)
+        overwrite = inputData.getBoolean(DOWNLOAD_OVERWRITE, DOWNLOAD_OVERWRITE_DEFAULT)
+        quality = inputData.getInt(DOWNLOAD_OVERWRITE, DOWNLOAD_QUALITY_DEFAULT)
+        styleUrl = inputData.getString(DOWNLOAD_STYLE_URL)
 
         // Check if any required data is missing
         return if (namespace == null || objectID == null || displayName == null)
             failure(ERROR_MISSING_DATA).second
         else {
             Timber.v("Downloading $objectID from $namespace...")
+            this.namespace = namespace
+            this.objectID = objectID
+            this.displayName = displayName
 
             // Build the notification
             val notificationBuilder = Notification.Builder(applicationContext)
@@ -312,7 +369,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 .setPersistent(true)
             notification = notificationBuilder.buildAndShow()
 
-            val currentDownload = download(objectID, namespace, overwrite, quality, null)
+            val currentDownload = download(null)
             val query = currentDownload.first
             val result = currentDownload.second
             if (result != null)
@@ -323,7 +380,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                     Timber.w("Cannot get Zone's children since query is null")
                 } else {
                     Timber.d("Downloading Zone's children...")
-                    download(objectID, Sector.NAMESPACE, overwrite, quality, query)
+                    this.namespace = Sector.NAMESPACE
+                    download(query)
                 }
 
             Timber.v("Finished downloading $displayName")
@@ -383,6 +441,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                             DOWNLOAD_NAMESPACE to dataClass.namespace,
                             DOWNLOAD_ID to dataClass.objectId,
                             DOWNLOAD_DISPLAY_NAME to dataClass.displayName,
+                            DOWNLOAD_STYLE_URL to styleUrl,
                             DOWNLOAD_OVERWRITE to overwrite,
                             DOWNLOAD_QUALITY to quality
                         )
