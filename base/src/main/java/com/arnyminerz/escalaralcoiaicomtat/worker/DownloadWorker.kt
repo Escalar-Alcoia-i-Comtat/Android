@@ -113,7 +113,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @param error The error name
      * @return A new failure Result with the set error data with key "error" for outputData.
      */
-    fun failure(error: String): Pair<ParseQuery<*>?, Result> {
+    private fun failure(error: String): Pair<ParseQuery<*>?, Result> {
         if (this::notification.isInitialized)
             notification.destroy()
         return null to Result.failure(
@@ -121,6 +121,139 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 "error" to error
             )
         )
+    }
+
+    /**
+     * Generates a pin from a [namespace] and an [objectID].
+     * @author Arnau Mora
+     * @since 20210405
+     * @param namespace The namespace of the object
+     * @param objectID The ID in [namespace] of the object.
+     * @return The pin [String]
+     */
+    private fun pin(namespace: String, objectID: String) =
+        "${DATA_FIX_LABEL}_${namespace}_$objectID"
+
+    /**
+     * This is the first step on a download, and consists on removing any possible already stored
+     * data that may be on the device, so the downloaded data is as updated as possible.
+     * Also updates the notification with the correct info text.
+     * @author Arnau Mora
+     * @since 20210405
+     * @param namespace The namespace of the object
+     * @param objectID The ID in [namespace] of the object.
+     * @return null if everything was correct, a [failure] otherwise.
+     * @see ERROR_UNPIN
+     */
+    private fun removeOldData(namespace: String, objectID: String) =
+        try {
+            notification
+                .edit()
+                .withInfoText(R.string.notification_download_progress_info_unpinning)
+                .buildAndShow()
+            ParseObject.unpinAll(pin(namespace, objectID))
+            null
+        } catch (_: ParseException) {
+            failure(ERROR_UNPIN)
+        }
+
+    /**
+     * Fetches the data from the server, and gets pinned through [pin] with [objectID] and [namespace].
+     * Also updates the notification's info text.
+     * @author Arnau Mora
+     * @since 20210405
+     * @param namespace The namespace of the object
+     * @param objectID The ID in [namespace] of the object.
+     * @param query If there was another query made before, for a parent object, for example.
+     * @param overwrite If the already downloaded content should be overridden
+     * @param quality The compression quality of the downloaded images
+     * @return A [Result] that should be used as the [Worker]'s result.
+     * @see pin
+     * @see MAX_BATCH_SIZE
+     * @see ERROR_ALREADY_DOWNLOADED
+     */
+    private fun fetchData(
+        objectID: String,
+        namespace: String,
+        query: ParseQuery<*>?,
+        overwrite: Boolean,
+        quality: Int
+    ): Pair<ParseQuery<*>?, Result?> {
+        Timber.d("Fetching data from server ($namespace)...")
+        notification
+            .edit()
+            .withInfoText(R.string.notification_download_progress_info_fetching)
+            .buildAndShow()
+        val fetchQuery = ParseQuery.getQuery<ParseObject>(namespace)
+        fetchQuery.limit = MAX_BATCH_SIZE
+        if (query != null) {
+            Timber.d("Downloading ${query.className}...")
+            val parameter = query.className.toLowerCase(Locale.getDefault())
+            Timber.d("  Should match $parameter at $namespace")
+            fetchQuery.whereMatchesQuery(parameter, query)
+        } else fetchQuery.whereEqualTo("objectId", objectID)
+        val result =
+            fetchQuery.fetchPinOrNetworkSync(pin(namespace, objectID), true) // Make sure to pin it
+        return if (result.isEmpty()) { // Object not found
+            Timber.d("Result list is empty.")
+            failure(ERROR_ALREADY_DOWNLOADED)
+        } else
+            processFetchedData(namespace, overwrite, quality, result, fetchQuery)
+    }
+
+    /**
+     * Once the data has been fetched in [fetchData], it gets processed, which downloads the image
+     * and maps so they are available offline.
+     * @author Arnau Mora
+     * @since 20210405
+     * @param namespace The namespace of the object
+     * @param overwrite If the already downloaded content should be overridden
+     * @param quality The compression quality of the downloaded images
+     * @param result The loaded list of [ParseObject]s.
+     * @param fetchQuery The [ParseQuery] where [result] was loaded from.
+     */
+    private fun processFetchedData(
+        namespace: String,
+        overwrite: Boolean,
+        quality: Int,
+        result: List<ParseObject>,
+        fetchQuery: ParseQuery<ParseObject>
+    ): Pair<ParseQuery<*>?, Result?> {
+        Timber.d("Fetched ${result.size} elements")
+        for (data in result) {
+            val objectId = data.objectId
+            val image = data.getString("image")!!
+            // This is the image file
+            val filename = "$namespace-$objectId.webp"
+            val dataDir = dataDir(applicationContext)
+            val imageFile = File(dataDir, filename)
+
+            var error: Pair<ParseQuery<*>?, Result>? = null
+            if (imageFile.exists() && !overwrite)
+                error = failure(ERROR_ALREADY_DOWNLOADED)
+            if (!imageFile.deleteIfExists())
+                error = failure(ERROR_DELETE_OLD)
+            if (!dataDir.exists() && !dataDir.mkdirs())
+                error = failure(ERROR_CREATE_PARENT)
+            if (error != null)
+                return error
+
+            Timber.d("Downloading image ($image)...")
+            notification
+                .edit()
+                .withInfoText(R.string.notification_download_progress_info_downloading_image)
+                .buildAndShow()
+            val stream = download(image)
+            Timber.d("Storing image ($imageFile)...")
+            notification
+                .edit()
+                .withInfoText(R.string.notification_download_progress_info_decoding_image)
+                .buildAndShow()
+            val bitmap = BitmapFactory.decodeStream(stream)
+            bitmap.storeToFile(imageFile, format = WEBP_LOSSLESS_LEGACY, quality = quality)
+        }
+
+        return fetchQuery to Result.success()
     }
 
     /**
@@ -147,72 +280,13 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         quality: Int,
         query: ParseQuery<*>?
     ): Pair<ParseQuery<*>?, Result?> {
-        val pin = "${DATA_FIX_LABEL}_${namespace}_$objectID"
-
         // Remove old data
-        try {
-            notification
-                .edit()
-                .withInfoText(R.string.notification_download_progress_info_unpinning)
-                .buildAndShow()
-            ParseObject.unpinAll(pin)
-        } catch (e: ParseException) {
-            return failure(ERROR_UNPIN)
-        }
+        val oldDataRemoved = removeOldData(namespace, objectID)
+        if (oldDataRemoved != null)
+            return oldDataRemoved
 
-        // Fetch the data
-        Timber.d("Fetching data from server ($namespace)...")
-        notification
-            .edit()
-            .withInfoText(R.string.notification_download_progress_info_fetching)
-            .buildAndShow()
-        val fetchQuery = ParseQuery.getQuery<ParseObject>(namespace)
-        fetchQuery.limit = MAX_BATCH_SIZE
-        if (query != null) {
-            Timber.d("Downloading ${query.className}...")
-            val parameter = query.className.toLowerCase(Locale.getDefault())
-            Timber.d("  Should match $parameter at $namespace")
-            fetchQuery.whereMatchesQuery(parameter, query)
-        } else fetchQuery.whereEqualTo("objectId", objectID)
-        val result = fetchQuery.fetchPinOrNetworkSync(pin, true) // Make sure to pin it
-        if (result.isEmpty()) { // Object not found
-            Timber.d("Result list is empty.")
-            return failure(ERROR_ALREADY_DOWNLOADED)
-        }
-
-        // Get the fetched data
-        Timber.d("Fetched ${result.size} elements")
-        for (data in result) {
-            val objectId = data.objectId
-            val image = data.getString("image")!!
-            // This is the image file
-            val filename = "$namespace-$objectId.webp"
-            val dataDir = dataDir(applicationContext)
-            val imageFile = File(dataDir, filename)
-
-            if (imageFile.exists() && !overwrite)
-                return failure(ERROR_ALREADY_DOWNLOADED)
-            if (!imageFile.deleteIfExists())
-                return failure(ERROR_DELETE_OLD)
-            if (!dataDir.exists() && !dataDir.mkdirs())
-                return failure(ERROR_CREATE_PARENT)
-
-            Timber.d("Downloading image ($image)...")
-            notification
-                .edit()
-                .withInfoText(R.string.notification_download_progress_info_downloading_image)
-                .buildAndShow()
-            val stream = download(image)
-            Timber.d("Storing image ($imageFile)...")
-            notification
-                .edit()
-                .withInfoText(R.string.notification_download_progress_info_decoding_image)
-                .buildAndShow()
-            val bitmap = BitmapFactory.decodeStream(stream)
-            bitmap.storeToFile(imageFile, format = WEBP_LOSSLESS_LEGACY, quality = quality)
-        }
-
-        return fetchQuery to null
+        // Fetch, process and store the data
+        return fetchData(objectID, namespace, query, overwrite, quality)
     }
 
     override fun doWork(): Result {
