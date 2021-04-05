@@ -210,7 +210,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             Timber.d("Result list is empty.")
             failure(ERROR_ALREADY_DOWNLOADED)
         } else
-            processFetchedData(namespace, overwrite, styleUrl, quality, result, fetchQuery)
+            processFetchedData(result, fetchQuery)
     }
 
     /**
@@ -218,18 +218,10 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * and maps so they are available offline.
      * @author Arnau Mora
      * @since 20210405
-     * @param namespace The namespace of the object
-     * @param overwrite If the already downloaded content should be overridden
-     * @param styleUrl The Mapbox Map style url.
-     * @param quality The compression quality of the downloaded images
      * @param result The loaded list of [ParseObject]s.
      * @param fetchQuery The [ParseQuery] where [result] was loaded from.
      */
     private fun processFetchedData(
-        namespace: String,
-        overwrite: Boolean,
-        styleUrl: String?,
-        quality: Int,
         result: List<ParseObject>,
         fetchQuery: ParseQuery<ParseObject>
     ): Pair<ParseQuery<*>?, Result?> {
