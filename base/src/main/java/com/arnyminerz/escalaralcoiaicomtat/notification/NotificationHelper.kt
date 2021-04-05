@@ -9,9 +9,11 @@ import androidx.annotation.StringRes
 import androidx.collection.arrayMapOf
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.exception.notification.NullChannelIdException
 import com.arnyminerz.escalaralcoiaicomtat.exception.notification.NullIconException
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
+import com.mapbox.mapboxsdk.plugins.offline.model.NotificationOptions
 
 private fun generateNotificationId(): Int {
     var greatest = 0
@@ -25,6 +27,15 @@ private fun generateNotificationId(): Int {
 private val builders = arrayMapOf<Int, Notification.Builder>()
 
 class Notification private constructor(private val builder: Builder) {
+    /**
+     * Returns [android.app.Notification] if the [show] method has been ran, or null if the notification
+     * is not ready.
+     * @author Arnau Mora
+     * @since 20210406
+     */
+    var notification: android.app.Notification? = null
+        private set
+
     /**
      * Returns the builder for this notification, for editing its contents.
      * @author Arnau Mora
@@ -78,8 +89,10 @@ class Notification private constructor(private val builder: Builder) {
                     action.clickListener
                 )
 
+            notification = notificationBuilder.build()
+
             NotificationManagerCompat.from(builder.context)
-                .notify(builder.id, notificationBuilder.build())
+                .notify(builder.id, notification!!)
         }
         return this
     }
@@ -93,6 +106,7 @@ class Notification private constructor(private val builder: Builder) {
     fun hide(): Notification {
         NotificationManagerCompat.from(builder.context)
             .cancel(builder.id)
+        notification = null
         return this
     }
 
@@ -386,5 +400,15 @@ class Notification private constructor(private val builder: Builder) {
         )
         fun buildAndShow(): Notification =
             build().show()
+
+        val notificationOptions: NotificationOptions
+            get() {
+                val builder = NotificationOptions.builder(context)
+                builder.smallIconRes(icon!!)
+                builder.contentTitle(title)
+                builder.contentText(text)
+                builder.returnActivity(MainActivity::class.java.name)
+                return builder.build()
+            }
     }
 }

@@ -29,6 +29,7 @@ import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.Style
 import timber.log.Timber
 import java.io.FileNotFoundException
 import java.util.concurrent.CompletableFuture.runAsync
@@ -37,6 +38,10 @@ class MapFragment : NetworkChangeListenerFragment() {
     private lateinit var mapHelper: MapHelper
     var mapLoaded = false
     var mapLoading = false
+    val mapStyle: Style?
+        get() = if (this::mapHelper.isInitialized)
+            mapHelper.style
+        else null
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!

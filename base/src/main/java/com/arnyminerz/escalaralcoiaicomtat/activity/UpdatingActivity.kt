@@ -143,7 +143,8 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
         dataClass.delete(this@UpdatingActivity)
 
         Timber.v("Downloading area #$updateArea...")
-        val result = dataClass.download(this)
+        // TODO: The map won't be downloaded again
+        val result = dataClass.download(this, null)
         result.observe(this) { workInfo ->
             val state = workInfo.state
             val data = workInfo.outputData

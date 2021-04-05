@@ -20,6 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.Style
 import com.parse.ParseAnalytics
 import timber.log.Timber
 import java.io.FileNotFoundException
@@ -32,6 +33,11 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
     protected lateinit var binding: LayoutListBinding
     protected lateinit var dataClass: T
     private lateinit var mapHelper: MapHelper
+
+    val mapStyle: Style?
+        get() = if (this::mapHelper.isInitialized)
+            mapHelper.style
+        else null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

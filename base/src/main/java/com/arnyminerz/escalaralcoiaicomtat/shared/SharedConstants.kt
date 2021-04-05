@@ -95,6 +95,29 @@ const val MORNING_INDEX = 1
 const val AFTERNOON_INDEX = 2
 const val NO_SUN_INDEX = 3
 
+/**
+ * Amount of meters the circumference of the planet measures.
+ * @author Arnau Mora
+ * @since 20210405
+ */
+const val EARTHS_CIRCUMFERENCE = 40075017
+
+/**
+ * The amount of meters there are in a degree of latitude nor longitude.
+ * @author Arnau Mora
+ * @since 20210405
+ */
+const val METERS_PER_LAT_LON_DEGREE = EARTHS_CIRCUMFERENCE / 360
+
 // Downloads Constants
 const val DOWNLOAD_OVERWRITE_DEFAULT = true
 const val DOWNLOAD_QUALITY_DEFAULT = 85
+
+/**
+ * The amount of margin in meters there should be left in the downloaded map around a marker.
+ * @author Arnau Mora
+ * @since 20210405
+ */
+const val DOWNLOAD_MARKER_MARGIN = 100
+const val DOWNLOAD_MARKER_MIN_ZOOM = 10.0
+const val DOWNLOAD_MARKER_MAX_ZOOM = 20.0

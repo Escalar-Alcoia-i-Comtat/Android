@@ -38,7 +38,8 @@ import timber.log.Timber
 class MainActivity : LanguageAppCompatActivity() {
 
     private lateinit var areasViewFragment: AreasViewFragment
-    private lateinit var mapFragment: MapFragment
+    lateinit var mapFragment: MapFragment
+        private set
     lateinit var downloadsFragment: DownloadsFragment
         private set
     private lateinit var settingsFragment: SettingsFragmentManager

@@ -99,7 +99,10 @@ class SectorsAdapter(
                 else
                     when (sector.downloadStatus(dataClassListActivity)) {
                         DownloadStatus.NOT_DOWNLOADED -> {
-                            val result = sector.download(dataClassListActivity)
+                            val result = sector.download(
+                                dataClassListActivity,
+                                dataClassListActivity.mapStyle
+                            )
                             result.observe(dataClassListActivity) { workInfo ->
                                 val state = workInfo.state
                                 val data = workInfo.outputData
