@@ -72,18 +72,19 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 errors.add(NearbyZonesError.NEARBY_ZONES_CONTEXT)
             else if (!nearbyEnabled)
                 errors.add(NearbyZonesError.NEARBY_ZONES_NOT_ENABLED)
-            else if (PermissionsManager.areLocationPermissionsGranted(requireContext()))
+            else if (PermissionsManager.areLocationPermissionsGranted(requireContext())) {
                 try {
                     mapHelper.enableLocationComponent(requireContext())
-                } catch (ex: IllegalStateException) {
+
+                    if (!isResumed)
+                        errors.add(NearbyZonesError.NEARBY_ZONES_RESUMED)
+
+                    if (AREAS.isEmpty)
+                        errors.add(NearbyZonesError.NEARBY_ZONES_EMPTY)
+                } catch (_: IllegalStateException) {
                     errors.add(NearbyZonesError.NEARBY_ZONES_GPS_DISABLED)
-                } else errors.add(NearbyZonesError.NEARBY_ZONES_PERMISSION)
-
-            if (!isResumed)
-                errors.add(NearbyZonesError.NEARBY_ZONES_RESUMED)
-
-            if (AREAS.isEmpty)
-                errors.add(NearbyZonesError.NEARBY_ZONES_EMPTY)
+                }
+            } else errors.add(NearbyZonesError.NEARBY_ZONES_PERMISSION)
         }
 
         if (errors.isNotEmpty())
@@ -269,7 +270,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             Timber.v("Starting MapsActivity...")
             startActivity(intent)
             true
-        } catch (e: MapAnyDataToLoadException) {
+        } catch (_: MapAnyDataToLoadException) {
             Timber.w("Clicked on nearby zones map and any data has been loaded")
             false
         }
