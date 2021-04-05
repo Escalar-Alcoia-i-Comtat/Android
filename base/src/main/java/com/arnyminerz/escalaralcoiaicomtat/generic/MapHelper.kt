@@ -144,6 +144,18 @@ class MapHelper(private val mapView: MapView) {
             for (callback in locationUpdateCallbacks)
                 callback(location)
         }
+
+        override fun onProviderEnabled(provider: String) {
+            Timber.d("The location provider has been enabled")
+        }
+
+        override fun onProviderDisabled(provider: String) {
+            Timber.d("The location provider has been disabled")
+        }
+
+        override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+            Timber.d("The status of provider $provider has been changed to $status.")
+        }
     }
 
     private var startingPosition: LatLng = LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
