@@ -12,6 +12,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.arnyminerz.escalaralcoiaicomtat.exception.notification.NullChannelIdException
 import com.arnyminerz.escalaralcoiaicomtat.exception.notification.NullIconException
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
+import com.mapbox.mapboxsdk.plugins.offline.model.NotificationOptions
 
 private fun generateNotificationId(): Int {
     var greatest = 0
@@ -398,5 +399,17 @@ class Notification private constructor(private val builder: Builder) {
         )
         fun buildAndShow(): Notification =
             build().show()
+
+        val notificationOptions: NotificationOptions
+            get() {
+                val builder = NotificationOptions.builder(context)
+                if (icon != null)
+                    builder.smallIconRes(icon!!)
+                if (title != null)
+                    builder.contentTitle(title)
+                if (text != null)
+                    builder.contentText(text)
+                return builder.build()
+            }
     }
 }
