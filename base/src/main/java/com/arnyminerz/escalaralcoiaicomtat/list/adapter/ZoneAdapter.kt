@@ -77,7 +77,10 @@ class ZoneAdapter(
             else
                 when (zone.downloadStatus(dataClassListActivity)) {
                     DownloadStatus.NOT_DOWNLOADED -> {
-                        val result = zone.download(dataClassListActivity)
+                        val result = zone.download(
+                            dataClassListActivity,
+                            dataClassListActivity.mapStyle
+                        )
                         result.observe(dataClassListActivity) { workInfo ->
                             val state = workInfo.state
                             val data = workInfo.outputData

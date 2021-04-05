@@ -40,6 +40,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.mapbox.mapboxsdk.maps.Style
 import com.parse.ParseObject
 import com.parse.ParseQuery
 import timber.log.Timber
@@ -206,6 +207,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20210313
      * @param context The context to run from.
+     * @param style The Mapbox Map's style.
      * @param overwrite If the new data should overwrite the old one
      * @param quality The quality in which do the codification
      * @return A LiveData object with the download work info
@@ -215,12 +217,17 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     @Throws(IllegalArgumentException::class)
     fun download(
         context: Context,
+        style: Style?,
         overwrite: Boolean = true,
         quality: Int = 100
     ): LiveData<WorkInfo> {
         if (quality < DOWNLOAD_QUALITY_MIN || quality > DOWNLOAD_QUALITY_MAX)
             throw IllegalArgumentException("Quality must be between 1 and 100")
-        return DownloadWorker.schedule(context, pin, DownloadData(this, overwrite, quality))
+        return DownloadWorker.schedule(
+            context,
+            pin,
+            DownloadData(this, style?.uri, overwrite, quality)
+        )
     }
 
     /**

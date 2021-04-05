@@ -52,27 +52,27 @@ class DownloadSectionsAdapter(
                 if (!appNetworkState.hasInternet)
                     mainActivity.toast(R.string.toast_error_no_internet)
                 else if (sectionDownloadStatus == DownloadStatus.NOT_DOWNLOADED) {
-                        val result = section.download(mainActivity)
-                        result.observe(mainActivity) { workInfo ->
-                            val state = workInfo.state
-                            val data = workInfo.outputData
-                            Timber.v("Current download status: ${workInfo.state}")
-                            when (state) {
-                                WorkInfo.State.FAILED -> {
-                                    mainActivity.toast(R.string.toast_error_internal)
-                                    visibility(downloadProgressBar, false)
-                                    Timber.w("Download failed! Error: ${data.getString("error")}")
-                                }
-                                WorkInfo.State.SUCCEEDED -> {
-                                    visibility(downloadProgressBar, false)
-                                    Timber.v("Finished downloading. Updating Downloads Recycler View...")
-                                    mainActivity.downloadsFragment.reloadSizeTextView()
-                                    notifyDataSetChanged()
-                                }
-                                else -> downloadProgressBar.isIndeterminate = true
+                    val result = section.download(mainActivity, mainActivity.mapFragment.mapStyle)
+                    result.observe(mainActivity) { workInfo ->
+                        val state = workInfo.state
+                        val data = workInfo.outputData
+                        Timber.v("Current download status: ${workInfo.state}")
+                        when (state) {
+                            WorkInfo.State.FAILED -> {
+                                mainActivity.toast(R.string.toast_error_internal)
+                                visibility(downloadProgressBar, false)
+                                Timber.w("Download failed! Error: ${data.getString("error")}")
                             }
+                            WorkInfo.State.SUCCEEDED -> {
+                                visibility(downloadProgressBar, false)
+                                Timber.v("Finished downloading. Updating Downloads Recycler View...")
+                                mainActivity.downloadsFragment.reloadSizeTextView()
+                                notifyDataSetChanged()
+                            }
+                            else -> downloadProgressBar.isIndeterminate = true
                         }
-                    } else if (section.downloadStatus(mainActivity) == DownloadStatus.DOWNLOADING)
+                    }
+                } else if (section.downloadStatus(mainActivity) == DownloadStatus.DOWNLOADING)
                     mainActivity.toast(R.string.message_already_downloading)
             }
             visibility(downloadProgressBar, sectionDownloadStatus == DownloadStatus.DOWNLOADING)
