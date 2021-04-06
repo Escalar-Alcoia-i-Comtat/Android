@@ -103,6 +103,16 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
         runAsync {
             val hasInfo = path.hasInfo()
             val pathSpannable = path.grade().getSpannable(activity)
+            val toggledPathSpannable =
+                if (path.grades.size > 1)
+                    Grade.GradesList(
+                        path.grades.subList(
+                            1,
+                            path.grades.size
+                        ) // Remove first line
+                    ).getSpannable(activity)
+                else
+                    pathSpannable
 
             // This determines if there are more than 1 line, so that means that the path has multiple
             //   pitches, and they should be shown when the arrow is tapped.
@@ -120,6 +130,15 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                         LinePattern(activity, R.string.sector_height)
                     ) else null
 
+            val descriptionDialog = DescriptionDialog.create(activity, path)
+
+            val chips = createChips(
+                path.endings,
+                path.pitches,
+                path.fixedSafesData,
+                path.requiredSafesData
+            )
+
             activity.runOnUiThread {
                 val cardView = holder.cardView
                 val titleTextView = holder.titleTextView
@@ -132,7 +151,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
 
                 if (hasInfo)
                     infoImageButton.setOnClickListener {
-                        DescriptionDialog.create(activity, path)?.show()
+                        descriptionDialog?.show()
                             ?: Timber.e("Could not create dialog")
                     }
                 else visibility(infoImageButton, false)
@@ -153,13 +172,9 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                     if (toggled[position]) ROTATION_B else ROTATION_A
                 updateCardToggleStatus(holder.cardView, toggled[position])
 
-                addChips(
-                    path.endings,
-                    path.pitches,
-                    path.fixedSafesData,
-                    path.requiredSafesData,
-                    holder.safesChipGroup
-                )
+                holder.safesChipGroup.removeAllViews()
+                for (chip in chips)
+                    holder.safesChipGroup.addView(chip)
 
                 holder.toggleImageButton.setOnClickListener { toggleImageButton ->
                     // Switch the toggled status
@@ -178,15 +193,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
 
                         difficultyTextView.isSingleLine = false
                         difficultyTextView.setText(
-                            (if (path.grades.size > 1)
-                                Grade.GradesList().addAllHere(
-                                    path.grades.subList(
-                                        1,
-                                        path.grades.size
-                                    ) // Remove first line
-                                ).getSpannable(activity)
-                            else
-                                path.grade().getSpannable(activity)),
+                            toggledPathSpannable,
                             TextView.BufferType.SPANNABLE
                         )
 
@@ -197,7 +204,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
 
                         difficultyTextView.isSingleLine = true
                         difficultyTextView.setText(
-                            path.grade().getSpannable(activity),
+                            pathSpannable,
                             TextView.BufferType.SPANNABLE
                         )
 
@@ -249,7 +256,6 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
     }
 
     private data class ChipData(
-        val chipGroup: ChipGroup,
         val chipType: ChipType,
         @DrawableRes val icon: Int? = null
     )
@@ -264,97 +270,99 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
     fun getString(@StringRes stringRes: Int) = activity.resources.getString(stringRes)
 
     /**
-     * Adds all the chips to the chip group.
+     * Creates all the [Chip]s that should be shown in the [ChipGroup].
      * @author Arnau Mora
      * @since 20210406
      */
     @UiThread
-    private fun addChips(
+    private fun createChips(
         endings: List<EndingType>,
         pitches: List<Pitch>,
         fixedSafesData: FixedSafesData,
-        requiredSafesData: RequiredSafesData,
-        safesChipGroup: ChipGroup
-    ) {
-        safesChipGroup.removeAllViews()
-
+        requiredSafesData: RequiredSafesData
+    ): List<Chip> = with(arrayListOf<Chip>()) {
         if (fixedSafesData.sum() > 0)
-            if (!fixedSafesData.hasSafeCount())
-                addChip(
-                    getString(R.string.safe_strings),
-                    fixedSafesData.stringCount,
-                    ChipData(
-                        safesChipGroup,
-                        ChipType.SAFE,
-                        R.drawable.ic_icona_express
-                    ),
-                    endings,
-                    pitches,
-                    fixedSafesData,
-                    requiredSafesData
-                )
-            else
-                addChip(
-                    getString(R.string.safe_strings_plural),
-                    null,
-                    ChipData(
-                        safesChipGroup,
-                        ChipType.SAFE,
-                        R.drawable.ic_icona_express
-                    ),
-                    endings,
-                    pitches,
-                    fixedSafesData,
-                    requiredSafesData
-                )
+            add(
+                if (!fixedSafesData.hasSafeCount())
+                    createChip(
+                        getString(R.string.safe_strings),
+                        fixedSafesData.stringCount,
+                        ChipData(
+                            ChipType.SAFE,
+                            R.drawable.ic_icona_express
+                        ),
+                        endings,
+                        pitches,
+                        fixedSafesData,
+                        requiredSafesData
+                    )
+                else
+                    createChip(
+                        getString(R.string.safe_strings_plural),
+                        null,
+                        ChipData(
+                            ChipType.SAFE,
+                            R.drawable.ic_icona_express
+                        ),
+                        endings,
+                        pitches,
+                        fixedSafesData,
+                        requiredSafesData
+                    )
+            )
 
         if (endings.size == 1 && !endings[0].isUnknown()) {
             val ending = endings.first()
             val endingVal = ending.index
 
-            addChip(
-                activity.resources.getStringArray(R.array.path_endings)[endingVal],
-                null,
-                ChipData(
-                    safesChipGroup,
-                    ChipType.ENDING,
-                    ending.getImage()
-                ),
-                endings,
-                pitches,
-                fixedSafesData,
-                requiredSafesData
+            add(
+                createChip(
+                    activity.resources.getStringArray(R.array.path_endings)[endingVal],
+                    null,
+                    ChipData(
+                        ChipType.ENDING,
+                        ending.getImage()
+                    ),
+                    endings,
+                    pitches,
+                    fixedSafesData,
+                    requiredSafesData
+                )
             )
         } else if (endings.size > 1)
-            addChip(
-                getString(R.string.path_ending_multiple),
-                null,
-                ChipData(
-                    safesChipGroup,
-                    ChipType.ENDING_MULTIPLE
-                ),
-                endings,
-                pitches,
-                fixedSafesData,
-                requiredSafesData
+            add(
+                createChip(
+                    getString(R.string.path_ending_multiple),
+                    null,
+                    ChipData(
+                        ChipType.ENDING_MULTIPLE
+                    ),
+                    endings,
+                    pitches,
+                    fixedSafesData,
+                    requiredSafesData
+                )
             )
         else
-            addChip(
-                getString(R.string.path_ending_none),
-                null,
-                ChipData(
-                    safesChipGroup,
-                    ChipType.ENDING,
-                    R.drawable.round_close_24
-                ),
-                endings,
-                pitches,
-                fixedSafesData,
-                requiredSafesData
+            add(
+                createChip(
+                    getString(R.string.path_ending_none),
+                    null,
+                    ChipData(
+                        ChipType.ENDING,
+                        R.drawable.round_close_24
+                    ),
+                    endings,
+                    pitches,
+                    fixedSafesData,
+                    requiredSafesData
+                )
             )
+
+        this
     }
 
-    private fun addChip(
+    private fun createChip(
         string: String?,
         count: Int?,
         chipData: ChipData,
@@ -362,11 +370,10 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
         pitches: List<Pitch>,
         fixedSafesData: FixedSafesData,
         requiredSafesData: RequiredSafesData
-    ) {
+    ): Chip {
         val chip = Chip(activity)
         val icon = chipData.icon
         val chipType = chipData.chipType
-        val chipGroup = chipData.chipGroup
 
         chip.text = string?.let {
             if (count == null) it
@@ -411,6 +418,6 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                     .create()
             }.show()
         }
-        chipGroup.addView(chip)
+        return chip
     }
 }
