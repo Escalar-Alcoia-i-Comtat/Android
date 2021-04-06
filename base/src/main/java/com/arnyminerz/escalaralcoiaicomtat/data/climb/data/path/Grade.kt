@@ -15,9 +15,9 @@ import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 
-fun Collection<Grade>.toGradesList(): Grade.GradesList {
-    return Grade.GradesList(this)
-}
+fun Collection<Grade>.toGradesList(): Grade.GradesList = Grade.GradesList(this)
+
+private const val PATH_GRADE_SPAN_PADDING = 3
 
 @Suppress("unused")
 class Grade(val displayName: String) : Parcelable {
@@ -52,7 +52,7 @@ class Grade(val displayName: String) : Parcelable {
         fun sublist(count: Int): GradesList {
             return try {
                 take(count)
-            } catch (ex: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 this
             }.toGradesList()
         }
@@ -100,20 +100,20 @@ class Grade(val displayName: String) : Parcelable {
                         Timber.v("Generating spannable for \"$grade\". Current char: $charCounter")
                         if (grade.indexOf(" ") >= 0) {
                             val prefix = grade.substring(0, 1)
-                            val gradePiece = grade.substring(3)
+                            val gradePiece = grade.substring(PATH_GRADE_SPAN_PADDING)
                             Timber.v("  It is pitch! GradePiece: $gradePiece")
                             spannable.setSpan(
                                 ForegroundColorSpan(getColor(context, gradeColor(prefix))),
                                 charCounter,
-                                charCounter + 3,
+                                charCounter + PATH_GRADE_SPAN_PADDING,
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                             )
                             spannable.setSpan(
                                 ForegroundColorSpan(getColor(context, gradeColor(gradePiece))),
                                 // Adding 3 for starting after L#
-                                charCounter + 3,
+                                charCounter + PATH_GRADE_SPAN_PADDING,
                                 // Should be the 3 added before and then -1 for the indexing of length
-                                charCounter + 3 + gradePiece.length,
+                                charCounter + PATH_GRADE_SPAN_PADDING + gradePiece.length,
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                             )
                         } else {
