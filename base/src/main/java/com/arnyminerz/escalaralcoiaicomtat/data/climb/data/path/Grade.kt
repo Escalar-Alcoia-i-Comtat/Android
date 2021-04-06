@@ -1,6 +1,8 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path
 
 import android.content.Context
+import android.os.Parcel
+import android.os.Parcelable
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -12,91 +14,14 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.Serializable
 
 fun Collection<Grade>.toGradesList(): Grade.GradesList {
     return Grade.GradesList(this)
 }
 
 @Suppress("unused")
-class Grade(val displayName: String) : Serializable {
-    companion object {
-
-        fun gradesListOf(vararg grades: Grade): GradesList {
-            val list = GradesList()
-            list.addAll(grades)
-            return list
-        }
-
-        fun fromDB(obj: String): GradesList {
-            val list = GradesList()
-            if (obj.contains("\n"))
-                for (ln in obj
-                    .replace("\r", "")
-                    .split("\n"))
-                    list.add(Grade(ln))
-            else
-                list.add(Grade(obj))
-            return list
-        }
-
-        @Throws(JSONException::class)
-        fun fromJSON(json: JSONObject): Grade {
-            return Grade(json.getString("displayName"))
-        }
-
-        @Throws(JSONException::class)
-        fun fromJSON(json: String): Grade {
-            val parsed = JSONObject(json)
-            return fromJSON(parsed)
-        }
-
-        @Throws(JSONException::class)
-        fun fromJSONArrayList(list: JSONArray): GradesList {
-            val lst = gradesListOf()
-            for (o in 0 until list.length())
-                with(list[o]) {
-                    if (this is String) {
-                        lst.add(Grade(this))
-                    } else
-                        lst.add(fromJSON(list.getJSONObject(o)))
-                }
-
-            return lst
-        }
-
-        fun listFromStrings(strings: Collection<String>): GradesList {
-            val grades = gradesListOf()
-            for (string in strings)
-                with(Grade(string)) {
-                    grades.add(this)
-                }
-            return grades
-        }
-
-        @ColorRes
-        fun gradeColor(text: String): Int {
-            if (text.isNotEmpty())
-                for (combination in startingColorCombinations)
-                    if (text[0] == combination.first)
-                        return combination.second
-
-            return defaultGradeColor
-        }
-
-        private const val gradeLColor = R.color.black
-        private const val defaultGradeColor = R.color.grade_purple
-        private val startingColorCombinations = arrayListOf(
-            Pair('3', R.color.grade_green),
-            Pair('4', R.color.grade_green),
-            Pair('5', R.color.grade_green),
-            Pair('6', R.color.grade_blue),
-            Pair('7', R.color.grade_red),
-            Pair('8', R.color.grade_black),
-            Pair('A', R.color.grade_yellow),
-            Pair('L', gradeLColor)
-        )
-    }
+class Grade(val displayName: String) : Parcelable {
+    constructor(parcel: Parcel) : this(parcel.readString()!!)
 
     override fun toString(): String = displayName
 
@@ -204,5 +129,94 @@ class Grade(val displayName: String) : Serializable {
 
             return spannable
         }
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(displayName)
+    }
+
+    override fun describeContents(): Int = 0
+
+    companion object CREATOR : Parcelable.Creator<Grade> {
+        override fun createFromParcel(parcel: Parcel): Grade {
+            return Grade(parcel)
+        }
+
+        override fun newArray(size: Int): Array<Grade?> = arrayOfNulls(size)
+
+        fun gradesListOf(vararg grades: Grade): GradesList {
+            val list = GradesList()
+            list.addAll(grades)
+            return list
+        }
+
+        fun fromDB(obj: String): GradesList {
+            val list = GradesList()
+            if (obj.contains("\n"))
+                for (ln in obj
+                    .replace("\r", "")
+                    .split("\n"))
+                    list.add(Grade(ln))
+            else
+                list.add(Grade(obj))
+            return list
+        }
+
+        @Throws(JSONException::class)
+        fun fromJSON(json: JSONObject): Grade {
+            return Grade(json.getString("displayName"))
+        }
+
+        @Throws(JSONException::class)
+        fun fromJSON(json: String): Grade {
+            val parsed = JSONObject(json)
+            return fromJSON(parsed)
+        }
+
+        @Throws(JSONException::class)
+        fun fromJSONArrayList(list: JSONArray): GradesList {
+            val lst = gradesListOf()
+            for (o in 0 until list.length())
+                with(list[o]) {
+                    if (this is String) {
+                        lst.add(Grade(this))
+                    } else
+                        lst.add(fromJSON(list.getJSONObject(o)))
+                }
+
+            return lst
+        }
+
+        fun listFromStrings(strings: Collection<String>): GradesList {
+            val grades = gradesListOf()
+            for (string in strings)
+                with(Grade(string)) {
+                    grades.add(this)
+                }
+            return grades
+        }
+
+        @ColorRes
+        fun gradeColor(text: String): Int {
+            if (text.isNotEmpty())
+                for (combination in startingColorCombinations)
+                    if (text[0] == combination.first)
+                        return combination.second
+
+            return defaultGradeColor
+        }
+
+        private const val gradeLColor = R.color.black
+        private const val defaultGradeColor = R.color.grade_purple
+        private val startingColorCombinations = arrayListOf(
+            Pair('3', R.color.grade_green),
+            Pair('4', R.color.grade_green),
+            Pair('5', R.color.grade_green),
+            Pair('6', R.color.grade_blue),
+            Pair('7', R.color.grade_red),
+            Pair('8', R.color.grade_black),
+            Pair('A', R.color.grade_yellow),
+            Pair('L', gradeLColor)
+        )
     }
 }
