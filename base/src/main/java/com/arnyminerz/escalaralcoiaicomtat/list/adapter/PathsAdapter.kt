@@ -79,9 +79,12 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
      * @since 20210406
      * @param toggled If the card should be toggled or not. If true, the card will be large, and more
      * info will be shown.
+     * @param hasInfo If true, the [Path] has a description
+     * @param blockStatus The [Path]'s [BlockingType]
      * @param pathSpannables The first element should be pathSpannable, the second one, toggledPathSpannable.
      * @param heights The first element should be the full height, the second one, the other cases'
      * height.
+     * @param holder The [SectorViewHolder] that holds the item's views
      */
     @UiThread
     private fun updateCardToggleStatus(
