@@ -1,8 +1,8 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 
 import android.app.Activity
+import android.text.SpannableString
 import android.text.TextUtils
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.animation.Animation
@@ -52,12 +52,16 @@ const val SMALL_CARD_HEIGHT = 73f
 class PathsAdapter(private val paths: List<Path>, private val activity: Activity) :
     RecyclerView.Adapter<SectorViewHolder>() {
     private val toggled = arrayListOf<Boolean>()
+    private val blockStatuses = arrayListOf<BlockingType>()
 
     init {
         val pathsSize = paths.size
         // if (pathsSize > 0) paths.sort()
         Timber.d("Created with %d paths", pathsSize)
-        (0 until pathsSize).forEach { _ -> toggled.add(false) }
+        (0 until pathsSize).forEach { _ ->
+            toggled.add(false)
+            blockStatuses.add(BlockingType.UNKNOWN)
+        }
     }
 
     override fun getItemCount(): Int = paths.size
@@ -73,20 +77,47 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
      * Updates the toggle status of the [CardView]: Changes the card's size according to [toggled].
      * @author Arnau Mora
      * @since 20210406
-     * @param cardView The [CardView] to update.
-     * @param toggled If the card should be toggled or not. If true, the card will be large, otherwise
-     * it will be smaller ([SMALL_CARD_HEIGHT]).
-     * @see SMALL_CARD_HEIGHT
+     * @param toggled If the card should be toggled or not. If true, the card will be large, and more
+     * info will be shown.
+     * @param pathSpannables The first element should be pathSpannable, the second one, toggledPathSpannable.
+     * @param heights The first element should be the full height, the second one, the other cases'
+     * height.
      */
     @UiThread
-    private fun updateCardToggleStatus(cardView: CardView, toggled: Boolean) {
-        val params = cardView.layoutParams
-        params.height = if (!toggled) TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            SMALL_CARD_HEIGHT,
-            activity.resources.displayMetrics
-        ).toInt() else ViewGroup.LayoutParams.WRAP_CONTENT
-        cardView.layoutParams = params
+    private fun updateCardToggleStatus(
+        toggled: Boolean,
+        hasInfo: Boolean,
+        blockStatus: BlockingType,
+        pathSpannables: Pair<SpannableString, SpannableString>,
+        heights: Pair<String?, String?>,
+        holder: SectorViewHolder
+    ) {
+        visibility(holder.safesChipGroup, toggled)
+        visibility(holder.infoImageButton, toggled && hasInfo)
+        visibility(holder.warningCardView, toggled && blockStatus != BlockingType.UNKNOWN)
+        if (toggled) {
+            holder.titleTextView.ellipsize = null
+            holder.titleTextView.isSingleLine = false
+
+            holder.difficultyTextView.isSingleLine = false
+            holder.difficultyTextView.setText(
+                pathSpannables.second,
+                TextView.BufferType.SPANNABLE
+            )
+
+            holder.heightTextView.text = heights.second ?: heights.first
+        } else {
+            holder.titleTextView.ellipsize = TextUtils.TruncateAt.END
+            holder.titleTextView.isSingleLine = true
+
+            holder.difficultyTextView.isSingleLine = true
+            holder.difficultyTextView.setText(
+                pathSpannables.first,
+                TextView.BufferType.SPANNABLE
+            )
+
+            holder.heightTextView.text = heights.first
+        }
     }
 
     @ExperimentalUnsignedTypes
@@ -100,6 +131,8 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
 
         Timber.d("Loading path data")
         runAsync {
+            val toggled = this@PathsAdapter.toggled[position]
+            val blockStatus = blockStatuses[position]
             val hasInfo = path.hasInfo()
             val pathSpannable = path.grade().getSpannable(activity)
             val toggledPathSpannable =
@@ -144,9 +177,11 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                 val difficultyTextView = holder.difficultyTextView
                 val infoImageButton = holder.infoImageButton
                 val heightTextView = holder.heightTextView
+                val safesChipGroup = holder.safesChipGroup
+                val warningCardView = holder.warningCardView
 
                 visibility(holder.warningImageView, false)
-                visibility(holder.warningCardView, false)
+                visibility(warningCardView, false)
 
                 if (hasInfo)
                     infoImageButton.setOnClickListener {
@@ -168,52 +203,47 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                 holder.idTextView.text = path.sketchId.toString()
 
                 holder.toggleImageButton.rotation =
-                    if (toggled[position]) ROTATION_B else ROTATION_A
-                updateCardToggleStatus(holder.cardView, toggled[position])
+                    if (toggled) ROTATION_B else ROTATION_A
+                updateCardToggleStatus(
+                    toggled,
+                    hasInfo,
+                    blockStatus,
+                    pathSpannable to toggledPathSpannable,
+                    heightFull to heightOther,
+                    holder
+                )
 
-                holder.safesChipGroup.removeAllViews()
+                safesChipGroup.removeAllViews()
                 for (chip in chips)
-                    holder.safesChipGroup.addView(chip)
+                    safesChipGroup.addView(chip)
 
                 holder.toggleImageButton.setOnClickListener { toggleImageButton ->
                     // Switch the toggled status
-                    val toggled = !this@PathsAdapter.toggled[position]
-                    this@PathsAdapter.toggled[position] = toggled
+                    val newToggled = !this@PathsAdapter.toggled[position]
+                    this@PathsAdapter.toggled[position] = newToggled
 
-                    Timber.d("Toggling card. Now it's $toggled")
+                    Timber.d("Toggling card. Now it's $newToggled")
+                    val newBlockStatus = blockStatuses[position]
 
                     TransitionManager.beginDelayedTransition(
                         cardView, TransitionSet().addTransition(ChangeBounds())
                     )
 
-                    if (toggled) {
-                        titleTextView.ellipsize = null
-                        titleTextView.isSingleLine = false
+                    updateCardToggleStatus(
+                        newToggled,
+                        hasInfo,
+                        newBlockStatus,
+                        pathSpannable to toggledPathSpannable,
+                        heightFull to heightOther,
+                        holder
+                    )
 
-                        difficultyTextView.isSingleLine = false
-                        difficultyTextView.setText(
-                            toggledPathSpannable,
-                            TextView.BufferType.SPANNABLE
-                        )
-
-                        heightTextView.text = heightOther ?: heightFull
-                    } else {
-                        titleTextView.ellipsize = TextUtils.TruncateAt.END
-                        titleTextView.isSingleLine = true
-
-                        difficultyTextView.isSingleLine = true
-                        difficultyTextView.setText(
-                            pathSpannable,
-                            TextView.BufferType.SPANNABLE
-                        )
-
-                        heightTextView.text = heightFull
-                    }
-
+                    val fromRotation = if (toggled) ROTATION_A else ROTATION_B
+                    val toRotation = if (toggled) ROTATION_B else ROTATION_A
                     toggleImageButton.startAnimation(
                         RotateAnimation(
-                            if (toggled) ROTATION_A else ROTATION_B,
-                            if (toggled) ROTATION_B else ROTATION_A,
+                            fromRotation,
+                            toRotation,
                             Animation.RELATIVE_TO_SELF,
                             ROTATION_PIVOT_X,
                             Animation.RELATIVE_TO_SELF,
@@ -225,14 +255,13 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                             fillAfter = true
                         }
                     )
-
-                    updateCardToggleStatus(cardView, toggled)
                 }
             }
 
             Timber.v("Checking if blocked...")
             val blocked = path.isBlocked()
             Timber.d("Path ${path.objectId} block status: $blocked")
+            blockStatuses[position] = blocked
 
             activity.runOnUiThread {
                 Timber.d("Binding ViewHolder for path $position: ${path.displayName}. Blocked: $blocked")
