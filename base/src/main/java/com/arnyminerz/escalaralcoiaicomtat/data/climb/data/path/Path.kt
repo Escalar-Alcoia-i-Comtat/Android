@@ -109,13 +109,7 @@ data class Path(
      * @since 20210316
      * @return If the path has safes count.
      */
-    fun hasSafeCount(): Boolean {
-        for ((_, value) in fixedSafesData)
-            if (value > 1)
-                return true
-
-        return false
-    }
+    fun hasSafeCount(): Boolean = fixedSafesData.hasSafeCount()
 
     override fun toString(): String = displayName
 

@@ -9,7 +9,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.list.viewListOf
 import io.noties.markwon.Markwon
 
-@ExperimentalUnsignedTypes
 class DescriptionDialog private constructor(private val context: Context, private val path: Path) {
     companion object {
         fun create(context: Context, path: Path): DescriptionDialog? =

@@ -13,7 +13,6 @@ import com.arnyminerz.escalaralcoiaicomtat.list.adapter.EquipmentAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.EquipmentAdapterType
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 
-@ExperimentalUnsignedTypes
 class PathEquipmentDialog(
     context: Context,
     private val fixedSafesData: FixedSafesData,
