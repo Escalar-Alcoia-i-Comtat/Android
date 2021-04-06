@@ -123,7 +123,6 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
         }
     }
 
-    @ExperimentalUnsignedTypes
     override fun onBindViewHolder(holder: SectorViewHolder, position: Int) {
         if (position >= paths.size) {
             Timber.e("Position $position is out of the paths' bounds: ${paths.size}. Hiding the card.")
