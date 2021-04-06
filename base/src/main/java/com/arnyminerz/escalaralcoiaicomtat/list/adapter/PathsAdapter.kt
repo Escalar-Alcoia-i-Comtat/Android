@@ -288,7 +288,11 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
 
     private data class ChipData(
         val chipType: ChipType,
-        @DrawableRes val icon: Int? = null
+        @DrawableRes val icon: Int? = null,
+        val endings: List<EndingType>,
+        val pitches: List<Pitch>,
+        val fixedSafesData: FixedSafesData,
+        val requiredSafesData: RequiredSafesData
     )
 
     /**
@@ -320,12 +324,12 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                         fixedSafesData.stringCount,
                         ChipData(
                             ChipType.SAFE,
-                            R.drawable.ic_icona_express
-                        ),
-                        endings,
-                        pitches,
-                        fixedSafesData,
-                        requiredSafesData
+                            R.drawable.ic_icona_express,
+                            endings,
+                            pitches,
+                            fixedSafesData,
+                            requiredSafesData
+                        )
                     )
                 else
                     createChip(
@@ -333,12 +337,12 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                         null,
                         ChipData(
                             ChipType.SAFE,
-                            R.drawable.ic_icona_express
-                        ),
-                        endings,
-                        pitches,
-                        fixedSafesData,
-                        requiredSafesData
+                            R.drawable.ic_icona_express,
+                            endings,
+                            pitches,
+                            fixedSafesData,
+                            requiredSafesData
+                        )
                     )
             )
 
@@ -352,12 +356,12 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                     null,
                     ChipData(
                         ChipType.ENDING,
-                        ending.getImage()
-                    ),
-                    endings,
-                    pitches,
-                    fixedSafesData,
-                    requiredSafesData
+                        ending.getImage(),
+                        endings,
+                        pitches,
+                        fixedSafesData,
+                        requiredSafesData
+                    )
                 )
             )
         } else if (endings.size > 1)
@@ -366,12 +370,13 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                     getString(R.string.path_ending_multiple),
                     null,
                     ChipData(
-                        ChipType.ENDING_MULTIPLE
-                    ),
-                    endings,
-                    pitches,
-                    fixedSafesData,
-                    requiredSafesData
+                        ChipType.ENDING_MULTIPLE,
+                        null,
+                        endings,
+                        pitches,
+                        fixedSafesData,
+                        requiredSafesData
+                    )
                 )
             )
         else
@@ -381,12 +386,12 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                     null,
                     ChipData(
                         ChipType.ENDING,
-                        R.drawable.round_close_24
-                    ),
-                    endings,
-                    pitches,
-                    fixedSafesData,
-                    requiredSafesData
+                        R.drawable.round_close_24,
+                        endings,
+                        pitches,
+                        fixedSafesData,
+                        requiredSafesData
+                    )
                 )
             )
 
@@ -396,15 +401,15 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
     private fun createChip(
         string: String?,
         count: Int?,
-        chipData: ChipData,
-        endings: List<EndingType>,
-        pitches: List<Pitch>,
-        fixedSafesData: FixedSafesData,
-        requiredSafesData: RequiredSafesData
+        chipData: ChipData
     ): Chip {
         val chip = Chip(activity)
         val icon = chipData.icon
         val chipType = chipData.chipType
+        val endings = chipData.endings
+        val pitches = chipData.pitches
+        val fixedSafesData = chipData.fixedSafesData
+        val requiredSafesData = chipData.requiredSafesData
 
         chip.text = string?.let {
             if (count == null) it
