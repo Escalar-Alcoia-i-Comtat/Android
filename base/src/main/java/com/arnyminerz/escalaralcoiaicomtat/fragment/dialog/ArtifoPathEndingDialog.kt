@@ -7,14 +7,16 @@ import android.view.ViewGroup
 import android.view.Window
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.EndingType
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Pitch
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogArtifoEndingBinding
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.ArtifoEndingPitchAdapter
 import timber.log.Timber
 
 class ArtifoPathEndingDialog(
     context: Context,
-    private val path: Path
+    private val endings: List<EndingType>,
+    private val pitches: List<Pitch>
 ) : Dialog(context, R.style.ThemeOverlay_App_AlertDialog) {
 
     private lateinit var binding: DialogArtifoEndingBinding
@@ -27,9 +29,6 @@ class ArtifoPathEndingDialog(
         setContentView(view)
 
         window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        val endings = path.endings
-        val pitches = path.pitches
 
         Timber.v("Endings: $endings")
         Timber.v("Pitches: $pitches")

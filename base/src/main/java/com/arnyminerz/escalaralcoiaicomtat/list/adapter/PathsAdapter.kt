@@ -11,6 +11,7 @@ import android.view.animation.RotateAnimation
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.annotation.UiThread
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -19,15 +20,18 @@ import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.BlockingType
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Grade
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Pitch
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes.FixedSafesData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.ArtifoPathEndingDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DescriptionDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.PathEquipmentDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.setTextColor
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.chip.Chip
@@ -66,7 +70,17 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
         )
     }
 
-    private fun updateToggleStatus(cardView: CardView, toggled: Boolean) {
+    /**
+     * Updates the toggle status of the [CardView]: Changes the card's size according to [toggled].
+     * @author Arnau Mora
+     * @since 20210406
+     * @param cardView The [CardView] to update.
+     * @param toggled If the card should be toggled or not. If true, the card will be large, otherwise
+     * it will be smaller ([SMALL_CARD_HEIGHT]).
+     * @see SMALL_CARD_HEIGHT
+     */
+    @UiThread
+    private fun updateCardToggleStatus(cardView: CardView, toggled: Boolean) {
         val params = cardView.layoutParams
         params.height = if (!toggled) TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
@@ -80,26 +94,136 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
     override fun onBindViewHolder(holder: SectorViewHolder, position: Int) {
         if (position >= paths.size) {
             Timber.e("Position $position is out of the paths' bounds: ${paths.size}. Hiding the card.")
-            holder.cardView.hide()
+            visibility(holder.cardView, false)
             return
         }
         val path = paths[position]
 
-        holder.warningImageView.hide()
-        holder.warningCardView.hide()
+        Timber.d("Loading path data")
+        runAsync {
+            val hasInfo = path.hasInfo()
+            val pathSpannable = path.grade().getSpannable(activity)
 
-        val hasInfo = path.hasInfo()
-        visibility(holder.infoImageButton, hasInfo)
-        if (hasInfo)
-            holder.infoImageButton.setOnClickListener {
-                val dialog = DescriptionDialog.create(activity, path)
-                if (dialog != null)
-                    dialog.show()
-                else
-                    Timber.e("Could not create dialog")
+            // This determines if there are more than 1 line, so that means that the path has multiple
+            //   pitches, and they should be shown when the arrow is tapped.
+            val shouldShowHeight = path.heights.isNotEmpty() && path.heights[0] > 0
+            val heightFull =
+                if (shouldShowHeight)
+                    String.format(
+                        activity.getString(R.string.sector_height),
+                        path.heights[0]
+                    ) else null
+            val heightOther =
+                if (shouldShowHeight && path.heights.size > 1)
+                    path.heights.toStringLineJumping(
+                        1,
+                        LinePattern(activity, R.string.sector_height)
+                    ) else null
+
+            activity.runOnUiThread {
+                val cardView = holder.cardView
+                val titleTextView = holder.titleTextView
+                val difficultyTextView = holder.difficultyTextView
+                val infoImageButton = holder.infoImageButton
+                val heightTextView = holder.heightTextView
+
+                visibility(holder.warningImageView, false)
+                visibility(holder.warningCardView, false)
+
+                if (hasInfo)
+                    infoImageButton.setOnClickListener {
+                        DescriptionDialog.create(activity, path)?.show()
+                            ?: Timber.e("Could not create dialog")
+                    }
+                else visibility(infoImageButton, false)
+
+                titleTextView.text = path.displayName
+                difficultyTextView.setText(
+                    pathSpannable,
+                    TextView.BufferType.SPANNABLE
+                )
+                difficultyTextView.maxLines = 1
+
+                heightTextView.text = heightFull
+                visibility(holder.heightTextView, shouldShowHeight)
+
+                holder.idTextView.text = path.sketchId.toString()
+
+                holder.toggleImageButton.rotation =
+                    if (toggled[position]) ROTATION_B else ROTATION_A
+                updateCardToggleStatus(holder.cardView, toggled[position])
+
+                addChips(
+                    path.endings,
+                    path.pitches,
+                    path.fixedSafesData,
+                    path.requiredSafesData,
+                    holder.safesChipGroup
+                )
+
+                holder.toggleImageButton.setOnClickListener { toggleImageButton ->
+                    // Switch the toggled status
+                    val toggled = !this@PathsAdapter.toggled[position]
+                    this@PathsAdapter.toggled[position] = toggled
+
+                    Timber.d("Toggling card. Now it's $toggled")
+
+                    TransitionManager.beginDelayedTransition(
+                        cardView, TransitionSet().addTransition(ChangeBounds())
+                    )
+
+                    if (toggled) {
+                        titleTextView.ellipsize = null
+                        titleTextView.isSingleLine = false
+
+                        difficultyTextView.isSingleLine = false
+                        difficultyTextView.setText(
+                            (if (path.grades.size > 1)
+                                Grade.GradesList().addAllHere(
+                                    path.grades.subList(
+                                        1,
+                                        path.grades.size
+                                    ) // Remove first line
+                                ).getSpannable(activity)
+                            else
+                                path.grade().getSpannable(activity)),
+                            TextView.BufferType.SPANNABLE
+                        )
+
+                        heightTextView.text = heightOther ?: heightFull
+                    } else {
+                        titleTextView.ellipsize = TextUtils.TruncateAt.END
+                        titleTextView.isSingleLine = true
+
+                        difficultyTextView.isSingleLine = true
+                        difficultyTextView.setText(
+                            path.grade().getSpannable(activity),
+                            TextView.BufferType.SPANNABLE
+                        )
+
+                        heightTextView.text = heightFull
+                    }
+
+                    toggleImageButton.startAnimation(
+                        RotateAnimation(
+                            if (toggled) ROTATION_A else ROTATION_B,
+                            if (toggled) ROTATION_B else ROTATION_A,
+                            Animation.RELATIVE_TO_SELF,
+                            ROTATION_PIVOT_X,
+                            Animation.RELATIVE_TO_SELF,
+                            ROTATION_PIVOT_Y
+                        ).apply {
+                            duration = ANIMATION_DURATION
+                            interpolator = LinearInterpolator()
+                            isFillEnabled = true
+                            fillAfter = true
+                        }
+                    )
+
+                    updateCardToggleStatus(cardView, toggled)
+                }
             }
 
-        runAsync {
             Timber.v("Checking if blocked...")
             val blocked = path.isBlocked()
             Timber.d("Path ${path.objectId} block status: $blocked")
@@ -118,164 +242,6 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                 visibility(holder.warningNameImageView, anyBlocking)
             }
         }
-
-        holder.titleTextView.text = path.displayName
-        holder.difficultyTextView.setText(
-            path.grade().getSpannable(activity),
-            TextView.BufferType.SPANNABLE
-        )
-
-        holder.difficultyTextView.maxLines = 1
-
-        val shouldShowHeight = path.heights.isNotEmpty() && path.heights[0] > 0
-        val heightFull =
-            if (shouldShowHeight)
-                String.format(
-                    activity.getString(R.string.sector_height),
-                    path.heights[0]
-                ) else null
-        val heightOther =
-            if (shouldShowHeight && path.heights.size > 1)
-                path.heights.toStringLineJumping(
-                    1,
-                    LinePattern(activity, R.string.sector_height)
-                ) else null
-        holder.heightTextView.text = heightFull
-        visibility(holder.heightTextView, shouldShowHeight)
-
-        holder.idTextView.text = path.sketchId.toString()
-        holder.toggleImageButton.setOnClickListener { toggleImageButton ->
-            this@PathsAdapter.toggled[position] =
-                !this@PathsAdapter.toggled[position]
-            val cardView = holder.cardView
-            val toggled = this@PathsAdapter.toggled[position]
-            Timber.d("Toggling card. Now it's $toggled")
-
-            TransitionManager.beginDelayedTransition(
-                cardView, TransitionSet().addTransition(ChangeBounds())
-            )
-
-            if (toggled) {
-                holder.titleTextView.ellipsize = null
-                holder.titleTextView.isSingleLine = false
-
-                holder.difficultyTextView.isSingleLine = false
-                if (path.grades.size > 1)
-                    holder.difficultyTextView.setText(
-                        Grade.GradesList().addAllHere(
-                            path.grades.subList(
-                                1,
-                                path.grades.size
-                            ) // Remove first line
-                        ).getSpannable(activity),
-                        TextView.BufferType.SPANNABLE
-                    )
-                else
-                    holder.difficultyTextView.setText(
-                        path.grade().getSpannable(activity),
-                        TextView.BufferType.SPANNABLE
-                    )
-
-                if (heightOther != null)
-                    holder.heightTextView.text = heightOther
-                else
-                    holder.heightTextView.text = heightFull
-            } else {
-                holder.titleTextView.ellipsize = TextUtils.TruncateAt.END
-                holder.titleTextView.isSingleLine = true
-
-                holder.difficultyTextView.isSingleLine = true
-                holder.difficultyTextView.setText(
-                    path.grade().getSpannable(activity),
-                    TextView.BufferType.SPANNABLE
-                )
-
-                holder.heightTextView.text = heightFull
-            }
-
-            val rotate = RotateAnimation(
-                if (toggled) ROTATION_A else ROTATION_B,
-                if (toggled) ROTATION_B else ROTATION_A,
-                Animation.RELATIVE_TO_SELF,
-                ROTATION_PIVOT_X,
-                Animation.RELATIVE_TO_SELF,
-                ROTATION_PIVOT_Y
-            )
-            rotate.duration = ANIMATION_DURATION
-            rotate.interpolator = LinearInterpolator()
-            rotate.isFillEnabled = true
-            rotate.fillAfter = true
-
-            toggleImageButton.startAnimation(rotate)
-
-            updateToggleStatus(cardView, toggled)
-        }
-
-        holder.toggleImageButton.rotation = if (toggled[position]) ROTATION_B else ROTATION_A
-        updateToggleStatus(holder.cardView, toggled[position])
-
-        holder.safesChipGroup.removeAllViews()
-
-        if (path.fixedSafesData.sum() > 0)
-            if (!path.hasSafeCount())
-                addChip(
-                    R.string.safe_strings,
-                    path.fixedSafesData.stringCount,
-                    ChipData(
-                        holder.safesChipGroup,
-                        ChipType.SAFE,
-                        R.drawable.ic_icona_express
-                    ),
-                    path = path
-                )
-            else
-                addChip(
-                    R.string.safe_strings_plural,
-                    null,
-                    ChipData(
-                        holder.safesChipGroup,
-                        ChipType.SAFE,
-                        R.drawable.ic_icona_express
-                    ),
-                    path = path
-                )
-
-        val endings = path.endings
-        if (endings.size == 1 && !endings[0].isUnknown()) {
-            val ending = endings.first()
-            val endingVal = ending.index
-
-            addChip(
-                activity.resources.getStringArray(R.array.path_endings)[endingVal],
-                null,
-                ChipData(
-                    holder.safesChipGroup,
-                    ChipType.ENDING,
-                    ending.getImage()
-                ),
-                path = path
-            )
-        } else if (endings.size > 1) {
-            addChip(
-                activity.resources.getString(R.string.path_ending_multiple),
-                null,
-                ChipData(
-                    holder.safesChipGroup,
-                    ChipType.ENDING_MULTIPLE
-                ),
-                path = path
-            )
-        } else
-            addChip(
-                activity.resources.getString(R.string.path_ending_none),
-                null,
-                ChipData(
-                    holder.safesChipGroup,
-                    ChipType.ENDING,
-                    R.drawable.round_close_24
-                ),
-                path = path
-            )
     }
 
     private enum class ChipType {
@@ -288,27 +254,114 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
         @DrawableRes val icon: Int? = null
     )
 
-    @ExperimentalUnsignedTypes
-    private fun addChip(
-        @StringRes string: Int?,
-        count: Int?,
-        chipData: ChipData,
-        path: Path
+    /**
+     * Gets a [String] from the resources of [activity].
+     * @author Arnau Mora
+     * @since 20210406
+     * @param stringRes The string resource to get
+     * @return The string value from the resources with key [stringRes].
+     */
+    fun getString(@StringRes stringRes: Int) = activity.resources.getString(stringRes)
+
+    /**
+     * Adds all the chips to the chip group.
+     * @author Arnau Mora
+     * @since 20210406
+     */
+    @UiThread
+    private fun addChips(
+        endings: List<EndingType>,
+        pitches: List<Pitch>,
+        fixedSafesData: FixedSafesData,
+        requiredSafesData: RequiredSafesData,
+        safesChipGroup: ChipGroup
     ) {
-        addChip(
-            if (string != null) activity.resources.getString(string) else null,
-            count,
-            chipData,
-            path
-        )
+        safesChipGroup.removeAllViews()
+
+        if (fixedSafesData.sum() > 0)
+            if (!fixedSafesData.hasSafeCount())
+                addChip(
+                    getString(R.string.safe_strings),
+                    fixedSafesData.stringCount,
+                    ChipData(
+                        safesChipGroup,
+                        ChipType.SAFE,
+                        R.drawable.ic_icona_express
+                    ),
+                    endings,
+                    pitches,
+                    fixedSafesData,
+                    requiredSafesData
+                )
+            else
+                addChip(
+                    getString(R.string.safe_strings_plural),
+                    null,
+                    ChipData(
+                        safesChipGroup,
+                        ChipType.SAFE,
+                        R.drawable.ic_icona_express
+                    ),
+                    endings,
+                    pitches,
+                    fixedSafesData,
+                    requiredSafesData
+                )
+
+        if (endings.size == 1 && !endings[0].isUnknown()) {
+            val ending = endings.first()
+            val endingVal = ending.index
+
+            addChip(
+                activity.resources.getStringArray(R.array.path_endings)[endingVal],
+                null,
+                ChipData(
+                    safesChipGroup,
+                    ChipType.ENDING,
+                    ending.getImage()
+                ),
+                endings,
+                pitches,
+                fixedSafesData,
+                requiredSafesData
+            )
+        } else if (endings.size > 1)
+            addChip(
+                getString(R.string.path_ending_multiple),
+                null,
+                ChipData(
+                    safesChipGroup,
+                    ChipType.ENDING_MULTIPLE
+                ),
+                endings,
+                pitches,
+                fixedSafesData,
+                requiredSafesData
+            )
+        else
+            addChip(
+                getString(R.string.path_ending_none),
+                null,
+                ChipData(
+                    safesChipGroup,
+                    ChipType.ENDING,
+                    R.drawable.round_close_24
+                ),
+                endings,
+                pitches,
+                fixedSafesData,
+                requiredSafesData
+            )
     }
 
-    @ExperimentalUnsignedTypes
     private fun addChip(
         string: String?,
         count: Int?,
         chipData: ChipData,
-        path: Path
+        endings: List<EndingType>,
+        pitches: List<Pitch>,
+        fixedSafesData: FixedSafesData,
+        requiredSafesData: RequiredSafesData
     ) {
         val chip = Chip(activity)
         val icon = chipData.icon
@@ -329,11 +382,15 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
 
         chip.setOnClickListener {
             when (chipType) {
-                ChipType.ENDING_MULTIPLE -> ArtifoPathEndingDialog(activity, path)
+                ChipType.ENDING_MULTIPLE -> ArtifoPathEndingDialog(
+                    activity,
+                    endings,
+                    pitches
+                )
                 ChipType.SAFE -> PathEquipmentDialog(
                     activity,
-                    path.fixedSafesData,
-                    path.requiredSafesData
+                    fixedSafesData,
+                    requiredSafesData
                 )
                 else -> MaterialAlertDialogBuilder(
                     activity,

@@ -13,8 +13,8 @@ import timber.log.Timber
 
 class ArtifoEndingPitchAdapter(
     private val context: Context,
-    private val endings: MutableList<EndingType>,
-    private val pitches: MutableList<Pitch>
+    private val endings: List<EndingType>,
+    private val pitches: List<Pitch>
 ) : RecyclerView.Adapter<ArtifoEndingPitchViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArtifoEndingPitchViewHolder =
         ArtifoEndingPitchViewHolder(

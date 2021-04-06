@@ -37,6 +37,20 @@ abstract class SafesData : Parcelable, Iterable<SafeCountData> {
         return count
     }
 
+    /**
+     * Checks if there's at least one count of safes.
+     * @author Arnau Mora
+     * @since 20210406
+     * @return If there's a safes count.
+     */
+    fun hasSafeCount(): Boolean {
+        for ((_, value) in this)
+            if (value > 1)
+                return true
+
+        return false
+    }
+
     abstract fun list(): List<SafeCountData>
 
     abstract fun toJSONString(): String
