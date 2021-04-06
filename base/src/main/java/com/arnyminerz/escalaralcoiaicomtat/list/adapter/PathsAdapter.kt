@@ -62,13 +62,12 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
 
     override fun getItemCount(): Int = paths.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SectorViewHolder {
-        return SectorViewHolder(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SectorViewHolder =
+        SectorViewHolder(
             LayoutInflater.from(activity).inflate(
                 R.layout.list_item_path, parent, false
             )
         )
-    }
 
     /**
      * Updates the toggle status of the [CardView]: Changes the card's size according to [toggled].
