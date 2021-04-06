@@ -144,11 +144,17 @@ class Grade(val displayName: String) : Parcelable {
 
         override fun newArray(size: Int): Array<Grade?> = arrayOfNulls(size)
 
-        fun gradesListOf(vararg grades: Grade): GradesList {
-            val list = GradesList()
-            list.addAll(grades)
-            return list
-        }
+        /**
+         * Creates a [GradesList] with [grades] as contents.
+         * @author Arnau Mora
+         * @since 20210406
+         * @param grades The grades to add to the [GradesList]
+         * @return A new [GradesList] populated with [grades].
+         */
+        fun gradesListOf(vararg grades: Grade): GradesList =
+            GradesList().apply {
+                addAll(grades)
+            }
 
         fun fromDB(obj: String): GradesList {
             val list = GradesList()
