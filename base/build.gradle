@@ -2,7 +2,6 @@ plugins {
     id('com.android.application')
     id('kotlin-android')
     id('org.jetbrains.dokka-android')
-    id('io.sentry.android.gradle')
 }
 
 apply from: './secure.gradle'
