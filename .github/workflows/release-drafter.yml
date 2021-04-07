@@ -77,10 +77,11 @@ jobs:
       - name: Sentry Upload
         run: |
           export SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_TOKEN }}
+          export SENTRY_ORG=${{ secrets.SENTRY_ORGANIZATION }}
+          export SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
+          export SENTRY_DSN=${{ secrets.SENTRY_DNS }}
           sentry-cli upload-proguard \
           --write-properties ./base/build/intermediates/assets/release/sentry-debug-meta.properties \
-          --org ${{ secrets.SENTRY_ORGANIZATION }} \
-          --project ${{ secrets.SENTRY_PROJECT }} \
           ./base/build/outputs/mapping/release/mapping.txt
 
       - name: Show build tree
