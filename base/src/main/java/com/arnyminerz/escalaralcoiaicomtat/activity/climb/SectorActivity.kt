@@ -14,6 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.SectorFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_AREA_ID
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_ZONE_ID
@@ -25,6 +26,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
+import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.parse.ParseException
 import com.parse.ParseObject
 import com.parse.ParseQuery
@@ -98,8 +100,8 @@ class SectorActivity : LanguageAppCompatActivity() {
      */
     @UiThread
     fun setLoading(loading: Boolean) {
-        com.arnyminerz.escalaralcoiaicomtat.view.visibility(binding.loadingLayout, loading)
-        com.arnyminerz.escalaralcoiaicomtat.view.visibility(binding.titleTextView, !loading)
+        visibility(binding.loadingLayout, loading)
+        visibility(binding.titleTextView, !loading)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -204,14 +206,15 @@ class SectorActivity : LanguageAppCompatActivity() {
                     setLoading(false)
                 }
             } catch (e: ParseException) {
-                throw e
+                Timber.e(e, "Could not load Sector")
+                toast(R.string.toast_error_internal)
             }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        if (loadComplete)
+        if (loadComplete && this::binding.isInitialized)
             setLoading(false)
     }
 
