@@ -20,8 +20,6 @@ android {
         versionName VERSION_NAME
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        multiDexEnabled true
-
         resValue "string", "mapbox_access_token", MAPBOX_PUBLIC_TOKEN
         resValue "string", "sentry_dsn", SENTRY_DNS
         buildConfigField "String", "PARSE_SERVER", "\"" + PARSE_SERVER + "\""
