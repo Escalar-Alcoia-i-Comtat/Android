@@ -76,7 +76,7 @@ jobs:
 
       - name: Sentry Upload
         run: |
-          sentry-cli upload-proguard ./base/build/outputs/mapping/release/mapping.txt
+          sentry-cli upload-proguard --write-properties ./sentry.properties ./base/build/outputs/mapping/release/mapping.txt
 
       - name: Show build tree
         run: |
