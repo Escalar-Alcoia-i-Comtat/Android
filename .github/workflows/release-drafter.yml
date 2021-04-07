@@ -75,11 +75,12 @@ jobs:
           path: ./base/build/outputs/apk/release/EscalarAlcoiaIComtat-release.apk
 
       - name: Sentry Upload
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORGANIZATION }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DNS }}
         run: |
-          export SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_TOKEN }}
-          export SENTRY_ORG=${{ secrets.SENTRY_ORGANIZATION }}
-          export SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
-          export SENTRY_DSN=${{ secrets.SENTRY_DNS }}
           sentry-cli upload-proguard \
           --write-properties ./base/build/intermediates/assets/release/sentry-debug-meta.properties \
           ./base/build/outputs/mapping/release/mapping.txt
