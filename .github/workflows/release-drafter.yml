@@ -76,9 +76,10 @@ jobs:
 
       - name: Sentry Upload
         run: |
+          chmod a+rwx ./base/build/outputs/mapping/release/mapping.txt
           sentry-cli upload-proguard \
           --write-properties ./sentry.properties \
-          --org arnyminerz
+          --org ${{ secrets.SENTRY_ORGANIZATION }}
           ./base/build/outputs/mapping/release/mapping.txt
 
       - name: Show build tree
