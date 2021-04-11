@@ -72,16 +72,6 @@ const val FOLDER_ACCESS_PERMISSION_REQUEST_CODE = 7
 
 const val PERMISSION_DIALOG_TAG = "PERM_TAG"
 
-/**
- * Specifies the DataClass' pin prefix
- */
-const val DATA_FIX_LABEL = "climbData"
-
-/**
- * Specifies the maximum amount of items that should be loaded on a single batch from Parse.
- */
-const val MAX_BATCH_SIZE = 1000
-
 const val MIME_TYPE_KML = "application/vnd.google-earth.kml+xml"
 const val MIME_TYPE_KMZ = "application/vnd.google-earth.kmz"
 const val MIME_TYPE_GPX = "application/gpx+xml"

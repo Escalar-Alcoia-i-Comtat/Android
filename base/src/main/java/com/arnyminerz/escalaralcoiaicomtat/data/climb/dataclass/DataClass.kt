@@ -50,15 +50,15 @@ import java.util.Date
 // A: List type
 // B: Parent Type
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
-    override val objectId: String,
+    final override val objectId: String,
     open val displayName: String,
     open val timestamp: Date?,
     open val imageUrl: String,
     open val kmlAddress: String?,
     @DrawableRes val placeholderDrawable: Int,
     @DrawableRes val errorPlaceholderDrawable: Int,
-    override val namespace: String,
-    protected open val documentPath: String,
+    final override val namespace: String,
+    open val documentPath: String,
 ) : DataClassImpl(objectId, namespace), Iterable<A> {
     companion object {
         /**
@@ -106,6 +106,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     protected val innerChildren = arrayListOf<A>()
+
+    private val pin = "${namespace}_$objectId"
 
     /**
      * Returns the data classes' children. May fetch them from storage, or return the cached items
