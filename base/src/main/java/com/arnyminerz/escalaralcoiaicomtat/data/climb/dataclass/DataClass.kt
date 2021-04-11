@@ -254,6 +254,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to run from
      * @return a matching DownloadStatus representing the Data Class' download status
      */
+    @WorkerThread
     fun downloadStatus(context: Context): DownloadStatus {
         Timber.d("$namespace:$objectId Checking if downloaded")
         var result: DownloadStatus? = null

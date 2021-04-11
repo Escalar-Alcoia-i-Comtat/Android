@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
 import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
@@ -32,7 +33,6 @@ import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import timber.log.Timber
-import java.util.concurrent.CompletableFuture.runAsync
 
 class SectorFragment : NetworkChangeListenerFragment() {
     private lateinit var areaId: String
@@ -51,6 +51,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
     private val sectorActivity: SectorActivity?
         get() = (activity as? SectorActivity?)
 
+    @UiThread
     private fun refreshMaximizeStatus() {
         binding.sizeChangeFab.setImageResource(
             if (maximized) R.drawable.round_flip_to_front_24
@@ -60,6 +61,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
         sectorActivity?.userInputEnabled(!maximized)
     }
 
+    @UiThread
     fun minimize() {
         maximized = false
         if (_binding != null)
@@ -122,23 +124,26 @@ class SectorFragment : NetworkChangeListenerFragment() {
      * @author Arnau Mora
      * @since 20210314
      */
-    @UiThread
+    @WorkerThread
     fun load() {
         if (!this::zoneId.isInitialized)
             return Timber.w("Could not load since class is not initialized")
 
         if (loaded && this::sector.isInitialized) {
-            sectorActivity?.updateTitle(sector.displayName, isDownloaded)
-            loadImage()
+            runOnUiThread {
+                sectorActivity?.updateTitle(sector.displayName, isDownloaded)
+                loadImage()
+            }
             return
         }
 
         Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
-        sectorActivity?.setLoading(true)
+        runOnUiThread {
+            sectorActivity?.setLoading(true)
+        }
         sector = AREAS[areaId]!![zoneId][sectorIndex]
 
         isDownloaded = sector.downloadStatus(requireContext()).isDownloaded()
-        sectorActivity?.updateTitle(sector.displayName)
         binding.sectorTextView.text = sector.displayName
 
         val size = getDisplaySize(requireActivity())
@@ -146,57 +151,59 @@ class SectorFragment : NetworkChangeListenerFragment() {
         binding.sectorImageViewLayout.layoutParams.height = notMaximizedImageHeight
         binding.sectorImageViewLayout.requestLayout()
 
-        sectorActivity?.updateTitle(sector.displayName, isDownloaded)
-        loadImage()
+        runOnUiThread {
+            sectorActivity?.updateTitle(sector.displayName, isDownloaded)
+            loadImage()
 
-        if (activity != null)
-            runAsync {
-                val activity = requireActivity()
-                Timber.v("Loading paths...")
-                val children = sector.getChildren()
+            binding.sizeChangeFab.setOnClickListener {
+                maximized = !maximized
 
-                runOnUiThread {
-                    // Load Paths
-                    binding.pathsRecyclerView.layoutManager = LinearLayoutManager(activity)
-                    binding.pathsRecyclerView.layoutAnimation =
-                        AnimationUtils.loadLayoutAnimation(
-                            activity,
-                            R.anim.item_enter_left_animator
-                        )
-                    binding.pathsRecyclerView.adapter =
-                        PathsAdapter(children, requireActivity())
-                    activity.visibility(binding.pathsRecyclerView, true)
-
-                    // Load info bar
-                    sector.sunTime.appendChip(activity, binding.sunChip)
-                    sector.kidsAptChip(activity, binding.kidsAptChip)
-                    sector.walkingTimeView(activity, binding.walkingTimeTextView)
+                (binding.sectorImageViewLayout.layoutParams as ViewGroup.MarginLayoutParams).apply {
+                    val tv = TypedValue()
+                    requireContext().theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)
+                    val actionBarHeight = resources.getDimensionPixelSize(tv.resourceId)
+                    setMargins(0, if (maximized) actionBarHeight else 0, 0, 0)
+                    height =
+                        if (maximized) LinearLayout.LayoutParams.MATCH_PARENT else notMaximizedImageHeight
                 }
+                binding.sectorImageViewLayout.requestLayout()
 
-                // Load chart
-                sector.loadChart(activity, binding.sectorBarChart)
-            } else
+                refreshMaximizeStatus()
+            }
+            binding.dataScrollView.show()
+            refreshMaximizeStatus()
+
+            sectorActivity?.setLoading(false)
+        }
+
+        if (activity != null) {
+            val activity = requireActivity()
+            Timber.v("Loading paths...")
+            val children = sector.getChildren()
+
+            runOnUiThread {
+                // Load Paths
+                binding.pathsRecyclerView.layoutManager = LinearLayoutManager(activity)
+                binding.pathsRecyclerView.layoutAnimation =
+                    AnimationUtils.loadLayoutAnimation(
+                        activity,
+                        R.anim.item_enter_left_animator
+                    )
+                binding.pathsRecyclerView.adapter =
+                    PathsAdapter(children, requireActivity())
+                activity.visibility(binding.pathsRecyclerView, true)
+
+                // Load info bar
+                sector.sunTime.appendChip(activity, binding.sunChip)
+                sector.kidsAptChip(activity, binding.kidsAptChip)
+                sector.walkingTimeView(activity, binding.walkingTimeTextView)
+            }
+
+            // Load chart
+            sector.loadChart(activity, binding.sectorBarChart)
+        } else
             Timber.e("Could not start loading sectors since context is null")
 
-        binding.sizeChangeFab.setOnClickListener {
-            maximized = !maximized
-
-            (binding.sectorImageViewLayout.layoutParams as ViewGroup.MarginLayoutParams).apply {
-                val tv = TypedValue()
-                requireContext().theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)
-                val actionBarHeight = resources.getDimensionPixelSize(tv.resourceId)
-                setMargins(0, if (maximized) actionBarHeight else 0, 0, 0)
-                height =
-                    if (maximized) LinearLayout.LayoutParams.MATCH_PARENT else notMaximizedImageHeight
-            }
-            binding.sectorImageViewLayout.requestLayout()
-
-            refreshMaximizeStatus()
-        }
-        binding.dataScrollView.show()
-        refreshMaximizeStatus()
-
-        sectorActivity?.setLoading(false)
         loaded = true
     }
 }
