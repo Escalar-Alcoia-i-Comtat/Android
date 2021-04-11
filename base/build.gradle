@@ -2,6 +2,7 @@ plugins {
     id('com.android.application')
     id('kotlin-android')
     id('org.jetbrains.dokka-android')
+    id('com.google.firebase.crashlytics')
 }
 
 apply from: './secure.gradle'
@@ -133,6 +134,12 @@ dependencies {
     androidTestImplementation "androidx.work:work-testing:$jetpack_work_version"
     implementation "androidx.startup:startup-runtime:1.0.0"
 
+    // Google Firebase
+    implementation platform('com.google.firebase:firebase-bom:26.7.0')
+    implementation 'com.google.firebase:firebase-database'
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'com.google.firebase:firebase-analytics'
+
     // MapBox SDK
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.6.1'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:0.9.0'
@@ -140,6 +147,8 @@ dependencies {
 
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3-native-mt'
+
+    implementation 'com.jakewharton.timber:timber:4.7.1'
 
     // Glide
     def glide_version = "4.12.0"
