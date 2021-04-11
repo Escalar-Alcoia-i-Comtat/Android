@@ -141,13 +141,6 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3-native-mt'
 
-    // Sentry
-    implementation 'io.sentry:sentry-android:4.3.0'
-    implementation 'io.sentry:sentry-android-timber:4.3.0'
-
-    // Parse Platform
-    implementation "com.github.parse-community.Parse-SDK-Android:parse:1.26.0"
-
     // Glide
     def glide_version = "4.12.0"
     implementation "com.github.bumptech.glide:glide:${glide_version}"
