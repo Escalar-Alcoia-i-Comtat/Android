@@ -51,10 +51,6 @@ const val TAB_ITEM_DOWNLOADS = 2
 const val TAB_ITEM_SETTINGS = 3
 const val TAB_ITEM_EXTRA = -1
 
-const val UPDATE_CHECKER_WORK_NAME = "update_checker"
-const val UPDATE_CHECKER_TAG = "update"
-const val UPDATE_CHECKER_FLEX_MINUTES: Long = 15
-
 val AREAS = arrayMapOf<String, Area>()
 
 const val PREVIEW_SCALE_PREFERENCE_MULTIPLIER = 10

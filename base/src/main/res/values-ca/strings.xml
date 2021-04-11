@@ -233,9 +233,6 @@
     <string name="status_failed">fallat</string>
     <string name="status_blocked">bloquejat</string>
     <string name="status_cancelled">cancel·lat</string>
-    <string name="pref_info_cat_services">Serveis</string>
-    <string name="pref_info_service_updates_title">Comprovador d\'actualitzacions</string>
-    <string name="pref_info_service_updates_sum">El servei que busca noves actualitzacions està ara mateix %1$s</string>
     <string name="status_downloading">Baixant…</string>
     <string name="status_storing">Desant…</string>
     <string name="status_loading_progress">Carregant %d/%d</string>

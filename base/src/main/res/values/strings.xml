@@ -152,13 +152,10 @@
 
     <string name="pref_info_cat_app">Application</string>
     <string name="pref_info_cat_source">Source</string>
-    <string name="pref_info_cat_services">Services</string>
     <string name="pref_info_version_title">Version</string>
     <string name="pref_info_build_title">Build Number</string>
     <string name="pref_info_git_title">Github</string>
     <string name="pref_info_git_sum">View the Github repository</string>
-    <string name="pref_info_service_updates_title">Update checker</string>
-    <string name="pref_info_service_updates_sum">The service that checks for new updates is currently %1$s</string>
 
     <string name="notification_channel_downloads_group_name">Downloads</string>
     <string name="notification_channel_download_progress_name">Download Progress</string>
