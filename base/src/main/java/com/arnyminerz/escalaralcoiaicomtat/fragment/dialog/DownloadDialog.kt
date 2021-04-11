@@ -8,10 +8,15 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.firestore.FirebaseFirestore
 import timber.log.Timber
 import java.util.concurrent.CompletableFuture.runAsync
 
-class DownloadDialog(private val context: Context, private val data: DataClass<*, *>) {
+class DownloadDialog(
+    private val context: Context,
+    private val data: DataClass<*, *>,
+    private val firestore: FirebaseFirestore
+) {
     fun show(deleteCallback: (() -> Unit)? = null) {
         val date = data.downloadDate(context)
         MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_App_MaterialAlertDialog)
@@ -45,7 +50,7 @@ class DownloadDialog(private val context: Context, private val data: DataClass<*
                         when (data) {
                             is Area, is Zone, is Sector ->
                                 runAsync {
-                                    for (child in data.getChildren())
+                                    for (child in data.getChildren(firestore))
                                         if (child is DataClass<*, *>)
                                             child.delete(context)
 

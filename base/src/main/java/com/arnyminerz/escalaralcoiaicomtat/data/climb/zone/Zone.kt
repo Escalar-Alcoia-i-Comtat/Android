@@ -13,8 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.mapbox.mapboxsdk.geometry.LatLng
 import timber.log.Timber
 import java.util.Date
@@ -53,7 +52,7 @@ class Zone(
         parcel.readInt() == 1,
         parcel.readString()!!
     ) {
-        parcel.readList(getChildren(), Sector::class.java.classLoader)
+        parcel.readList(innerChildren, Sector::class.java.classLoader)
     }
 
     /**
@@ -81,14 +80,11 @@ class Zone(
      * @see Sector
      */
     @WorkerThread
-    override fun loadChildren(): List<Sector> {
+    override fun loadChildren(firestore: FirebaseFirestore): List<Sector> {
         val result = arrayListOf<Sector>()
 
-        Timber.d("Getting Firestore Instance...")
-        val firebaseDatabase = Firebase.firestore
-
         Timber.d("Fetching...")
-        val ref = firebaseDatabase
+        val ref = firestore
             .document(documentPath)
             .collection("Sectors")
         val childTask = ref.get()

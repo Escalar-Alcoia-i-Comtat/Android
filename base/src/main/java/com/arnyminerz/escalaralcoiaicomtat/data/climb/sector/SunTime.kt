@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.data.climb.sector
 import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.UiThread
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.shared.AFTERNOON_INDEX
@@ -20,6 +21,7 @@ enum class SunTime(val value: Int) : Parcelable {
 
     override fun toString(): String = value.toString()
 
+    @UiThread
     fun appendChip(context: Context, sunChip: Chip) {
         val resources = context.resources
         val suns = resources.getStringArray(R.array.suns)

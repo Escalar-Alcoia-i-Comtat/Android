@@ -16,27 +16,30 @@ import timber.log.Timber
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
-data class Path(
+class Path(
     override val objectId: String,
     val timestamp: Date?,
-    val sketchId: Int,
+    val sketchId: Long,
     val displayName: String,
     val grades: Grade.GradesList,
-    val heights: ArrayList<Int>,
+    val heights: ArrayList<Long>,
     val endings: ArrayList<EndingType>,
     val pitches: ArrayList<Pitch>,
     val fixedSafesData: FixedSafesData,
     val requiredSafesData: RequiredSafesData,
     val description: String?,
     val builtBy: String?,
-    val rebuiltBy: String?,
+    rebuiltBy: String?,
     val downloaded: Boolean = false,
     val pointer: String,
 ) : DataClassImpl(objectId, NAMESPACE), Comparable<Path> {
+    var rebuiltBy: String? = rebuiltBy
+        private set
+
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString().toTimestamp(),
-        parcel.readInt(),
+        parcel.readLong(),
         parcel.readString()!!,
         Grade.GradesList(),
         arrayListOf(),
@@ -60,44 +63,49 @@ data class Path(
     constructor(data: DocumentSnapshot) : this(
         data.id,
         data.getDate("created"),
-        data.get("sketchId", Int::class.java)!!,
-        data.getString("displayName")!!.fixTildes(),
+        data.getString("sketchId")?.toLongOrNull() ?: 0L,
+        data.getString("displayName")?.fixTildes() ?: "",
         Grade.GradesList(),
         arrayListOf(),
         arrayListOf(),
         arrayListOf(),
         FixedSafesData(
-            data.get("stringCount", Int::class.java)!!,
-            data.get("paraboltCount", Int::class.java)!!,
-            data.get("spitCount", Int::class.java)!!,
-            data.get("tensorCount", Int::class.java)!!,
-            data.get("pitonCount", Int::class.java)!!,
-            data.get("burilCount", Int::class.java)!!,
+            data.getLong("stringCount") ?: 0,
+            data.getLong("paraboltCount") ?: 0,
+            data.getLong("spitCount") ?: 0,
+            data.getLong("tensorCount") ?: 0,
+            data.getLong("pitonCount") ?: 0,
+            data.getLong("burilCount") ?: 0,
         ),
         RequiredSafesData(
-            data.getBoolean("lanyardRequired")!!,
-            data.getBoolean("crackerRequired")!!,
-            data.getBoolean("friendRequired")!!,
-            data.getBoolean("stripsRequired")!!,
-            data.getBoolean("pitonRequired")!!,
-            data.getBoolean("nailRequired")!!,
+            data.getBoolean("lanyardRequired") ?: false,
+            data.getBoolean("crackerRequired") ?: false,
+            data.getBoolean("friendRequired") ?: false,
+            data.getBoolean("stripsRequired") ?: false,
+            data.getBoolean("pitonRequired") ?: false,
+            data.getBoolean("nailRequired") ?: false,
         ),
         data.getString("description")?.fixTildes(),
         data.getString("builtBy")?.fixTildes(),
-        data.get("rebuiltBy", Array::class.java)?.joinToString(separator = ", "),
+        "",
         pointer = data.reference.path
     ) {
-        val heights = data.get("height", Array::class.java)
+        val pathData = data.data
+
+        Timber.d("Loading heights for Path $objectId")
+        val heights = pathData?.get("height") as List<*>?
         if (heights != null)
             for (h in heights.indices)
-                this.heights.add((heights[h].toString()).toInt())
+                this.heights.add((heights[h].toString()).toLong())
         else Timber.w("Heights is null")
 
+        Timber.d("Loading grade for Path $objectId")
         val gradeValue = data.getString("grade")!!.fixTildes()
         val gradeValues = gradeValue.split(" ")
         grades.addAll(Grade.listFromStrings(gradeValues))
 
-        val endingsList = data.get("ending", Array::class.java)
+        Timber.d("Loading endings for Path $objectId")
+        val endingsList = pathData?.get("ending") as List<*>?
         if (endingsList != null)
             for (e in endingsList.indices) {
                 val ending = endingsList[e].toString()
@@ -106,6 +114,7 @@ data class Path(
             }
         else Timber.w("Endings list is null")
 
+        Timber.d("Loading artifo endings for Path $objectId")
         val endingArtifo = data.getString("ending_artifo")?.fixTildes()
         endingArtifo?.let {
             val artifos = it.replace("\r", "").split("\n")
@@ -113,6 +122,11 @@ data class Path(
                 Pitch.fromEndingDataString(artifo)
                     ?.let { artifoEnding -> pitches.add(artifoEnding) }
         }
+
+        Timber.d("Loading rebuilders...")
+        val rebuilders = pathData?.get("rebuiltBy") as List<*>?
+        val d = rebuilders?.joinToString(separator = ", ")
+        rebuiltBy = d
     }
 
     /**
@@ -189,7 +203,7 @@ data class Path(
         dest?.apply {
             writeString(objectId)
             writeSerializable(timestamp)
-            writeInt(sketchId)
+            writeLong(sketchId)
             writeString(displayName)
             writeList(grades)
             writeList(heights)

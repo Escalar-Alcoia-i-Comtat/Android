@@ -116,7 +116,7 @@ class DownloadSectionsAdapter(
 
                     sizeChip.setOnClickListener {
                         Timber.v("Showing download dialog for ZONE")
-                        DownloadDialog(mainActivity, section).show()
+                        DownloadDialog(mainActivity, section, mainActivity.firestore).show()
                     }
                 }
                 if (sectionHasDownloadedChildren) {

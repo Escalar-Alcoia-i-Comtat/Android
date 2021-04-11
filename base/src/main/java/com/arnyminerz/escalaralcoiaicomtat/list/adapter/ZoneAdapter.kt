@@ -107,7 +107,8 @@ class ZoneAdapter(
                     DownloadStatus.DOWNLOADING -> dataClassListActivity.toast(R.string.message_already_downloading)
                     else -> DownloadDialog(
                         dataClassListActivity,
-                        zone
+                        zone,
+                        dataClassListActivity.firestore
                     ).show {
                         updateImageRes(holder, zone)
                     }

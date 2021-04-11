@@ -59,7 +59,7 @@ class EquipmentAdapter(
                 if (equipmentType == EquipmentAdapterType.REQUIRED) context.getString(safe.displayName)
                 else {
                     var str = context.getString(safe.displayName, safe.count)
-                    if (safe.count == 1)
+                    if (safe.count == 1L)
                         str = str.replace(str.split(" ").first(), "")
                     str
                 }

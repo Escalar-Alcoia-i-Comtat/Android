@@ -88,7 +88,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
 
         if (!loaded)
             try {
-                val sectors = dataClass.getChildren()
+                val sectors = dataClass.getChildren(firestore)
                 Timber.v("Got ${sectors.size} sectors.")
 
                 runOnUiThread {

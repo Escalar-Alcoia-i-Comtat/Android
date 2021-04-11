@@ -31,6 +31,9 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_MAP
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_SETTINGS
 import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.mapbox.android.core.permissions.PermissionsManager
 import timber.log.Timber
 
@@ -45,6 +48,8 @@ class MainActivity : LanguageAppCompatActivity() {
 
     var adapter: MainPagerAdapter? = null
     private lateinit var binding: ActivityMainBinding
+
+    internal lateinit var firestore: FirebaseFirestore
 
     private fun updateBottomAppBar() {
         Timber.d("Updating bottom app bar...")
@@ -179,6 +184,8 @@ class MainActivity : LanguageAppCompatActivity() {
         binding.actionExtra.setOnClickListener { navigate(TAB_ITEM_EXTRA) }
 
         Timber.v("  --- Found ${AREAS.size} areas ---")
+
+        firestore = Firebase.firestore
 
         areasViewFragment.setItemClickListener { holder, position ->
             visibility(binding.loadingLayout, true)

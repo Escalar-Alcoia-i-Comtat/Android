@@ -37,7 +37,7 @@ class SectorsAdapter(
     private var onItemSelected: ((viewHolder: SectorsViewHolder, index: Int) -> Unit)? =
         listener
 
-    private val sectors = AREAS[areaId]!![zoneId].getChildren()
+    private val sectors = AREAS[areaId]!![zoneId].getChildren(dataClassListActivity.firestore)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SectorsViewHolder =
         SectorsViewHolder(
@@ -128,7 +128,8 @@ class SectorsAdapter(
                         DownloadStatus.DOWNLOADING -> dataClassListActivity.toast(R.string.toast_downloading)
                         DownloadStatus.DOWNLOADED -> DownloadDialog(
                             dataClassListActivity,
-                            sector
+                            sector,
+                            dataClassListActivity.firestore
                         ).show {
                             refreshDownloadImage(sector, downloadImageButton, downloadProgressBar)
                         }

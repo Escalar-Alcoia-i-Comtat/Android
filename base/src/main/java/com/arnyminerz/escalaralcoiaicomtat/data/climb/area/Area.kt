@@ -12,8 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import timber.log.Timber
 import java.util.Date
 
@@ -49,7 +48,7 @@ class Area(
         parcel.readInt() == 1,
         parcel.readString()!!
     ) {
-        parcel.readList(getChildren(), Zone::class.java.classLoader)
+        parcel.readList(innerChildren, Zone::class.java.classLoader)
     }
 
     /**
@@ -76,15 +75,12 @@ class Area(
      * @see Zone
      */
     @WorkerThread
-    override fun loadChildren(): List<Zone> {
+    override fun loadChildren(firestore: FirebaseFirestore): List<Zone> {
         Timber.v("Loading Area's children.")
         val result = arrayListOf<Zone>()
 
-        Timber.d("Getting Firestore Instance...")
-        val firebaseDatabase = Firebase.firestore
-
         Timber.d("Fetching...")
-        val ref = firebaseDatabase
+        val ref = firestore
             .document(documentPath)
             .collection("Zones")
         val childTask = ref.get()
@@ -138,11 +134,11 @@ class Area(
  * @since 20210411
  */
 @WorkerThread
-fun Map<String, Area>.getZones(): List<Zone> {
+fun Map<String, Area>.getZones(firestore: FirebaseFirestore): List<Zone> {
     val zones = arrayListOf<Zone>()
 
     for (area in values)
-        zones.addAll(area.getChildren())
+        zones.addAll(area.getChildren(firestore))
 
     return zones
 }

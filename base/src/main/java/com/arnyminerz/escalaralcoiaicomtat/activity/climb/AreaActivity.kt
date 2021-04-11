@@ -91,7 +91,7 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
             loading = true
             try {
                 Timber.v("Getting children zones...")
-                val zones = dataClass.getChildren()
+                val zones = dataClass.getChildren(firestore)
                 Timber.v("Got zones.")
 
                 runOnUiThread {

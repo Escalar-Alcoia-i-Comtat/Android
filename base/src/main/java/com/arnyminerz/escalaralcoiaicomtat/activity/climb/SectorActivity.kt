@@ -25,6 +25,9 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 import java.util.concurrent.CompletableFuture.runAsync
 
@@ -38,6 +41,7 @@ class SectorActivity : LanguageAppCompatActivity() {
     private val fragments = arrayListOf<SectorFragment>()
 
     private lateinit var binding: ActivitySectorBinding
+    lateinit var firestore: FirebaseFirestore
 
     /**
      * Tells if the content has been loaded correctly
@@ -96,12 +100,13 @@ class SectorActivity : LanguageAppCompatActivity() {
      */
     @UiThread
     fun setLoading(loading: Boolean) {
-        visibility(binding.loadingLayout, loading)
-        visibility(binding.titleTextView, !loading)
+        binding.loadingLayout.visibility(loading)
+        binding.titleTextView.visibility(!loading)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        firestore = Firebase.firestore
         binding = ActivitySectorBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
@@ -159,6 +164,11 @@ class SectorActivity : LanguageAppCompatActivity() {
                         }
                     }
                 )
+
+            val defaultPosition = savedInstanceState?.getInt(EXTRA_POSITION.key)
+                ?: intent.getExtra(EXTRA_SECTOR_INDEX, 0)
+            fragments[defaultPosition].load()
+
             runOnUiThread {
                 Timber.v("Initializing view pager...")
                 Timber.d("  Initializing adapter for ${fragments.size} pages...")
@@ -179,7 +189,9 @@ class SectorActivity : LanguageAppCompatActivity() {
                         for (fragment in fragments)
                             fragment.minimize()
 
-                        fragments[position].load()
+                        runAsync {
+                            fragments[position].load()
+                        }
                     }
                 }
                 Timber.d("  Setting adapter...")
@@ -188,10 +200,7 @@ class SectorActivity : LanguageAppCompatActivity() {
                 binding.sectorViewPager.registerOnPageChangeCallback(callback)
                 // If there's an stored positon, load it
                 Timber.d("  Setting position")
-                val defaultPosition = savedInstanceState?.getInt(EXTRA_POSITION.key)
-                    ?: intent.getExtra(EXTRA_SECTOR_INDEX, 0)
                 binding.sectorViewPager.setCurrentItem(defaultPosition, false)
-                fragments[defaultPosition].load()
 
                 loadComplete = true
                 Timber.d("Load completed, hiding loading layout")

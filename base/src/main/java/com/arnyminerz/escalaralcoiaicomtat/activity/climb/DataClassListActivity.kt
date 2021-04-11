@@ -18,6 +18,9 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.Style
@@ -32,6 +35,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
     protected lateinit var binding: LayoutListBinding
     protected lateinit var dataClass: T
     private lateinit var mapHelper: MapHelper
+    lateinit var firestore: FirebaseFirestore
 
     val mapStyle: Style?
         get() = if (this::mapHelper.isInitialized)
@@ -42,6 +46,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         super.onCreate(savedInstanceState)
 
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
+        firestore = Firebase.firestore
 
         binding = LayoutListBinding.inflate(layoutInflater)
         val view = binding.root

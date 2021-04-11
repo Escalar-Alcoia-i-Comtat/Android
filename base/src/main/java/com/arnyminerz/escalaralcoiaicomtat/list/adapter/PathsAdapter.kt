@@ -399,7 +399,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
 
     private fun createChip(
         string: String?,
-        count: Int?,
+        count: Long?,
         chipData: ChipData
     ): Chip {
         val chip = Chip(activity)

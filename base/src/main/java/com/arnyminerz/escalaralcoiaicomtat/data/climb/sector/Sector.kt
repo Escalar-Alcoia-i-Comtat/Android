@@ -27,8 +27,7 @@ import com.google.android.gms.tasks.Tasks
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.mapbox.mapboxsdk.geometry.LatLng
 import timber.log.Timber
 import java.util.Date
@@ -39,7 +38,7 @@ class Sector constructor(
     timestamp: Date?,
     val sunTime: SunTime,
     val kidsApt: Boolean,
-    val walkingTime: Int,
+    val walkingTime: Long,
     val location: LatLng?,
     imageUrl: String,
     documentPath: String,
@@ -65,9 +64,9 @@ class Sector constructor(
         data.id,
         data.getString("displayName")!!.fixTildes(),
         data.getDate("timestamp"),
-        SunTime.find(data.get("sunTime", Int::class.java)!!),
+        SunTime.find(data.getLong("sunTime")!!.toInt()),
         data.getBoolean("kidsApt") ?: false,
-        data.get("walkingTime", Int::class.java)!!,
+        data.getLong("walkingTime")!!,
         data.getGeoPoint("location")?.toLatLng(),
         data.getString("image")!!.fixTildes(),
         documentPath = data.reference.path
@@ -79,7 +78,7 @@ class Sector constructor(
         parcel.writeString(timestamp?.let { TIMESTAMP_FORMAT.format(timestamp) })
         parcel.writeInt(sunTime.value)
         parcel.writeInt(if (kidsApt) 1 else 0)
-        parcel.writeInt(walkingTime)
+        parcel.writeLong(walkingTime)
         parcel.writeParcelable(location, 0)
         parcel.writeString(imageUrl)
         parcel.writeString(documentPath)
@@ -92,7 +91,7 @@ class Sector constructor(
         parcel.readString().toTimestamp(), // Timestamp
         SunTime.find(parcel.readInt()), // Sun Time
         parcel.readInt() == 1, // Kids Apt
-        parcel.readInt(), // Walking Time
+        parcel.readLong(), // Walking Time
         parcel.readParcelable<LatLng?>(LatLng::class.java.classLoader),
         parcel.readString()!!, // Image Url
         parcel.readString()!!, // Pointer
@@ -108,14 +107,11 @@ class Sector constructor(
      * @see Path
      */
     @WorkerThread
-    override fun loadChildren(): List<Path> {
+    override fun loadChildren(firestore: FirebaseFirestore): List<Path> {
         val result = arrayListOf<Path>()
 
-        Timber.d("Getting Firestore Instance...")
-        val firebaseDatabase = Firebase.firestore
-
         Timber.d("Fetching...")
-        val ref = firebaseDatabase
+        val ref = firestore
             .document(documentPath)
             .collection("Paths")
         val childTask = ref.get()
@@ -127,9 +123,12 @@ class Sector constructor(
             e?.let { throw it }
         } else {
             val paths = snapshot.documents
-            Timber.d("Got ${paths.size} elements.")
+            Timber.d("Got ${paths.size} elements. Processing paths...")
             for (l in paths.indices)
                 result.add(Path(paths[l]))
+            Timber.d("Finished processing paths. Sorting...")
+            result.sortBy { it.sketchId }
+            Timber.d("Finished sorting.")
         }
         return result
     }
@@ -190,44 +189,43 @@ class Sector constructor(
      * @since 20210323
      * @param activity The [Activity] to call from
      * @param chart The [BarChart] to update
+     * @param paths A collection of [Path]s.
      */
-    @WorkerThread
-    fun loadChart(activity: Activity, chart: BarChart) {
-        val chartHelper = BarChartHelper.fromPaths(activity, getChildren())
-        activity.runOnUiThread {
-            with(chart) {
-                data = chartHelper.barData
-                setFitBars(false)
-                setNoDataText(context.getString(R.string.error_chart_no_data))
-                setDrawGridBackground(false)
-                setDrawBorders(false)
-                setDrawBarShadow(false)
-                setDrawMarkers(false)
-                setPinchZoom(false)
-                isDoubleTapToZoomEnabled = false
-                isHighlightPerTapEnabled = false
-                isHighlightPerDragEnabled = false
-                legend.isEnabled = false
+    @UiThread
+    fun loadChart(activity: Activity, chart: BarChart, paths: Collection<Path>) {
+        val chartHelper = BarChartHelper.fromPaths(activity, paths)
+        with(chart) {
+            data = chartHelper.barData
+            setFitBars(false)
+            setNoDataText(context.getString(R.string.error_chart_no_data))
+            setDrawGridBackground(false)
+            setDrawBorders(false)
+            setDrawBarShadow(false)
+            setDrawMarkers(false)
+            setPinchZoom(false)
+            isDoubleTapToZoomEnabled = false
+            isHighlightPerTapEnabled = false
+            isHighlightPerDragEnabled = false
+            legend.isEnabled = false
 
-                description = with(Description()) {
-                    text = ""
-                    this
-                }
-
-                val valueTextColor = getAttribute(context, R.attr.text_dark)
-                xAxis.apply {
-                    granularity = 1f
-                    valueFormatter = chartHelper.xFormatter
-                    position = XAxis.XAxisPosition.BOTTOM
-                    textColor = valueTextColor
-                }
-                chartHelper.barData.setValueTextColor(valueTextColor)
-
-                chartHelper.removeStyles(axisLeft)
-                chartHelper.removeStyles(axisRight)
-
-                invalidate()
+            description = with(Description()) {
+                text = ""
+                this
             }
+
+            val valueTextColor = getAttribute(context, R.attr.text_dark)
+            xAxis.apply {
+                granularity = 1f
+                valueFormatter = chartHelper.xFormatter
+                position = XAxis.XAxisPosition.BOTTOM
+                textColor = valueTextColor
+            }
+            chartHelper.barData.setValueTextColor(valueTextColor)
+
+            chartHelper.removeStyles(axisLeft)
+            chartHelper.removeStyles(axisRight)
+
+            invalidate()
         }
     }
 

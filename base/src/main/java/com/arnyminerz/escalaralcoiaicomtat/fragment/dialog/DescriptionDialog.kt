@@ -36,7 +36,7 @@ class DescriptionDialog private constructor(private val context: Context, privat
         else
             viewListOf(builderTextView, builderTitleTextView).visibility(false)
         if (path.rebuiltBy != null)
-            markwon.setMarkdown(rebuilderTextView, path.rebuiltBy)
+            markwon.setMarkdown(rebuilderTextView, path.rebuiltBy!!)
         else viewListOf(rebuilderTextView, rebuilderTitleTextView).visibility(false)
         if (path.description != null)
             markwon.setMarkdown(descriptionTextView, path.description)
