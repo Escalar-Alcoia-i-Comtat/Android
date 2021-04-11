@@ -2,16 +2,21 @@ package com.arnyminerz.escalaralcoiaicomtat.fragment.dialog
 
 import android.content.Context
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.firestore.FirebaseFirestore
 import timber.log.Timber
 import java.util.concurrent.CompletableFuture.runAsync
 
-class DownloadDialog(private val context: Context, private val data: DataClass<*, *>) {
+class DownloadDialog(
+    private val context: Context,
+    private val data: DataClass<*, *>,
+    private val firestore: FirebaseFirestore
+) {
     fun show(deleteCallback: (() -> Unit)? = null) {
         val date = data.downloadDate(context)
         MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_App_MaterialAlertDialog)
@@ -43,14 +48,15 @@ class DownloadDialog(private val context: Context, private val data: DataClass<*
                     .setPositiveButton(R.string.action_delete) { d, _ ->
                         d.dismiss()
                         when (data) {
-                            is Area, is Zone, is Sector -> runAsync {
-                                for (child in data.children)
-                                    if (child is DataClass<*, *>)
-                                        child.delete(context)
+                            is Area, is Zone, is Sector ->
+                                runAsync {
+                                    for (child in data.getChildren(firestore))
+                                        if (child is DataClass<*, *>)
+                                            child.delete(context)
 
-                                data.delete(context)
-                                deleteCallback?.invoke()
-                            }
+                                    data.delete(context)
+                                    deleteCallback?.invoke()
+                                }
                             else -> Timber.e("Data is not valid.")
                         }
                     }

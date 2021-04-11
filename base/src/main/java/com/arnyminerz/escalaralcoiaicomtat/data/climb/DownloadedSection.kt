@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.download
+package com.arnyminerz.escalaralcoiaicomtat.data.climb
 
 import android.content.Context
 import android.util.TypedValue
@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.TOGGLED_CARD_HEIGHT
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.ROTATION_A

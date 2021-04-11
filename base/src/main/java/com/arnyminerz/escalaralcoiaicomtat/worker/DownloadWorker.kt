@@ -13,45 +13,41 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.connection.parse.fetchPinOrNetworkSync
 import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSLESS_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.storeToFile
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
-import com.arnyminerz.escalaralcoiaicomtat.shared.DATA_FIX_LABEL
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_MARKER_MARGIN
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_MARKER_MAX_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_MARKER_MIN_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_OVERWRITE_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_QUALITY_DEFAULT
-import com.arnyminerz.escalaralcoiaicomtat.shared.MAX_BATCH_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.shared.METERS_PER_LAT_LON_DEGREE
-import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition
 import com.mapbox.mapboxsdk.plugins.offline.model.OfflineDownloadOptions
 import com.mapbox.mapboxsdk.plugins.offline.offline.OfflinePlugin
 import com.mapbox.mapboxsdk.plugins.offline.utils.OfflineUtils
-import com.parse.ParseException
-import com.parse.ParseObject
-import com.parse.ParseQuery
 import timber.log.Timber
 import java.io.File
-import java.util.Locale
 
 const val DOWNLOAD_QUALITY_MIN = 1
 const val DOWNLOAD_QUALITY_MAX = 100
 
 const val DOWNLOAD_DISPLAY_NAME = "display_name"
 const val DOWNLOAD_NAMESPACE = "namespace"
-const val DOWNLOAD_ID = "id"
+const val DOWNLOAD_PATH = "path"
 const val DOWNLOAD_OVERWRITE = "overwrite"
 const val DOWNLOAD_QUALITY = "quality"
 const val DOWNLOAD_INTENT_AREA_ID = "area_id"
@@ -64,12 +60,6 @@ const val DOWNLOAD_STYLE_URL = "style_url"
  * @since 20210313
  */
 const val ERROR_MISSING_DATA = "missing_data"
-
-/**
- * When old data could not be removed from Datastore
- * @since 20210313
- */
-const val ERROR_UNPIN = "unpin_old"
 
 /**
  * When old data was tried to be deleted but was not possible
@@ -95,6 +85,18 @@ const val ERROR_ALREADY_DOWNLOADED = "already_downloaded"
  */
 const val ERROR_CREATE_PARENT = "create_parent"
 
+/**
+ * When trying to fetch data from the server
+ * @since 20210411
+ */
+const val ERROR_DATA_FETCH = "data_fetch"
+
+/**
+ * When there's an unkown error while storing the image.
+ * @since 20210411
+ */
+const val ERROR_STORE_IMAGE = "store_image"
+
 class DownloadData
 /**
  * Initializes the class with specific parameters
@@ -114,162 +116,20 @@ constructor(
 class DownloadWorker private constructor(appContext: Context, workerParams: WorkerParameters) :
     Worker(appContext, workerParams) {
     private lateinit var namespace: String
-    private lateinit var objectID: String
     private lateinit var displayName: String
+    private var downloadPath: String? = null
     private var overwrite: Boolean = false
     private var quality: Int = -1
     private var styleUrl: String? = null
+
+    private val objectId: String?
+        get() = downloadPath?.split('/')?.last()
 
     /**
      * Specifies the downloading notification. For modifying it later.
      * @since 20210323
      */
     private lateinit var notification: Notification
-
-    /**
-     * Creates a new failure Result with some error data.
-     * @author Arnau Mora
-     * @since 20210323
-     * @param error The error name
-     * @return A new failure Result with the set error data with key "error" for outputData.
-     */
-    private fun failure(error: String): Pair<ParseQuery<*>?, Result> {
-        if (this::notification.isInitialized)
-            notification.destroy()
-        return null to Result.failure(
-            dataOf(
-                "error" to error
-            )
-        )
-    }
-
-    /**
-     * Generates a pin from a [namespace] and an [objectID].
-     * @author Arnau Mora
-     * @since 20210405
-     * @param namespace The namespace of the object
-     * @param objectID The ID in [namespace] of the object.
-     * @return The pin [String]
-     */
-    private fun pin(namespace: String, objectID: String) =
-        "${DATA_FIX_LABEL}_${namespace}_$objectID"
-
-    /**
-     * This is the first step on a download, and consists on removing any possible already stored
-     * data that may be on the device, so the downloaded data is as updated as possible.
-     * Also updates the notification with the correct info text.
-     * @author Arnau Mora
-     * @since 20210405
-     * @param namespace The namespace of the object
-     * @param objectID The ID in [namespace] of the object.
-     * @return null if everything was correct, a [failure] otherwise.
-     * @see ERROR_UNPIN
-     */
-    private fun removeOldData(namespace: String, objectID: String) =
-        try {
-            notification
-                .edit()
-                .withInfoText(R.string.notification_download_progress_info_unpinning)
-                .buildAndShow()
-            ParseObject.unpinAll(pin(namespace, objectID))
-            null
-        } catch (_: ParseException) {
-            failure(ERROR_UNPIN)
-        }
-
-    /**
-     * Fetches the data from the server, and gets pinned through [pin] with [objectID] and [namespace].
-     * Also updates the notification's info text.
-     * @author Arnau Mora
-     * @since 20210405
-     * @param query If there was another query made before, for a parent object, for example.
-     * @return A [Result] that should be used as the [Worker]'s result.
-     * @see pin
-     * @see MAX_BATCH_SIZE
-     * @see ERROR_ALREADY_DOWNLOADED
-     */
-    private fun fetchData(
-        query: ParseQuery<*>?
-    ): Pair<ParseQuery<*>?, Result?> {
-        Timber.d("Fetching data from server ($namespace)...")
-        notification
-            .edit()
-            .withInfoText(R.string.notification_download_progress_info_fetching)
-            .buildAndShow()
-        val fetchQuery = ParseQuery.getQuery<ParseObject>(namespace)
-        fetchQuery.limit = MAX_BATCH_SIZE
-        if (query != null) {
-            Timber.d("Downloading ${query.className}...")
-            val parameter = query.className.toLowerCase(Locale.getDefault())
-            Timber.d("  Should match $parameter at $namespace")
-            fetchQuery.whereMatchesQuery(parameter, query)
-        } else fetchQuery.whereEqualTo("objectId", objectID)
-        val result =
-            fetchQuery.fetchPinOrNetworkSync(pin(namespace, objectID), true) // Make sure to pin it
-        return if (result.isEmpty()) { // Object not found
-            Timber.d("Result list is empty.")
-            failure(ERROR_ALREADY_DOWNLOADED)
-        } else
-            processFetchedData(result, fetchQuery)
-    }
-
-    /**
-     * Once the data has been fetched in [fetchData], it gets processed, which downloads the image
-     * and maps so they are available offline.
-     * @author Arnau Mora
-     * @since 20210405
-     * @param result The loaded list of [ParseObject]s.
-     * @param fetchQuery The [ParseQuery] where [result] was loaded from.
-     */
-    private fun processFetchedData(
-        result: List<ParseObject>,
-        fetchQuery: ParseQuery<ParseObject>
-    ): Pair<ParseQuery<*>?, Result?> {
-        Timber.d("Fetched ${result.size} elements")
-        for (data in result) {
-            val objectId = data.objectId
-            val image = data.getString("image")!!
-            // This is the image file
-            val filename = "$namespace-$objectId.webp"
-            val dataDir = dataDir(applicationContext)
-            val imageFile = File(dataDir, filename)
-
-            var error: Pair<ParseQuery<*>?, Result>? = null
-            if (imageFile.exists() && !overwrite)
-                error = failure(ERROR_ALREADY_DOWNLOADED)
-            if (!imageFile.deleteIfExists())
-                error = failure(ERROR_DELETE_OLD)
-            if (!dataDir.exists() && !dataDir.mkdirs())
-                error = failure(ERROR_CREATE_PARENT)
-            if (error != null)
-                return error
-
-            Timber.d("Downloading image ($image)...")
-            notification
-                .edit()
-                .withInfoText(R.string.notification_download_progress_info_downloading_image)
-                .buildAndShow()
-            val stream = download(image)
-            Timber.d("Storing image ($imageFile)...")
-            notification
-                .edit()
-                .withInfoText(R.string.notification_download_progress_info_decoding_image)
-                .buildAndShow()
-            val bitmap = BitmapFactory.decodeStream(stream)
-            bitmap.storeToFile(imageFile, format = WEBP_LOSSLESS_LEGACY, quality = quality)
-
-            Timber.d("Preparing map region download...")
-            val locationRaw = data.getParseGeoPoint("location")
-            if (styleUrl != null && locationRaw != null)
-                downloadMapRegion(
-                    LatLng(locationRaw.latitude, locationRaw.longitude)
-                )
-            else
-                Timber.d("Won't download map. Style url ($styleUrl) or location ($locationRaw) may be null.")
-        }
-
-        return fetchQuery to Result.success()
-    }
 
     /**
      * Downloads a region of the map defined by the [location] and a circle around it with a radius
@@ -303,53 +163,148 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         OfflinePlugin.getInstance(applicationContext).startDownload(
             OfflineDownloadOptions.builder()
                 .definition(definition)
-                .metadata(OfflineUtils.convertRegionName(pin(namespace, objectID)))
+                .metadata(OfflineUtils.convertRegionName("${namespace}_$objectId"))
                 .notificationOptions(notification.edit().notificationOptions)
                 .build()
         )
     }
 
+    fun downloadImageFile(imageUrl: String, imageFile: File): Result {
+        val dataDir = imageFile.parentFile!!
+
+        var error: Result? = null
+        if (imageFile.exists() && !overwrite)
+            error = failure(ERROR_ALREADY_DOWNLOADED)
+        if (!imageFile.deleteIfExists())
+            error = failure(ERROR_DELETE_OLD)
+        if (!dataDir.exists() && !dataDir.mkdirs())
+            error = failure(ERROR_CREATE_PARENT)
+        if (error != null)
+            return error
+
+        Timber.d("Downloading image ($imageUrl)...")
+        notification
+            .edit()
+            .withInfoText(R.string.notification_download_progress_info_downloading_image)
+            .buildAndShow()
+        val stream = download(imageUrl)
+        Timber.d("Storing image ($imageFile)...")
+        notification
+            .edit()
+            .withInfoText(R.string.notification_download_progress_info_decoding_image)
+            .buildAndShow()
+        val bitmap = BitmapFactory.decodeStream(stream)
+        bitmap.storeToFile(imageFile, format = WEBP_LOSSLESS_LEGACY, quality = quality)
+        if (!imageFile.exists())
+            return failure(ERROR_STORE_IMAGE)
+
+        return Result.success()
+    }
+
     /**
-     * Downloads an object for using it offline.
+     * Downloads the data of a [Zone] for using it offline.
      * @author Arnau Mora
      * @since 20210323
-     * @param query If downloading a children, this should be the parent's query.
-     * @return A pair of a nullable [ParseQuery], and a nullable [Result].
+     * @param firestore The [FirebaseFirestore] instance.
+     * @param path The path to download
      *
      * @see ERROR_MISSING_DATA
      * @see ERROR_ALREADY_DOWNLOADED
      * @see ERROR_DELETE_OLD
      * @see ERROR_NOT_FOUND
-     * @see ERROR_UNPIN
+     * @see ERROR_DATA_FETCH
+     * @see ERROR_STORE_IMAGE
      */
-    private fun download(
-        query: ParseQuery<*>?
-    ): Pair<ParseQuery<*>?, Result?> {
-        // Remove old data
-        val oldDataRemoved = removeOldData(namespace, objectID)
-        if (oldDataRemoved != null)
-            return oldDataRemoved
+    private fun downloadZone(firestore: FirebaseFirestore, path: String): Result {
+        Timber.d("Downloading Zone $path...")
+        Timber.v("Getting document...")
+        val task = firestore.document(path).get()
+        Timber.v("Awaiting document task...")
+        Tasks.await(task)
+        val exception = task.exception
+        if (exception != null)
+            return failure(ERROR_DATA_FETCH)
 
-        // Fetch, process and store the data
-        return fetchData(query)
+        val result = task.result!!
+        val zone = Zone(result)
+
+        val image = zone.imageUrl
+        val imageFile = zone.imageFile(applicationContext)
+        downloadImageFile(image, imageFile)
+
+        Timber.d("Preparing map region download...")
+        val position = zone.position
+        if (styleUrl != null && position != null)
+            downloadMapRegion(position)
+        else
+            Timber.d("Won't download map. Style url ($styleUrl) or location ($position) is null.")
+
+        Timber.d("Downloading child sectors...")
+        for (sector in zone)
+            downloadSector(firestore, sector.documentPath)
+
+        return Result.success()
+    }
+
+    /**
+     * Downloads the data of a [Sector] for using it offline.
+     * @author Arnau Mora
+     * @since 20210323
+     * @param firestore The [FirebaseFirestore] instance.
+     * @param path The path to download
+     *
+     * @see ERROR_MISSING_DATA
+     * @see ERROR_ALREADY_DOWNLOADED
+     * @see ERROR_DELETE_OLD
+     * @see ERROR_NOT_FOUND
+     * @see ERROR_DATA_FETCH
+     * @see ERROR_STORE_IMAGE
+     */
+    private fun downloadSector(firestore: FirebaseFirestore, path: String): Result {
+        Timber.d("Downloading Sector $path...")
+        Timber.v("Getting document...")
+        val task = firestore.document(path).get()
+        Timber.v("Awaiting document task...")
+        Tasks.await(task)
+        val exception = task.exception
+        if (exception != null)
+            return failure(ERROR_DATA_FETCH)
+
+        val result = task.result!!
+        val zone = Sector(result)
+
+        val image = zone.imageUrl
+        val imageFile = zone.imageFile(applicationContext)
+        downloadImageFile(image, imageFile)
+
+        Timber.d("Preparing map region download...")
+        val position = zone.location
+        if (styleUrl != null && position != null)
+            downloadMapRegion(position)
+        else
+            Timber.d("Won't download map. Style url ($styleUrl) or location ($position) is null.")
+
+        return Result.success()
     }
 
     override fun doWork(): Result {
         // Get all data
         val namespace = inputData.getString(DOWNLOAD_NAMESPACE)
-        val objectID = inputData.getString(DOWNLOAD_ID)
+        downloadPath = inputData.getString(DOWNLOAD_PATH)
         val displayName = inputData.getString(DOWNLOAD_DISPLAY_NAME)
         overwrite = inputData.getBoolean(DOWNLOAD_OVERWRITE, DOWNLOAD_OVERWRITE_DEFAULT)
         quality = inputData.getInt(DOWNLOAD_OVERWRITE, DOWNLOAD_QUALITY_DEFAULT)
         styleUrl = inputData.getString(DOWNLOAD_STYLE_URL)
 
         // Check if any required data is missing
-        return if (namespace == null || objectID == null || displayName == null)
-            failure(ERROR_MISSING_DATA).second
+        return if (namespace == null || downloadPath == null || displayName == null)
+            failure(ERROR_MISSING_DATA)
         else {
-            Timber.v("Downloading $objectID from $namespace...")
+            Timber.v("Getting Firestore instance...")
+            val firebase = Firebase.firestore
+
+            Timber.v("Downloading from $namespace ($downloadPath)...")
             this.namespace = namespace
-            this.objectID = objectID
             this.displayName = displayName
 
             // Build the notification
@@ -361,20 +316,15 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 .setPersistent(true)
             notification = notificationBuilder.buildAndShow()
 
-            val currentDownload = download(null)
-            val query = currentDownload.first
-            val result = currentDownload.second
-            if (result != null)
-                return result
-
-            if (namespace == Zone.NAMESPACE)
-                if (query == null) {
-                    Timber.w("Cannot get Zone's children since query is null")
-                } else {
-                    Timber.d("Downloading Zone's children...")
-                    this.namespace = Sector.NAMESPACE
-                    download(query)
-                }
+            if (namespace == Zone.NAMESPACE) {
+                Timber.d("Downloading Zone...")
+                this.namespace = Sector.NAMESPACE
+                downloadZone(firebase, downloadPath!!)
+            } else if (namespace == Sector.NAMESPACE) {
+                Timber.d("Downloading Sector...")
+                this.namespace = Sector.NAMESPACE
+                downloadZone(firebase, downloadPath!!)
+            }
 
             Timber.v("Finished downloading $displayName")
             notification.destroy()
@@ -417,7 +367,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
          * @see ERROR_ALREADY_DOWNLOADED
          * @see ERROR_DELETE_OLD
          * @see ERROR_NOT_FOUND
-         * @see ERROR_UNPIN
+         * @see ERROR_DATA_FETCH
+         * @see ERROR_STORE_IMAGE
          */
         fun schedule(context: Context, tag: String, data: DownloadData): LiveData<WorkInfo> {
             val constraints = Constraints.Builder()
@@ -431,7 +382,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                     with(data) {
                         workDataOf(
                             DOWNLOAD_NAMESPACE to dataClass.namespace,
-                            DOWNLOAD_ID to dataClass.objectId,
+                            DOWNLOAD_PATH to dataClass.documentPath,
                             DOWNLOAD_DISPLAY_NAME to dataClass.displayName,
                             DOWNLOAD_STYLE_URL to styleUrl,
                             DOWNLOAD_OVERWRITE to overwrite,

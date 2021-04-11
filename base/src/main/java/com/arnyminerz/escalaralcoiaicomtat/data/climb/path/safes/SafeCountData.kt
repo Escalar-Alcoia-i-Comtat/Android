@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes
 
 import android.os.Parcel
 import android.os.Parcelable
@@ -6,12 +6,12 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 
 data class SafeCountData(
-    val count: Int,
+    val count: Long,
     @StringRes val displayName: Int,
     @DrawableRes val image: Int
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
-        parcel.readInt(),
+        parcel.readLong(),
         parcel.readInt(),
         parcel.readInt()
     )
@@ -20,7 +20,7 @@ data class SafeCountData(
             this(if (required) 1 else 0, displayName, image)
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(count)
+        parcel.writeLong(count)
         parcel.writeInt(displayName)
         parcel.writeInt(image)
     }

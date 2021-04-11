@@ -2,6 +2,9 @@ plugins {
     id('com.android.application')
     id('kotlin-android')
     id('org.jetbrains.dokka-android')
+    id('com.google.gms.google-services')
+    id('com.google.firebase.crashlytics')
+    id('com.google.firebase.firebase-perf')
 }
 
 apply from: './secure.gradle'
@@ -20,10 +23,6 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         resValue "string", "mapbox_access_token", MAPBOX_PUBLIC_TOKEN
-        resValue "string", "sentry_dsn", SENTRY_DNS
-        buildConfigField "String", "PARSE_SERVER", "\"" + PARSE_SERVER + "\""
-        buildConfigField "String", "PARSE_KEY", "\"" + PARSE_KEY + "\""
-        buildConfigField "String", "PARSE_APPLICATION_ID", "\"" + PARSE_APPLICATION_ID + "\""
     }
     signingConfigs {
         release {
@@ -133,6 +132,14 @@ dependencies {
     androidTestImplementation "androidx.work:work-testing:$jetpack_work_version"
     implementation "androidx.startup:startup-runtime:1.0.0"
 
+    // Google Firebase
+    implementation platform('com.google.firebase:firebase-bom:26.7.0')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-firestore-ktx'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.firebase:firebase-config-ktx'
+    implementation 'com.google.firebase:firebase-perf-ktx'
+
     // MapBox SDK
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.6.1'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:0.9.0'
@@ -141,12 +148,7 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3-native-mt'
 
-    // Sentry
-    implementation 'io.sentry:sentry-android:4.3.0'
-    implementation 'io.sentry:sentry-android-timber:4.3.0'
-
-    // Parse Platform
-    implementation "com.github.parse-community.Parse-SDK-Android:parse:1.26.0"
+    implementation 'com.jakewharton.timber:timber:4.7.1'
 
     // Glide
     def glide_version = "4.12.0"

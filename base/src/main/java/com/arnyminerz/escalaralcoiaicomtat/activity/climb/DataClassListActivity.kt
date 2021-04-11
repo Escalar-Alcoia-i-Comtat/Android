@@ -4,7 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
@@ -18,10 +18,12 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.Style
-import com.parse.ParseAnalytics
 import timber.log.Timber
 import java.io.FileNotFoundException
 import java.util.concurrent.CompletableFuture.runAsync
@@ -33,6 +35,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
     protected lateinit var binding: LayoutListBinding
     protected lateinit var dataClass: T
     private lateinit var mapHelper: MapHelper
+    lateinit var firestore: FirebaseFirestore
 
     val mapStyle: Style?
         get() = if (this::mapHelper.isInitialized)
@@ -43,12 +46,11 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         super.onCreate(savedInstanceState)
 
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
+        firestore = Firebase.firestore
 
         binding = LayoutListBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-
-        ParseAnalytics.trackAppOpenedInBackground(intent)
 
         mapHelper = MapHelper(binding.map)
             .withIconSizeMultiplier(iconSizeMultiplier)
@@ -95,6 +97,8 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         mapHelper.onDestroy()
     }
 
+    override fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {}
+
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         val hasInternet = state.hasInternet
         visibility(binding.noInternetCard.noInternetCardView, !hasInternet)
@@ -125,15 +129,15 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                                         Timber.v("Starting MapsActivity...")
                                         startActivity(intent)
                                         true
-                                    } catch (e: MapAnyDataToLoadException) {
+                                    } catch (_: MapAnyDataToLoadException) {
                                         Timber.w("Clicked on map and any data has been loaded")
                                         false
                                     }
                                 }
-                            } catch (e: NoInternetAccessException) {
+                            } catch (_: NoInternetAccessException) {
                                 Timber.w("Could not load KML since internet connection is not available")
                                 binding.map.hide()
-                            } catch (e: FileNotFoundException) {
+                            } catch (_: FileNotFoundException) {
                                 Timber.w("KMZ file not found")
                                 binding.map.hide()
                             } finally {

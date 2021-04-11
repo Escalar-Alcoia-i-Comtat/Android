@@ -2,9 +2,9 @@ package com.arnyminerz.escalaralcoiaicomtat.generic.extension
 
 import android.location.Location
 import android.net.Uri
+import com.google.firebase.firestore.GeoPoint
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
-import com.parse.ParseGeoPoint
 
 fun LatLng.toUri(showMarker: Boolean = false, markerTitle: String? = null): Uri {
     return Uri.parse(
@@ -24,7 +24,4 @@ fun LatLngBounds.Builder.includeAll(points: Collection<LatLng>) {
         include(point)
 }
 
-fun ParseGeoPoint?.toLatLng() =
-    if (this != null)
-        LatLng(latitude, longitude)
-    else null
+fun GeoPoint.toLatLng(): LatLng = LatLng(latitude, longitude)

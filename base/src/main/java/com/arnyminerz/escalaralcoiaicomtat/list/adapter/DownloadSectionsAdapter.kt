@@ -8,12 +8,12 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass.Companion.getIntent
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DownloadStatus
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.DownloadedSection
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass.Companion.getIntent
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
@@ -116,7 +116,7 @@ class DownloadSectionsAdapter(
 
                     sizeChip.setOnClickListener {
                         Timber.v("Showing download dialog for ZONE")
-                        DownloadDialog(mainActivity, section).show()
+                        DownloadDialog(mainActivity, section, mainActivity.firestore).show()
                     }
                 }
                 if (sectionHasDownloadedChildren) {

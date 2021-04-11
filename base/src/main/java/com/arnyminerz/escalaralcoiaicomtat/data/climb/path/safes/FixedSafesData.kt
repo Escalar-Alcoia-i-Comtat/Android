@@ -1,24 +1,24 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes
 
 import android.os.Parcel
 import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.R
 
 data class FixedSafesData(
-    val stringCount: Int,
-    val paraboltCount: Int,
-    val spitCount: Int,
-    val tensorCount: Int,
-    val pitonCount: Int,
-    val burilCount: Int
+    val stringCount: Long,
+    val paraboltCount: Long,
+    val spitCount: Long,
+    val tensorCount: Long,
+    val pitonCount: Long,
+    val burilCount: Long
 ) : SafesData() {
     constructor(parcel: Parcel) : this(
-        parcel.readInt(),
-        parcel.readInt(),
-        parcel.readInt(),
-        parcel.readInt(),
-        parcel.readInt(),
-        parcel.readInt()
+        parcel.readLong(),
+        parcel.readLong(),
+        parcel.readLong(),
+        parcel.readLong(),
+        parcel.readLong(),
+        parcel.readLong()
     )
 
     override fun list(): List<SafeCountData> =
@@ -62,12 +62,12 @@ data class FixedSafesData(
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(stringCount)
-        parcel.writeInt(paraboltCount)
-        parcel.writeInt(spitCount)
-        parcel.writeInt(tensorCount)
-        parcel.writeInt(pitonCount)
-        parcel.writeInt(burilCount)
+        parcel.writeLong(stringCount)
+        parcel.writeLong(paraboltCount)
+        parcel.writeLong(spitCount)
+        parcel.writeLong(tensorCount)
+        parcel.writeLong(pitonCount)
+        parcel.writeLong(burilCount)
     }
 
     override fun describeContents(): Int = 0

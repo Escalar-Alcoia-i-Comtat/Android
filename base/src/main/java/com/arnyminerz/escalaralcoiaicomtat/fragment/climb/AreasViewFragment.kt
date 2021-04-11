@@ -15,8 +15,9 @@ import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.NearbyZonesError
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area.getZones
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.getZones
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
@@ -164,7 +165,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             mapHelper.clearSymbols()
 
             runAsync {
-                val zones = AREAS.getZones()
+                val zones = AREAS.getZones((requireActivity() as ZoneActivity).firestore)
                 Timber.v("Iterating through ${zones.size} zones.")
                 Timber.v("Current Location: [${location.latitude},${location.longitude}]")
                 for (zone in zones) {

@@ -1,12 +1,13 @@
 package com.arnyminerz.escalaralcoiaicomtat.shared
 
 import androidx.collection.arrayMapOf
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
 
-const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7
+const val APP_UPDATE_MAX_TIME_DAYS_KEY = "APP_UPDATE_MAX_TIME_DAYS"
+const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7L
 
 /**
  * The maximum amount of days that will be allowed to the user not having updated the app
@@ -14,8 +15,14 @@ const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7
  */
 var APP_UPDATE_MAX_TIME_DAYS = APP_UPDATE_MAX_TIME_DAYS_DEFAULT
 
+val REMOTE_CONFIG_DEFAULTS = mapOf(
+    APP_UPDATE_MAX_TIME_DAYS_KEY to APP_UPDATE_MAX_TIME_DAYS_DEFAULT
+)
+const val REMOTE_CONFIG_MIN_FETCH_INTERVAL = 3600L
+
 val EXTRA_AREA = IntentExtra<String>("area")
 val EXTRA_ZONE = IntentExtra<String>("zone")
+val EXTRA_SECTOR_COUNT = IntentExtra<Int>("sector_count")
 val EXTRA_SECTOR_INDEX = IntentExtra<Int>("sector_index")
 
 val EXTRA_POSITION = IntentExtra<Int>("position")
@@ -50,10 +57,6 @@ const val TAB_ITEM_DOWNLOADS = 2
 const val TAB_ITEM_SETTINGS = 3
 const val TAB_ITEM_EXTRA = -1
 
-const val UPDATE_CHECKER_WORK_NAME = "update_checker"
-const val UPDATE_CHECKER_TAG = "update"
-const val UPDATE_CHECKER_FLEX_MINUTES: Long = 15
-
 val AREAS = arrayMapOf<String, Area>()
 
 const val PREVIEW_SCALE_PREFERENCE_MULTIPLIER = 10
@@ -74,16 +77,6 @@ const val LOCATION_PERMISSION_REQUEST_CODE = 3 // This number was chosen by Dono
 const val FOLDER_ACCESS_PERMISSION_REQUEST_CODE = 7
 
 const val PERMISSION_DIALOG_TAG = "PERM_TAG"
-
-/**
- * Specifies the DataClass' pin prefix
- */
-const val DATA_FIX_LABEL = "climbData"
-
-/**
- * Specifies the maximum amount of items that should be loaded on a single batch from Parse.
- */
-const val MAX_BATCH_SIZE = 1000
 
 const val MIME_TYPE_KML = "application/vnd.google-earth.kml+xml"
 const val MIME_TYPE_KMZ = "application/vnd.google-earth.kmz"

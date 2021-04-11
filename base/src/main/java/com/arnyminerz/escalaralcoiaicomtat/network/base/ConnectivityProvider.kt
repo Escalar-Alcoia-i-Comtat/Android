@@ -4,7 +4,11 @@ import android.content.Context
 import android.content.Context.CONNECTIVITY_SERVICE
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.net.NetworkCapabilities.*
+import android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET
+import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
+import android.net.NetworkCapabilities.TRANSPORT_ETHERNET
+import android.net.NetworkCapabilities.TRANSPORT_WIFI
+import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.network.ConnectivityProviderImpl
 
 private const val SLOW_CONNECTION_SPEED = 400 // kbps
@@ -12,6 +16,9 @@ private const val SLOW_CONNECTION_SPEED = 400 // kbps
 interface ConnectivityProvider {
     interface ConnectivityStateListener {
         fun onStateChange(state: NetworkState)
+
+        @WorkerThread
+        fun onStateChangeAsync(state: NetworkState)
     }
 
     fun addListener(listener: ConnectivityStateListener)
@@ -57,7 +64,8 @@ interface ConnectivityProvider {
             get() = networkCapabilities?.hasTransport(TRANSPORT_ETHERNET) ?: false
 
         val isConnectionFast: Boolean =
-            networkCapabilities?.linkDownstreamBandwidthKbps?.let { it >= SLOW_CONNECTION_SPEED } ?: false
+            networkCapabilities?.linkDownstreamBandwidthKbps?.let { it >= SLOW_CONNECTION_SPEED }
+                ?: false
     }
 
     companion object {

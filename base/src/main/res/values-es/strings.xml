@@ -234,9 +234,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="status_failed">fallido</string>
     <string name="status_blocked">bloqueado</string>
     <string name="status_cancelled">cancelado</string>
-    <string name="pref_info_cat_services">Servicios</string>
-    <string name="pref_info_service_updates_title">Comprobador de actualizaciones</string>
-    <string name="pref_info_service_updates_sum">El servicio que busca nuevas actualizaciones está ahora mismo %1$s</string>
     <string name="status_downloading">Descargando…</string>
     <string name="status_storing">Guardando…</string>
     <string name="status_loading_progress">Cargando %d/%d</string>

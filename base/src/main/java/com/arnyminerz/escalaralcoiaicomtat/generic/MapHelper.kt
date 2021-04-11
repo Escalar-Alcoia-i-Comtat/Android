@@ -31,7 +31,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass.Companion.getIntent
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass.Companion.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
@@ -69,6 +69,7 @@ import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.perf.FirebasePerformance
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdate
@@ -89,7 +90,6 @@ import com.mapbox.mapboxsdk.plugins.annotation.LineManager
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
-import com.parse.ParseAnalytics
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
@@ -842,10 +842,11 @@ class MapHelper(private val mapView: MapView) {
      */
     @Throws(FileNotFoundException::class)
     fun storeGPX(context: Context, uri: Uri, title: String = "Escalar Alcoià i Comtat") {
-        ParseAnalytics.trackEventInBackground(
-            "storeGPX",
-            hashMapOf("uri" to uri.toString(), "fileName" to uri.fileName(context))
-        )
+        val trace = FirebasePerformance.getInstance().newTrace("store_gpx").apply {
+            putAttribute("uri", uri.toString())
+            uri.fileName(context)?.let { putAttribute("file_name", it) }
+        }
+        trace.start()
 
         val contentResolver = context.contentResolver
         val stream = contentResolver.openOutputStream(uri) ?: throw CouldNotOpenStreamException()
@@ -892,6 +893,8 @@ class MapHelper(private val mapView: MapView) {
             stream.write("</wpt>")
         }
         stream.write("</gpx>")
+
+        trace.stop()
     }
 
     /**
@@ -921,10 +924,11 @@ class MapHelper(private val mapView: MapView) {
         description: String? = null,
         imageCompressionQuality: Int = 100
     ) {
-        ParseAnalytics.trackEventInBackground(
-            "storeKMZ",
-            hashMapOf("uri" to uri.toString(), "fileName" to uri.fileName(context))
-        )
+        val trace = FirebasePerformance.getInstance().newTrace("store_kmz").apply {
+            putAttribute("uri", uri.toString())
+            uri.fileName(context)?.let { putAttribute("file_name", it) }
+        }
+        trace.start()
 
         val contentResolver = context.contentResolver
         val stream = contentResolver.openOutputStream(uri) ?: throw CouldNotOpenStreamException()
@@ -1098,6 +1102,8 @@ class MapHelper(private val mapView: MapView) {
         Timber.d("Compressing KMZ...")
         zipFile(dir, stream, false)
         Timber.d("Complete!")
+
+        trace.stop()
     }
 
     /**

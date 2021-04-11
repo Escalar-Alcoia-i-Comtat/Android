@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes
 
 import android.os.Parcelable
 
@@ -30,8 +30,8 @@ abstract class SafesData : Parcelable, Iterable<SafeCountData> {
      * @since 20210316
      * @return The total count of safes. If using booleans, it will be the amount of trues
      */
-    fun sum(): Int {
-        var count = 0
+    fun sum(): Long {
+        var count: Long = 0
         for (i in this)
             count += i.count
         return count

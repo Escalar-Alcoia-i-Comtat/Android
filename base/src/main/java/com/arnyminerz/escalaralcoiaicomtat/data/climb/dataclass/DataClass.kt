@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass
 
 import android.app.Activity
 import android.content.Context
@@ -15,7 +15,7 @@ import androidx.work.WorkManager
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.allTrue
@@ -23,6 +23,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
@@ -40,9 +41,8 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.google.firebase.firestore.FirebaseFirestore
 import com.mapbox.mapboxsdk.maps.Style
-import com.parse.ParseObject
-import com.parse.ParseQuery
 import timber.log.Timber
 import java.io.File
 import java.util.Date
@@ -50,15 +50,15 @@ import java.util.Date
 // A: List type
 // B: Parent Type
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
-    override val objectId: String,
+    final override val objectId: String,
     open val displayName: String,
     open val timestamp: Date?,
     open val imageUrl: String,
     open val kmlAddress: String?,
     @DrawableRes val placeholderDrawable: Int,
     @DrawableRes val errorPlaceholderDrawable: Int,
-    override val namespace: String,
-    open val childrenNamespace: String
+    final override val namespace: String,
+    open val documentPath: String,
 ) : DataClassImpl(objectId, namespace), Iterable<A> {
     companion object {
         /**
@@ -82,6 +82,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                                     Timber.d("Found Zone id ${zone.objectId}!")
                                     putExtra(EXTRA_AREA, area.objectId)
                                     putExtra(EXTRA_ZONE, zone.objectId)
+                                    putExtra(EXTRA_SECTOR_COUNT, zone.count())
                                 }
                             else if (zone.isNotEmpty())
                                 for ((s, sector) in zone.withIndex()) {
@@ -91,6 +92,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                                             Timber.d("Found Sector id ${sector.objectId} at $s!")
                                             putExtra(EXTRA_AREA, area.objectId)
                                             putExtra(EXTRA_ZONE, zone.objectId)
+                                            putExtra(EXTRA_SECTOR_COUNT, zone.count())
                                             putExtra(EXTRA_SECTOR_INDEX, s)
                                         }
                                 }
@@ -105,21 +107,27 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
     protected val innerChildren = arrayListOf<A>()
 
+    private val pin = "${namespace}_$objectId"
+
     /**
      * Returns the data classes' children. May fetch them from storage, or return the cached items
      * @author Arnau Mora
      * @since 20210313
+     * @param firestore The Firestore instance.
      * @throws NoInternetAccessException If no Internet connection is available, and the children are
      * not stored in storage.
+     * @throws IllegalStateException When the children has not been loaded and [firestore] is null.
      */
-    val children: List<A>
-        @WorkerThread
-        @Throws(NoInternetAccessException::class)
-        get() {
-            if (innerChildren.isEmpty())
-                innerChildren.addAll(loadChildren())
-            return innerChildren
-        }
+    @WorkerThread
+    @Throws(NoInternetAccessException::class, IllegalStateException::class)
+    fun getChildren(firestore: FirebaseFirestore?): List<A> {
+        if (innerChildren.isEmpty())
+            if (firestore == null)
+                throw IllegalStateException("There are no loaded children, and firestore is null.")
+            else
+                innerChildren.addAll(loadChildren(firestore))
+        return innerChildren
+    }
 
     fun add(item: A) {
         innerChildren.add(item)
@@ -157,11 +165,19 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         return anyRunning
     }
 
-    operator fun get(index: Int): A = children[index]
+    /**
+     * Gets the children element at [index].
+     * @author Arnau Mora
+     * @since 20210411
+     * @see getChildren
+     */
+    @WorkerThread
+    @Throws(NoInternetAccessException::class)
+    operator fun get(index: Int): A = getChildren(null)[index]
 
     @WorkerThread
     @Throws(NoInternetAccessException::class)
-    protected abstract fun loadChildren(): List<A>
+    protected abstract fun loadChildren(firestore: FirebaseFirestore): List<A>
 
     /**
      * Gets an object based on objectId
@@ -169,12 +185,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210312
      * @param objectId The id to find
      * @return The found dataclass
-     * @see children
+     * @see getChildren
      * @throws IllegalStateException If the children's list is empty
      * @throws IndexOutOfBoundsException If the objectId was not found
      */
     @Throws(IllegalStateException::class, IndexOutOfBoundsException::class)
     operator fun get(objectId: String): A {
+        val children = getChildren(null)
         if (children.isEmpty())
             throw IllegalStateException("Children is empty")
         for (child in children)
@@ -189,13 +206,21 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         return other.namespace == namespace && other.objectId == objectId
     }
 
-    override fun iterator(): Iterator<A> = children.iterator()
+    /**
+     * Gets the children [Iterator].
+     * @author Arnau Mora
+     * @since 20210411
+     * @see getChildren
+     */
+    @WorkerThread
+    @Throws(NoInternetAccessException::class)
+    override fun iterator(): Iterator<A> = getChildren(null).iterator()
 
     override fun toString(): String = displayName
 
     fun downloadedSectionList(): ArrayList<DownloadedSection> {
         val downloadedSectionsList = arrayListOf<DownloadedSection>()
-        for (child in children)
+        for (child in getChildren(null))
             (child as? DataClass<*, *>)?.let { // Paths shouldn't be included
                 downloadedSectionsList.add(DownloadedSection(it))
             }
@@ -237,6 +262,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to run from
      * @return a matching DownloadStatus representing the Data Class' download status
      */
+    @WorkerThread
     fun downloadStatus(context: Context): DownloadStatus {
         Timber.d("$namespace:$objectId Checking if downloaded")
         var result: DownloadStatus? = null
@@ -248,7 +274,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 if (!imageFileExists) {
                     Timber.d("$namespace:$objectId Image file ($imageFile) doesn't exist")
                     result = DownloadStatus.NOT_DOWNLOADED
-                } else for (child in children)
+                } else for (child in getChildren(null))
                     if (child is DataClass<*, *>) {
                         if (!child.downloadStatus(context)) {
                             Timber.d("There's a non-downloaded children (${child.namespace}:${child.objectId})")
@@ -269,7 +295,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @return If the data class has any downloaded children
      */
     fun hasAnyDownloadedChildren(context: Context): Boolean {
-        for (child in children)
+        for (child in getChildren(null))
             if (child is DataClass<*, *> && child.downloadStatus(context) == DownloadStatus.DOWNLOADED)
                 return true
         return false
@@ -287,14 +313,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val imgFile = imageFile(context)
         val lst = arrayListOf<Boolean>()
 
-        Timber.d("Unpinning...")
-        val query = ParseQuery<ParseObject>(namespace)
-        val obj = query.get(objectId)
-        obj.unpin()
-
         Timber.v("Deleting \"$imgFile\"...")
         lst.add(imgFile.deleteIfExists())
-        for (child in children)
+        for (child in getChildren(null))
             (child as? DataClass<*, *>)?.let {
                 lst.add(it.delete(context))
             }
@@ -319,7 +340,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
         var size = imgFile.length()
 
-        for (child in children)
+        for (child in getChildren(null))
             if (child is DataClass<*, *>)
                 size += child.size(context)
 
@@ -333,8 +354,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @date 2020/09/11
      * @return The amount of children the data class has
+     * @see getChildren
      */
-    fun count(): Int = children.size
+    @WorkerThread
+    fun count(): Int = getChildren(null).size
 
     /**
      * Returns the amount of children the data class has, as well as all the children
@@ -367,12 +390,18 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
     /**
      * Checks if the data class has children
+     * @author Arnau Mora
+     * @since 20210411
      */
-    fun isEmpty(): Boolean = children.isEmpty()
+    @WorkerThread
+    fun isEmpty(): Boolean = getChildren(null).isEmpty()
 
     /**
      * Checks if the data class doesn't have any children
+     * @author Arnau Mora
+     * @since 20210411
      */
+    @WorkerThread
     fun isNotEmpty() = !isEmpty()
 
     /**
@@ -458,7 +487,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         result = 31 * result + placeholderDrawable
         result = 31 * result + errorPlaceholderDrawable
         result = 31 * result + namespace.hashCode()
-        result = 31 * result + children.hashCode()
         return result
     }
 }

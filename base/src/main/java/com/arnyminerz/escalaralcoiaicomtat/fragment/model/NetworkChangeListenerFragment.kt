@@ -16,4 +16,7 @@ abstract class NetworkChangeListenerFragment : Fragment(),
         super.onPause()
         appNetworkProvider.removeListener(this)
     }
+
+    override fun onStateChange(state: ConnectivityProvider.NetworkState) {}
+    override fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {}
 }

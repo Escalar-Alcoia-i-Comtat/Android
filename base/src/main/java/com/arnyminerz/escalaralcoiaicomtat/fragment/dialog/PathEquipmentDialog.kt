@@ -6,8 +6,8 @@ import android.os.Bundle
 import android.view.Window
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes.FixedSafesData
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogPathEquipmentBinding
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.EquipmentAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.EquipmentAdapterType

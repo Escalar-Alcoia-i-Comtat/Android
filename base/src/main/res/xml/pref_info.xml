@@ -22,11 +22,4 @@
             app:title="@string/pref_info_git_title"/>
 
     </PreferenceCategory>
-
-    <PreferenceCategory app:title="@string/pref_info_cat_services">
-        <Preference
-            app:key="pref_update_checker"
-            app:summary="@string/pref_info_service_updates_sum"
-            app:title="@string/pref_info_service_updates_title" />
-    </PreferenceCategory>
 </PreferenceScreen>

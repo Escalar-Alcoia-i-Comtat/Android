@@ -7,9 +7,9 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes.RequiredSafesData
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes.SafeCountData
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes.SafesData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.SafeCountData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.SafesData
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.PathEquipmentViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
@@ -59,7 +59,7 @@ class EquipmentAdapter(
                 if (equipmentType == EquipmentAdapterType.REQUIRED) context.getString(safe.displayName)
                 else {
                     var str = context.getString(safe.displayName, safe.count)
-                    if (safe.count == 1)
+                    if (safe.count == 1L)
                         str = str.replace(str.split(" ").first(), "")
                     str
                 }
