@@ -65,8 +65,15 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             val configSettings = remoteConfigSettings {
                 minimumFetchIntervalInSeconds = REMOTE_CONFIG_MIN_FETCH_INTERVAL
             }
-            remoteConfig.setConfigSettingsAsync(configSettings)
-            remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS)
+            com.google.android.gms.tasks.Tasks.await(
+                remoteConfig.setConfigSettingsAsync(configSettings)
+            )
+            com.google.android.gms.tasks.Tasks.await(
+                remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS)
+            )
+            com.google.android.gms.tasks.Tasks.await(
+                remoteConfig.fetchAndActivate()
+            )
             APP_UPDATE_MAX_TIME_DAYS = remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
 
             Timber.v("Searching for updates...")
