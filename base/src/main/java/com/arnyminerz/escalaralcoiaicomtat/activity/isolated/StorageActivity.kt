@@ -10,7 +10,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.deleteDir
 import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.google.android.material.snackbar.Snackbar
-import com.parse.ParseAnalytics
 import java.io.IOException
 
 @ExperimentalUnsignedTypes
@@ -22,8 +21,6 @@ class StorageActivity : LanguageAppCompatActivity() {
         binding = ActivityStorageBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-
-        ParseAnalytics.trackAppOpenedInBackground(intent)
 
         binding.clearCacheButton.setOnClickListener {
             try {

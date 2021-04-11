@@ -7,13 +7,12 @@ import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.loadAreasFromCache
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.loadAreasFromCache
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChannels
 import com.arnyminerz.escalaralcoiaicomtat.shared.APP_UPDATE_MAX_TIME_DAYS
-import com.arnyminerz.escalaralcoiaicomtat.shared.APP_UPDATE_MAX_TIME_DAYS_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -22,11 +21,8 @@ import com.google.android.play.core.install.model.ActivityResult.RESULT_IN_APP_U
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
 import com.google.android.play.core.tasks.Tasks
-import com.parse.ParseConfig
-import com.parse.ParseException
-import io.sentry.SentryLevel
-import io.sentry.android.core.SentryAndroid
-import io.sentry.android.timber.SentryTimberIntegration
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 import java.util.concurrent.CompletableFuture.runAsync
 
@@ -46,13 +42,6 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         Timber.plant(Timber.DebugTree())
         Timber.v("Planted Timber.")
 
-        Timber.v("Instantiating Sentry")
-        SentryAndroid.init(this) { options ->
-            options.addIntegration(
-                SentryTimberIntegration(SentryLevel.ERROR, SentryLevel.INFO)
-            )
-        }
-
         val showIntro = IntroActivity.shouldShow()
         if (showIntro != IntroShowReason.OK) {
             Timber.w("  Showing intro! Reason: ${showIntro.msg}")
@@ -67,16 +56,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
         runAsync {
             Timber.v("Getting Parse configuration...")
-            try {
-                val config = ParseConfig.get()
-                Timber.d("Got Parse configuration.")
-                APP_UPDATE_MAX_TIME_DAYS =
-                    config.getInt("APP_UPDATE_MAX_TIME_DAYS", APP_UPDATE_MAX_TIME_DAYS_DEFAULT)
-                Timber.d("  APP_UPDATE_MAX_TIME_DAYS=$APP_UPDATE_MAX_TIME_DAYS")
-            } catch (e: ParseException) {
-                Timber.w("Could not get configuration. Loading defaults...")
-                APP_UPDATE_MAX_TIME_DAYS = APP_UPDATE_MAX_TIME_DAYS_DEFAULT
-            }
+            // TODO: Remote config parameters get
+            // APP_UPDATE_MAX_TIME_DAYS | APP_UPDATE_MAX_TIME_DAYS_DEFAULT
 
             Timber.v("Searching for updates...")
             val appUpdateManager = AppUpdateManagerFactory.create(this)
@@ -113,14 +94,18 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                 } else Timber.w("Flexible update is not allowed")
             } else Timber.d("There's no update available. ($updateAvailability)")
 
-            Timber.v("Finished preparing App...")
-            load()
+            runOnUiThread {
+                Timber.v("Finished preparing App...")
+                load()
+            }
         }
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         load()
     }
+
+    override fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {}
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == APP_UPDATE_REQUEST_CODE)
@@ -141,36 +126,35 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         loading = false
     }
 
+    @UiThread
     private fun load() {
         if (loading)
             return
         loading = true
         binding.progressTextView.setText(R.string.status_downloading)
         try {
-            runAsync {
-                loadAreasFromCache({ progress, max ->
-                    Timber.i("Download progress: $progress / $max")
-                    runOnUiThread {
-                        if (max >= 0) {
-                            binding.progressBar.max = max
-                            binding.progressBar.setProgressCompat(progress, true)
-                            binding.progressTextView.text =
-                                getString(R.string.status_loading_progress, progress, max)
-                        } else {
-                            visibility(binding.progressBar, false)
-                            binding.progressBar.isIndeterminate = true
-                            visibility(binding.progressBar, true)
-                            binding.progressTextView.setText(R.string.status_storing)
-                        }
+            loadAreasFromCache(Firebase.firestore, { progress, max ->
+                Timber.i("Download progress: $progress / $max")
+                runOnUiThread {
+                    if (max >= 0) {
+                        binding.progressBar.max = max
+                        binding.progressBar.setProgressCompat(progress, true)
+                        binding.progressTextView.text =
+                            getString(R.string.status_loading_progress, progress, max)
+                    } else {
+                        visibility(binding.progressBar, false)
+                        binding.progressBar.isIndeterminate = true
+                        visibility(binding.progressBar, true)
+                        binding.progressTextView.setText(R.string.status_storing)
                     }
-                }) {
-                    if (AREAS.size > 0)
-                        startActivity(Intent(this, MainActivity::class.java))
-                    else if (!appNetworkState.hasInternet)
-                        noInternetAccess()
                 }
+            }) {
+                if (AREAS.size > 0)
+                    startActivity(Intent(this, MainActivity::class.java))
+                else if (!appNetworkState.hasInternet)
+                    noInternetAccess()
             }
-        } catch (e: NoInternetAccessException) {
+        } catch (_: NoInternetAccessException) {
             noInternetAccess()
         }
     }

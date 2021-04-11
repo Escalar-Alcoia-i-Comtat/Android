@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass
 
 import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.shared.DATA_FIX_LABEL

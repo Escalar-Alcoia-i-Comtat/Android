@@ -8,7 +8,7 @@ import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.download.DownloadedSection
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentDownloadsBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.sizeString

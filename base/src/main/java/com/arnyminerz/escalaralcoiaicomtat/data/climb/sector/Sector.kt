@@ -1,19 +1,17 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.sector
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.connection.parse.fetchPinOrNetworkSync
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
@@ -25,25 +23,26 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.components.XAxis
+import com.google.android.gms.tasks.Tasks
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.mapbox.mapboxsdk.geometry.LatLng
-import com.parse.ParseObject
-import com.parse.ParseQuery
 import timber.log.Timber
 import java.util.Date
-import java.util.Locale
-import java.util.concurrent.TimeoutException
 
-data class Sector constructor(
-    override val objectId: String,
-    override val displayName: String,
-    override val timestamp: Date?,
+class Sector constructor(
+    objectId: String,
+    displayName: String,
+    timestamp: Date?,
     val sunTime: SunTime,
     val kidsApt: Boolean,
     val walkingTime: Int,
     val location: LatLng?,
-    override val imageUrl: String
+    imageUrl: String,
+    documentPath: String,
 ) : DataClass<Path, Zone>(
     objectId,
     displayName,
@@ -53,25 +52,25 @@ data class Sector constructor(
     R.drawable.ic_wide_placeholder,
     R.drawable.ic_wide_placeholder,
     NAMESPACE,
-    Path.NAMESPACE
+    documentPath
 ) {
     /**
-     * Creates a new sector from the data of a ParseObject.
+     * Creates a new [Sector] from the data of a [DocumentSnapshot].
      * Note: This doesn't add children
      * @author Arnau Mora
-     * @since 20210312
-     * @param parseObject The object to get data from. It must be of class Sector
-     * @see ParseObject
+     * @since 20210411
+     * @param data The object to get data from
      */
-    constructor(parseObject: ParseObject) : this(
-        parseObject.objectId,
-        parseObject.getString("displayName")!!.fixTildes(),
-        parseObject.updatedAt,
-        SunTime.find(parseObject.getInt("sunTime")),
-        parseObject.getBoolean("kidsApt"),
-        parseObject.getInt("walkingTime"),
-        parseObject.getParseGeoPoint("location").toLatLng(),
-        parseObject.getString("image")!!
+    constructor(data: DocumentSnapshot) : this(
+        data.id,
+        data.getString("displayName")!!.fixTildes(),
+        data.getDate("timestamp"),
+        SunTime.find(data.get("sunTime", Int::class.java)!!),
+        data.getBoolean("kidsApt") ?: false,
+        data.get("walkingTime", Int::class.java)!!,
+        data.getGeoPoint("location")?.toLatLng(),
+        data.getString("image")!!.fixTildes(),
+        documentPath = data.reference.path
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -79,13 +78,11 @@ data class Sector constructor(
         parcel.writeString(displayName)
         parcel.writeString(timestamp?.let { TIMESTAMP_FORMAT.format(timestamp) })
         parcel.writeInt(sunTime.value)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            parcel.writeBoolean(kidsApt)
-        else
-            parcel.writeInt(if (kidsApt) 1 else 0)
+        parcel.writeInt(if (kidsApt) 1 else 0)
         parcel.writeInt(walkingTime)
         parcel.writeParcelable(location, 0)
         parcel.writeString(imageUrl)
+        parcel.writeString(documentPath)
         parcel.writeList(innerChildren)
     }
 
@@ -94,10 +91,11 @@ data class Sector constructor(
         parcel.readString()!!, // Display Name
         parcel.readString().toTimestamp(), // Timestamp
         SunTime.find(parcel.readInt()), // Sun Time
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) parcel.readBoolean() else parcel.readInt() == 1, // Kids Apt
+        parcel.readInt() == 1, // Kids Apt
         parcel.readInt(), // Walking Time
         parcel.readParcelable<LatLng?>(LatLng::class.java.classLoader),
         parcel.readString()!!, // Image Url
+        parcel.readString()!!, // Pointer
     ) {
         parcel.readList(innerChildren, Path::class.java.classLoader)
     }
@@ -105,31 +103,34 @@ data class Sector constructor(
     /**
      * Loads the Sector's children Paths
      * @author Arnau Mora
-     * @since 20210323
+     * @since 20210411
      * @return The loaded Paths list
-     * @throws NoInternetAccessException If no data is stored, and there's no Internet connection available
-     * @throws TimeoutException If timeout passed before finishing the task
      * @see Path
      */
     @WorkerThread
-    @Throws(NoInternetAccessException::class, TimeoutException::class)
     override fun loadChildren(): List<Path> {
-        val key = namespace.toLowerCase(Locale.getDefault())
-        Timber.d("Loading elements from \"$childrenNamespace\", where $key=$objectId")
-
-        val parentQuery = ParseQuery.getQuery<ParseObject>(namespace)
-        parentQuery.whereEqualTo("objectId", objectId)
-
-        val query = ParseQuery.getQuery<ParseObject>(childrenNamespace)
-        query.addAscendingOrder("sketchId")
-        query.whereMatchesQuery(key, parentQuery)
-
-        val loads = query.fetchPinOrNetworkSync(pin, true)
-        Timber.d("Got ${loads.size} elements.")
         val result = arrayListOf<Path>()
-        for (load in loads)
-            result.add(Path(load))
-        result.sortBy { it.sketchId }
+
+        Timber.d("Getting Firestore Instance...")
+        val firebaseDatabase = Firebase.firestore
+
+        Timber.d("Fetching...")
+        val ref = firebaseDatabase
+            .document(documentPath)
+            .collection("Paths")
+        val childTask = ref.get()
+        Tasks.await(childTask)
+        val snapshot = childTask.result
+        val e = childTask.exception
+        if (!childTask.isSuccessful || snapshot == null) {
+            Timber.w(e, "Could not get.")
+            e?.let { throw it }
+        } else {
+            val paths = snapshot.documents
+            Timber.d("Got ${paths.size} elements.")
+            for (l in paths.indices)
+                result.add(Path(paths[l]))
+        }
         return result
     }
 
@@ -187,44 +188,46 @@ data class Sector constructor(
      * Loads the Sector's chart. Sets all the styles and loads the data from the instance.
      * @author Arnau Mora
      * @since 20210323
-     * @param context The context to call from
+     * @param activity The [Activity] to call from
      * @param chart The [BarChart] to update
      */
-    @UiThread
-    fun loadChart(context: Context, chart: BarChart) {
-        val chartHelper = BarChartHelper.fromPaths(context, children)
-        with(chart) {
-            data = chartHelper.barData
-            setFitBars(false)
-            setNoDataText(context.getString(R.string.error_chart_no_data))
-            setDrawGridBackground(false)
-            setDrawBorders(false)
-            setDrawBarShadow(false)
-            setDrawMarkers(false)
-            setPinchZoom(false)
-            isDoubleTapToZoomEnabled = false
-            isHighlightPerTapEnabled = false
-            isHighlightPerDragEnabled = false
-            legend.isEnabled = false
+    @WorkerThread
+    fun loadChart(activity: Activity, chart: BarChart) {
+        val chartHelper = BarChartHelper.fromPaths(activity, getChildren())
+        activity.runOnUiThread {
+            with(chart) {
+                data = chartHelper.barData
+                setFitBars(false)
+                setNoDataText(context.getString(R.string.error_chart_no_data))
+                setDrawGridBackground(false)
+                setDrawBorders(false)
+                setDrawBarShadow(false)
+                setDrawMarkers(false)
+                setPinchZoom(false)
+                isDoubleTapToZoomEnabled = false
+                isHighlightPerTapEnabled = false
+                isHighlightPerDragEnabled = false
+                legend.isEnabled = false
 
-            description = with(Description()) {
-                text = ""
-                this
+                description = with(Description()) {
+                    text = ""
+                    this
+                }
+
+                val valueTextColor = getAttribute(context, R.attr.text_dark)
+                xAxis.apply {
+                    granularity = 1f
+                    valueFormatter = chartHelper.xFormatter
+                    position = XAxis.XAxisPosition.BOTTOM
+                    textColor = valueTextColor
+                }
+                chartHelper.barData.setValueTextColor(valueTextColor)
+
+                chartHelper.removeStyles(axisLeft)
+                chartHelper.removeStyles(axisRight)
+
+                invalidate()
             }
-
-            val valueTextColor = getAttribute(context, R.attr.text_dark)
-            xAxis.apply {
-                granularity = 1f
-                valueFormatter = chartHelper.xFormatter
-                position = XAxis.XAxisPosition.BOTTOM
-                textColor = valueTextColor
-            }
-            chartHelper.barData.setValueTextColor(valueTextColor)
-
-            chartHelper.removeStyles(axisLeft)
-            chartHelper.removeStyles(axisRight)
-
-            invalidate()
         }
     }
 

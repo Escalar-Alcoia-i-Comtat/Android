@@ -76,7 +76,7 @@ class MapFragment : NetworkChangeListenerFragment() {
                     try {
                         val permissionGranted = try {
                             PermissionsManager.areLocationPermissionsGranted(requireContext())
-                        } catch (ex: IllegalStateException) {
+                        } catch (_: IllegalStateException) {
                             Timber.w("Tried to check location permission without being attached to a context.")
                             false
                         }
@@ -84,7 +84,7 @@ class MapFragment : NetworkChangeListenerFragment() {
                             mapHelper.enableLocationComponent(requireContext())
                         else
                             Timber.w("User hasn't granted the location permission. Marker won't be enabled.")
-                    } catch (ex: IllegalStateException) {
+                    } catch (_: IllegalStateException) {
                         Timber.d("GPS not enabled.")
                         MaterialAlertDialogBuilder(
                             requireContext(),

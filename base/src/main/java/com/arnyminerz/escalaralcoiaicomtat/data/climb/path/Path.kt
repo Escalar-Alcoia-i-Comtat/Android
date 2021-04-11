@@ -1,21 +1,20 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.path
 
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.WorkerThread
-import com.arnyminerz.escalaralcoiaicomtat.connection.parse.fetchPinOrNetworkSync
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClassImpl
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes.FixedSafesData
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
-import com.parse.ParseObject
-import com.parse.ParseQuery
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 import java.util.Date
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 
 data class Path(
     override val objectId: String,
@@ -31,7 +30,8 @@ data class Path(
     val description: String?,
     val builtBy: String?,
     val rebuiltBy: String?,
-    val downloaded: Boolean = false
+    val downloaded: Boolean = false,
+    val pointer: String,
 ) : DataClassImpl(objectId, NAMESPACE), Comparable<Path> {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
@@ -46,54 +46,67 @@ data class Path(
         parcel.readParcelable<RequiredSafesData>(RequiredSafesData::class.java.classLoader)!!,
         parcel.readString(),
         parcel.readString(),
-        parcel.readString()
+        parcel.readString(),
+        parcel.readInt() == 1,
+        parcel.readString()!!,
     )
 
-    constructor(parseObject: ParseObject) : this(
-        parseObject.objectId,
-        parseObject.updatedAt,
-        (parseObject.getString("sketchId")?.fixTildes() ?: "0").toInt(),
-        parseObject.getString("displayName")!!.fixTildes(),
+    /**
+     * Creates a new [Path] from the data of a [DocumentSnapshot].
+     * @author Arnau Mora
+     * @since 20210411
+     * @param data The object to get data from
+     */
+    constructor(data: DocumentSnapshot) : this(
+        data.id,
+        data.getDate("created"),
+        data.get("sketchId", Int::class.java)!!,
+        data.getString("displayName")!!.fixTildes(),
         Grade.GradesList(),
         arrayListOf(),
         arrayListOf(),
         arrayListOf(),
         FixedSafesData(
-            parseObject.getInt("stringCount"),
-            parseObject.getInt("paraboltCount"),
-            parseObject.getInt("spitCount"),
-            parseObject.getInt("tensorCount"),
-            parseObject.getInt("pitonCount"),
-            parseObject.getInt("burilCount")
+            data.get("stringCount", Int::class.java)!!,
+            data.get("paraboltCount", Int::class.java)!!,
+            data.get("spitCount", Int::class.java)!!,
+            data.get("tensorCount", Int::class.java)!!,
+            data.get("pitonCount", Int::class.java)!!,
+            data.get("burilCount", Int::class.java)!!,
         ),
         RequiredSafesData(
-            parseObject.getBoolean("lanyardRequired"),
-            parseObject.getBoolean("crackerRequired"),
-            parseObject.getBoolean("friendRequired"),
-            parseObject.getBoolean("stripsRequired"),
-            parseObject.getBoolean("pitonRequired"),
-            parseObject.getBoolean("nailRequired")
+            data.getBoolean("lanyardRequired")!!,
+            data.getBoolean("crackerRequired")!!,
+            data.getBoolean("friendRequired")!!,
+            data.getBoolean("stripsRequired")!!,
+            data.getBoolean("pitonRequired")!!,
+            data.getBoolean("nailRequired")!!,
         ),
-        parseObject.getString("description")?.fixTildes(),
-        parseObject.getString("builtBy")?.fixTildes(),
-        parseObject.getList<String>("rebuiltBy")?.joinToString(separator = ", ")
+        data.getString("description")?.fixTildes(),
+        data.getString("builtBy")?.fixTildes(),
+        data.get("rebuiltBy", Array::class.java)?.joinToString(separator = ", "),
+        pointer = data.reference.path
     ) {
-        heights.addAll(parseObject.getList("height")!!)
+        val heights = data.get("height", Array::class.java)
+        if (heights != null)
+            for (h in heights.indices)
+                this.heights.add((heights[h].toString()).toInt())
+        else Timber.w("Heights is null")
 
-        val gradeValue = parseObject.getString("grade")!!.fixTildes()
+        val gradeValue = data.getString("grade")!!.fixTildes()
         val gradeValues = gradeValue.split(" ")
         grades.addAll(Grade.listFromStrings(gradeValues))
 
-        val endingsList = parseObject.getList<ParseObject>("ending")
+        val endingsList = data.get("ending", Array::class.java)
         if (endingsList != null)
-            for (e in endingsList) {
-                val ending = e.fetchIfNeeded<ParseObject>()
-                val endingName = ending.getString("name")?.fixTildes()
-                val endingType = EndingType.find(endingName)
+            for (e in endingsList.indices) {
+                val ending = endingsList[e].toString()
+                val endingType = EndingType.find(ending)
                 endings.add(endingType)
             }
+        else Timber.w("Endings list is null")
 
-        val endingArtifo = parseObject.getString("endingArtifo")?.fixTildes()
+        val endingArtifo = data.getString("ending_artifo")?.fixTildes()
         endingArtifo?.let {
             val artifos = it.replace("\r", "").split("\n")
             for (artifo in artifos)
@@ -128,10 +141,16 @@ data class Path(
      */
     @WorkerThread
     fun isBlocked(): BlockingType {
-        Timber.v("Checking if $objectId is blocked...")
-        val pin = pin + "_blocked"
+        Timber.d("Getting FirebaseDatabase Instance...")
+        val firebaseDatabase = Firebase.firestore
+
+        Timber.d("Fetching...")
+        val ref = firebaseDatabase.document(pointer)
+
+        Timber.v("Checking if $pointer is blocked...")
         return try {
-            Timber.d("Creating ParseQuery for Path...")
+            // TODO: Get blocking type
+            /*Timber.d("Creating ParseQuery for Path...")
             val query = ParseQuery<ParseObject>("Path")
             query.limit = 1
             query.whereEqualTo("objectId", objectId)
@@ -145,13 +164,10 @@ data class Path(
                 val blockedName = blocked.getString("name")
                 Timber.d("Got block status: $blockedName")
                 BlockingType.find(blockedName)
-            } else
-                BlockingType.UNKNOWN
+            } else*/
+            BlockingType.UNKNOWN
         } catch (_: NoInternetAccessException) {
             Timber.d("Could not get block status since Internet is not available")
-            BlockingType.UNKNOWN
-        } catch (_: TimeoutException) {
-            Timber.d("Could not get block status since the request was timed out")
             BlockingType.UNKNOWN
         }
     }
@@ -184,6 +200,8 @@ data class Path(
             writeString(description)
             writeString(builtBy)
             writeString(rebuiltBy)
+            writeInt(if (downloaded) 1 else 0)
+            writeString(pointer)
         }
     }
 

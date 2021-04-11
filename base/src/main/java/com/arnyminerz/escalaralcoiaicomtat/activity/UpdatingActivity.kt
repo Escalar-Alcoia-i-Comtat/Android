@@ -5,11 +5,11 @@ import android.os.Bundle
 import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DownloadStatus
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityUpdatingBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra

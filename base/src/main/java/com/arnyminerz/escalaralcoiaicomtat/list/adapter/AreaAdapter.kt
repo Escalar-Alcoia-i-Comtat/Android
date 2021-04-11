@@ -40,8 +40,6 @@ class AreaAdapter(
 
         holder.titleTextView.text = area.displayName
         holder.imageView.setOnClickListener {
-            Timber.v("Loading area ${area.displayName} with ${area.count()} zones")
-
             clickListener?.invoke(holder, position) ?: Timber.w("Any click listener was set!")
         }
         area.asyncLoadImage(

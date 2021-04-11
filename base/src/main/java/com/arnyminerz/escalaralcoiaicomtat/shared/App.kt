@@ -2,10 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.shared
 
 import android.app.Application
 import android.content.Context
-import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import com.parse.Parse
-import com.parse.Parse.Configuration
 import timber.log.Timber
 
 class App : Application(), ConnectivityProvider.ConnectivityStateListener {
@@ -14,14 +11,6 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
 
     override fun onCreate() {
         super.onCreate()
-        Parse.initialize(
-            Configuration.Builder(this)
-                .applicationId(BuildConfig.PARSE_APPLICATION_ID) // if defined
-                .clientKey(BuildConfig.PARSE_KEY)
-                .server(BuildConfig.PARSE_SERVER)
-                .enableLocalDataStore()
-                .build()
-        )
 
         sharedPreferences =
             applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
@@ -41,5 +30,9 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         Timber.v("Network state updated: $state")
         appNetworkState = state
+    }
+
+    override fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
+        Timber.v("Network state updated asyncronously: $state")
     }
 }

@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.worker
 
 import android.app.PendingIntent
 import android.content.Context
-import android.graphics.BitmapFactory
 import androidx.lifecycle.LiveData
 import androidx.work.Constraints
 import androidx.work.NetworkType
@@ -13,14 +12,9 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.connection.parse.fetchPinOrNetworkSync
-import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSLESS_LEGACY
-import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
-import com.arnyminerz.escalaralcoiaicomtat.generic.storeToFile
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
@@ -32,19 +26,13 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_OVERWRITE_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.MAX_BATCH_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.shared.METERS_PER_LAT_LON_DEGREE
-import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition
 import com.mapbox.mapboxsdk.plugins.offline.model.OfflineDownloadOptions
 import com.mapbox.mapboxsdk.plugins.offline.offline.OfflinePlugin
 import com.mapbox.mapboxsdk.plugins.offline.utils.OfflineUtils
-import com.parse.ParseException
-import com.parse.ParseObject
-import com.parse.ParseQuery
 import timber.log.Timber
-import java.io.File
-import java.util.Locale
 
 const val DOWNLOAD_QUALITY_MIN = 1
 const val DOWNLOAD_QUALITY_MAX = 100
@@ -64,12 +52,6 @@ const val DOWNLOAD_STYLE_URL = "style_url"
  * @since 20210313
  */
 const val ERROR_MISSING_DATA = "missing_data"
-
-/**
- * When old data could not be removed from Datastore
- * @since 20210313
- */
-const val ERROR_UNPIN = "unpin_old"
 
 /**
  * When old data was tried to be deleted but was not possible
@@ -126,7 +108,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      */
     private lateinit var notification: Notification
 
-    /**
+    /*/**
      * Creates a new failure Result with some error data.
      * @author Arnau Mora
      * @since 20210323
@@ -141,7 +123,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 "error" to error
             )
         )
-    }
+    }*/
 
     /**
      * Generates a pin from a [namespace] and an [objectID].
@@ -155,29 +137,6 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         "${DATA_FIX_LABEL}_${namespace}_$objectID"
 
     /**
-     * This is the first step on a download, and consists on removing any possible already stored
-     * data that may be on the device, so the downloaded data is as updated as possible.
-     * Also updates the notification with the correct info text.
-     * @author Arnau Mora
-     * @since 20210405
-     * @param namespace The namespace of the object
-     * @param objectID The ID in [namespace] of the object.
-     * @return null if everything was correct, a [failure] otherwise.
-     * @see ERROR_UNPIN
-     */
-    private fun removeOldData(namespace: String, objectID: String) =
-        try {
-            notification
-                .edit()
-                .withInfoText(R.string.notification_download_progress_info_unpinning)
-                .buildAndShow()
-            ParseObject.unpinAll(pin(namespace, objectID))
-            null
-        } catch (_: ParseException) {
-            failure(ERROR_UNPIN)
-        }
-
-    /**
      * Fetches the data from the server, and gets pinned through [pin] with [objectID] and [namespace].
      * Also updates the notification's info text.
      * @author Arnau Mora
@@ -189,9 +148,10 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @see ERROR_ALREADY_DOWNLOADED
      */
     private fun fetchData(
-        query: ParseQuery<*>?
-    ): Pair<ParseQuery<*>?, Result?> {
-        Timber.d("Fetching data from server ($namespace)...")
+        query: Any?
+    ): Pair<Any?, Result?> {
+        // TODO: Fix downloads
+        /*Timber.d("Fetching data from server ($namespace)...")
         notification
             .edit()
             .withInfoText(R.string.notification_download_progress_info_fetching)
@@ -210,9 +170,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             Timber.d("Result list is empty.")
             failure(ERROR_ALREADY_DOWNLOADED)
         } else
-            processFetchedData(result, fetchQuery)
+            processFetchedData(result, fetchQuery)*/
+        return null to Result.success()
     }
 
+    /*
     /**
      * Once the data has been fetched in [fetchData], it gets processed, which downloads the image
      * and maps so they are available offline.
@@ -269,7 +231,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         }
 
         return fetchQuery to Result.success()
-    }
+    }*/
 
     /**
      * Downloads a region of the map defined by the [location] and a circle around it with a radius
@@ -320,16 +282,10 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @see ERROR_ALREADY_DOWNLOADED
      * @see ERROR_DELETE_OLD
      * @see ERROR_NOT_FOUND
-     * @see ERROR_UNPIN
      */
     private fun download(
-        query: ParseQuery<*>?
-    ): Pair<ParseQuery<*>?, Result?> {
-        // Remove old data
-        val oldDataRemoved = removeOldData(namespace, objectID)
-        if (oldDataRemoved != null)
-            return oldDataRemoved
-
+        query: Any?
+    ): Pair<Any?, Result?> {
         // Fetch, process and store the data
         return fetchData(query)
     }
@@ -345,7 +301,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
         // Check if any required data is missing
         return if (namespace == null || objectID == null || displayName == null)
-            failure(ERROR_MISSING_DATA).second
+            failure(ERROR_MISSING_DATA)
         else {
             Timber.v("Downloading $objectID from $namespace...")
             this.namespace = namespace
@@ -417,7 +373,6 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
          * @see ERROR_ALREADY_DOWNLOADED
          * @see ERROR_DELETE_OLD
          * @see ERROR_NOT_FOUND
-         * @see ERROR_UNPIN
          */
         fun schedule(context: Context, tag: String, data: DownloadData): LiveData<WorkInfo> {
             val constraints = Constraints.Builder()

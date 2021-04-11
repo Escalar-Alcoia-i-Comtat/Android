@@ -48,7 +48,6 @@ import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.parse.ParseAnalytics
 import timber.log.Timber
 import java.io.File
 import java.util.concurrent.CompletableFuture.runAsync
@@ -63,7 +62,6 @@ class MapsActivity : LanguageAppCompatActivity() {
     private lateinit var mapHelper: MapHelper
 
     private var markerWindow: MapHelper.MarkerWindow? = null
-    private var markerName: String? = null
 
     private var showingPolyline: GeoGeometry? = null
 
@@ -74,8 +72,6 @@ class MapsActivity : LanguageAppCompatActivity() {
         binding = ActivityMapsBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-
-        ParseAnalytics.trackAppOpenedInBackground(intent)
 
         // Hi from march of 2021
         Timber.v("Getting Mapbox instance...")
@@ -399,7 +395,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                 binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
 
                 result = true
-            } catch (e: IllegalStateException) {
+            } catch (_: IllegalStateException) {
                 Timber.d("GPS not enabled.")
                 MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
                     .setTitle(R.string.dialog_gps_disabled_title)
@@ -411,7 +407,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                         dialog.dismiss()
                     }
                     .show()
-            } catch (e: MapNotInitializedException) {
+            } catch (_: MapNotInitializedException) {
                 Timber.w("The map has not been initialized yet.")
             }
         }

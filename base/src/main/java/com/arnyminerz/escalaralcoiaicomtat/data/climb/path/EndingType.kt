@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.path
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes

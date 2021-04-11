@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path.safes
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes
 
 import android.content.Context
 import android.os.Parcel

@@ -1,9 +1,9 @@
 package com.arnyminerz.escalaralcoiaicomtat.shared
 
 import androidx.collection.arrayMapOf
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
 
 const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7
@@ -16,6 +16,7 @@ var APP_UPDATE_MAX_TIME_DAYS = APP_UPDATE_MAX_TIME_DAYS_DEFAULT
 
 val EXTRA_AREA = IntentExtra<String>("area")
 val EXTRA_ZONE = IntentExtra<String>("zone")
+val EXTRA_SECTOR_COUNT = IntentExtra<Int>("sector_count")
 val EXTRA_SECTOR_INDEX = IntentExtra<Int>("sector_index")
 
 val EXTRA_POSITION = IntentExtra<Int>("position")

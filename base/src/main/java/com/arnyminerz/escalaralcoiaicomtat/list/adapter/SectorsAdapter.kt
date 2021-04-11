@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DownloadStatus
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_PREVIEW_SCALE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
@@ -37,7 +37,7 @@ class SectorsAdapter(
     private var onItemSelected: ((viewHolder: SectorsViewHolder, index: Int) -> Unit)? =
         listener
 
-    private val sectors = AREAS[areaId]!![zoneId].children
+    private val sectors = AREAS[areaId]!![zoneId].getChildren()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SectorsViewHolder =
         SectorsViewHolder(

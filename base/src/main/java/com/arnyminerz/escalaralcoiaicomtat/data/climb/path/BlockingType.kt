@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.data.path
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.path
 
 enum class BlockingType(val idName: String) {
     UNKNOWN("NULL"),

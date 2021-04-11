@@ -32,7 +32,6 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_SETTINGS
 import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.mapbox.android.core.permissions.PermissionsManager
-import com.parse.ParseAnalytics
 import timber.log.Timber
 
 class MainActivity : LanguageAppCompatActivity() {
@@ -151,8 +150,6 @@ class MainActivity : LanguageAppCompatActivity() {
         val view = binding.root
         setContentView(view)
         setSupportActionBar(binding.bottomAppBar)
-
-        ParseAnalytics.trackAppOpenedInBackground(intent)
 
         areasViewFragment = AreasViewFragment()
         mapFragment = MapFragment()

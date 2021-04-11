@@ -9,8 +9,8 @@ import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.dataclass.DownloadStatus
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
@@ -57,7 +57,7 @@ class ZoneAdapter(
         ViewCompat.setTransitionName(holder.titleTextView, zone.transitionName)
 
         holder.imageView.setOnClickListener {
-            Timber.v("Loading area \"%s\" with %s sectors", zone.displayName, zone.count())
+            Timber.v("Loading area \"%s\"", zone.displayName)
 
             onItemSelected?.let { it(zone, holder, position) }
         }

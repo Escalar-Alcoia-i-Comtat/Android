@@ -12,10 +12,11 @@ import androidx.annotation.UiThread
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.data.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.getDisplaySize
+import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.PathsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
@@ -31,6 +32,7 @@ import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import timber.log.Timber
+import java.util.concurrent.CompletableFuture.runAsync
 
 class SectorFragment : NetworkChangeListenerFragment() {
     private lateinit var areaId: String
@@ -147,25 +149,33 @@ class SectorFragment : NetworkChangeListenerFragment() {
         sectorActivity?.updateTitle(sector.displayName, isDownloaded)
         loadImage()
 
-        if (context != null) {
-            val context = requireContext()
-            Timber.v("Loading paths...")
+        if (activity != null)
+            runAsync {
+                val activity = requireActivity()
+                Timber.v("Loading paths...")
+                val children = sector.getChildren()
 
-            // Load Paths
-            binding.pathsRecyclerView.layoutManager = LinearLayoutManager(context)
-            binding.pathsRecyclerView.layoutAnimation =
-                AnimationUtils.loadLayoutAnimation(context, R.anim.item_enter_left_animator)
-            binding.pathsRecyclerView.adapter = PathsAdapter(sector.children, requireActivity())
-            context.visibility(binding.pathsRecyclerView, true)
+                runOnUiThread {
+                    // Load Paths
+                    binding.pathsRecyclerView.layoutManager = LinearLayoutManager(activity)
+                    binding.pathsRecyclerView.layoutAnimation =
+                        AnimationUtils.loadLayoutAnimation(
+                            activity,
+                            R.anim.item_enter_left_animator
+                        )
+                    binding.pathsRecyclerView.adapter =
+                        PathsAdapter(children, requireActivity())
+                    activity.visibility(binding.pathsRecyclerView, true)
 
-            // Load info bar
-            sector.sunTime.appendChip(context, binding.sunChip)
-            sector.kidsAptChip(context, binding.kidsAptChip)
-            sector.walkingTimeView(context, binding.walkingTimeTextView)
+                    // Load info bar
+                    sector.sunTime.appendChip(activity, binding.sunChip)
+                    sector.kidsAptChip(activity, binding.kidsAptChip)
+                    sector.walkingTimeView(activity, binding.walkingTimeTextView)
+                }
 
-            // Load chart
-            sector.loadChart(context, binding.sectorBarChart)
-        } else
+                // Load chart
+                sector.loadChart(activity, binding.sectorBarChart)
+            } else
             Timber.e("Could not start loading sectors since context is null")
 
         binding.sizeChangeFab.setOnClickListener {
