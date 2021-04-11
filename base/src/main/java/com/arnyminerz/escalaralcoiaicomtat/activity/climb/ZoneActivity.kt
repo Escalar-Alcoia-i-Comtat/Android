@@ -17,6 +17,7 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_POSITION
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
@@ -115,6 +116,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                                     Intent(this, SectorActivity()::class.java)
                                         .putExtra(EXTRA_AREA, areaId)
                                         .putExtra(EXTRA_ZONE, zoneId)
+                                        .putExtra(EXTRA_SECTOR_COUNT, sectors.size)
                                         .putExtra(EXTRA_SECTOR_INDEX, index)
                                         .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
                                 val options =
