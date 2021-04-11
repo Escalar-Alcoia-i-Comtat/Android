@@ -13,7 +13,10 @@ import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChannels
 import com.arnyminerz.escalaralcoiaicomtat.shared.APP_UPDATE_MAX_TIME_DAYS
+import com.arnyminerz.escalaralcoiaicomtat.shared.APP_UPDATE_MAX_TIME_DAYS_KEY
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.REMOTE_CONFIG_DEFAULTS
+import com.arnyminerz.escalaralcoiaicomtat.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -23,6 +26,8 @@ import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAI
 import com.google.android.play.core.tasks.Tasks
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import timber.log.Timber
 import java.util.concurrent.CompletableFuture.runAsync
 
@@ -55,9 +60,14 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             createNotificationChannels()
 
         runAsync {
-            Timber.v("Getting Parse configuration...")
-            // TODO: Remote config parameters get
-            // APP_UPDATE_MAX_TIME_DAYS | APP_UPDATE_MAX_TIME_DAYS_DEFAULT
+            Timber.v("Getting remote configuration...")
+            val remoteConfig = Firebase.remoteConfig
+            val configSettings = remoteConfigSettings {
+                minimumFetchIntervalInSeconds = REMOTE_CONFIG_MIN_FETCH_INTERVAL
+            }
+            remoteConfig.setConfigSettingsAsync(configSettings)
+            remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS)
+            APP_UPDATE_MAX_TIME_DAYS = remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
 
             Timber.v("Searching for updates...")
             val appUpdateManager = AppUpdateManagerFactory.create(this)
