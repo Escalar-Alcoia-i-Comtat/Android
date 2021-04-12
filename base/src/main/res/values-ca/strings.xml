@@ -265,4 +265,5 @@
     <string name="dialog_gps_disabled_message">Tens el proveïdor d\'ubiació desconnectat.</string>
     <string name="toast_error_language">No s\'ha pogut canviar l\'idioma</string>
     <string name="notification_download_progress_info_downloading_map">Baixant mapa…</string>
+    <string name="feedback_error_empty_message">Has d\'escriure el missatge a enviar</string>
 </resources>

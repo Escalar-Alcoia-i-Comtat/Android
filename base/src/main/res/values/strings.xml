@@ -232,6 +232,7 @@
     <string name="feedback_email_help">This is confidential, and won\'t be shared with anyone. It will be used only for user registration, and if you want, to contact you about your report.</string>
     <string name="feedback_message">Message</string>
     <string name="feedback_dont_contact">Don\'t contact me</string>
+    <string name="feedback_error_empty_message">You have to set a message to send</string>
 
     <string name="item_explore">Explore</string>
     <string name="item_map">Map</string>
