@@ -31,9 +31,6 @@ jobs:
         with:
           java-version: '15'
           java-package: jdk
-      - name: Set Up sentry-cli
-        run: |
-          curl -sL https://sentry.io/get-cli/ | bash
 
       - name: Prepare google-services.json
         run: echo "${{ secrets.GOOGLE_SERVICES }}" >> base/google-services.json
@@ -74,37 +71,10 @@ jobs:
           name: APK Artifact
           path: ./base/build/outputs/apk/release/EscalarAlcoiaIComtat-release.apk
 
-      - name: Sentry Upload
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORGANIZATION }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DNS }}
-        run: |
-          sentry-cli upload-proguard \
-          --write-properties ./base/build/intermediates/assets/release/sentry-debug-meta.properties \
-          ./base/build/outputs/mapping/release/mapping.txt
-
-      - name: Show build tree
-        run: |
-          sudo apt install tree
-          tree -a
-
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: ":robot: Commit Changes"
           file_pattern: "gradle.properties base/version.gradle"
-
-      - name: Create Sentry release
-        id: sentry_release
-        uses: getsentry/action-release@v1
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORGANIZATION }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-        with:
-          environment: production
-          version: ${{ steps.create_release.outputs.tag_name }}
 
       - name: Build AAB
         id: build_aab
@@ -117,25 +87,6 @@ jobs:
         with:
           name: AAB Artifact
           path: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
-
-      #      - name: Upload APK
-      #        id: upload_apk_asset
-      #        uses: svenstaro/upload-release-action@v2
-      #        with:
-      #          repo_token: ${{ secrets.GITHUB_TOKEN }}
-      #          tag: ${{ steps.create_release.outputs.tag_name }}
-      #          file: ./base/build/outputs/apk/release/EscalarAlcoiaIComtat-release.apk
-      #          asset_name: EscalarAlcoiaIComtat.apk
-      #          overwrite: true
-      #      - name: Upload AAB
-      #        id: upload_aab_asset
-      #        uses: svenstaro/upload-release-action@v2
-      #        with:
-      #          repo_token: ${{ secrets.GITHUB_TOKEN }}
-      #          tag: ${{ steps.create_release.outputs.tag_name }}
-      #          file: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
-      #          asset_name: EscalarAlcoiaIComtat.aab
-      #          overwrite: true
 
       - name: Prepare changelog
         id: prepare_changelog
