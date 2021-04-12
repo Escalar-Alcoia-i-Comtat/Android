@@ -26,6 +26,7 @@ import com.google.android.play.core.install.model.ActivityResult.RESULT_IN_APP_U
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
 import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
@@ -41,6 +42,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     private lateinit var binding: ActivityLoadingBinding
     private var loading = false
 
+    private lateinit var firestore: FirebaseFirestore
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoadingBinding.inflate(layoutInflater)
@@ -52,6 +55,9 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         val enableErrorReporting = SETTINGS_ERROR_REPORTING_PREF.get()
         Firebase.crashlytics.setCrashlyticsCollectionEnabled(enableErrorReporting)
         Timber.v("Set Crashlytics collection enabled to $enableErrorReporting")
+
+        Timber.v("Getting Firestore instance...")
+        firestore = Firebase.firestore
 
         val showIntro = IntroActivity.shouldShow()
         if (showIntro != IntroShowReason.OK) {
@@ -148,7 +154,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         loading = true
         binding.progressTextView.setText(R.string.status_downloading)
         try {
-            loadAreasFromCache(Firebase.firestore, { progress, max ->
+            loadAreasFromCache(firestore, { progress, max ->
                 Timber.i("Download progress: $progress / $max")
                 runOnUiThread {
                     if (max >= 0) {
