@@ -123,10 +123,6 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        if (state.hasInternet)
-            firestore.enableNetwork()
-        else
-            firestore.disableNetwork()
         load()
     }
 
