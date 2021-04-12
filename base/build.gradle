@@ -43,12 +43,20 @@ android {
             kotlinOptions {
                 freeCompilerArgs = [ '-Xuse-experimental=kotlin.Experimental' ]
             }
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
 
             ndk.debugSymbolLevel = 'FULL'
         }
         debug {
+            minifyEnabled true
             versionNameSuffix "-debug-build" + getDate()
             setProperty("archivesBaseName", "EscalarAlcoiaIComtat")
+
+            firebaseCrashlytics {
+                mappingFileUploadEnabled true
+            }
         }
     }
     kotlinOptions {
