@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.ROTATION_A
 import com.arnyminerz.escalaralcoiaicomtat.shared.ROTATION_B
 import com.arnyminerz.escalaralcoiaicomtat.shared.TOGGLE_ANIMATION_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.firebase.firestore.FirebaseFirestore
 import timber.log.Timber
 
 @Suppress("UNCHECKED_CAST")
@@ -32,14 +33,15 @@ data class DownloadedSection(val section: DataClass<*, *>) {
          * @date 14/05/2020
          * @patch Arnau Mora - 2020/09/11
          * @author ArnyminerZ
+         * @param firestore The [FirebaseFirestore] instance to load the data from.
          * @return The sections that have been downloaded
          */
-        fun list(): ArrayList<DownloadedSection> {
+        fun list(firestore: FirebaseFirestore): ArrayList<DownloadedSection> {
             Timber.v("Loading downloads...")
             val list = arrayListOf<DownloadedSection>()
 
             for (area in AREAS.values)
-                list.addAll(area.downloadedSectionList())
+                list.addAll(area.downloadedSectionList(firestore))
 
             return list
         }

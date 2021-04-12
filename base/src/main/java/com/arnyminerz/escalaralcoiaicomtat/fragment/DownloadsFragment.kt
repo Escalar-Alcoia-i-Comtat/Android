@@ -49,8 +49,11 @@ class DownloadsFragment : Fragment() {
 
         reloadSizeTextView()
 
+        val mainActivity = requireActivity() as MainActivity
+        val firestore = mainActivity.firestore
+
         runAsync {
-            val sections = DownloadedSection.list()
+            val sections = DownloadedSection.list(firestore)
 
             runOnUiThread {
                 binding.downloadsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
