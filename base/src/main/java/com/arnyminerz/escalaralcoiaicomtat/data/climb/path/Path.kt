@@ -6,12 +6,12 @@ import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
-import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Source
 import timber.log.Timber
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -31,7 +31,7 @@ class Path(
     val builtBy: String?,
     rebuiltBy: String?,
     val downloaded: Boolean = false,
-    val pointer: String,
+    val documentPath: String,
 ) : DataClassImpl(objectId, NAMESPACE), Comparable<Path> {
     var rebuiltBy: String? = rebuiltBy
         private set
@@ -88,7 +88,7 @@ class Path(
         data.getString("description")?.fixTildes(),
         data.getString("builtBy")?.fixTildes(),
         "",
-        pointer = data.reference.path
+        documentPath = data.reference.path
     ) {
         val pathData = data.data
 
@@ -154,35 +154,23 @@ class Path(
      * @return A matching BlockingType class
      */
     @WorkerThread
-    fun isBlocked(): BlockingType {
-        Timber.d("Getting FirebaseDatabase Instance...")
-        val firebaseDatabase = Firebase.firestore
-
+    fun isBlocked(firestore: FirebaseFirestore): BlockingType {
         Timber.d("Fetching...")
-        val ref = firebaseDatabase.document(pointer)
+        val ref = firestore.document(documentPath)
 
-        Timber.v("Checking if $pointer is blocked...")
-        return try {
-            // TODO: Get blocking type
-            /*Timber.d("Creating ParseQuery for Path...")
-            val query = ParseQuery<ParseObject>("Path")
-            query.limit = 1
-            query.whereEqualTo("objectId", objectId)
-            Timber.d("Fetching pin $pin")
-            val l = query.fetchPinOrNetworkSync(pin, shouldPin = false, timeout = BLOCKED_TIMEOUT)
-            if (l.isNotEmpty()) {
-                Timber.d("Path found! Getting blocked...")
-                val path = l[0]
-                val blocked = path.getParseObject("blocked")!!.fetch<ParseObject>()
-                Timber.d("Getting name...")
-                val blockedName = blocked.getString("name")
-                Timber.d("Got block status: $blockedName")
-                BlockingType.find(blockedName)
-            } else*/
-            BlockingType.UNKNOWN
-        } catch (_: NoInternetAccessException) {
-            Timber.d("Could not get block status since Internet is not available")
-            BlockingType.UNKNOWN
+        Timber.v("Checking if \"$documentPath\" is blocked...")
+        val task = ref.get(Source.SERVER)
+        Tasks.await(task)
+        if (!task.isSuccessful) {
+            val e = task.exception!!
+            Timber.w(e, "Could not check if path is blocked")
+            throw e
+        } else {
+            val result = task.result
+            val blocked = result.getString("blocked")
+            val blockingType = BlockingType.find(blocked)
+            Timber.v("Blocking status for \"$displayName\": $blockingType")
+            return blockingType
         }
     }
 
@@ -215,7 +203,7 @@ class Path(
             writeString(builtBy)
             writeString(rebuiltBy)
             writeInt(if (downloaded) 1 else 0)
-            writeString(pointer)
+            writeString(documentPath)
         }
     }
 
