@@ -34,8 +34,6 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             setProperty("archivesBaseName", "EscalarAlcoiaIComtat-${android.defaultConfig.versionCode}-${android.defaultConfig.versionName}")
             signingConfig signingConfigs.release
@@ -44,18 +42,17 @@ android {
                 freeCompilerArgs = [ '-Xuse-experimental=kotlin.Experimental' ]
             }
             firebaseCrashlytics {
-                mappingFileUploadEnabled false
+                mappingFileUploadEnabled true
             }
 
             ndk.debugSymbolLevel = 'FULL'
         }
         debug {
-            minifyEnabled true
             versionNameSuffix "-debug-build" + getDate()
             setProperty("archivesBaseName", "EscalarAlcoiaIComtat")
 
             firebaseCrashlytics {
-                mappingFileUploadEnabled true
+                mappingFileUploadEnabled false
             }
         }
     }
