@@ -218,9 +218,16 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
     override fun toString(): String = displayName
 
-    fun downloadedSectionList(): ArrayList<DownloadedSection> {
+    /**
+     * Generates a list of [DownloadedSection].
+     * @author Arnau Mora
+     * @since 20210412
+     * @param firestore The [FirebaseFirestore] instance to load the data from.
+     */
+    @WorkerThread
+    fun downloadedSectionList(firestore: FirebaseFirestore): ArrayList<DownloadedSection> {
         val downloadedSectionsList = arrayListOf<DownloadedSection>()
-        for (child in getChildren(null))
+        for (child in getChildren(firestore))
             (child as? DataClass<*, *>)?.let { // Paths shouldn't be included
                 downloadedSectionsList.add(DownloadedSection(it))
             }
@@ -291,11 +298,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @date 2020/09/14
      * @param context The context to run from
+     * @param firestore A [FirebaseFirestore] instance to load new data from.
      *
      * @return If the data class has any downloaded children
      */
-    fun hasAnyDownloadedChildren(context: Context): Boolean {
-        for (child in getChildren(null))
+    @WorkerThread
+    fun hasAnyDownloadedChildren(context: Context, firestore: FirebaseFirestore? = null): Boolean {
+        for (child in getChildren(firestore))
             if (child is DataClass<*, *> && child.downloadStatus(context) == DownloadStatus.DOWNLOADED)
                 return true
         return false
