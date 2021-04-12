@@ -20,11 +20,11 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.REMOTE_CONFIG_DEFAULTS
 import com.arnyminerz.escalaralcoiaicomtat.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.android.gms.tasks.Tasks
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.ActivityResult.RESULT_IN_APP_UPDATE_FAILED
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
-import com.google.android.play.core.tasks.Tasks
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -65,27 +65,9 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             createNotificationChannels()
 
-        runAsync {
-            Timber.v("Getting remote configuration...")
-            val remoteConfig = Firebase.remoteConfig
-            val configSettings = remoteConfigSettings {
-                minimumFetchIntervalInSeconds = REMOTE_CONFIG_MIN_FETCH_INTERVAL
-            }
-            com.google.android.gms.tasks.Tasks.await(
-                remoteConfig.setConfigSettingsAsync(configSettings)
-            )
-            com.google.android.gms.tasks.Tasks.await(
-                remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS)
-            )
-            com.google.android.gms.tasks.Tasks.await(
-                remoteConfig.fetchAndActivate()
-            )
-            APP_UPDATE_MAX_TIME_DAYS = remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
-
-            Timber.v("Searching for updates...")
-            val appUpdateManager = AppUpdateManagerFactory.create(this)
-            val appUpdateInfoTask = appUpdateManager.appUpdateInfo
-            val appUpdateInfo = Tasks.await(appUpdateInfoTask)
+        Timber.v("Searching for updates...")
+        val appUpdateManager = AppUpdateManagerFactory.create(this)
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
             val updateAvailability = appUpdateInfo.updateAvailability()
             if (updateAvailability == UPDATE_AVAILABLE) {
                 Timber.v("There's an update available")
@@ -101,7 +83,6 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                             APP_UPDATE_REQUEST_CODE
                         )
                         loading = true
-                        return@runAsync
                     } else Timber.w("Immediate update is not allowed")
                 } else if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
                     // Request flexible update
@@ -113,9 +94,20 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                         APP_UPDATE_REQUEST_CODE
                     )
                     loading = true
-                    return@runAsync
                 } else Timber.w("Flexible update is not allowed")
             } else Timber.d("There's no update available. ($updateAvailability)")
+        }
+
+        runAsync {
+            Timber.v("Getting remote configuration...")
+            val remoteConfig = Firebase.remoteConfig
+            val configSettings = remoteConfigSettings {
+                minimumFetchIntervalInSeconds = REMOTE_CONFIG_MIN_FETCH_INTERVAL
+            }
+            Tasks.await(remoteConfig.setConfigSettingsAsync(configSettings))
+            Tasks.await(remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS))
+            Tasks.await(remoteConfig.fetchAndActivate())
+            APP_UPDATE_MAX_TIME_DAYS = remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
 
             runOnUiThread {
                 Timber.v("Finished preparing App...")
@@ -127,8 +119,6 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         load()
     }
-
-    override fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {}
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == APP_UPDATE_REQUEST_CODE)
@@ -151,8 +141,10 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
     @UiThread
     private fun load() {
-        if (loading)
+        if (loading) {
+            Timber.v("Skipped load since already loading")
             return
+        }
         loading = true
         binding.progressTextView.setText(R.string.status_downloading)
         try {
