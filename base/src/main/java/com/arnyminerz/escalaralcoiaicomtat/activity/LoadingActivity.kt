@@ -10,6 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.loadAreasFromCache
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ERROR_REPORTING_PREF
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChannels
 import com.arnyminerz.escalaralcoiaicomtat.shared.APP_UPDATE_MAX_TIME_DAYS
@@ -24,6 +25,7 @@ import com.google.android.play.core.install.model.ActivityResult.RESULT_IN_APP_U
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
 import com.google.android.play.core.tasks.Tasks
+import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
@@ -46,6 +48,10 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
         Timber.plant(Timber.DebugTree())
         Timber.v("Planted Timber.")
+
+        val enableErrorReporting = SETTINGS_ERROR_REPORTING_PREF.get()
+        Firebase.crashlytics.setCrashlyticsCollectionEnabled(enableErrorReporting)
+        Timber.v("Set Crashlytics collection enabled to $enableErrorReporting")
 
         val showIntro = IntroActivity.shouldShow()
         if (showIntro != IntroShowReason.OK) {
