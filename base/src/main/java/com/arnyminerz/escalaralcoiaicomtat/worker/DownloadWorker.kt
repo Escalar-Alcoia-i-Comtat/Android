@@ -105,6 +105,8 @@ class DownloadData
  * @param overwrite If the download should be overwritten if already downloaded. Note that if this
  * is false, if the download already exists the task will fail.
  * @param quality The compression quality of the image
+ * @see DOWNLOAD_OVERWRITE_DEFAULT
+ * @see DOWNLOAD_QUALITY_DEFAULT
  */
 constructor(
     val dataClass: DataClass<*, *>,
@@ -296,6 +298,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         quality = inputData.getInt(DOWNLOAD_OVERWRITE, DOWNLOAD_QUALITY_DEFAULT)
         styleUrl = inputData.getString(DOWNLOAD_STYLE_URL)
 
+        Timber.v("Starting download for $displayName")
+
         // Check if any required data is missing
         return if (namespace == null || downloadPath == null || displayName == null)
             failure(ERROR_MISSING_DATA)
@@ -371,10 +375,14 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
          * @see ERROR_STORE_IMAGE
          */
         fun schedule(context: Context, tag: String, data: DownloadData): LiveData<WorkInfo> {
+            Timber.v("Scheduling new download...")
+            Timber.v("Building download constraints...")
+            // TODO: Add metered and mobile data constraints
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
 
+            Timber.v("Building DownloadWorker request...")
             val request = OneTimeWorkRequestBuilder<DownloadWorker>()
                 .setConstraints(constraints)
                 .addTag(tag)
@@ -392,6 +400,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 )
                 .build()
 
+            Timber.v("Getting WorkManager instance, and enqueueing job.")
             val workManager = WorkManager
                 .getInstance(context)
             workManager.enqueue(request)

@@ -101,7 +101,7 @@ class SectorsAdapter(
                         DownloadStatus.NOT_DOWNLOADED -> {
                             val result = sector.download(
                                 dataClassListActivity,
-                                dataClassListActivity.mapStyle
+                                dataClassListActivity.mapStyle?.uri
                             )
                             result.observe(dataClassListActivity) { workInfo ->
                                 val state = workInfo.state

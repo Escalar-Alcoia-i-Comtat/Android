@@ -24,7 +24,6 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.runAsync
 
 const val TOGGLED_CARD_HEIGHT = 96f
@@ -79,14 +78,18 @@ class DownloadSectionsAdapter(
     private fun downloadSection(
         section: DataClass<*, *>,
         holder: DownloadSectionViewHolder
-    ): CompletableFuture<Void> =
+    ) {
+        val mapStyle = mainActivity.mapFragment.mapStyle
+        val mapUri = mapStyle?.uri
         runAsync {
+            Timber.v("Downloading section \"$section\"")
             val downloadStatus = section.downloadStatus(mainActivity)
 
-            if (!appNetworkState.hasInternet)
+            if (!appNetworkState.hasInternet) {
+                Timber.v("Cannot download, there's no internet connection.")
                 toast(mainActivity, R.string.toast_error_no_internet)
-            else if (downloadStatus == DownloadStatus.NOT_DOWNLOADED)
-                section.download(mainActivity, mainActivity.mapFragment.mapStyle)
+            } else if (downloadStatus == DownloadStatus.NOT_DOWNLOADED)
+                section.download(mainActivity, mapUri)
                     .observe(mainActivity) { workInfo ->
                         val state = workInfo.state
                         val data = workInfo.outputData
@@ -108,9 +111,12 @@ class DownloadSectionsAdapter(
                             }
                         }
                     }
-            else if (downloadStatus == DownloadStatus.DOWNLOADING)
+            else if (downloadStatus == DownloadStatus.DOWNLOADING) {
+                Timber.v("Already downloading.")
                 toast(mainActivity, R.string.message_already_downloading)
+            }
         }
+    }
 
     /**
      * Shows a dialog to the user to confirm the deletion of a [DataClass].

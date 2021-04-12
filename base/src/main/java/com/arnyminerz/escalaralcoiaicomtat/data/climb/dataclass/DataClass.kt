@@ -239,7 +239,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20210313
      * @param context The context to run from.
-     * @param style The Mapbox Map's style.
+     * @param styleUri The Mapbox Map's [Style] uri ([Style.getUri]).
      * @param overwrite If the new data should overwrite the old one
      * @param quality The quality in which do the codification
      * @return A LiveData object with the download work info
@@ -249,17 +249,19 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     @Throws(IllegalArgumentException::class)
     fun download(
         context: Context,
-        style: Style?,
+        styleUri: String?,
         overwrite: Boolean = true,
         quality: Int = 100
     ): LiveData<WorkInfo> {
         if (quality < DOWNLOAD_QUALITY_MIN || quality > DOWNLOAD_QUALITY_MAX)
-            throw IllegalArgumentException("Quality must be between 1 and 100")
-        return DownloadWorker.schedule(
-            context,
-            pin,
-            DownloadData(this, style?.uri, overwrite, quality)
-        )
+            throw IllegalArgumentException(
+                "Quality must be between $DOWNLOAD_QUALITY_MIN and $DOWNLOAD_QUALITY_MAX"
+            )
+        Timber.v("Downloading $namespace \"$displayName\"...")
+        Timber.v("Preparing DownloadData...")
+        val downloadData = DownloadData(this, styleUri, overwrite, quality)
+        Timber.v("Scheduling download...")
+        return DownloadWorker.schedule(context, pin, downloadData)
     }
 
     /**
