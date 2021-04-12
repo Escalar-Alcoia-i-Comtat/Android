@@ -19,7 +19,7 @@ import timber.log.Timber
 private const val PREVIEW_SCALE_REDUCER = 10f
 
 class GeneralSettingsFragment : PreferenceFragmentCompat() {
-    private var sensibilityPreference: SeekBarPreference? = null
+    private var errorReportingPreference: SwitchPreference? = null
     private var markerSizePreference: SeekBarPreference? = null
     private var previewScalePreference: SeekBarPreference? = null
     private var languagePreference: ListPreference? = null
@@ -30,9 +30,10 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.pref_general, rootKey)
 
-        sensibilityPreference = findPreference("pref_swipe_sensibility")
-        sensibilityPreference?.setOnPreferenceChangeListener { _, value ->
-            SETTINGS_GESTURE_SENSIBILITY_PREF.put(value as Int)
+        errorReportingPreference = findPreference("pref")
+        errorReportingPreference?.setOnPreferenceChangeListener { _, value ->
+            val newValue = value as Boolean
+            SETTINGS_ERROR_REPORTING_PREF.put(newValue)
             true
         }
 
@@ -134,8 +135,6 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
      * @since 20210324
      */
     private fun updateFields() {
-        sensibilityPreference?.value = SETTINGS_GESTURE_SENSIBILITY_PREF.get()
-
         languagePreference?.setDefaultValue(
             SETTINGS_LANGUAGE_PREF.get()
         )
@@ -153,5 +152,7 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
         markerSizePreference?.value = SETTINGS_MARKER_SIZE_PREF.get()
         previewScalePreference?.value =
             (SETTINGS_PREVIEW_SCALE_PREF.get() * PREVIEW_SCALE_PREFERENCE_MULTIPLIER).toInt()
+
+        errorReportingPreference?.isChecked = SETTINGS_ERROR_REPORTING_PREF.get()
     }
 }
