@@ -266,4 +266,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="dialog_gps_disabled_message">Tienes el proveedor de ubicación desconectado.</string>
     <string name="toast_error_language">No se ha podido cambiar el idioma</string>
     <string name="notification_download_progress_info_downloading_map">Descargando mapa…</string>
+    <string name="feedback_error_empty_message">Debes escribir el mensaje a mandar</string>
 </resources>
