@@ -73,9 +73,6 @@
     <string name="pref_noti_alert_sum">"Esto activará/desactivará las alertas locales"</string>
     <string name="pref_noti_device_title">"Ajustes de notificaciones"</string>
     <string name="pref_noti_device_sum">"Muestra los ajustes de notificaciones del sistema"</string>
-    <string name="pref_gene_gesture_sens_title">"Cambia la sensibilidad de gestos"</string>
-    <string name="pref_gene_gesture_sens_sum">"Sensibilidad de los gestos como deslizar hacia los lados desde la vista del sector"</string>
-    <string name="pref_gene_gesture_sens_msg">"Sensibilidad"</string>
     <string name="pref_gene_language_title">"Idioma "</string>
     <string name="pref_gene_language_sum">"Idioma para usar en la aplicación "</string>
     <string name="pref_gene_nearby_title">"Habilitar la vista de zonas cercanas "</string>
@@ -267,4 +264,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="toast_error_language">No se ha podido cambiar el idioma</string>
     <string name="notification_download_progress_info_downloading_map">Descargando mapa…</string>
     <string name="feedback_error_empty_message">Debes escribir el mensaje a mandar</string>
+    <string name="pref_gene_error_reporting_title">Habilitar reportes de error</string>
+    <string name="pref_gene_error_reporting_sum">Si está activado, cada vez que la app se cierre inesperadamente o haya un error, se mandará un reporte anónimo a los desarrolladores para que pueda ser reparado lo más pronto posible. Por favor, te pedimos que mantengas esta opción activada, aunque eres libre que desactivarla si lo deseas.</string>
 </resources>

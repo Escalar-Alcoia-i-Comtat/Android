@@ -11,14 +11,12 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.SETTINGS_HEIGHT_MAIN
 import com.arnyminerz.escalaralcoiaicomtat.fragment.SETTINGS_HEIGHT_UPPER
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_QUALITY_DEFAULT
 
-private const val GESTURE_SENSIBILITY_DEFAULT = 3
 private const val NEARBY_DISTANCE_DEFAULT = 1000
 private const val MARKER_SIZE_DEFAULT = 3
 private const val PREVIEW_SCALE_DEFAULT = .5f
 
+val SETTINGS_ERROR_REPORTING_PREF = PreferenceData("error_reporting", true)
 val SETTINGS_ALERT_PREF = PreferenceData("alert_pref", true)
-val SETTINGS_GESTURE_SENSIBILITY_PREF =
-    PreferenceData("gest_sens_pref", GESTURE_SENSIBILITY_DEFAULT)
 val SETTINGS_LANGUAGE_PREF = PreferenceData("lang_pref", "en")
 val SETTINGS_NEARBY_DISTANCE_PREF = PreferenceData("nearby_distance", NEARBY_DISTANCE_DEFAULT)
 val SETTINGS_MARKER_SIZE_PREF = PreferenceData("marker_size", MARKER_SIZE_DEFAULT)

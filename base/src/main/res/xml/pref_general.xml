@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <SeekBarPreference
-        android:defaultValue="3"
-        android:dialogMessage="@string/pref_gene_gesture_sens_msg"
-        android:key="pref_swipe_sensibility"
-        android:max="6"
-        android:summary="@string/pref_gene_gesture_sens_sum"
-        android:text=""
-        android:title="@string/pref_gene_gesture_sens_title" />
-
     <ListPreference
         android:entries="@array/app_languages"
         android:entryValues="@array/app_languages_values"
@@ -58,5 +49,10 @@
             android:max="10"
             android:title="@string/pref_gene_preview_scale_title"
             android:summary="@string/pref_gene_preview_scale_sum" />
+
+        <SwitchPreference
+            android:key="pref_error_reporting"
+            android:summary="@string/pref_gene_error_reporting_sum"
+            android:title="@string/pref_gene_error_reporting_title" />
     </PreferenceCategory>
 </PreferenceScreen>

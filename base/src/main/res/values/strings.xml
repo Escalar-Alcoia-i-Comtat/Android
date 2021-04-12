@@ -117,9 +117,6 @@
     <string name="pref_noti_device_title">Notification Settings</string>
     <string name="pref_noti_device_sum">Show the system notification settings</string>
 
-    <string name="pref_gene_gesture_sens_title">Swipe Gesture Sensibility</string>
-    <string name="pref_gene_gesture_sens_sum">The sensibility for gestures such as the swipe to the sides from the Sector View.</string>
-    <string name="pref_gene_gesture_sens_msg">Sensibility</string>
     <string name="pref_gene_language_title">Language</string>
     <string name="pref_gene_language_sum">The language to use in the app</string>
     <string name="pref_gene_nearby_title">Enable Nearby Zones View</string>
@@ -137,6 +134,8 @@
     <string name="pref_gene_section_nearby">Nearby Zones</string>
     <string name="pref_gene_section_map">Map</string>
     <string name="pref_gene_section_advanced">Advanced</string>
+    <string name="pref_gene_error_reporting_title">Enable error reporting</string>
+    <string name="pref_gene_error_reporting_sum">This will send an anonymous error report to the developers when the app crashes or there\'s an error, so it can be fixed as soon as possible. Please, we kindly ask you to keep this enabled, but you are free to disable it.</string>
 
     <string name="pref_down_cat_downloads">Downloads</string>
     <string name="pref_down_mobile_title">Mobile Data</string>

@@ -73,9 +73,6 @@
     <string name="pref_noti_alert_sum">"Açò habilitarà o no les alertes locals"</string>
     <string name="pref_noti_device_title">"Configuració de Notificacions"</string>
     <string name="pref_noti_device_sum">"Obre la configuració de notificacions del sistema"</string>
-    <string name="pref_gene_gesture_sens_title">"Sensibilitat lliscar"</string>
-    <string name="pref_gene_gesture_sens_sum">"La sensibilitat dels gestos com lliscar cap als costats en la vista de sector"</string>
-    <string name="pref_gene_gesture_sens_msg">"Sensibilitat"</string>
     <string name="pref_gene_language_title">"Idioma"</string>
     <string name="pref_gene_language_sum">"L'idioma a utilitzar en l'aplicació"</string>
     <string name="pref_gene_nearby_title">"Habilitar la vista de Zones Properes"</string>
@@ -266,4 +263,6 @@
     <string name="toast_error_language">No s\'ha pogut canviar l\'idioma</string>
     <string name="notification_download_progress_info_downloading_map">Baixant mapa…</string>
     <string name="feedback_error_empty_message">Has d\'escriure el missatge a enviar</string>
+    <string name="pref_gene_error_reporting_title">Habilitar reports d\'error</string>
+    <string name="pref_gene_error_reporting_sum">Si està habilitat, cada vegada que l\'app es tanque de manera sobtada, o hi haja algun error, s\'enviarà un report anònim als desenvolupadors per a que l\'arreglen el més prompte possible. Et demanem que mantingues aquesta opció activada, però eres lliure de deshabilitar-la si vols.</string>
 </resources>
