@@ -267,6 +267,19 @@ class Notification private constructor(private val builder: Builder) {
         }
 
         /**
+         * Sets the text of the notification when it's expanded from a resource
+         * @author Arnau Mora
+         * @since 20210313
+         * @param longTextRes The [StringRes] of the notification when expanded
+         * @param args The arguments for replacing placeholders in the text
+         * @return The Builder instance
+         */
+        fun withLongText(@StringRes longTextRes: Int, vararg args: Any): Builder {
+            this.longText = context.getString(longTextRes, args)
+            return this
+        }
+
+        /**
          * Sets the action of the notification
          * @author Arnau Mora
          * @since 20210313
