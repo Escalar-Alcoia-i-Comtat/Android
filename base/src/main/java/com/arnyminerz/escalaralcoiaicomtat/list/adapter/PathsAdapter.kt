@@ -37,6 +37,8 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 import java.util.concurrent.CompletableFuture.runAsync
 
@@ -130,6 +132,8 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
             return
         }
         val path = paths[position]
+
+        val firestore = Firebase.firestore
 
         Timber.d("Loading path data")
         runAsync {
@@ -261,7 +265,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
             }
 
             Timber.v("Checking if blocked...")
-            val blocked = path.isBlocked()
+            val blocked = path.isBlocked(firestore)
             Timber.d("Path ${path.objectId} block status: $blocked")
             blockStatuses[position] = blocked
 
