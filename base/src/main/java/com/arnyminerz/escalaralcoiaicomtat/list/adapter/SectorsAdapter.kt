@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ProgressBar
+import androidx.annotation.UiThread
 import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -23,6 +24,7 @@ import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import timber.log.Timber
+import java.util.concurrent.CompletableFuture.runAsync
 
 private const val IMAGE_LOAD_TRANSITION_TIME = 50
 private const val IMAGE_THUMBNAIL_SIZE = 0.1f
@@ -141,20 +143,34 @@ class SectorsAdapter(
         }
     }
 
+    /**
+     * Updates the download button's image to show the download status of the [Sector].
+     * @author Arnau Mora
+     * @since 20210413
+     * @param sector
+     */
+    @UiThread
     private fun refreshDownloadImage(
         sector: Sector,
         downloadImagebutton: ImageButton,
         downloadProgressbar: ProgressBar
     ) {
-        when (sector.downloadStatus(dataClassListActivity, dataClassListActivity.firestore)) {
-            DownloadStatus.NOT_DOWNLOADED, DownloadStatus.PARTIALLY ->
-                downloadImagebutton.setImageResource(R.drawable.download)
-            DownloadStatus.DOWNLOADING -> {
-                downloadImagebutton.setImageResource(R.drawable.download_outline)
-                visibility(downloadProgressbar, true)
-                downloadProgressbar.isIndeterminate = true
+        runAsync {
+            val downloadStatus =
+                sector.downloadStatus(dataClassListActivity, dataClassListActivity.firestore)
+
+            dataClassListActivity.runOnUiThread {
+                when (downloadStatus) {
+                    DownloadStatus.NOT_DOWNLOADED, DownloadStatus.PARTIALLY ->
+                        downloadImagebutton.setImageResource(R.drawable.download)
+                    DownloadStatus.DOWNLOADING -> {
+                        downloadImagebutton.setImageResource(R.drawable.download_outline)
+                        visibility(downloadProgressbar, true)
+                        downloadProgressbar.isIndeterminate = true
+                    }
+                    DownloadStatus.DOWNLOADED -> downloadImagebutton.setImageResource(R.drawable.cloud_check)
+                }
             }
-            DownloadStatus.DOWNLOADED -> downloadImagebutton.setImageResource(R.drawable.cloud_check)
         }
     }
 }

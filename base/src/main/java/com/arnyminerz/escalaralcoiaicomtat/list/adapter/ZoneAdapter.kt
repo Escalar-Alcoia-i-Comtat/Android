@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.UiThread
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
@@ -23,6 +24,7 @@ import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
 import java.io.File
+import java.util.concurrent.CompletableFuture.runAsync
 
 class ZoneAdapter(
     private val zones: List<Zone>,
@@ -63,16 +65,19 @@ class ZoneAdapter(
         }
         zone.asyncLoadImage(dataClassListActivity, holder.imageView)
 
-        if (zone.downloadStatus(
+        runAsync {
+            val downloadStatus = zone.downloadStatus(
                 dataClassListActivity,
                 dataClassListActivity.firestore
-            ) == DownloadStatus.DOWNLOADED ||
-            zone.kmlAddress != null
-        )
-            holder.mapImageButton.setOnClickListener {
-                showMap(zone)
+            )
+            dataClassListActivity.runOnUiThread {
+                if (downloadStatus.isDownloaded() || zone.kmlAddress != null)
+                    holder.mapImageButton.setOnClickListener {
+                        showMap(zone)
+                    }
+                else visibility(holder.mapImageButton, false)
             }
-        else visibility(holder.mapImageButton, false)
+        }
 
         holder.downloadImageButton.setOnClickListener {
             if (!appNetworkState.hasInternet)
@@ -120,14 +125,21 @@ class ZoneAdapter(
         updateImageRes(holder, zone)
     }
 
+    @UiThread
     private fun updateImageRes(holder: ZonesViewHolder, zone: Zone) {
-        holder.downloadImageButton.setImageResource(
-            when (zone.downloadStatus(dataClassListActivity, dataClassListActivity.firestore)) {
-                DownloadStatus.DOWNLOADED -> R.drawable.cloud_check
-                DownloadStatus.DOWNLOADING -> R.drawable.download_outline
-                else -> R.drawable.download
+        runAsync {
+            val downloadStatus =
+                zone.downloadStatus(dataClassListActivity, dataClassListActivity.firestore)
+            dataClassListActivity.runOnUiThread {
+                holder.downloadImageButton.setImageResource(
+                    when (downloadStatus) {
+                        DownloadStatus.DOWNLOADED -> R.drawable.cloud_check
+                        DownloadStatus.DOWNLOADING -> R.drawable.download_outline
+                        else -> R.drawable.download
+                    }
+                )
             }
-        )
+        }
     }
 
     private fun showMap(zone: Zone) {
