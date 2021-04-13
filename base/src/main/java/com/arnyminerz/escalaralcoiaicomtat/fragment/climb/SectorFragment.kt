@@ -148,14 +148,20 @@ class SectorFragment : NetworkChangeListenerFragment() {
         }
         sector = AREAS[areaId]!![zoneId][sectorIndex]
 
+        uiContext {
+            binding.sectorTextView.text = sector.displayName
+        }
+
         isDownloaded =
             sector.downloadStatus(requireContext(), sectorActivity.firestore).isDownloaded()
-        binding.sectorTextView.text = sector.displayName
 
         val size = getDisplaySize(requireActivity())
         notMaximizedImageHeight = size.second / 2
-        binding.sectorImageViewLayout.layoutParams.height = notMaximizedImageHeight
-        binding.sectorImageViewLayout.requestLayout()
+
+        uiContext {
+            binding.sectorImageViewLayout.layoutParams.height = notMaximizedImageHeight
+            binding.sectorImageViewLayout.requestLayout()
+        }
 
         if (activity != null) {
             Timber.v("Loading paths...")
