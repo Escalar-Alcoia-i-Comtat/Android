@@ -50,14 +50,14 @@ import java.util.Date
 // A: List type
 // B: Parent Type
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
-    final override val objectId: String,
+    objectId: String,
     open val displayName: String,
     open val timestamp: Date?,
     open val imageUrl: String,
     open val kmlAddress: String?,
     @DrawableRes val placeholderDrawable: Int,
     @DrawableRes val errorPlaceholderDrawable: Int,
-    final override val namespace: String,
+    namespace: String,
     open val documentPath: String,
 ) : DataClassImpl(objectId, namespace), Iterable<A> {
     companion object {
@@ -238,8 +238,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val downloadedSectionsList = arrayListOf<DownloadedSection>()
         for (child in getChildren(firestore))
             (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
-                if (showNonDownloaded || dataClass.downloadStatus(context, firestore)
-                        .isDownloaded()
+                val downloadStatus = dataClass.downloadStatus(context, firestore)
+                if (showNonDownloaded ||
+                    downloadStatus.isDownloaded() || downloadStatus.partialDownload()
                 )
                     downloadedSectionsList.add(DownloadedSection(dataClass))
             }
@@ -299,14 +300,29 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     result = DownloadStatus.NOT_DOWNLOADED
                 }
                 Timber.v("Getting children elements download status...")
-                for (child in getChildren(firestore))
+                for (child in getChildren(firestore)) {
                     if (child is DataClass<*, *>) {
-                        if (!child.downloadStatus(context, firestore)) {
-                            Timber.d("There's a non-downloaded children (${child.namespace}:${child.objectId})")
-                            result = DownloadStatus.PARTIALLY
-                            break
+                        val childDownloadStatus = child.downloadStatus(context, firestore)
+                        // If the dataclass's image is not downloaded
+                        if (result == DownloadStatus.NOT_DOWNLOADED) {
+                            // But a child has been found to be downloaded
+                            if (childDownloadStatus.isDownloaded()) {
+                                Timber.d("There's a downloaded children (${child.namespace}:${child.objectId})")
+                                result = DownloadStatus.PARTIALLY
+                            }
+                            // Or the result has not been set yet, which means the image is downloaded
+                        } else if (result == null) {
+                            // But there's a non-downloaded children
+                            if (!childDownloadStatus.isDownloaded()) {
+                                Timber.d("There's a non-downloaded children (${child.namespace}:${child.objectId})")
+                                result = DownloadStatus.PARTIALLY
+                            }
                         }
                     } else Timber.d("$namespace:$objectId Child is not DataClass")
+                    // If a result has been obtained, exit the for
+                    if (result != DownloadStatus.NOT_DOWNLOADED && result != null)
+                        break
+                }
             }
         }
         Timber.d("Finished checking download status. Result: $result")

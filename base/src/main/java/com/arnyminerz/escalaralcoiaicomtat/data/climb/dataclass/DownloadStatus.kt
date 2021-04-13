@@ -45,4 +45,11 @@ enum class DownloadStatus {
      * @since 20210413
      */
     fun isDownloaded(): Boolean = this == DOWNLOADED
+
+    /**
+     * Checks if the [DataClass] is partially downloaded.
+     * @author Arnau Mora
+     * @since 20210413
+     */
+    fun partialDownload(): Boolean = this == PARTIALLY
 }

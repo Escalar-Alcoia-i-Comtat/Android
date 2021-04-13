@@ -179,6 +179,8 @@ class DownloadSectionsAdapter(
         val downloadedSection = downloadedSections[position]
         val section = downloadedSection.section
 
+        Timber.v("Binding view holder for $section")
+
         // Update the name of the section
         holder.titleTextView.text = section.displayName
 
