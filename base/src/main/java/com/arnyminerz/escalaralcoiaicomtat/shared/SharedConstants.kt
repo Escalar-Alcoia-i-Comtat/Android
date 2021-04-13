@@ -9,14 +9,23 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra
 const val APP_UPDATE_MAX_TIME_DAYS_KEY = "APP_UPDATE_MAX_TIME_DAYS"
 const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7L
 
+const val SHOW_NON_DOWNLOADED_KEY = "SHOW_NON_DOWNLOADED"
+const val SHOW_NON_DOWNLOADED_DEFAULT = false
+
 /**
  * The maximum amount of days that will be allowed to the user not having updated the app
  * before forcing an update.
  */
 var APP_UPDATE_MAX_TIME_DAYS = APP_UPDATE_MAX_TIME_DAYS_DEFAULT
 
+/**
+ * Sets if the non-downloaded items should show in the downloads page
+ */
+var SHOW_NON_DOWNLOADED = SHOW_NON_DOWNLOADED_DEFAULT
+
 val REMOTE_CONFIG_DEFAULTS = mapOf(
-    APP_UPDATE_MAX_TIME_DAYS_KEY to APP_UPDATE_MAX_TIME_DAYS_DEFAULT
+    APP_UPDATE_MAX_TIME_DAYS_KEY to APP_UPDATE_MAX_TIME_DAYS_DEFAULT,
+    SHOW_NON_DOWNLOADED_KEY to SHOW_NON_DOWNLOADED_DEFAULT,
 )
 const val REMOTE_CONFIG_MIN_FETCH_INTERVAL = 3600L
 

@@ -97,6 +97,12 @@ const val ERROR_DATA_FETCH = "data_fetch"
  */
 const val ERROR_STORE_IMAGE = "store_image"
 
+/**
+ * When the specified namespace is not downloadable.
+ * @since 20210412
+ */
+const val ERROR_UNKNOWN_NAMESPACE = "unknown_namespace"
+
 class DownloadData
 /**
  * Initializes the class with specific parameters
@@ -105,6 +111,8 @@ class DownloadData
  * @param overwrite If the download should be overwritten if already downloaded. Note that if this
  * is false, if the download already exists the task will fail.
  * @param quality The compression quality of the image
+ * @see DOWNLOAD_OVERWRITE_DEFAULT
+ * @see DOWNLOAD_QUALITY_DEFAULT
  */
 constructor(
     val dataClass: DataClass<*, *>,
@@ -240,7 +248,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             Timber.d("Won't download map. Style url ($styleUrl) or location ($position) is null.")
 
         Timber.d("Downloading child sectors...")
-        for (sector in zone)
+        val sectors = zone.getChildren(firestore)
+        for (sector in sectors)
             downloadSector(firestore, sector.documentPath)
 
         return Result.success()
@@ -296,14 +305,13 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         quality = inputData.getInt(DOWNLOAD_OVERWRITE, DOWNLOAD_QUALITY_DEFAULT)
         styleUrl = inputData.getString(DOWNLOAD_STYLE_URL)
 
+        Timber.v("Starting download for $displayName")
+
         // Check if any required data is missing
         return if (namespace == null || downloadPath == null || displayName == null)
             failure(ERROR_MISSING_DATA)
         else {
-            Timber.v("Getting Firestore instance...")
-            val firebase = Firebase.firestore
-
-            Timber.v("Downloading from $namespace ($downloadPath)...")
+            Timber.v("Downloading $namespace at $downloadPath...")
             this.namespace = namespace
             this.displayName = displayName
 
@@ -316,27 +324,28 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 .setPersistent(true)
             notification = notificationBuilder.buildAndShow()
 
-            if (namespace == Zone.NAMESPACE) {
-                Timber.d("Downloading Zone...")
-                this.namespace = Sector.NAMESPACE
-                downloadZone(firebase, downloadPath!!)
-            } else if (namespace == Sector.NAMESPACE) {
-                Timber.d("Downloading Sector...")
-                this.namespace = Sector.NAMESPACE
-                downloadZone(firebase, downloadPath!!)
+            Timber.v("Getting Firestore instance...")
+            val firestore = Firebase.firestore
+
+            val downloadResult = when (namespace) {
+                Zone.NAMESPACE -> {
+                    Timber.d("Downloading Zone...")
+                    downloadZone(firestore, downloadPath!!)
+                }
+                Sector.NAMESPACE -> {
+                    Timber.d("Downloading Sector...")
+                    downloadSector(firestore, downloadPath!!)
+                }
+                else -> failure(ERROR_UNKNOWN_NAMESPACE)
             }
 
-            Timber.v("Finished downloading $displayName")
+            Timber.v("Finished downloading $displayName. Result: $downloadResult")
             notification.destroy()
 
-            Timber.v("Showing download finished notification")
-            Notification.Builder(applicationContext)
-                .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
-                .withIcon(R.drawable.ic_notifications)
-                .withTitle(R.string.notification_download_complete_title)
-                .withText(R.string.notification_download_complete_message)
-                .withIntent(
-                    DataClass.getIntent(applicationContext, displayName)?.let { intent ->
+            if (downloadResult == Result.success()) {
+                Timber.v("Getting intent...")
+                val intent =
+                    DataClass.getIntent(applicationContext, displayName, firestore)?.let { intent ->
                         PendingIntent.getActivity(
                             applicationContext,
                             0,
@@ -344,10 +353,30 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                             PendingIntent.FLAG_IMMUTABLE
                         )
                     }
-                )
-                .buildAndShow()
+                Timber.v("Showing download finished notification")
+                Notification.Builder(applicationContext)
+                    .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
+                    .withIcon(R.drawable.ic_notifications)
+                    .withTitle(R.string.notification_download_complete_title)
+                    .withText(R.string.notification_download_complete_message, displayName)
+                    .withIntent(intent)
+                    .buildAndShow()
+            } else {
+                Timber.v("Download failed! Result: $downloadResult. Showing notification.")
+                Notification.Builder(applicationContext)
+                    .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
+                    .withIcon(R.drawable.ic_notifications)
+                    .withTitle(R.string.notification_download_failed_title)
+                    .withText(R.string.notification_download_failed_message, displayName)
+                    .withLongText(
+                        R.string.notification_download_failed_message_long,
+                        displayName,
+                        downloadResult.outputData.getString("error") ?: "unknown"
+                    )
+                    .buildAndShow()
+            }
 
-            Result.success()
+            downloadResult
         }
     }
 
@@ -371,10 +400,14 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
          * @see ERROR_STORE_IMAGE
          */
         fun schedule(context: Context, tag: String, data: DownloadData): LiveData<WorkInfo> {
+            Timber.v("Scheduling new download...")
+            Timber.v("Building download constraints...")
+            // TODO: Add metered and mobile data constraints
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
 
+            Timber.v("Building DownloadWorker request...")
             val request = OneTimeWorkRequestBuilder<DownloadWorker>()
                 .setConstraints(constraints)
                 .addTag(tag)
@@ -392,6 +425,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 )
                 .build()
 
+            Timber.v("Getting WorkManager instance, and enqueueing job.")
             val workManager = WorkManager
                 .getInstance(context)
             workManager.enqueue(request)

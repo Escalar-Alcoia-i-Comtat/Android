@@ -14,6 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.exception.notification.NullChannelIdE
 import com.arnyminerz.escalaralcoiaicomtat.exception.notification.NullIconException
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
 import com.mapbox.mapboxsdk.plugins.offline.model.NotificationOptions
+import timber.log.Timber
 
 private fun generateNotificationId(): Int {
     var greatest = 0
@@ -33,7 +34,7 @@ class Notification private constructor(private val builder: Builder) {
      * @author Arnau Mora
      * @since 20210406
      */
-    var notification: android.app.Notification? = null
+    var android: android.app.Notification? = null
         private set
 
     /**
@@ -89,10 +90,11 @@ class Notification private constructor(private val builder: Builder) {
                     action.clickListener
                 )
 
-            notification = notificationBuilder.build()
+            android = notificationBuilder.build()
 
+            Timber.v("Showing new notification with id ${builder.id}")
             NotificationManagerCompat.from(builder.context)
-                .notify(builder.id, notification!!)
+                .notify(builder.id, android!!)
         }
         return this
     }
@@ -106,7 +108,7 @@ class Notification private constructor(private val builder: Builder) {
     fun hide(): Notification {
         NotificationManagerCompat.from(builder.context)
             .cancel(builder.id)
-        notification = null
+        android = null
         return this
     }
 
@@ -263,6 +265,19 @@ class Notification private constructor(private val builder: Builder) {
          */
         fun withLongText(longText: String): Builder {
             this.longText = longText
+            return this
+        }
+
+        /**
+         * Sets the text of the notification when it's expanded from a resource
+         * @author Arnau Mora
+         * @since 20210313
+         * @param longTextRes The [StringRes] of the notification when expanded
+         * @param args The arguments for replacing placeholders in the text
+         * @return The Builder instance
+         */
+        fun withLongText(@StringRes longTextRes: Int, vararg args: Any): Builder {
+            this.longText = context.getString(longTextRes, args)
             return this
         }
 
