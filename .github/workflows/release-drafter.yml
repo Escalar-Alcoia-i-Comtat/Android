@@ -103,6 +103,8 @@ jobs:
           sed -i 's/Changes//g' ./changelog/whatsnew-en-US
           # Remove markdown emojis
           sed -i 's/:.*: //g' ./changelog/whatsnew-en-US
+          # Remove the author and issue id
+          sed -i 's/\@.*)//g' ./changelog/whatsnew-en-US
           truncate --size=499 ./changelog/whatsnew-en-US
           cat ./changelog/whatsnew-en-US
 
