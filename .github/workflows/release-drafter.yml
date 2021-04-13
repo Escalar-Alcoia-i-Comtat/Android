@@ -92,17 +92,18 @@ jobs:
         id: prepare_changelog
         run: |
           mkdir -p -- "./changelog"
-          echo "${{ steps.create_release.outputs.body }}" > ./changelog/whatsnew-en-US
+          # Insert the "more info url"
+          echo "More info at: ${{ steps.create_release.outputs.html_url }}" > ./changelog/whatsnew-en-US
+          # Insert a line jump
+          echo >> ./changelog/whatsnew-en-US
+          echo "${{ steps.create_release.outputs.body }}" >> ./changelog/whatsnew-en-US
           # Remove all the markdown title double hashtag (##)
           sed -i 's/## //g' ./changelog/whatsnew-en-US
           # Remove the "Changes" title.
           sed -i 's/Changes//g' ./changelog/whatsnew-en-US
           # Remove markdown emojis
           sed -i 's/:.*: //g' ./changelog/whatsnew-en-US
-          # Insert a line jump
-          echo >> ./changelog/whatsnew-en-US
-          # Insert the "more info url"
-          echo "More info at: ${{ steps.create_release.outputs.html_url }}" >> ./changelog/whatsnew-en-US
+          truncate --size=499 ./changelog/whatsnew-en-US
           cat ./changelog/whatsnew-en-US
 
       - name: Upload to Play Store
