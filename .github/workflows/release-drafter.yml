@@ -114,5 +114,5 @@ jobs:
           releaseFiles: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
           track: internal
           inAppUpdatePriority: 2
-          mappingFile: ./base/build/outputs/mapping/release/mapping.txt
+#          mappingFile: ./base/build/outputs/mapping/release/mapping.txt
           whatsNewDirectory: ./changelog
