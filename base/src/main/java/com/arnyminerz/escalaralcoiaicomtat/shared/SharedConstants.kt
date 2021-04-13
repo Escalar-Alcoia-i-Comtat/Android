@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.shared
 
-import androidx.collection.arrayMapOf
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
@@ -66,7 +65,7 @@ const val TAB_ITEM_DOWNLOADS = 2
 const val TAB_ITEM_SETTINGS = 3
 const val TAB_ITEM_EXTRA = -1
 
-val AREAS = arrayMapOf<String, Area>()
+val AREAS = arrayListOf<Area>()
 
 const val PREVIEW_SCALE_PREFERENCE_MULTIPLIER = 10
 const val SECTOR_THUMBNAIL_SIZE = .8f

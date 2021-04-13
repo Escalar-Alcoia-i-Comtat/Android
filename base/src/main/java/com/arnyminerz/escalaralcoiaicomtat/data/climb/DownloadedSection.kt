@@ -47,7 +47,7 @@ data class DownloadedSection(val section: DataClass<*, *>) {
             Timber.v("Loading downloads...")
             val list = arrayListOf<DownloadedSection>()
 
-            for (area in AREAS.values)
+            for (area in AREAS)
                 list.addAll(
                     area.downloadedSectionList(
                         context,

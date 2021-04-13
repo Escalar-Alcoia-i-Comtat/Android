@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.area
 
-import androidx.collection.arrayMapOf
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.google.firebase.firestore.FirebaseFirestore
 import timber.log.Timber
@@ -26,18 +25,19 @@ fun loadAreasFromCache(
             Timber.w(e, "Could not get areas.")
         }
         .addOnSuccessListener { result ->
-            val areas = arrayMapOf<String, Area>()
+            val areas = arrayListOf<Area>()
             val areasCount = result.size()
             Timber.d("Got $areasCount areas. Processing...")
             for ((a, areaData) in result.documents.withIndex()) {
                 val area = Area(areaData)
-                areas[area.objectId] = area
+                areas.add(area)
                 progressCallback(a, areasCount)
             }
+            Timber.v("Areas processed, ordering them...")
+            areas.sortBy { area -> area.displayName }
+            Timber.v("Storing loaded areas...")
             AREAS.clear()
-            AREAS.putAll(
-                areas.toList().sortedBy { (_, value) -> value.displayName }.toMap()
-            )
+            AREAS.addAll(areas)
             callback()
         }
 }

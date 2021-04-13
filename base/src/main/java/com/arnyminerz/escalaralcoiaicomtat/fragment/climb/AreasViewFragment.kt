@@ -80,7 +80,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     if (!isResumed)
                         errors.add(NearbyZonesError.NEARBY_ZONES_RESUMED)
 
-                    if (AREAS.isEmpty)
+                    if (AREAS.isEmpty())
                         errors.add(NearbyZonesError.NEARBY_ZONES_EMPTY)
                 } catch (_: IllegalStateException) {
                     errors.add(NearbyZonesError.NEARBY_ZONES_GPS_DISABLED)
