@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.MainThread
 import androidx.annotation.UiThread
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -13,8 +14,10 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.ZonesViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KML_ADDRESS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
@@ -24,7 +27,6 @@ import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
 import java.io.File
-import java.util.concurrent.CompletableFuture.runAsync
 
 class ZoneAdapter(
     private val zones: List<Zone>,
@@ -65,12 +67,12 @@ class ZoneAdapter(
         }
         zone.asyncLoadImage(dataClassListActivity, holder.imageView)
 
-        runAsync {
+        doAsync {
             val downloadStatus = zone.downloadStatus(
                 dataClassListActivity,
                 dataClassListActivity.firestore
             )
-            dataClassListActivity.runOnUiThread {
+            uiContext {
                 if (downloadStatus.isDownloaded() || zone.kmlAddress != null)
                     holder.mapImageButton.setOnClickListener {
                         showMap(zone)
@@ -82,55 +84,60 @@ class ZoneAdapter(
         holder.downloadImageButton.setOnClickListener {
             if (!appNetworkState.hasInternet)
                 dataClassListActivity.toast(R.string.toast_error_no_internet)
-            else
-                when (zone.downloadStatus(dataClassListActivity, dataClassListActivity.firestore)) {
-                    DownloadStatus.NOT_DOWNLOADED -> {
-                        val result = zone.download(
-                            dataClassListActivity,
-                            dataClassListActivity.mapStyle?.uri
-                        )
-                        result.observe(dataClassListActivity) { workInfo ->
-                            val state = workInfo.state
-                            val data = workInfo.outputData
-                            when (state) {
-                                WorkInfo.State.FAILED -> {
-                                    toast(dataClassListActivity, R.string.toast_error_internal)
-                                    visibility(holder.progressBar, false)
-                                    Timber.w("Download failed! Error: ${data.getString("error")}")
+            else doAsync {
+                val status =
+                    zone.downloadStatus(dataClassListActivity, dataClassListActivity.firestore)
+                uiContext {
+                    when (status) {
+                        DownloadStatus.NOT_DOWNLOADED -> {
+                            val result = zone.download(
+                                dataClassListActivity,
+                                dataClassListActivity.mapStyle?.uri
+                            )
+                            result.observe(dataClassListActivity) { workInfo ->
+                                val state = workInfo.state
+                                val data = workInfo.outputData
+                                when (state) {
+                                    WorkInfo.State.FAILED -> {
+                                        toast(dataClassListActivity, R.string.toast_error_internal)
+                                        visibility(holder.progressBar, false)
+                                        Timber.w("Download failed! Error: ${data.getString("error")}")
+                                    }
+                                    WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED -> {
+                                        Timber.v("Download running...")
+                                        visibility(holder.progressBar, true)
+                                        updateImageRes(holder, zone)
+                                    }
+                                    WorkInfo.State.SUCCEEDED -> {
+                                        Timber.v("Download complete!")
+                                        visibility(holder.progressBar, false)
+                                        updateImageRes(holder, zone)
+                                    }
+                                    else -> Timber.v("Current download status: ${workInfo.state}")
                                 }
-                                WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED -> {
-                                    Timber.v("Download running...")
-                                    visibility(holder.progressBar, true)
-                                    updateImageRes(holder, zone)
-                                }
-                                WorkInfo.State.SUCCEEDED -> {
-                                    Timber.v("Download complete!")
-                                    visibility(holder.progressBar, false)
-                                    updateImageRes(holder, zone)
-                                }
-                                else -> Timber.v("Current download status: ${workInfo.state}")
                             }
                         }
-                    }
-                    DownloadStatus.DOWNLOADING -> dataClassListActivity.toast(R.string.message_already_downloading)
-                    else -> DownloadDialog(
-                        dataClassListActivity,
-                        zone,
-                        dataClassListActivity.firestore
-                    ).show {
-                        updateImageRes(holder, zone)
+                        DownloadStatus.DOWNLOADING -> dataClassListActivity.toast(R.string.message_already_downloading)
+                        else -> DownloadDialog(
+                            dataClassListActivity,
+                            zone,
+                            dataClassListActivity.firestore
+                        ).show {
+                            updateImageRes(holder, zone)
+                        }
                     }
                 }
+            }
         }
         updateImageRes(holder, zone)
     }
 
     @UiThread
     private fun updateImageRes(holder: ZonesViewHolder, zone: Zone) {
-        runAsync {
+        doAsync {
             val downloadStatus =
                 zone.downloadStatus(dataClassListActivity, dataClassListActivity.firestore)
-            dataClassListActivity.runOnUiThread {
+            uiContext {
                 holder.downloadImageButton.setImageResource(
                     when (downloadStatus) {
                         DownloadStatus.DOWNLOADED -> R.drawable.cloud_check
@@ -142,31 +149,41 @@ class ZoneAdapter(
         }
     }
 
-    private fun showMap(zone: Zone) {
-        when {
-            zone.downloadStatus(
-                dataClassListActivity,
-                dataClassListActivity.firestore
-            ) == DownloadStatus.DOWNLOADED ->
-                dataClassListActivity.startActivity(
-                    Intent(dataClassListActivity, MapsActivity::class.java)
-                        .putExtra(
-                            EXTRA_KMZ_FILE,
-                            File(
-                                filesDir(dataClassListActivity),
-                                "data/zone_${zone.objectId}.kmz"
-                            ).path
-                        )
-                        .putExtra(EXTRA_ZONE_NAME, zone.displayName)
-                )
-            zone.kmlAddress != null ->
-                dataClassListActivity.startActivity(
-                    Intent(dataClassListActivity, MapsActivity::class.java)
-                        .putExtra(
-                            EXTRA_KML_ADDRESS,
-                            zone.kmlAddress
-                        )
-                )
+    /**
+     * Requests to show the map of a [Zone]
+     * @author Arnau Mora
+     * @since 20210413
+     * @param zone The [Zone] to show the map from
+     */
+    @MainThread
+    private fun showMap(zone: Zone) = doAsync {
+        val status = zone.downloadStatus(
+            dataClassListActivity,
+            dataClassListActivity.firestore
+        )
+        uiContext {
+            when {
+                status.isDownloaded() ->
+                    dataClassListActivity.startActivity(
+                        Intent(dataClassListActivity, MapsActivity::class.java)
+                            .putExtra(
+                                EXTRA_KMZ_FILE,
+                                File(
+                                    filesDir(dataClassListActivity),
+                                    "data/zone_${zone.objectId}.kmz"
+                                ).path
+                            )
+                            .putExtra(EXTRA_ZONE_NAME, zone.displayName)
+                    )
+                zone.kmlAddress != null ->
+                    dataClassListActivity.startActivity(
+                        Intent(dataClassListActivity, MapsActivity::class.java)
+                            .putExtra(
+                                EXTRA_KML_ADDRESS,
+                                zone.kmlAddress
+                            )
+                    )
+            }
         }
     }
 }

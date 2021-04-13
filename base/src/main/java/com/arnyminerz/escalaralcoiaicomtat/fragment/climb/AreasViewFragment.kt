@@ -18,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.NearbyZonesError
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.getZones
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
@@ -29,6 +30,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_DISABLE_NEA
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
@@ -43,8 +45,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
+import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
-import java.util.concurrent.CompletableFuture.runAsync
 
 class AreasViewFragment : NetworkChangeListenerFragment() {
     private var justAttached = false
@@ -164,8 +166,9 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
             mapHelper.clearSymbols()
 
-            runAsync {
-                val zones = AREAS.getZones((requireActivity() as ZoneActivity).firestore)
+            doAsync {
+                val zones = arrayListOf<Zone>()
+                AREAS.getZones((requireActivity() as ZoneActivity).firestore).toCollection(zones)
                 Timber.v("Iterating through ${zones.size} zones.")
                 Timber.v("Current Location: [${location.latitude},${location.longitude}]")
                 for (zone in zones) {

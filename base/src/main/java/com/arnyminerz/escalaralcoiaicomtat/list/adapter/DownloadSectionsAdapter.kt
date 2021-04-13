@@ -17,15 +17,17 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass.Compan
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.DownloadSectionViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
-import java.util.concurrent.CompletableFuture.runAsync
 
 class DownloadSectionsAdapter(
     private val downloadedSections: ArrayList<DownloadedSection>,
@@ -59,14 +61,16 @@ class DownloadSectionsAdapter(
 
         if (downloadStatus != DownloadStatus.DOWNLOADED) {
             holder.sizeChip.text = mainActivity.getString(R.string.status_not_downloaded)
-        } else {
+        } else doAsync {
             val size = section.size(mainActivity)
 
-            holder.sizeChip.text = humanReadableByteCountBin(size)
+            uiContext {
+                holder.sizeChip.text = humanReadableByteCountBin(size)
 
-            holder.sizeChip.setOnClickListener {
-                Timber.v("Showing download dialog for ZONE")
-                DownloadDialog(mainActivity, section, firestore).show()
+                holder.sizeChip.setOnClickListener {
+                    Timber.v("Showing download dialog for ZONE")
+                    DownloadDialog(mainActivity, section, firestore).show()
+                }
             }
         }
     }
@@ -85,7 +89,7 @@ class DownloadSectionsAdapter(
     ) {
         val mapStyle = mainActivity.mapFragment.mapStyle
         val mapUri = mapStyle?.uri
-        runAsync {
+        doAsync {
             Timber.v("Downloading section \"$section\"")
             val downloadStatus = section.downloadStatus(mainActivity, firestore)
 
@@ -155,22 +159,44 @@ class DownloadSectionsAdapter(
      */
     @MainThread
     fun deleteSection(holder: DownloadSectionViewHolder, section: DataClass<*, *>) {
-        runAsync {
+        doAsync {
             Timber.v("Deleting section \"$section\"")
             section.delete(mainActivity)
             Timber.v("Section deleted, getting new download status...")
             val newDownloadStatus = section.downloadStatus(mainActivity, firestore)
             Timber.v("Section download status loaded, getting downloaded section list...")
-            val newChildSectionList =
-                section.downloadedSectionList(mainActivity, firestore, true)
+            val newChildSectionList = arrayListOf<DownloadedSection>()
+            section.downloadedSectionList(mainActivity, firestore, true)
+                .toCollection(newChildSectionList)
             Timber.v("Got downloaded section list. Updating UI...")
 
-            mainActivity.runOnUiThread {
+            uiContext {
                 mainActivity.downloadsFragment.reloadSizeTextView()
                 updateDownloadStatus(holder, newDownloadStatus, section)
                 holder.recyclerView.adapter =
                     DownloadSectionsAdapter(newChildSectionList, mainActivity)
                 // TODO: This should remove the item from the list
+            }
+        }
+    }
+
+    /**
+     * Launches an specific [DataClass].
+     * @author Arnau Mora
+     * @since 20210413
+     * @param section The [DataClass] to show.
+     */
+    private fun view(section: DataClass<*, *>) {
+        doAsync {
+            val intent = getIntent(mainActivity, section.displayName, firestore)
+            uiContext {
+                if (intent == null) {
+                    Timber.w("Could not launch activity.")
+                    toast(mainActivity, R.string.toast_error_internal)
+                } else {
+                    Timber.v("Loading intent...")
+                    mainActivity.startActivity(intent)
+                }
             }
         }
     }
@@ -193,15 +219,16 @@ class DownloadSectionsAdapter(
         visibility(holder.toggleButton, false)
         visibility(holder.sizeChip, false)
 
-        runAsync {
+        doAsync {
             Timber.v("Checking section's downloaded children.")
             val sectionDownloadStatus = section.downloadStatus(mainActivity, firestore)
             // Get all the children for the section
             Timber.v("Loading section list for \"${section.displayName}\"...")
-            val childSectionList =
-                section.downloadedSectionList(mainActivity, firestore, true)
+            val childSectionList = arrayListOf<DownloadedSection>()
+            section.downloadedSectionList(mainActivity, firestore, true)
+                .toCollection(childSectionList)
 
-            mainActivity.runOnUiThread {
+            uiContext {
                 updateDownloadStatus(holder, sectionDownloadStatus, section)
 
                 // Show the toggle button just to Zones and Areas
@@ -227,15 +254,7 @@ class DownloadSectionsAdapter(
                 )
 
                 holder.viewButton.setOnClickListener {
-                    val intent =
-                        getIntent(mainActivity, section.displayName, firestore)
-                    if (intent == null) {
-                        Timber.w("Could not launch activity.")
-                        toast(mainActivity, R.string.toast_error_internal)
-                    } else {
-                        Timber.v("Loading intent...")
-                        mainActivity.startActivity(intent)
-                    }
+                    view(section)
                 }
 
                 holder.recyclerView.layoutManager = LinearLayoutManager(mainActivity)

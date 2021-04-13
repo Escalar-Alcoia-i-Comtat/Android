@@ -91,13 +91,18 @@ import com.mapbox.mapboxsdk.plugins.annotation.LineManager
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
 
 class MapHelper(private val mapView: MapView) {
     companion object {
-        fun getTarget(context: Context, marker: Symbol, firestore: FirebaseFirestore): Intent? {
+        suspend fun getTarget(
+            context: Context,
+            marker: Symbol,
+            firestore: FirebaseFirestore
+        ): Intent? {
             Timber.d("Getting marker's title...")
             val title = marker.getWindow().title
             Timber.v("Searching in ${AREAS.size} cached areas...")
@@ -1183,7 +1188,9 @@ class MapHelper(private val mapView: MapView) {
             val window = marker.getWindow()
             val title = window.title
             val description = window.message
-            val activityIntent = getTarget(activity, marker, firestore) // Info Window Data Class
+            // TODO: May not be convenient to run blocking
+            val activityIntent =
+                runBlocking { getTarget(activity, marker, firestore) } // Info Window Data Class
 
             Timber.v("Marker title: $title")
             Timber.v("Marker description: $description")

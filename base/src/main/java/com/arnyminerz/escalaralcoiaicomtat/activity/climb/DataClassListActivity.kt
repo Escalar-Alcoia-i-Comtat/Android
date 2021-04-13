@@ -2,7 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.os.Build
 import android.os.Bundle
-import androidx.annotation.WorkerThread
+import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
@@ -14,6 +14,8 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
@@ -58,9 +60,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         mapHelper.onCreate(savedInstanceState)
 
         binding.statusImageView.setOnClickListener { it.performLongClick() }
-        runAsync {
-            updateIcon()
-        }
+        updateIcon()
     }
 
     override fun onStart() {
@@ -100,13 +100,11 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         mapHelper.onDestroy()
     }
 
-    override fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
-        updateIcon()
-    }
-
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         val hasInternet = state.hasInternet
         visibility(binding.noInternetCard.noInternetCardView, !hasInternet)
+
+        updateIcon()
 
         if (this::mapHelper.isInitialized && !mapHelper.isLoaded && hasInternet) {
             Timber.v("Loading map...")
@@ -160,13 +158,29 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         }
     }
 
-    @WorkerThread
+    @UiThread
     private fun updateIcon() {
-        val downloadStatus = dataClass.downloadStatus(this, firestore)
+        val i = binding.statusImageView
+        binding.statusImageView.hide(setGone = false)
+        val activity = this
+        val dataClassInitialized = this::dataClass.isInitialized
+        doAsync {
+            if (!appNetworkState.hasInternet)
+                uiContext {
+                    i.setImageResource(R.drawable.ic_round_signal_cellular_off_24)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                        i.tooltipText = getString(R.string.status_no_internet)
+                    i.show()
+                }
 
-        runOnUiThread {
-            binding.statusImageView.let { i ->
-                if (this::dataClass.isInitialized && downloadStatus.isDownloaded()) {
+            Timber.v("Updating icon, getting download status...")
+            val downloadStatus = if (dataClassInitialized)
+                dataClass.downloadStatus(activity, firestore)
+            else null
+            Timber.v("Got download status: $downloadStatus")
+
+            uiContext {
+                if (downloadStatus?.isDownloaded() == true) {
                     i.setImageResource(R.drawable.cloud_check)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                         i.tooltipText = getString(R.string.status_downloaded)

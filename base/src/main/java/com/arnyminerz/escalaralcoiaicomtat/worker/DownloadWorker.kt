@@ -39,6 +39,8 @@ import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition
 import com.mapbox.mapboxsdk.plugins.offline.model.OfflineDownloadOptions
 import com.mapbox.mapboxsdk.plugins.offline.offline.OfflinePlugin
 import com.mapbox.mapboxsdk.plugins.offline.utils.OfflineUtils
+import kotlinx.coroutines.flow.toCollection
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 import java.io.File
 
@@ -247,10 +249,13 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         else
             Timber.d("Won't download map. Style url ($styleUrl) or location ($position) is null.")
 
-        Timber.d("Downloading child sectors...")
-        val sectors = zone.getChildren(firestore)
-        for (sector in sectors)
-            downloadSector(firestore, sector.documentPath)
+        runBlocking {
+            Timber.d("Downloading child sectors...")
+            val sectors = arrayListOf<Sector>()
+            zone.getChildren(firestore).toCollection(sectors)
+            for (sector in sectors)
+                downloadSector(firestore, sector.metadata.documentPath)
+        }
 
         return Result.success()
     }
@@ -343,24 +348,27 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             notification.destroy()
 
             if (downloadResult == Result.success()) {
-                Timber.v("Getting intent...")
-                val intent =
-                    DataClass.getIntent(applicationContext, displayName, firestore)?.let { intent ->
-                        PendingIntent.getActivity(
-                            applicationContext,
-                            0,
-                            intent,
-                            PendingIntent.FLAG_IMMUTABLE
-                        )
-                    }
-                Timber.v("Showing download finished notification")
-                Notification.Builder(applicationContext)
-                    .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
-                    .withIcon(R.drawable.ic_notifications)
-                    .withTitle(R.string.notification_download_complete_title)
-                    .withText(R.string.notification_download_complete_message, displayName)
-                    .withIntent(intent)
-                    .buildAndShow()
+                runBlocking {
+                    Timber.v("Getting intent...")
+                    val intent =
+                        DataClass.getIntent(applicationContext, displayName, firestore)
+                            ?.let { intent ->
+                                PendingIntent.getActivity(
+                                    applicationContext,
+                                    0,
+                                    intent,
+                                    PendingIntent.FLAG_IMMUTABLE
+                                )
+                            }
+                    Timber.v("Showing download finished notification")
+                    Notification.Builder(applicationContext)
+                        .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
+                        .withIcon(R.drawable.ic_notifications)
+                        .withTitle(R.string.notification_download_complete_title)
+                        .withText(R.string.notification_download_complete_message, displayName)
+                        .withIntent(intent)
+                        .buildAndShow()
+                }
             } else {
                 Timber.v("Download failed! Result: $downloadResult. Showing notification.")
                 Notification.Builder(applicationContext)
@@ -415,7 +423,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                     with(data) {
                         workDataOf(
                             DOWNLOAD_NAMESPACE to dataClass.namespace,
-                            DOWNLOAD_PATH to dataClass.documentPath,
+                            DOWNLOAD_PATH to dataClass.metadata.documentPath,
                             DOWNLOAD_DISPLAY_NAME to dataClass.displayName,
                             DOWNLOAD_STYLE_URL to styleUrl,
                             DOWNLOAD_OVERWRITE to overwrite,

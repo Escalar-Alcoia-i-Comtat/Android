@@ -18,7 +18,7 @@ interface ConnectivityProvider {
         fun onStateChange(state: NetworkState)
 
         @WorkerThread
-        fun onStateChangeAsync(state: NetworkState)
+        suspend fun onStateChangeAsync(state: NetworkState)
     }
 
     fun addListener(listener: ConnectivityStateListener)

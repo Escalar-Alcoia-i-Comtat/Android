@@ -10,14 +10,14 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.get
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_PREVIEW_SCALE_PREF
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorsViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -25,7 +25,6 @@ import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import timber.log.Timber
-import java.util.concurrent.CompletableFuture.runAsync
 
 private const val IMAGE_LOAD_TRANSITION_TIME = 50
 private const val IMAGE_THUMBNAIL_SIZE = 0.1f
@@ -33,14 +32,11 @@ private const val IMAGE_THUMBNAIL_SIZE = 0.1f
 @Suppress("unused")
 class SectorsAdapter(
     private val dataClassListActivity: DataClassListActivity<*>,
-    areaId: String,
-    zoneId: String,
+    private val sectors: List<Sector>,
     listener: ((viewHolder: SectorsViewHolder, index: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<SectorsViewHolder>() {
     private var onItemSelected: ((viewHolder: SectorsViewHolder, index: Int) -> Unit)? =
         listener
-
-    private val sectors = AREAS[areaId]!![zoneId].getChildren(dataClassListActivity.firestore)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SectorsViewHolder =
         SectorsViewHolder(
@@ -99,47 +95,58 @@ class SectorsAdapter(
             downloadImageButton.setOnClickListener {
                 if (!appNetworkState.hasInternet)
                     dataClassListActivity.toast(R.string.toast_error_no_internet)
-                else
-                    when (sector.downloadStatus(
+                else doAsync {
+                    val status = sector.downloadStatus(
                         dataClassListActivity,
                         dataClassListActivity.firestore
-                    )) {
-                        DownloadStatus.NOT_DOWNLOADED, DownloadStatus.PARTIALLY -> {
-                            val result = sector.download(
-                                dataClassListActivity,
-                                dataClassListActivity.mapStyle?.uri
-                            )
-                            result.observe(dataClassListActivity) { workInfo ->
-                                val state = workInfo.state
-                                val data = workInfo.outputData
-                                Timber.v("Current download status: ${workInfo.state}")
-                                when (state) {
-                                    WorkInfo.State.FAILED -> {
-                                        toast(dataClassListActivity, R.string.toast_error_internal)
-                                        visibility(downloadProgressBar, false)
-                                        Timber.w("Download failed! Error: ${data.getString("error")}")
+                    )
+                    uiContext {
+                        when (status) {
+                            DownloadStatus.NOT_DOWNLOADED, DownloadStatus.PARTIALLY -> {
+                                val result = sector.download(
+                                    dataClassListActivity,
+                                    dataClassListActivity.mapStyle?.uri
+                                )
+                                result.observe(dataClassListActivity) { workInfo ->
+                                    val state = workInfo.state
+                                    val data = workInfo.outputData
+                                    Timber.v("Current download status: ${workInfo.state}")
+                                    when (state) {
+                                        WorkInfo.State.FAILED -> {
+                                            toast(
+                                                dataClassListActivity,
+                                                R.string.toast_error_internal
+                                            )
+                                            visibility(downloadProgressBar, false)
+                                            Timber.w("Download failed! Error: ${data.getString("error")}")
+                                        }
+                                        WorkInfo.State.SUCCEEDED -> {
+                                            visibility(downloadProgressBar, false)
+                                            refreshDownloadImage(
+                                                sector,
+                                                downloadImageButton,
+                                                downloadProgressBar
+                                            )
+                                        }
+                                        else -> downloadProgressBar.isIndeterminate = true
                                     }
-                                    WorkInfo.State.SUCCEEDED -> {
-                                        visibility(downloadProgressBar, false)
-                                        refreshDownloadImage(
-                                            sector,
-                                            downloadImageButton,
-                                            downloadProgressBar
-                                        )
-                                    }
-                                    else -> downloadProgressBar.isIndeterminate = true
                                 }
                             }
-                        }
-                        DownloadStatus.DOWNLOADING -> dataClassListActivity.toast(R.string.toast_downloading)
-                        DownloadStatus.DOWNLOADED -> DownloadDialog(
-                            dataClassListActivity,
-                            sector,
-                            dataClassListActivity.firestore
-                        ).show {
-                            refreshDownloadImage(sector, downloadImageButton, downloadProgressBar)
+                            DownloadStatus.DOWNLOADING -> dataClassListActivity.toast(R.string.toast_downloading)
+                            DownloadStatus.DOWNLOADED -> DownloadDialog(
+                                dataClassListActivity,
+                                sector,
+                                dataClassListActivity.firestore
+                            ).show {
+                                refreshDownloadImage(
+                                    sector,
+                                    downloadImageButton,
+                                    downloadProgressBar
+                                )
+                            }
                         }
                     }
+                }
             }
         }
     }
@@ -156,11 +163,11 @@ class SectorsAdapter(
         downloadImagebutton: ImageButton,
         downloadProgressbar: ProgressBar
     ) {
-        runAsync {
+        doAsync {
             val downloadStatus =
                 sector.downloadStatus(dataClassListActivity, dataClassListActivity.firestore)
 
-            dataClassListActivity.runOnUiThread {
+            uiContext {
                 when (downloadStatus) {
                     DownloadStatus.NOT_DOWNLOADED, DownloadStatus.PARTIALLY ->
                         downloadImagebutton.setImageResource(R.drawable.download)

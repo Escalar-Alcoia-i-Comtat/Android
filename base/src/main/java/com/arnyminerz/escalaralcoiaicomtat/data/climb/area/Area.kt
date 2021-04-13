@@ -6,13 +6,18 @@ import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassMetadata
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import java.util.Date
 
@@ -20,20 +25,24 @@ class Area(
     objectId: String,
     displayName: String,
     timestamp: Date?,
-    val image: String,
+    image: String,
     kmlAddress: String?,
     private val downloaded: Boolean = false,
     documentPath: String,
 ) : DataClass<Zone, DataClassImpl>(
-    objectId,
     displayName,
     timestamp,
     image,
     kmlAddress,
-    R.drawable.ic_wide_placeholder,
-    R.drawable.ic_wide_placeholder,
-    NAMESPACE,
-    documentPath
+    UIMetadata(
+        R.drawable.ic_wide_placeholder,
+        R.drawable.ic_wide_placeholder,
+    ),
+    DataClassMetadata(
+        objectId,
+        NAMESPACE,
+        documentPath
+    )
 ) {
     val transitionName
         get() = objectId + displayName.replace(" ", "_")
@@ -75,19 +84,17 @@ class Area(
      * @see Zone
      */
     @WorkerThread
-    override fun loadChildren(firestore: FirebaseFirestore): List<Zone> {
+    override suspend fun loadChildren(firestore: FirebaseFirestore): Flow<Zone> = flow {
         Timber.v("Loading Area's children.")
-        val result = arrayListOf<Zone>()
 
         Timber.d("Fetching...")
         val ref = firestore
-            .document(documentPath)
+            .document(metadata.documentPath)
             .collection("Zones")
         val childTask = ref.get()
         Timber.v("Awaiting results...")
-        Tasks.await(childTask)
+        val snapshot = childTask.awaitTask()
         Timber.v("Got children result")
-        val snapshot = childTask.result
         val e = childTask.exception
         if (!childTask.isSuccessful || snapshot == null) {
             Timber.w(e, "Could not get.")
@@ -99,21 +106,20 @@ class Area(
                 val zoneData = zones[l]
                 Timber.d("Processing zone #$l")
                 val zone = Zone(zoneData)
-                result.add(zone)
+                emit(zone)
             }
             Timber.d("Finished loading zones")
         }
-        return result
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(objectId)
         parcel.writeString(displayName)
         parcel.writeString(timestamp?.let { TIMESTAMP_FORMAT.format(timestamp) })
-        parcel.writeString(image)
+        parcel.writeString(imageUrl)
         parcel.writeString(kmlAddress)
         parcel.writeInt(if (downloaded) 1 else 0)
-        parcel.writeString(documentPath)
+        parcel.writeString(metadata.documentPath)
         parcel.writeList(innerChildren)
     }
 
@@ -134,13 +140,9 @@ class Area(
  * @since 20210411
  */
 @WorkerThread
-fun Iterable<Area>.getZones(firestore: FirebaseFirestore): List<Zone> {
-    val zones = arrayListOf<Zone>()
-
-    for (area in this)
-        zones.addAll(area.getChildren(firestore))
-
-    return zones
+suspend fun Iterable<Area>.getZones(firestore: FirebaseFirestore): Flow<Zone> = flow {
+    for (area in this@getZones)
+        emitAll(area.getChildren(firestore))
 }
 
 /**

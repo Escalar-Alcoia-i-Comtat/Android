@@ -17,6 +17,8 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.ROTATION_B
 import com.arnyminerz.escalaralcoiaicomtat.shared.TOGGLE_ANIMATION_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 
 data class DownloadedSection(val section: DataClass<*, *>) {
@@ -38,17 +40,15 @@ data class DownloadedSection(val section: DataClass<*, *>) {
          * @return The sections that have been downloaded
          */
         @WorkerThread
-        fun list(
+        suspend fun list(
             context: Context,
             firestore: FirebaseFirestore,
             showNonDownloaded: Boolean,
-            progressListener: (current: Int, max: Int) -> Unit
-        ): ArrayList<DownloadedSection> {
+            progressListener: suspend (current: Int, max: Int) -> Unit
+        ) = flow {
             Timber.v("Loading downloads...")
-            val list = arrayListOf<DownloadedSection>()
-
             for (area in AREAS)
-                list.addAll(
+                emitAll(
                     area.downloadedSectionList(
                         context,
                         firestore,
@@ -56,8 +56,6 @@ data class DownloadedSection(val section: DataClass<*, *>) {
                         progressListener
                     )
                 )
-
-            return list
         }
     }
 

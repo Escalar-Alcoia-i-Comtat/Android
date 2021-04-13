@@ -11,6 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityUpdatingBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
@@ -27,7 +28,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 import java.io.IOException
-import java.util.concurrent.CompletableFuture.runAsync
 
 class UpdatingActivity : NetworkChangeListenerActivity() {
     private var updateArea: Area? = null // Sets the area id to update (re-download images)
@@ -101,7 +101,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             binding.progressTextView.setText(R.string.update_progress_downloading_new_cache)
             binding.progressBar.isIndeterminate = true
             try {
-                runAsync {
+                doAsync {
                     if (updateArea != null) // Update area
                         iterateUpdate(updateArea!!)
                     if (updateZone != null) // Update zone
@@ -123,15 +123,19 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             binding.progressTextView.setText(R.string.update_progress_downloading_new_cache)
             binding.progressBar.isIndeterminate = true
 
-            for (area in AREAS) {
-                if (area.downloadStatus(this, firestore).isDownloaded())
-                    iterateUpdate(area)
-                else for (zone in area)
-                    if (zone.downloadStatus(this, firestore).isDownloaded())
-                        iterateUpdate(zone)
-                    else for (sector in zone)
-                        if (sector.downloadStatus(this, firestore).isDownloaded())
-                            iterateUpdate(sector)
+            doAsync {
+                for (area in AREAS) {
+                    if (area.downloadStatus(this@UpdatingActivity, firestore).isDownloaded())
+                        iterateUpdate(area)
+                    else for (zone in area)
+                        if (zone.downloadStatus(this@UpdatingActivity, firestore).isDownloaded())
+                            iterateUpdate(zone)
+                        else for (sector in zone)
+                            if (sector.downloadStatus(this@UpdatingActivity, firestore)
+                                    .isDownloaded()
+                            )
+                                iterateUpdate(sector)
+                }
             }
         }
 
@@ -145,7 +149,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             (if (updateSector != null) 1 else 0)
     private var updatesCounter = 0
 
-    private fun iterateUpdate(dataClass: DataClass<*, *>) {
+    private suspend fun iterateUpdate(dataClass: DataClass<*, *>) {
         Timber.v("Deleting area #$updateArea...")
         dataClass.delete(this@UpdatingActivity)
 
