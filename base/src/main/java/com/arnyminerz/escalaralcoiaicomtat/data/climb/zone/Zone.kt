@@ -6,19 +6,22 @@ import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassMetadata
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mapbox.mapboxsdk.geometry.LatLng
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import java.util.Date
 
-@Suppress("UNCHECKED_CAST")
 class Zone(
     objectId: String,
     displayName: String,
@@ -29,15 +32,19 @@ class Zone(
     private val downloaded: Boolean = false,
     documentPath: String
 ) : DataClass<Sector, Area>(
-    objectId,
     displayName,
     timestamp,
     image,
     kmlAddress,
-    R.drawable.ic_tall_placeholder,
-    R.drawable.ic_tall_placeholder,
-    NAMESPACE,
-    documentPath
+    UIMetadata(
+        R.drawable.ic_tall_placeholder,
+        R.drawable.ic_tall_placeholder,
+    ),
+    DataClassMetadata(
+        objectId,
+        NAMESPACE,
+        documentPath
+    )
 ) {
     val transitionName = objectId + displayName.replace(" ", "_")
 
@@ -80,16 +87,13 @@ class Zone(
      * @see Sector
      */
     @WorkerThread
-    override fun loadChildren(firestore: FirebaseFirestore): List<Sector> {
-        val result = arrayListOf<Sector>()
-
+    override suspend fun loadChildren(firestore: FirebaseFirestore): Flow<Sector> = flow {
         Timber.d("Fetching...")
         val ref = firestore
-            .document(documentPath)
+            .document(metadata.documentPath)
             .collection("Sectors")
         val childTask = ref.get()
-        Tasks.await(childTask)
-        val snapshot = childTask.result
+        val snapshot = childTask.awaitTask()
         val e = childTask.exception
         if (!childTask.isSuccessful || snapshot == null) {
             Timber.w(e, "Could not get.")
@@ -98,9 +102,8 @@ class Zone(
             val sectors = snapshot.documents
             Timber.d("Got ${sectors.size} elements.")
             for (l in sectors.indices)
-                result.add(Sector(sectors[l]))
+                emit(Sector(sectors[l]))
         }
-        return result
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -112,7 +115,7 @@ class Zone(
         parcel.writeDouble(position?.latitude ?: 0.0)
         parcel.writeDouble(position?.longitude ?: 0.0)
         parcel.writeInt(if (downloaded) 1 else 0)
-        parcel.writeString(documentPath)
+        parcel.writeString(metadata.documentPath)
         parcel.writeList(innerChildren)
     }
 

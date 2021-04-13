@@ -14,6 +14,8 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
@@ -160,9 +162,11 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
     private fun updateIcon() {
         val i = binding.statusImageView
         binding.statusImageView.hide(setGone = false)
-        runAsync {
+        val activity = this
+        val dataClassInitialized = this::dataClass.isInitialized
+        doAsync {
             if (!appNetworkState.hasInternet)
-                runOnUiThread {
+                uiContext {
                     i.setImageResource(R.drawable.ic_round_signal_cellular_off_24)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                         i.tooltipText = getString(R.string.status_no_internet)
@@ -170,11 +174,13 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                 }
 
             Timber.v("Updating icon, getting download status...")
-            val downloadStatus = dataClass.downloadStatus(this, firestore)
-            Timber.v("Got download status for $dataClass: $downloadStatus")
+            val downloadStatus = if (dataClassInitialized)
+                dataClass.downloadStatus(activity, firestore)
+            else null
+            Timber.v("Got download status: $downloadStatus")
 
-            runOnUiThread {
-                if (this::dataClass.isInitialized && downloadStatus.isDownloaded()) {
+            uiContext {
+                if (downloadStatus?.isDownloaded() == true) {
                     i.setImageResource(R.drawable.cloud_check)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                         i.tooltipText = getString(R.string.status_downloaded)

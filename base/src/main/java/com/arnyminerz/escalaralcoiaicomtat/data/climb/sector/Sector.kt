@@ -10,8 +10,11 @@ import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassMetadata
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
@@ -23,12 +26,13 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.components.XAxis
-import com.google.android.gms.tasks.Tasks
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mapbox.mapboxsdk.geometry.LatLng
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import java.util.Date
 
@@ -43,15 +47,19 @@ class Sector constructor(
     imageUrl: String,
     documentPath: String,
 ) : DataClass<Path, Zone>(
-    objectId,
     displayName,
     timestamp,
     imageUrl,
     null,
-    R.drawable.ic_wide_placeholder,
-    R.drawable.ic_wide_placeholder,
-    NAMESPACE,
-    documentPath
+    UIMetadata(
+        R.drawable.ic_wide_placeholder,
+        R.drawable.ic_wide_placeholder,
+    ),
+    DataClassMetadata(
+        objectId,
+        NAMESPACE,
+        documentPath
+    )
 ) {
     /**
      * Creates a new [Sector] from the data of a [DocumentSnapshot].
@@ -81,7 +89,7 @@ class Sector constructor(
         parcel.writeLong(walkingTime)
         parcel.writeParcelable(location, 0)
         parcel.writeString(imageUrl)
-        parcel.writeString(documentPath)
+        parcel.writeString(metadata.documentPath)
         parcel.writeList(innerChildren)
     }
 
@@ -107,16 +115,13 @@ class Sector constructor(
      * @see Path
      */
     @WorkerThread
-    override fun loadChildren(firestore: FirebaseFirestore): List<Path> {
-        val result = arrayListOf<Path>()
-
+    override suspend fun loadChildren(firestore: FirebaseFirestore): Flow<Path> = flow {
         Timber.d("Fetching...")
         val ref = firestore
-            .document(documentPath)
+            .document(metadata.documentPath)
             .collection("Paths")
         val childTask = ref.get()
-        Tasks.await(childTask)
-        val snapshot = childTask.result
+        val snapshot = childTask.awaitTask()
         val e = childTask.exception
         if (!childTask.isSuccessful || snapshot == null) {
             Timber.w(e, "Could not get.")
@@ -125,12 +130,9 @@ class Sector constructor(
             val paths = snapshot.documents
             Timber.d("Got ${paths.size} elements. Processing paths...")
             for (l in paths.indices)
-                result.add(Path(paths[l]))
-            Timber.d("Finished processing paths. Sorting...")
-            result.sortBy { it.sketchId }
-            Timber.d("Finished sorting.")
+                emit(Path(paths[l]))
+            Timber.d("Finished processing paths")
         }
-        return result
     }
 
     override fun describeContents(): Int = 0

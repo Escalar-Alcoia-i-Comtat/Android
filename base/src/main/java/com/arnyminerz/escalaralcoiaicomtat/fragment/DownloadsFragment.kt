@@ -10,12 +10,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentDownloadsBinding
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.sizeString
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.DownloadSectionsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.SHOW_NON_DOWNLOADED
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 import java.util.concurrent.CompletableFuture.runAsync
 
@@ -59,22 +62,23 @@ class DownloadsFragment : Fragment() {
         visibility(binding.loadingDownloadsProgressBar, true)
         visibility(binding.loadingDownloadsProgressIndicator, true)
 
-        runAsync {
+        doAsync {
             Timber.v("Getting downloaded sections list, SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
-            val sections = DownloadedSection.list(
+            val sections = arrayListOf<DownloadedSection>()
+            DownloadedSection.list(
                 mainActivity,
                 firestore,
                 SHOW_NON_DOWNLOADED
             ) { progress, max ->
-                runOnUiThread {
+                uiContext {
                     binding.loadingDownloadsProgressIndicator.progress = progress
                     binding.loadingDownloadsProgressIndicator.max = max
                 }
-            }
+            }.toCollection(sections)
             val sectionsEmpty = sections.isEmpty()
             Timber.v("Got sections list with ${sections.size} elements.")
 
-            runOnUiThread {
+            uiContext {
                 visibility(binding.downloadsRecyclerView, !sectionsEmpty)
                 visibility(binding.noDownloadsTextView, sectionsEmpty)
 

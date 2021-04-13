@@ -11,7 +11,9 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity.Companion
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.SectorFragment
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_AREA_ID
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_ZONE_ID
@@ -29,7 +31,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
-import java.util.concurrent.CompletableFuture.runAsync
 
 class SectorActivity : LanguageAppCompatActivity() {
     private var transitionName: String? = null
@@ -150,7 +151,7 @@ class SectorActivity : LanguageAppCompatActivity() {
         binding.backImageButton.setOnClickListener { onBackPressed() }
         binding.statusImageView.setOnClickListener { it.performLongClick() }
 
-        runAsync {
+        doAsync {
             Timber.v("There are $sectorCount sectors.")
             Timber.d("Initializing fragments...")
             fragments.clear()
@@ -169,10 +170,10 @@ class SectorActivity : LanguageAppCompatActivity() {
                 ?: intent.getExtra(EXTRA_SECTOR_INDEX, 0)
             fragments[defaultPosition].load()
 
-            runOnUiThread {
+            uiContext {
                 Timber.v("Initializing view pager...")
                 Timber.d("  Initializing adapter for ${fragments.size} pages...")
-                val adapter = object : FragmentStateAdapter(this) {
+                val adapter = object : FragmentStateAdapter(this@SectorActivity) {
                     override fun getItemCount(): Int = fragments.size
                     override fun createFragment(position: Int): Fragment {
                         Timber.d("Creating fragment #$position")
@@ -189,7 +190,7 @@ class SectorActivity : LanguageAppCompatActivity() {
                         for (fragment in fragments)
                             fragment.minimize()
 
-                        runAsync {
+                        doAsync {
                             fragments[position].load()
                         }
                     }

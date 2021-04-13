@@ -2,7 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.network.base
 
 import android.os.Handler
 import android.os.Looper
-import java.util.concurrent.CompletableFuture.runAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 
 abstract class ConnectivityProviderBaseImpl : ConnectivityProvider {
     private val handler = Handler(Looper.getMainLooper())
@@ -13,7 +13,7 @@ abstract class ConnectivityProviderBaseImpl : ConnectivityProvider {
         listeners.add(listener)
         val networkState = getNetworkState()
         listener.onStateChange(networkState) // propagate an initial state
-        runAsync { listener.onStateChangeAsync(networkState) }
+        doAsync { listener.onStateChangeAsync(networkState) }
         verifySubscription()
     }
 
@@ -36,7 +36,7 @@ abstract class ConnectivityProviderBaseImpl : ConnectivityProvider {
         handler.post {
             for (listener in listeners) {
                 listener.onStateChange(state) // propagate an initial state
-                runAsync { listener.onStateChangeAsync(state) }
+                doAsync { listener.onStateChangeAsync(state) }
             }
         }
     }

@@ -59,7 +59,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     open val imageUrl: String,
     open val kmlAddress: String?,
     val uiMetadata: UIMetadata,
-    metadata: DataClassMetadata
+    val metadata: DataClassMetadata
 ) : DataClassImpl(metadata.objectId, metadata.namespace), Iterable<A> {
     companion object {
         /**
@@ -190,7 +190,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     operator fun get(index: Int): A = innerChildren[index]
 
     @WorkerThread
-    protected abstract fun loadChildren(firestore: FirebaseFirestore): Flow<A>
+    protected abstract suspend fun loadChildren(firestore: FirebaseFirestore): Flow<A>
 
     /**
      * Gets an object based on objectId
@@ -248,7 +248,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         context: Context,
         firestore: FirebaseFirestore,
         showNonDownloaded: Boolean,
-        progressListener: ((current: Int, max: Int) -> Unit)? = null
+        progressListener: (suspend (current: Int, max: Int) -> Unit)? = null
     ): Flow<DownloadedSection> = flow {
         Timber.v("Getting downloaded sections...")
         val downloadedSectionsList = arrayListOf<DownloadedSection>()

@@ -14,11 +14,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.get
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getDisplaySize
-import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.PathsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
@@ -32,8 +34,8 @@ import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
+import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
-import java.util.concurrent.CompletableFuture.runAsync
 
 class SectorFragment : NetworkChangeListenerFragment() {
     private lateinit var areaId: String
@@ -117,7 +119,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         if (isResumed)
-            runAsync {
+            doAsync {
                 load()
             }
     }
@@ -128,12 +130,12 @@ class SectorFragment : NetworkChangeListenerFragment() {
      * @since 20210314
      */
     @WorkerThread
-    fun load() {
+    suspend fun load() {
         if (!this::zoneId.isInitialized)
             return Timber.w("Could not load since class is not initialized")
 
         if (loaded && this::sector.isInitialized) {
-            runOnUiThread {
+            uiContext {
                 sectorActivity.updateTitle(sector.displayName, isDownloaded)
                 loadImage()
             }
@@ -141,7 +143,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
         }
 
         Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
-        runOnUiThread {
+        uiContext {
             sectorActivity.setLoading(true)
         }
         sector = AREAS[areaId]!![zoneId][sectorIndex]
@@ -157,10 +159,11 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
         if (activity != null) {
             Timber.v("Loading paths...")
-            val children = sector.getChildren(sectorActivity.firestore)
+            val children = arrayListOf<Path>()
+            sector.getChildren(sectorActivity.firestore).toCollection(children)
             Timber.v("Finished loading children sectors")
 
-            runOnUiThread {
+            uiContext {
                 Timber.v("Finished loading paths, performing UI updates")
                 (this as? SectorActivity?)?.updateTitle(sector.displayName, isDownloaded)
                 loadImage()
@@ -188,22 +191,22 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 refreshMaximizeStatus()
 
                 // Load Paths
-                binding.pathsRecyclerView.layoutManager = LinearLayoutManager(this)
+                binding.pathsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
                 binding.pathsRecyclerView.layoutAnimation =
                     AnimationUtils.loadLayoutAnimation(
-                        this,
+                        requireContext(),
                         R.anim.item_enter_left_animator
                     )
                 binding.pathsRecyclerView.adapter = PathsAdapter(children, requireActivity())
                 binding.pathsRecyclerView.show()
 
                 // Load info bar
-                sector.sunTime.appendChip(this, binding.sunChip)
-                sector.kidsAptChip(this, binding.kidsAptChip)
-                sector.walkingTimeView(this, binding.walkingTimeTextView)
+                sector.sunTime.appendChip(requireContext(), binding.sunChip)
+                sector.kidsAptChip(requireContext(), binding.kidsAptChip)
+                sector.walkingTimeView(requireContext(), binding.walkingTimeTextView)
 
                 // Load chart
-                sector.loadChart(this, binding.sectorBarChart, children)
+                sector.loadChart(requireActivity(), binding.sectorBarChart, children)
 
                 (this as? SectorActivity?)?.setLoading(false)
             }

@@ -46,7 +46,7 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         appNetworkState = state
     }
 
-    override fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
+    override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
         Timber.v("Network state updated asyncronously: $state")
     }
 }

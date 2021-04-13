@@ -17,5 +17,5 @@ abstract class NetworkChangeListenerActivity : LanguageAppCompatActivity(),
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {}
-    override fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {}
+    override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {}
 }

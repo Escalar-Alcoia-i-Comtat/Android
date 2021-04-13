@@ -8,11 +8,13 @@ import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.get
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.SectorsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
@@ -25,6 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
 class ZoneActivity : DataClassListActivity<Zone>() {
@@ -84,28 +87,27 @@ class ZoneActivity : DataClassListActivity<Zone>() {
         }
     }
 
-    override fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
+    override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
         super.onStateChangeAsync(state)
 
         if (!loaded)
             try {
-                val sectors = dataClass.getChildren(firestore)
+                val sectors = arrayListOf<Sector>()
+                dataClass.getChildren(firestore).toCollection(sectors)
+
                 Timber.v("Got ${sectors.size} sectors.")
 
-                runOnUiThread {
+                uiContext {
                     binding.recyclerView.let { r ->
-                        r.layoutManager = LinearLayoutManager(this)
+                        r.layoutManager = LinearLayoutManager(this@ZoneActivity)
                         if (justAttached)
                             binding.recyclerView.layoutAnimation =
                                 AnimationUtils.loadLayoutAnimation(
-                                    this,
+                                    this@ZoneActivity,
                                     R.anim.item_enter_left_animator
                                 )
                         r.adapter =
-                            SectorsAdapter(
-                                this,
-                                areaId, zoneId
-                            ) { viewHolder, index ->
+                            SectorsAdapter(this@ZoneActivity, sectors) { viewHolder, index ->
                                 binding.loadingLayout.show()
 
                                 Timber.v("Clicked item $index")
@@ -114,7 +116,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                                         .toString()
                                 Timber.v("Transition name: $trn")
                                 val intent =
-                                    Intent(this, SectorActivity()::class.java)
+                                    Intent(this@ZoneActivity, SectorActivity()::class.java)
                                         .putExtra(EXTRA_AREA, areaId)
                                         .putExtra(EXTRA_ZONE, zoneId)
                                         .putExtra(EXTRA_SECTOR_COUNT, sectors.size)
@@ -122,7 +124,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                                         .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
                                 val options =
                                     ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                        this, viewHolder.titleTextView, trn
+                                        this@ZoneActivity, viewHolder.titleTextView, trn
                                     )
 
                                 startActivity(intent, options.toBundle())

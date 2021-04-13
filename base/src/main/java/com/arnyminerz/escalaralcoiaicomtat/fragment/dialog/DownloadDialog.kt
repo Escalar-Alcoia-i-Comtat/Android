@@ -4,13 +4,16 @@ import android.content.Context
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.toCollection
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
-import java.util.concurrent.CompletableFuture.runAsync
 
 class DownloadDialog(
     private val context: Context,
@@ -32,7 +35,7 @@ class DownloadDialog(
                     } ?: "N/A"
                 ) + '\n' + context.getString(
                     R.string.dialog_uses_storage_msg,
-                    humanReadableByteCountBin(data.size(context))
+                    runBlocking { humanReadableByteCountBin(data.size(context)) }
                 )
             )
             .setNeutralButton(R.string.action_delete) { dialog, _ ->
@@ -49,8 +52,10 @@ class DownloadDialog(
                         d.dismiss()
                         when (data) {
                             is Area, is Zone, is Sector ->
-                                runAsync {
-                                    for (child in data.getChildren(firestore))
+                                doAsync {
+                                    val children = arrayListOf<DataClassImpl>()
+                                    data.getChildren(firestore).toCollection(children)
+                                    for (child in children)
                                         if (child is DataClass<*, *>)
                                             child.delete(context)
 
