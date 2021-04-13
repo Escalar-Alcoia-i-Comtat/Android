@@ -34,19 +34,28 @@ data class DownloadedSection(val section: DataClass<*, *>) {
          * @param context The [Context] where the function is being ran on.
          * @param firestore The [FirebaseFirestore] instance to load the data from.
          * @param showNonDownloaded If the non-downloaded sections should be added.
+         * @param progressListener A listener for the progress of the load.
          * @return The sections that have been downloaded
          */
         @WorkerThread
         fun list(
             context: Context,
             firestore: FirebaseFirestore,
-            showNonDownloaded: Boolean
+            showNonDownloaded: Boolean,
+            progressListener: (current: Int, max: Int) -> Unit
         ): ArrayList<DownloadedSection> {
             Timber.v("Loading downloads...")
             val list = arrayListOf<DownloadedSection>()
 
             for (area in AREAS.values)
-                list.addAll(area.downloadedSectionList(context, firestore, showNonDownloaded))
+                list.addAll(
+                    area.downloadedSectionList(
+                        context,
+                        firestore,
+                        showNonDownloaded,
+                        progressListener
+                    )
+                )
 
             return list
         }

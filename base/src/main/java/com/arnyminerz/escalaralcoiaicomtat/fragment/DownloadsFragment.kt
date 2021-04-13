@@ -56,10 +56,21 @@ class DownloadsFragment : Fragment() {
 
         visibility(binding.downloadsRecyclerView, false)
         visibility(binding.noDownloadsTextView, false)
+        visibility(binding.loadingDownloadsProgressBar, true)
+        visibility(binding.loadingDownloadsProgressIndicator, true)
 
         runAsync {
             Timber.v("Getting downloaded sections list, SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
-            val sections = DownloadedSection.list(mainActivity, firestore, SHOW_NON_DOWNLOADED)
+            val sections = DownloadedSection.list(
+                mainActivity,
+                firestore,
+                SHOW_NON_DOWNLOADED
+            ) { progress, max ->
+                runOnUiThread {
+                    binding.loadingDownloadsProgressIndicator.progress = progress
+                    binding.loadingDownloadsProgressIndicator.max = max
+                }
+            }
             val sectionsEmpty = sections.isEmpty()
             Timber.v("Got sections list with ${sections.size} elements.")
 
@@ -70,7 +81,8 @@ class DownloadsFragment : Fragment() {
                 binding.downloadsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
                 binding.downloadsRecyclerView.adapter =
                     DownloadSectionsAdapter(sections, requireActivity() as MainActivity)
-                binding.loadingDownloadsProgressBar.visibility(false)
+                visibility(binding.loadingDownloadsProgressBar, false)
+                visibility(binding.loadingDownloadsProgressIndicator, false)
             }
         }
     }
