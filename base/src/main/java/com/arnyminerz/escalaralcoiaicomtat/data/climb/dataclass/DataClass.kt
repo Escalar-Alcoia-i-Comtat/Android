@@ -126,8 +126,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         if (innerChildren.isEmpty())
             if (firestore == null)
                 throw IllegalStateException("There are no loaded children, and firestore is null.")
-            else
+            else {
                 innerChildren.addAll(loadChildren(firestore))
+                innerChildren.sortBy { (it as? DataClass<*, *>?)?.displayName ?: it.objectId }
+            }
         return innerChildren
     }
 
