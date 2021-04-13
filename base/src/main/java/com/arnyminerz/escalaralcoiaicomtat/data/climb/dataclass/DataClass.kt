@@ -6,7 +6,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.widget.ImageView
 import android.widget.ProgressBar
-import androidx.annotation.DrawableRes
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
@@ -55,16 +54,13 @@ import java.util.Date
 // A: List type
 // B: Parent Type
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
-    objectId: String,
     open val displayName: String,
     open val timestamp: Date?,
     open val imageUrl: String,
     open val kmlAddress: String?,
-    @DrawableRes val placeholderDrawable: Int,
-    @DrawableRes val errorPlaceholderDrawable: Int,
-    namespace: String,
-    open val documentPath: String,
-) : DataClassImpl(objectId, namespace), Iterable<A> {
+    val uiMetadata: UIMetadata,
+    metadata: DataClassMetadata
+) : DataClassImpl(metadata.objectId, metadata.namespace), Iterable<A> {
     companion object {
         /**
          * Searches in AREAS and tries to get an intent from them
@@ -540,9 +536,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             imageLoadRequest
                 .load(imageUrl)
         }
-        imageLoadRequest.placeholder(placeholderDrawable)
-            .error(errorPlaceholderDrawable)
-            .fallback(errorPlaceholderDrawable)
+        imageLoadRequest.placeholder(uiMetadata.placeholderDrawable)
+            .error(uiMetadata.errorPlaceholderDrawable)
+            .fallback(uiMetadata.errorPlaceholderDrawable)
             .thumbnail(scale)
             .apply(imageLoadParameters)
             .addListener(object : RequestListener<Bitmap> {
@@ -575,8 +571,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         result = 31 * result + displayName.hashCode()
         result = 31 * result + (timestamp?.hashCode() ?: 0)
         result = 31 * result + imageUrl.hashCode()
-        result = 31 * result + placeholderDrawable
-        result = 31 * result + errorPlaceholderDrawable
+        result = 31 * result + uiMetadata.placeholderDrawable
+        result = 31 * result + uiMetadata.errorPlaceholderDrawable
         result = 31 * result + namespace.hashCode()
         return result
     }
