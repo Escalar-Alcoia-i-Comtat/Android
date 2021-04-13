@@ -7,7 +7,6 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityUpdatingBinding
@@ -23,6 +22,9 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.UPDATE_SECTOR
 import com.arnyminerz.escalaralcoiaicomtat.shared.UPDATE_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 import java.io.IOException
 import java.util.concurrent.CompletableFuture.runAsync
@@ -41,6 +43,8 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
 
     private lateinit var binding: ActivityUpdatingBinding
 
+    private lateinit var firestore: FirebaseFirestore
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUpdatingBinding.inflate(layoutInflater)
@@ -52,6 +56,8 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             onBackPressed()
             return
         }
+
+        firestore = Firebase.firestore
 
         updateArea = intent.getExtra(UPDATE_AREA)
         updateZone = intent.getExtra(UPDATE_ZONE)
@@ -117,13 +123,13 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             binding.progressBar.isIndeterminate = true
 
             for (area in AREAS.values) {
-                if (area.downloadStatus(this) == DownloadStatus.DOWNLOADED)
+                if (area.downloadStatus(this, firestore).isDownloaded())
                     iterateUpdate(area)
                 else for (zone in area)
-                    if (zone.downloadStatus(this) == DownloadStatus.DOWNLOADED)
+                    if (zone.downloadStatus(this, firestore).isDownloaded())
                         iterateUpdate(zone)
                     else for (sector in zone)
-                        if (sector.downloadStatus(this) == DownloadStatus.DOWNLOADED)
+                        if (sector.downloadStatus(this, firestore).isDownloaded())
                             iterateUpdate(sector)
             }
         }

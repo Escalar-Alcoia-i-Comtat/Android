@@ -23,6 +23,7 @@ import com.arnyminerz.escalaralcoiaicomtat.list.holder.DownloadSectionViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.firestore.FirebaseFirestore
 import timber.log.Timber
 import java.util.concurrent.CompletableFuture.runAsync
 
@@ -30,6 +31,9 @@ class DownloadSectionsAdapter(
     private val downloadedSections: ArrayList<DownloadedSection>,
     private val mainActivity: MainActivity
 ) : RecyclerView.Adapter<DownloadSectionViewHolder>() {
+    private val firestore: FirebaseFirestore
+        get() = mainActivity.firestore
+
     override fun getItemCount(): Int = downloadedSections.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DownloadSectionViewHolder =
@@ -54,7 +58,6 @@ class DownloadSectionsAdapter(
         visibility(holder.sizeChip, true)
 
         if (downloadStatus != DownloadStatus.DOWNLOADED) {
-            visibility(holder.progressBar, false)
             holder.sizeChip.text = mainActivity.getString(R.string.status_not_downloaded)
         } else {
             val size = section.size(mainActivity)
@@ -63,7 +66,7 @@ class DownloadSectionsAdapter(
 
             holder.sizeChip.setOnClickListener {
                 Timber.v("Showing download dialog for ZONE")
-                DownloadDialog(mainActivity, section, mainActivity.firestore).show()
+                DownloadDialog(mainActivity, section, firestore).show()
             }
         }
     }
@@ -84,7 +87,7 @@ class DownloadSectionsAdapter(
         val mapUri = mapStyle?.uri
         runAsync {
             Timber.v("Downloading section \"$section\"")
-            val downloadStatus = section.downloadStatus(mainActivity)
+            val downloadStatus = section.downloadStatus(mainActivity, firestore)
 
             if (!appNetworkState.hasInternet) {
                 Timber.v("Cannot download, there's no internet connection.")
@@ -156,15 +159,18 @@ class DownloadSectionsAdapter(
             Timber.v("Deleting section \"$section\"")
             section.delete(mainActivity)
             Timber.v("Section deleted, getting new download status...")
-            val newDownloadStatus = section.downloadStatus(mainActivity)
+            val newDownloadStatus = section.downloadStatus(mainActivity, firestore)
             Timber.v("Section download status loaded, getting downloaded section list...")
-            val newSectionList = section.downloadedSectionList(mainActivity.firestore)
+            val newChildSectionList =
+                section.downloadedSectionList(mainActivity, firestore, true)
             Timber.v("Got downloaded section list. Updating UI...")
 
             mainActivity.runOnUiThread {
                 mainActivity.downloadsFragment.reloadSizeTextView()
                 updateDownloadStatus(holder, newDownloadStatus, section)
-                holder.recyclerView.adapter = DownloadSectionsAdapter(newSectionList, mainActivity)
+                holder.recyclerView.adapter =
+                    DownloadSectionsAdapter(newChildSectionList, mainActivity)
+                // TODO: This should remove the item from the list
             }
         }
     }
@@ -173,8 +179,12 @@ class DownloadSectionsAdapter(
         val downloadedSection = downloadedSections[position]
         val section = downloadedSection.section
 
+        Timber.v("Binding view holder for $section")
+
+        // Update the name of the section
         holder.titleTextView.text = section.displayName
 
+        // Hide all extra progress bars and buttons
         visibility(holder.progressBar, true)
         visibility(holder.downloadProgressBar, false)
         visibility(holder.downloadButton, false)
@@ -185,14 +195,13 @@ class DownloadSectionsAdapter(
 
         runAsync {
             Timber.v("Checking section's downloaded children.")
-            val sectionDownloadStatus = section.downloadStatus(mainActivity)
+            val sectionDownloadStatus = section.downloadStatus(mainActivity, firestore)
+            // Get all the children for the section
             Timber.v("Loading section list for \"${section.displayName}\"...")
-            val sectionList = section.downloadedSectionList(mainActivity.firestore)
+            val childSectionList =
+                section.downloadedSectionList(mainActivity, firestore, true)
 
             mainActivity.runOnUiThread {
-                holder.downloadButton.setOnClickListener {
-                    downloadSection(section, holder)
-                }
                 updateDownloadStatus(holder, sectionDownloadStatus, section)
 
                 // Show the toggle button just to Zones and Areas
@@ -201,24 +210,25 @@ class DownloadSectionsAdapter(
                     section is Zone || section is Area
                 )
 
+                holder.downloadButton.setOnClickListener {
+                    downloadSection(section, holder)
+                }
                 holder.toggleButton.setOnClickListener {
                     downloadedSection.toggle(
                         holder.cardView,
                         it as ImageButton,
-                        holder.recyclerView,
-                        mainActivity
+                        holder.recyclerView
                     )
                 }
                 downloadedSection.updateView(
                     holder.cardView,
                     holder.toggleButton,
-                    holder.recyclerView,
-                    mainActivity
+                    holder.recyclerView
                 )
 
                 holder.viewButton.setOnClickListener {
                     val intent =
-                        getIntent(mainActivity, section.displayName, mainActivity.firestore)
+                        getIntent(mainActivity, section.displayName, firestore)
                     if (intent == null) {
                         Timber.w("Could not launch activity.")
                         toast(mainActivity, R.string.toast_error_internal)
@@ -229,9 +239,10 @@ class DownloadSectionsAdapter(
                 }
 
                 holder.recyclerView.layoutManager = LinearLayoutManager(mainActivity)
-                Timber.v("  Section List has ${sectionList.count()} sections")
+                Timber.v("  Section List has ${childSectionList.count()} sections")
                 Timber.v("Loading data for \"${section.displayName}\"...")
-                holder.recyclerView.adapter = DownloadSectionsAdapter(sectionList, mainActivity)
+                holder.recyclerView.adapter =
+                    DownloadSectionsAdapter(childSectionList, mainActivity)
 
                 holder.deleteButton.setOnClickListener {
                     requestSectionDelete(holder, section)

@@ -266,4 +266,8 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="feedback_error_empty_message">Debes escribir el mensaje a mandar</string>
     <string name="pref_gene_error_reporting_title">Habilitar reportes de error</string>
     <string name="pref_gene_error_reporting_sum">Si está activado, cada vez que la app se cierre inesperadamente o haya un error, se mandará un reporte anónimo a los desarrolladores para que pueda ser reparado lo más pronto posible. Por favor, te pedimos que mantengas esta opción activada, aunque eres libre que desactivarla si lo deseas.</string>
+    <string name="notification_download_failed_title">La descarga ha fallado!</string>
+    <string name="notification_download_failed_message">No se ha podido descargar %s.</string>
+    <string name="notification_download_failed_message_long">Ha ocurrido un error al descargar %1$s. Código de error: %2$s</string>
+    <string name="downloads_no_download">No hay nada descargado</string>
 </resources>

@@ -173,6 +173,9 @@
     <string name="notification_download_progress_message">Downloading %s</string>
     <string name="notification_download_complete_title">Download complete!</string>
     <string name="notification_download_complete_message">Downloaded %s. Tap to open.</string>
+    <string name="notification_download_failed_title">Download failed!</string>
+    <string name="notification_download_failed_message">Could not download %s.</string>
+    <string name="notification_download_failed_message_long">There was an error while downloading %1$s. Error code: %2$s</string>
     <string name="notification_download_progress_info_unpinning">Unpinning…</string>
     <string name="notification_download_progress_info_fetching">Downloading data…</string>
     <string name="notification_download_progress_info_downloading_image">Downloading image…</string>
@@ -190,6 +193,7 @@
     <string name="downloads_size_value">%sMB</string>
     <string name="downloads_delete_dialog_title">Are you sure?</string>
     <string name="downloads_delete_dialog_msg">This will delete %s from your device FOREVER. You will have to download it again.</string>
+    <string name="downloads_no_download">There\'s nothing downloaded</string>
 
     <string name="error_chart_no_data">No Data</string>
 

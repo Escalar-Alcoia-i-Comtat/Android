@@ -265,4 +265,8 @@
     <string name="feedback_error_empty_message">Has d\'escriure el missatge a enviar</string>
     <string name="pref_gene_error_reporting_title">Habilitar reports d\'error</string>
     <string name="pref_gene_error_reporting_sum">Si està habilitat, cada vegada que l\'app es tanque de manera sobtada, o hi haja algun error, s\'enviarà un report anònim als desenvolupadors per a que l\'arreglen el més prompte possible. Et demanem que mantingues aquesta opció activada, però eres lliure de deshabilitar-la si vols.</string>
+    <string name="notification_download_failed_title">La baixada ha fallat!</string>
+    <string name="notification_download_failed_message">No s\'ha pogut baixar %s.</string>
+    <string name="notification_download_failed_message_long">Ha hagut un error al baixar %1$s. Codi d\'error: %2$s</string>
+    <string name="downloads_no_download">No hi ha res baixat</string>
 </resources>
