@@ -18,6 +18,8 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.APP_UPDATE_MAX_TIME_DAYS_KEY
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.REMOTE_CONFIG_DEFAULTS
 import com.arnyminerz.escalaralcoiaicomtat.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
+import com.arnyminerz.escalaralcoiaicomtat.shared.SHOW_NON_DOWNLOADED
+import com.arnyminerz.escalaralcoiaicomtat.shared.SHOW_NON_DOWNLOADED_KEY
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.gms.tasks.Tasks
@@ -114,6 +116,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             Tasks.await(remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS))
             Tasks.await(remoteConfig.fetchAndActivate())
             APP_UPDATE_MAX_TIME_DAYS = remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
+            SHOW_NON_DOWNLOADED = remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
 
             runOnUiThread {
                 Timber.v("Finished preparing App...")
