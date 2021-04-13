@@ -41,9 +41,6 @@ android {
             kotlinOptions {
                 freeCompilerArgs = [ '-Xuse-experimental=kotlin.Experimental' ]
             }
-            firebaseCrashlytics {
-                mappingFileUploadEnabled true
-            }
 
             ndk.debugSymbolLevel = 'FULL'
         }
@@ -51,6 +48,7 @@ android {
             versionNameSuffix "-debug-build" + getDate()
             setProperty("archivesBaseName", "EscalarAlcoiaIComtat")
 
+            minifyEnabled true
             firebaseCrashlytics {
                 mappingFileUploadEnabled false
             }
