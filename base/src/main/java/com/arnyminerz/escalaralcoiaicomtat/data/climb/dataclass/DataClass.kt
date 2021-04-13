@@ -66,7 +66,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
          */
         fun getIntent(context: Context, queryName: String, firestore: FirebaseFirestore): Intent? {
             Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
-            for (area in AREAS.values) {
+            for (area in AREAS) {
                 Timber.d("  Finding in ${area.displayName}. It has ${area.count()} zones.")
                 when {
                     area.displayName.equals(queryName, true) ->

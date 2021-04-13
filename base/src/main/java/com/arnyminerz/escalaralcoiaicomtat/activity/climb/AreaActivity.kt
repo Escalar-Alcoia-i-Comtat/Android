@@ -8,6 +8,8 @@ import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.ensureGet
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.has
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
@@ -52,12 +54,12 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
             onBackPressed()
             return
         }
-        if (!AREAS.containsKey(areaId)) {
+        if (!AREAS.has(areaId)) {
             Timber.e("Area is not loaded in AREAS")
             onBackPressed()
             return
         }
-        dataClass = AREAS[areaId]!!
+        dataClass = AREAS.ensureGet(areaId)
         Timber.d("DataClass id: ${dataClass.objectId}")
 
         position = intent.getExtra(
@@ -114,7 +116,7 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
                                             .putExtra(EXTRA_AREA, areaId)
                                             .putExtra(
                                                 EXTRA_ZONE,
-                                                AREAS[areaId]!![position].objectId
+                                                dataClass[position].objectId
                                             )
 
                                     val optionsBundle =

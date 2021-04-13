@@ -110,6 +110,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
                         iterateUpdate(updateSector!!)
                 }
             } catch (e: IOException) {
+                Timber.w(e, "Could not iterate update.")
                 vibrate(this, ERROR_VIBRATE)
                 visibility(binding.progressBar, false, setGone = false)
                 binding.updatingTextView.setText(R.string.update_progress_error)
@@ -122,7 +123,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             binding.progressTextView.setText(R.string.update_progress_downloading_new_cache)
             binding.progressBar.isIndeterminate = true
 
-            for (area in AREAS.values) {
+            for (area in AREAS) {
                 if (area.downloadStatus(this, firestore).isDownloaded())
                     iterateUpdate(area)
                 else for (zone in area)

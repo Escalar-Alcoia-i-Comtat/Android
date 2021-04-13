@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.get
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog

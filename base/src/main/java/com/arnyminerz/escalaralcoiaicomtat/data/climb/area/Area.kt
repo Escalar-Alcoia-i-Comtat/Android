@@ -128,17 +128,59 @@ class Area(
 }
 
 /**
- * Gets the [Zone]s list from an [Area]s [Map].
+ * Gets the [Zone]s list from an [Area]s [Iterable].
  * Must be ran async.
  * @author Arnau Mora
  * @since 20210411
  */
 @WorkerThread
-fun Map<String, Area>.getZones(firestore: FirebaseFirestore): List<Zone> {
+fun Iterable<Area>.getZones(firestore: FirebaseFirestore): List<Zone> {
     val zones = arrayListOf<Zone>()
 
-    for (area in values)
+    for (area in this)
         zones.addAll(area.getChildren(firestore))
 
     return zones
+}
+
+/**
+ * Checks if an [Area] list contains an [Area] with an specific id.
+ * @author Arnau Mora
+ * @since 20210413
+ * @param areaId The id to search
+ */
+fun Iterable<Area>.has(areaId: String): Boolean {
+    for (area in this)
+        if (area.objectId == areaId)
+            return true
+    return false
+}
+
+/**
+ * Finds an [Area] inside a list with an specific id. If it's not found, a [ClassNotFoundException]
+ * is thrown.
+ * @author Arnau Mora
+ * @since 20210413
+ * @param areaId The id to search
+ * @throws ClassNotFoundException If the [areaId] doesn't exist in [this]
+ */
+@Throws(ClassNotFoundException::class)
+fun Iterable<Area>.ensureGet(areaId: String): Area {
+    for (area in this)
+        if (area.objectId == areaId)
+            return area
+    throw ClassNotFoundException("Could not find an area with id $areaId")
+}
+
+/**
+ * Finds an [Area] inside a list with an specific id. If it's not found, null is returned.
+ * @author Arnau Mora
+ * @since 20210413
+ * @param areaId The id to search
+ */
+operator fun Iterable<Area>.get(areaId: String): Area? {
+    for (area in this)
+        if (area.objectId == areaId)
+            return area
+    return null
 }

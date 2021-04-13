@@ -191,7 +191,7 @@ class MainActivity : LanguageAppCompatActivity() {
             visibility(binding.loadingLayout, true)
             Timber.v("Clicked item %s", position)
             val intent = Intent(this, AreaActivity()::class.java)
-                .putExtra(EXTRA_AREA, AREAS.valueAt(position)!!.objectId)
+                .putExtra(EXTRA_AREA, AREAS[position].objectId)
 
             val optionsBundle =
                 ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->

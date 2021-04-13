@@ -13,6 +13,7 @@ import androidx.annotation.WorkerThread
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.get
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
