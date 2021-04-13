@@ -101,7 +101,7 @@ class SectorsAdapter(
                         dataClassListActivity,
                         dataClassListActivity.firestore
                     )) {
-                        DownloadStatus.NOT_DOWNLOADED -> {
+                        DownloadStatus.NOT_DOWNLOADED, DownloadStatus.PARTIALLY -> {
                             val result = sector.download(
                                 dataClassListActivity,
                                 dataClassListActivity.mapStyle?.uri
@@ -147,7 +147,8 @@ class SectorsAdapter(
         downloadProgressbar: ProgressBar
     ) {
         when (sector.downloadStatus(dataClassListActivity, dataClassListActivity.firestore)) {
-            DownloadStatus.NOT_DOWNLOADED -> downloadImagebutton.setImageResource(R.drawable.download)
+            DownloadStatus.NOT_DOWNLOADED, DownloadStatus.PARTIALLY ->
+                downloadImagebutton.setImageResource(R.drawable.download)
             DownloadStatus.DOWNLOADING -> {
                 downloadImagebutton.setImageResource(R.drawable.download_outline)
                 visibility(downloadProgressbar, true)
