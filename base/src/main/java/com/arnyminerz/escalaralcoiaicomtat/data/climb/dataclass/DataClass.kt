@@ -224,14 +224,21 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Generates a list of [DownloadedSection].
      * @author Arnau Mora
      * @since 20210412
+     * @param context The [Context] where the function is being ran on.
      * @param firestore The [FirebaseFirestore] instance to load the data from.
+     * @param showNonDownloaded If the non-downloaded sections should be added.
      */
     @WorkerThread
-    fun downloadedSectionList(firestore: FirebaseFirestore): ArrayList<DownloadedSection> {
+    fun downloadedSectionList(
+        context: Context,
+        firestore: FirebaseFirestore,
+        showNonDownloaded: Boolean
+    ): ArrayList<DownloadedSection> {
         val downloadedSectionsList = arrayListOf<DownloadedSection>()
         for (child in getChildren(firestore))
-            (child as? DataClass<*, *>)?.let { // Paths shouldn't be included
-                downloadedSectionsList.add(DownloadedSection(it))
+            (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
+                if (!showNonDownloaded || dataClass.downloadStatus(context).isDownloaded())
+                    downloadedSectionsList.add(DownloadedSection(dataClass))
             }
         return downloadedSectionsList
     }

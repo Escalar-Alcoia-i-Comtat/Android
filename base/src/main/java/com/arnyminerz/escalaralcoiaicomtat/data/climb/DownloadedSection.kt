@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb
 
+import android.content.Context
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageButton
@@ -29,15 +30,21 @@ data class DownloadedSection(val section: DataClass<*, *>) {
          * @date 14/05/2020
          * @patch Arnau Mora - 2020/09/11
          * @author ArnyminerZ
+         * @param context The [Context] where the function is being ran on.
          * @param firestore The [FirebaseFirestore] instance to load the data from.
+         * @param showNonDownloaded If the non-downloaded sections should be added.
          * @return The sections that have been downloaded
          */
-        fun list(firestore: FirebaseFirestore): ArrayList<DownloadedSection> {
+        fun list(
+            context: Context,
+            firestore: FirebaseFirestore,
+            showNonDownloaded: Boolean
+        ): ArrayList<DownloadedSection> {
             Timber.v("Loading downloads...")
             val list = arrayListOf<DownloadedSection>()
 
             for (area in AREAS.values)
-                list.addAll(area.downloadedSectionList(firestore))
+                list.addAll(area.downloadedSectionList(context, firestore, showNonDownloaded))
 
             return list
         }

@@ -13,6 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentDownloadsBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.generic.sizeString
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.DownloadSectionsAdapter
+import com.arnyminerz.escalaralcoiaicomtat.shared.SHOW_NON_DOWNLOADED
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import java.util.concurrent.CompletableFuture.runAsync
@@ -53,7 +54,7 @@ class DownloadsFragment : Fragment() {
         val firestore = mainActivity.firestore
 
         runAsync {
-            val sections = DownloadedSection.list(firestore)
+            val sections = DownloadedSection.list(mainActivity, firestore, SHOW_NON_DOWNLOADED)
 
             runOnUiThread {
                 binding.downloadsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
