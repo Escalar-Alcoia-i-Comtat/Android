@@ -173,8 +173,10 @@ class DownloadSectionsAdapter(
         val downloadedSection = downloadedSections[position]
         val section = downloadedSection.section
 
+        // Update the name of the section
         holder.titleTextView.text = section.displayName
 
+        // Hide all extra progress bars and buttons
         visibility(holder.progressBar, true)
         visibility(holder.downloadProgressBar, false)
         visibility(holder.downloadButton, false)
@@ -190,9 +192,6 @@ class DownloadSectionsAdapter(
             val sectionList = section.downloadedSectionList(mainActivity.firestore)
 
             mainActivity.runOnUiThread {
-                holder.downloadButton.setOnClickListener {
-                    downloadSection(section, holder)
-                }
                 updateDownloadStatus(holder, sectionDownloadStatus, section)
 
                 // Show the toggle button just to Zones and Areas
@@ -201,19 +200,20 @@ class DownloadSectionsAdapter(
                     section is Zone || section is Area
                 )
 
+                holder.downloadButton.setOnClickListener {
+                    downloadSection(section, holder)
+                }
                 holder.toggleButton.setOnClickListener {
                     downloadedSection.toggle(
                         holder.cardView,
                         it as ImageButton,
-                        holder.recyclerView,
-                        mainActivity
+                        holder.recyclerView
                     )
                 }
                 downloadedSection.updateView(
                     holder.cardView,
                     holder.toggleButton,
-                    holder.recyclerView,
-                    mainActivity
+                    holder.recyclerView
                 )
 
                 holder.viewButton.setOnClickListener {
