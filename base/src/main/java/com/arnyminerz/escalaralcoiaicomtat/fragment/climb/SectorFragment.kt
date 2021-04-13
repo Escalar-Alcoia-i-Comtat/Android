@@ -161,6 +161,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             Timber.v("Loading paths...")
             val children = arrayListOf<Path>()
             sector.getChildren(sectorActivity.firestore).toCollection(children)
+            children.sortBy { it.sketchId }
             Timber.v("Finished loading children sectors")
 
             uiContext {
