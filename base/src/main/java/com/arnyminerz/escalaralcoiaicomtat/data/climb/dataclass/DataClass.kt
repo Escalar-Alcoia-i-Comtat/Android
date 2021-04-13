@@ -292,11 +292,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 if (!imageFileExists) {
                     Timber.d("$namespace:$objectId Image file ($imageFile) doesn't exist")
                     result = DownloadStatus.NOT_DOWNLOADED
-                } else for (child in getChildren(null))
+                }
+                for (child in getChildren(null))
                     if (child is DataClass<*, *>) {
                         if (!child.downloadStatus(context)) {
                             Timber.d("There's a non-downloaded children (${child.namespace}:${child.objectId})")
-                            result = DownloadStatus.NOT_DOWNLOADED
+                            result = DownloadStatus.PARTIALLY
+                            break
                         }
                     } else Timber.d("$namespace:$objectId Child is not DataClass")
             }
