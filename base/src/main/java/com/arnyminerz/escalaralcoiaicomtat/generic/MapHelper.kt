@@ -69,6 +69,7 @@ import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.perf.FirebasePerformance
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraPosition
@@ -96,11 +97,11 @@ import java.io.FileNotFoundException
 
 class MapHelper(private val mapView: MapView) {
     companion object {
-        fun getTarget(context: Context, marker: Symbol): Intent? {
+        fun getTarget(context: Context, marker: Symbol, firestore: FirebaseFirestore): Intent? {
             Timber.d("Getting marker's title...")
             val title = marker.getWindow().title
             Timber.v("Searching in ${AREAS.size} cached areas...")
-            return getIntent(context, title)
+            return getIntent(context, title, firestore)
         }
 
         fun getImageUrl(description: String?): String? {
@@ -1117,10 +1118,10 @@ class MapHelper(private val mapView: MapView) {
      */
     fun infoCard(
         activity: Activity,
+        firestore: FirebaseFirestore,
         marker: Symbol,
         rootView: ViewGroup
-    ): MarkerWindow =
-        MarkerWindow(activity, marker, rootView)
+    ): MarkerWindow = MarkerWindow(activity, marker, rootView, firestore)
 
     /**
      * Changes the map view visibility
@@ -1158,7 +1159,8 @@ class MapHelper(private val mapView: MapView) {
     @UiThread constructor(
         private val activity: Activity,
         marker: Symbol,
-        rootView: ViewGroup
+        rootView: ViewGroup,
+        firestore: FirebaseFirestore
     ) {
         private var destroyed = false
 
@@ -1181,7 +1183,7 @@ class MapHelper(private val mapView: MapView) {
             val window = marker.getWindow()
             val title = window.title
             val description = window.message
-            val activityIntent = getTarget(activity, marker) // Info Window Data Class
+            val activityIntent = getTarget(activity, marker, firestore) // Info Window Data Class
 
             Timber.v("Marker title: $title")
             Timber.v("Marker description: $description")

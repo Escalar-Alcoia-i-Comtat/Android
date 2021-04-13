@@ -64,7 +64,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         /**
          * Searches in AREAS and tries to get an intent from them
          */
-        fun getIntent(context: Context, queryName: String): Intent? {
+        fun getIntent(context: Context, queryName: String, firestore: FirebaseFirestore): Intent? {
             Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
             for (area in AREAS.values) {
                 Timber.d("  Finding in ${area.displayName}. It has ${area.count()} zones.")
@@ -76,7 +76,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         }
                     area.isNotEmpty() ->
                         for (zone in area) {
-                            Timber.d("    Finding in ${zone.displayName}. It has ${zone.count()} sectors.")
+                            Timber.d("    Finding in ${zone.displayName}.")
                             if (zone.displayName.equals(queryName, true))
                                 return Intent(context, ZoneActivity::class.java).apply {
                                     Timber.d("Found Zone id ${zone.objectId}!")
@@ -84,8 +84,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                                     putExtra(EXTRA_ZONE, zone.objectId)
                                     putExtra(EXTRA_SECTOR_COUNT, zone.count())
                                 }
-                            else if (zone.isNotEmpty())
-                                for ((s, sector) in zone.withIndex()) {
+                            else {
+                                val children = zone.getChildren(firestore)
+                                for ((s, sector) in children.withIndex()) {
                                     Timber.d("      Finding in ${sector.displayName}.")
                                     if (sector.displayName.equals(queryName, true))
                                         return Intent(context, SectorActivity::class.java).apply {
@@ -96,6 +97,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                                             putExtra(EXTRA_SECTOR_INDEX, s)
                                         }
                                 }
+                            }
                         }
                     else -> Timber.w("Area is empty.")
                 }

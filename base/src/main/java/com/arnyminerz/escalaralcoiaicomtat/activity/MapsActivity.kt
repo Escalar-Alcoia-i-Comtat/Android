@@ -43,6 +43,8 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.MIME_TYPE_GPX
 import com.arnyminerz.escalaralcoiaicomtat.shared.MIME_TYPE_KMZ
 import com.arnyminerz.escalaralcoiaicomtat.shared.PERMISSION_DIALOG_TAG
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.Mapbox
@@ -76,6 +78,8 @@ class MapsActivity : LanguageAppCompatActivity() {
         // Hi from march of 2021
         Timber.v("Getting Mapbox instance...")
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
+
+        val firestore = Firebase.firestore
 
         var kmlAddress: String? = null
         var kmzFile: File? = null
@@ -194,6 +198,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                             if (title.isNotEmpty()) {
                                 markerWindow = mapHelper.infoCard(
                                     this@MapsActivity,
+                                    firestore,
                                     this,
                                     view
                                 )

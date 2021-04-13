@@ -26,8 +26,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber
 import java.util.concurrent.CompletableFuture.runAsync
 
-const val TOGGLED_CARD_HEIGHT = 96f
-
 class DownloadSectionsAdapter(
     private val downloadedSections: ArrayList<DownloadedSection>,
     private val mainActivity: MainActivity
@@ -47,10 +45,13 @@ class DownloadSectionsAdapter(
         downloadStatus: DownloadStatus,
         section: DataClass<*, *>
     ) {
+        Timber.v("Updating download status for $section: $downloadStatus")
+
         visibility(holder.downloadProgressBar, downloadStatus == DownloadStatus.DOWNLOADING)
         visibility(holder.downloadButton, downloadStatus != DownloadStatus.DOWNLOADED)
         visibility(holder.deleteButton, downloadStatus == DownloadStatus.DOWNLOADED)
         visibility(holder.viewButton, downloadStatus == DownloadStatus.DOWNLOADED)
+        visibility(holder.sizeChip, true)
 
         if (downloadStatus != DownloadStatus.DOWNLOADED) {
             visibility(holder.progressBar, false)
@@ -175,6 +176,12 @@ class DownloadSectionsAdapter(
         holder.titleTextView.text = section.displayName
 
         visibility(holder.progressBar, true)
+        visibility(holder.downloadProgressBar, false)
+        visibility(holder.downloadButton, false)
+        visibility(holder.deleteButton, false)
+        visibility(holder.viewButton, false)
+        visibility(holder.toggleButton, false)
+        visibility(holder.sizeChip, false)
 
         runAsync {
             Timber.v("Checking section's downloaded children.")
@@ -210,7 +217,8 @@ class DownloadSectionsAdapter(
                 )
 
                 holder.viewButton.setOnClickListener {
-                    val intent = getIntent(mainActivity, section.displayName)
+                    val intent =
+                        getIntent(mainActivity, section.displayName, mainActivity.firestore)
                     if (intent == null) {
                         Timber.w("Could not launch activity.")
                         toast(mainActivity, R.string.toast_error_internal)

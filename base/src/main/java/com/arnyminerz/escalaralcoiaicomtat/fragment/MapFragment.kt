@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
@@ -107,7 +108,12 @@ class MapFragment : NetworkChangeListenerFragment() {
 
                     markerWindow?.hide()
                     activity?.let {
-                        markerWindow = mapHelper.infoCard(it, this, binding.root)
+                        markerWindow = mapHelper.infoCard(
+                            it,
+                            (requireActivity() as MainActivity).firestore,
+                            this,
+                            binding.root
+                        )
                     }
 
                     true
