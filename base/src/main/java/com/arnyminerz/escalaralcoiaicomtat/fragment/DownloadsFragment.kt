@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.list.adapter.DownloadSectionsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.SHOW_NON_DOWNLOADED
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import timber.log.Timber
 import java.util.concurrent.CompletableFuture.runAsync
 
 class DownloadsFragment : Fragment() {
@@ -53,10 +54,19 @@ class DownloadsFragment : Fragment() {
         val mainActivity = requireActivity() as MainActivity
         val firestore = mainActivity.firestore
 
+        visibility(binding.downloadsRecyclerView, false)
+        visibility(binding.noDownloadsTextView, false)
+
         runAsync {
+            Timber.v("Getting downloaded sections list, SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
             val sections = DownloadedSection.list(mainActivity, firestore, SHOW_NON_DOWNLOADED)
+            val sectionsEmpty = sections.isEmpty()
+            Timber.v("Got sections list with ${sections.size} elements.")
 
             runOnUiThread {
+                visibility(binding.downloadsRecyclerView, !sectionsEmpty)
+                visibility(binding.noDownloadsTextView, sectionsEmpty)
+
                 binding.downloadsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
                 binding.downloadsRecyclerView.adapter =
                     DownloadSectionsAdapter(sections, requireActivity() as MainActivity)

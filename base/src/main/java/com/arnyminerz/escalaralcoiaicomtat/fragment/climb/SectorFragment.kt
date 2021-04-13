@@ -48,8 +48,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
     private var _binding: FragmentSectorBinding? = null
     private val binding get() = _binding!!
 
-    private val sectorActivity: SectorActivity?
-        get() = (activity as? SectorActivity?)
+    private val sectorActivity: SectorActivity
+        get() = (requireActivity() as SectorActivity)
 
     @UiThread
     private fun refreshMaximizeStatus() {
@@ -58,7 +58,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             else R.drawable.round_flip_to_back_24
         )
 
-        sectorActivity?.userInputEnabled(!maximized)
+        sectorActivity.userInputEnabled(!maximized)
     }
 
     @UiThread
@@ -133,7 +133,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
         if (loaded && this::sector.isInitialized) {
             runOnUiThread {
-                (this as? SectorActivity?)?.updateTitle(sector.displayName, isDownloaded)
+                sectorActivity.updateTitle(sector.displayName, isDownloaded)
                 loadImage()
             }
             return
@@ -141,11 +141,12 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
         Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
         runOnUiThread {
-            (this as? SectorActivity?)?.setLoading(true)
+            sectorActivity.setLoading(true)
         }
         sector = AREAS[areaId]!![zoneId][sectorIndex]
 
-        isDownloaded = sector.downloadStatus(requireContext()).isDownloaded()
+        isDownloaded =
+            sector.downloadStatus(requireContext(), sectorActivity.firestore).isDownloaded()
         binding.sectorTextView.text = sector.displayName
 
         val size = getDisplaySize(requireActivity())
@@ -155,7 +156,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
         if (activity != null) {
             Timber.v("Loading paths...")
-            val children = sector.getChildren(sectorActivity!!.firestore)
+            val children = sector.getChildren(sectorActivity.firestore)
             Timber.v("Finished loading children sectors")
 
             runOnUiThread {

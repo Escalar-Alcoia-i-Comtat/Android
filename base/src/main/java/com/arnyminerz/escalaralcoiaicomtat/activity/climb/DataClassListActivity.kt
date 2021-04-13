@@ -159,7 +159,9 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
 
     private fun updateIcon() {
         binding.statusImageView.let { i ->
-            if (this::dataClass.isInitialized && dataClass.downloadStatus(this).isDownloaded()) {
+            if (this::dataClass.isInitialized && dataClass.downloadStatus(this, firestore)
+                    .isDownloaded()
+            ) {
                 i.setImageResource(R.drawable.cloud_check)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     i.tooltipText = getString(R.string.status_downloaded)

@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageButton
 import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
@@ -35,6 +36,7 @@ data class DownloadedSection(val section: DataClass<*, *>) {
          * @param showNonDownloaded If the non-downloaded sections should be added.
          * @return The sections that have been downloaded
          */
+        @WorkerThread
         fun list(
             context: Context,
             firestore: FirebaseFirestore,

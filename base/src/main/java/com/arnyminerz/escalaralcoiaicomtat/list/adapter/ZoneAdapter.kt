@@ -63,7 +63,10 @@ class ZoneAdapter(
         }
         zone.asyncLoadImage(dataClassListActivity, holder.imageView)
 
-        if (zone.downloadStatus(dataClassListActivity) == DownloadStatus.DOWNLOADED ||
+        if (zone.downloadStatus(
+                dataClassListActivity,
+                dataClassListActivity.firestore
+            ) == DownloadStatus.DOWNLOADED ||
             zone.kmlAddress != null
         )
             holder.mapImageButton.setOnClickListener {
@@ -75,7 +78,7 @@ class ZoneAdapter(
             if (!appNetworkState.hasInternet)
                 dataClassListActivity.toast(R.string.toast_error_no_internet)
             else
-                when (zone.downloadStatus(dataClassListActivity)) {
+                when (zone.downloadStatus(dataClassListActivity, dataClassListActivity.firestore)) {
                     DownloadStatus.NOT_DOWNLOADED -> {
                         val result = zone.download(
                             dataClassListActivity,
@@ -119,7 +122,7 @@ class ZoneAdapter(
 
     private fun updateImageRes(holder: ZonesViewHolder, zone: Zone) {
         holder.downloadImageButton.setImageResource(
-            when (zone.downloadStatus(dataClassListActivity)) {
+            when (zone.downloadStatus(dataClassListActivity, dataClassListActivity.firestore)) {
                 DownloadStatus.DOWNLOADED -> R.drawable.cloud_check
                 DownloadStatus.DOWNLOADING -> R.drawable.download_outline
                 else -> R.drawable.download
@@ -129,7 +132,10 @@ class ZoneAdapter(
 
     private fun showMap(zone: Zone) {
         when {
-            zone.downloadStatus(dataClassListActivity) == DownloadStatus.DOWNLOADED ->
+            zone.downloadStatus(
+                dataClassListActivity,
+                dataClassListActivity.firestore
+            ) == DownloadStatus.DOWNLOADED ->
                 dataClassListActivity.startActivity(
                     Intent(dataClassListActivity, MapsActivity::class.java)
                         .putExtra(

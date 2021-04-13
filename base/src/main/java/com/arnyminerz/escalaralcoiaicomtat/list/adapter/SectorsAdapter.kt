@@ -97,7 +97,10 @@ class SectorsAdapter(
                 if (!appNetworkState.hasInternet)
                     dataClassListActivity.toast(R.string.toast_error_no_internet)
                 else
-                    when (sector.downloadStatus(dataClassListActivity)) {
+                    when (sector.downloadStatus(
+                        dataClassListActivity,
+                        dataClassListActivity.firestore
+                    )) {
                         DownloadStatus.NOT_DOWNLOADED -> {
                             val result = sector.download(
                                 dataClassListActivity,
@@ -143,7 +146,7 @@ class SectorsAdapter(
         downloadImagebutton: ImageButton,
         downloadProgressbar: ProgressBar
     ) {
-        when (sector.downloadStatus(dataClassListActivity)) {
+        when (sector.downloadStatus(dataClassListActivity, dataClassListActivity.firestore)) {
             DownloadStatus.NOT_DOWNLOADED -> downloadImagebutton.setImageResource(R.drawable.download)
             DownloadStatus.DOWNLOADING -> {
                 downloadImagebutton.setImageResource(R.drawable.download_outline)
