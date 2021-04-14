@@ -17,6 +17,8 @@ import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MOBILE_DOWNLOAD_PREF
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ROAMING_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSLESS_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.storeToFile
@@ -410,14 +412,18 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         fun schedule(context: Context, tag: String, data: DownloadData): LiveData<WorkInfo> {
             Timber.v("Scheduling new download...")
             Timber.v("Building download constraints...")
-            // TODO: Add metered and mobile data constraints
-            val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build()
+            var constraints = Constraints.Builder()
+            constraints = if (SETTINGS_MOBILE_DOWNLOAD_PREF.get())
+                constraints.setRequiredNetworkType(NetworkType.UNMETERED)
+            else
+                constraints.setRequiredNetworkType(NetworkType.METERED)
+            if (!SETTINGS_ROAMING_DOWNLOAD_PREF.get())
+                constraints = constraints.setRequiredNetworkType(NetworkType.NOT_ROAMING)
+            constraints = constraints.setRequiredNetworkType(NetworkType.CONNECTED)
 
             Timber.v("Building DownloadWorker request...")
             val request = OneTimeWorkRequestBuilder<DownloadWorker>()
-                .setConstraints(constraints)
+                .setConstraints(constraints.build())
                 .addTag(tag)
                 .setInputData(
                     with(data) {
