@@ -175,7 +175,6 @@ class DownloadSectionsAdapter(
                 updateDownloadStatus(holder, newDownloadStatus, section)
                 holder.recyclerView.adapter =
                     DownloadSectionsAdapter(newChildSectionList, mainActivity)
-                // TODO: This should remove the item from the list
             }
         }
     }
