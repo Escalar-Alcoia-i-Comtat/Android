@@ -146,7 +146,10 @@ class SectorFragment : NetworkChangeListenerFragment() {
         uiContext {
             sectorActivity.setLoading(true)
         }
-        sector = AREAS[areaId]!![zoneId][sectorIndex]
+        val sectors = arrayListOf<Sector>()
+        AREAS[areaId]!![zoneId].getChildren(sectorActivity.firestore).toCollection(sectors)
+        sectors.sortBy { it.displayName }
+        sector = sectors[sectorIndex]
 
         uiContext {
             binding.sectorTextView.text = sector.displayName

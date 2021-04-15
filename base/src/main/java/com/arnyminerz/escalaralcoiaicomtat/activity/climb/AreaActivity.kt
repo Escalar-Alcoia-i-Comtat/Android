@@ -123,7 +123,7 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
                                             .putExtra(EXTRA_AREA, areaId)
                                             .putExtra(
                                                 EXTRA_ZONE,
-                                                dataClass[position].objectId
+                                                zones[position].objectId
                                             )
 
                                     val optionsBundle =
