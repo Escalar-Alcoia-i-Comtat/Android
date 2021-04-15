@@ -92,6 +92,7 @@ class Zone(
         val ref = firestore
             .document(metadata.documentPath)
             .collection("Sectors")
+            .orderBy("weight")
         val childTask = ref.get()
         val snapshot = childTask.awaitTask()
         val e = childTask.exception
@@ -104,10 +105,6 @@ class Zone(
             for (l in sectors.indices)
                 emit(Sector(sectors[l]))
         }
-    }
-
-    override fun sort() {
-        innerChildren.sortBy { it.weight }
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {

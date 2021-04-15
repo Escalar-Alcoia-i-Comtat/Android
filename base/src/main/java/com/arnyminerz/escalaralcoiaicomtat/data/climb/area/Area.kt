@@ -91,6 +91,7 @@ class Area(
         val ref = firestore
             .document(metadata.documentPath)
             .collection("Zones")
+            .orderBy("displayName")
         val childTask = ref.get()
         Timber.v("Awaiting results...")
         val snapshot = childTask.awaitTask()
@@ -110,10 +111,6 @@ class Area(
             }
             Timber.d("Finished loading zones")
         }
-    }
-
-    override fun sort() {
-        innerChildren.sortBy { it.displayName }
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {

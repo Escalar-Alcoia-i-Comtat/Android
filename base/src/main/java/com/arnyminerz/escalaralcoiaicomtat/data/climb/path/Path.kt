@@ -17,7 +17,7 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 
 class Path(
-    override val objectId: String,
+    objectId: String,
     val timestamp: Date?,
     val sketchId: Long,
     val displayName: String,

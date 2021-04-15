@@ -124,6 +124,7 @@ class Sector constructor(
         val ref = firestore
             .document(metadata.documentPath)
             .collection("Paths")
+            .orderBy("sketchId")
         val childTask = ref.get()
         val snapshot = childTask.awaitTask()
         val e = childTask.exception
@@ -137,10 +138,6 @@ class Sector constructor(
                 emit(Path(paths[l]))
             Timber.d("Finished processing paths")
         }
-    }
-
-    override fun sort() {
-        innerChildren.sortBy { it.displayName }
     }
 
     override fun describeContents(): Int = 0
