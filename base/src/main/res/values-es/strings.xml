@@ -169,8 +169,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="item_map">Mapa</string>
     <string name="item_downloads">Descargas</string>
     <string name="item_settings">Configuración</string>
-    <string name="intro_storage_title">Permiso de Almacenamiento</string>
-    <string name="intro_storage_message">Para hacer posibles las descargas necesitamos acceso a tu almacenamiento</string>
     <string name="dialog_description_description_title">Descripción</string>
     <string name="dialog_description_builder_title">Equipada por</string>
     <string name="dialog_description_rebuilder_title">Reequipada por</string>
@@ -270,4 +268,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="notification_download_failed_message">No se ha podido descargar %s.</string>
     <string name="notification_download_failed_message_long">Ha ocurrido un error al descargar %1$s. Código de error: %2$s</string>
     <string name="downloads_no_download">No hay nada descargado</string>
+    <string name="intro_warning_title">Atención</string>
+    <string name="intro_warning_message">La escalada es un deporte considerado de riesgo, todo lo que lo practico tiene que preocuparse de su conocimiento y correcta ejecución. La información de esta aplicación es puramente informativa y puede ser errónea. Ten cuidado, el material en buen estado, y vigila\'t no sólo a ti mismo, sino también a tus compañeros, y sobre todo, disfruta.</string>
 </resources>
