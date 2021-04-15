@@ -106,6 +106,10 @@ class Zone(
         }
     }
 
+    override fun sort() {
+        innerChildren.sortBy { it.weight }
+    }
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(objectId)
         parcel.writeString(displayName)

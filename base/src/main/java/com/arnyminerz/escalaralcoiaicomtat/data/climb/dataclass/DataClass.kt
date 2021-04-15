@@ -140,7 +140,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         else
             for (a in innerChildren)
                 emit(a)
+        sort()
     }
+
+    /**
+     * Sorts the elements in the [DataClass].
+     * @author Arnau Mora
+     * @since 20210415
+     */
+    protected abstract fun sort()
 
     fun add(item: A) {
         innerChildren.add(item)

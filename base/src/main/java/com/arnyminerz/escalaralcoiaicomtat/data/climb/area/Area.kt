@@ -112,6 +112,10 @@ class Area(
         }
     }
 
+    override fun sort() {
+        innerChildren.sortBy { it.displayName }
+    }
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(objectId)
         parcel.writeString(displayName)

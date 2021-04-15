@@ -139,6 +139,10 @@ class Sector constructor(
         }
     }
 
+    override fun sort() {
+        innerChildren.sortBy { it.displayName }
+    }
+
     override fun describeContents(): Int = 0
 
     /**
