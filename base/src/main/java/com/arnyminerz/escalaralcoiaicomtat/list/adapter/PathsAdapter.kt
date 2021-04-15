@@ -29,8 +29,10 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesDa
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.ArtifoPathEndingDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DescriptionDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.PathEquipmentDialog
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.view.setTextColor
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -40,7 +42,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
-import java.util.concurrent.CompletableFuture.runAsync
 
 const val ROTATION_A = 0f
 const val ROTATION_B = 180f
@@ -136,7 +137,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
         val firestore = Firebase.firestore
 
         Timber.d("Loading path data")
-        runAsync {
+        doAsync {
             val toggled = this@PathsAdapter.toggled[position]
             val blockStatus = blockStatuses[position]
             val hasInfo = path.hasInfo()
@@ -177,7 +178,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                 path.requiredSafesData
             )
 
-            activity.runOnUiThread {
+            uiContext {
                 val cardView = holder.cardView
                 val titleTextView = holder.titleTextView
                 val difficultyTextView = holder.difficultyTextView
@@ -269,7 +270,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
             Timber.d("Path ${path.objectId} block status: $blocked")
             blockStatuses[position] = blocked
 
-            activity.runOnUiThread {
+            uiContext {
                 Timber.d("Binding ViewHolder for path $position: ${path.displayName}. Blocked: $blocked")
 
                 val anyBlocking = blocked != BlockingType.UNKNOWN
