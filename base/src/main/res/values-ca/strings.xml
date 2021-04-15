@@ -168,8 +168,6 @@
     <string name="intro_beta_title">Prova Beta</string>
     <string name="notification_channel_task_completed_name">Tasca completada</string>
     <string name="notification_channel_task_completed_desc">Et notificarem en el moment s\'haja completat una tasca en segon pla.</string>
-    <string name="intro_storage_title">Permís d\'Emmagatzematge</string>
-    <string name="intro_storage_message">Per a fer possibles les baixades necessitem accés al teu emmagatzematge</string>
     <string name="dialog_description_description_title">Descripció</string>
     <string name="dialog_description_builder_title">Equipada per</string>
     <string name="dialog_description_rebuilder_title">Reequipada per</string>
@@ -269,4 +267,6 @@
     <string name="notification_download_failed_message">No s\'ha pogut baixar %s.</string>
     <string name="notification_download_failed_message_long">Ha hagut un error al baixar %1$s. Codi d\'error: %2$s</string>
     <string name="downloads_no_download">No hi ha res baixat</string>
+    <string name="intro_warning_title">Atenció</string>
+    <string name="intro_warning_message">L\'escalada és un esport considerat de risc, tot el que el practique té que preocupar-se del seu coneixement i correcta execució. L\'informació d\'aquesta aplicació és purament informativa i pot ser errònia. Tingues cura, el material en bon estat, i vigila\'t no tant sols a tu mateix, sinó també als teus companys, i sobre tot, gaudeix.</string>
 </resources>
