@@ -12,6 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityIntroBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.BetaIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.MainIntroFragment
+import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.WarningIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_SHOWN_INTRO
 import timber.log.Timber
 
@@ -70,10 +71,12 @@ class IntroActivity : LanguageAppCompatActivity() {
         val fragments = arrayListOf<Fragment>()
 
         val mainIntroFragment = MainIntroFragment()
+        val warningIntroFragment = WarningIntroFragment()
         val betaIntroFragment = BetaIntroFragment()
 
         init {
             fragments.add(mainIntroFragment)
+            fragments.add(warningIntroFragment)
             if (BuildConfig.DEBUG)
                 fragments.add(betaIntroFragment)
         }
