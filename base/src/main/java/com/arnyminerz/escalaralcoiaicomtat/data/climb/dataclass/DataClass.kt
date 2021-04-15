@@ -54,10 +54,10 @@ import java.util.Date
 // A: List type
 // B: Parent Type
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
-    open val displayName: String,
-    open val timestamp: Date?,
-    open val imageUrl: String,
-    open val kmlAddress: String?,
+    val displayName: String,
+    val timestamp: Date?,
+    val imageUrl: String,
+    val kmlAddress: String?,
     val uiMetadata: UIMetadata,
     val metadata: DataClassMetadata
 ) : DataClassImpl(metadata.objectId, metadata.namespace), Iterable<A> {
@@ -140,20 +140,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         else
             for (a in innerChildren)
                 emit(a)
-    }
-
-    fun add(item: A) {
-        innerChildren.add(item)
-    }
-
-    fun addAll(vararg items: A) {
-        for (item in items)
-            innerChildren.add(item)
-    }
-
-    fun addAll(items: Iterable<A>) {
-        for (item in items)
-            innerChildren.add(item)
     }
 
     /**

@@ -12,6 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
@@ -25,8 +26,10 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_TRANSITION_NAME
+import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
@@ -37,6 +40,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
 
     private var justAttached = false
     private var loaded = false
+    private var dataClassInitialized = false
 
     private lateinit var areaId: String
     private lateinit var zoneId: String
@@ -62,15 +66,24 @@ class ZoneActivity : DataClassListActivity<Zone>() {
         }
         areaId = areaIdExtra
         zoneId = zoneIdExtra
-        dataClass = AREAS[areaId]!![zoneId]
+        doAsync {
+            val area = AREAS[areaId]!!
+            area.getChildren(firestore).collect()
+            dataClass = area[zoneId]
 
-        val transitionName = intent.getExtra(EXTRA_ZONE_TRANSITION_NAME)
-        position = intent.getExtra(EXTRA_POSITION, 0)
+            val transitionName = intent.getExtra(EXTRA_ZONE_TRANSITION_NAME)
+            position = intent.getExtra(EXTRA_POSITION, 0)
 
-        binding.titleTextView.text = dataClass.displayName
-        binding.titleTextView.transitionName = transitionName
+            uiContext {
+                binding.titleTextView.text = dataClass.displayName
+                binding.titleTextView.transitionName = transitionName
 
-        binding.backImageButton.setOnClickListener { onBackPressed() }
+                binding.backImageButton.setOnClickListener { onBackPressed() }
+
+                dataClassInitialized = true
+                onStateChangeAsync(appNetworkState)
+            }
+        }
     }
 
     override fun onResume() {
@@ -90,11 +103,10 @@ class ZoneActivity : DataClassListActivity<Zone>() {
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
         super.onStateChangeAsync(state)
 
-        if (!loaded)
+        if (!loaded && dataClassInitialized)
             try {
                 val sectors = arrayListOf<Sector>()
                 dataClass.getChildren(firestore).toCollection(sectors)
-                sectors.sortBy { it.displayName }
 
                 Timber.v("Got ${sectors.size} sectors.")
 

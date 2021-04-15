@@ -100,7 +100,6 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
                 Timber.v("Getting children zones...")
                 val zones = arrayListOf<Zone>()
                 dataClass.getChildren(firestore).toCollection(zones)
-                zones.sortBy { it.displayName }
                 Timber.v("Got zones.")
 
                 uiContext {
@@ -123,7 +122,7 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
                                             .putExtra(EXTRA_AREA, areaId)
                                             .putExtra(
                                                 EXTRA_ZONE,
-                                                dataClass[position].objectId
+                                                zones[position].objectId
                                             )
 
                                     val optionsBundle =

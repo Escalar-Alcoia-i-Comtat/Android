@@ -91,6 +91,7 @@ class Area(
         val ref = firestore
             .document(metadata.documentPath)
             .collection("Zones")
+            .orderBy("displayName")
         val childTask = ref.get()
         Timber.v("Awaiting results...")
         val snapshot = childTask.awaitTask()

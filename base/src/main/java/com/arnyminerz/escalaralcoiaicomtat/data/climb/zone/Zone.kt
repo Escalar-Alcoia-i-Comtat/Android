@@ -92,6 +92,7 @@ class Zone(
         val ref = firestore
             .document(metadata.documentPath)
             .collection("Sectors")
+            .orderBy("weight")
         val childTask = ref.get()
         val snapshot = childTask.awaitTask()
         val e = childTask.exception

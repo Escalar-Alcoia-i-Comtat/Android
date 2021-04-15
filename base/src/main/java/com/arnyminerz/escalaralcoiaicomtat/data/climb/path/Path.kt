@@ -6,18 +6,17 @@ import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Source
 import timber.log.Timber
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
 class Path(
-    override val objectId: String,
+    objectId: String,
     val timestamp: Date?,
     val sketchId: Long,
     val displayName: String,
@@ -154,23 +153,22 @@ class Path(
      * @return A matching BlockingType class
      */
     @WorkerThread
-    fun isBlocked(firestore: FirebaseFirestore): BlockingType {
+    suspend fun isBlocked(firestore: FirebaseFirestore): BlockingType {
         Timber.d("Fetching...")
         val ref = firestore.document(documentPath)
 
         Timber.v("Checking if \"$documentPath\" is blocked...")
-        val task = ref.get(Source.SERVER)
-        Tasks.await(task)
-        if (!task.isSuccessful) {
+        val task = ref.get()
+        val result = task.awaitTask()
+        return if (!task.isSuccessful) {
             val e = task.exception!!
             Timber.w(e, "Could not check if path is blocked")
-            throw e
+            BlockingType.UNKNOWN
         } else {
-            val result = task.result
-            val blocked = result.getString("blocked")
+            val blocked = result!!.getString("blocked")
             val blockingType = BlockingType.find(blocked)
             Timber.v("Blocking status for \"$displayName\": $blockingType")
-            return blockingType
+            blockingType
         }
     }
 

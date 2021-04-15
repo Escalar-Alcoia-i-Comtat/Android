@@ -44,6 +44,7 @@ class Sector constructor(
     val kidsApt: Boolean,
     val walkingTime: Long,
     val location: LatLng?,
+    val weight: String,
     imageUrl: String,
     documentPath: String,
 ) : DataClass<Path, Zone>(
@@ -76,6 +77,7 @@ class Sector constructor(
         data.getBoolean("kidsApt") ?: false,
         data.getLong("walkingTime")!!,
         data.getGeoPoint("location")?.toLatLng(),
+        data.getString("weight")!!,
         data.getString("image")!!.fixTildes(),
         documentPath = data.reference.path
     )
@@ -88,6 +90,7 @@ class Sector constructor(
         parcel.writeInt(if (kidsApt) 1 else 0)
         parcel.writeLong(walkingTime)
         parcel.writeParcelable(location, 0)
+        parcel.writeString(weight)
         parcel.writeString(imageUrl)
         parcel.writeString(metadata.documentPath)
         parcel.writeList(innerChildren)
@@ -101,6 +104,7 @@ class Sector constructor(
         parcel.readInt() == 1, // Kids Apt
         parcel.readLong(), // Walking Time
         parcel.readParcelable<LatLng?>(LatLng::class.java.classLoader),
+        parcel.readString()!!,
         parcel.readString()!!, // Image Url
         parcel.readString()!!, // Pointer
     ) {
@@ -120,6 +124,7 @@ class Sector constructor(
         val ref = firestore
             .document(metadata.documentPath)
             .collection("Paths")
+            .orderBy("sketchId")
         val childTask = ref.get()
         val snapshot = childTask.awaitTask()
         val e = childTask.exception
