@@ -44,7 +44,7 @@ class Sector constructor(
     val kidsApt: Boolean,
     val walkingTime: Long,
     val location: LatLng?,
-    private val weight: String,
+    val weight: String,
     imageUrl: String,
     documentPath: String,
 ) : DataClass<Path, Zone>(

@@ -148,7 +148,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
         }
         val sectors = arrayListOf<Sector>()
         AREAS[areaId]!![zoneId].getChildren(sectorActivity.firestore).toCollection(sectors)
-        sectors.sortBy { it.displayName }
+        sectors.sortBy { it.weight }
         sector = sectors[sectorIndex]
 
         uiContext {

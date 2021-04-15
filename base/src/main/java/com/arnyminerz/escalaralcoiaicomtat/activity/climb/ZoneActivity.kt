@@ -94,7 +94,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
             try {
                 val sectors = arrayListOf<Sector>()
                 dataClass.getChildren(firestore).toCollection(sectors)
-                sectors.sortBy { it.displayName }
+                sectors.sortBy { it.weight }
 
                 Timber.v("Got ${sectors.size} sectors.")
 
