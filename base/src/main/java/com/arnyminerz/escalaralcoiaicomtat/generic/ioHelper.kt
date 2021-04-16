@@ -8,9 +8,8 @@ import android.webkit.MimeTypeMap
 import java.io.File
 import java.text.CharacterIterator
 import java.text.StringCharacterIterator
-import java.util.*
+import java.util.Locale
 import kotlin.math.abs
-
 
 fun deleteDir(dir: File?): Boolean {
     if (dir == null || !dir.exists())
@@ -39,13 +38,32 @@ fun File.deleteIfExists(): Boolean {
     else true
 }
 
+/**
+ * Creates the directory named by this abstract pathname, including any necessary but nonexistent
+ * parent directories. Note that if this operation fails it may have succeeded in creating some of
+ * the necessary parent directories.
+ * @author Arnau Mora
+ * @since 20210416
+ * @param shouldDeleteIfNotDir If the target [File] already exists, but it's not a directory, and
+ * [shouldDeleteIfNotDir] is true, the already existing path will be deleted and recreated.
+ */
+fun File.mkdirsIfNotExists(shouldDeleteIfNotDir: Boolean = true): Boolean {
+    return if (exists())
+        when {
+            isDirectory -> true
+            shouldDeleteIfNotDir -> delete() && mkdirs()
+            else -> false
+        }
+    else mkdirs()
+}
+
 fun dirSize(file: File): Long {
     if (file.exists()) {
         var result: Long = 0
         val fileList: Array<File>? = file.listFiles()
         if (fileList != null)
             for (i in fileList.indices)
-                // Recursive call if it's a directory
+            // Recursive call if it's a directory
                 result += if (fileList[i].isDirectory)
                     dirSize(fileList[i])
                 else
