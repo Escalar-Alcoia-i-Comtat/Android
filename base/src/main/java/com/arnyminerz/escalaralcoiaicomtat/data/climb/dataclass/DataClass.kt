@@ -167,6 +167,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
+     * Gets the KMZ file path.
+     * @author Arnau Mora
+     * @since 20210416
+     * @param context The context to run from.
+     */
+    private fun getKmzFile(context: Context): File = File(context.cacheDir, pin)
+
+    /**
      * Gets the KMZ file of the [Area] and stores it into [targetFile].
      * @author Arnau Mora
      * @since 20210416
