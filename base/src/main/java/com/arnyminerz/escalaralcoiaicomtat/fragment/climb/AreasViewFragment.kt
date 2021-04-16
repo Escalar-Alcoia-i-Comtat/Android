@@ -15,7 +15,6 @@ import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.NearbyZonesError
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.getZones
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
@@ -168,7 +167,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
             doAsync {
                 val zones = arrayListOf<Zone>()
-                AREAS.getZones((requireActivity() as ZoneActivity).firestore).toCollection(zones)
+                AREAS.getZones((requireActivity() as MainActivity).firestore).toCollection(zones)
                 Timber.v("Iterating through ${zones.size} zones.")
                 Timber.v("Current Location: [${location.latitude},${location.longitude}]")
                 for (zone in zones) {
