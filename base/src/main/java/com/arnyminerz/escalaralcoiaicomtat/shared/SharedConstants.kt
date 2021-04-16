@@ -46,7 +46,6 @@ val UPDATE_IMAGES = IntentExtra<Boolean>("update_images")
 
 val QUIET_UPDATE = IntentExtra<Boolean>("quiet_update")
 
-val EXTRA_KML_ADDRESS = IntentExtra<String>("KMLAddr")
 val EXTRA_KMZ_FILE = IntentExtra<String>("KMZFle")
 val EXTRA_ICON_SIZE_MULTIPLIER = IntentExtra<Float>("IconSize")
 val EXTRA_ZONE_NAME = IntentExtra<String>("ZneNm")
