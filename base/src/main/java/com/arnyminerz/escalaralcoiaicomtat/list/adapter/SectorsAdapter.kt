@@ -136,7 +136,9 @@ class SectorsAdapter(
                             DownloadStatus.DOWNLOADED -> DownloadDialog(
                                 dataClassListActivity,
                                 sector,
-                                dataClassListActivity.firestore
+                                dataClassListActivity.firestore,
+                                status == DownloadStatus.PARTIALLY,
+                                { }
                             ).show {
                                 refreshDownloadImage(
                                     sector,
