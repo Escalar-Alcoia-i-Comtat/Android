@@ -36,7 +36,7 @@ import javax.xml.parsers.DocumentBuilderFactory
     NoInternetAccessException::class
 )
 @WorkerThread
-fun loadKML(
+fun loadKMZ(
     context: Context,
     kmzFile: File
 ): MapFeatures {
