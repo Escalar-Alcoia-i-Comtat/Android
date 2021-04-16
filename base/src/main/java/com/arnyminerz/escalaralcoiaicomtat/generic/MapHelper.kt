@@ -1122,11 +1122,12 @@ class MapHelper(private val mapView: MapView) {
     inner class MarkerWindow
     @UiThread constructor(
         private val activity: Activity,
-        marker: Symbol,
-        rootView: ViewGroup,
-        firestore: FirebaseFirestore
+        private val marker: Symbol,
+        private val rootView: ViewGroup,
+        private val firestore: FirebaseFirestore
     ) {
         private var destroyed = false
+        private var shown = false
 
         private var view: View =
             activity.layoutInflater.inflate(R.layout.dialog_map_marker, rootView, false)
@@ -1138,7 +1139,14 @@ class MapHelper(private val mapView: MapView) {
         private var mapButton: FloatingActionButton = view.findViewById(R.id.fab_maps)
         private var buttonsLayout: LinearLayout = view.findViewById(R.id.actions_layout)
 
-        init {
+        private val hideListeners = arrayListOf<() -> Unit>()
+
+        /**
+         * Shows the [MarkerWindow].
+         * @author Arnau Mora
+         * @since 20210416
+         */
+        fun show() = also {
             val anim = AnimationUtils.loadAnimation(activity, R.anim.enter_bottom)
             anim.duration = MARKER_WINDOW_SHOW_DURATION
             cardView.show()
@@ -1186,6 +1194,8 @@ class MapHelper(private val mapView: MapView) {
                 else LinearLayout.HORIZONTAL
 
             rootView.addView(cardView, view.layoutParams)
+            shown = true
+            destroyed = false
         }
 
         /**
