@@ -246,7 +246,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
         Timber.d("Preparing map region download...")
         val position = zone.position
-        if (styleUrl != null && position != null)
+        if (styleUrl != null)
             downloadMapRegion(position)
         else
             Timber.d("Won't download map. Style url ($styleUrl) or location ($position) is null.")
