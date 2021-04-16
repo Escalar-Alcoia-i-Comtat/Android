@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.view
 
-import android.app.Activity
 import android.content.Context
 import android.util.TypedValue
 import android.view.MenuItem
@@ -10,9 +9,7 @@ import androidx.annotation.AttrRes
 import androidx.annotation.ColorRes
 import androidx.annotation.UiThread
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.preference.Preference
-import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.ViewList
 import timber.log.Timber
 
@@ -58,50 +55,6 @@ fun visibility(view: Preference?, visible: Boolean, debug: Boolean = false) {
     view?.isVisible = visible
 }
 
-@UiThread
-fun Context?.visibility(
-    view: View?,
-    visible: Boolean,
-    setGone: Boolean = true,
-    debug: Boolean = false,
-    clearAnimation: Boolean = true
-) {
-    if (this != null)
-        this.onUiThread {
-            com.arnyminerz.escalaralcoiaicomtat.view.visibility(
-                view,
-                visible,
-                setGone,
-                debug,
-                clearAnimation
-            )
-        }
-    else com.arnyminerz.escalaralcoiaicomtat.view.visibility(
-        view,
-        visible,
-        setGone,
-        debug,
-        clearAnimation
-    )
-}
-
-fun Activity?.visibility(
-    view: View?,
-    visible: Boolean,
-    setGone: Boolean = true,
-    debug: Boolean = false,
-    clearAnimation: Boolean = true
-) =
-    (this as? Context?).visibility(view, visible, setGone, debug, clearAnimation)
-
-fun Fragment.visibility(
-    view: View?,
-    visible: Boolean,
-    setGone: Boolean = true,
-    debug: Boolean = false,
-    clearAnimation: Boolean = true
-) = context.visibility(view, visible, setGone, debug, clearAnimation)
-
 /**
  * Checks if a view is visible
  * @author ArnyminerZ
@@ -123,25 +76,21 @@ fun View.visibility(
     visible: Boolean,
     setGone: Boolean = true,
     debug: Boolean = false,
-    clearAnimation: Boolean = true,
-    useContext: Boolean = true
+    clearAnimation: Boolean = true
 ) =
-    if (useContext)
-        context.visibility(this, visible, setGone, debug, clearAnimation)
-    else
-        visibility(this, visible, setGone, debug, clearAnimation)
+    visibility(this, visible, setGone, debug, clearAnimation)
 
 /**
  * Sets the visibility of a view to gone
  */
 @UiThread
-fun View.hide(setGone: Boolean = true) = context.visibility(this, false, setGone = setGone)
+fun View.hide(setGone: Boolean = true) = visibility(this, false, setGone = setGone)
 
 /**
  * Sets the visibility of a view to visible
  */
 @UiThread
-fun View.show() = context.visibility(this, true)
+fun View.show() = visibility(this, true)
 
 @UiThread
 @Suppress("DEPRECATION")
