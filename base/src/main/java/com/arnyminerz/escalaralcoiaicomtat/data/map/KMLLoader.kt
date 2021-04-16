@@ -31,8 +31,6 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * Loads the KML address or KMZ file. Should be called asyncronously.
@@ -46,12 +44,12 @@ import kotlin.coroutines.suspendCoroutine
     NoInternetAccessException::class
 )
 @WorkerThread
-suspend fun loadKML(
+fun loadKML(
     context: Context,
     map: MapboxMap,
     kmlAddress: String? = null,
     kmzFile: File? = null
-): MapFeatures = suspendCoroutine { continuation ->
+): MapFeatures {
     if (kmlAddress == null && kmzFile == null)
         throw IllegalStateException("Both kmlAddress and kmzFile are null")
 
@@ -302,7 +300,7 @@ suspend fun loadKML(
                     if (coordItems != null) {
                         for (coordinate in coordItems) {
                             val latLngD = coordinate.split(",")
-                            if (latLngD.size != 3) continue
+                            if (latLngD.size != MAP_LOADER_LATLNG_SIZE) continue
                             val latLng =
                                 LatLng(latLngD[1].toDouble(), latLngD[0].toDouble())
                             polygonPoints.add(latLng)
@@ -346,7 +344,7 @@ suspend fun loadKML(
 
                     for (coordinate in coordItems) {
                         val latLngD = coordinate.split(",")
-                        if (latLngD.size != 3) continue
+                        if (latLngD.size != MAP_LOADER_LATLNG_SIZE) continue
                         val latLng =
                             LatLng(latLngD[1].toDouble(), latLngD[0].toDouble())
                         polygonPoints.add(latLng)
@@ -380,16 +378,12 @@ suspend fun loadKML(
     Timber.v("Centering map...")
     context.onUiThread {
         if (addedPoints.size > 1)
-            try {
-                newLatLngBounds(
-                    addedPoints,
-                    context.resources.getInteger(R.integer.marker_padding)
-                )?.let { bounds ->
-                    map.moveCamera(bounds)
-                }
-            } catch (ex: NullPointerException) { // This sometimes throw when trying to get bounds
-                Timber.e(ex, "Could not find bounds:")
-            }
+            newLatLngBounds(
+                addedPoints,
+                context.resources.getInteger(R.integer.marker_padding)
+            )?.let { bounds ->
+                map.moveCamera(bounds)
+            } ?: Timber.e("Could not find bounds:")
         else if (addedPoints.size > 0)
             map.moveCamera(
                 CameraUpdateFactory.newCameraPosition(
@@ -404,5 +398,5 @@ suspend fun loadKML(
     tempDir?.deleteRecursively()
     stream?.close()
 
-    continuation.resume(result)
+    return result
 }
