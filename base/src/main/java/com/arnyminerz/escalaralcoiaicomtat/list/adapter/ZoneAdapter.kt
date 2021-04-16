@@ -19,7 +19,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.ZonesViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KML_ADDRESS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
@@ -73,7 +72,7 @@ class ZoneAdapter(
                 dataClassListActivity.firestore
             )
             uiContext {
-                if (downloadStatus.isDownloaded() || zone.kmlAddress != null)
+                if (downloadStatus.isDownloaded())
                     holder.mapImageButton.setOnClickListener {
                         showMap(zone)
                     }
@@ -175,12 +174,12 @@ class ZoneAdapter(
                             )
                             .putExtra(EXTRA_ZONE_NAME, zone.displayName)
                     )
-                zone.kmlAddress != null ->
+                zone.kmzReferenceUrl != null ->
                     dataClassListActivity.startActivity(
                         Intent(dataClassListActivity, MapsActivity::class.java)
                             .putExtra(
-                                EXTRA_KML_ADDRESS,
-                                zone.kmlAddress
+                                EXTRA_KMZ_FILE,
+                                zone.kmzReferenceUrl
                             )
                     )
             }

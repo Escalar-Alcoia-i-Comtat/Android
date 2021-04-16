@@ -10,8 +10,8 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
+import com.arnyminerz.escalaralcoiaicomtat.data.map.loadKMZ
 import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
-import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
@@ -24,6 +24,8 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.Style
@@ -37,7 +39,9 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
     protected lateinit var binding: LayoutListBinding
     protected lateinit var dataClass: T
     private lateinit var mapHelper: MapHelper
+
     lateinit var firestore: FirebaseFirestore
+    lateinit var storage: FirebaseStorage
 
     val mapStyle: Style?
         get() = if (this::mapHelper.isInitialized)
@@ -49,6 +53,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
 
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
         firestore = Firebase.firestore
+        storage = Firebase.storage
 
         binding = LayoutListBinding.inflate(layoutInflater)
         val view = binding.root
@@ -112,46 +117,38 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                 .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
                 .withControllable(false)
                 .loadMap(this) { _, map, _ ->
-                    val kmlAddress = dataClass.kmlAddress
+                    try {
+                        doAsync {
+                            Timber.v("Getting KMZ file...")
+                            val kmzFile = dataClass.getKmzFile(this@DataClassListActivity, storage)
+                            Timber.v("Getting map features...")
+                            val features = loadKMZ(this@DataClassListActivity, kmzFile)
+                            Timber.v("Adding features to the map...")
+                            mapHelper.add(features)
+                            uiContext {
+                                binding.map.show()
 
-                    if (kmlAddress != null)
-                        try {
-                            doAsync {
-                                val features =
-                                    mapHelper.loadKML(this@DataClassListActivity, kmlAddress)
-                                uiContext {
-                                    mapHelper.add(features)
-                                    binding.map.show()
-
-                                    map.addOnMapClickListener {
-                                        try {
-                                            val intent = mapHelper.mapsActivityIntent(
-                                                this@DataClassListActivity,
-                                                overrideLoadedMapData
-                                            )
-                                            Timber.v("Starting MapsActivity...")
-                                            startActivity(intent)
-                                            true
-                                        } catch (_: MapAnyDataToLoadException) {
-                                            Timber.w("Clicked on map and any data has been loaded")
-                                            false
-                                        }
+                                map.addOnMapClickListener {
+                                    try {
+                                        val intent = mapHelper.mapsActivityIntent(
+                                            this@DataClassListActivity,
+                                            overrideLoadedMapData
+                                        )
+                                        Timber.v("Starting MapsActivity...")
+                                        startActivity(intent)
+                                        true
+                                    } catch (_: MapAnyDataToLoadException) {
+                                        Timber.w("Clicked on map and any data has been loaded")
+                                        false
                                     }
                                 }
                             }
-                        } catch (_: NoInternetAccessException) {
-                            Timber.w("Could not load KML since internet connection is not available")
-                            binding.map.hide()
-                        } catch (_: FileNotFoundException) {
-                            Timber.w("KMZ file not found")
-                            binding.map.hide()
-                        } finally {
-                            binding.loadingLayout.hide()
                         }
-                    else {
-                        Timber.w("KML was not found")
-                        binding.loadingLayout.hide()
+                    } catch (_: FileNotFoundException) {
+                        Timber.w("KMZ file not found")
                         binding.map.hide()
+                    } finally {
+                        binding.loadingLayout.hide()
                     }
                 }
         } else if (!hasInternet) {
