@@ -15,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.DownloadedSection
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.allTrue
@@ -41,6 +42,8 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FileDownloadTask
+import com.google.firebase.storage.FirebaseStorage
 import com.mapbox.mapboxsdk.maps.Style
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -51,6 +54,9 @@ import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 import java.io.File
 import java.util.Date
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 // A: List type
 // B: Parent Type
@@ -58,10 +64,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     val displayName: String,
     timestamp: Date,
     val imageUrl: String,
-    val kmlAddress: String?,
+    val kmzReferenceUrl: String?,
     val uiMetadata: UIMetadata,
     val metadata: DataClassMetadata
-) : DataClassImpl(metadata.objectId, metadata.namespace), Iterable<A> {
+) : DataClassImpl(metadata.objectId, metadata.namespace, timestamp), Iterable<A> {
     companion object {
         /**
          * Searches in [AREAS] and tries to get an intent from them.
@@ -159,6 +165,27 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             for (a in innerChildren)
                 emit(a)
     }
+
+    /**
+     * Gets the KMZ file of the [Area] and stores it into [targetFile].
+     * @author Arnau Mora
+     * @since 20210416
+     * @param storage The [FirebaseStorage] instance.
+     * @param targetFile The [File] to store the KMZ at.
+     * @see kmzReferenceUrl
+     */
+    suspend fun storeKmz(
+        storage: FirebaseStorage,
+        targetFile: File
+    ): FileDownloadTask.TaskSnapshot? =
+        if (kmzReferenceUrl != null)
+            suspendCoroutine { cont ->
+                storage.getReferenceFromUrl(kmzReferenceUrl)
+                    .getFile(targetFile)
+                    .addOnSuccessListener { cont.resume(it) }
+                    .addOnFailureListener { cont.resumeWithException(it) }
+            }
+        else null
 
     /**
      * Checks if the DataClass is being downloaded
@@ -573,7 +600,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     override fun hashCode(): Int {
         var result = objectId.hashCode()
         result = 31 * result + displayName.hashCode()
-        result = 31 * result + (timestamp?.hashCode() ?: 0)
+        result = 31 * result + timestamp.hashCode()
         result = 31 * result + imageUrl.hashCode()
         result = 31 * result + uiMetadata.placeholderDrawable
         result = 31 * result + uiMetadata.errorPlaceholderDrawable

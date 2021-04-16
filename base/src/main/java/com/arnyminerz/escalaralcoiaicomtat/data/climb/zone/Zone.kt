@@ -27,15 +27,14 @@ class Zone(
     displayName: String,
     timestamp: Date,
     val image: String,
-    kmlAddress: String?,
-    val position: LatLng?,
-    private val downloaded: Boolean = false,
+    kmzReferenceUrl: String,
+    val position: LatLng,
     documentPath: String
 ) : DataClass<Sector, Area>(
     displayName,
     timestamp,
     image,
-    kmlAddress,
+    kmzReferenceUrl,
     UIMetadata(
         R.drawable.ic_tall_placeholder,
         R.drawable.ic_tall_placeholder,
@@ -56,7 +55,6 @@ class Zone(
         parcel.readString()!!,
         parcel.readString()!!,
         LatLng(parcel.readDouble(), parcel.readDouble()),
-        parcel.readInt() == 1,
         parcel.readString()!!
     ) {
         parcel.readList(innerChildren, Sector::class.java.classLoader)
@@ -74,8 +72,8 @@ class Zone(
         data.getString("displayName")!!.fixTildes(),
         data.getDate("created")!!,
         data.getString("image")!!.fixTildes(),
-        data.getString("kmlAddress")?.fixTildes(),
-        data.getGeoPoint("location")?.toLatLng(),
+        data.getString("kmz")!!,
+        data.getGeoPoint("location")!!.toLatLng(),
         documentPath = data.reference.path
     )
 
@@ -112,10 +110,9 @@ class Zone(
         parcel.writeString(displayName)
         parcel.writeString(TIMESTAMP_FORMAT.format(timestamp))
         parcel.writeString(image)
-        parcel.writeString(kmlAddress)
-        parcel.writeDouble(position?.latitude ?: 0.0)
-        parcel.writeDouble(position?.longitude ?: 0.0)
-        parcel.writeInt(if (downloaded) 1 else 0)
+        parcel.writeString(kmzReferenceUrl)
+        parcel.writeDouble(position.latitude)
+        parcel.writeDouble(position.longitude)
         parcel.writeString(metadata.documentPath)
         parcel.writeList(innerChildren)
     }

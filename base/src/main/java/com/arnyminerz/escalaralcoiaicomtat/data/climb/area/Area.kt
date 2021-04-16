@@ -21,19 +21,28 @@ import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import java.util.Date
 
+/**
+ * Creates a new Area instance.
+ * @author Arnau Mora
+ * @since 20210416
+ * @param objectId The id of the object
+ * @param displayName The Area's display name
+ * @param timestamp The update date of the Area
+ * @param kmzReferenceUrl The reference url from Firebase Storage for the Area's KMZ file
+ * @param documentPath The path in Firebase Firestore of the Area
+ */
 class Area(
     objectId: String,
     displayName: String,
     timestamp: Date,
     image: String,
-    kmlAddress: String?,
-    private val downloaded: Boolean = false,
+    kmzReferenceUrl: String,
     documentPath: String,
 ) : DataClass<Zone, DataClassImpl>(
     displayName,
     timestamp,
     image,
-    kmlAddress,
+    kmzReferenceUrl,
     UIMetadata(
         R.drawable.ic_wide_placeholder,
         R.drawable.ic_wide_placeholder,
@@ -53,8 +62,7 @@ class Area(
         parcel.readString()!!,
         parcel.readString().toTimestamp()!!,
         parcel.readString()!!,
-        parcel.readString(),
-        parcel.readInt() == 1,
+        parcel.readString()!!,
         parcel.readString()!!
     ) {
         parcel.readList(innerChildren, Zone::class.java.classLoader)
@@ -72,7 +80,7 @@ class Area(
         data.getString("displayName")!!.fixTildes(),
         data.getDate("created")!!,
         data.getString("image")!!.fixTildes(),
-        data.getString("kmlAddress")!!.fixTildes(),
+        data.getString("kmz")!!,
         documentPath = data.reference.path
     )
 
@@ -118,8 +126,7 @@ class Area(
         parcel.writeString(displayName)
         parcel.writeString(TIMESTAMP_FORMAT.format(timestamp))
         parcel.writeString(imageUrl)
-        parcel.writeString(kmlAddress)
-        parcel.writeInt(if (downloaded) 1 else 0)
+        parcel.writeString(kmzReferenceUrl)
         parcel.writeString(metadata.documentPath)
         parcel.writeList(innerChildren)
     }
