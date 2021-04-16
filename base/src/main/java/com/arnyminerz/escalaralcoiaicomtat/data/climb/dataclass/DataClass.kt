@@ -63,53 +63,70 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 ) : DataClassImpl(metadata.objectId, metadata.namespace), Iterable<A> {
     companion object {
         /**
-         * Searches in AREAS and tries to get an intent from them
+         * Searches in [AREAS] and tries to get an intent from them.
+         * @author Arnau Mora
+         * @since 20210416
+         * @param context The context to initialize the [Intent]
+         * @param queryName What to search
+         * @param firestore The [FirebaseFirestore] instance.
+         * @return An [Intent] if the [DataClass] was found, or null.
          */
         suspend fun getIntent(
             context: Context,
             queryName: String,
             firestore: FirebaseFirestore
         ): Intent? {
+            var result: Intent? = null
             Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
             for (area in AREAS) {
                 Timber.d("  Finding in ${area.displayName}. It has ${area.count()} zones.")
                 when {
-                    area.displayName.equals(queryName, true) ->
-                        return Intent(context, AreaActivity::class.java).apply {
+                    area.displayName.equals(queryName, true) -> {
+                        result = Intent(context, AreaActivity::class.java).apply {
                             Timber.d("Found Area id ${area.objectId}!")
                             putExtra(EXTRA_AREA, area.objectId)
                         }
-                    area.isNotEmpty() ->
-                        for (zone in area) {
-                            Timber.d("    Finding in ${zone.displayName}.")
-                            if (zone.displayName.equals(queryName, true))
-                                return Intent(context, ZoneActivity::class.java).apply {
-                                    Timber.d("Found Zone id ${zone.objectId}!")
-                                    putExtra(EXTRA_AREA, area.objectId)
-                                    putExtra(EXTRA_ZONE, zone.objectId)
-                                    putExtra(EXTRA_SECTOR_COUNT, zone.count())
-                                }
-                            else {
-                                val children = arrayListOf<Sector>()
-                                zone.getChildren(firestore).toCollection(children)
-                                for ((s, sector) in children.withIndex()) {
-                                    Timber.d("      Finding in ${sector.displayName}.")
-                                    if (sector.displayName.equals(queryName, true))
-                                        return Intent(context, SectorActivity::class.java).apply {
-                                            Timber.d("Found Sector id ${sector.objectId} at $s!")
-                                            putExtra(EXTRA_AREA, area.objectId)
-                                            putExtra(EXTRA_ZONE, zone.objectId)
-                                            putExtra(EXTRA_SECTOR_COUNT, zone.count())
-                                            putExtra(EXTRA_SECTOR_INDEX, s)
+                    }
+                    else -> {
+                        area.getChildren(firestore)
+                            .takeWhile { result == null }
+                            .onEach { zone ->
+                                Timber.d("    Finding in ${zone.displayName}.")
+                                if (zone.displayName.equals(queryName, true))
+                                    result = Intent(context, ZoneActivity::class.java).apply {
+                                        Timber.d("Found Zone id ${zone.objectId}!")
+                                        putExtra(EXTRA_AREA, area.objectId)
+                                        putExtra(EXTRA_ZONE, zone.objectId)
+                                        putExtra(EXTRA_SECTOR_COUNT, zone.count())
+                                    }
+                                else {
+                                    var counter = 0
+                                    zone.getChildren(firestore)
+                                        .takeWhile { result == null }
+                                        .onEach { sector ->
+                                            Timber.d("      Finding in ${sector.displayName}.")
+                                            if (sector.displayName.equals(queryName, true))
+                                                result = Intent(
+                                                    context,
+                                                    SectorActivity::class.java
+                                                ).apply {
+                                                    Timber.d("Found Sector id ${sector.objectId} at $counter!")
+                                                    putExtra(EXTRA_AREA, area.objectId)
+                                                    putExtra(EXTRA_ZONE, zone.objectId)
+                                                    putExtra(EXTRA_SECTOR_COUNT, zone.count())
+                                                    putExtra(EXTRA_SECTOR_INDEX, counter)
+                                                }
+                                            counter++
                                         }
                                 }
                             }
-                        }
-                    else -> Timber.w("Area is empty.")
+                    }
                 }
+                if (result != null)
+                    break
             }
             Timber.w("Could not generate intent")
-            return null
+            return result
         }
     }
 
