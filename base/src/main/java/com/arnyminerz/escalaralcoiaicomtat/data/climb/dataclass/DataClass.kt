@@ -182,7 +182,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param targetFile The [File] to store the KMZ at.
      * @see kmzReferenceUrl
      */
-    suspend fun storeKmz(
+    private suspend fun storeKmz(
         storage: FirebaseStorage,
         targetFile: File
     ): FileDownloadTask.TaskSnapshot? =
@@ -194,6 +194,23 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     .addOnFailureListener { cont.resumeWithException(it) }
             }
         else null
+
+    /**
+     * Gets the KMZ file path.
+     * If it has never been loaded, it gets loaded from [storage]. Otherwise, it gets loaded from cache.
+     * @author Arnau Mora
+     * @since 20210416
+     * @param context The context to run from.
+     * @param storage The [FirebaseStorage] instance.
+     */
+    suspend fun getKmzFile(context: Context, storage: FirebaseStorage): File {
+        val kmzFile = getKmzFile(context)
+
+        if (!kmzFile.exists())
+            storeKmz(storage, kmzFile)
+
+        return kmzFile
+    }
 
     /**
      * Checks if the DataClass is being downloaded
