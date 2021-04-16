@@ -1202,9 +1202,12 @@ class MapHelper(private val mapView: MapView) {
          * Hides the window
          * @author Arnau Mora
          * @since 20210315
-         * @throws IllegalStateException If the method is called when the card has already been destroyed
+         * @throws IllegalStateException If the method is called when the card has already been
+         * destroyed, or has not been shown yet.
          */
-        fun hide() {
+        fun hide() = also {
+            if (!shown)
+                throw IllegalStateException("The card has already been destroyed")
             if (destroyed)
                 throw IllegalStateException("The card has already been destroyed")
 
@@ -1217,9 +1220,23 @@ class MapHelper(private val mapView: MapView) {
                 cardView.hide()
                 (cardView.parent as ViewManager).removeView(cardView)
                 destroyed = true
+                shown = false
             }, MARKER_WINDOW_HIDE_DURATION)
             cardView.startAnimation(anim)
+
+            for (list in hideListeners)
+                list()
         }
+
+        /**
+         * Listens for when the window is hidden by the user.
+         * @author Arnau Mora
+         * @since 20210416
+         */
+        fun listenHide(block: () -> Unit): MarkerWindow =
+            this.also {
+                hideListeners.add(block)
+            }
     }
 }
 
