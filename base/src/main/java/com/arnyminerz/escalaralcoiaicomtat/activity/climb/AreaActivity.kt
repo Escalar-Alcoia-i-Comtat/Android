@@ -24,7 +24,6 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_POSITION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_TRANSITION_NAME
-import com.arnyminerz.escalaralcoiaicomtat.view.show
 import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
@@ -114,34 +113,33 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
                                 )
                         adapter =
                             ZoneAdapter(zones, this@AreaActivity) { _, holder, position ->
-                                binding.loadingLayout.show()
-                                runOnUiThread {
-                                    Timber.v("Clicked item $position")
-                                    val intent =
-                                        Intent(this@AreaActivity, ZoneActivity()::class.java)
-                                            .putExtra(EXTRA_AREA, areaId)
-                                            .putExtra(
-                                                EXTRA_ZONE,
-                                                zones[position].objectId
+                                binding.loadingIndicator.show()
+
+                                Timber.v("Clicked item $position")
+                                val intent =
+                                    Intent(this@AreaActivity, ZoneActivity()::class.java)
+                                        .putExtra(EXTRA_AREA, areaId)
+                                        .putExtra(
+                                            EXTRA_ZONE,
+                                            zones[position].objectId
+                                        )
+
+                                val optionsBundle =
+                                    ViewCompat.getTransitionName(holder.titleTextView)
+                                        ?.let { transitionName ->
+                                            intent.putExtra(
+                                                EXTRA_ZONE_TRANSITION_NAME,
+                                                transitionName
                                             )
 
-                                    val optionsBundle =
-                                        ViewCompat.getTransitionName(holder.titleTextView)
-                                            ?.let { transitionName ->
-                                                intent.putExtra(
-                                                    EXTRA_ZONE_TRANSITION_NAME,
-                                                    transitionName
-                                                )
+                                            ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                                this@AreaActivity,
+                                                holder.titleTextView,
+                                                transitionName
+                                            ).toBundle()
+                                        } ?: Bundle.EMPTY
 
-                                                ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                                    this@AreaActivity,
-                                                    holder.titleTextView,
-                                                    transitionName
-                                                ).toBundle()
-                                            } ?: Bundle.EMPTY
-
-                                    startActivity(intent, optionsBundle)
-                                }
+                                startActivity(intent, optionsBundle)
                             }
                         scrollToPosition(position)
                     }

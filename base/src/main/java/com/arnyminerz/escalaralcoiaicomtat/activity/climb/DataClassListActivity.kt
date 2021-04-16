@@ -76,7 +76,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         super.onResume()
         mapHelper.onResume()
         if (this::mapHelper.isInitialized && mapHelper.isLoaded)
-            binding.loadingLayout.hide()
+            binding.loadingIndicator.hide()
     }
 
     override fun onPause() {
@@ -149,11 +149,11 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                         Timber.w("KMZ file not found")
                         binding.map.hide()
                     } finally {
-                        binding.loadingLayout.hide()
+                        binding.loadingIndicator.hide()
                     }
                 }
         } else if (!hasInternet) {
-            binding.loadingLayout.hide()
+            binding.loadingIndicator.hide()
             if (this::mapHelper.isInitialized)
                 mapHelper.hide()
         }

@@ -27,7 +27,6 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
-import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.toCollection
@@ -121,7 +120,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                                 )
                         r.adapter =
                             SectorsAdapter(this@ZoneActivity, sectors) { viewHolder, index ->
-                                binding.loadingLayout.show()
+                                binding.loadingIndicator.show()
 
                                 Timber.v("Clicked item $index")
                                 val trn =
