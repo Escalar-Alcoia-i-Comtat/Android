@@ -117,12 +117,17 @@ class MapFragment : NetworkChangeListenerFragment() {
 
                     markerWindow?.hide()
                     activity?.let {
+                        (activity as? MainActivity?)?.binding?.bottomAppBar?.performHide()
                         markerWindow = mapHelper.infoCard(
                             it,
                             (requireActivity() as MainActivity).firestore,
                             this,
                             binding.root
                         )
+                            .show()
+                            .listenHide {
+                                (activity as? MainActivity?)?.binding?.bottomAppBar?.performShow()
+                            }
                     }
 
                     true
