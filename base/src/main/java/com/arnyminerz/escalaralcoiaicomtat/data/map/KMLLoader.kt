@@ -49,12 +49,12 @@ fun loadKML(
     map: MapboxMap,
     kmlAddress: String? = null,
     kmzFile: File? = null
-): LoadResult {
+): MapFeatures {
     if (kmlAddress == null && kmzFile == null)
         throw IllegalStateException("Both kmlAddress and kmzFile are null")
 
     Timber.d("Instantiating LoadResult...")
-    val result = LoadResult()
+    val result = MapFeatures()
     Timber.v("Loading KML $kmlAddress...")
     val tempDir = kmlAddress?.let { addr -> File(context.cacheDir, addr.replace("/", "")) }
     val docKmlFile = File(tempDir, "doc.kml")
@@ -415,10 +415,4 @@ fun loadKML(
     stream?.close()
 
     return result
-}
-
-class LoadResult {
-    val markers: ArrayList<GeoMarker> = arrayListOf()
-    val polygons: ArrayList<GeoGeometry> = arrayListOf()
-    val polylines: ArrayList<GeoGeometry> = arrayListOf()
 }
