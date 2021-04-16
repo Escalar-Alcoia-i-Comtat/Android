@@ -66,18 +66,8 @@ class ZoneAdapter(
         }
         zone.asyncLoadImage(dataClassListActivity, holder.imageView)
 
-        doAsync {
-            val downloadStatus = zone.downloadStatus(
-                dataClassListActivity,
-                dataClassListActivity.firestore
-            )
-            uiContext {
-                if (downloadStatus.isDownloaded())
-                    holder.mapImageButton.setOnClickListener {
-                        showMap(zone)
-                    }
-                else visibility(holder.mapImageButton, false)
-            }
+        holder.mapImageButton.setOnClickListener {
+            showMap(zone)
         }
 
         holder.downloadImageButton.setOnClickListener {
