@@ -86,7 +86,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             var result: Intent? = null
             Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
             for (area in AREAS) {
-                Timber.d("  Finding in ${area.displayName}. It has ${area.count()} zones.")
+                Timber.d("  Finding in ${area.displayName}.")
                 when {
                     area.displayName.equals(queryName, true) -> {
                         result = Intent(context, AreaActivity::class.java).apply {
