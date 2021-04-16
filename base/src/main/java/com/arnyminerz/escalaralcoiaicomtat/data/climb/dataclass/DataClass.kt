@@ -16,6 +16,8 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.allTrue
@@ -48,8 +50,6 @@ import com.mapbox.mapboxsdk.maps.Style
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 import java.io.File
@@ -87,50 +87,53 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
             for (area in AREAS) {
                 Timber.d("  Finding in ${area.displayName}.")
-                when {
-                    area.displayName.equals(queryName, true) -> {
-                        result = Intent(context, AreaActivity::class.java).apply {
-                            Timber.d("Found Area id ${area.objectId}!")
-                            putExtra(EXTRA_AREA, area.objectId)
-                        }
+                if (area.displayName.equals(queryName, true))
+                    result = Intent(context, AreaActivity::class.java).apply {
+                        Timber.d("Found Area id ${area.objectId}!")
+                        putExtra(EXTRA_AREA, area.objectId)
                     }
-                    else -> {
-                        area.getChildren(firestore)
-                            .takeWhile { result == null }
-                            .onEach { zone ->
-                                Timber.d("    Finding in ${zone.displayName}.")
-                                if (zone.displayName.equals(queryName, true))
-                                    result = Intent(context, ZoneActivity::class.java).apply {
-                                        Timber.d("Found Zone id ${zone.objectId}!")
+                else {
+                    Timber.d("  Iterating area's children...")
+                    val zones = arrayListOf<Zone>()
+                    area.getChildren(firestore).toCollection(zones)
+                    for (zone in zones) {
+                        Timber.d("    Finding in ${zone.displayName}.")
+                        if (zone.displayName.equals(queryName, true))
+                            result = Intent(context, ZoneActivity::class.java).apply {
+                                Timber.d("Found Zone id ${zone.objectId}!")
+                                putExtra(EXTRA_AREA, area.objectId)
+                                putExtra(EXTRA_ZONE, zone.objectId)
+                                putExtra(EXTRA_SECTOR_COUNT, zone.count())
+                            }
+                        else {
+                            val sectors = arrayListOf<Sector>()
+                            zone.getChildren(firestore).toCollection(sectors)
+                            for ((counter, sector) in sectors.withIndex()) {
+                                Timber.d("      Finding in ${sector.displayName}.")
+                                if (sector.displayName.equals(queryName, true))
+                                    result = Intent(
+                                        context,
+                                        SectorActivity::class.java
+                                    ).apply {
+                                        Timber.d("Found Sector id ${sector.objectId} at $counter!")
                                         putExtra(EXTRA_AREA, area.objectId)
                                         putExtra(EXTRA_ZONE, zone.objectId)
-                                        putExtra(EXTRA_SECTOR_COUNT, zone.count())
+                                        putExtra(
+                                            EXTRA_SECTOR_COUNT,
+                                            zone.count()
+                                        )
+                                        putExtra(EXTRA_SECTOR_INDEX, counter)
                                     }
-                                else {
-                                    var counter = 0
-                                    zone.getChildren(firestore)
-                                        .takeWhile { result == null }
-                                        .onEach { sector ->
-                                            Timber.d("      Finding in ${sector.displayName}.")
-                                            if (sector.displayName.equals(queryName, true))
-                                                result = Intent(
-                                                    context,
-                                                    SectorActivity::class.java
-                                                ).apply {
-                                                    Timber.d("Found Sector id ${sector.objectId} at $counter!")
-                                                    putExtra(EXTRA_AREA, area.objectId)
-                                                    putExtra(EXTRA_ZONE, zone.objectId)
-                                                    putExtra(EXTRA_SECTOR_COUNT, zone.count())
-                                                    putExtra(EXTRA_SECTOR_INDEX, counter)
-                                                }
-                                            counter++
-                                        }
-                                }
+
+                                // If a result has been found, exit loop
+                                if (result != null) break
                             }
+                        }
+                        // If a result has been found, exit loop
+                        if (result != null) break
                     }
                 }
-                if (result != null)
-                    break
+                if (result != null) break
             }
             Timber.w("Could not generate intent")
             return result
