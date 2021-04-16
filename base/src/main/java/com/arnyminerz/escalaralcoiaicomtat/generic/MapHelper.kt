@@ -350,33 +350,15 @@ class MapHelper(private val mapView: MapView) {
     @WorkerThread
     fun loadKML(
         activity: FragmentActivity,
-        kmlAddress: String?,
-        addToMap: Boolean = true
+        kmlAddress: String?
     ): MapFeatures {
-        if (addToMap && !isLoaded)
-            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
         if (!appNetworkState.hasInternet)
             throw NoInternetAccessException()
 
         Timber.v("Loading KML $kmlAddress...")
         val result = loadKML(activity, map!!, kmlAddress = kmlAddress)
-        if (addToMap)
-            activity.runOnUiThread {
-                Timber.v("Loading features...")
-                with(result) {
-                    Timber.v("  Loading ${markers.size} markers...")
-                    addMarkers(markers)
-                    Timber.v("  Loading ${polygons.size} polygons...")
-                    addGeometries(polygons)
-                    Timber.v("  Loading ${polylines.size} polylines...")
-                    addGeometries(polylines)
-
-                    display()
-                    center()
-                }
-            }
         loadedKMLAddress = kmlAddress
-        return MapFeatures(result.markers, result.polylines, result.polygons)
+        return result
     }
 
     /**
