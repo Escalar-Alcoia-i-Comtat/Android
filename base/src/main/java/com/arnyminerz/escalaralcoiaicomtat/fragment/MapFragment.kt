@@ -19,8 +19,9 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerF
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapNotInitializedException
-import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
@@ -33,7 +34,6 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import timber.log.Timber
 import java.io.FileNotFoundException
-import java.util.concurrent.CompletableFuture.runAsync
 
 class MapFragment : NetworkChangeListenerFragment() {
     private lateinit var mapHelper: MapHelper
@@ -126,7 +126,9 @@ class MapFragment : NetworkChangeListenerFragment() {
                 }
 
                 Timber.v("Finished loading map. Calling loadMap...")
-                loadMap()
+                doAsync {
+                    loadMap()
+                }
             }
     }
 
@@ -177,11 +179,13 @@ class MapFragment : NetworkChangeListenerFragment() {
         if (isResumed) {
             visibility(binding.pageMapView, hasInternet)
             visibility(binding.mapsNoInternetCardView.noInternetCardView, !hasInternet)
-            loadMap()
+            doAsync {
+                loadMap()
+            }
         }
     }
 
-    private fun loadMap() {
+    private suspend fun loadMap() {
         if (mapLoaded || mapLoading || !mapHelper.isLoaded) {
             Timber.v("Skipping map load ($mapLoaded, $mapLoading, ${mapHelper.isLoaded}).")
             return
@@ -191,35 +195,32 @@ class MapFragment : NetworkChangeListenerFragment() {
             return
         }
         mapLoading = true
-        runAsync {
-            Timber.v("Loading map...")
-            for (area in AREAS)
-                try {
-                    val kml = area.kmlAddress
-                    Timber.v("Loading KML ($kml) for ${area.displayName}...")
-                    mapHelper.loadKML(requireActivity(), kml, false).apply {
-                        Timber.d("Adding features to map...")
-                        mapHelper.addMarkers(markers)
-                        mapHelper.addGeometries(polygons)
-                        mapHelper.addGeometries(polylines)
-                    }
-                } catch (e: FileNotFoundException) {
-                    Timber.e(e, "Could not load KML")
-                    runOnUiThread { toast(R.string.toast_error_internal) }
-                } catch (e: NoInternetAccessException) {
-                    Timber.e(e, "Could not load KML")
-                    runOnUiThread { toast(R.string.toast_error_internal) }
-                } catch (e: MapNotInitializedException) {
-                    Timber.e(e, "Could not load KML")
-                    runOnUiThread { toast(R.string.toast_error_internal) }
+
+        Timber.v("Loading map...")
+        for (area in AREAS)
+            try {
+                val kml = area.kmlAddress
+                Timber.v("Loading KML ($kml) for ${area.displayName}...")
+                val features = mapHelper.loadKML(requireActivity(), kml)
+                uiContext {
+                    mapHelper.add(features)
                 }
-            runOnUiThread {
-                Timber.d("Centering map...")
-                mapHelper.display()
-                mapHelper.center()
+            } catch (e: FileNotFoundException) {
+                Timber.e(e, "Could not load KML")
+                uiContext { toast(requireContext(), R.string.toast_error_internal) }
+            } catch (e: NoInternetAccessException) {
+                Timber.e(e, "Could not load KML")
+                uiContext { toast(requireContext(), R.string.toast_error_internal) }
+            } catch (e: MapNotInitializedException) {
+                Timber.e(e, "Could not load KML")
+                uiContext { toast(requireContext(), R.string.toast_error_internal) }
             }
-            mapLoading = false
-            mapLoaded = true
+        uiContext {
+            Timber.d("Centering map...")
+            mapHelper.display()
+            mapHelper.center()
         }
+        mapLoading = false
+        mapLoaded = true
     }
 }
