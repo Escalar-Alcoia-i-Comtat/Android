@@ -172,7 +172,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 Timber.v("Iterating through ${zones.size} zones.")
                 Timber.v("Current Location: [${location.latitude},${location.longitude}]")
                 for (zone in zones) {
-                    val zoneLocation = zone.position ?: continue
+                    val zoneLocation = zone.position
                     if (zoneLocation.distanceTo(position) <= requiredDistance) {
                         Timber.d("Adding zone #${zone.objectId}. Creating marker...")
                         val marker = GeoMarker(
