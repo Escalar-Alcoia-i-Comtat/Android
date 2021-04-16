@@ -236,9 +236,16 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val exception = task.exception
         if (exception != null)
             return failure(ERROR_DATA_FETCH)
+        Timber.v("Got Zone document!")
 
         val result = task.result!!
         val zone = Zone(result)
+
+        Timber.v("Updating notification...")
+        notification = notification
+            .edit()
+            .withTitle(R.string.notification_download_progress_title, zone.displayName)
+            .buildAndShow()
 
         val image = zone.imageUrl
         val imageFile = zone.imageFile(applicationContext)
@@ -287,14 +294,20 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             return failure(ERROR_DATA_FETCH)
 
         val result = task.result!!
-        val zone = Sector(result)
+        val sector = Sector(result)
 
-        val image = zone.imageUrl
-        val imageFile = zone.imageFile(applicationContext)
+        Timber.v("Updating notification...")
+        notification = notification
+            .edit()
+            .withTitle(R.string.notification_download_progress_title, sector.displayName)
+            .buildAndShow()
+
+        val image = sector.imageUrl
+        val imageFile = sector.imageFile(applicationContext)
         downloadImageFile(image, imageFile)
 
         Timber.d("Preparing map region download...")
-        val position = zone.location
+        val position = sector.location
         if (styleUrl != null && position != null)
             downloadMapRegion(position)
         else
@@ -328,6 +341,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 .withIcon(R.drawable.ic_notifications)
                 .withTitle(R.string.notification_download_progress_title)
                 .withText(R.string.notification_download_progress_message, displayName)
+                .withProgress(-1, 0)
                 .setPersistent(true)
             notification = notificationBuilder.buildAndShow()
 
