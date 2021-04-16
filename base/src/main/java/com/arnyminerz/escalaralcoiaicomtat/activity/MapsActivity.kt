@@ -354,7 +354,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                             firestore,
                             this,
                             binding.root
-                        )
+                        ).show()
 
                         true
                     } else
