@@ -188,7 +188,6 @@ class MainActivity : LanguageAppCompatActivity() {
         firestore = Firebase.firestore
 
         areasViewFragment.setItemClickListener { holder, position ->
-            visibility(binding.loadingLayout, true)
             Timber.v("Clicked item %s", position)
             val intent = Intent(this, AreaActivity()::class.java)
                 .putExtra(EXTRA_AREA, AREAS[position].objectId)
@@ -248,19 +247,5 @@ class MainActivity : LanguageAppCompatActivity() {
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        finishedLoading()
-    }
-
-    /**
-     * Informs the activity it has finished loading
-     * @author Arnau Mora
-     * @since 20210321
-     */
-    fun finishedLoading() {
-        visibility(binding.loadingLayout, false)
     }
 }
