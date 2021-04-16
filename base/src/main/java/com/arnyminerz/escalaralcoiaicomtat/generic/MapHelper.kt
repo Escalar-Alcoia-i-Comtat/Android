@@ -541,9 +541,7 @@ class MapHelper(private val mapView: MapView) {
      * Adds markers to the map
      * @param markers The markers to add
      * @see GeoMarker
-     * @throws MapNotInitializedException If the map has not been initialized
      */
-    @Throws(MapNotInitializedException::class)
     fun addMarkers(markers: Collection<GeoMarker>) {
         for (marker in markers)
             addMarker(marker)
@@ -553,9 +551,7 @@ class MapHelper(private val mapView: MapView) {
      * Adds a marker to the map
      * @param marker The marker to add
      * @see GeoMarker
-     * @throws MapNotInitializedException If the map has not been initialized
      */
-    @Throws(MapNotInitializedException::class)
     fun addMarker(marker: GeoMarker) {
         marker.iconSizeMultiplier = markerSizeMultiplier
         markers.add(marker)
@@ -565,9 +561,7 @@ class MapHelper(private val mapView: MapView) {
      * Adds geometries to the map
      * @param geometries The geometries to add
      * @see GeoGeometry
-     * @throws MapNotInitializedException If the map has not been initialized
      */
-    @Throws(MapNotInitializedException::class)
     fun addGeometries(geometries: Collection<GeoGeometry>) {
         for (geometry in geometries)
             addGeometry(geometry)
@@ -577,9 +571,7 @@ class MapHelper(private val mapView: MapView) {
      * Adds a geometry to the map
      * @param geometry The geometry to add
      * @see GeoGeometry
-     * @throws MapNotInitializedException If the map has not been initialized
      */
-    @Throws(MapNotInitializedException::class)
     fun addGeometry(geometry: GeoGeometry) {
         geometries.add(geometry)
     }
@@ -590,9 +582,7 @@ class MapHelper(private val mapView: MapView) {
      * @param element The element to add
      * @see GeoGeometry
      * @see GeoMarker
-     * @throws MapNotInitializedException If the map has not been initialized
      */
-    @Throws(MapNotInitializedException::class)
     fun add(element: Parcelable) {
         if (element is GeoMarker)
             addMarker(element)
