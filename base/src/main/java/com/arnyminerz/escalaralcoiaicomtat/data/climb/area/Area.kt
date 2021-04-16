@@ -24,7 +24,7 @@ import java.util.Date
 class Area(
     objectId: String,
     displayName: String,
-    timestamp: Date?,
+    timestamp: Date,
     image: String,
     kmlAddress: String?,
     private val downloaded: Boolean = false,
@@ -51,7 +51,7 @@ class Area(
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString()!!,
-        parcel.readString().toTimestamp(),
+        parcel.readString().toTimestamp()!!,
         parcel.readString()!!,
         parcel.readString(),
         parcel.readInt() == 1,
@@ -70,7 +70,7 @@ class Area(
     constructor(data: DocumentSnapshot) : this(
         data.id,
         data.getString("displayName")!!.fixTildes(),
-        data.getDate("created"),
+        data.getDate("created")!!,
         data.getString("image")!!.fixTildes(),
         data.getString("kmlAddress")!!.fixTildes(),
         documentPath = data.reference.path
@@ -116,7 +116,7 @@ class Area(
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(objectId)
         parcel.writeString(displayName)
-        parcel.writeString(timestamp?.let { TIMESTAMP_FORMAT.format(timestamp) })
+        parcel.writeString(TIMESTAMP_FORMAT.format(timestamp))
         parcel.writeString(imageUrl)
         parcel.writeString(kmlAddress)
         parcel.writeInt(if (downloaded) 1 else 0)

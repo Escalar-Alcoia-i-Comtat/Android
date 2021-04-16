@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
 
 class Path(
     objectId: String,
-    val timestamp: Date?,
+    timestamp: Date,
     val sketchId: Long,
     val displayName: String,
     val grades: Grade.GradesList,
@@ -31,13 +31,13 @@ class Path(
     rebuiltBy: String?,
     val downloaded: Boolean = false,
     val documentPath: String,
-) : DataClassImpl(objectId, NAMESPACE), Comparable<Path> {
+) : DataClassImpl(objectId, NAMESPACE, timestamp), Comparable<Path> {
     var rebuiltBy: String? = rebuiltBy
         private set
 
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
-        parcel.readString().toTimestamp(),
+        parcel.readString().toTimestamp()!!,
         parcel.readLong(),
         parcel.readString()!!,
         Grade.GradesList(),
@@ -61,7 +61,7 @@ class Path(
      */
     constructor(data: DocumentSnapshot) : this(
         data.id,
-        data.getDate("created"),
+        data.getDate("created")!!,
         data.getString("sketchId")?.toLongOrNull() ?: 0L,
         data.getString("displayName")?.fixTildes() ?: "",
         Grade.GradesList(),

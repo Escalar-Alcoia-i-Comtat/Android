@@ -39,7 +39,7 @@ import java.util.Date
 class Sector constructor(
     objectId: String,
     displayName: String,
-    timestamp: Date?,
+    timestamp: Date,
     val sunTime: SunTime,
     val kidsApt: Boolean,
     val walkingTime: Long,
@@ -72,7 +72,7 @@ class Sector constructor(
     constructor(data: DocumentSnapshot) : this(
         data.id,
         data.getString("displayName")!!.fixTildes(),
-        data.getDate("timestamp"),
+        data.getDate("created")!!,
         SunTime.find(data.getLong("sunTime")!!.toInt()),
         data.getBoolean("kidsApt") ?: false,
         data.getLong("walkingTime")!!,
@@ -85,7 +85,7 @@ class Sector constructor(
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(objectId)
         parcel.writeString(displayName)
-        parcel.writeString(timestamp?.let { TIMESTAMP_FORMAT.format(timestamp) })
+        parcel.writeString(timestamp.let { TIMESTAMP_FORMAT.format(timestamp) })
         parcel.writeInt(sunTime.value)
         parcel.writeInt(if (kidsApt) 1 else 0)
         parcel.writeLong(walkingTime)
@@ -99,7 +99,7 @@ class Sector constructor(
     constructor(parcel: Parcel) : this(
         parcel.readString()!!, // objectId
         parcel.readString()!!, // Display Name
-        parcel.readString().toTimestamp(), // Timestamp
+        parcel.readString().toTimestamp()!!, // Timestamp
         SunTime.find(parcel.readInt()), // Sun Time
         parcel.readInt() == 1, // Kids Apt
         parcel.readLong(), // Walking Time

@@ -56,7 +56,7 @@ import java.util.Date
 // B: Parent Type
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     val displayName: String,
-    val timestamp: Date?,
+    timestamp: Date,
     val imageUrl: String,
     val kmlAddress: String?,
     val uiMetadata: UIMetadata,

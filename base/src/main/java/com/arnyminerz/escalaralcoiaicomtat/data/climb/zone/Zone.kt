@@ -25,7 +25,7 @@ import java.util.Date
 class Zone(
     objectId: String,
     displayName: String,
-    timestamp: Date?,
+    timestamp: Date,
     val image: String,
     kmlAddress: String?,
     val position: LatLng?,
@@ -52,7 +52,7 @@ class Zone(
     private constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString()!!,
-        parcel.readString().toTimestamp(),
+        parcel.readString().toTimestamp()!!,
         parcel.readString()!!,
         parcel.readString()!!,
         LatLng(parcel.readDouble(), parcel.readDouble()),
@@ -72,7 +72,7 @@ class Zone(
     constructor(data: DocumentSnapshot) : this(
         data.id,
         data.getString("displayName")!!.fixTildes(),
-        data.getDate("created"),
+        data.getDate("created")!!,
         data.getString("image")!!.fixTildes(),
         data.getString("kmlAddress")?.fixTildes(),
         data.getGeoPoint("location")?.toLatLng(),
@@ -110,7 +110,7 @@ class Zone(
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(objectId)
         parcel.writeString(displayName)
-        parcel.writeString(timestamp?.let { TIMESTAMP_FORMAT.format(timestamp) })
+        parcel.writeString(TIMESTAMP_FORMAT.format(timestamp))
         parcel.writeString(image)
         parcel.writeString(kmlAddress)
         parcel.writeDouble(position?.latitude ?: 0.0)
