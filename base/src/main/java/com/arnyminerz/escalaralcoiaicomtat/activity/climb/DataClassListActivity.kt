@@ -29,7 +29,6 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.Style
 import timber.log.Timber
 import java.io.FileNotFoundException
-import java.util.concurrent.CompletableFuture.runAsync
 
 abstract class DataClassListActivity<T : DataClass<*, *>>(
     private val iconSizeMultiplier: Float = ICON_SIZE_MULTIPLIER,
@@ -116,34 +115,38 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                     val kmlAddress = dataClass.kmlAddress
 
                     if (kmlAddress != null)
-                        runAsync {
-                            try {
-                                mapHelper.loadKML(this@DataClassListActivity, kmlAddress)
-                                binding.map.show()
+                        try {
+                            doAsync {
+                                val features =
+                                    mapHelper.loadKML(this@DataClassListActivity, kmlAddress)
+                                uiContext {
+                                    mapHelper.add(features)
+                                    binding.map.show()
 
-                                map.addOnMapClickListener {
-                                    try {
-                                        val intent = mapHelper.mapsActivityIntent(
-                                            this,
-                                            overrideLoadedMapData
-                                        )
-                                        Timber.v("Starting MapsActivity...")
-                                        startActivity(intent)
-                                        true
-                                    } catch (_: MapAnyDataToLoadException) {
-                                        Timber.w("Clicked on map and any data has been loaded")
-                                        false
+                                    map.addOnMapClickListener {
+                                        try {
+                                            val intent = mapHelper.mapsActivityIntent(
+                                                this@DataClassListActivity,
+                                                overrideLoadedMapData
+                                            )
+                                            Timber.v("Starting MapsActivity...")
+                                            startActivity(intent)
+                                            true
+                                        } catch (_: MapAnyDataToLoadException) {
+                                            Timber.w("Clicked on map and any data has been loaded")
+                                            false
+                                        }
                                     }
                                 }
-                            } catch (_: NoInternetAccessException) {
-                                Timber.w("Could not load KML since internet connection is not available")
-                                binding.map.hide()
-                            } catch (_: FileNotFoundException) {
-                                Timber.w("KMZ file not found")
-                                binding.map.hide()
-                            } finally {
-                                binding.loadingLayout.hide()
                             }
+                        } catch (_: NoInternetAccessException) {
+                            Timber.w("Could not load KML since internet connection is not available")
+                            binding.map.hide()
+                        } catch (_: FileNotFoundException) {
+                            Timber.w("KMZ file not found")
+                            binding.map.hide()
+                        } finally {
+                            binding.loadingLayout.hide()
                         }
                     else {
                         Timber.w("KML was not found")
