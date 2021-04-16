@@ -123,9 +123,10 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                             val kmzFile = dataClass.getKmzFile(this@DataClassListActivity, storage)
                             Timber.v("Getting map features...")
                             val features = loadKMZ(this@DataClassListActivity, kmzFile)
-                            Timber.v("Adding features to the map...")
-                            mapHelper.add(features)
                             uiContext {
+                                Timber.v("Adding features to the map...")
+                                mapHelper.add(features)
+
                                 binding.map.show()
 
                                 map.addOnMapClickListener {
