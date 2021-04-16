@@ -177,9 +177,6 @@ class MapHelper(private val mapView: MapView) {
         get() = symbolManager != null && fillManager != null && lineManager != null &&
                 map != null && style != null && style!!.isFullyLoaded && mapSetUp
 
-    val kmlAddress: String?
-        get() = loadedKMLAddress
-
     fun onCreate(savedInstanceState: Bundle?) = mapView.onCreate(savedInstanceState)
 
     fun onStart() {
