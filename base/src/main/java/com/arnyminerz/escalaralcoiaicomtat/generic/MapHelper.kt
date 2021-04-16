@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
+import android.os.TransactionTooLargeException
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewManager
@@ -24,11 +25,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
-import androidx.annotation.WorkerThread
 import androidx.cardview.widget.CardView
 import androidx.collection.arrayMapOf
 import androidx.core.content.res.ResourcesCompat
-import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass.Companion.getIntent
@@ -47,22 +46,18 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.MARKER_WINDOW_SHOW_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
 import com.arnyminerz.escalaralcoiaicomtat.data.map.addToMap
 import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
-import com.arnyminerz.escalaralcoiaicomtat.data.map.loadKML
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCompressImageException
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCreateDirException
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotOpenStreamException
 import com.arnyminerz.escalaralcoiaicomtat.exception.MissingPermissionException
-import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.includeAll
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KML_ADDRESS
 import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.storage.zipFile
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
@@ -133,8 +128,6 @@ class MapHelper(private val mapView: MapView) {
     private var symbolManager: SymbolManager? = null
     private var fillManager: FillManager? = null
     private var lineManager: LineManager? = null
-
-    private var loadedKMLAddress: String? = null
 
     private lateinit var locationManager: LocationManager
     var lastKnownLocation: LatLng? = null
@@ -333,49 +326,23 @@ class MapHelper(private val mapView: MapView) {
     }
 
     /**
-     * Loads the KML address. Should be called asyncronously.
-     * @throws FileNotFoundException When the KMZ file could not be found
-     * @throws NoInternetAccessException When no Internet access was detected
-     * @throws MapNotInitializedException If this function is called before loadMap
-     * @see loadMap
-     * @see MapFeatures
-     * @author Arnau Mora
-     * @return A MapFeatures object with all the loaded data
-     */
-    @Throws(
-        FileNotFoundException::class,
-        NoInternetAccessException::class,
-        MapNotInitializedException::class
-    )
-    @WorkerThread
-    fun loadKML(
-        activity: FragmentActivity,
-        kmlAddress: String?
-    ): MapFeatures {
-        if (!appNetworkState.hasInternet)
-            throw NoInternetAccessException()
-
-        Timber.v("Loading KML $kmlAddress...")
-        val result = loadKML(activity, map!!, kmlAddress = kmlAddress)
-        loadedKMLAddress = kmlAddress
-        return result
-    }
-
-    /**
      * Generates an intent for launching the MapsActivity
      * @author Arnau Mora
      * @param context The context to launch from
      * @param overrideLoadedValues If true, the loader markers and geometries will be ignored, and
      * the KML address will be passed to MapsActivity.
      * @throws MapAnyDataToLoadException When no data has been loaded
+     * @throws TransactionTooLargeException When there's too much data on the map to transfer
      * @see MapsActivity
      */
-    @Throws(MapAnyDataToLoadException::class)
+    @Throws(
+        MapAnyDataToLoadException::class,
+        TransactionTooLargeException::class
+    )
     fun mapsActivityIntent(context: Context, overrideLoadedValues: Boolean = false): Intent {
         val loadedElements = markers.isNotEmpty() || geometries.isNotEmpty()
-
-        if (loadedKMLAddress == null && !loadedElements)
-            throw MapAnyDataToLoadException("Map doesn't have any loaded data. You may run loadKML, for example.")
+        if (!loadedElements)
+            throw MapAnyDataToLoadException("Map doesn't have any loaded data.")
 
         Timber.d("Preparing MapsActivity intent...")
         val elementsIntent = Intent(context, MapsActivity::class.java).apply {
@@ -399,11 +366,7 @@ class MapHelper(private val mapView: MapView) {
         return if (loadedElements && !overrideLoadedValues && elementsIntentSize < MBYTE / 2)
             elementsIntent
         else
-            Intent(context, MapsActivity::class.java).apply {
-                Timber.d("Passing to MapsActivity with kml address ($loadedKMLAddress).")
-                putExtra(EXTRA_KML_ADDRESS, loadedKMLAddress!!)
-                putExtra(EXTRA_ICON_SIZE_MULTIPLIER, markerSizeMultiplier)
-            }
+            throw TransactionTooLargeException("There are too many items in the map. Size: $elementsIntentSize")
     }
 
     /**
