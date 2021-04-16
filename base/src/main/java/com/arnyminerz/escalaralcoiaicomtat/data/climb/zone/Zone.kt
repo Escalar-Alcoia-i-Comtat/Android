@@ -9,18 +9,21 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import com.mapbox.mapboxsdk.geometry.LatLng
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import java.util.Date
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 class Zone(
     objectId: String,
@@ -86,22 +89,34 @@ class Zone(
      */
     @WorkerThread
     override suspend fun loadChildren(firestore: FirebaseFirestore): Flow<Sector> = flow {
+        Timber.v("Loading Zone's children.")
+
         Timber.d("Fetching...")
         val ref = firestore
             .document(metadata.documentPath)
             .collection("Sectors")
             .orderBy("weight")
         val childTask = ref.get()
-        val snapshot = childTask.awaitTask()
-        val e = childTask.exception
-        if (!childTask.isSuccessful || snapshot == null) {
-            Timber.w(e, "Could not get.")
-            e?.let { throw it }
-        } else {
+        try {
+            Timber.v("Awaiting results...")
+            val snapshot = suspendCoroutine<QuerySnapshot> { cont ->
+                childTask
+                    .addOnSuccessListener { cont.resume(it) }
+                    .addOnFailureListener { cont.resumeWithException(it) }
+            }
+            Timber.v("Got children result")
             val sectors = snapshot.documents
-            Timber.d("Got ${sectors.size} elements.")
-            for (l in sectors.indices)
-                emit(Sector(sectors[l]))
+            Timber.d("Got ${sectors.size} elements. Processing result")
+            for (l in sectors.indices) {
+                val sectorData = sectors[l]
+                Timber.d("Processing sector #$l")
+                val sector = Sector(sectorData)
+                emit(sector)
+            }
+            Timber.d("Finished loading sectors")
+        } catch (e: Exception) {
+            Timber.w(e, "Could not get.")
+            e.let { throw it }
         }
     }
 
