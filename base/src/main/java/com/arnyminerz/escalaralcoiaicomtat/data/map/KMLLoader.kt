@@ -19,8 +19,8 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.style.layers.Property
-import org.w3c.dom.Document
 import org.w3c.dom.Element
+import org.xml.sax.InputSource
 import timber.log.Timber
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -31,6 +31,8 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Loads the KML address or KMZ file. Should be called asyncronously.
@@ -44,12 +46,12 @@ import javax.xml.parsers.DocumentBuilderFactory
     NoInternetAccessException::class
 )
 @WorkerThread
-fun loadKML(
+suspend fun loadKML(
     context: Context,
     map: MapboxMap,
     kmlAddress: String? = null,
     kmzFile: File? = null
-): MapFeatures {
+): MapFeatures = suspendCoroutine { continuation ->
     if (kmlAddress == null && kmzFile == null)
         throw IllegalStateException("Both kmlAddress and kmzFile are null")
 
@@ -58,12 +60,10 @@ fun loadKML(
     Timber.v("Loading KML $kmlAddress...")
     val tempDir = kmlAddress?.let { addr -> File(context.cacheDir, addr.replace("/", "")) }
     val docKmlFile = File(tempDir, "doc.kml")
-    var kmlDownloaded = false
     val stream =
         if (tempDir?.exists() == true && docKmlFile.exists()) {
             Timber.v("The kml for ($kmlAddress) is already downloaded in cache. Loading from there.")
-            kmlDownloaded = true
-            null
+            docKmlFile.inputStream()
         } else {
             val stream = if (kmlAddress != null)
                 if (kmlAddress.endsWith("kmz")) null
@@ -83,21 +83,11 @@ fun loadKML(
     val kmldbf: DocumentBuilderFactory =
         DocumentBuilderFactory.newInstance()
     val kmlDB: DocumentBuilder = kmldbf.newDocumentBuilder()
-    val kmlDoc: Document? = when {
-        stream != null -> {
-            Timber.d("Parsing stream...")
-            val doc = kmlDB.parse(stream)
-            Timber.d("Stream ready.")
-            doc
-        }
-        kmlDownloaded -> {
-            Timber.d("Parsing file contents ($docKmlFile)...")
-            val doc = kmlDB.parse(docKmlFile)
-            Timber.d("Contents loaded!")
-            doc
-        }
-        else -> null
-    }
+
+    Timber.d("Parsing stream...")
+    val inputSource = InputSource(stream)
+    val kmlDoc = kmlDB.parse(inputSource)
+    Timber.d("Stream ready.")
 
     if (kmzFile != null)
         Timber.v("Loading stored KML...")
@@ -414,5 +404,5 @@ fun loadKML(
     tempDir?.deleteRecursively()
     stream?.close()
 
-    return result
+    continuation.resume(result)
 }
