@@ -48,7 +48,6 @@ android {
             versionNameSuffix "-debug-build" + getDate()
             setProperty("archivesBaseName", "EscalarAlcoiaIComtat")
 
-            minifyEnabled true
             firebaseCrashlytics {
                 mappingFileUploadEnabled false
             }
