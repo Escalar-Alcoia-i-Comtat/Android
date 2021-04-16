@@ -23,10 +23,12 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAsker
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapNotInitializedException
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.fileName
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.mime
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_CENTER_CURRENT_LOCATION
@@ -52,7 +54,6 @@ import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import timber.log.Timber
 import java.io.File
-import java.util.concurrent.CompletableFuture.runAsync
 
 class MapsActivity : LanguageAppCompatActivity() {
 
@@ -155,13 +156,16 @@ class MapsActivity : LanguageAppCompatActivity() {
         mapHelper
             .withIconSizeMultiplier(iconSizeMultiplier)
             .loadMap(this) { _, map, _ ->
-                runAsync {
-                    if (kmlAddress != null) {
+                doAsync {
+                    val kmlResult = if (kmlAddress != null) {
                         Timber.v("Loading KML...")
-                        mapHelper.loadKML(this, kmlAddress)
-                    }
+                        mapHelper.loadKML(this@MapsActivity, kmlAddress)
+                    } else null
 
-                    runOnUiThread {
+                    uiContext {
+                        if (kmlResult != null)
+                            mapHelper.add(kmlResult)
+
                         Timber.v("Loading current location")
                         tryToShowCurrentLocation()
 
