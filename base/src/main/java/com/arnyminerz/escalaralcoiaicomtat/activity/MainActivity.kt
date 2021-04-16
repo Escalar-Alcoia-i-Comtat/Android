@@ -47,7 +47,7 @@ class MainActivity : LanguageAppCompatActivity() {
     private lateinit var settingsFragment: SettingsFragmentManager
 
     var adapter: MainPagerAdapter? = null
-    private lateinit var binding: ActivityMainBinding
+    lateinit var binding: ActivityMainBinding
 
     internal lateinit var firestore: FirebaseFirestore
 
