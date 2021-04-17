@@ -14,7 +14,7 @@ fun filesDir(context: Context): File = context.filesDir
 fun dataDir(context: Context): File = File(filesDir(context), "data")
 
 fun readBitmap(file: File): Bitmap =
-    BitmapFactory.decodeFile(file.path)
+    BitmapFactory.decodeStream(file.inputStream())
 
 fun storeFile(file: File, stream: InputStream) {
     file.parentFile?.mkdirs()
