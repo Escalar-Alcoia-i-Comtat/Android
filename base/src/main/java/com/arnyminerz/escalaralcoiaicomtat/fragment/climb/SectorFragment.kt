@@ -34,6 +34,9 @@ import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
@@ -50,6 +53,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
     private var _binding: FragmentSectorBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var storage: FirebaseStorage
 
     private val sectorActivity: SectorActivity
         get() = (requireActivity() as SectorActivity)
@@ -80,6 +85,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
     private fun loadImage() {
         sector.asyncLoadImage(
             requireContext(),
+            storage,
             binding.sectorImageView,
             binding.sectorProgressBar,
             ImageLoadParameters<Bitmap>().apply {
@@ -110,6 +116,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
         areaId = requireArguments().getString(ARGUMENT_AREA_ID)!!
         zoneId = requireArguments().getString(ARGUMENT_ZONE_ID)!!
         sectorIndex = requireArguments().getInt(ARGUMENT_SECTOR_INDEX, 0)
+
+        storage = Firebase.storage
     }
 
     override fun onDestroyView() {

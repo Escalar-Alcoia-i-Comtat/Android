@@ -262,7 +262,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     requireContext(),
                     R.anim.item_fall_animator
                 )
-        binding.areasRecyclerView.adapter = AreaAdapter(requireActivity(), areaClickListener)
+        binding.areasRecyclerView.adapter =
+            AreaAdapter(requireActivity() as MainActivity, areaClickListener)
     }
 
     private fun nearbyZonesClick(): Boolean =

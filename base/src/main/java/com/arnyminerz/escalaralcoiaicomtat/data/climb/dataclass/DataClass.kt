@@ -21,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.allTrue
+import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
@@ -51,6 +52,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toCollection
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 import java.io.File
 import java.util.Date
@@ -63,7 +65,7 @@ import kotlin.coroutines.suspendCoroutine
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     val displayName: String,
     timestamp: Date,
-    val imageUrl: String,
+    val imageReferenceUrl: String,
     val kmzReferenceUrl: String?,
     val uiMetadata: UIMetadata,
     val metadata: DataClassMetadata
@@ -574,6 +576,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     @UiThread
     fun asyncLoadImage(
         context: Context,
+        storage: FirebaseStorage,
         imageView: ImageView,
         progressBar: ProgressBar? = null,
         imageLoadParameters: ImageLoadParameters<Bitmap>? = null
@@ -589,13 +592,17 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             .asBitmap()
         val downloadedImageFile = imageFile(context)
         imageLoadRequest = if (downloadedImageFile.exists()) {
-            Timber.d("Loading area image from storage: ${downloadedImageFile.path}")
+            Timber.d("Loading image from storage: ${downloadedImageFile.path}")
             imageLoadRequest
                 .load(readBitmap(downloadedImageFile))
         } else {
-            Timber.d("Getting image from URL ($imageUrl)")
+            Timber.d("Getting image from Firebase: $imageReferenceUrl")
+            val ref = storage.getReferenceFromUrl(imageReferenceUrl)
+            val url = runBlocking {
+                ref.downloadUrl.awaitTask()
+            }
             imageLoadRequest
-                .load(imageUrl)
+                .load(url)
         }
         imageLoadRequest.placeholder(uiMetadata.placeholderDrawable)
             .error(uiMetadata.errorPlaceholderDrawable)
@@ -631,7 +638,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         var result = objectId.hashCode()
         result = 31 * result + displayName.hashCode()
         result = 31 * result + timestamp.hashCode()
-        result = 31 * result + imageUrl.hashCode()
+        result = 31 * result + imageReferenceUrl.hashCode()
         result = 31 * result + uiMetadata.placeholderDrawable
         result = 31 * result + uiMetadata.errorPlaceholderDrawable
         result = 31 * result + namespace.hashCode()

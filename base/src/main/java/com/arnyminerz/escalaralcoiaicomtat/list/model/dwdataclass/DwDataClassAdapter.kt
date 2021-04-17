@@ -80,7 +80,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
             }
         }
 
-        data.asyncLoadImage(activity, holder.imageView)
+        data.asyncLoadImage(activity, activity.storage, holder.imageView)
         updateUi(holder, data, true)
     }
 

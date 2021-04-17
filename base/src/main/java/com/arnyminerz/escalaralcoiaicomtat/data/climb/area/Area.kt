@@ -128,7 +128,7 @@ class Area(
         parcel.writeString(objectId)
         parcel.writeString(displayName)
         parcel.writeString(TIMESTAMP_FORMAT.format(timestamp))
-        parcel.writeString(imageUrl)
+        parcel.writeString(imageReferenceUrl)
         parcel.writeString(kmzReferenceUrl)
         parcel.writeString(metadata.documentPath)
         parcel.writeList(innerChildren)

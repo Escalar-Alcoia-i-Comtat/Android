@@ -94,7 +94,7 @@ class Sector constructor(
         parcel.writeLong(walkingTime)
         parcel.writeParcelable(location, 0)
         parcel.writeString(weight)
-        parcel.writeString(imageUrl)
+        parcel.writeString(imageReferenceUrl)
         parcel.writeString(metadata.documentPath)
         parcel.writeList(innerChildren)
     }

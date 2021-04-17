@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.worker
 
 import android.app.PendingIntent
 import android.content.Context
-import android.graphics.BitmapFactory
 import androidx.lifecycle.LiveData
 import androidx.work.Constraints
 import androidx.work.NetworkType
@@ -13,15 +12,13 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MOBILE_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ROAMING_DOWNLOAD_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSLESS_LEGACY
+import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
-import com.arnyminerz.escalaralcoiaicomtat.generic.storeToFile
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
@@ -35,6 +32,9 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageException
+import com.google.firebase.storage.ktx.storage
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition
@@ -134,6 +134,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
     private var quality: Int = -1
     private var styleUrl: String? = null
 
+    private lateinit var storage: FirebaseStorage
+
     private val objectId: String?
         get() = downloadPath?.split('/')?.last()
 
@@ -181,7 +183,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         )
     }
 
-    fun downloadImageFile(imageUrl: String, imageFile: File): Result {
+    fun downloadImageFile(imageReferenceUrl: String, imageFile: File): Result {
         val dataDir = imageFile.parentFile!!
 
         var error: Result? = null
@@ -194,19 +196,20 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         if (error != null)
             return error
 
-        Timber.d("Downloading image ($imageUrl)...")
+        Timber.d("Downloading image from Firebase Storage: $imageReferenceUrl...")
         notification
             .edit()
             .withInfoText(R.string.notification_download_progress_info_downloading_image)
             .buildAndShow()
-        val stream = download(imageUrl)
-        Timber.d("Storing image ($imageFile)...")
-        notification
-            .edit()
-            .withInfoText(R.string.notification_download_progress_info_decoding_image)
-            .buildAndShow()
-        val bitmap = BitmapFactory.decodeStream(stream)
-        bitmap.storeToFile(imageFile, format = WEBP_LOSSLESS_LEGACY, quality = quality)
+
+        try {
+            runBlocking {
+                storage.getReferenceFromUrl(imageReferenceUrl).getFile(imageFile).awaitTask()
+            }
+        } catch (e: StorageException) {
+            return failure(ERROR_STORE_IMAGE)
+        }
+
         if (!imageFile.exists())
             return failure(ERROR_STORE_IMAGE)
 
@@ -247,7 +250,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             .withTitle(R.string.notification_download_progress_title, zone.displayName)
             .buildAndShow()
 
-        val image = zone.imageUrl
+        val image = zone.imageReferenceUrl
         val imageFile = zone.imageFile(applicationContext)
         downloadImageFile(image, imageFile)
 
@@ -302,7 +305,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             .withTitle(R.string.notification_download_progress_title, sector.displayName)
             .buildAndShow()
 
-        val image = sector.imageUrl
+        val image = sector.imageReferenceUrl
         val imageFile = sector.imageFile(applicationContext)
         downloadImageFile(image, imageFile)
 
@@ -325,22 +328,30 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         quality = inputData.getInt(DOWNLOAD_OVERWRITE, DOWNLOAD_QUALITY_DEFAULT)
         styleUrl = inputData.getString(DOWNLOAD_STYLE_URL)
 
-        Timber.v("Starting download for $displayName")
+        Timber.v("Starting download for %s".format(displayName))
 
         // Check if any required data is missing
         return if (namespace == null || downloadPath == null || displayName == null)
             failure(ERROR_MISSING_DATA)
         else {
+            Timber.v("Initializing Firebase Storage instance...")
+            storage = Firebase.storage
+
             Timber.v("Downloading $namespace at $downloadPath...")
             this.namespace = namespace
             this.displayName = displayName
+
+            val message = applicationContext.getString(
+                R.string.notification_download_progress_message,
+                displayName
+            )
 
             // Build the notification
             val notificationBuilder = Notification.Builder(applicationContext)
                 .withChannelId(DOWNLOAD_PROGRESS_CHANNEL_ID)
                 .withIcon(R.drawable.ic_notifications)
                 .withTitle(R.string.notification_download_progress_title)
-                .withText(R.string.notification_download_progress_message, displayName)
+                .withText(message)
                 .withProgress(-1, 0)
                 .setPersistent(true)
             notification = notificationBuilder.buildAndShow()
@@ -381,7 +392,10 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                         .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
                         .withIcon(R.drawable.ic_notifications)
                         .withTitle(R.string.notification_download_complete_title)
-                        .withText(R.string.notification_download_complete_message, displayName)
+                        .withText(
+                            R.string.notification_download_complete_message,
+                            this@DownloadWorker.displayName
+                        )
                         .withIntent(intent)
                         .buildAndShow()
                 }
@@ -391,7 +405,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                     .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
                     .withIcon(R.drawable.ic_notifications)
                     .withTitle(R.string.notification_download_failed_title)
-                    .withText(R.string.notification_download_failed_message, displayName)
+                    .withText(R.string.notification_download_failed_message, this.displayName)
                     .withLongText(
                         R.string.notification_download_failed_message_long,
                         displayName,
