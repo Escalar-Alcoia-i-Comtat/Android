@@ -196,7 +196,6 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         if (error != null)
             return error
 
-        Timber.d("Downloading image from Firebase Storage: $imageReferenceUrl...")
         notification
             .edit()
             .withInfoText(R.string.notification_download_progress_info_downloading_image)
@@ -204,9 +203,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
         try {
             runBlocking {
+                Timber.d("Downloading image from Firebase Storage: $imageReferenceUrl...")
                 storage.getReferenceFromUrl(imageReferenceUrl).getFile(imageFile).awaitTask()
             }
         } catch (e: StorageException) {
+            Timber.w(e, "Could not get image")
             return failure(ERROR_STORE_IMAGE)
         }
 
@@ -405,30 +406,29 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             notification.destroy()
 
             if (downloadResult == Result.success()) {
-                runBlocking {
+                val intent = runBlocking {
                     Timber.v("Getting intent...")
-                    val intent =
-                        DataClass.getIntent(applicationContext, displayName, firestore)
-                            ?.let { intent ->
-                                PendingIntent.getActivity(
-                                    applicationContext,
-                                    0,
-                                    intent,
-                                    PendingIntent.FLAG_IMMUTABLE
-                                )
-                            }
-                    Timber.v("Showing download finished notification")
-                    Notification.Builder(applicationContext)
-                        .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
-                        .withIcon(R.drawable.ic_notifications)
-                        .withTitle(R.string.notification_download_complete_title)
-                        .withText(
-                            R.string.notification_download_complete_message,
-                            this@DownloadWorker.displayName
-                        )
-                        .withIntent(intent)
-                        .buildAndShow()
+                    DataClass.getIntent(applicationContext, displayName, firestore)
+                        ?.let { intent ->
+                            PendingIntent.getActivity(
+                                applicationContext,
+                                0,
+                                intent,
+                                PendingIntent.FLAG_IMMUTABLE
+                            )
+                        }
                 }
+                Timber.v("Showing download finished notification")
+                Notification.Builder(applicationContext)
+                    .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
+                    .withIcon(R.drawable.ic_notifications)
+                    .withTitle(R.string.notification_download_complete_title)
+                    .withText(
+                        R.string.notification_download_complete_message,
+                        this@DownloadWorker.displayName
+                    )
+                    .withIntent(intent)
+                    .buildAndShow()
             } else {
                 Timber.v("Download failed! Result: $downloadResult. Showing notification.")
                 Notification.Builder(applicationContext)
