@@ -239,8 +239,10 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         Timber.v("Awaiting document task...")
         Tasks.await(task)
         val exception = task.exception
-        if (exception != null)
+        if (exception != null) {
+            Timber.e(exception, "Could not get data")
             return failure(ERROR_DATA_FETCH)
+        }
         Timber.v("Got Zone document!")
 
         val result = task.result!!
@@ -255,6 +257,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             .edit()
             .withText(newText)
             .withInfoText(R.string.notification_download_progress_info_fetching)
+            .withProgress(ValueMax(0, -1))
             .buildAndShow()
 
         var image = zone.imageReferenceUrl
@@ -337,8 +340,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             .apply {
                 withText(newText)
                 withInfoText(R.string.notification_download_progress_info_fetching)
-                if (progress != null)
-                    withProgress(progress)
+                withProgress(progress ?: ValueMax(0, -1))
             }
             .buildAndShow()
 
