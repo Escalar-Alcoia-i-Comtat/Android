@@ -110,38 +110,37 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                 Timber.v("Got ${sectors.size} sectors.")
 
                 uiContext {
-                    binding.recyclerView.let { r ->
-                        r.layoutManager = LinearLayoutManager(this@ZoneActivity)
-                        if (justAttached)
-                            binding.recyclerView.layoutAnimation =
-                                AnimationUtils.loadLayoutAnimation(
-                                    this@ZoneActivity,
-                                    R.anim.item_enter_left_animator
+                    val r = binding.recyclerView
+                    r.layoutManager = LinearLayoutManager(this)
+                    if (justAttached)
+                        r.layoutAnimation =
+                            AnimationUtils.loadLayoutAnimation(
+                                this,
+                                R.anim.item_enter_left_animator
+                            )
+                    r.adapter =
+                        DwDataClassAdapter(this, sectors) { _, viewHolder, index ->
+                            binding.loadingIndicator.show()
+
+                            Timber.v("Clicked item $index")
+                            val trn =
+                                ViewCompat.getTransitionName(viewHolder.titleTextView)
+                                    .toString()
+                            Timber.v("Transition name: $trn")
+                            val intent =
+                                Intent(this, SectorActivity()::class.java)
+                                    .putExtra(EXTRA_AREA, areaId)
+                                    .putExtra(EXTRA_ZONE, zoneId)
+                                    .putExtra(EXTRA_SECTOR_COUNT, sectors.size)
+                                    .putExtra(EXTRA_SECTOR_INDEX, index)
+                                    .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
+                            val options =
+                                ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                    this, viewHolder.titleTextView, trn
                                 )
-                        r.adapter =
-                            DwDataClassAdapter(this@ZoneActivity, sectors) { _, viewHolder, index ->
-                                binding.loadingIndicator.show()
 
-                                Timber.v("Clicked item $index")
-                                val trn =
-                                    ViewCompat.getTransitionName(viewHolder.titleTextView)
-                                        .toString()
-                                Timber.v("Transition name: $trn")
-                                val intent =
-                                    Intent(this@ZoneActivity, SectorActivity()::class.java)
-                                        .putExtra(EXTRA_AREA, areaId)
-                                        .putExtra(EXTRA_ZONE, zoneId)
-                                        .putExtra(EXTRA_SECTOR_COUNT, sectors.size)
-                                        .putExtra(EXTRA_SECTOR_INDEX, index)
-                                        .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
-                                val options =
-                                    ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                        this@ZoneActivity, viewHolder.titleTextView, trn
-                                    )
-
-                                startActivity(intent, options.toBundle())
-                            }
-                    }
+                            startActivity(intent, options.toBundle())
+                        }
                 }
 
                 loaded = true
