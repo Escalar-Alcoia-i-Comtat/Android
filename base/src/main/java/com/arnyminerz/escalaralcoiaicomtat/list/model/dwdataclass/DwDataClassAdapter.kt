@@ -9,6 +9,7 @@ import androidx.collection.arrayMapOf
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
@@ -38,6 +39,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
     private val storage = Firebase.storage
 
     private val downloadStatuses = arrayMapOf<String, DownloadStatus>()
+    private val downloadObservers = arrayMapOf<String, () -> Unit>()
 
     override fun getItemCount(): Int = items.size
 
@@ -111,9 +113,41 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
         holder.progressIndicator.visibility(true)
         holder.downloadImageButton.visibility(false, setGone = false)
         doAsync {
-            if (!downloadStatuses.containsKey(data.objectId) || updateDownloadStatus)
-                downloadStatuses[data.objectId] = data.downloadStatus(activity, activity.firestore)
+            val lastDownloadStatus = downloadStatuses[data.objectId]
+            if (!downloadStatuses.containsKey(data.objectId) || updateDownloadStatus) {
+                val newStatus = data.downloadStatus(activity, activity.firestore)
+                downloadStatuses[data.objectId] = newStatus
+                Timber.v("$data download status: $newStatus")
+            }
             val status = downloadStatuses[data.objectId]!!
+            val shouldAddObserver =
+                lastDownloadStatus != status && status == DownloadStatus.DOWNLOADING
+
+            if (status == DownloadStatus.DOWNLOADING && shouldAddObserver)
+                uiContext {
+                    Timber.v("$data is being downloaded, observing...")
+                    val workInfo = data.downloadWorkInfo(activity)!!
+                    val workManager = WorkManager.getInstance(activity)
+
+                    val liveData = workManager.getWorkInfoByIdLiveData(workInfo.id)
+                    liveData.observe(activity) {
+                        val state = workInfo.state
+                        val outputData = workInfo.outputData
+                        when (state) {
+                            WorkInfo.State.FAILED -> {
+                                toast(activity, R.string.toast_error_internal)
+                                Timber.w("Download failed! Error: ${outputData.getString("error")}")
+                            }
+                            WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED ->
+                                Timber.v("Download running...")
+                            WorkInfo.State.SUCCEEDED ->
+                                Timber.v("Download complete!")
+                            else -> Timber.v("Current download status: ${workInfo.state}")
+                        }
+                        updateUi(holder, data, true)
+                    }
+                    Timber.v("Observing download progress for \"$data\"")
+                }
 
             uiContext {
                 holder.downloadImageButton.setImageResource(
@@ -163,6 +197,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
             activity,
             activity.mapStyle?.uri
         )
+        updateUi(holder, data, true)
         result.observe(activity) { workInfo ->
             val state = workInfo.state
             val outputData = workInfo.outputData
