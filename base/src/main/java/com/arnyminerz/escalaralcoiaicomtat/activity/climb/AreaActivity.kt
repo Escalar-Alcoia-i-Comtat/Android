@@ -16,7 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
-import com.arnyminerz.escalaralcoiaicomtat.list.adapter.ZoneAdapter
+import com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass.DwDataClassAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
@@ -112,7 +112,7 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
                                     R.anim.item_enter_left_animator
                                 )
                         adapter =
-                            ZoneAdapter(zones, this@AreaActivity) { _, holder, position ->
+                            DwDataClassAdapter(this@AreaActivity, zones) { _, holder, position ->
                                 binding.loadingIndicator.show()
 
                                 Timber.v("Clicked item $position")

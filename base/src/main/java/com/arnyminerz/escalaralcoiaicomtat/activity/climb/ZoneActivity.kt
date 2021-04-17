@@ -16,7 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
-import com.arnyminerz.escalaralcoiaicomtat.list.adapter.SectorsAdapter
+import com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass.DwDataClassAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
@@ -119,7 +119,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                                     R.anim.item_enter_left_animator
                                 )
                         r.adapter =
-                            SectorsAdapter(this@ZoneActivity, sectors) { viewHolder, index ->
+                            DwDataClassAdapter(this@ZoneActivity, sectors) { _, viewHolder, index ->
                                 binding.loadingIndicator.show()
 
                                 Timber.v("Clicked item $index")
