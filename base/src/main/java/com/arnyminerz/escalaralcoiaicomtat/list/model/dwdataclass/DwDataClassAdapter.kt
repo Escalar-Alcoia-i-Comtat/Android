@@ -91,7 +91,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
                 height = itemHeightDp
             }
         doAsync {
-            data.loadImage(activity, activity.storage, holder.imageView)
+            data.loadImage(activity, activity.storage, activity.firestore, holder.imageView)
         }
         updateUi(holder, data, true)
     }

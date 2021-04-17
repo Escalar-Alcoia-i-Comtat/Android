@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.widget.ImageView
-import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
@@ -590,25 +589,24 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @date 2020/09/11
      * @patch 2020/09/12 - Arnau Mora: Added function loadImage into this
      * @param context The context to run from
+     * @param firestore The [FirebaseFirestore] instance to update data in case there's something wrong.
      * @param imageView The Image View for loading the image into
-     * @param progressBar The loading progress bar
      * @param imageLoadParameters The parameters to use for loading the image
      */
     @UiThread
     suspend fun loadImage(
         context: Context,
         storage: FirebaseStorage,
+        firestore: FirebaseFirestore,
         imageView: ImageView,
-        progressBar: ProgressBar? = null,
         imageLoadParameters: ImageLoadParameters<Bitmap>? = null
     ) {
         if (context is Activity)
-            if (context.isDestroyed)
-                return Timber.e("The activity is destroyed, won't load image.")
+            if (context.isDestroyed) {
+                Timber.e("The activity is destroyed, won't load image.")
+                return
+            }
 
-        uiContext {
-            progressBar?.show()
-        }
         val scale = imageLoadParameters?.resultImageScale ?: 1f
 
         var imageLoadRequest = Glide.with(context)
@@ -620,10 +618,36 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 .load(readBitmap(downloadedImageFile))
         } else {
             Timber.d("Getting image from Firebase: $imageReferenceUrl")
-            val ref = storage.getReferenceFromUrl(imageReferenceUrl)
-            val url = ref.downloadUrl.awaitTask()
-            imageLoadRequest
-                .load(url)
+            var image = imageReferenceUrl
+            if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/")) {
+                Timber.w("Fixing zone image reference ($image)...")
+                val i = image.lastIndexOf('/') + 1
+                val newImage =
+                    "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
+                Timber.w("Changing image address to \"$newImage\"...")
+                firestore
+                    .document(metadata.documentPath)
+                    .update(mapOf("image" to newImage))
+                    .awaitTask()
+                Timber.w("Image address updated.")
+                image = newImage
+            }
+            try {
+                val ref = storage.getReferenceFromUrl(image)
+                val url = ref.downloadUrl.awaitTask()
+                imageLoadRequest
+                    .load(url)
+            } catch (e: IllegalArgumentException) {
+                Timber.e(
+                    e,
+                    "Image reference ($imageReferenceUrl) doesn't exist in Firebase Storage"
+                )
+                throw e
+            } catch (e: StorageException) {
+                Timber.e(e, "Could not load image from Firebase ($image)")
+                imageLoadRequest
+                    .load(uiMetadata.errorPlaceholderDrawable)
+            }
         }
         uiContext {
             imageLoadRequest.placeholder(uiMetadata.placeholderDrawable)
@@ -638,7 +662,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         target: Target<Bitmap>?,
                         isFirstResource: Boolean
                     ): Boolean {
-                        progressBar?.hide()
+                        Timber.e(e, "Finished loading bitmap with error!")
                         return false
                     }
 
@@ -649,7 +673,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         dataSource: DataSource?,
                         isFirstResource: Boolean
                     ): Boolean {
-                        progressBar?.hide()
+                        Timber.v("Finished loading bitmap!")
                         return false
                     }
                 })
