@@ -235,25 +235,23 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
-     * Checks if the DataClass is being downloaded
+     * Gets the [WorkInfo] if the DataClass is being downloaded, or null otherwise.
      * @author Arnau Mora
-     * @since 20210313
+     * @since 20210417
      * @param context The context to check from
-     * @return If the DataClass is being downloaded
      */
     @WorkerThread
-    fun isDownloading(context: Context): Boolean {
+    fun downloadWorkInfo(context: Context): WorkInfo? {
         val workManager = WorkManager.getInstance(context)
         val workInfos = workManager.getWorkInfosByTag(pin).get()
-        if (workInfos.isEmpty())
-            return false
-        var anyRunning = false
-        for (workInfo in workInfos)
-            when (workInfo.state) {
-                WorkInfo.State.ENQUEUED, WorkInfo.State.RUNNING -> anyRunning = true
-                else -> continue
-            }
-        return anyRunning
+        var result: WorkInfo? = null
+        if (workInfos.isNotEmpty())
+            for (workInfo in workInfos)
+                if (!workInfo.state.isFinished) {
+                    result = workInfos[0]
+                    break
+                }
+        return result
     }
 
     /**
@@ -391,39 +389,40 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     ): DownloadStatus {
         Timber.d("$namespace:$objectId Checking if downloaded")
         var result: DownloadStatus? = null
-        when {
-            isDownloading(context) -> result = DownloadStatus.DOWNLOADING
-            else -> {
-                val imageFile = imageFile(context)
-                Timber.v("Checking if image file exists...")
-                val imageFileExists = imageFile.exists()
-                if (!imageFileExists) {
-                    Timber.d("$namespace:$objectId Image file ($imageFile) doesn't exist")
-                    result = DownloadStatus.NOT_DOWNLOADED
-                }
 
-                Timber.v("Getting children elements download status...")
-                val children = arrayListOf<DataClassImpl>()
-                getChildren(firestore).toCollection(children)
-                for ((c, child) in children.withIndex()) {
-                    if (child is DataClass<*, *>) {
-                        progressListener?.invoke(c, children.size)
-                        val childDownloadStatus = child.downloadStatus(context, firestore)
-                        // If the result has not been set yet, which means the image is downloaded
-                        if (result == null) {
-                            // But there's a non-downloaded children
-                            if (!childDownloadStatus.isDownloaded()) {
-                                Timber.d("There's a non-downloaded children (${child.namespace}:${child.objectId})")
-                                result = DownloadStatus.PARTIALLY
-                            }
+        val downloadWorkInfo = downloadWorkInfo(context)
+        if (downloadWorkInfo != null)
+            result = DownloadStatus.DOWNLOADING
+        else {
+            val imageFile = imageFile(context)
+            Timber.v("Checking if image file exists...")
+            val imageFileExists = imageFile.exists()
+            if (!imageFileExists) {
+                Timber.d("$namespace:$objectId Image file ($imageFile) doesn't exist")
+                result = DownloadStatus.NOT_DOWNLOADED
+            }
+
+            Timber.v("Getting children elements download status...")
+            val children = arrayListOf<DataClassImpl>()
+            getChildren(firestore).toCollection(children)
+            for ((c, child) in children.withIndex()) {
+                if (child is DataClass<*, *>) {
+                    progressListener?.invoke(c, children.size)
+                    val childDownloadStatus = child.downloadStatus(context, firestore)
+                    // If the result has not been set yet, which means the image is downloaded
+                    if (result == null)
+                    // But there's a non-downloaded children
+                        if (childDownloadStatus != DownloadStatus.NOT_DOWNLOADED) {
+                            Timber.d("There's a non-downloaded children (${child.namespace}:${child.objectId})")
+                            result = DownloadStatus.PARTIALLY
                         }
-                    } else Timber.d("$namespace:$objectId Child is not DataClass")
-                    // If a result has been obtained, exit the for
-                    if (result != DownloadStatus.NOT_DOWNLOADED && result != null)
-                        break
-                }
+                } else Timber.d("$namespace:$objectId Child is not DataClass")
+                // If a result has been obtained, exit the for
+                if (result != DownloadStatus.NOT_DOWNLOADED && result != null)
+                    break
             }
         }
+
         Timber.d("Finished checking download status. Result: $result")
         return result ?: DownloadStatus.DOWNLOADED
     }
