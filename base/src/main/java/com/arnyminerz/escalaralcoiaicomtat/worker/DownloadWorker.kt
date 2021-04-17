@@ -17,6 +17,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MOBILE_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ROAMING_DOWNLOAD_PREF
+import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
@@ -282,13 +283,15 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         else
             Timber.d("Won't download map. Style url ($styleUrl) or location ($position) is null.")
 
-        runBlocking {
+        val sectors = runBlocking {
             Timber.d("Downloading child sectors...")
             val sectors = arrayListOf<Sector>()
             zone.getChildren(firestore).toCollection(sectors)
-            for (sector in sectors)
-                downloadSector(firestore, sector.metadata.documentPath)
+            sectors
         }
+        val total = sectors.size
+        for ((s, sector) in sectors.withIndex())
+            downloadSector(firestore, sector.metadata.documentPath, ValueMax(s, total))
 
         return Result.success()
     }
@@ -307,7 +310,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @see ERROR_DATA_FETCH
      * @see ERROR_STORE_IMAGE
      */
-    private fun downloadSector(firestore: FirebaseFirestore, path: String): Result {
+    private fun downloadSector(
+        firestore: FirebaseFirestore,
+        path: String,
+        progress: ValueMax<Int>?
+    ): Result {
         Timber.d("Downloading Sector $path...")
         Timber.v("Getting document...")
         val task = firestore.document(path).get()
@@ -327,8 +334,12 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         )
         notification = notification
             .edit()
-            .withText(newText)
-            .withInfoText(R.string.notification_download_progress_info_fetching)
+            .apply {
+                withText(newText)
+                withInfoText(R.string.notification_download_progress_info_fetching)
+                if (progress != null)
+                    withProgress(progress)
+            }
             .buildAndShow()
 
         var image = sector.imageReferenceUrl
@@ -408,7 +419,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 }
                 Sector.NAMESPACE -> {
                     Timber.d("Downloading Sector...")
-                    downloadSector(firestore, downloadPath!!)
+                    downloadSector(firestore, downloadPath!!, null)
                 }
                 else -> failure(ERROR_UNKNOWN_NAMESPACE)
             }
