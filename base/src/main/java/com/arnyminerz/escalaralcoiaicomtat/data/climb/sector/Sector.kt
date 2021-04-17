@@ -128,7 +128,7 @@ class Sector constructor(
         val ref = firestore
             .document(metadata.documentPath)
             .collection("Paths")
-            .orderBy("displayName")
+            .orderBy("sketchId")
         val childTask = ref.get()
         try {
             Timber.v("Awaiting results...")
