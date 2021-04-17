@@ -16,14 +16,8 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
 import com.mapbox.mapboxsdk.plugins.offline.model.NotificationOptions
 import timber.log.Timber
 
-private fun generateNotificationId(): Int {
-    var greatest = 0
-    for (id in builders.keys) {
-        if (id > greatest)
-            greatest = id
-    }
-    return greatest + 1
-}
+private var notificationIdCounter = 0
+private fun generateNotificationId(): Int = notificationIdCounter++
 
 private val builders = arrayMapOf<Int, Notification.Builder>()
 
