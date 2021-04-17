@@ -246,9 +246,14 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val zone = Zone(result)
 
         Timber.v("Updating notification...")
+        val newText = applicationContext.getString(
+            R.string.notification_download_progress_message,
+            zone.displayName
+        )
         notification = notification
             .edit()
-            .withText(R.string.notification_download_progress_message, zone.displayName)
+            .withText(newText)
+            .withInfoText(R.string.notification_download_progress_info_fetching)
             .buildAndShow()
 
         var image = zone.imageReferenceUrl
@@ -316,9 +321,14 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val sector = Sector(result)
 
         Timber.v("Updating notification...")
+        val newText = applicationContext.getString(
+            R.string.notification_download_progress_message,
+            sector.displayName
+        )
         notification = notification
             .edit()
-            .withText(R.string.notification_download_progress_message, sector.displayName)
+            .withText(newText)
+            .withInfoText(R.string.notification_download_progress_info_fetching)
             .buildAndShow()
 
         var image = sector.imageReferenceUrl
@@ -382,6 +392,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 .withChannelId(DOWNLOAD_PROGRESS_CHANNEL_ID)
                 .withIcon(R.drawable.ic_notifications)
                 .withTitle(R.string.notification_download_progress_title)
+                .withInfoText(R.string.notification_download_progress_info_fetching)
                 .withText(message)
                 .withProgress(-1, 0)
                 .setPersistent(true)
