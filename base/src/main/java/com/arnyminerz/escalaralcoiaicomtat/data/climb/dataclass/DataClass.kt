@@ -102,6 +102,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     area.getChildren(firestore).toCollection(zones)
                     for (zone in zones) {
                         Timber.d("    Finding in ${zone.displayName}.")
+                        // Children must be loaded so `count` is fetched correctly.
+                        val sectors = arrayListOf<Sector>()
+                        zone.getChildren(firestore).toCollection(sectors)
+
                         if (zone.displayName.equals(queryName, true))
                             result = Intent(context, ZoneActivity::class.java).apply {
                                 Timber.d("Found Zone id ${zone.objectId}!")
@@ -109,9 +113,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                                 putExtra(EXTRA_ZONE, zone.objectId)
                                 putExtra(EXTRA_SECTOR_COUNT, zone.count())
                             }
-                        else {
-                            val sectors = arrayListOf<Sector>()
-                            zone.getChildren(firestore).toCollection(sectors)
+                        else
                             for ((counter, sector) in sectors.withIndex()) {
                                 Timber.d("      Finding in ${sector.displayName}.")
                                 if (sector.displayName.equals(queryName, true))
@@ -132,7 +134,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                                 // If a result has been found, exit loop
                                 if (result != null) break
                             }
-                        }
                         // If a result has been found, exit loop
                         if (result != null) break
                     }
