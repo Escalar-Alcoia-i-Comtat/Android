@@ -34,6 +34,8 @@ import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
@@ -54,6 +56,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
     private var _binding: FragmentSectorBinding? = null
     private val binding get() = _binding!!
 
+    private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
 
     private val sectorActivity: SectorActivity
@@ -85,8 +88,9 @@ class SectorFragment : NetworkChangeListenerFragment() {
         sector.loadImage(
             requireContext(),
             storage,
+            firestore,
             binding.sectorImageView,
-            binding.sectorProgressBar,
+            //binding.sectorProgressBar,
             ImageLoadParameters<Bitmap>().apply {
                 withTransitionOptions(BitmapTransitionOptions.withCrossFade(CROSSFADE_DURATION))
                 withThumbnailSize(SECTOR_THUMBNAIL_SIZE)
@@ -99,6 +103,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 )
                 setShowPlaceholder(false)
             })
+        Timber.v("Finished loading image")
     }
 
     override fun onCreateView(
@@ -116,6 +121,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
         zoneId = requireArguments().getString(ARGUMENT_ZONE_ID)!!
         sectorIndex = requireArguments().getInt(ARGUMENT_SECTOR_INDEX, 0)
 
+        firestore = Firebase.firestore
         storage = Firebase.storage
     }
 

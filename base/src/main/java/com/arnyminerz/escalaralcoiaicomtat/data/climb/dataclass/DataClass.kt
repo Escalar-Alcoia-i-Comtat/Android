@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.widget.ImageView
-import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
@@ -35,8 +34,6 @@ import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.view.apply
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
-import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData
@@ -49,6 +46,7 @@ import com.bumptech.glide.request.target.Target
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageException
 import com.mapbox.mapboxsdk.maps.Style
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -67,7 +65,7 @@ import kotlin.coroutines.suspendCoroutine
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     val displayName: String,
     timestamp: Date,
-    val imageReferenceUrl: String,
+    imageReferenceUrl: String,
     val kmzReferenceUrl: String?,
     val uiMetadata: UIMetadata,
     val metadata: DataClassMetadata
@@ -146,6 +144,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     protected val innerChildren = arrayListOf<A>()
+
+    var imageReferenceUrl: String = imageReferenceUrl
+        private set
 
     private val pin = "${namespace}_$objectId"
 
@@ -235,25 +236,23 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
-     * Checks if the DataClass is being downloaded
+     * Gets the [WorkInfo] if the DataClass is being downloaded, or null otherwise.
      * @author Arnau Mora
-     * @since 20210313
+     * @since 20210417
      * @param context The context to check from
-     * @return If the DataClass is being downloaded
      */
     @WorkerThread
-    fun isDownloading(context: Context): Boolean {
+    fun downloadWorkInfo(context: Context): WorkInfo? {
         val workManager = WorkManager.getInstance(context)
         val workInfos = workManager.getWorkInfosByTag(pin).get()
-        if (workInfos.isEmpty())
-            return false
-        var anyRunning = false
-        for (workInfo in workInfos)
-            when (workInfo.state) {
-                WorkInfo.State.ENQUEUED, WorkInfo.State.RUNNING -> anyRunning = true
-                else -> continue
-            }
-        return anyRunning
+        var result: WorkInfo? = null
+        if (workInfos.isNotEmpty())
+            for (workInfo in workInfos)
+                if (!workInfo.state.isFinished) {
+                    result = workInfos[0]
+                    break
+                }
+        return result
     }
 
     /**
@@ -389,43 +388,55 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         firestore: FirebaseFirestore,
         progressListener: ((current: Int, max: Int) -> Unit)? = null
     ): DownloadStatus {
-        Timber.d("$namespace:$objectId Checking if downloaded")
-        var result: DownloadStatus? = null
-        when {
-            isDownloading(context) -> result = DownloadStatus.DOWNLOADING
-            else -> {
-                val imageFile = imageFile(context)
-                Timber.v("Checking if image file exists...")
-                val imageFileExists = imageFile.exists()
-                if (!imageFileExists) {
-                    Timber.d("$namespace:$objectId Image file ($imageFile) doesn't exist")
-                    result = DownloadStatus.NOT_DOWNLOADED
-                }
+        Timber.d("$pin Checking if downloaded")
 
-                Timber.v("Getting children elements download status...")
-                val children = arrayListOf<DataClassImpl>()
-                getChildren(firestore).toCollection(children)
-                for ((c, child) in children.withIndex()) {
-                    if (child is DataClass<*, *>) {
-                        progressListener?.invoke(c, children.size)
-                        val childDownloadStatus = child.downloadStatus(context, firestore)
-                        // If the result has not been set yet, which means the image is downloaded
-                        if (result == null) {
-                            // But there's a non-downloaded children
-                            if (!childDownloadStatus.isDownloaded()) {
-                                Timber.d("There's a non-downloaded children (${child.namespace}:${child.objectId})")
-                                result = DownloadStatus.PARTIALLY
-                            }
-                        }
-                    } else Timber.d("$namespace:$objectId Child is not DataClass")
-                    // If a result has been obtained, exit the for
-                    if (result != DownloadStatus.NOT_DOWNLOADED && result != null)
+        val downloadWorkInfo = downloadWorkInfo(context)
+        val result = if (downloadWorkInfo != null)
+            DownloadStatus.DOWNLOADING
+        else {
+            val imageFile = imageFile(context)
+            Timber.v("Checking if image file exists...")
+            val imageFileExists = imageFile.exists()
+            if (!imageFileExists)
+                Timber.d("$pin Image file ($imageFile) doesn't exist")
+
+            // If image file exists:
+            // - If all the children are downloaded: DOWNLOADED
+            // - If there's a non-downloaded children: PARTIALLY
+            // If image file doesn't exist:
+            // - If there are not any downloaded children: NOT_DOWNLOADED
+            // - If there's at least one downloaded children: PARTIALLY
+
+            Timber.v("$pin Getting children elements download status...")
+            val children = arrayListOf<DataClassImpl>()
+            getChildren(firestore).toCollection(children)
+
+            Timber.v("$pin Finding for a downloaded children in ${children.size}...")
+            var allChildrenDownloaded = true
+            var atLeastOneChildrenDownloaded = false
+            for ((c, child) in children.withIndex()) {
+                if (child is DataClass<*, *>) {
+                    progressListener?.invoke(c, children.size)
+                    val childDownloadStatus = child.downloadStatus(context, firestore)
+                    if (childDownloadStatus != DownloadStatus.DOWNLOADED) {
+                        Timber.d(
+                            "$pin has a non-downloaded children (${child.pin}): $childDownloadStatus"
+                        )
+                        allChildrenDownloaded = false
                         break
-                }
+                    } else atLeastOneChildrenDownloaded = true
+                } else Timber.d("$pin Child is not DataClass")
             }
+
+            if (imageFileExists && allChildrenDownloaded)
+                DownloadStatus.DOWNLOADED
+            else if (!imageFileExists && !atLeastOneChildrenDownloaded)
+                DownloadStatus.NOT_DOWNLOADED
+            else DownloadStatus.PARTIALLY
         }
-        Timber.d("Finished checking download status. Result: $result")
-        return result ?: DownloadStatus.DOWNLOADED
+
+        Timber.d("$pin Finished checking download status. Result: $result")
+        return result
     }
 
     /**
@@ -584,25 +595,24 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @date 2020/09/11
      * @patch 2020/09/12 - Arnau Mora: Added function loadImage into this
      * @param context The context to run from
+     * @param firestore The [FirebaseFirestore] instance to update data in case there's something wrong.
      * @param imageView The Image View for loading the image into
-     * @param progressBar The loading progress bar
      * @param imageLoadParameters The parameters to use for loading the image
      */
     @UiThread
     suspend fun loadImage(
         context: Context,
         storage: FirebaseStorage,
+        firestore: FirebaseFirestore,
         imageView: ImageView,
-        progressBar: ProgressBar? = null,
         imageLoadParameters: ImageLoadParameters<Bitmap>? = null
     ) {
         if (context is Activity)
-            if (context.isDestroyed)
-                return Timber.e("The activity is destroyed, won't load image.")
+            if (context.isDestroyed) {
+                Timber.e("The activity is destroyed, won't load image.")
+                return
+            }
 
-        uiContext {
-            progressBar?.show()
-        }
         val scale = imageLoadParameters?.resultImageScale ?: 1f
 
         var imageLoadRequest = Glide.with(context)
@@ -614,10 +624,36 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 .load(readBitmap(downloadedImageFile))
         } else {
             Timber.d("Getting image from Firebase: $imageReferenceUrl")
-            val ref = storage.getReferenceFromUrl(imageReferenceUrl)
-            val url = ref.downloadUrl.awaitTask()
-            imageLoadRequest
-                .load(url)
+            var image = imageReferenceUrl
+            if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/")) {
+                Timber.w("Fixing zone image reference ($image)...")
+                val i = image.lastIndexOf('/') + 1
+                val newImage =
+                    "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
+                Timber.w("Changing image address to \"$newImage\"...")
+                firestore
+                    .document(metadata.documentPath)
+                    .update(mapOf("image" to newImage))
+                    .awaitTask()
+                Timber.w("Image address updated.")
+                image = newImage
+            }
+            try {
+                val ref = storage.getReferenceFromUrl(image)
+                val url = ref.downloadUrl.awaitTask()
+                imageLoadRequest
+                    .load(url)
+            } catch (e: IllegalArgumentException) {
+                Timber.e(
+                    e,
+                    "Image reference ($imageReferenceUrl) doesn't exist in Firebase Storage"
+                )
+                throw e
+            } catch (e: StorageException) {
+                Timber.e(e, "Could not load image from Firebase ($image)")
+                imageLoadRequest
+                    .load(uiMetadata.errorPlaceholderDrawable)
+            }
         }
         uiContext {
             imageLoadRequest.placeholder(uiMetadata.placeholderDrawable)
@@ -632,7 +668,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         target: Target<Bitmap>?,
                         isFirstResource: Boolean
                     ): Boolean {
-                        progressBar?.hide()
+                        Timber.e(e, "Finished loading bitmap with error!")
                         return false
                     }
 
@@ -643,7 +679,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         dataSource: DataSource?,
                         isFirstResource: Boolean
                     ): Boolean {
-                        progressBar?.hide()
+                        Timber.v("Finished loading bitmap!")
                         return false
                     }
                 })

@@ -9,6 +9,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.toCollection
@@ -81,7 +82,9 @@ class DownloadDialog<T : DataClass<*, *>>(
                                                 child.delete(context)
 
                                         data.delete(context)
-                                        deleteCallback?.invoke()
+                                        uiContext {
+                                            deleteCallback?.invoke()
+                                        }
                                     }
                                 else -> Timber.e("Data is not valid.")
                             }
