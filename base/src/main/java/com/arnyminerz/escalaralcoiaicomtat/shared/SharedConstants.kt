@@ -121,3 +121,11 @@ const val DOWNLOAD_QUALITY_DEFAULT = 85
 const val DOWNLOAD_MARKER_MARGIN = 100
 const val DOWNLOAD_MARKER_MIN_ZOOM = 10.0
 const val DOWNLOAD_MARKER_MAX_ZOOM = 20.0
+
+/**
+ * The time that will be delayed inside the inner children load while, for not overflowing the thread.
+ * In millis
+ * @author Arnau Mora
+ * @since 20210417
+ */
+const val DATACLASS_WAIT_CHILDREN_DELAY = 10L

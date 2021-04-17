@@ -26,6 +26,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.DATACLASS_WAIT_CHILDREN_DELAY
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
@@ -49,6 +50,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
 import com.mapbox.mapboxsdk.maps.Style
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
@@ -148,6 +150,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
     val transitionName = objectId + displayName.replace(" ", "_")
 
+    private var loadingChildren = false
+
     /**
      * Returns the data classes' children. May fetch them from storage, or return the cached items
      * @author Arnau Mora
@@ -160,14 +164,24 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     @WorkerThread
     @Throws(NoInternetAccessException::class, IllegalStateException::class)
     suspend fun getChildren(firestore: FirebaseFirestore?): Flow<A> = flow {
+        if (loadingChildren) {
+            Timber.v("Waiting for children to finish loading")
+            while (loadingChildren) {
+                delay(DATACLASS_WAIT_CHILDREN_DELAY)
+            }
+            Timber.v("Finished loading children!")
+        }
         if (innerChildren.isEmpty())
             if (firestore == null)
                 throw IllegalStateException("There are no loaded children, and firestore is null.")
-            else
+            else {
+                loadingChildren = true
                 loadChildren(firestore).collect {
                     innerChildren.add(it)
                     emit(it)
                 }
+                loadingChildren = false
+            }
         else
             for (a in innerChildren)
                 emit(a)
