@@ -48,8 +48,6 @@ class Zone(
         documentPath
     )
 ) {
-    val transitionName = objectId + displayName.replace(" ", "_")
-
     @WorkerThread
     private constructor(parcel: Parcel) : this(
         parcel.readString()!!,
