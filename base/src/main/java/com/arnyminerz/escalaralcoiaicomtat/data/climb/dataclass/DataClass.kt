@@ -35,8 +35,6 @@ import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.view.apply
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
-import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData
@@ -49,6 +47,7 @@ import com.bumptech.glide.request.target.Target
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageException
 import com.mapbox.mapboxsdk.maps.Style
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -67,7 +66,7 @@ import kotlin.coroutines.suspendCoroutine
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     val displayName: String,
     timestamp: Date,
-    val imageReferenceUrl: String,
+    imageReferenceUrl: String,
     val kmzReferenceUrl: String?,
     val uiMetadata: UIMetadata,
     val metadata: DataClassMetadata
@@ -146,6 +145,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     protected val innerChildren = arrayListOf<A>()
+
+    var imageReferenceUrl: String = imageReferenceUrl
+        private set
 
     private val pin = "${namespace}_$objectId"
 
@@ -387,7 +389,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         firestore: FirebaseFirestore,
         progressListener: ((current: Int, max: Int) -> Unit)? = null
     ): DownloadStatus {
-        Timber.d("$namespace:$objectId Checking if downloaded")
+        Timber.d("$pin Checking if downloaded")
         var result: DownloadStatus? = null
 
         val downloadWorkInfo = downloadWorkInfo(context)
@@ -398,33 +400,38 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             Timber.v("Checking if image file exists...")
             val imageFileExists = imageFile.exists()
             if (!imageFileExists) {
-                Timber.d("$namespace:$objectId Image file ($imageFile) doesn't exist")
+                Timber.d("$pin Image file ($imageFile) doesn't exist")
                 result = DownloadStatus.NOT_DOWNLOADED
-            }
 
-            Timber.v("Getting children elements download status...")
-            val children = arrayListOf<DataClassImpl>()
-            getChildren(firestore).toCollection(children)
-            for ((c, child) in children.withIndex()) {
-                if (child is DataClass<*, *>) {
-                    progressListener?.invoke(c, children.size)
-                    val childDownloadStatus = child.downloadStatus(context, firestore)
-                    // If the result has not been set yet, which means the image is downloaded
-                    if (result == null)
-                    // But there's a non-downloaded children
-                        if (childDownloadStatus != DownloadStatus.NOT_DOWNLOADED) {
-                            Timber.d("There's a non-downloaded children (${child.namespace}:${child.objectId})")
-                            result = DownloadStatus.PARTIALLY
-                        }
-                } else Timber.d("$namespace:$objectId Child is not DataClass")
-                // If a result has been obtained, exit the for
-                if (result != DownloadStatus.NOT_DOWNLOADED && result != null)
-                    break
+                // Just check for children when the image is not downloaded, since if it's downloaded
+                // all the children should be downloaded.
+                Timber.v("$pin Getting children elements download status...")
+                val children = arrayListOf<DataClassImpl>()
+                getChildren(firestore).toCollection(children)
+                for ((c, child) in children.withIndex()) {
+                    if (child is DataClass<*, *>) {
+                        progressListener?.invoke(c, children.size)
+                        val childDownloadStatus = child.downloadStatus(context, firestore)
+                        // If the result has not been set yet, which means the image is downloaded
+                        if (result == null)
+                        // But there's a non-downloaded children
+                            if (childDownloadStatus != DownloadStatus.NOT_DOWNLOADED) {
+                                Timber.d(
+                                    "$pin has a non-downloaded children (${child.pin}): $childDownloadStatus"
+                                )
+                                result = DownloadStatus.PARTIALLY
+                            }
+                    } else Timber.d("$pin Child is not DataClass")
+                    // If a result has been obtained, exit the for
+                    if (result != DownloadStatus.NOT_DOWNLOADED && result != null)
+                        break
+                }
             }
         }
 
-        Timber.d("Finished checking download status. Result: $result")
-        return result ?: DownloadStatus.DOWNLOADED
+        result = result ?: DownloadStatus.DOWNLOADED
+        Timber.d("$pin Finished checking download status. Result: $result")
+        return result
     }
 
     /**
