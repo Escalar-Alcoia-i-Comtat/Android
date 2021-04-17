@@ -78,7 +78,7 @@
         android:tooltipText="@string/image_desc_no_internet"
         android:translationZ="10dp"
         app:tint="@color/bg_color"
-        app:layout_constraintBottom_toBottomOf="@+id/cardView4"
+        app:layout_constraintBottom_toBottomOf="@+id/actionBar_cardView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
