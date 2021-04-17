@@ -389,46 +389,52 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         progressListener: ((current: Int, max: Int) -> Unit)? = null
     ): DownloadStatus {
         Timber.d("$pin Checking if downloaded")
-        var result: DownloadStatus? = null
 
         val downloadWorkInfo = downloadWorkInfo(context)
-        if (downloadWorkInfo != null)
-            result = DownloadStatus.DOWNLOADING
+        val result = if (downloadWorkInfo != null)
+            DownloadStatus.DOWNLOADING
         else {
             val imageFile = imageFile(context)
             Timber.v("Checking if image file exists...")
             val imageFileExists = imageFile.exists()
-            if (!imageFileExists) {
+            if (!imageFileExists)
                 Timber.d("$pin Image file ($imageFile) doesn't exist")
-                result = DownloadStatus.NOT_DOWNLOADED
 
-                // Just check for children when the image is not downloaded, since if it's downloaded
-                // all the children should be downloaded.
-                Timber.v("$pin Getting children elements download status...")
-                val children = arrayListOf<DataClassImpl>()
-                getChildren(firestore).toCollection(children)
-                for ((c, child) in children.withIndex()) {
-                    if (child is DataClass<*, *>) {
-                        progressListener?.invoke(c, children.size)
-                        val childDownloadStatus = child.downloadStatus(context, firestore)
-                        // If the result has not been set yet, which means the image is downloaded
-                        if (result == null)
-                        // But there's a non-downloaded children
-                            if (childDownloadStatus != DownloadStatus.NOT_DOWNLOADED) {
-                                Timber.d(
-                                    "$pin has a non-downloaded children (${child.pin}): $childDownloadStatus"
-                                )
-                                result = DownloadStatus.PARTIALLY
-                            }
-                    } else Timber.d("$pin Child is not DataClass")
-                    // If a result has been obtained, exit the for
-                    if (result != DownloadStatus.NOT_DOWNLOADED && result != null)
+            // If image file exists:
+            // - If all the children are downloaded: DOWNLOADED
+            // - If there's a non-downloaded children: PARTIALLY
+            // If image file doesn't exist:
+            // - If there are not any downloaded children: NOT_DOWNLOADED
+            // - If there's at least one downloaded children: PARTIALLY
+
+            Timber.v("$pin Getting children elements download status...")
+            val children = arrayListOf<DataClassImpl>()
+            getChildren(firestore).toCollection(children)
+
+            Timber.v("$pin Finding for a downloaded children in ${children.size}...")
+            var allChildrenDownloaded = true
+            var atLeastOneChildrenDownloaded = false
+            for ((c, child) in children.withIndex()) {
+                if (child is DataClass<*, *>) {
+                    progressListener?.invoke(c, children.size)
+                    val childDownloadStatus = child.downloadStatus(context, firestore)
+                    if (childDownloadStatus != DownloadStatus.DOWNLOADED) {
+                        Timber.d(
+                            "$pin has a non-downloaded children (${child.pin}): $childDownloadStatus"
+                        )
+                        allChildrenDownloaded = false
                         break
-                }
+                    } else atLeastOneChildrenDownloaded = true
+                } else Timber.d("$pin Child is not DataClass")
             }
+
+            if (imageFileExists && allChildrenDownloaded)
+                DownloadStatus.DOWNLOADED
+            else if (!imageFileExists && !atLeastOneChildrenDownloaded)
+                DownloadStatus.NOT_DOWNLOADED
+            else DownloadStatus.PARTIALLY
         }
 
-        result = result ?: DownloadStatus.DOWNLOADED
         Timber.d("$pin Finished checking download status. Result: $result")
         return result
     }
