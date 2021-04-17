@@ -119,7 +119,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                                 R.anim.item_enter_left_animator
                             )
                     r.adapter =
-                        DwDataClassAdapter(this, sectors) { _, viewHolder, index ->
+                        DwDataClassAdapter(this, sectors, 2, 500) { _, viewHolder, index ->
                             binding.loadingIndicator.show()
 
                             Timber.v("Clicked item $index")

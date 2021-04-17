@@ -31,6 +31,8 @@ import timber.log.Timber
 class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
     private val activity: DataClassListActivity<P>,
     val items: List<T>,
+    val itemsPerRow: Int = 1,
+    val itemHeightDp: Int? = null,
     private val onItemSelected: ((data: T, holder: DwDataClassViewHolder, position: Int) -> Unit)?
 ) : RecyclerView.Adapter<DwDataClassViewHolder>() {
     private val storage = Firebase.storage
@@ -38,6 +40,8 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
     private val downloadStatuses = arrayMapOf<String, DownloadStatus>()
 
     override fun getItemCount(): Int = items.size
+
+    override fun getItemViewType(position: Int): Int = position % itemsPerRow
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DwDataClassViewHolder =
         DwDataClassViewHolder(
@@ -80,6 +84,10 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
             }
         }
 
+        if (itemHeightDp != null)
+            holder.imageView.layoutParams = holder.imageView.layoutParams.apply {
+                height = itemHeightDp
+            }
         doAsync {
             data.loadImage(activity, activity.storage, holder.imageView)
         }

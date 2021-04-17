@@ -112,7 +112,11 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
                                     R.anim.item_enter_left_animator
                                 )
                         adapter =
-                            DwDataClassAdapter(this@AreaActivity, zones) { _, holder, position ->
+                            DwDataClassAdapter(
+                                this@AreaActivity,
+                                zones,
+                                itemHeightDp = 700
+                            ) { _, holder, position ->
                                 binding.loadingIndicator.show()
 
                                 Timber.v("Clicked item $position")
