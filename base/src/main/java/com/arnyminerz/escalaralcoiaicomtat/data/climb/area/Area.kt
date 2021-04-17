@@ -56,9 +56,6 @@ class Area(
         documentPath
     )
 ) {
-    val transitionName
-        get() = objectId + displayName.replace(" ", "_")
-
     @WorkerThread
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
