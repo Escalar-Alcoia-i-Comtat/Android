@@ -81,9 +81,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
      * @author Arnau Mora
      * @since 20210323
      */
-    @UiThread
-    private fun loadImage() {
-        sector.asyncLoadImage(
+    private suspend fun loadImage() {
+        sector.loadImage(
             requireContext(),
             storage,
             binding.sectorImageView,

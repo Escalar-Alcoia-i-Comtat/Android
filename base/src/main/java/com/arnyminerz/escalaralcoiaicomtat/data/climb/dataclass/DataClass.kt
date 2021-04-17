@@ -24,6 +24,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_COUNT
@@ -52,7 +53,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toCollection
-import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 import java.io.File
 import java.util.Date
@@ -574,7 +574,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param imageLoadParameters The parameters to use for loading the image
      */
     @UiThread
-    fun asyncLoadImage(
+    suspend fun loadImage(
         context: Context,
         storage: FirebaseStorage,
         imageView: ImageView,
@@ -585,7 +585,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             if (context.isDestroyed)
                 return Timber.e("The activity is destroyed, won't load image.")
 
-        progressBar?.show()
+        uiContext {
+            progressBar?.show()
+        }
         val scale = imageLoadParameters?.resultImageScale ?: 1f
 
         var imageLoadRequest = Glide.with(context)
@@ -598,40 +600,40 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         } else {
             Timber.d("Getting image from Firebase: $imageReferenceUrl")
             val ref = storage.getReferenceFromUrl(imageReferenceUrl)
-            val url = runBlocking {
-                ref.downloadUrl.awaitTask()
-            }
+            val url = ref.downloadUrl.awaitTask()
             imageLoadRequest
                 .load(url)
         }
-        imageLoadRequest.placeholder(uiMetadata.placeholderDrawable)
-            .error(uiMetadata.errorPlaceholderDrawable)
-            .fallback(uiMetadata.errorPlaceholderDrawable)
-            .thumbnail(scale)
-            .apply(imageLoadParameters)
-            .addListener(object : RequestListener<Bitmap> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<Bitmap>?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    progressBar?.hide()
-                    return false
-                }
+        uiContext {
+            imageLoadRequest.placeholder(uiMetadata.placeholderDrawable)
+                .error(uiMetadata.errorPlaceholderDrawable)
+                .fallback(uiMetadata.errorPlaceholderDrawable)
+                .thumbnail(scale)
+                .apply(imageLoadParameters)
+                .addListener(object : RequestListener<Bitmap> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Bitmap>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        progressBar?.hide()
+                        return false
+                    }
 
-                override fun onResourceReady(
-                    resource: Bitmap?,
-                    model: Any?,
-                    target: Target<Bitmap>?,
-                    dataSource: DataSource?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    progressBar?.hide()
-                    return false
-                }
-            })
-            .into(imageView)
+                    override fun onResourceReady(
+                        resource: Bitmap?,
+                        model: Any?,
+                        target: Target<Bitmap>?,
+                        dataSource: DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        progressBar?.hide()
+                        return false
+                    }
+                })
+                .into(imageView)
+        }
     }
 
     override fun hashCode(): Int {
