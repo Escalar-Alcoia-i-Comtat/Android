@@ -248,7 +248,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         Timber.v("Updating notification...")
         notification = notification
             .edit()
-            .withTitle(R.string.notification_download_progress_title, zone.displayName)
+            .withText(R.string.notification_download_progress_message, zone.displayName)
             .buildAndShow()
 
         var image = zone.imageReferenceUrl
@@ -318,7 +318,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         Timber.v("Updating notification...")
         notification = notification
             .edit()
-            .withTitle(R.string.notification_download_progress_title, sector.displayName)
+            .withText(R.string.notification_download_progress_message, sector.displayName)
             .buildAndShow()
 
         var image = sector.imageReferenceUrl
