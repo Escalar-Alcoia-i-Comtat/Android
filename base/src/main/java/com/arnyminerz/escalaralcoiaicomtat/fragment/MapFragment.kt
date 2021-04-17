@@ -13,19 +13,25 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
+import com.arnyminerz.escalaralcoiaicomtat.data.map.loadKMZ
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentMapBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapNotInitializedException
-import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -33,7 +39,6 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import timber.log.Timber
 import java.io.FileNotFoundException
-import java.util.concurrent.CompletableFuture.runAsync
 
 class MapFragment : NetworkChangeListenerFragment() {
     private lateinit var mapHelper: MapHelper
@@ -46,6 +51,8 @@ class MapFragment : NetworkChangeListenerFragment() {
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var firebaseStorage: FirebaseStorage
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,6 +70,8 @@ class MapFragment : NetworkChangeListenerFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         Timber.d("onActivityCreated()")
+
+        firebaseStorage = Firebase.storage
 
         Timber.v("Preparing MapHelper...")
         mapHelper = MapHelper(binding.pageMapView)
@@ -108,12 +117,17 @@ class MapFragment : NetworkChangeListenerFragment() {
 
                     markerWindow?.hide()
                     activity?.let {
+                        (activity as? MainActivity?)?.binding?.bottomAppBar?.performHide()
                         markerWindow = mapHelper.infoCard(
                             it,
                             (requireActivity() as MainActivity).firestore,
                             this,
                             binding.root
                         )
+                            .show()
+                            .listenHide {
+                                (activity as? MainActivity?)?.binding?.bottomAppBar?.performShow()
+                            }
                     }
 
                     true
@@ -126,7 +140,9 @@ class MapFragment : NetworkChangeListenerFragment() {
                 }
 
                 Timber.v("Finished loading map. Calling loadMap...")
-                loadMap()
+                doAsync {
+                    loadMap()
+                }
             }
     }
 
@@ -177,11 +193,13 @@ class MapFragment : NetworkChangeListenerFragment() {
         if (isResumed) {
             visibility(binding.pageMapView, hasInternet)
             visibility(binding.mapsNoInternetCardView.noInternetCardView, !hasInternet)
-            loadMap()
+            doAsync {
+                loadMap()
+            }
         }
     }
 
-    private fun loadMap() {
+    private suspend fun loadMap() {
         if (mapLoaded || mapLoading || !mapHelper.isLoaded) {
             Timber.v("Skipping map load ($mapLoaded, $mapLoading, ${mapHelper.isLoaded}).")
             return
@@ -191,35 +209,37 @@ class MapFragment : NetworkChangeListenerFragment() {
             return
         }
         mapLoading = true
-        runAsync {
-            Timber.v("Loading map...")
-            for (area in AREAS)
-                try {
-                    val kml = area.kmlAddress
-                    Timber.v("Loading KML ($kml) for ${area.displayName}...")
-                    mapHelper.loadKML(requireActivity(), kml, false).apply {
-                        Timber.d("Adding features to map...")
-                        mapHelper.addMarkers(markers)
-                        mapHelper.addGeometries(polygons)
-                        mapHelper.addGeometries(polylines)
-                    }
-                } catch (e: FileNotFoundException) {
-                    Timber.e(e, "Could not load KML")
-                    runOnUiThread { toast(R.string.toast_error_internal) }
-                } catch (e: NoInternetAccessException) {
-                    Timber.e(e, "Could not load KML")
-                    runOnUiThread { toast(R.string.toast_error_internal) }
-                } catch (e: MapNotInitializedException) {
-                    Timber.e(e, "Could not load KML")
-                    runOnUiThread { toast(R.string.toast_error_internal) }
-                }
-            runOnUiThread {
-                Timber.d("Centering map...")
-                mapHelper.display()
-                mapHelper.center()
+
+        Timber.v("Loading map...")
+        for (area in AREAS)
+            try {
+                Timber.v("Getting KMZ file of $area...")
+                val kmzFile = area.getKmzFile(requireContext(), firebaseStorage)
+                Timber.v("Loading KMZ features...")
+                val features = loadKMZ(requireContext(), kmzFile)
+                Timber.v("Adding features to map...")
+                mapHelper.add(features, center = false, display = false)
+            } catch (e: FileNotFoundException) {
+                Timber.e(e, "Could not load KML")
+                Firebase.crashlytics.recordException(e)
+                uiContext { toast(requireContext(), R.string.toast_error_internal) }
+            } catch (e: NoInternetAccessException) {
+                Timber.e(e, "Could not load KML")
+                Firebase.crashlytics.recordException(e)
+                uiContext { toast(requireContext(), R.string.toast_error_internal) }
+            } catch (e: MapNotInitializedException) {
+                Timber.e(e, "Could not load KML")
+                Firebase.crashlytics.recordException(e)
+                uiContext { toast(requireContext(), R.string.toast_error_internal) }
             }
-            mapLoading = false
-            mapLoaded = true
+
+        uiContext {
+            Timber.d("Displaying and centering map...")
+            mapHelper.display()
+            mapHelper.center()
         }
+
+        mapLoading = false
+        mapLoaded = true
     }
 }

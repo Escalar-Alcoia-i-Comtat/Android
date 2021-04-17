@@ -8,7 +8,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
-import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import timber.log.Timber
@@ -17,7 +16,7 @@ import java.util.concurrent.TimeUnit
 
 class Path(
     objectId: String,
-    val timestamp: Date?,
+    timestamp: Date,
     val sketchId: Long,
     val displayName: String,
     val grades: Grade.GradesList,
@@ -31,13 +30,13 @@ class Path(
     rebuiltBy: String?,
     val downloaded: Boolean = false,
     val documentPath: String,
-) : DataClassImpl(objectId, NAMESPACE), Comparable<Path> {
+) : DataClassImpl(objectId, NAMESPACE, timestamp), Comparable<Path> {
     var rebuiltBy: String? = rebuiltBy
         private set
 
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
-        parcel.readString().toTimestamp(),
+        parcel.readString().toTimestamp()!!,
         parcel.readLong(),
         parcel.readString()!!,
         Grade.GradesList(),
@@ -61,9 +60,9 @@ class Path(
      */
     constructor(data: DocumentSnapshot) : this(
         data.id,
-        data.getDate("created"),
+        data.getDate("created")!!,
         data.getString("sketchId")?.toLongOrNull() ?: 0L,
-        data.getString("displayName")?.fixTildes() ?: "",
+        data.getString("displayName")!!,
         Grade.GradesList(),
         arrayListOf(),
         arrayListOf(),
@@ -84,8 +83,8 @@ class Path(
             data.getBoolean("pitonRequired") ?: false,
             data.getBoolean("nailRequired") ?: false,
         ),
-        data.getString("description")?.fixTildes(),
-        data.getString("builtBy")?.fixTildes(),
+        data.getString("description"),
+        data.getString("builtBy"),
         "",
         documentPath = data.reference.path
     ) {
@@ -99,7 +98,7 @@ class Path(
         else Timber.w("Heights is null")
 
         Timber.d("Loading grade for Path $objectId")
-        val gradeValue = data.getString("grade")!!.fixTildes()
+        val gradeValue = data.getString("grade")!!
         val gradeValues = gradeValue.split(" ")
         grades.addAll(Grade.listFromStrings(gradeValues))
 
@@ -114,7 +113,7 @@ class Path(
         else Timber.w("Endings list is null")
 
         Timber.d("Loading artifo endings for Path $objectId")
-        val endingArtifo = data.getString("ending_artifo")?.fixTildes()
+        val endingArtifo = data.getString("ending_artifo")
         endingArtifo?.let {
             val artifos = it.replace("\r", "").split("\n")
             for (artifo in artifos)

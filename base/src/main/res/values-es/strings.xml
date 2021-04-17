@@ -270,4 +270,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="downloads_no_download">No hay nada descargado</string>
     <string name="intro_warning_title">Atención</string>
     <string name="intro_warning_message">La escalada es un deporte considerado de riesgo, todo lo que lo practico tiene que preocuparse de su conocimiento y correcta ejecución. La información de esta aplicación es puramente informativa y puede ser errónea. Ten cuidado, el material en buen estado, y vigila\'t no sólo a ti mismo, sino también a tus compañeros, y sobre todo, disfruta.</string>
+    <string name="dialog_downloaded_partially_msg">Algunos elementos se han descargado, pero no %s completamente. Quieres descargarla entera?</string>
 </resources>

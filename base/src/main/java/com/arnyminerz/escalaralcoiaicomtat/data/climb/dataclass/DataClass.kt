@@ -15,13 +15,18 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.DownloadedSection
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.allTrue
+import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.DATACLASS_WAIT_CHILDREN_DELAY
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
@@ -42,7 +47,10 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FileDownloadTask
+import com.google.firebase.storage.FirebaseStorage
 import com.mapbox.mapboxsdk.maps.Style
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
@@ -50,72 +58,100 @@ import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 import java.io.File
 import java.util.Date
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 // A: List type
 // B: Parent Type
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     val displayName: String,
-    val timestamp: Date?,
-    val imageUrl: String,
-    val kmlAddress: String?,
+    timestamp: Date,
+    val imageReferenceUrl: String,
+    val kmzReferenceUrl: String?,
     val uiMetadata: UIMetadata,
     val metadata: DataClassMetadata
-) : DataClassImpl(metadata.objectId, metadata.namespace), Iterable<A> {
+) : DataClassImpl(metadata.objectId, metadata.namespace, timestamp), Iterable<A> {
     companion object {
         /**
-         * Searches in AREAS and tries to get an intent from them
+         * Searches in [AREAS] and tries to get an intent from them.
+         * @author Arnau Mora
+         * @since 20210416
+         * @param context The context to initialize the [Intent]
+         * @param queryName What to search
+         * @param firestore The [FirebaseFirestore] instance.
+         * @return An [Intent] if the [DataClass] was found, or null.
          */
         suspend fun getIntent(
             context: Context,
             queryName: String,
             firestore: FirebaseFirestore
         ): Intent? {
+            var result: Intent? = null
             Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
             for (area in AREAS) {
-                Timber.d("  Finding in ${area.displayName}. It has ${area.count()} zones.")
-                when {
-                    area.displayName.equals(queryName, true) ->
-                        return Intent(context, AreaActivity::class.java).apply {
-                            Timber.d("Found Area id ${area.objectId}!")
-                            putExtra(EXTRA_AREA, area.objectId)
-                        }
-                    area.isNotEmpty() ->
-                        for (zone in area) {
-                            Timber.d("    Finding in ${zone.displayName}.")
-                            if (zone.displayName.equals(queryName, true))
-                                return Intent(context, ZoneActivity::class.java).apply {
-                                    Timber.d("Found Zone id ${zone.objectId}!")
-                                    putExtra(EXTRA_AREA, area.objectId)
-                                    putExtra(EXTRA_ZONE, zone.objectId)
-                                    putExtra(EXTRA_SECTOR_COUNT, zone.count())
-                                }
-                            else {
-                                val children = arrayListOf<Sector>()
-                                zone.getChildren(firestore).toCollection(children)
-                                for ((s, sector) in children.withIndex()) {
-                                    Timber.d("      Finding in ${sector.displayName}.")
-                                    if (sector.displayName.equals(queryName, true))
-                                        return Intent(context, SectorActivity::class.java).apply {
-                                            Timber.d("Found Sector id ${sector.objectId} at $s!")
-                                            putExtra(EXTRA_AREA, area.objectId)
-                                            putExtra(EXTRA_ZONE, zone.objectId)
-                                            putExtra(EXTRA_SECTOR_COUNT, zone.count())
-                                            putExtra(EXTRA_SECTOR_INDEX, s)
-                                        }
-                                }
+                Timber.d("  Finding in ${area.displayName}.")
+                if (area.displayName.equals(queryName, true))
+                    result = Intent(context, AreaActivity::class.java).apply {
+                        Timber.d("Found Area id ${area.objectId}!")
+                        putExtra(EXTRA_AREA, area.objectId)
+                    }
+                else {
+                    Timber.d("  Iterating area's children...")
+                    val zones = arrayListOf<Zone>()
+                    area.getChildren(firestore).toCollection(zones)
+                    for (zone in zones) {
+                        Timber.d("    Finding in ${zone.displayName}.")
+                        // Children must be loaded so `count` is fetched correctly.
+                        val sectors = arrayListOf<Sector>()
+                        zone.getChildren(firestore).toCollection(sectors)
+
+                        if (zone.displayName.equals(queryName, true))
+                            result = Intent(context, ZoneActivity::class.java).apply {
+                                Timber.d("Found Zone id ${zone.objectId}!")
+                                putExtra(EXTRA_AREA, area.objectId)
+                                putExtra(EXTRA_ZONE, zone.objectId)
+                                putExtra(EXTRA_SECTOR_COUNT, zone.count())
                             }
-                        }
-                    else -> Timber.w("Area is empty.")
+                        else
+                            for ((counter, sector) in sectors.withIndex()) {
+                                Timber.d("      Finding in ${sector.displayName}.")
+                                if (sector.displayName.equals(queryName, true))
+                                    result = Intent(
+                                        context,
+                                        SectorActivity::class.java
+                                    ).apply {
+                                        Timber.d("Found Sector id ${sector.objectId} at $counter!")
+                                        putExtra(EXTRA_AREA, area.objectId)
+                                        putExtra(EXTRA_ZONE, zone.objectId)
+                                        putExtra(
+                                            EXTRA_SECTOR_COUNT,
+                                            zone.count()
+                                        )
+                                        putExtra(EXTRA_SECTOR_INDEX, counter)
+                                    }
+
+                                // If a result has been found, exit loop
+                                if (result != null) break
+                            }
+                        // If a result has been found, exit loop
+                        if (result != null) break
+                    }
                 }
+                if (result != null) break
             }
             Timber.w("Could not generate intent")
-            return null
+            return result
         }
     }
 
     protected val innerChildren = arrayListOf<A>()
 
     private val pin = "${namespace}_$objectId"
+
+    val transitionName = objectId + displayName.replace(" ", "_")
+
+    private var loadingChildren = false
 
     /**
      * Returns the data classes' children. May fetch them from storage, or return the cached items
@@ -129,17 +165,73 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     @WorkerThread
     @Throws(NoInternetAccessException::class, IllegalStateException::class)
     suspend fun getChildren(firestore: FirebaseFirestore?): Flow<A> = flow {
+        if (loadingChildren) {
+            Timber.v("Waiting for children to finish loading")
+            while (loadingChildren) {
+                delay(DATACLASS_WAIT_CHILDREN_DELAY)
+            }
+            Timber.v("Finished loading children!")
+        }
         if (innerChildren.isEmpty())
             if (firestore == null)
                 throw IllegalStateException("There are no loaded children, and firestore is null.")
-            else
+            else {
+                loadingChildren = true
                 loadChildren(firestore).collect {
                     innerChildren.add(it)
                     emit(it)
                 }
+                loadingChildren = false
+            }
         else
             for (a in innerChildren)
                 emit(a)
+    }
+
+    /**
+     * Gets the KMZ file path.
+     * @author Arnau Mora
+     * @since 20210416
+     * @param context The context to run from.
+     */
+    private fun getKmzFile(context: Context): File = File(context.cacheDir, pin)
+
+    /**
+     * Gets the KMZ file of the [Area] and stores it into [targetFile].
+     * @author Arnau Mora
+     * @since 20210416
+     * @param storage The [FirebaseStorage] instance.
+     * @param targetFile The [File] to store the KMZ at.
+     * @see kmzReferenceUrl
+     */
+    private suspend fun storeKmz(
+        storage: FirebaseStorage,
+        targetFile: File
+    ): FileDownloadTask.TaskSnapshot? =
+        if (kmzReferenceUrl != null)
+            suspendCoroutine { cont ->
+                storage.getReferenceFromUrl(kmzReferenceUrl)
+                    .getFile(targetFile)
+                    .addOnSuccessListener { cont.resume(it) }
+                    .addOnFailureListener { cont.resumeWithException(it) }
+            }
+        else null
+
+    /**
+     * Gets the KMZ file path.
+     * If it has never been loaded, it gets loaded from [storage]. Otherwise, it gets loaded from cache.
+     * @author Arnau Mora
+     * @since 20210416
+     * @param context The context to run from.
+     * @param storage The [FirebaseStorage] instance.
+     */
+    suspend fun getKmzFile(context: Context, storage: FirebaseStorage): File {
+        val kmzFile = getKmzFile(context)
+
+        if (!kmzFile.exists())
+            storeKmz(storage, kmzFile)
+
+        return kmzFile
     }
 
     /**
@@ -308,27 +400,27 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 if (!imageFileExists) {
                     Timber.d("$namespace:$objectId Image file ($imageFile) doesn't exist")
                     result = DownloadStatus.NOT_DOWNLOADED
-                } else {
-                    Timber.v("Getting children elements download status...")
-                    val children = arrayListOf<DataClassImpl>()
-                    getChildren(firestore).toCollection(children)
-                    for ((c, child) in children.withIndex()) {
-                        if (child is DataClass<*, *>) {
-                            progressListener?.invoke(c, children.size)
-                            val childDownloadStatus = child.downloadStatus(context, firestore)
-                            // If the result has not been set yet, which means the image is downloaded
-                            if (result == null) {
-                                // But there's a non-downloaded children
-                                if (!childDownloadStatus.isDownloaded()) {
-                                    Timber.d("There's a non-downloaded children (${child.namespace}:${child.objectId})")
-                                    result = DownloadStatus.PARTIALLY
-                                }
+                }
+
+                Timber.v("Getting children elements download status...")
+                val children = arrayListOf<DataClassImpl>()
+                getChildren(firestore).toCollection(children)
+                for ((c, child) in children.withIndex()) {
+                    if (child is DataClass<*, *>) {
+                        progressListener?.invoke(c, children.size)
+                        val childDownloadStatus = child.downloadStatus(context, firestore)
+                        // If the result has not been set yet, which means the image is downloaded
+                        if (result == null) {
+                            // But there's a non-downloaded children
+                            if (!childDownloadStatus.isDownloaded()) {
+                                Timber.d("There's a non-downloaded children (${child.namespace}:${child.objectId})")
+                                result = DownloadStatus.PARTIALLY
                             }
-                        } else Timber.d("$namespace:$objectId Child is not DataClass")
-                        // If a result has been obtained, exit the for
-                        if (result != DownloadStatus.NOT_DOWNLOADED && result != null)
-                            break
-                    }
+                        }
+                    } else Timber.d("$namespace:$objectId Child is not DataClass")
+                    // If a result has been obtained, exit the for
+                    if (result != DownloadStatus.NOT_DOWNLOADED && result != null)
+                        break
                 }
             }
         }
@@ -497,8 +589,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param imageLoadParameters The parameters to use for loading the image
      */
     @UiThread
-    fun asyncLoadImage(
+    suspend fun loadImage(
         context: Context,
+        storage: FirebaseStorage,
         imageView: ImageView,
         progressBar: ProgressBar? = null,
         imageLoadParameters: ImageLoadParameters<Bitmap>? = null
@@ -507,56 +600,62 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             if (context.isDestroyed)
                 return Timber.e("The activity is destroyed, won't load image.")
 
-        progressBar?.show()
+        uiContext {
+            progressBar?.show()
+        }
         val scale = imageLoadParameters?.resultImageScale ?: 1f
 
         var imageLoadRequest = Glide.with(context)
             .asBitmap()
         val downloadedImageFile = imageFile(context)
         imageLoadRequest = if (downloadedImageFile.exists()) {
-            Timber.d("Loading area image from storage: ${downloadedImageFile.path}")
+            Timber.d("Loading image from storage: ${downloadedImageFile.path}")
             imageLoadRequest
                 .load(readBitmap(downloadedImageFile))
         } else {
-            Timber.d("Getting image from URL ($imageUrl)")
+            Timber.d("Getting image from Firebase: $imageReferenceUrl")
+            val ref = storage.getReferenceFromUrl(imageReferenceUrl)
+            val url = ref.downloadUrl.awaitTask()
             imageLoadRequest
-                .load(imageUrl)
+                .load(url)
         }
-        imageLoadRequest.placeholder(uiMetadata.placeholderDrawable)
-            .error(uiMetadata.errorPlaceholderDrawable)
-            .fallback(uiMetadata.errorPlaceholderDrawable)
-            .thumbnail(scale)
-            .apply(imageLoadParameters)
-            .addListener(object : RequestListener<Bitmap> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<Bitmap>?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    progressBar?.hide()
-                    return false
-                }
+        uiContext {
+            imageLoadRequest.placeholder(uiMetadata.placeholderDrawable)
+                .error(uiMetadata.errorPlaceholderDrawable)
+                .fallback(uiMetadata.errorPlaceholderDrawable)
+                .thumbnail(scale)
+                .apply(imageLoadParameters)
+                .addListener(object : RequestListener<Bitmap> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Bitmap>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        progressBar?.hide()
+                        return false
+                    }
 
-                override fun onResourceReady(
-                    resource: Bitmap?,
-                    model: Any?,
-                    target: Target<Bitmap>?,
-                    dataSource: DataSource?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    progressBar?.hide()
-                    return false
-                }
-            })
-            .into(imageView)
+                    override fun onResourceReady(
+                        resource: Bitmap?,
+                        model: Any?,
+                        target: Target<Bitmap>?,
+                        dataSource: DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        progressBar?.hide()
+                        return false
+                    }
+                })
+                .into(imageView)
+        }
     }
 
     override fun hashCode(): Int {
         var result = objectId.hashCode()
         result = 31 * result + displayName.hashCode()
-        result = 31 * result + (timestamp?.hashCode() ?: 0)
-        result = 31 * result + imageUrl.hashCode()
+        result = 31 * result + timestamp.hashCode()
+        result = 31 * result + imageReferenceUrl.hashCode()
         result = 31 * result + uiMetadata.placeholderDrawable
         result = 31 * result + uiMetadata.errorPlaceholderDrawable
         result = 31 * result + namespace.hashCode()

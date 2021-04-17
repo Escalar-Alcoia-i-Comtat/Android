@@ -9,33 +9,34 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
-import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import com.mapbox.mapboxsdk.geometry.LatLng
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import java.util.Date
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 class Zone(
     objectId: String,
     displayName: String,
-    timestamp: Date?,
+    timestamp: Date,
     val image: String,
-    kmlAddress: String?,
-    val position: LatLng?,
-    private val downloaded: Boolean = false,
+    kmzReferenceUrl: String,
+    val position: LatLng,
     documentPath: String
 ) : DataClass<Sector, Area>(
     displayName,
     timestamp,
     image,
-    kmlAddress,
+    kmzReferenceUrl,
     UIMetadata(
         R.drawable.ic_tall_placeholder,
         R.drawable.ic_tall_placeholder,
@@ -46,17 +47,14 @@ class Zone(
         documentPath
     )
 ) {
-    val transitionName = objectId + displayName.replace(" ", "_")
-
     @WorkerThread
     private constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString()!!,
-        parcel.readString().toTimestamp(),
+        parcel.readString().toTimestamp()!!,
         parcel.readString()!!,
         parcel.readString()!!,
         LatLng(parcel.readDouble(), parcel.readDouble()),
-        parcel.readInt() == 1,
         parcel.readString()!!
     ) {
         parcel.readList(innerChildren, Sector::class.java.classLoader)
@@ -71,11 +69,11 @@ class Zone(
      */
     constructor(data: DocumentSnapshot) : this(
         data.id,
-        data.getString("displayName")!!.fixTildes(),
-        data.getDate("created"),
-        data.getString("image")!!.fixTildes(),
-        data.getString("kmlAddress")?.fixTildes(),
-        data.getGeoPoint("location")?.toLatLng(),
+        data.getString("displayName")!!,
+        data.getDate("created")!!,
+        data.getString("image")!!,
+        data.getString("kmz")!!,
+        data.getGeoPoint("location")!!.toLatLng(),
         documentPath = data.reference.path
     )
 
@@ -88,34 +86,45 @@ class Zone(
      */
     @WorkerThread
     override suspend fun loadChildren(firestore: FirebaseFirestore): Flow<Sector> = flow {
+        Timber.v("Loading Zone's children.")
+
         Timber.d("Fetching...")
         val ref = firestore
             .document(metadata.documentPath)
             .collection("Sectors")
             .orderBy("weight")
         val childTask = ref.get()
-        val snapshot = childTask.awaitTask()
-        val e = childTask.exception
-        if (!childTask.isSuccessful || snapshot == null) {
-            Timber.w(e, "Could not get.")
-            e?.let { throw it }
-        } else {
+        try {
+            Timber.v("Awaiting results...")
+            val snapshot = suspendCoroutine<QuerySnapshot> { cont ->
+                childTask
+                    .addOnSuccessListener { cont.resume(it) }
+                    .addOnFailureListener { cont.resumeWithException(it) }
+            }
+            Timber.v("Got children result")
             val sectors = snapshot.documents
-            Timber.d("Got ${sectors.size} elements.")
-            for (l in sectors.indices)
-                emit(Sector(sectors[l]))
+            Timber.d("Got ${sectors.size} elements. Processing result")
+            for (l in sectors.indices) {
+                val sectorData = sectors[l]
+                Timber.d("Processing sector #$l")
+                val sector = Sector(sectorData)
+                emit(sector)
+            }
+            Timber.d("Finished loading sectors")
+        } catch (e: Exception) {
+            Timber.w(e, "Could not get.")
+            e.let { throw it }
         }
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(objectId)
         parcel.writeString(displayName)
-        parcel.writeString(timestamp?.let { TIMESTAMP_FORMAT.format(timestamp) })
+        parcel.writeString(TIMESTAMP_FORMAT.format(timestamp))
         parcel.writeString(image)
-        parcel.writeString(kmlAddress)
-        parcel.writeDouble(position?.latitude ?: 0.0)
-        parcel.writeDouble(position?.longitude ?: 0.0)
-        parcel.writeInt(if (downloaded) 1 else 0)
+        parcel.writeString(kmzReferenceUrl)
+        parcel.writeDouble(position.latitude)
+        parcel.writeDouble(position.longitude)
         parcel.writeString(metadata.documentPath)
         parcel.writeList(innerChildren)
     }

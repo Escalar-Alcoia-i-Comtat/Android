@@ -16,7 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
-import com.arnyminerz.escalaralcoiaicomtat.list.adapter.ZoneAdapter
+import com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass.DwDataClassAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
@@ -24,7 +24,6 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_POSITION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_TRANSITION_NAME
-import com.arnyminerz.escalaralcoiaicomtat.view.show
 import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
@@ -113,35 +112,38 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
                                     R.anim.item_enter_left_animator
                                 )
                         adapter =
-                            ZoneAdapter(zones, this@AreaActivity) { _, holder, position ->
-                                binding.loadingLayout.show()
-                                runOnUiThread {
-                                    Timber.v("Clicked item $position")
-                                    val intent =
-                                        Intent(this@AreaActivity, ZoneActivity()::class.java)
-                                            .putExtra(EXTRA_AREA, areaId)
-                                            .putExtra(
-                                                EXTRA_ZONE,
-                                                zones[position].objectId
+                            DwDataClassAdapter(
+                                this@AreaActivity,
+                                zones,
+                                itemHeightDp = 700
+                            ) { _, holder, position ->
+                                binding.loadingIndicator.show()
+
+                                Timber.v("Clicked item $position")
+                                val intent =
+                                    Intent(this@AreaActivity, ZoneActivity()::class.java)
+                                        .putExtra(EXTRA_AREA, areaId)
+                                        .putExtra(
+                                            EXTRA_ZONE,
+                                            zones[position].objectId
+                                        )
+
+                                val optionsBundle =
+                                    ViewCompat.getTransitionName(holder.titleTextView)
+                                        ?.let { transitionName ->
+                                            intent.putExtra(
+                                                EXTRA_ZONE_TRANSITION_NAME,
+                                                transitionName
                                             )
 
-                                    val optionsBundle =
-                                        ViewCompat.getTransitionName(holder.titleTextView)
-                                            ?.let { transitionName ->
-                                                intent.putExtra(
-                                                    EXTRA_ZONE_TRANSITION_NAME,
-                                                    transitionName
-                                                )
+                                            ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                                this@AreaActivity,
+                                                holder.titleTextView,
+                                                transitionName
+                                            ).toBundle()
+                                        } ?: Bundle.EMPTY
 
-                                                ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                                    this@AreaActivity,
-                                                    holder.titleTextView,
-                                                    transitionName
-                                                ).toBundle()
-                                            } ?: Bundle.EMPTY
-
-                                    startActivity(intent, optionsBundle)
-                                }
+                                startActivity(intent, optionsBundle)
                             }
                         scrollToPosition(position)
                     }

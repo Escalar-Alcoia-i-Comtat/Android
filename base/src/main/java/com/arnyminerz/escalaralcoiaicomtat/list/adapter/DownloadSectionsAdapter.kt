@@ -69,7 +69,13 @@ class DownloadSectionsAdapter(
 
                 holder.sizeChip.setOnClickListener {
                     Timber.v("Showing download dialog for ZONE")
-                    DownloadDialog(mainActivity, section, firestore).show()
+                    DownloadDialog(
+                        mainActivity,
+                        section,
+                        firestore,
+                        downloadStatus == DownloadStatus.PARTIALLY,
+                        { downloadSection(it, holder) }
+                    ).show()
                 }
             }
         }

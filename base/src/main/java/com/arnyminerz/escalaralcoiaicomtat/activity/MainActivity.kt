@@ -34,6 +34,8 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import com.mapbox.android.core.permissions.PermissionsManager
 import timber.log.Timber
 
@@ -47,9 +49,10 @@ class MainActivity : LanguageAppCompatActivity() {
     private lateinit var settingsFragment: SettingsFragmentManager
 
     var adapter: MainPagerAdapter? = null
-    private lateinit var binding: ActivityMainBinding
+    lateinit var binding: ActivityMainBinding
 
     internal lateinit var firestore: FirebaseFirestore
+    internal lateinit var storage: FirebaseStorage
 
     private fun updateBottomAppBar() {
         Timber.d("Updating bottom app bar...")
@@ -186,9 +189,9 @@ class MainActivity : LanguageAppCompatActivity() {
         Timber.v("  --- Found ${AREAS.size} areas ---")
 
         firestore = Firebase.firestore
+        storage = Firebase.storage
 
         areasViewFragment.setItemClickListener { holder, position ->
-            visibility(binding.loadingLayout, true)
             Timber.v("Clicked item %s", position)
             val intent = Intent(this, AreaActivity()::class.java)
                 .putExtra(EXTRA_AREA, AREAS[position].objectId)
@@ -248,19 +251,5 @@ class MainActivity : LanguageAppCompatActivity() {
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        finishedLoading()
-    }
-
-    /**
-     * Informs the activity it has finished loading
-     * @author Arnau Mora
-     * @since 20210321
-     */
-    fun finishedLoading() {
-        visibility(binding.loadingLayout, false)
     }
 }

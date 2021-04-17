@@ -17,23 +17,24 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MAP_LOAD_PADDING
 import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
+import com.arnyminerz.escalaralcoiaicomtat.data.map.loadKMZ
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMapsBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAskerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapNotInitializedException
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.fileName
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.mime
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_CENTER_CURRENT_LOCATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KML_ADDRESS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.FOLDER_ACCESS_PERMISSION_REQUEST_CODE
 import com.arnyminerz.escalaralcoiaicomtat.shared.INFO_VIBRATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
@@ -43,6 +44,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.MIME_TYPE_GPX
 import com.arnyminerz.escalaralcoiaicomtat.shared.MIME_TYPE_KMZ
 import com.arnyminerz.escalaralcoiaicomtat.shared.PERMISSION_DIALOG_TAG
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -52,16 +54,15 @@ import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import timber.log.Timber
 import java.io.File
-import java.util.concurrent.CompletableFuture.runAsync
 
 class MapsActivity : LanguageAppCompatActivity() {
 
-    private var zoneName: String? = null
     private var markers = arrayListOf<GeoMarker>()
     private var geometries = arrayListOf<GeoGeometry>()
     private var iconSizeMultiplier = ICON_SIZE_MULTIPLIER
 
     private lateinit var mapHelper: MapHelper
+    private lateinit var firestore: FirebaseFirestore
 
     private var markerWindow: MapHelper.MarkerWindow? = null
 
@@ -72,16 +73,14 @@ class MapsActivity : LanguageAppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMapsBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(binding.root)
 
         // Hi from march of 2021
         Timber.v("Getting Mapbox instance...")
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
 
-        val firestore = Firebase.firestore
+        firestore = Firebase.firestore
 
-        var kmlAddress: String? = null
         var kmzFile: File? = null
         var centerCurrentLocation = false
         if (intent != null) {
@@ -98,10 +97,7 @@ class MapsActivity : LanguageAppCompatActivity() {
             iconSizeMultiplier =
                 intent.getExtra(EXTRA_ICON_SIZE_MULTIPLIER) ?: ICON_SIZE_MULTIPLIER
 
-            kmlAddress = intent.getExtra(EXTRA_KML_ADDRESS)
-            zoneName = intent.getExtra(EXTRA_ZONE_NAME)
-            intent.getExtra(EXTRA_KMZ_FILE)
-                .let { path -> if (path != null) kmzFile = File(path) }
+            kmzFile = intent.getExtra(EXTRA_KMZ_FILE)?.let { File(it) }
             centerCurrentLocation = intent.getExtra(EXTRA_CENTER_CURRENT_LOCATION, false)
         } else
             Timber.w("Intent is null")
@@ -150,84 +146,7 @@ class MapsActivity : LanguageAppCompatActivity() {
             popup.show()
         }
 
-        mapHelper = MapHelper(binding.map)
-        mapHelper.onCreate(savedInstanceState)
-        mapHelper
-            .withIconSizeMultiplier(iconSizeMultiplier)
-            .loadMap(this) { _, map, _ ->
-                runAsync {
-                    if (kmlAddress != null) {
-                        Timber.v("Loading KML...")
-                        mapHelper.loadKML(this, kmlAddress)
-                    }
-
-                    runOnUiThread {
-                        Timber.v("Loading current location")
-                        tryToShowCurrentLocation()
-
-                        map.uiSettings.apply {
-                            isCompassEnabled = true
-                            isDoubleTapGesturesEnabled = true
-                        }
-
-                        map.addOnMoveListener(object : MapboxMap.OnMoveListener {
-                            override fun onMoveBegin(detector: MoveGestureDetector) {
-                                if (mapHelper.lastKnownLocation != null)
-                                    binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
-                            }
-
-                            override fun onMove(detector: MoveGestureDetector) {}
-                            override fun onMoveEnd(detector: MoveGestureDetector) {}
-                        })
-                        map.addOnMapClickListener {
-                            showingPolyline = null
-
-                            markerWindow?.hide()
-                            markerWindow = null
-
-                            true
-                        }
-
-                        mapHelper.addSymbolClickListener {
-                            if (SETTINGS_CENTER_MARKER_PREF.get())
-                                mapHelper.move(latLng)
-                            markerWindow?.hide()
-                            val window = getWindow()
-                            val title = window.title
-
-                            if (title.isNotEmpty()) {
-                                markerWindow = mapHelper.infoCard(
-                                    this@MapsActivity,
-                                    firestore,
-                                    this,
-                                    view
-                                )
-
-                                true
-                            } else
-                                false
-                        }
-
-                        if (kmzFile != null)
-                            binding.mapDownloadedImageView.visibility = View.VISIBLE
-
-                        Timber.v(
-                            "Got ${markers.size} markers and ${geometries.size} geometries from intent."
-                        )
-
-                        mapHelper.addMarkers(markers)
-                        mapHelper.addGeometries(geometries)
-
-                        mapHelper.display()
-                        mapHelper.center(
-                            MAP_LOAD_PADDING,
-                            includeCurrentLocation = centerCurrentLocation
-                        )
-
-                        binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
-                    }
-                }
-            }
+        loadMap(savedInstanceState, kmzFile, centerCurrentLocation)
     }
 
     override fun onStart() {
@@ -357,6 +276,92 @@ class MapsActivity : LanguageAppCompatActivity() {
     override fun onBackPressed() {
         super.onBackPressed()
         finish()
+    }
+
+    private fun loadMap(
+        savedInstanceState: Bundle?,
+        kmzFile: File?,
+        centerCurrentLocation: Boolean
+    ) {
+        mapHelper = MapHelper(binding.map)
+        mapHelper.onCreate(savedInstanceState)
+        mapHelper
+            .withIconSizeMultiplier(iconSizeMultiplier)
+            .loadMap(this) { _, map, _ ->
+                Timber.v("Map loaded successfully")
+                doAsync {
+                    val kmlResult = kmzFile?.let { loadKMZ(this@MapsActivity, it) }
+
+                    if (kmlResult != null)
+                        mapHelper.add(kmlResult, center = false, display = false)
+
+                    // Add the features from the intent
+                    Timber.v(
+                        "Got ${markers.size} markers and ${geometries.size} geometries from intent."
+                    )
+                    mapHelper.addMarkers(markers)
+                    mapHelper.addGeometries(geometries)
+
+                    uiContext {
+                        mapHelper.display()
+                        mapHelper.center(
+                            MAP_LOAD_PADDING,
+                            includeCurrentLocation = centerCurrentLocation
+                        )
+                    }
+                }
+
+                Timber.v("Loading current location")
+                tryToShowCurrentLocation()
+
+                map.uiSettings.apply {
+                    isCompassEnabled = true
+                    isDoubleTapGesturesEnabled = true
+                }
+
+                map.addOnMoveListener(object : MapboxMap.OnMoveListener {
+                    override fun onMoveBegin(detector: MoveGestureDetector) {
+                        if (mapHelper.lastKnownLocation != null)
+                            binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
+                    }
+
+                    override fun onMove(detector: MoveGestureDetector) {}
+                    override fun onMoveEnd(detector: MoveGestureDetector) {}
+                })
+                map.addOnMapClickListener {
+                    showingPolyline = null
+
+                    markerWindow?.hide()
+                    markerWindow = null
+
+                    true
+                }
+
+                mapHelper.addSymbolClickListener {
+                    if (SETTINGS_CENTER_MARKER_PREF.get())
+                        mapHelper.move(latLng)
+                    markerWindow?.hide()
+                    val window = getWindow()
+                    val title = window.title
+
+                    if (title.isNotEmpty()) {
+                        markerWindow = mapHelper.infoCard(
+                            this@MapsActivity,
+                            firestore,
+                            this,
+                            binding.root
+                        ).show()
+
+                        true
+                    } else
+                        false
+                }
+
+                if (kmzFile != null)
+                    binding.mapDownloadedImageView.visibility = View.VISIBLE
+
+                binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
+            }
     }
 
     @SuppressLint("MissingPermission")

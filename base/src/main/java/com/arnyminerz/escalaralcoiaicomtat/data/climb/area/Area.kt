@@ -9,31 +9,42 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
-import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import java.util.Date
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
+/**
+ * Creates a new Area instance.
+ * @author Arnau Mora
+ * @since 20210416
+ * @param objectId The id of the object
+ * @param displayName The Area's display name
+ * @param timestamp The update date of the Area
+ * @param kmzReferenceUrl The reference url from Firebase Storage for the Area's KMZ file
+ * @param documentPath The path in Firebase Firestore of the Area
+ */
 class Area(
     objectId: String,
     displayName: String,
-    timestamp: Date?,
+    timestamp: Date,
     image: String,
-    kmlAddress: String?,
-    private val downloaded: Boolean = false,
+    kmzReferenceUrl: String,
     documentPath: String,
 ) : DataClass<Zone, DataClassImpl>(
     displayName,
     timestamp,
     image,
-    kmlAddress,
+    kmzReferenceUrl,
     UIMetadata(
         R.drawable.ic_wide_placeholder,
         R.drawable.ic_wide_placeholder,
@@ -44,17 +55,13 @@ class Area(
         documentPath
     )
 ) {
-    val transitionName
-        get() = objectId + displayName.replace(" ", "_")
-
     @WorkerThread
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString()!!,
-        parcel.readString().toTimestamp(),
+        parcel.readString().toTimestamp()!!,
         parcel.readString()!!,
-        parcel.readString(),
-        parcel.readInt() == 1,
+        parcel.readString()!!,
         parcel.readString()!!
     ) {
         parcel.readList(innerChildren, Zone::class.java.classLoader)
@@ -69,10 +76,10 @@ class Area(
      */
     constructor(data: DocumentSnapshot) : this(
         data.id,
-        data.getString("displayName")!!.fixTildes(),
-        data.getDate("created"),
-        data.getString("image")!!.fixTildes(),
-        data.getString("kmlAddress")!!.fixTildes(),
+        data.getString("displayName")!!,
+        data.getDate("created")!!,
+        data.getString("image")!!,
+        data.getString("kmz")!!,
         documentPath = data.reference.path
     )
 
@@ -93,14 +100,14 @@ class Area(
             .collection("Zones")
             .orderBy("displayName")
         val childTask = ref.get()
-        Timber.v("Awaiting results...")
-        val snapshot = childTask.awaitTask()
-        Timber.v("Got children result")
-        val e = childTask.exception
-        if (!childTask.isSuccessful || snapshot == null) {
-            Timber.w(e, "Could not get.")
-            e?.let { throw it }
-        } else {
+        try {
+            Timber.v("Awaiting results...")
+            val snapshot = suspendCoroutine<QuerySnapshot> { cont ->
+                childTask
+                    .addOnSuccessListener { cont.resume(it) }
+                    .addOnFailureListener { cont.resumeWithException(it) }
+            }
+            Timber.v("Got children result")
             val zones = snapshot.documents
             Timber.d("Got ${zones.size} elements. Processing result")
             for (l in zones.indices) {
@@ -110,16 +117,18 @@ class Area(
                 emit(zone)
             }
             Timber.d("Finished loading zones")
+        } catch (e: Exception) {
+            Timber.w(e, "Could not get.")
+            e.let { throw it }
         }
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(objectId)
         parcel.writeString(displayName)
-        parcel.writeString(timestamp?.let { TIMESTAMP_FORMAT.format(timestamp) })
-        parcel.writeString(imageUrl)
-        parcel.writeString(kmlAddress)
-        parcel.writeInt(if (downloaded) 1 else 0)
+        parcel.writeString(TIMESTAMP_FORMAT.format(timestamp))
+        parcel.writeString(imageReferenceUrl)
+        parcel.writeString(kmzReferenceUrl)
         parcel.writeString(metadata.documentPath)
         parcel.writeList(innerChildren)
     }

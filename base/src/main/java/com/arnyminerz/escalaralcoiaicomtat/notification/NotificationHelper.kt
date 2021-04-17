@@ -16,14 +16,8 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
 import com.mapbox.mapboxsdk.plugins.offline.model.NotificationOptions
 import timber.log.Timber
 
-private fun generateNotificationId(): Int {
-    var greatest = 0
-    for (id in builders.keys) {
-        if (id > greatest)
-            greatest = id
-    }
-    return greatest + 1
-}
+private var notificationIdCounter = 0
+private fun generateNotificationId(): Int = notificationIdCounter++
 
 private val builders = arrayMapOf<Int, Notification.Builder>()
 
@@ -82,6 +76,7 @@ class Notification private constructor(private val builder: Builder) {
                     notificationBuilder.setProgress(value, max, false)
             }
             notificationBuilder.setOngoing(persistent)
+            notificationBuilder.setOnlyAlertOnce(alertOnce)
 
             for (action in actions)
                 notificationBuilder.addAction(
@@ -146,6 +141,7 @@ class Notification private constructor(private val builder: Builder) {
         var intent: PendingIntent? = null
         var progress: ValueMax<Int>? = null
         val actions: ArrayList<NotificationButton> = arrayListOf()
+        var alertOnce = true
 
         /**
          * Sets an id to the notification
@@ -366,6 +362,18 @@ class Notification private constructor(private val builder: Builder) {
          */
         fun setPersistent(persistent: Boolean = true): Builder {
             this.persistent = persistent
+            return this
+        }
+
+        /**
+         * Sets if the notification should interrupt the user every time it's updated.
+         * @author Arnau Mora
+         * @since 20210313
+         * @param alertOnce If the notification should only interrupt the user once.
+         * @return The Builder instance
+         */
+        fun setAlertOnce(alertOnce: Boolean = true): Builder {
+            this.alertOnce = alertOnce
             return this
         }
 

@@ -19,8 +19,8 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.style.layers.Property
-import org.w3c.dom.Document
 import org.w3c.dom.Element
+import org.xml.sax.InputSource
 import timber.log.Timber
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -49,21 +49,19 @@ fun loadKML(
     map: MapboxMap,
     kmlAddress: String? = null,
     kmzFile: File? = null
-): LoadResult {
+): MapFeatures {
     if (kmlAddress == null && kmzFile == null)
         throw IllegalStateException("Both kmlAddress and kmzFile are null")
 
     Timber.d("Instantiating LoadResult...")
-    val result = LoadResult()
+    val result = MapFeatures()
     Timber.v("Loading KML $kmlAddress...")
     val tempDir = kmlAddress?.let { addr -> File(context.cacheDir, addr.replace("/", "")) }
     val docKmlFile = File(tempDir, "doc.kml")
-    var kmlDownloaded = false
     val stream =
         if (tempDir?.exists() == true && docKmlFile.exists()) {
             Timber.v("The kml for ($kmlAddress) is already downloaded in cache. Loading from there.")
-            kmlDownloaded = true
-            null
+            docKmlFile.inputStream()
         } else {
             val stream = if (kmlAddress != null)
                 if (kmlAddress.endsWith("kmz")) null
@@ -83,21 +81,11 @@ fun loadKML(
     val kmldbf: DocumentBuilderFactory =
         DocumentBuilderFactory.newInstance()
     val kmlDB: DocumentBuilder = kmldbf.newDocumentBuilder()
-    val kmlDoc: Document? = when {
-        stream != null -> {
-            Timber.d("Parsing stream...")
-            val doc = kmlDB.parse(stream)
-            Timber.d("Stream ready.")
-            doc
-        }
-        kmlDownloaded -> {
-            Timber.d("Parsing file contents ($docKmlFile)...")
-            val doc = kmlDB.parse(docKmlFile)
-            Timber.d("Contents loaded!")
-            doc
-        }
-        else -> null
-    }
+
+    Timber.d("Parsing stream...")
+    val inputSource = InputSource(stream)
+    val kmlDoc = kmlDB.parse(inputSource)
+    Timber.d("Stream ready.")
 
     if (kmzFile != null)
         Timber.v("Loading stored KML...")
@@ -312,7 +300,7 @@ fun loadKML(
                     if (coordItems != null) {
                         for (coordinate in coordItems) {
                             val latLngD = coordinate.split(",")
-                            if (latLngD.size != 3) continue
+                            if (latLngD.size != MAP_LOADER_LATLNG_SIZE) continue
                             val latLng =
                                 LatLng(latLngD[1].toDouble(), latLngD[0].toDouble())
                             polygonPoints.add(latLng)
@@ -356,7 +344,7 @@ fun loadKML(
 
                     for (coordinate in coordItems) {
                         val latLngD = coordinate.split(",")
-                        if (latLngD.size != 3) continue
+                        if (latLngD.size != MAP_LOADER_LATLNG_SIZE) continue
                         val latLng =
                             LatLng(latLngD[1].toDouble(), latLngD[0].toDouble())
                         polygonPoints.add(latLng)
@@ -390,16 +378,12 @@ fun loadKML(
     Timber.v("Centering map...")
     context.onUiThread {
         if (addedPoints.size > 1)
-            try {
-                newLatLngBounds(
-                    addedPoints,
-                    context.resources.getInteger(R.integer.marker_padding)
-                )?.let { bounds ->
-                    map.moveCamera(bounds)
-                }
-            } catch (ex: NullPointerException) { // This sometimes throw when trying to get bounds
-                Timber.e(ex, "Could not find bounds:")
-            }
+            newLatLngBounds(
+                addedPoints,
+                context.resources.getInteger(R.integer.marker_padding)
+            )?.let { bounds ->
+                map.moveCamera(bounds)
+            } ?: Timber.e("Could not find bounds:")
         else if (addedPoints.size > 0)
             map.moveCamera(
                 CameraUpdateFactory.newCameraPosition(
@@ -415,10 +399,4 @@ fun loadKML(
     stream?.close()
 
     return result
-}
-
-class LoadResult {
-    val markers: ArrayList<GeoMarker> = arrayListOf()
-    val polygons: ArrayList<GeoGeometry> = arrayListOf()
-    val polylines: ArrayList<GeoGeometry> = arrayListOf()
 }

@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
+import android.os.TransactionTooLargeException
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewManager
@@ -24,11 +25,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
-import androidx.annotation.WorkerThread
 import androidx.cardview.widget.CardView
 import androidx.collection.arrayMapOf
 import androidx.core.content.res.ResourcesCompat
-import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass.Companion.getIntent
@@ -47,22 +46,18 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.MARKER_WINDOW_SHOW_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
 import com.arnyminerz.escalaralcoiaicomtat.data.map.addToMap
 import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
-import com.arnyminerz.escalaralcoiaicomtat.data.map.loadKML
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCompressImageException
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCreateDirException
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotOpenStreamException
 import com.arnyminerz.escalaralcoiaicomtat.exception.MissingPermissionException
-import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.includeAll
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KML_ADDRESS
 import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.storage.zipFile
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
@@ -134,8 +129,6 @@ class MapHelper(private val mapView: MapView) {
     private var fillManager: FillManager? = null
     private var lineManager: LineManager? = null
 
-    private var loadedKMLAddress: String? = null
-
     private lateinit var locationManager: LocationManager
     var lastKnownLocation: LatLng? = null
         private set
@@ -183,9 +176,6 @@ class MapHelper(private val mapView: MapView) {
     val isLoaded: Boolean
         get() = symbolManager != null && fillManager != null && lineManager != null &&
                 map != null && style != null && style!!.isFullyLoaded && mapSetUp
-
-    val kmlAddress: String?
-        get() = loadedKMLAddress
 
     fun onCreate(savedInstanceState: Bundle?) = mapView.onCreate(savedInstanceState)
 
@@ -333,67 +323,23 @@ class MapHelper(private val mapView: MapView) {
     }
 
     /**
-     * Loads the KML address. Should be called asyncronously.
-     * @throws FileNotFoundException When the KMZ file could not be found
-     * @throws NoInternetAccessException When no Internet access was detected
-     * @throws MapNotInitializedException If this function is called before loadMap
-     * @see loadMap
-     * @see MapFeatures
-     * @author Arnau Mora
-     * @return A MapFeatures object with all the loaded data
-     */
-    @Throws(
-        FileNotFoundException::class,
-        NoInternetAccessException::class,
-        MapNotInitializedException::class
-    )
-    @WorkerThread
-    fun loadKML(
-        activity: FragmentActivity,
-        kmlAddress: String?,
-        addToMap: Boolean = true
-    ): MapFeatures {
-        if (addToMap && !isLoaded)
-            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
-        if (!appNetworkState.hasInternet)
-            throw NoInternetAccessException()
-
-        Timber.v("Loading KML $kmlAddress...")
-        val result = loadKML(activity, map!!, kmlAddress = kmlAddress)
-        if (addToMap)
-            activity.runOnUiThread {
-                Timber.v("Loading features...")
-                with(result) {
-                    Timber.v("  Loading ${markers.size} markers...")
-                    addMarkers(markers)
-                    Timber.v("  Loading ${polygons.size} polygons...")
-                    addGeometries(polygons)
-                    Timber.v("  Loading ${polylines.size} polylines...")
-                    addGeometries(polylines)
-
-                    display()
-                    center()
-                }
-            }
-        loadedKMLAddress = kmlAddress
-        return MapFeatures(result.markers, result.polylines, result.polygons)
-    }
-
-    /**
      * Generates an intent for launching the MapsActivity
      * @author Arnau Mora
      * @param context The context to launch from
      * @param overrideLoadedValues If true, the loader markers and geometries will be ignored, and
      * the KML address will be passed to MapsActivity.
      * @throws MapAnyDataToLoadException When no data has been loaded
+     * @throws TransactionTooLargeException When there's too much data on the map to transfer
      * @see MapsActivity
      */
-    @Throws(MapAnyDataToLoadException::class)
+    @Throws(
+        MapAnyDataToLoadException::class,
+        TransactionTooLargeException::class
+    )
     fun mapsActivityIntent(context: Context, overrideLoadedValues: Boolean = false): Intent {
         val loadedElements = markers.isNotEmpty() || geometries.isNotEmpty()
-
-        if (loadedKMLAddress == null && !loadedElements)
-            throw MapAnyDataToLoadException("Map doesn't have any loaded data. You may run loadKML, for example.")
+        if (!loadedElements)
+            throw MapAnyDataToLoadException("Map doesn't have any loaded data.")
 
         Timber.d("Preparing MapsActivity intent...")
         val elementsIntent = Intent(context, MapsActivity::class.java).apply {
@@ -417,11 +363,7 @@ class MapHelper(private val mapView: MapView) {
         return if (loadedElements && !overrideLoadedValues && elementsIntentSize < MBYTE / 2)
             elementsIntent
         else
-            Intent(context, MapsActivity::class.java).apply {
-                Timber.d("Passing to MapsActivity with kml address ($loadedKMLAddress).")
-                putExtra(EXTRA_KML_ADDRESS, loadedKMLAddress!!)
-                putExtra(EXTRA_ICON_SIZE_MULTIPLIER, markerSizeMultiplier)
-            }
+            throw TransactionTooLargeException("There are too many items in the map. Size: $elementsIntentSize")
     }
 
     /**
@@ -596,12 +538,37 @@ class MapHelper(private val mapView: MapView) {
     }
 
     /**
-     * Adds markers to the map
-     * @param markers The markers to add
+     * Adds the map features to the map
+     * @param result The [MapFeatures] to add
+     * @param center If the camera should be centered on the features after loading them
+     * @param display If the added features should be displayed. This is ignored if [center] is true.
+     * @see MapFeatures
+     * @see GeoGeometry
      * @see GeoMarker
      * @throws MapNotInitializedException If the map has not been initialized
      */
+    @UiThread
     @Throws(MapNotInitializedException::class)
+    fun add(result: MapFeatures, center: Boolean = true, display: Boolean = true) {
+        Timber.v("Loading features...")
+        with(result) {
+            Timber.v("  Loading ${markers.size} markers...")
+            addMarkers(markers)
+            Timber.v("  Loading ${polygons.size} polygons...")
+            addGeometries(polygons)
+            Timber.v("  Loading ${polylines.size} polylines...")
+            addGeometries(polylines)
+
+            if (display || center) display()
+            if (center) center()
+        }
+    }
+
+    /**
+     * Adds markers to the map
+     * @param markers The markers to add
+     * @see GeoMarker
+     */
     fun addMarkers(markers: Collection<GeoMarker>) {
         for (marker in markers)
             addMarker(marker)
@@ -611,9 +578,7 @@ class MapHelper(private val mapView: MapView) {
      * Adds a marker to the map
      * @param marker The marker to add
      * @see GeoMarker
-     * @throws MapNotInitializedException If the map has not been initialized
      */
-    @Throws(MapNotInitializedException::class)
     fun addMarker(marker: GeoMarker) {
         marker.iconSizeMultiplier = markerSizeMultiplier
         markers.add(marker)
@@ -623,9 +588,7 @@ class MapHelper(private val mapView: MapView) {
      * Adds geometries to the map
      * @param geometries The geometries to add
      * @see GeoGeometry
-     * @throws MapNotInitializedException If the map has not been initialized
      */
-    @Throws(MapNotInitializedException::class)
     fun addGeometries(geometries: Collection<GeoGeometry>) {
         for (geometry in geometries)
             addGeometry(geometry)
@@ -635,9 +598,7 @@ class MapHelper(private val mapView: MapView) {
      * Adds a geometry to the map
      * @param geometry The geometry to add
      * @see GeoGeometry
-     * @throws MapNotInitializedException If the map has not been initialized
      */
-    @Throws(MapNotInitializedException::class)
     fun addGeometry(geometry: GeoGeometry) {
         geometries.add(geometry)
     }
@@ -648,9 +609,7 @@ class MapHelper(private val mapView: MapView) {
      * @param element The element to add
      * @see GeoGeometry
      * @see GeoMarker
-     * @throws MapNotInitializedException If the map has not been initialized
      */
-    @Throws(MapNotInitializedException::class)
     fun add(element: Parcelable) {
         if (element is GeoMarker)
             addMarker(element)
@@ -1163,11 +1122,12 @@ class MapHelper(private val mapView: MapView) {
     inner class MarkerWindow
     @UiThread constructor(
         private val activity: Activity,
-        marker: Symbol,
-        rootView: ViewGroup,
-        firestore: FirebaseFirestore
+        private val marker: Symbol,
+        private val rootView: ViewGroup,
+        private val firestore: FirebaseFirestore
     ) {
         private var destroyed = false
+        private var shown = false
 
         private var view: View =
             activity.layoutInflater.inflate(R.layout.dialog_map_marker, rootView, false)
@@ -1179,7 +1139,14 @@ class MapHelper(private val mapView: MapView) {
         private var mapButton: FloatingActionButton = view.findViewById(R.id.fab_maps)
         private var buttonsLayout: LinearLayout = view.findViewById(R.id.actions_layout)
 
-        init {
+        private val hideListeners = arrayListOf<() -> Unit>()
+
+        /**
+         * Shows the [MarkerWindow].
+         * @author Arnau Mora
+         * @since 20210416
+         */
+        fun show() = also {
             val anim = AnimationUtils.loadAnimation(activity, R.anim.enter_bottom)
             anim.duration = MARKER_WINDOW_SHOW_DURATION
             cardView.show()
@@ -1227,15 +1194,20 @@ class MapHelper(private val mapView: MapView) {
                 else LinearLayout.HORIZONTAL
 
             rootView.addView(cardView, view.layoutParams)
+            shown = true
+            destroyed = false
         }
 
         /**
          * Hides the window
          * @author Arnau Mora
          * @since 20210315
-         * @throws IllegalStateException If the method is called when the card has already been destroyed
+         * @throws IllegalStateException If the method is called when the card has already been
+         * destroyed, or has not been shown yet.
          */
-        fun hide() {
+        fun hide() = also {
+            if (!shown)
+                throw IllegalStateException("The card has already been destroyed")
             if (destroyed)
                 throw IllegalStateException("The card has already been destroyed")
 
@@ -1248,9 +1220,23 @@ class MapHelper(private val mapView: MapView) {
                 cardView.hide()
                 (cardView.parent as ViewManager).removeView(cardView)
                 destroyed = true
+                shown = false
             }, MARKER_WINDOW_HIDE_DURATION)
             cardView.startAnimation(anim)
+
+            for (list in hideListeners)
+                list()
         }
+
+        /**
+         * Listens for when the window is hidden by the user.
+         * @author Arnau Mora
+         * @since 20210416
+         */
+        fun listenHide(block: () -> Unit): MarkerWindow =
+            this.also {
+                hideListeners.add(block)
+            }
     }
 }
 

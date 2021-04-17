@@ -14,12 +14,10 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassMetadat
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
-import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.arnyminerz.escalaralcoiaicomtat.view.BarChartHelper
 import com.arnyminerz.escalaralcoiaicomtat.view.getAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -30,16 +28,20 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import com.mapbox.mapboxsdk.geometry.LatLng
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import java.util.Date
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 class Sector constructor(
     objectId: String,
     displayName: String,
-    timestamp: Date?,
+    timestamp: Date,
     val sunTime: SunTime,
     val kidsApt: Boolean,
     val walkingTime: Long,
@@ -71,27 +73,27 @@ class Sector constructor(
      */
     constructor(data: DocumentSnapshot) : this(
         data.id,
-        data.getString("displayName")!!.fixTildes(),
-        data.getDate("timestamp"),
+        data.getString("displayName")!!,
+        data.getDate("created")!!,
         SunTime.find(data.getLong("sunTime")!!.toInt()),
         data.getBoolean("kidsApt") ?: false,
         data.getLong("walkingTime")!!,
         data.getGeoPoint("location")?.toLatLng(),
         data.getString("weight")!!,
-        data.getString("image")!!.fixTildes(),
+        data.getString("image")!!,
         documentPath = data.reference.path
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(objectId)
         parcel.writeString(displayName)
-        parcel.writeString(timestamp?.let { TIMESTAMP_FORMAT.format(timestamp) })
+        parcel.writeString(timestamp.let { TIMESTAMP_FORMAT.format(timestamp) })
         parcel.writeInt(sunTime.value)
         parcel.writeInt(if (kidsApt) 1 else 0)
         parcel.writeLong(walkingTime)
         parcel.writeParcelable(location, 0)
         parcel.writeString(weight)
-        parcel.writeString(imageUrl)
+        parcel.writeString(imageReferenceUrl)
         parcel.writeString(metadata.documentPath)
         parcel.writeList(innerChildren)
     }
@@ -99,7 +101,7 @@ class Sector constructor(
     constructor(parcel: Parcel) : this(
         parcel.readString()!!, // objectId
         parcel.readString()!!, // Display Name
-        parcel.readString().toTimestamp(), // Timestamp
+        parcel.readString().toTimestamp()!!, // Timestamp
         SunTime.find(parcel.readInt()), // Sun Time
         parcel.readInt() == 1, // Kids Apt
         parcel.readLong(), // Walking Time
@@ -120,23 +122,34 @@ class Sector constructor(
      */
     @WorkerThread
     override suspend fun loadChildren(firestore: FirebaseFirestore): Flow<Path> = flow {
+        Timber.v("Loading Sector's children.")
+
         Timber.d("Fetching...")
         val ref = firestore
             .document(metadata.documentPath)
             .collection("Paths")
-            .orderBy("sketchId")
+            .orderBy("displayName")
         val childTask = ref.get()
-        val snapshot = childTask.awaitTask()
-        val e = childTask.exception
-        if (!childTask.isSuccessful || snapshot == null) {
-            Timber.w(e, "Could not get.")
-            e?.let { throw it }
-        } else {
+        try {
+            Timber.v("Awaiting results...")
+            val snapshot = suspendCoroutine<QuerySnapshot> { cont ->
+                childTask
+                    .addOnSuccessListener { cont.resume(it) }
+                    .addOnFailureListener { cont.resumeWithException(it) }
+            }
+            Timber.v("Got children result")
             val paths = snapshot.documents
-            Timber.d("Got ${paths.size} elements. Processing paths...")
-            for (l in paths.indices)
-                emit(Path(paths[l]))
-            Timber.d("Finished processing paths")
+            Timber.d("Got ${paths.size} elements. Processing result")
+            for (l in paths.indices) {
+                val pathData = paths[l]
+                Timber.d("Processing sector #$l")
+                val path = Path(pathData)
+                emit(path)
+            }
+            Timber.d("Finished loading zones")
+        } catch (e: Exception) {
+            Timber.w(e, "Could not get.")
+            e.let { throw it }
         }
     }
 

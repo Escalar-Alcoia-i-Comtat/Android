@@ -24,3 +24,5 @@ const val CURRENT_LOCATION_DEFAULT_ZOOM = 17.0
 const val MAP_LOAD_PADDING = 50
 
 const val WINDOW_DATA_KEY = "window_data"
+
+const val MAP_LOADER_LATLNG_SIZE = 3

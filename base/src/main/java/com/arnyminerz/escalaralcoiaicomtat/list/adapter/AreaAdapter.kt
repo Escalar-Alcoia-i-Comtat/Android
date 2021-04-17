@@ -1,13 +1,14 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 
-import android.app.Activity
 import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_PREVIEW_SCALE_PREF
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
@@ -15,7 +16,7 @@ import timber.log.Timber
 import java.io.InvalidClassException
 
 class AreaAdapter(
-    private val activity: Activity,
+    private val activity: MainActivity,
     private var clickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<AreaViewHolder>() {
     init {
@@ -42,13 +43,16 @@ class AreaAdapter(
         holder.imageView.setOnClickListener {
             clickListener?.invoke(holder, position) ?: Timber.w("Any click listener was set!")
         }
-        area.asyncLoadImage(
-            activity,
-            holder.imageView,
-            imageLoadParameters =
-            ImageLoadParameters<Bitmap>().withThumbnailSize(
-                SETTINGS_PREVIEW_SCALE_PREF.get()
+        doAsync {
+            area.loadImage(
+                activity,
+                activity.storage,
+                holder.imageView,
+                imageLoadParameters =
+                ImageLoadParameters<Bitmap>().withThumbnailSize(
+                    SETTINGS_PREVIEW_SCALE_PREF.get()
+                )
             )
-        )
+        }
     }
 }

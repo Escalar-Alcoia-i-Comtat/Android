@@ -101,7 +101,7 @@ class SectorActivity : LanguageAppCompatActivity() {
      */
     @UiThread
     fun setLoading(loading: Boolean) {
-        binding.loadingLayout.visibility(loading)
+        binding.loadingIndicator.visibility(loading)
         binding.titleTextView.visibility(!loading)
     }
 

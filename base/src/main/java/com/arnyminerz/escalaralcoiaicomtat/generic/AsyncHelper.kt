@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
+import android.app.Activity
 import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +42,17 @@ fun doOnMain(block: suspend CoroutineScope.() -> Unit) =
  */
 suspend fun <T> uiContext(block: suspend CoroutineScope.() -> T) =
     withContext(Dispatchers.Main, block)
+
+/**
+ * Runs a block of code on the main dispatcher (UI thread).
+ * @author Arnau Mora
+ * @since 20210413
+ * @param block The code to run
+ */
+suspend fun <T, A : Activity> A.uiContext(block: suspend A.() -> T) =
+    withContext(Dispatchers.Main) {
+        block(this@uiContext)
+    }
 
 suspend fun <T> Task<T>.awaitTask(): T? = suspendCoroutine { continuation ->
     this.addOnCompleteListener { task ->
