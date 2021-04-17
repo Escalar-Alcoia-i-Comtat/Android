@@ -11,7 +11,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
-import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
@@ -77,9 +76,9 @@ class Area(
      */
     constructor(data: DocumentSnapshot) : this(
         data.id,
-        data.getString("displayName")!!.fixTildes(),
+        data.getString("displayName")!!,
         data.getDate("created")!!,
-        data.getString("image")!!.fixTildes(),
+        data.getString("image")!!,
         data.getString("kmz")!!,
         documentPath = data.reference.path
     )

@@ -18,7 +18,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
-import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.arnyminerz.escalaralcoiaicomtat.view.BarChartHelper
 import com.arnyminerz.escalaralcoiaicomtat.view.getAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -74,14 +73,14 @@ class Sector constructor(
      */
     constructor(data: DocumentSnapshot) : this(
         data.id,
-        data.getString("displayName")!!.fixTildes(),
+        data.getString("displayName")!!,
         data.getDate("created")!!,
         SunTime.find(data.getLong("sunTime")!!.toInt()),
         data.getBoolean("kidsApt") ?: false,
         data.getLong("walkingTime")!!,
         data.getGeoPoint("location")?.toLatLng(),
         data.getString("weight")!!,
-        data.getString("image")!!.fixTildes(),
+        data.getString("image")!!,
         documentPath = data.reference.path
     )
 

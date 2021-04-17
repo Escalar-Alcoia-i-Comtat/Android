@@ -12,7 +12,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
-import com.arnyminerz.escalaralcoiaicomtat.generic.fixTildes
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
@@ -70,9 +69,9 @@ class Zone(
      */
     constructor(data: DocumentSnapshot) : this(
         data.id,
-        data.getString("displayName")!!.fixTildes(),
+        data.getString("displayName")!!,
         data.getDate("created")!!,
-        data.getString("image")!!.fixTildes(),
+        data.getString("image")!!,
         data.getString("kmz")!!,
         data.getGeoPoint("location")!!.toLatLng(),
         documentPath = data.reference.path
