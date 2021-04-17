@@ -250,7 +250,22 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             .withTitle(R.string.notification_download_progress_title, zone.displayName)
             .buildAndShow()
 
-        val image = zone.imageReferenceUrl
+        var image = zone.imageReferenceUrl
+        if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/"))
+            runBlocking {
+                Timber.w("Fixing zone image reference ($image)...")
+                val i = image.lastIndexOf('/') + 1
+                val newImage =
+                    "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
+                Timber.w("Changing image address to \"$newImage\"...")
+                firestore
+                    .document(path)
+                    .update(mapOf("image" to newImage))
+                    .awaitTask()
+                Timber.w("Image address updated.")
+                image = newImage
+            }
+
         val imageFile = zone.imageFile(applicationContext)
         downloadImageFile(image, imageFile)
 
@@ -305,7 +320,22 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             .withTitle(R.string.notification_download_progress_title, sector.displayName)
             .buildAndShow()
 
-        val image = sector.imageReferenceUrl
+        var image = sector.imageReferenceUrl
+        if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/"))
+            runBlocking {
+                Timber.w("Fixing zone image reference ($image)...")
+                val i = image.lastIndexOf('/') + 1
+                val newImage =
+                    "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
+                Timber.w("Changing image address to \"$newImage\"...")
+                firestore
+                    .document(path)
+                    .update(mapOf("image" to newImage))
+                    .awaitTask()
+                Timber.w("Image address updated.")
+                image = newImage
+            }
+
         val imageFile = sector.imageFile(applicationContext)
         downloadImageFile(image, imageFile)
 
