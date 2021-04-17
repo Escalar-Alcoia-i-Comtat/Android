@@ -441,23 +441,28 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                         }
                 }
                 Timber.v("Showing download finished notification")
+                val text = applicationContext.getString(
+                    R.string.notification_download_complete_message,
+                    this@DownloadWorker.displayName
+                )
                 Notification.Builder(applicationContext)
                     .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
                     .withIcon(R.drawable.ic_notifications)
                     .withTitle(R.string.notification_download_complete_title)
-                    .withText(
-                        R.string.notification_download_complete_message,
-                        this@DownloadWorker.displayName
-                    )
+                    .withText(text)
                     .withIntent(intent)
                     .buildAndShow()
             } else {
                 Timber.v("Download failed! Result: $downloadResult. Showing notification.")
+                val text = applicationContext.getString(
+                    R.string.notification_download_failed_message,
+                    this.displayName
+                )
                 Notification.Builder(applicationContext)
                     .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
                     .withIcon(R.drawable.ic_notifications)
                     .withTitle(R.string.notification_download_failed_title)
-                    .withText(R.string.notification_download_failed_message, this.displayName)
+                    .withText(text)
                     .withLongText(
                         R.string.notification_download_failed_message_long,
                         displayName,
