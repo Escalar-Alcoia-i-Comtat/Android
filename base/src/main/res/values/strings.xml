@@ -79,6 +79,7 @@
     <string name="dialog_permission_message">The functionality you are trying to use requires the %s permission. Please grant it, or refuse to use that.</string>
     <string name="dialog_permission_my_location_message">For showing your current position, the app must have access to the location of your device. Please, grant it, or refuse to use this functionality.</string>
     <string name="dialog_downloaded_msg">Downloaded on: %s</string>
+    <string name="dialog_downloaded_partially_msg">Some children have been downloaded, but not "%s" completely. Do you want to download it complete?</string>
     <string name="dialog_uses_storage_msg">Uses: %s</string>
     <string name="dialog_description_description_title">Description</string>
     <string name="dialog_description_builder_title">Built By</string>
