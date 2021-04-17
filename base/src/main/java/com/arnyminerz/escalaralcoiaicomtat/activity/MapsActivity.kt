@@ -35,7 +35,6 @@ import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_CENTER_CURRENT_LOCATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.FOLDER_ACCESS_PERMISSION_REQUEST_CODE
 import com.arnyminerz.escalaralcoiaicomtat.shared.INFO_VIBRATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
@@ -58,7 +57,6 @@ import java.io.File
 
 class MapsActivity : LanguageAppCompatActivity() {
 
-    private var zoneName: String? = null
     private var markers = arrayListOf<GeoMarker>()
     private var geometries = arrayListOf<GeoGeometry>()
     private var iconSizeMultiplier = ICON_SIZE_MULTIPLIER
@@ -99,9 +97,7 @@ class MapsActivity : LanguageAppCompatActivity() {
             iconSizeMultiplier =
                 intent.getExtra(EXTRA_ICON_SIZE_MULTIPLIER) ?: ICON_SIZE_MULTIPLIER
 
-            zoneName = intent.getExtra(EXTRA_ZONE_NAME)
-            intent.getExtra(EXTRA_KMZ_FILE)
-                .let { path -> if (path != null) kmzFile = File(path) }
+            kmzFile = intent.getExtra(EXTRA_KMZ_FILE)?.let { File(it) }
             centerCurrentLocation = intent.getExtra(EXTRA_CENTER_CURRENT_LOCATION, false)
         } else
             Timber.w("Intent is null")
