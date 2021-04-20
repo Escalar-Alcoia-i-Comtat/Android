@@ -355,7 +355,10 @@ class MapHelper(private val mapView: MapView) {
     }
 
     /**
-     * Generates an intent for launching the MapsActivity
+     * Generates an intent for launching the MapsActivity.
+     * If the loaded features fit inside the [Intent]'s extras, they will be passed with this method,
+     * otherwise, [TransactionTooLargeException] will be thrown, unless the data has been loaded
+     * through [loadKMZ].
      * @author Arnau Mora
      * @param context The context to launch from
      * @param overrideLoadedValues If true, the loader markers and geometries will be ignored, and
