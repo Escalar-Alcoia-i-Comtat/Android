@@ -168,6 +168,8 @@ class MapHelper(private val mapView: MapView) {
     private val lines = arrayListOf<Line>()
     private val fills = arrayListOf<Fill>()
 
+    private var loadedKmzFile: File? = null
+
     private val addedImages = arrayListOf<String>()
 
     private val symbolClickListeners = arrayListOf<Symbol.() -> Boolean>()
@@ -320,6 +322,39 @@ class MapHelper(private val mapView: MapView) {
         }
 
         return this
+    }
+
+    /**
+     * Loads a KMZ file into the map.
+     * @author Arnau Mora
+     * @since 20210420
+     * @param context The context to call from
+     * @param kmzFile The file to load
+     * @param addToMap If true, the loaded features will be added automatically to the map
+     * @param display If true, the loaded features will be shown automatically to the map. Note that
+     * this parameter is ignored if [addToMap] is false.
+     */
+    suspend fun loadKMZ(
+        context: Context,
+        kmzFile: File,
+        addToMap: Boolean = true,
+        display: Boolean = true
+    ): MapFeatures {
+        Timber.v("Getting map features...")
+        val features = loadKMZ(context, kmzFile)
+        loadedKmzFile = kmzFile
+
+        uiContext {
+            if (addToMap) {
+                Timber.v("Adding features to the map...")
+                add(features)
+
+                if (display)
+                    display()
+            }
+        }
+
+        return features
     }
 
     /**
