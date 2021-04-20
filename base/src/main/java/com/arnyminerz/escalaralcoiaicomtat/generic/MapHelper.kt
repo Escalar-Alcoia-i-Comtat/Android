@@ -54,10 +54,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.includeAll
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
-import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
-import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
+import com.arnyminerz.escalaralcoiaicomtat.shared.*
 import com.arnyminerz.escalaralcoiaicomtat.storage.zipFile
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
@@ -167,6 +164,8 @@ class MapHelper(private val mapView: MapView) {
     private val symbols = arrayListOf<Symbol>()
     private val lines = arrayListOf<Line>()
     private val fills = arrayListOf<Fill>()
+
+    private var loadedKmzFile: File? = null
 
     private val addedImages = arrayListOf<String>()
 
@@ -323,7 +322,43 @@ class MapHelper(private val mapView: MapView) {
     }
 
     /**
-     * Generates an intent for launching the MapsActivity
+     * Loads a KMZ file into the map.
+     * @author Arnau Mora
+     * @since 20210420
+     * @param context The context to call from
+     * @param kmzFile The file to load
+     * @param addToMap If true, the loaded features will be added automatically to the map
+     * @param display If true, the loaded features will be shown automatically to the map. Note that
+     * this parameter is ignored if [addToMap] is false.
+     */
+    suspend fun loadKMZ(
+        context: Context,
+        kmzFile: File,
+        addToMap: Boolean = true,
+        display: Boolean = true
+    ): MapFeatures {
+        Timber.v("Getting map features...")
+        val features = com.arnyminerz.escalaralcoiaicomtat.data.map.loadKMZ(context, kmzFile)
+        loadedKmzFile = kmzFile
+
+        uiContext {
+            if (addToMap) {
+                Timber.v("Adding features to the map...")
+                add(features)
+
+                if (display)
+                    display()
+            }
+        }
+
+        return features
+    }
+
+    /**
+     * Generates an intent for launching the MapsActivity.
+     * If the loaded features fit inside the [Intent]'s extras, they will be passed with this method,
+     * otherwise, [TransactionTooLargeException] will be thrown, unless the data has been loaded
+     * through [loadKMZ].
      * @author Arnau Mora
      * @param context The context to launch from
      * @param overrideLoadedValues If true, the loader markers and geometries will be ignored, and
@@ -362,6 +397,10 @@ class MapHelper(private val mapView: MapView) {
         // The size check ensures that TransactionTooLargeException is not thrown
         return if (loadedElements && !overrideLoadedValues && elementsIntentSize < MBYTE / 2)
             elementsIntent
+        else if (loadedKmzFile != null)
+            Intent(context, MapsActivity::class.java).apply {
+                putExtra(EXTRA_KMZ_FILE, loadedKmzFile!!.path)
+            }
         else
             throw TransactionTooLargeException("There are too many items in the map. Size: $elementsIntentSize")
     }
