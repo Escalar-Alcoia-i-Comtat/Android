@@ -338,7 +338,7 @@ class MapHelper(private val mapView: MapView) {
         display: Boolean = true
     ): MapFeatures {
         Timber.v("Getting map features...")
-        val features = loadKMZ(context, kmzFile)
+        val features = com.arnyminerz.escalaralcoiaicomtat.data.map.loadKMZ(context, kmzFile)
         loadedKmzFile = kmzFile
 
         uiContext {
