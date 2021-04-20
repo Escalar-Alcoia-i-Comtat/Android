@@ -54,10 +54,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.includeAll
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
-import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
-import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
+import com.arnyminerz.escalaralcoiaicomtat.shared.*
 import com.arnyminerz.escalaralcoiaicomtat.storage.zipFile
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
@@ -397,6 +394,10 @@ class MapHelper(private val mapView: MapView) {
         // The size check ensures that TransactionTooLargeException is not thrown
         return if (loadedElements && !overrideLoadedValues && elementsIntentSize < MBYTE / 2)
             elementsIntent
+        else if (loadedKmzFile != null)
+            Intent(context, MapsActivity::class.java).apply {
+                putExtra(EXTRA_KMZ_FILE, loadedKmzFile!!.path)
+            }
         else
             throw TransactionTooLargeException("There are too many items in the map. Size: $elementsIntentSize")
     }
