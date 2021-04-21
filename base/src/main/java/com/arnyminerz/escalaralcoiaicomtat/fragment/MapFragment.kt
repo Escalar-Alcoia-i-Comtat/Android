@@ -74,7 +74,8 @@ class MapFragment : NetworkChangeListenerFragment() {
         firebaseStorage = Firebase.storage
 
         Timber.v("Preparing MapHelper...")
-        mapHelper = MapHelper(binding.pageMapView)
+        mapHelper = MapHelper(requireContext())
+            .withMapView(binding.pageMapView)
         mapHelper.onCreate(savedInstanceState)
         mapHelper
             .withIconSizeMultiplier(ICON_SIZE_MULTIPLIER)

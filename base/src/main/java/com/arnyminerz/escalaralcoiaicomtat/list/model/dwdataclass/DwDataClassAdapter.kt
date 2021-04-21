@@ -123,10 +123,10 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
             val shouldAddObserver =
                 lastDownloadStatus != status && status == DownloadStatus.DOWNLOADING
 
-            if (status == DownloadStatus.DOWNLOADING && shouldAddObserver)
+            val workInfo = data.downloadWorkInfo(activity)
+            if (status == DownloadStatus.DOWNLOADING && workInfo != null && shouldAddObserver)
                 uiContext {
                     Timber.v("$data is being downloaded, observing...")
-                    val workInfo = data.downloadWorkInfo(activity)!!
                     val workManager = WorkManager.getInstance(activity)
 
                     val liveData = workManager.getWorkInfoByIdLiveData(workInfo.id)

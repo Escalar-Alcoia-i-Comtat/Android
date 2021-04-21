@@ -51,7 +51,6 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
         firestore = Firebase.firestore
         storage = Firebase.storage
 
@@ -59,7 +58,8 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         val view = binding.root
         setContentView(view)
 
-        mapHelper = MapHelper(binding.map)
+        mapHelper = MapHelper(this)
+            .withMapView(binding.map)
             .withIconSizeMultiplier(iconSizeMultiplier)
         mapHelper.onCreate(savedInstanceState)
 
