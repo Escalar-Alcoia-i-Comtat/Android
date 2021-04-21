@@ -172,7 +172,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
      */
     @MainThread
     private fun showMap(data: T) = doAsync {
-        val kmzFile = data.getKmzFile(activity, storage)
+        val kmzFile = data.getKmzFile(activity, storage, false)
         uiContext {
             activity.startActivity(
                 Intent(activity, MapsActivity::class.java)

@@ -120,7 +120,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                     try {
                         doAsync {
                             Timber.v("Getting KMZ file...")
-                            val kmzFile = dataClass.getKmzFile(this@DataClassListActivity, storage)
+                            val kmzFile = dataClass.getKmzFile(this@DataClassListActivity, storage, false)
                             Timber.v("Getting map features...")
                             mapHelper.loadKMZ(this@DataClassListActivity, kmzFile)
                             uiContext {

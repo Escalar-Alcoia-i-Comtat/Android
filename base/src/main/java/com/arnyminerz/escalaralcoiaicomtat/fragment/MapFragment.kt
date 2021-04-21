@@ -215,7 +215,7 @@ class MapFragment : NetworkChangeListenerFragment() {
         for (area in AREAS)
             try {
                 Timber.v("Getting KMZ file of $area...")
-                val kmzFile = area.getKmzFile(requireContext(), firebaseStorage)
+                val kmzFile = area.getKmzFile(requireContext(), firebaseStorage, false)
                 Timber.v("Loading KMZ features...")
                 val features = mapHelper.loadKMZ(
                     requireContext(),

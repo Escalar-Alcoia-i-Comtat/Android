@@ -286,6 +286,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         else
             Timber.d("Won't download map. Style url ($styleUrl) or location ($position) is null.")
 
+        Timber.d("Downloading KMZ file...")
+        runBlocking {
+            zone.getKmzFile(applicationContext, storage, true)
+        }
+
         val sectors = runBlocking {
             Timber.d("Downloading child sectors...")
             val sectors = arrayListOf<Sector>()
@@ -362,6 +367,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
         val imageFile = sector.imageFile(applicationContext)
         downloadImageFile(image, imageFile)
+
+        Timber.d("Downloading KMZ file...")
+        runBlocking {
+            sector.getKmzFile(applicationContext, storage, true)
+        }
 
         Timber.d("Preparing map region download...")
         val position = sector.location
