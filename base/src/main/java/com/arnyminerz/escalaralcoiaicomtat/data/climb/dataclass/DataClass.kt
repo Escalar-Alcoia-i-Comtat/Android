@@ -479,6 +479,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val imgFile = imageFile(context)
         val lst = arrayListOf<Boolean>()
 
+        val kmzFile = getKmzFile(context, true)
+        if (kmzFile.exists()) {
+            Timber.v("Deleting \"$kmzFile\"")
+            kmzFile.deleteIfExists()
+        }
+
         Timber.v("Deleting \"$imgFile\"...")
         lst.add(imgFile.deleteIfExists())
         val children = arrayListOf<DataClassImpl>()
