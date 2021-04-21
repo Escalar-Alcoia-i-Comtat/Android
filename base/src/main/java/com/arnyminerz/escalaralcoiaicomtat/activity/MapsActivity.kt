@@ -76,8 +76,6 @@ class MapsActivity : LanguageAppCompatActivity() {
         setContentView(binding.root)
 
         // Hi from march of 2021
-        Timber.v("Getting Mapbox instance...")
-        Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
 
         firestore = Firebase.firestore
 
@@ -283,7 +281,8 @@ class MapsActivity : LanguageAppCompatActivity() {
         kmzFile: File?,
         centerCurrentLocation: Boolean
     ) {
-        mapHelper = MapHelper(binding.map)
+        mapHelper = MapHelper(this)
+        mapHelper.withMapView(binding.map)
         mapHelper.onCreate(savedInstanceState)
         mapHelper
             .withIconSizeMultiplier(iconSizeMultiplier)

@@ -64,6 +64,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.perf.FirebasePerformance
 import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
@@ -88,7 +89,15 @@ import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
 
-class MapHelper(private val mapView: MapView) {
+class MapHelper
+/**
+ * Initializes the MapHelper instance. This also prepares the Mapbox interface with the access token.
+ * Note that this should be called before any map view inflation.
+ * @author Arnau Mora
+ * @since 20210421
+ * @see R.string.mapbox_access_token
+ */
+constructor(context: Context) {
     companion object {
         suspend fun getTarget(
             context: Context,
@@ -154,6 +163,9 @@ class MapHelper(private val mapView: MapView) {
         }
     }
 
+    private lateinit var mapView: MapView
+        private set
+
     private var startingPosition: LatLng = LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
     private var startingZoom: Double = DEFAULT_ZOOM
     private var markerSizeMultiplier: Float = ICON_SIZE_MULTIPLIER
@@ -175,6 +187,11 @@ class MapHelper(private val mapView: MapView) {
     val isLoaded: Boolean
         get() = symbolManager != null && fillManager != null && lineManager != null &&
                 map != null && style != null && style!!.isFullyLoaded && mapSetUp
+
+    init {
+        Timber.v("Getting Mapbox instance...")
+        Mapbox.getInstance(context, context.getString(R.string.mapbox_access_token))
+    }
 
     fun onCreate(savedInstanceState: Bundle?) = mapView.onCreate(savedInstanceState)
 
@@ -213,6 +230,11 @@ class MapHelper(private val mapView: MapView) {
             locationManager.removeUpdates(locationUpdateCallback)
         mapView.onDestroy()
         Timber.d("onDestroy()")
+    }
+
+    fun withMapView(mapView: MapView): MapHelper {
+        this.mapView = mapView
+        return this
     }
 
     fun withStartingPosition(startingPosition: LatLng?, zoom: Double = DEFAULT_ZOOM): MapHelper {

@@ -232,7 +232,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        Mapbox.getInstance(context, getString(R.string.mapbox_access_token))
         justAttached = true
     }
 
@@ -241,10 +240,12 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Timber.d("Initializing MapHelper...")
+        mapHelper = MapHelper(requireContext())
+
         _binding = FragmentViewAreasBinding.inflate(inflater, container, false)
 
-        Timber.d("Initializing MapHelper...")
-        mapHelper = MapHelper(binding.mapView)
+        mapHelper.withMapView(binding.mapView)
         mapHelper.onCreate(savedInstanceState)
         initializeMap()
 
