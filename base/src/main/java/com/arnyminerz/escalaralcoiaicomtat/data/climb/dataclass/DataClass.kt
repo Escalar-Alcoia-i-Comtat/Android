@@ -195,7 +195,11 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210416
      * @param context The context to run from.
      */
-    private fun getKmzFile(context: Context): File = File(context.cacheDir, pin)
+    private fun getKmzFile(context: Context, permanent: Boolean): File =
+        File(
+            if(permanent) context.cacheDir else dataDir(context),
+            pin
+        )
 
     /**
      * Gets the KMZ file of the [Area] and stores it into [targetFile].
@@ -220,14 +224,17 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
     /**
      * Gets the KMZ file path.
-     * If it has never been loaded, it gets loaded from [storage]. Otherwise, it gets loaded from cache.
+     * If it has never been loaded, it gets loaded from [storage]. Otherwise, it gets loaded from
+     * cache.
      * @author Arnau Mora
      * @since 20210416
      * @param context The context to run from.
      * @param storage The [FirebaseStorage] instance.
+     * @param permanent If true, the KMZ will get stored in the data directory, if false, it will
+     * be cached.
      */
-    suspend fun getKmzFile(context: Context, storage: FirebaseStorage): File {
-        val kmzFile = getKmzFile(context)
+    suspend fun getKmzFile(context: Context, storage: FirebaseStorage, permanent: Boolean): File {
+        val kmzFile = getKmzFile(context, permanent)
 
         if (!kmzFile.exists())
             storeKmz(storage, kmzFile)
