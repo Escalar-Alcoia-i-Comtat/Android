@@ -217,9 +217,16 @@ class MapFragment : NetworkChangeListenerFragment() {
                 Timber.v("Getting KMZ file of $area...")
                 val kmzFile = area.getKmzFile(requireContext(), firebaseStorage)
                 Timber.v("Loading KMZ features...")
-                val features = loadKMZ(requireContext(), kmzFile)
-                Timber.v("Adding features to map...")
-                mapHelper.add(features, center = false, display = false)
+                val features = mapHelper.loadKMZ(
+                    requireContext(),
+                    kmzFile,
+                    addToMap = false,
+                    display = false
+                )
+                if (features != null) {
+                    Timber.v("Adding features to map...")
+                    mapHelper.add(features, center = false, display = false)
+                }
             } catch (e: FileNotFoundException) {
                 Timber.e(e, "Could not load KML")
                 Firebase.crashlytics.recordException(e)

@@ -289,7 +289,7 @@ class MapsActivity : LanguageAppCompatActivity() {
             .loadMap(this) { _, map, _ ->
                 Timber.v("Map loaded successfully")
                 doAsync {
-                    val kmlResult = kmzFile?.let { loadKMZ(this@MapsActivity, it) }
+                    val kmlResult = kmzFile?.let { mapHelper.loadKMZ(this@MapsActivity, it) }
 
                     if (kmlResult != null)
                         mapHelper.add(kmlResult, center = false, display = false)

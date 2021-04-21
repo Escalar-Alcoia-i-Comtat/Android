@@ -358,23 +358,27 @@ constructor(context: Context) {
         kmzFile: File,
         addToMap: Boolean = true,
         display: Boolean = true
-    ): MapFeatures {
-        Timber.v("Getting map features...")
-        val features = com.arnyminerz.escalaralcoiaicomtat.data.map.loadKMZ(context, kmzFile)
-        loadedKmzFile = kmzFile
+    ): MapFeatures? =
+        try {
+            Timber.v("Getting map features...")
+            val features = com.arnyminerz.escalaralcoiaicomtat.data.map.loadKMZ(context, kmzFile)
+            loadedKmzFile = kmzFile
 
-        uiContext {
-            if (addToMap) {
-                Timber.v("Adding features to the map...")
-                add(features)
+            uiContext {
+                if (addToMap) {
+                    Timber.v("Adding features to the map...")
+                    add(features)
 
-                if (display)
-                    display()
+                    if (display)
+                        display()
+                }
             }
-        }
 
-        return features
-    }
+            features
+        } catch (e: FileNotFoundException) {
+            Timber.w("Could not find KMZ file ($kmzFile). Will not load features")
+            null
+        }
 
     /**
      * Generates an intent for launching the MapsActivity.
