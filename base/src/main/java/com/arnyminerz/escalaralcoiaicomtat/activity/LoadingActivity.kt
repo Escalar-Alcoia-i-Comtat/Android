@@ -34,7 +34,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import timber.log.Timber
-import java.util.concurrent.CompletableFuture.runAsync
+import java.util.concurrent.CompletableFuture.*
 
 class LoadingActivity : NetworkChangeListenerActivity() {
     companion object {
@@ -50,9 +50,6 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLoadingBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        Timber.plant(Timber.DebugTree())
-        Timber.v("Planted Timber.")
 
         val enableErrorReporting = SETTINGS_ERROR_REPORTING_PREF.get()
         Firebase.crashlytics.setCrashlyticsCollectionEnabled(enableErrorReporting)
