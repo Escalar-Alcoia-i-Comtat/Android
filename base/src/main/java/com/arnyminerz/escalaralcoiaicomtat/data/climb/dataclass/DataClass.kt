@@ -616,8 +616,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param firestore The [FirebaseFirestore] instance to update data in case there's something wrong.
      * @param imageView The Image View for loading the image into
      * @param imageLoadParameters The parameters to use for loading the image
+     * @throws StorageException When there was an error while loading from [storage].
+     * @throws IllegalArgumentException When the stored reference url ([imageReferenceUrl]) is not well formatted.
+     * @see imageReferenceUrl
      */
     @UiThread
+    @Throws(StorageException::class, IllegalArgumentException::class)
     suspend fun loadImage(
         context: Context,
         storage: FirebaseStorage,
