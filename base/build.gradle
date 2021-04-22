@@ -1,10 +1,10 @@
 plugins {
     id('com.android.application')
     id('kotlin-android')
-    id('org.jetbrains.dokka-android')
     id('com.google.gms.google-services')
     id('com.google.firebase.crashlytics')
     id('com.google.firebase.firebase-perf')
+    id('org.jetbrains.dokka')
 }
 
 apply from: './secure.gradle'
@@ -70,14 +70,13 @@ android {
     buildFeatures {
         viewBinding true
     }
+}
 
-    dokka {
-        outputFormat = 'html'
-        outputDirectory = "$buildDir/javadoc"
-        // Do not output deprecated members
-        skipDeprecated = true
-        // Emit warnings about not documented members.
-        reportUndocumented = true
+tasks.named("dokkaHtml") {
+    dokkaSourceSets {
+        configureEach {
+            noAndroidSdkLink.set(false)
+        }
     }
 }
 

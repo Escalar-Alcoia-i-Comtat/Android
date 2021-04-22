@@ -3,10 +3,6 @@
 apply from: './base/secure.gradle'
 
 buildscript {
-    ext {
-        dokkaAndroidVersion = '0.9.16'
-    }
-
     repositories {
         google()
         mavenCentral()
@@ -23,7 +19,7 @@ buildscript {
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.2'
         classpath 'com.google.firebase:perf-plugin:1.3.5'
 
-        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokkaAndroidVersion"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.4.32"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -36,6 +32,7 @@ allprojects {
         mavenCentral()
         maven { url "https://jitpack.io" }
         maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
+        maven { url "https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven" }
         maven {
             url 'https://api.mapbox.com/downloads/v2/releases/maven'
             authentication {
