@@ -13,7 +13,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
-import com.arnyminerz.escalaralcoiaicomtat.data.map.loadKMZ
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentMapBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
@@ -215,7 +214,7 @@ class MapFragment : NetworkChangeListenerFragment() {
         for (area in AREAS)
             try {
                 Timber.v("Getting KMZ file of $area...")
-                val kmzFile = area.getKmzFile(requireContext(), firebaseStorage, false)
+                val kmzFile = area.kmzFile(requireContext(), firebaseStorage, false)
                 Timber.v("Loading KMZ features...")
                 val features = mapHelper.loadKMZ(
                     requireContext(),

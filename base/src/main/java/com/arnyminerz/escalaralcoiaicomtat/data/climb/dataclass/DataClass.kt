@@ -195,7 +195,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210416
      * @param context The context to run from.
      */
-    private fun getKmzFile(context: Context, permanent: Boolean): File =
+    private fun kmzFile(context: Context, permanent: Boolean): File =
         File(
             if(permanent) context.cacheDir else dataDir(context),
             pin
@@ -233,8 +233,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param permanent If true, the KMZ will get stored in the data directory, if false, it will
      * be cached.
      */
-    suspend fun getKmzFile(context: Context, storage: FirebaseStorage, permanent: Boolean): File {
-        val kmzFile = getKmzFile(context, permanent)
+    suspend fun kmzFile(context: Context, storage: FirebaseStorage, permanent: Boolean): File {
+        val kmzFile = kmzFile(context, permanent)
 
         if (!kmzFile.exists())
             storeKmz(storage, kmzFile)
@@ -479,7 +479,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val imgFile = imageFile(context)
         val lst = arrayListOf<Boolean>()
 
-        val kmzFile = getKmzFile(context, true)
+        val kmzFile = kmzFile(context, true)
         if (kmzFile.exists()) {
             Timber.v("Deleting \"$kmzFile\"")
             kmzFile.deleteIfExists()

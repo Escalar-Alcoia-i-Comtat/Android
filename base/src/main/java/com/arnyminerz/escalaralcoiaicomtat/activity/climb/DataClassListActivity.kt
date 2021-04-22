@@ -10,7 +10,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
-import com.arnyminerz.escalaralcoiaicomtat.data.map.loadKMZ
 import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
@@ -26,7 +25,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
-import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.Style
 import timber.log.Timber
@@ -120,7 +118,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                     try {
                         doAsync {
                             Timber.v("Getting KMZ file...")
-                            val kmzFile = dataClass.getKmzFile(this@DataClassListActivity, storage, false)
+                            val kmzFile = dataClass.kmzFile(this@DataClassListActivity, storage, false)
                             Timber.v("Getting map features...")
                             mapHelper.loadKMZ(this@DataClassListActivity, kmzFile)
                             uiContext {

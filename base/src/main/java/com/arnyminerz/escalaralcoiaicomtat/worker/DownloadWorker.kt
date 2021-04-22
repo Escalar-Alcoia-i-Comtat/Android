@@ -288,7 +288,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
         Timber.d("Downloading KMZ file...")
         runBlocking {
-            zone.getKmzFile(applicationContext, storage, true)
+            zone.kmzFile(applicationContext, storage, true)
         }
 
         val sectors = runBlocking {
@@ -370,7 +370,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
         Timber.d("Downloading KMZ file...")
         runBlocking {
-            sector.getKmzFile(applicationContext, storage, true)
+            sector.kmzFile(applicationContext, storage, true)
         }
 
         Timber.d("Preparing map region download...")
