@@ -197,7 +197,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     private fun kmzFile(context: Context, permanent: Boolean): File =
         File(
-            if(permanent) context.cacheDir else dataDir(context),
+            if(permanent) dataDir(context) else context.cacheDir,
             pin
         )
 
