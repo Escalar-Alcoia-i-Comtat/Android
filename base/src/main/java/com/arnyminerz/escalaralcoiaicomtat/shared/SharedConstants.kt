@@ -11,6 +11,9 @@ const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7L
 const val SHOW_NON_DOWNLOADED_KEY = "SHOW_NON_DOWNLOADED"
 const val SHOW_NON_DOWNLOADED_DEFAULT = false
 
+const val ENABLE_AUTHENTICATION_KEY = "ENABLE_AUTHENTICATION"
+const val ENABLE_AUTHENTICATION_DEFAULT = false
+
 /**
  * The maximum amount of days that will be allowed to the user not having updated the app
  * before forcing an update.
@@ -22,9 +25,19 @@ var APP_UPDATE_MAX_TIME_DAYS = APP_UPDATE_MAX_TIME_DAYS_DEFAULT
  */
 var SHOW_NON_DOWNLOADED = SHOW_NON_DOWNLOADED_DEFAULT
 
+/**
+ * Sets if the authentication features should be enabled
+ * @since 20210422
+ */
+var ENABLE_AUTHENTICATION = ENABLE_AUTHENTICATION_DEFAULT
+
+/**
+ * Sets the default values for Remote Config
+ */
 val REMOTE_CONFIG_DEFAULTS = mapOf(
     APP_UPDATE_MAX_TIME_DAYS_KEY to APP_UPDATE_MAX_TIME_DAYS_DEFAULT,
     SHOW_NON_DOWNLOADED_KEY to SHOW_NON_DOWNLOADED_DEFAULT,
+    ENABLE_AUTHENTICATION_KEY to ENABLE_AUTHENTICATION_DEFAULT,
 )
 const val REMOTE_CONFIG_MIN_FETCH_INTERVAL = 3600L
 
