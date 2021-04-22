@@ -375,7 +375,7 @@ constructor(context: Context) {
             }
 
             features
-        } catch (e: FileNotFoundException) {
+        } catch (_: FileNotFoundException) {
             Timber.w("Could not find KMZ file ($kmzFile). Will not load features")
             null
         }
