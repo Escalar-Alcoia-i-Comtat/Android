@@ -29,8 +29,12 @@ fun loadAreasFromCache(
             val areasCount = result.size()
             Timber.d("Got $areasCount areas. Processing...")
             for ((a, areaData) in result.documents.withIndex()) {
-                val area = Area(areaData)
-                areas.add(area)
+                if (Area.validate(areaData))
+                    areas.add(
+                        Area(areaData)
+                    )
+                else
+                    Timber.w("Could not load Area (${areaData.reference}) data. Some parameters are missing.")
                 progressCallback(a, areasCount)
             }
             Timber.v("Areas processed, ordering them...")
