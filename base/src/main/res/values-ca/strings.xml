@@ -270,4 +270,5 @@
     <string name="intro_warning_title">Atenció</string>
     <string name="intro_warning_message">L\'escalada és un esport considerat de risc, tot el que el practique té que preocupar-se del seu coneixement i correcta execució. L\'informació d\'aquesta aplicació és purament informativa i pot ser errònia. Tingues cura, el material en bon estat, i vigila\'t no tant sols a tu mateix, sinó també als teus companys, i sobre tot, gaudeix.</string>
     <string name="dialog_downloaded_partially_msg">Alguns elements s\'han baixat, però no %s sencera. Vols descarregar-la sencera?</string>
+    <string name="toast_error_no_kmz">No s\'ha pogut trobar el fitxer KMZ</string>
 </resources>

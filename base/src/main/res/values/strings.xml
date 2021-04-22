@@ -201,6 +201,7 @@
     <string name="toast_error_internal">An internal error occurred</string>
     <string name="toast_error_no_internet">No Internet Access detected</string>
     <string name="toast_error_language">Cannot change language</string>
+    <string name="toast_error_no_kmz">Could not find KMZ file</string>
     <string name="toast_location_not_shown">Current location won\'t be shown</string>
     <string name="toast_stored_gpx">GPX stored!</string>
     <string name="toast_stored_kmz">KMZ stored!</string>
@@ -277,8 +278,6 @@
     <string name="image_desc_nav_map">View areas map</string>
     <string name="image_desc_nav_downloads">View downloads</string>
     <string name="image_desc_nav_extra">Extra options</string>
-    <string name="image_desc_logo_eaic">Escalar Alcoia i Comtat\'s Logo</string>
-    <string name="image_desc_logo_cea">Centre Excursionista d\'Alcoi\'s Logo</string>
 
     <string name="button_desc_view_download">View Download</string>
     <string name="button_desc_download">Download</string>
