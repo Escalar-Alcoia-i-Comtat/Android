@@ -31,6 +31,9 @@
         android:vmSafeMode="true"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute,LockedOrientationActivity">
         <activity
+            android:name=".activity.profile.AuthActivity"
+            android:exported="true" />
+        <activity
             android:name=".activity.LoadingActivity"
             android:exported="true">
             <intent-filter>
@@ -39,7 +42,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activity.isolated.FeedbackActivity"
             android:exported="true" />
@@ -74,7 +76,6 @@
         <meta-data
             android:name="firebase_performance_logcat_enabled"
             android:value="true" />
-
 
         <provider
             android:name="androidx.core.content.FileProvider"
