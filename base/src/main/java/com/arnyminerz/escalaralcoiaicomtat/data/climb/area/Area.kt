@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
-import java.util.Date
+import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -140,6 +140,19 @@ class Area(
         override fun newArray(size: Int): Array<Area?> = arrayOfNulls(size)
 
         const val NAMESPACE = "Area"
+
+        /**
+         * Checks if [data] contains the valid data for creating an instance of [Area].
+         * @author Arnau Mora
+         * @since 20210422
+         * @param data The data to check.
+         * @return True if the [data] contents are valid, false otherwise.
+         */
+        fun validate(data: DocumentSnapshot): Boolean =
+            data.contains("displayName") &&
+                    data.contains("created") &&
+                    data.contains("image") &&
+                    data.contains("kmz")
     }
 }
 
