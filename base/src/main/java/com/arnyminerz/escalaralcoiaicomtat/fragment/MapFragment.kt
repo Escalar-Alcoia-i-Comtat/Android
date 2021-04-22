@@ -233,11 +233,15 @@ class MapFragment : NetworkChangeListenerFragment() {
             } catch (e: NoInternetAccessException) {
                 Timber.e(e, "Could not load KML")
                 Firebase.crashlytics.recordException(e)
-                uiContext { toast(requireContext(), R.string.toast_error_internal) }
+                uiContext { toast(requireContext(), R.string.toast_error_no_internet) }
             } catch (e: MapNotInitializedException) {
                 Timber.e(e, "Could not load KML")
                 Firebase.crashlytics.recordException(e)
                 uiContext { toast(requireContext(), R.string.toast_error_internal) }
+            } catch (e: IllegalStateException) {
+                Timber.e("Could not load KML")
+                Firebase.crashlytics.recordException(e)
+                uiContext { toast(requireContext(), R.string.toast_error_no_kmz) }
             }
 
         uiContext {

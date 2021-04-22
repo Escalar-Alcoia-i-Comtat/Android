@@ -20,6 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ROAMING
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
@@ -29,7 +30,9 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_MARKER_MIN_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_OVERWRITE_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.METERS_PER_LAT_LON_DEGREE
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -286,9 +289,14 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         else
             Timber.d("Won't download map. Style url ($styleUrl) or location ($position) is null.")
 
-        Timber.d("Downloading KMZ file...")
-        runBlocking {
-            zone.kmzFile(applicationContext, storage, true)
+        try {
+            Timber.d("Downloading KMZ file...")
+            runBlocking {
+                zone.kmzFile(applicationContext, storage, true)
+            }
+        } catch (e: IllegalStateException) {
+            Firebase.crashlytics.recordException(e)
+            Timber.w("The Zone ($zone) does not contain a KMZ address")
         }
 
         val sectors = runBlocking {
@@ -368,9 +376,14 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val imageFile = sector.imageFile(applicationContext)
         downloadImageFile(image, imageFile)
 
-        Timber.d("Downloading KMZ file...")
-        runBlocking {
-            sector.kmzFile(applicationContext, storage, true)
+        try {
+            Timber.d("Downloading KMZ file...")
+            runBlocking {
+                sector.kmzFile(applicationContext, storage, true)
+            }
+        } catch (e: IllegalStateException) {
+            Firebase.crashlytics.recordException(e)
+            Timber.w("The Sector ($sector) does not contain a KMZ address")
         }
 
         Timber.d("Preparing map region download...")

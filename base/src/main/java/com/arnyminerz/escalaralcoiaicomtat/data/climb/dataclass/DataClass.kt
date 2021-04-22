@@ -232,12 +232,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param storage The [FirebaseStorage] instance.
      * @param permanent If true, the KMZ will get stored in the data directory, if false, it will
      * be cached.
+     * @throws IllegalStateException When [kmzReferenceUrl] is null, so a [File] can't be retrieved.
      */
+    @Throws(IllegalStateException::class)
     suspend fun kmzFile(context: Context, storage: FirebaseStorage, permanent: Boolean): File {
         val kmzFile = kmzFile(context, permanent)
 
-        if (!kmzFile.exists())
+        if (!kmzFile.exists()) {
             storeKmz(storage, kmzFile)
+        }
 
         return kmzFile
     }

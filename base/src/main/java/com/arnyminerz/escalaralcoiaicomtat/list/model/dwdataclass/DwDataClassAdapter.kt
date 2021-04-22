@@ -25,8 +25,10 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
@@ -63,7 +65,14 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
             onItemSelected?.let { it(data, holder, position) }
         }
         holder.mapImageButton.setOnClickListener {
-            showMap(data)
+            try {
+                Timber.v("Showing map for $data.")
+                showMap(data)
+            }catch (e: IllegalStateException){
+                Firebase.crashlytics.recordException(e)
+                Timber.w("The DataClass ($data) does not contain a KMZ address")
+                toast(activity, R.string.toast_error_no_kmz)
+            }
         }
         holder.downloadImageButton.setOnClickListener {
             if (!appNetworkState.hasInternet)
@@ -169,8 +178,10 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
      * @author Arnau Mora
      * @since 20210413
      * @param data The [T] to show.
+     * @throws IllegalStateException When there's no KMZ file in the [data], so the map cannot be shown.
      */
     @MainThread
+    @Throws(IllegalStateException::class)
     private fun showMap(data: T) = doAsync {
         val kmzFile = data.kmzFile(activity, storage, false)
         uiContext {
