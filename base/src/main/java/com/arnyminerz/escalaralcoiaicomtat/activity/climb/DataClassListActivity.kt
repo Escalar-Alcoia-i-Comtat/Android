@@ -18,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
+import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -26,6 +27,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.Style
@@ -120,7 +122,8 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                     try {
                         doAsync {
                             Timber.v("Getting KMZ file...")
-                            val kmzFile = dataClass.kmzFile(this@DataClassListActivity, storage, false)
+                            val kmzFile =
+                                dataClass.kmzFile(this@DataClassListActivity, storage, false)
                             Timber.v("Getting map features...")
                             mapHelper.loadKMZ(this@DataClassListActivity, kmzFile)
                             uiContext {
@@ -150,6 +153,13 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                         Timber.w("The DataClass ($dataClass) does not contain a KMZ address")
                         toast(R.string.toast_error_no_kmz)
                         binding.map.hide()
+                    } catch (e: StorageException) {
+                        Firebase.crashlytics.recordException(e)
+                        val handler = handleStorageException(e)
+                        if (handler != null) {
+                            Timber.e(e, handler.second)
+                            toast(handler.first)
+                        }
                     } finally {
                         binding.loadingIndicator.hide()
                     }

@@ -207,8 +207,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210416
      * @param storage The [FirebaseStorage] instance.
      * @param targetFile The [File] to store the KMZ at.
+     * @throws StorageException When there has been an exception with the [storage] download.
      * @see kmzReferenceUrl
      */
+    @Throws(StorageException::class)
     private suspend fun storeKmz(
         storage: FirebaseStorage,
         targetFile: File

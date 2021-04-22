@@ -30,6 +30,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_MARKER_MIN_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_OVERWRITE_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.METERS_PER_LAT_LON_DEGREE
+import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.crashlytics.ktx.crashlytics
@@ -297,6 +298,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         } catch (e: IllegalStateException) {
             Firebase.crashlytics.recordException(e)
             Timber.w("The Zone ($zone) does not contain a KMZ address")
+        } catch (e: StorageException) {
+            Firebase.crashlytics.recordException(e)
+            val handler = handleStorageException(e)
+            if (handler != null)
+                Timber.e(e, handler.second)
         }
 
         val sectors = runBlocking {
@@ -384,6 +390,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         } catch (e: IllegalStateException) {
             Firebase.crashlytics.recordException(e)
             Timber.w("The Sector ($sector) does not contain a KMZ address")
+        } catch (e: StorageException) {
+            Firebase.crashlytics.recordException(e)
+            val handler = handleStorageException(e)
+            if (handler != null)
+                Timber.e(e, handler.second)
         }
 
         Timber.d("Preparing map region download...")

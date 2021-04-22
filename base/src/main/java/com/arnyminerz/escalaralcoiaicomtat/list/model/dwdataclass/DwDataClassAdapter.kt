@@ -23,10 +23,12 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
+import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
@@ -68,10 +70,17 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
             try {
                 Timber.v("Showing map for $data.")
                 showMap(data)
-            }catch (e: IllegalStateException){
+            } catch (e: IllegalStateException) {
                 Firebase.crashlytics.recordException(e)
                 Timber.w("The DataClass ($data) does not contain a KMZ address")
                 toast(activity, R.string.toast_error_no_kmz)
+            } catch (e: StorageException) {
+                Firebase.crashlytics.recordException(e)
+                val handler = handleStorageException(e)
+                if (handler != null) {
+                    Timber.e(e, handler.second)
+                    toast(activity, handler.first)
+                }
             }
         }
         holder.downloadImageButton.setOnClickListener {
@@ -179,9 +188,11 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
      * @since 20210413
      * @param data The [T] to show.
      * @throws IllegalStateException When there's no KMZ file in the [data], so the map cannot be shown.
+     * @throws StorageException When there has been an error while loading the KMZ file.
+     * @see DataClass.kmzFile
      */
     @MainThread
-    @Throws(IllegalStateException::class)
+    @Throws(IllegalStateException::class, StorageException::class)
     private fun showMap(data: T) = doAsync {
         val kmzFile = data.kmzFile(activity, storage, false)
         uiContext {
