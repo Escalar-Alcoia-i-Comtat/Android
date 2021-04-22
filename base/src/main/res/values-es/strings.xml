@@ -271,4 +271,9 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="intro_warning_title">Atención</string>
     <string name="intro_warning_message">La escalada es un deporte considerado de riesgo, todo lo que lo practico tiene que preocuparse de su conocimiento y correcta ejecución. La información de esta aplicación es puramente informativa y puede ser errónea. Ten cuidado, el material en buen estado, y vigila\'t no sólo a ti mismo, sino también a tus compañeros, y sobre todo, disfruta.</string>
     <string name="dialog_downloaded_partially_msg">Algunos elementos se han descargado, pero no %s completamente. Quieres descargarla entera?</string>
+    <string name="toast_error_no_kmz">No sé ha podido encontrar el archivo KMZ</string>
+    <string name="toast_error_storage_not_found">No se ha podido encontrar el archivo</string>
+    <string name="toast_error_storage_cancelled">La solicitud ha sido cancelada</string>
+    <string name="toast_error_storage_corrupt">El archivo descargado está corrupto, contacta con un administrador</string>
+    <string name="toast_error_storage_authentication">No se ha podido acceder a un archivo privado</string>
 </resources>

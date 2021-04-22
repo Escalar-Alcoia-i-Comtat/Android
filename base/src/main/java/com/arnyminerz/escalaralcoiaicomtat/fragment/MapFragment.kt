@@ -13,7 +13,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
-import com.arnyminerz.escalaralcoiaicomtat.data.map.loadKMZ
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentMapBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
@@ -26,11 +25,13 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
+import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
@@ -215,7 +216,7 @@ class MapFragment : NetworkChangeListenerFragment() {
         for (area in AREAS)
             try {
                 Timber.v("Getting KMZ file of $area...")
-                val kmzFile = area.getKmzFile(requireContext(), firebaseStorage, false)
+                val kmzFile = area.kmzFile(requireContext(), firebaseStorage, false)
                 Timber.v("Loading KMZ features...")
                 val features = mapHelper.loadKMZ(
                     requireContext(),
@@ -234,11 +235,22 @@ class MapFragment : NetworkChangeListenerFragment() {
             } catch (e: NoInternetAccessException) {
                 Timber.e(e, "Could not load KML")
                 Firebase.crashlytics.recordException(e)
-                uiContext { toast(requireContext(), R.string.toast_error_internal) }
+                uiContext { toast(requireContext(), R.string.toast_error_no_internet) }
             } catch (e: MapNotInitializedException) {
                 Timber.e(e, "Could not load KML")
                 Firebase.crashlytics.recordException(e)
                 uiContext { toast(requireContext(), R.string.toast_error_internal) }
+            } catch (e: IllegalStateException) {
+                Timber.e("Could not load KML")
+                Firebase.crashlytics.recordException(e)
+                uiContext { toast(requireContext(), R.string.toast_error_no_kmz) }
+            } catch (e: StorageException) {
+                Firebase.crashlytics.recordException(e)
+                val handler = handleStorageException(e)
+                if (handler != null) {
+                    Timber.e(e, handler.second)
+                    toast(requireContext(), handler.first)
+                }
             }
 
         uiContext {

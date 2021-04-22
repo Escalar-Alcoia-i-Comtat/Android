@@ -20,6 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ROAMING
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
@@ -29,8 +30,12 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_MARKER_MIN_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_OVERWRITE_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.METERS_PER_LAT_LON_DEGREE
+import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
@@ -107,6 +112,12 @@ const val ERROR_STORE_IMAGE = "store_image"
  * @since 20210412
  */
 const val ERROR_UNKNOWN_NAMESPACE = "unknown_namespace"
+
+/**
+ * When the image reference could not be updated.
+ * @since 20210422
+ */
+const val ERROR_UPDATE_IMAGE_REF = "update_image_ref"
 
 class DownloadData
 /**
@@ -218,6 +229,29 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         return Result.success()
     }
 
+    private fun fixImageReferenceUrl(image: String, firestore: FirebaseFirestore, path: String): Pair<String?, Result?> =
+        if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/"))
+            try {
+                runBlocking {
+                    Timber.w("Fixing zone image reference ($image)...")
+                    val i = image.lastIndexOf('/') + 1
+                    val newImage =
+                        "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
+                    Timber.w("Changing image address to \"$newImage\"...")
+                    firestore
+                        .document(path)
+                        .update(mapOf("image" to newImage))
+                        .awaitTask()
+                    Timber.w("Image address updated.")
+                    newImage to null
+                }
+            } catch (e: FirebaseFirestoreException) {
+                Firebase.crashlytics.recordException(e)
+                Timber.e(e, "Could not update zone image reference")
+                null to failure(ERROR_UPDATE_IMAGE_REF)
+            }
+        else image to null
+
     /**
      * Downloads the data of a [Zone] for using it offline.
      * @author Arnau Mora
@@ -260,24 +294,15 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             .withProgress(ValueMax(0, -1))
             .buildAndShow()
 
-        var image = zone.imageReferenceUrl
-        if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/"))
-            runBlocking {
-                Timber.w("Fixing zone image reference ($image)...")
-                val i = image.lastIndexOf('/') + 1
-                val newImage =
-                    "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
-                Timber.w("Changing image address to \"$newImage\"...")
-                firestore
-                    .document(path)
-                    .update(mapOf("image" to newImage))
-                    .awaitTask()
-                Timber.w("Image address updated.")
-                image = newImage
-            }
+        Timber.v("Fixing image reference URL...")
+        val image = fixImageReferenceUrl(zone.imageReferenceUrl, firestore, path)
+        if (image.second != null)
+            return image.second!!
+        Timber.v("Got valid URL!")
+        val imageRef = image.first!!
 
         val imageFile = zone.imageFile(applicationContext)
-        downloadImageFile(image, imageFile)
+        downloadImageFile(imageRef, imageFile)
 
         Timber.d("Preparing map region download...")
         val position = zone.position
@@ -286,9 +311,19 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         else
             Timber.d("Won't download map. Style url ($styleUrl) or location ($position) is null.")
 
-        Timber.d("Downloading KMZ file...")
-        runBlocking {
-            zone.getKmzFile(applicationContext, storage, true)
+        try {
+            Timber.d("Downloading KMZ file...")
+            runBlocking {
+                zone.kmzFile(applicationContext, storage, true)
+            }
+        } catch (e: IllegalStateException) {
+            Firebase.crashlytics.recordException(e)
+            Timber.w("The Zone ($zone) does not contain a KMZ address")
+        } catch (e: StorageException) {
+            Firebase.crashlytics.recordException(e)
+            val handler = handleStorageException(e)
+            if (handler != null)
+                Timber.e(e, handler.second)
         }
 
         val sectors = runBlocking {
@@ -349,28 +384,27 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             }
             .buildAndShow()
 
-        var image = sector.imageReferenceUrl
-        if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/"))
-            runBlocking {
-                Timber.w("Fixing zone image reference ($image)...")
-                val i = image.lastIndexOf('/') + 1
-                val newImage =
-                    "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
-                Timber.w("Changing image address to \"$newImage\"...")
-                firestore
-                    .document(path)
-                    .update(mapOf("image" to newImage))
-                    .awaitTask()
-                Timber.w("Image address updated.")
-                image = newImage
-            }
+        val image = fixImageReferenceUrl(sector.imageReferenceUrl, firestore, path)
+        if (image.second != null)
+            return image.second!!
+        val imageRef = image.first!!
 
         val imageFile = sector.imageFile(applicationContext)
-        downloadImageFile(image, imageFile)
+        downloadImageFile(imageRef, imageFile)
 
-        Timber.d("Downloading KMZ file...")
-        runBlocking {
-            sector.getKmzFile(applicationContext, storage, true)
+        try {
+            Timber.d("Downloading KMZ file...")
+            runBlocking {
+                sector.kmzFile(applicationContext, storage, true)
+            }
+        } catch (e: IllegalStateException) {
+            Firebase.crashlytics.recordException(e)
+            Timber.w("The Sector ($sector) does not contain a KMZ address")
+        } catch (e: StorageException) {
+            Firebase.crashlytics.recordException(e)
+            val handler = handleStorageException(e)
+            if (handler != null)
+                Timber.e(e, handler.second)
         }
 
         Timber.d("Preparing map region download...")
@@ -505,6 +539,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
          * @see ERROR_NOT_FOUND
          * @see ERROR_DATA_FETCH
          * @see ERROR_STORE_IMAGE
+         * @see ERROR_UPDATE_IMAGE_REF
          */
         fun schedule(context: Context, tag: String, data: DownloadData): LiveData<WorkInfo> {
             Timber.v("Scheduling new download...")

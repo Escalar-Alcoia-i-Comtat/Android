@@ -195,9 +195,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210416
      * @param context The context to run from.
      */
-    private fun getKmzFile(context: Context, permanent: Boolean): File =
+    private fun kmzFile(context: Context, permanent: Boolean): File =
         File(
-            if(permanent) context.cacheDir else dataDir(context),
+            if(permanent) dataDir(context) else context.cacheDir,
             pin
         )
 
@@ -207,8 +207,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210416
      * @param storage The [FirebaseStorage] instance.
      * @param targetFile The [File] to store the KMZ at.
+     * @throws StorageException When there has been an exception with the [storage] download.
      * @see kmzReferenceUrl
      */
+    @Throws(StorageException::class)
     private suspend fun storeKmz(
         storage: FirebaseStorage,
         targetFile: File
@@ -232,12 +234,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param storage The [FirebaseStorage] instance.
      * @param permanent If true, the KMZ will get stored in the data directory, if false, it will
      * be cached.
+     * @throws IllegalStateException When [kmzReferenceUrl] is null, so a [File] can't be retrieved.
      */
-    suspend fun getKmzFile(context: Context, storage: FirebaseStorage, permanent: Boolean): File {
-        val kmzFile = getKmzFile(context, permanent)
+    @Throws(IllegalStateException::class)
+    suspend fun kmzFile(context: Context, storage: FirebaseStorage, permanent: Boolean): File {
+        val kmzFile = kmzFile(context, permanent)
 
-        if (!kmzFile.exists())
+        if (!kmzFile.exists()) {
             storeKmz(storage, kmzFile)
+        }
 
         return kmzFile
     }
@@ -479,7 +484,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val imgFile = imageFile(context)
         val lst = arrayListOf<Boolean>()
 
-        val kmzFile = getKmzFile(context, true)
+        val kmzFile = kmzFile(context, true)
         if (kmzFile.exists()) {
             Timber.v("Deleting \"$kmzFile\"")
             kmzFile.deleteIfExists()
@@ -611,8 +616,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param firestore The [FirebaseFirestore] instance to update data in case there's something wrong.
      * @param imageView The Image View for loading the image into
      * @param imageLoadParameters The parameters to use for loading the image
+     * @throws StorageException When there was an error while loading from [storage].
+     * @throws IllegalArgumentException When the stored reference url ([imageReferenceUrl]) is not well formatted.
+     * @see imageReferenceUrl
      */
     @UiThread
+    @Throws(StorageException::class, IllegalArgumentException::class)
     suspend fun loadImage(
         context: Context,
         storage: FirebaseStorage,
