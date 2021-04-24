@@ -93,6 +93,13 @@ const val ROTATION_B = -90f
 
 const val DEFAULT_BITMAP_COMPRESSION = 100
 
+/**
+ * The compression quality for a profile image.
+ * @author Arnau Mora
+ * @since 20210425
+ */
+const val PROFILE_IMAGE_COMPRESSION_QUALITY = 85
+
 const val LOCATION_PERMISSION_REQUEST_CODE = 3 // This number was chosen by Dono
 const val FOLDER_ACCESS_PERMISSION_REQUEST_CODE = 7
 
