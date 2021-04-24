@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
+import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthRegisterBinding
 import com.google.android.material.textfield.TextInputLayout
 
@@ -81,6 +82,9 @@ class RegisterFragment private constructor() : Fragment() {
 
         binding.registerButton.setOnClickListener {
 
+        }
+        binding.loginButton.setOnClickListener {
+            (activity as? AuthActivity?)?.changePage(AuthActivity.PAGE_LOGIN)
         }
     }
 

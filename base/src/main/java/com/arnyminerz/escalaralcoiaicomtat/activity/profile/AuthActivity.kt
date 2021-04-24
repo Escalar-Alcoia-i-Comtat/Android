@@ -25,15 +25,31 @@ class AuthActivity : LanguageFragmentActivity() {
         binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val authPages = listOf(
-            RegisterFragment.newInstance(),
-            LoginFragment.newInstance()
+        val authPages = mapOf(
+            PAGE_REGISTER to RegisterFragment.newInstance(),
+            PAGE_LOGIN to LoginFragment.newInstance()
         )
 
         binding.authViewPager.adapter = object : FragmentStateAdapter(this) {
             override fun getItemCount(): Int = authPages.size
 
-            override fun createFragment(position: Int): Fragment = authPages[position]
+            override fun createFragment(position: Int): Fragment = authPages[position]!!
         }
+    }
+
+    /**
+     * Changes the current page on the [ActivityAuthBinding.authViewPager].
+     * @author Arnau Mora
+     * @since 20210424
+     * @param page The new page
+     * @param animate If the change should be animated
+     */
+    fun changePage(page: Int, animate: Boolean = true) {
+        binding.authViewPager.setCurrentItem(page, animate)
+    }
+
+    companion object {
+        const val PAGE_REGISTER = 0
+        const val PAGE_LOGIN = 1
     }
 }
