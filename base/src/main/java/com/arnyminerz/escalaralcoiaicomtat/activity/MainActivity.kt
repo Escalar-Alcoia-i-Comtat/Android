@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.widget.PopupMenu
+import androidx.annotation.UiThread
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.widget.ImageViewCompat
@@ -34,6 +35,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_MAP
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_SETTINGS
 import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -221,6 +223,7 @@ class MainActivity : LanguageAppCompatActivity() {
         }
 
         updateBottomAppBar()
+        refreshLoginStatus()
     }
 
     override fun onBackPressed() {
@@ -261,5 +264,25 @@ class MainActivity : LanguageAppCompatActivity() {
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Timber.v("Got activity result. Code: %s", resultCode)
+        when (requestCode) {
+            LOGGED_IN_REQUEST_CODE -> refreshLoginStatus()
+            else -> super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    /**
+     * Updates the UI according to the login status.
+     * @author Arnau Mora
+     * @since 20210424
+     */
+    @UiThread
+    private fun refreshLoginStatus() {
+        val user = Firebase.auth.currentUser
+
+        binding.profileCardView.visibility(user != null)
     }
 }
