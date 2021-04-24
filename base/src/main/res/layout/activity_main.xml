@@ -26,6 +26,29 @@
         android:src="@drawable/ic_round_person_outline_24"
         app:layout_anchor="@id/bottomAppBar" />
 
+    <androidx.cardview.widget.CardView
+        android:id="@+id/profile_cardView"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="?attr/selectableItemBackground"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="9dp"
+        app:cardPreventCornerOverlap="true"
+        app:cardUseCompatPadding="false"
+        app:layout_anchor="@id/auth_fab"
+        app:layout_anchorGravity="center">
+
+        <ImageButton
+            android:id="@+id/profile_imageView"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/image_desc_profile_image"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_profile_image" />
+
+    </androidx.cardview.widget.CardView>
+
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottomAppBar"
         android:layout_width="match_parent"
