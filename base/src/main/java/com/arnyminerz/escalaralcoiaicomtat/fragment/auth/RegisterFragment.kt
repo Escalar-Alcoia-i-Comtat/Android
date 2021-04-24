@@ -28,6 +28,62 @@ class RegisterFragment private constructor() : Fragment() {
         _binding = null
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.emailEditText.setOnEditorActionListener { _, _, _ ->
+            binding.displayNameEditText.requestFocus()
+
+            true
+        }
+        binding.emailEditText.setOnFocusChangeListener { _, focused ->
+            if (focused) {
+                binding.emailTextField.error = null
+                binding.emailTextField.isErrorEnabled = false
+            }
+        }
+
+        binding.displayNameEditText.setOnEditorActionListener { _, _, _ ->
+            binding.passwordEditText.requestFocus()
+
+            true
+        }
+        binding.displayNameEditText.setOnFocusChangeListener { _, focused ->
+            if (focused) {
+                binding.displayNameTextField.error = null
+                binding.displayNameTextField.isErrorEnabled = false
+            }
+        }
+
+        binding.passwordEditText.setOnEditorActionListener { _, _, _ ->
+            binding.passwordConfirmEditText.requestFocus()
+
+            true
+        }
+        binding.passwordEditText.setOnFocusChangeListener { _, focused ->
+            if (focused) {
+                binding.passwordTextField.error = null
+                binding.passwordTextField.isErrorEnabled = false
+            }
+        }
+
+        binding.passwordConfirmEditText.setOnEditorActionListener { _, _, _ ->
+            binding.registerButton.performClick()
+
+            true
+        }
+        binding.passwordConfirmEditText.setOnFocusChangeListener { _, focused ->
+            if (focused) {
+                binding.passwordConfirmTextField.error = null
+                binding.passwordConfirmTextField.isErrorEnabled = false
+            }
+        }
+
+        binding.registerButton.setOnClickListener {
+
+        }
+    }
+
     /**
      * Shows an error to the user through a text field.
      * @author Arnau Mora
