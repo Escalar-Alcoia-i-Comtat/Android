@@ -96,6 +96,13 @@ const val DEFAULT_BITMAP_COMPRESSION = 100
 const val LOCATION_PERMISSION_REQUEST_CODE = 3 // This number was chosen by Dono
 const val FOLDER_ACCESS_PERMISSION_REQUEST_CODE = 7
 
+/**
+ * When a log in request has been completed.
+ * @author Arnau Mora
+ * @since 20210425
+ */
+const val LOGGED_IN_REQUEST_CODE = 5
+
 const val PERMISSION_DIALOG_TAG = "PERM_TAG"
 
 const val MIME_TYPE_KML = "application/vnd.google-earth.kml+xml"

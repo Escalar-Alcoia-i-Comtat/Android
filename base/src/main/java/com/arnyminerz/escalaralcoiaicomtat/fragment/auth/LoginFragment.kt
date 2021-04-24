@@ -10,6 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentLoginBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.viewListOf
+import com.arnyminerz.escalaralcoiaicomtat.shared.LOGGED_IN_REQUEST_CODE
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.FirebaseError
 import com.google.firebase.auth.FirebaseAuthException
@@ -76,8 +77,8 @@ class LoginFragment private constructor() : Fragment() {
             val email = binding.emailEditText.text.toString()
             val password = binding.passwordEditText.text.toString()
             Firebase.auth.signInWithEmailAndPassword(email, password)
-                .addOnSuccessListener { result ->
-
+                .addOnSuccessListener { _ ->
+                    requireActivity().finishActivity(LOGGED_IN_REQUEST_CODE)
                 }
                 .addOnFailureListener { exception ->
                     Timber.w(exception, "Could not login.")
@@ -120,6 +121,11 @@ class LoginFragment private constructor() : Fragment() {
     }
 
     companion object {
+        /**
+         * Initializes a new instance of the [LoginFragment].
+         * @author Arnau Mora
+         * @since 20210425
+         */
         fun newInstance(): LoginFragment = LoginFragment()
     }
 }
