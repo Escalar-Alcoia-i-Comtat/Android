@@ -60,4 +60,35 @@ class ViewList<T : View?> : ArrayList<T>() {
         for (view in this)
             view?.clearFocus()
     }
+
+    /**
+     * Changes the status of the fields to enabled ([View.isEnabled]=true).
+     * @author Arnau Mora
+     * @since 20210424
+     */
+    fun enable() {
+        for (view in this)
+            view?.isEnabled = true
+    }
+
+    /**
+     * Changes the status of the fields to disabled ([View.isEnabled]=false).
+     * @author Arnau Mora
+     * @since 20210424
+     */
+    fun disable() {
+        for (view in this)
+            view?.isEnabled = false
+    }
+
+    /**
+     * Changes the status of the fields to [status] ([View.isEnabled]=[status]).
+     * @author Arnau Mora
+     * @since 20210424
+     * @param status If true, the views will be enabled, if false, they will be disabled.
+     */
+    fun enabled(status: Boolean) {
+        for (view in this)
+            view?.isEnabled = status
+    }
 }
