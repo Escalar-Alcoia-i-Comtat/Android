@@ -50,4 +50,14 @@ class ViewList<T : View?> : ArrayList<T>() {
         for (view in this)
             com.arnyminerz.escalaralcoiaicomtat.view.visibility(view, visible, setGone, debug)
     }
+
+    /**
+     * Clears the focus of the views in the list.
+     * @author Arnau Mora
+     * @since 20210424
+     */
+    fun clearFocus() {
+        for (view in this)
+            view?.clearFocus()
+    }
 }
