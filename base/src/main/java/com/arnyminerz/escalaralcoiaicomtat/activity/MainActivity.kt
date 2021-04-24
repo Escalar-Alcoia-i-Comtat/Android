@@ -12,6 +12,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.DownloadsFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.MapFragment
@@ -21,9 +22,11 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFrag
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
+import com.arnyminerz.escalaralcoiaicomtat.shared.LOGGED_IN_REQUEST_CODE
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_DOWNLOADS
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_HOME
@@ -159,6 +162,9 @@ class MainActivity : LanguageAppCompatActivity() {
         setContentView(view)
         setSupportActionBar(binding.bottomAppBar)
 
+        binding.spaceAuth.visibility(ENABLE_AUTHENTICATION)
+        binding.authFab.visibility(ENABLE_AUTHENTICATION)
+
         areasViewFragment = AreasViewFragment()
         mapFragment = MapFragment()
         downloadsFragment = DownloadsFragment()
@@ -208,6 +214,10 @@ class MainActivity : LanguageAppCompatActivity() {
                 } ?: Bundle.EMPTY
 
             startActivity(intent, optionsBundle)
+        }
+
+        binding.authFab.setOnClickListener {
+            startActivityForResult(Intent(this, AuthActivity::class.java), LOGGED_IN_REQUEST_CODE)
         }
 
         updateBottomAppBar()
