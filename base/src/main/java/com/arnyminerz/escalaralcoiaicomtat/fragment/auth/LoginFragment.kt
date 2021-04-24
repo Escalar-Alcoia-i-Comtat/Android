@@ -35,11 +35,23 @@ class LoginFragment private constructor() : Fragment() {
 
             true
         }
+        binding.emailEditText.setOnFocusChangeListener { _, focused ->
+            if (focused) {
+                binding.emailTextField.error = null
+                binding.emailTextField.isErrorEnabled = false
+            }
+        }
 
         binding.passwordEditText.setOnEditorActionListener { _, _, _ ->
             binding.loginButton.performClick()
 
             true
+        }
+        binding.passwordEditText.setOnFocusChangeListener { _, focused ->
+            if (focused) {
+                binding.passwordTextField.error = null
+                binding.passwordTextField.isErrorEnabled = false
+            }
         }
 
         binding.loginButton.setOnClickListener {
