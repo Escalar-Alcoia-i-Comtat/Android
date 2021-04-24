@@ -6,6 +6,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageFragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityAuthBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.auth.LoginFragment
+import com.arnyminerz.escalaralcoiaicomtat.fragment.auth.RegisterFragment
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOGGED_IN_REQUEST_CODE
 
 /**
@@ -25,6 +26,7 @@ class AuthActivity : LanguageFragmentActivity() {
         setContentView(binding.root)
 
         val authPages = listOf(
+            RegisterFragment.newInstance(),
             LoginFragment.newInstance()
         )
 
