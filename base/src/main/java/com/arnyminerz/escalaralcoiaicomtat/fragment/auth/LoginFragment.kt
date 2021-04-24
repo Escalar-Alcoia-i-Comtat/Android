@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentLoginBinding
+import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthLoginBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.viewListOf
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOGGED_IN_REQUEST_CODE
@@ -19,16 +19,16 @@ import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 
 class LoginFragment private constructor() : Fragment() {
-    private var _binding: FragmentLoginBinding? = null
+    private var _binding: FragmentAuthLoginBinding? = null
 
-    private val binding: FragmentLoginBinding = _binding!!
+    private val binding: FragmentAuthLoginBinding = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentLoginBinding.inflate(inflater, container, false)
+        _binding = FragmentAuthLoginBinding.inflate(inflater, container, false)
         return binding.root
     }
 
