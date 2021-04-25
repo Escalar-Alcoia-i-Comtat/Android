@@ -282,7 +282,7 @@ class RegisterFragment private constructor() : Fragment() {
     private fun sendConfirmationMail(result: AuthResult) {
         result.user?.sendEmailVerification(
             ActionCodeSettings.newBuilder()
-                .setUrl("app:escalaralcoiaicomtat.org/email")
+                .setUrl("app://escalaralcoiaicomtat.org/email")
                 .setHandleCodeInApp(true)
                 .setAndroidPackageName(BuildConfig.APPLICATION_ID, true, null)
                 .build()
