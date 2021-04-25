@@ -121,6 +121,10 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             SHOW_NON_DOWNLOADED = remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
             ENABLE_AUTHENTICATION = remoteConfig.getBoolean(ENABLE_AUTHENTICATION_KEY)
 
+            Timber.v("APP_UPDATE_MAX_TIME_DAYS: $APP_UPDATE_MAX_TIME_DAYS")
+            Timber.v("SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
+            Timber.v("ENABLE_AUTHENTICATION: $ENABLE_AUTHENTICATION")
+
             uiContext {
                 Timber.v("Finished preparing App...")
                 load()
