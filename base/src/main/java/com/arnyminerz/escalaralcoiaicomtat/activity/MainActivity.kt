@@ -15,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.profile.ProfileActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.DownloadsFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.MapFragment
@@ -225,6 +226,9 @@ class MainActivity : LanguageAppCompatActivity() {
 
         binding.authFab.setOnClickListener {
             startActivityForResult(Intent(this, AuthActivity::class.java), REQUEST_CODE_LOGIN)
+        }
+        binding.profileImageView.setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
         }
         binding.profileImageView.setOnLongClickListener {
             MaterialAlertDialogBuilder(this)
