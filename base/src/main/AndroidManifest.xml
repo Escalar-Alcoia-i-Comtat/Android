@@ -40,9 +40,9 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="escalaralcoiaicomtat.org"
+                    android:host="escalaralcoiaicomtat.page.link"
                     android:pathPrefix="/email"
-                    android:scheme="app" />
+                    android:scheme="https" />
             </intent-filter>
         </activity>
         <activity
