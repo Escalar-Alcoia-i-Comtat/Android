@@ -38,6 +38,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_MAP
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_SETTINGS
 import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -225,7 +226,18 @@ class MainActivity : LanguageAppCompatActivity() {
             startActivityForResult(Intent(this, AuthActivity::class.java), REQUEST_CODE_LOGIN)
         }
         binding.profileCardView.setOnLongClickListener {
-            Firebase.auth.signOut()
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.dialog_logout_title)
+                .setMessage(R.string.dialog_logout_message)
+                .setPositiveButton(R.string.action_logout) { _, _ ->
+                    Firebase.auth.signOut()
+                    refreshLoginStatus()
+                }
+                .setNegativeButton(R.string.action_cancel) { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+
             true
         }
 
