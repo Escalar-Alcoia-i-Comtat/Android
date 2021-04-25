@@ -16,8 +16,11 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthRegisterBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSY_LEGACY
+import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.viewListOf
 import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_COMPRESSION_QUALITY
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_WAITING_EMAIL_CONFIRMATION
@@ -121,7 +124,6 @@ class RegisterFragment private constructor() : Fragment() {
         }
 
         binding.registerButton.setOnClickListener {
-
             fields.clearFocus()
             fields.disable()
 
@@ -205,41 +207,47 @@ class RegisterFragment private constructor() : Fragment() {
         binding.progressIndicator.isIndeterminate = false
         binding.progressIndicator.visibility(true)
 
-        Timber.v("Registration has been successful, setting default profile image...")
-        result.user?.let { user ->
-            Timber.v("Starting profile image upload...")
-            val storageRef = Firebase.storage.reference
-            val profileImageRef = storageRef.child("profile/${user.uid}.webp")
-            val d = ContextCompat.getDrawable(requireContext(), R.drawable.ic_profile_image)
-            val profileImage = d!!.toBitmap()
-            val baos = ByteArrayOutputStream()
-            profileImage.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
-            val data = baos.toByteArray()
+        try {
+            Timber.v("Registration has been successful, setting default profile image...")
+            result.user?.let { user ->
+                Timber.v("Starting profile image upload...")
+                val storageRef = Firebase.storage.reference
+                val profileImageRef = storageRef.child("profile/${user.uid}.webp")
+                val d = ContextCompat.getDrawable(requireContext(), R.drawable.ic_profile_image)
+                val profileImage = d!!.toBitmap()
+                val baos = ByteArrayOutputStream()
+                profileImage.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
+                val data = baos.toByteArray()
 
-            Timber.v("Uploading profile image...")
-            profileImageRef.putBytes(data)
-                .addOnProgressListener { task ->
-                    binding.progressIndicator.progress = task.bytesTransferred.toInt()
-                    binding.progressIndicator.max = task.totalByteCount.toInt()
-                }
-                .addOnSuccessListener {
-                    binding.progressIndicator.visibility(false)
-                    binding.progressIndicator.isIndeterminate = true
-                    binding.progressIndicator.visibility(true)
+                Timber.v("Uploading profile image...")
+                profileImageRef.putBytes(data)
+                    .addOnProgressListener { task ->
+                        binding.progressIndicator.progress = task.bytesTransferred.toInt()
+                        binding.progressIndicator.max = task.totalByteCount.toInt()
+                    }
+                    .addOnSuccessListener {
+                        binding.progressIndicator.visibility(false)
+                        binding.progressIndicator.isIndeterminate = true
+                        binding.progressIndicator.visibility(true)
 
-                    updateProfileData(
-                        result,
-                        "gs://escalaralcoiaicomtat.appspot.com/" + profileImageRef.path
-                    )
-                }
-                .addOnFailureListener {
-                    Timber.e(it, "Could not upload profile image")
-                    val e = handleStorageException(it as StorageException)
-                        ?: return@addOnFailureListener
-                    toast(requireContext(), e.first)
-                    binding.progressIndicator.visibility(false)
-                    fields.enable()
-                }
+                        updateProfileData(
+                            result,
+                            "gs://escalaralcoiaicomtat.appspot.com/" + profileImageRef.path
+                        )
+                    }
+                    .addOnFailureListener {
+                        Timber.e(it, "Could not upload profile image")
+                        cancelRegistration(result)
+                        val e = handleStorageException(it as StorageException)
+                            ?: return@addOnFailureListener
+                        toast(requireContext(), e.first)
+                        binding.progressIndicator.visibility(false)
+                        fields.enable()
+                    }
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Could not update profile image.")
+            cancelRegistration(result)
         }
     }
 
@@ -266,7 +274,7 @@ class RegisterFragment private constructor() : Fragment() {
             ?.addOnFailureListener {
                 Timber.e(it, "Could not update profile data.")
                 // TODO: Handle individual exceptions
-                toast(R.string.toast_error_internal)
+                cancelRegistration(result)
             }
             ?.addOnCompleteListener {
                 binding.progressIndicator.visibility(false)
@@ -295,6 +303,25 @@ class RegisterFragment private constructor() : Fragment() {
                 PREF_WAITING_EMAIL_CONFIRMATION.put(true)
                 activity.finishActivityWithResult(RESULT_CODE_WAITING_EMAIL_CONFIRMATION, null)
             }
+    }
+
+    /**
+     * Cancels the currently going registration by deleting the user from the database, and logging
+     * out.
+     * @author Arnau Mora
+     * @since 20210425
+     * @param result The result that the user creation has given.
+     */
+    @UiThread
+    private fun cancelRegistration(result: AuthResult) {
+        doAsync {
+            Timber.i("Deleting just created user...")
+            result.user?.delete()?.awaitTask()
+
+            uiContext {
+                toast(R.string.toast_error_internal)
+            }
+        }
     }
 
     companion object {
