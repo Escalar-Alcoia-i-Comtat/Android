@@ -58,6 +58,7 @@
     <string name="action_register">Register</string>
     <string name="action_login">Login</string>
     <string name="action_logout">Log out</string>
+    <string name="action_resend_email">Resend confirmation email</string>
 
     <string name="status_updating">Updating…</string>
     <string name="status_loading">Loading…</string>
@@ -219,6 +220,7 @@
     <string name="toast_clear_ok">Cleared correctly</string>
     <string name="toast_permission_required">This permission is required</string>
     <string name="toast_message_sent">Message sent!</string>
+    <string name="toast_confirmation_sent">Confirmation sent!</string>
 
     <string name="path_warning_dry">This path has some safes getting dry. This may be because some kind of chemical safe has been using for the safes. This should be active for 2 days more or less.</string>
     <string name="path_warning_build">This path is under construction or revision. This may take from days to weeks. Please, be patient. You can enable alert notifications on settings, and we will alert you when this is ready.</string>

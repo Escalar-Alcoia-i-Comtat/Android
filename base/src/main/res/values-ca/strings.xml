@@ -302,4 +302,6 @@
     <string name="action_logout">Tancar la sessió</string>
     <string name="dialog_logout_title">Tancar la sessió</string>
     <string name="dialog_logout_message">Segur que vols tancar la sessió?</string>
+    <string name="action_resend_email">Tornar a enviar correu</string>
+    <string name="toast_confirmation_sent">Confirmació enviada!</string>
 </resources>
