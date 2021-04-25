@@ -5,13 +5,16 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.widget.PopupMenu
+import androidx.annotation.UiThread
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.DownloadsFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.MapFragment
@@ -21,9 +24,13 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFrag
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
+import com.arnyminerz.escalaralcoiaicomtat.shared.REQUEST_CODE_LOGIN
+import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_LOGGED_IN
+import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_DOWNLOADS
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_HOME
@@ -31,6 +38,8 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_MAP
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_SETTINGS
 import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -159,6 +168,9 @@ class MainActivity : LanguageAppCompatActivity() {
         setContentView(view)
         setSupportActionBar(binding.bottomAppBar)
 
+        binding.spaceAuth.visibility(ENABLE_AUTHENTICATION)
+        binding.authFab.visibility(ENABLE_AUTHENTICATION)
+
         areasViewFragment = AreasViewFragment()
         mapFragment = MapFragment()
         downloadsFragment = DownloadsFragment()
@@ -210,7 +222,27 @@ class MainActivity : LanguageAppCompatActivity() {
             startActivity(intent, optionsBundle)
         }
 
+        binding.authFab.setOnClickListener {
+            startActivityForResult(Intent(this, AuthActivity::class.java), REQUEST_CODE_LOGIN)
+        }
+        binding.profileImageView.setOnLongClickListener {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.dialog_logout_title)
+                .setMessage(R.string.dialog_logout_message)
+                .setPositiveButton(R.string.action_logout) { _, _ ->
+                    Firebase.auth.signOut()
+                    refreshLoginStatus()
+                }
+                .setNegativeButton(R.string.action_cancel) { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+
+            true
+        }
+
         updateBottomAppBar()
+        refreshLoginStatus()
     }
 
     override fun onBackPressed() {
@@ -251,5 +283,28 @@ class MainActivity : LanguageAppCompatActivity() {
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Timber.v("Got activity result. Code: %s", resultCode)
+        if (requestCode == REQUEST_CODE_LOGIN)
+            when (resultCode) {
+                RESULT_CODE_LOGGED_IN -> refreshLoginStatus()
+                RESULT_CODE_WAITING_EMAIL_CONFIRMATION ->
+                    startActivity(Intent(this, EmailConfirmationActivity::class.java))
+            }
+        else super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    /**
+     * Updates the UI according to the login status.
+     * @author Arnau Mora
+     * @since 20210424
+     */
+    @UiThread
+    private fun refreshLoginStatus() {
+        val user = Firebase.auth.currentUser
+
+        binding.profileCardView.visibility(user != null)
     }
 }

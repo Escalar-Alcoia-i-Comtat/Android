@@ -5,24 +5,30 @@ import android.os.Build
 import android.os.Bundle
 import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.loadAreasFromCache
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ERROR_REPORTING_PREF
+import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChannels
 import com.arnyminerz.escalaralcoiaicomtat.shared.APP_UPDATE_MAX_TIME_DAYS
 import com.arnyminerz.escalaralcoiaicomtat.shared.APP_UPDATE_MAX_TIME_DAYS_KEY
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
+import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION_KEY
 import com.arnyminerz.escalaralcoiaicomtat.shared.REMOTE_CONFIG_DEFAULTS
 import com.arnyminerz.escalaralcoiaicomtat.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
 import com.arnyminerz.escalaralcoiaicomtat.shared.SHOW_NON_DOWNLOADED
 import com.arnyminerz.escalaralcoiaicomtat.shared.SHOW_NON_DOWNLOADED_KEY
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.google.android.gms.tasks.Tasks
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.ActivityResult.RESULT_IN_APP_UPDATE_FAILED
 import com.google.android.play.core.install.model.AppUpdateType
@@ -34,7 +40,6 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import timber.log.Timber
-import java.util.concurrent.CompletableFuture.*
 
 class LoadingActivity : NetworkChangeListenerActivity() {
     companion object {
@@ -103,19 +108,24 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             } else Timber.d("There's no update available. ($updateAvailability)")
         }
 
-        runAsync {
+        doAsync {
             Timber.v("Getting remote configuration...")
             val remoteConfig = Firebase.remoteConfig
             val configSettings = remoteConfigSettings {
                 minimumFetchIntervalInSeconds = REMOTE_CONFIG_MIN_FETCH_INTERVAL
             }
-            Tasks.await(remoteConfig.setConfigSettingsAsync(configSettings))
-            Tasks.await(remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS))
-            Tasks.await(remoteConfig.fetchAndActivate())
+            remoteConfig.setConfigSettingsAsync(configSettings).awaitTask()
+            remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS).awaitTask()
+            remoteConfig.fetchAndActivate().awaitTask()
             APP_UPDATE_MAX_TIME_DAYS = remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
             SHOW_NON_DOWNLOADED = remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
+            ENABLE_AUTHENTICATION = remoteConfig.getBoolean(ENABLE_AUTHENTICATION_KEY)
 
-            runOnUiThread {
+            Timber.v("APP_UPDATE_MAX_TIME_DAYS: $APP_UPDATE_MAX_TIME_DAYS")
+            Timber.v("SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
+            Timber.v("ENABLE_AUTHENTICATION: $ENABLE_AUTHENTICATION")
+
+            uiContext {
                 Timber.v("Finished preparing App...")
                 load()
             }
@@ -147,6 +157,12 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
     @UiThread
     private fun load() {
+        val waitingForEmailConfirmation = PREF_WAITING_EMAIL_CONFIRMATION.get()
+        if (waitingForEmailConfirmation) {
+            startActivity(Intent(this, EmailConfirmationActivity::class.java))
+            return
+        }
+
         if (loading) {
             Timber.v("Skipped load since already loading")
             return

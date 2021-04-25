@@ -11,6 +11,9 @@ const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7L
 const val SHOW_NON_DOWNLOADED_KEY = "SHOW_NON_DOWNLOADED"
 const val SHOW_NON_DOWNLOADED_DEFAULT = false
 
+const val ENABLE_AUTHENTICATION_KEY = "ENABLE_AUTHENTICATION"
+const val ENABLE_AUTHENTICATION_DEFAULT = false
+
 /**
  * The maximum amount of days that will be allowed to the user not having updated the app
  * before forcing an update.
@@ -22,9 +25,19 @@ var APP_UPDATE_MAX_TIME_DAYS = APP_UPDATE_MAX_TIME_DAYS_DEFAULT
  */
 var SHOW_NON_DOWNLOADED = SHOW_NON_DOWNLOADED_DEFAULT
 
+/**
+ * Sets if the authentication features should be enabled
+ * @since 20210422
+ */
+var ENABLE_AUTHENTICATION = ENABLE_AUTHENTICATION_DEFAULT
+
+/**
+ * Sets the default values for Remote Config
+ */
 val REMOTE_CONFIG_DEFAULTS = mapOf(
     APP_UPDATE_MAX_TIME_DAYS_KEY to APP_UPDATE_MAX_TIME_DAYS_DEFAULT,
     SHOW_NON_DOWNLOADED_KEY to SHOW_NON_DOWNLOADED_DEFAULT,
+    ENABLE_AUTHENTICATION_KEY to ENABLE_AUTHENTICATION_DEFAULT,
 )
 const val REMOTE_CONFIG_MIN_FETCH_INTERVAL = 3600L
 
@@ -80,8 +93,36 @@ const val ROTATION_B = -90f
 
 const val DEFAULT_BITMAP_COMPRESSION = 100
 
+/**
+ * The compression quality for a profile image.
+ * @author Arnau Mora
+ * @since 20210425
+ */
+const val PROFILE_IMAGE_COMPRESSION_QUALITY = 85
+
 const val LOCATION_PERMISSION_REQUEST_CODE = 3 // This number was chosen by Dono
 const val FOLDER_ACCESS_PERMISSION_REQUEST_CODE = 7
+
+/**
+ * Requests the user to get logged in
+ * @author Arnau Mora
+ * @since 20210425
+ */
+const val REQUEST_CODE_LOGIN = 5
+
+/**
+ * When the user has just been registered and the confirmation email has been sent.
+ * @author Arnau Mora
+ * @since 20210425
+ */
+const val RESULT_CODE_WAITING_EMAIL_CONFIRMATION = 1
+
+/**
+ * When the user has successfully been logged in.
+ * @author Arnau Mora
+ * @since 20210425
+ */
+const val RESULT_CODE_LOGGED_IN = 2
 
 const val PERMISSION_DIALOG_TAG = "PERM_TAG"
 

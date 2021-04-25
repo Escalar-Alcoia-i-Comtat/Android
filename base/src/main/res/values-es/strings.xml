@@ -276,4 +276,31 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="toast_error_storage_cancelled">La solicitud ha sido cancelada</string>
     <string name="toast_error_storage_corrupt">El archivo descargado está corrupto, contacta con un administrador</string>
     <string name="toast_error_storage_authentication">No se ha podido acceder a un archivo privado</string>
+    <string name="action_register">Registrarse</string>
+    <string name="action_login">Acceder</string>
+    <string name="toast_error_confirmation_send">No se ha podido enviar el correo de confirmación</string>
+    <string name="image_desc_logo_cea">Logo del Centre Excursionista d\'Alcoi</string>
+    <string name="image_desc_authenticate">Autenticarse</string>
+    <string name="image_desc_profile_image">Imagen de perfil</string>
+    <string name="image_desc_check_inbox">Icono de comprovación de bandeja de entrada</string>
+    <string name="login_email">Correo electrónico</string>
+    <string name="login_password">Contraseña</string>
+    <string name="login_condition">Al tocar en Iniciar sessión estás aceptando nuestros <a href="https://escalaralcoiaicomtat.centrexcursionistalcoi.org">Términos y condiciones de uso</a>.</string>
+    <string name="login_error_user_not_found">El correo electrónico no está registrado</string>
+    <string name="login_error_invalid_credentials">Contraseña incorrecta</string>
+    <string name="login_error_user_disabled">El usuario se ha deshabilitado. Contacta con un administrador</string>
+    <string name="register_email">Correo electrónico</string>
+    <string name="register_display_name">Nombre</string>
+    <string name="register_password">Contraseña</string>
+    <string name="register_password_confirm">Confirmar Contraseña</string>
+    <string name="register_error_passwords_not_match">Las contraseñas no coinciden</string>
+    <string name="register_error_weak_password">La contraseña debe ser más fuerte</string>
+    <string name="register_error_invalid_email">La dirección de correo introducida no es válida</string>
+    <string name="register_error_already_exists">El correo electrónico ya ha sido registrado</string>
+    <string name="register_error_display_name_required">El nombre es necesario</string>
+    <string name="register_result_inbox_title">Comprueba tu bandeja de entrada</string>
+    <string name="register_result_inbox_message">Te hemos enviado un correo de confirmación, por favor, sigue las instrucciones allí. Comprueba tu carpeta de correo basura.</string>
+    <string name="action_logout">Cerrar sesión</string>
+    <string name="dialog_logout_title">Cerrar sesión</string>
+    <string name="dialog_logout_message">Seguro que quieres cerrar la sesión?</string>
 </resources>

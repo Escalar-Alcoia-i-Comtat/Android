@@ -275,4 +275,31 @@
     <string name="toast_error_storage_cancelled">La sol·licitud s\'ha cancel·lat</string>
     <string name="toast_error_storage_corrupt">El fitxer baixat està corromput, contacta a un adminstrador</string>
     <string name="toast_error_storage_authentication">No s\'ha pogut accedir a un fitxer privat</string>
+    <string name="action_register">Registrar-se</string>
+    <string name="action_login">Accedir</string>
+    <string name="toast_error_confirmation_send">No s\'ha pogut enviar el correu de confirmació</string>
+    <string name="image_desc_logo_cea">Logo del Centre Excursionista d\'Alcoi</string>
+    <string name="image_desc_authenticate">Autenticar-se</string>
+    <string name="image_desc_profile_image">Imatge de perfil</string>
+    <string name="image_desc_check_inbox">Icona de comprovació de safata d\'entrada</string>
+    <string name="login_email">Correu electrònic</string>
+    <string name="login_password">Contrassenya</string>
+    <string name="login_condition">Al fer clic a Iniciar sessió estàs acceptant els nostres <a href="https://escalaralcoiaicomtat.centrexcursionistalcoi.org">Termes d\'ús i condicions</a>.</string>
+    <string name="login_error_user_not_found">El correu electrònic no està registrat</string>
+    <string name="login_error_invalid_credentials">Contrassenya incorrecta</string>
+    <string name="login_error_user_disabled">L\'usuari ha estat inhabilitat. Contacta a un administrador</string>
+    <string name="register_email">Correu electrònic</string>
+    <string name="register_display_name">Nom</string>
+    <string name="register_password">Contrassenya</string>
+    <string name="register_password_confirm">Confirmar Contrassenya</string>
+    <string name="register_error_passwords_not_match">Les contrassenyes no coincideixen</string>
+    <string name="register_error_weak_password">La contrassenya ha de ser més forta</string>
+    <string name="register_error_invalid_email">La direcció de correu introduida no és vàlida</string>
+    <string name="register_error_already_exists">El correu electrònic ja ha estat registrat</string>
+    <string name="register_error_display_name_required">El nom és necessari</string>
+    <string name="register_result_inbox_title">Comprova la teua safata d\'entrada</string>
+    <string name="register_result_inbox_message">T\'hem enviat un correu electrònic de confirmació, per favor, segueix les instruccions indicades. Revisa també la carpeta de correu brossa.</string>
+    <string name="action_logout">Tancar la sessió</string>
+    <string name="dialog_logout_title">Tancar la sessió</string>
+    <string name="dialog_logout_message">Segur que vols tancar la sessió?</string>
 </resources>
