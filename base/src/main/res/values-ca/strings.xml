@@ -305,4 +305,7 @@
     <string name="action_resend_email">Tornar a enviar correu</string>
     <string name="toast_confirmation_sent">Confirmació enviada!</string>
     <string name="toast_error_confirmation">No s\'ha pogut confirmar el correu!</string>
+    <string name="image_desc_change_profile_image">Indicador de canvi d\'imatge de perfil</string>
+    <string name="toast_error_profile_image_update">No s\'ha pogut actualitzar la imatge de perfil</string>
+    <string name="toast_profile_image_updated">Imatge de perfil actualitzada!</string>
 </resources>

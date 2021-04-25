@@ -17,6 +17,7 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthRegisterBindi
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
+import com.arnyminerz.escalaralcoiaicomtat.generic.cropToSquare
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
@@ -218,9 +219,9 @@ class RegisterFragment private constructor() : Fragment() {
                 val storageRef = Firebase.storage.reference
                 val profileImageRef = storageRef.child("profile/${user.uid}.webp")
                 val d = ContextCompat.getDrawable(requireContext(), R.drawable.ic_profile_image)
-                val profileImage = d!!.toBitmap()
+                val profileImage = d!!.toBitmap().cropToSquare()
                 val baos = ByteArrayOutputStream()
-                profileImage.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
+                profileImage?.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
                 val data = baos.toByteArray()
 
                 Timber.v("Uploading profile image...")

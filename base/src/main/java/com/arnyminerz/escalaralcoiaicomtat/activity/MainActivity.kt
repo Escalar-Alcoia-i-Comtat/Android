@@ -15,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.profile.ProfileActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.DownloadsFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.MapFragment
@@ -169,9 +170,6 @@ class MainActivity : LanguageAppCompatActivity() {
         setContentView(view)
         setSupportActionBar(binding.bottomAppBar)
 
-        binding.spaceAuth.visibility(ENABLE_AUTHENTICATION)
-        binding.authFab.visibility(ENABLE_AUTHENTICATION)
-
         areasViewFragment = AreasViewFragment()
         mapFragment = MapFragment()
         downloadsFragment = DownloadsFragment()
@@ -225,6 +223,9 @@ class MainActivity : LanguageAppCompatActivity() {
 
         binding.authFab.setOnClickListener {
             startActivityForResult(Intent(this, AuthActivity::class.java), REQUEST_CODE_LOGIN)
+        }
+        binding.profileImageView.setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
         }
         binding.profileImageView.setOnLongClickListener {
             MaterialAlertDialogBuilder(this)
@@ -304,14 +305,19 @@ class MainActivity : LanguageAppCompatActivity() {
      */
     @UiThread
     private fun refreshLoginStatus() {
-        val user = Firebase.auth.currentUser
+        binding.spaceAuth.visibility(ENABLE_AUTHENTICATION)
+        binding.authFab.visibility(ENABLE_AUTHENTICATION)
 
-        binding.profileCardView.visibility(user != null)
+        if (ENABLE_AUTHENTICATION) {
+            val user = Firebase.auth.currentUser
 
-        if (user != null)
-            if (!user.isEmailVerified) {
-                PREF_WAITING_EMAIL_CONFIRMATION.put(true)
-                startActivity(Intent(this, EmailConfirmationActivity::class.java))
-            }
+            binding.profileCardView.visibility(user != null)
+
+            if (user != null)
+                if (!user.isEmailVerified) {
+                    PREF_WAITING_EMAIL_CONFIRMATION.put(true)
+                    startActivity(Intent(this, EmailConfirmationActivity::class.java))
+                }
+        }
     }
 }

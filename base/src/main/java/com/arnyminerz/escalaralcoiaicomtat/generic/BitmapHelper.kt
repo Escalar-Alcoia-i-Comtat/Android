@@ -1,13 +1,19 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
+import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
+import android.os.ParcelFileDescriptor
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCreateNewFileException
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotDeleteFileException
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileDescriptor
 import java.io.FileOutputStream
+import java.io.IOException
 
 /**
  * Tries to use the WEB_LOSSLESS codec, if API level is less than R, uses WEBP
@@ -106,3 +112,30 @@ fun File.storeBitmap(
     quality: Int = 100
 ) =
     bitmap.storeToFile(this, overwrite, mkdirs, format, quality)
+
+fun Bitmap.cropToSquare(): Bitmap? {
+    val newWidth = if (height > width) width else height
+    val newHeight = if (height > width) height - (height - width) else height
+    var cropW = (width - height) / 2
+    cropW = if (cropW < 0) 0 else cropW
+    var cropH = (height - width) / 2
+    cropH = if (cropH < 0) 0 else cropH
+    return Bitmap.createBitmap(this, cropW, cropH, newWidth, newHeight)
+}
+
+/**
+ * Extracts a [Bitmap] from an [Uri].
+ * @author Arnau Mora
+ * @since 20210425
+ * @param contentResolver The content resolve
+ * @throws IOException When there was an error while loading the bitmap.
+ */
+@Throws(IOException::class)
+fun getBitmapFromUri(contentResolver: ContentResolver, uri: Uri): Bitmap? {
+    val parcelFileDescriptor: ParcelFileDescriptor =
+        contentResolver.openFileDescriptor(uri, "r") ?: return null
+    val fileDescriptor: FileDescriptor = parcelFileDescriptor.fileDescriptor
+    val image: Bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor)
+    parcelFileDescriptor.close()
+    return image
+}
