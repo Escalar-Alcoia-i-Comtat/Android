@@ -35,9 +35,11 @@ class DynamicLinkHandler : Activity() {
 
                 val mode = deepLink.getQueryParameter("mode")
                 val actionCode = deepLink.getQueryParameter("oobCode")
-                if (mode.equals("verifyEmail", true) && actionCode != null)
+                if (mode.equals("verifyEmail", true) && actionCode != null) {
+                    Timber.i("Applying email verification code...")
                     Firebase.auth.applyActionCode(actionCode)
                         .addOnSuccessListener {
+                            Timber.i("Verified email successfully.")
                             PREF_WAITING_EMAIL_CONFIRMATION.put(false)
                             startActivity(Intent(this, LoadingActivity::class.java))
                         }
@@ -46,6 +48,7 @@ class DynamicLinkHandler : Activity() {
                             toast(R.string.toast_error_confirmation)
                             finish()
                         }
+                }
             }
             .addOnFailureListener(this) { e ->
                 Timber.w(e, "getDynamicLink:onFailure")
