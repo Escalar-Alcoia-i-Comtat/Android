@@ -25,6 +25,8 @@ class ProfileActivity : AppCompatActivity() {
             return
         }
 
+        binding.profileNameTextView.text = user.displayName
+
         val profileImageUrl = user.photoUrl
         if (profileImageUrl != null)
             Firebase.storage.getReferenceFromUrl(profileImageUrl.toString())

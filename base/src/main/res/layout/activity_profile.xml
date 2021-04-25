@@ -38,4 +38,16 @@
             tools:src="@tools:sample/avatars" />
     </androidx.cardview.widget.CardView>
 
+    <TextView
+        android:id="@+id/profileName_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/placeholder"
+        android:textAlignment="center"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/profileImage_cardView" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
