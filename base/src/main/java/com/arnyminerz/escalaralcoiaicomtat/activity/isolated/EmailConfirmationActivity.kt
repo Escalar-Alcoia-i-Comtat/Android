@@ -23,6 +23,18 @@ class EmailConfirmationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityEmailConfirmationBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        Firebase.dynamicLinks
+            .getDynamicLink(intent)
+            .addOnSuccessListener(this) { pendingDynamicLinkData ->
+                // Get deep link from result (may be null if no link is found)
+                var deepLink: Uri? = null
+                if (pendingDynamicLinkData != null)
+                    deepLink = pendingDynamicLinkData.link
+
+                Timber.v("Got deep link: $deepLink")
+            }
+            .addOnFailureListener(this) { e -> Timber.w(e, "getDynamicLink:onFailure") }
     }
 
     override fun onResume() {
