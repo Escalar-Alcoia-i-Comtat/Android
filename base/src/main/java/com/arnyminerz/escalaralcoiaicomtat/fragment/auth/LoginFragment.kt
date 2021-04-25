@@ -14,7 +14,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.viewListOf
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_LOGGED_IN
 import com.google.android.material.textfield.TextInputLayout
-import com.google.firebase.FirebaseError
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -89,18 +88,18 @@ class LoginFragment private constructor() : Fragment() {
                 .addOnFailureListener { exception ->
                     Timber.w(exception, "Could not login.")
                     val e = exception as FirebaseAuthException
-                    when (e.errorCode.toInt()) {
-                        FirebaseError.ERROR_USER_NOT_FOUND ->
+                    when (e.errorCode) {
+                        "ERROR_USER_NOT_FOUND" ->
                             showError(
                                 binding.emailTextField,
                                 R.string.login_error_user_not_found
                             )
-                        FirebaseError.ERROR_INVALID_CREDENTIAL ->
+                        "ERROR_INVALID_CREDENTIAL" ->
                             showError(
                                 binding.passwordTextField,
                                 R.string.login_error_invalid_credentials
                             )
-                        FirebaseError.ERROR_USER_DISABLED ->
+                        "ERROR_USER_DISABLED" ->
                             showError(
                                 binding.emailTextField,
                                 R.string.login_error_user_disabled
