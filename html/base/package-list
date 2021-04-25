@@ -47,6 +47,8 @@ $dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity.profile/AuthActivit
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity.profile/AuthActivity///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity.profile/-auth-activity/index.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity.profile/AuthActivity/AuthActivity/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity.profile/-auth-activity/-auth-activity.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity.profile/AuthActivity/changePage/#kotlin.Int#kotlin.Boolean/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity.profile/-auth-activity/change-page.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity.profile/ProfileActivity///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity.profile/-profile-activity/index.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity.profile/ProfileActivity/ProfileActivity/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity.profile/-profile-activity/-profile-activity.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity////PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity/index.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity/IntroActivity.Companion///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity/-intro-activity/-companion/index.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity/IntroActivity.Companion/shouldChange/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity/-intro-activity/-companion/should-change.html
@@ -950,6 +952,7 @@ $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//WEBP_LOSSLESS_LEGAC
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//WEBP_LOSSY_LEGACY/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/-w-e-b-p_-l-o-s-s-y_-l-e-g-a-c-y.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//allTrue/kotlin.collections.Collection[kotlin.Boolean]#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/all-true.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//awaitTask/com.google.android.gms.tasks.Task[TypeParam(bounds=[kotlin.Any?])]#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/await-task.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//cropToSquare/android.graphics.Bitmap#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/crop-to-square.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//deleteDir/#java.io.File?/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/delete-dir.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//deleteDirAndContents/java.io.File#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/delete-dir-and-contents.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//deleteIfExists/java.io.File#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/delete-if-exists.html
@@ -962,6 +965,7 @@ $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//extension/android.n
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//fileName/android.net.Uri#android.content.Context/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/file-name.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//finishActivityWithResult/android.app.Activity?#kotlin.Int#android.content.Intent?/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/finish-activity-with-result.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//generateUUID/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/generate-u-u-i-d.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//getBitmapFromUri/#android.content.ContentResolver#android.net.Uri/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/get-bitmap-from-uri.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//getDisplaySize/#android.app.Activity/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/get-display-size.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//getExtra/android.content.Intent#com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra[TypeParam(bounds=[kotlin.Any?])]#TypeParam(bounds=[kotlin.Any?])/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/get-extra.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//getExtra/android.content.Intent#com.arnyminerz.escalaralcoiaicomtat.generic.IntentExtra[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/get-extra.html
@@ -1329,6 +1333,7 @@ $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//QUIET_UPDATE/#/Point
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//REMOTE_CONFIG_DEFAULTS/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-r-e-m-o-t-e_-c-o-n-f-i-g_-d-e-f-a-u-l-t-s.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//REMOTE_CONFIG_MIN_FETCH_INTERVAL/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-r-e-m-o-t-e_-c-o-n-f-i-g_-m-i-n_-f-e-t-c-h_-i-n-t-e-r-v-a-l.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//REQUEST_CODE_LOGIN/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-r-e-q-u-e-s-t_-c-o-d-e_-l-o-g-i-n.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//REQUEST_CODE_SELECT_PROFILE_IMAGE/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-r-e-q-u-e-s-t_-c-o-d-e_-s-e-l-e-c-t_-p-r-o-f-i-l-e_-i-m-a-g-e.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//RESULT_CODE_LOGGED_IN/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-r-e-s-u-l-t_-c-o-d-e_-l-o-g-g-e-d_-i-n.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//RESULT_CODE_WAITING_EMAIL_CONFIRMATION/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-r-e-s-u-l-t_-c-o-d-e_-w-a-i-t-i-n-g_-e-m-a-i-l_-c-o-n-f-i-r-m-a-t-i-o-n.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//ROTATION_A/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-r-o-t-a-t-i-o-n_-a.html
