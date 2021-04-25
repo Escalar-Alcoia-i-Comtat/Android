@@ -1281,6 +1281,8 @@ $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//AREAS/#/PointingToDe
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//ARGUMENT_AREA_ID/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-a-r-g-u-m-e-n-t_-a-r-e-a_-i-d.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//ARGUMENT_SECTOR_INDEX/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-a-r-g-u-m-e-n-t_-s-e-c-t-o-r_-i-n-d-e-x.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//ARGUMENT_ZONE_ID/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-a-r-g-u-m-e-n-t_-z-o-n-e_-i-d.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//CONFIRMATION_EMAIL_DYNAMIC/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-c-o-n-f-i-r-m-a-t-i-o-n_-e-m-a-i-l_-d-y-n-a-m-i-c.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//CONFIRMATION_EMAIL_URL/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-c-o-n-f-i-r-m-a-t-i-o-n_-e-m-a-i-l_-u-r-l.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//CROSSFADE_DURATION/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-c-r-o-s-s-f-a-d-e_-d-u-r-a-t-i-o-n.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//DATACLASS_WAIT_CHILDREN_DELAY/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-d-a-t-a-c-l-a-s-s_-w-a-i-t_-c-h-i-l-d-r-e-n_-d-e-l-a-y.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared//DEFAULT_BITMAP_COMPRESSION/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/-d-e-f-a-u-l-t_-b-i-t-m-a-p_-c-o-m-p-r-e-s-s-i-o-n.html
