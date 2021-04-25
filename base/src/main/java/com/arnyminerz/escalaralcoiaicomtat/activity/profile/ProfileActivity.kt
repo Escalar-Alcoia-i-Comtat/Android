@@ -10,6 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityProfileBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.MEGABYTE
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSY_LEGACY
+import com.arnyminerz.escalaralcoiaicomtat.generic.cropToSquare
 import com.arnyminerz.escalaralcoiaicomtat.generic.getBitmapFromUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_COMPRESSION_QUALITY
@@ -38,7 +39,8 @@ class ProfileActivity : AppCompatActivity() {
         binding.profileNameTextView.text = user.displayName
 
         val profileImageUrl = user.photoUrl
-        if (profileImageUrl != null)
+        if (profileImageUrl != null) {
+            binding.profileProgressIndicator.visibility(true)
             Firebase.storage.getReferenceFromUrl(profileImageUrl.toString())
                 .getBytes(MEGABYTE * 5)
                 .addOnSuccessListener { bytes ->
@@ -48,6 +50,10 @@ class ProfileActivity : AppCompatActivity() {
                 .addOnFailureListener {
                     Timber.e(it, "Could not load profile image")
                 }
+                .addOnCompleteListener {
+                    binding.profileProgressIndicator.visibility(false)
+                }
+        } else binding.profileProgressIndicator.visibility(false)
 
         binding.profileImageImageView.setOnClickListener {
             startActivityForResult(
@@ -86,7 +92,8 @@ class ProfileActivity : AppCompatActivity() {
 
             val profileImageRef = Firebase.storage.getReference("profile/")
             val baos = ByteArrayOutputStream()
-            bitmap.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
+            bitmap.cropToSquare()
+                ?.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
             profileImageRef.putBytes(baos.toByteArray())
                 .addOnProgressListener { task ->
                     binding.profileProgressIndicator.progress = task.bytesTransferred.toInt()
