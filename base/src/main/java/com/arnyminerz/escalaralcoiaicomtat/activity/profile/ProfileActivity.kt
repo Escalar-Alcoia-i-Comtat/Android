@@ -94,7 +94,9 @@ class ProfileActivity : AppCompatActivity() {
             val baos = ByteArrayOutputStream()
             bitmap.cropToSquare()
                 ?.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
-            profileImageRef.putBytes(baos.toByteArray())
+            val bitmapBytes = baos.toByteArray()
+            bitmap.recycle()
+            profileImageRef.putBytes(bitmapBytes)
                 .addOnProgressListener { task ->
                     binding.profileProgressIndicator.progress = task.bytesTransferred.toInt()
                     binding.profileProgressIndicator.max = task.totalByteCount.toInt()
