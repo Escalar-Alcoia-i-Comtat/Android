@@ -303,4 +303,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="action_logout">Cerrar sesión</string>
     <string name="dialog_logout_title">Cerrar sesión</string>
     <string name="dialog_logout_message">Seguro que quieres cerrar la sesión?</string>
+    <string name="action_resend_email">Volver a enviar el correo</string>
+    <string name="toast_confirmation_sent">Confirmación enviada!</string>
 </resources>
