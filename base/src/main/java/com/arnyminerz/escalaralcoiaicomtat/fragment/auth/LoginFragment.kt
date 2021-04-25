@@ -9,9 +9,10 @@ import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthLoginBinding
+import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.viewListOf
-import com.arnyminerz.escalaralcoiaicomtat.shared.LOGGED_IN_REQUEST_CODE
+import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_LOGGED_IN
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.FirebaseError
 import com.google.firebase.auth.FirebaseAuthException
@@ -82,7 +83,7 @@ class LoginFragment private constructor() : Fragment() {
             val password = binding.passwordEditText.text.toString()
             Firebase.auth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener { _ ->
-                    requireActivity().finishActivity(LOGGED_IN_REQUEST_CODE)
+                    activity.finishActivityWithResult(RESULT_CODE_LOGGED_IN, null)
                 }
                 .addOnFailureListener { exception ->
                     Timber.w(exception, "Could not login.")
