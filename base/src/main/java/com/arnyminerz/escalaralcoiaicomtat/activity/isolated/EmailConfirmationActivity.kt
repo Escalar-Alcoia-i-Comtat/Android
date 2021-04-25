@@ -30,6 +30,7 @@ class EmailConfirmationActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.resendConfirmationMailButton.setOnClickListener {
+            binding.resendConfirmationMailButton.isEnabled = false
             val user = Firebase.auth.currentUser
             user?.sendEmailVerification(
                 ActionCodeSettings.newBuilder()
@@ -38,11 +39,12 @@ class EmailConfirmationActivity : AppCompatActivity() {
                     .build()
             )
                 ?.addOnSuccessListener {
-                    toast(R.string.toast_error_confirmation_send)
+                    toast(R.string.toast_confirmation_sent)
                 }
                 ?.addOnFailureListener {
                     Timber.e(it, "Could not send verification mail")
-                    toast(R.string.toast_confirmation_sent)
+                    toast(R.string.toast_error_confirmation_send)
+                    binding.resendConfirmationMailButton.isEnabled = true
                 }
         }
 
