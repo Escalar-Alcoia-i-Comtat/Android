@@ -32,12 +32,16 @@ fun Context.onUiThread(call: (context: Context) -> Unit) {
 }
 
 fun toast(context: Context?, @StringRes text: Int) =
-    context?.onUiThread { it.toast(text) }
+    context?.toast(text)
 
 fun toast(context: Context?, text: String) =
-    context?.onUiThread { it.toast(text) }
+    context?.toast(text)
+
+fun Fragment.toast(@StringRes text: Int) =
+    context?.toast(text)
 
 class ContextUtils(base: Context) : ContextWrapper(base)
+
 @ExperimentalUnsignedTypes
 fun loadLocale(context: Context): ContextWrapper {
     Timber.v("Loading app language...")
