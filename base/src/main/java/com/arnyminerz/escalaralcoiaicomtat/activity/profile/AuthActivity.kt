@@ -7,7 +7,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageFragmentActivi
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityAuthBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.auth.LoginFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.auth.RegisterFragment
-import com.arnyminerz.escalaralcoiaicomtat.shared.LOGGED_IN_REQUEST_CODE
+import com.arnyminerz.escalaralcoiaicomtat.shared.REQUEST_CODE_LOGIN
 
 /**
  * Allows the user to get logged into the app, register, or get some help on a lost account.
@@ -15,7 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.LOGGED_IN_REQUEST_CODE
  * the javadoc.
  * @author Arnau Mora
  * @since 20210425
- * @see LOGGED_IN_REQUEST_CODE
+ * @see REQUEST_CODE_LOGIN
  */
 class AuthActivity : LanguageFragmentActivity() {
     private lateinit var binding: ActivityAuthBinding
