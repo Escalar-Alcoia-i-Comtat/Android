@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.generic
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.LocaleList
@@ -10,9 +11,10 @@ import android.os.Looper
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_LANGUAGE_PREF
 import timber.log.Timber
-import java.util.Locale
+import java.util.*
 
 fun Context.toast(text: String, duration: Int = Toast.LENGTH_SHORT) =
     Toast.makeText(this, text, duration).show()
@@ -52,3 +54,12 @@ fun loadLocale(context: Context): ContextWrapper {
 
 fun Context.isPermissionGranted(permission: String): Boolean =
     ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+
+fun Activity?.finishActivityWithResult(resultCode: Int, data: Intent?) =
+    this?.also {
+        if (data == null)
+            setResult(resultCode)
+        else
+            setResult(resultCode, data)
+        finish()
+    }
