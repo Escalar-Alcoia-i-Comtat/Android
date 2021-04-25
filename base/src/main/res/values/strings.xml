@@ -213,6 +213,7 @@
     <string name="toast_error_storage_corrupt">The downloaded file is corrupt, contact an administrator</string>
     <string name="toast_error_storage_authentication">Could not access private file</string>
     <string name="toast_error_confirmation_send">Could not send confirmation mail</string>
+    <string name="toast_error_confirmation">Could not verify email!</string>
     <string name="toast_location_not_shown">Current location won\'t be shown</string>
     <string name="toast_stored_gpx">GPX stored!</string>
     <string name="toast_stored_kmz">KMZ stored!</string>

@@ -31,7 +31,7 @@
         android:vmSafeMode="true"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute,LockedOrientationActivity">
         <activity
-            android:name=".activity.isolated.EmailConfirmationActivity"
+            android:name=".activity.isolated.DynamicLinkHandler"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -41,10 +41,12 @@
 
                 <data
                     android:host="escalaralcoiaicomtat.page.link"
-                    android:pathPrefix="/email"
                     android:scheme="https" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".activity.isolated.EmailConfirmationActivity"
+            android:exported="true" />
         <activity
             android:name=".activity.profile.AuthActivity"
             android:exported="true" />

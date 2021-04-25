@@ -21,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.MapFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.SettingsFragmentManager
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.AreasViewFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFragment.Companion.SettingsPage
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
@@ -306,5 +307,11 @@ class MainActivity : LanguageAppCompatActivity() {
         val user = Firebase.auth.currentUser
 
         binding.profileCardView.visibility(user != null)
+
+        if (user != null)
+            if (!user.isEmailVerified) {
+                PREF_WAITING_EMAIL_CONFIRMATION.put(true)
+                startActivity(Intent(this, EmailConfirmationActivity::class.java))
+            }
     }
 }

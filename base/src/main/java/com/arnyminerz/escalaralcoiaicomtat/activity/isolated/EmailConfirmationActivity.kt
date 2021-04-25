@@ -1,9 +1,9 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.isolated
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.LoadingActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityEmailConfirmationBinding
@@ -17,7 +17,6 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.CONFIRMATION_EMAIL_URL
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.dynamiclinks.ktx.dynamicLinks
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 
@@ -36,6 +35,8 @@ class EmailConfirmationActivity : AppCompatActivity() {
                 ActionCodeSettings.newBuilder()
                     .setUrl(CONFIRMATION_EMAIL_URL)
                     .setDynamicLinkDomain(CONFIRMATION_EMAIL_DYNAMIC)
+                    .setHandleCodeInApp(true)
+                    .setAndroidPackageName(BuildConfig.APPLICATION_ID, true, null)
                     .build()
             )
                 ?.addOnSuccessListener {
@@ -47,18 +48,6 @@ class EmailConfirmationActivity : AppCompatActivity() {
                     binding.resendConfirmationMailButton.isEnabled = true
                 }
         }
-
-        Firebase.dynamicLinks
-            .getDynamicLink(intent)
-            .addOnSuccessListener(this) { pendingDynamicLinkData ->
-                // Get deep link from result (may be null if no link is found)
-                var deepLink: Uri? = null
-                if (pendingDynamicLinkData != null)
-                    deepLink = pendingDynamicLinkData.link
-
-                Timber.v("Got deep link: $deepLink")
-            }
-            .addOnFailureListener(this) { e -> Timber.w(e, "getDynamicLink:onFailure") }
     }
 
     override fun onResume() {

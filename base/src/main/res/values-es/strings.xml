@@ -305,4 +305,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="dialog_logout_message">Seguro que quieres cerrar la sesión?</string>
     <string name="action_resend_email">Volver a enviar el correo</string>
     <string name="toast_confirmation_sent">Confirmación enviada!</string>
+    <string name="toast_error_confirmation">No se ha podido verificar el email!</string>
 </resources>
