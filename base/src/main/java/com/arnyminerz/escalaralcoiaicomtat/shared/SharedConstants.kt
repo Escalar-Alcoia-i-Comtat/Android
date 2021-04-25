@@ -111,6 +111,13 @@ const val FOLDER_ACCESS_PERMISSION_REQUEST_CODE = 7
 const val REQUEST_CODE_LOGIN = 5
 
 /**
+ * Requests the user to select an image for its profile.
+ * @author Arnau Mora
+ * @since 20210425
+ */
+const val REQUEST_CODE_SELECT_PROFILE_IMAGE = 3
+
+/**
  * When the user has just been registered and the confirmation email has been sent.
  * @author Arnau Mora
  * @since 20210425
