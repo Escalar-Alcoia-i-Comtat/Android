@@ -21,6 +21,8 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.viewListOf
+import com.arnyminerz.escalaralcoiaicomtat.shared.CONFIRMATION_EMAIL_DYNAMIC
+import com.arnyminerz.escalaralcoiaicomtat.shared.CONFIRMATION_EMAIL_URL
 import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_COMPRESSION_QUALITY
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
@@ -291,8 +293,8 @@ class RegisterFragment private constructor() : Fragment() {
         Firebase.auth.useAppLanguage()
         result.user?.sendEmailVerification(
             ActionCodeSettings.newBuilder()
-                .setUrl("https://escalaralcoiaicomtat.page.link/email")
-                .setDynamicLinkDomain("escalaralcoiaicomtat.page.link")
+                .setUrl(CONFIRMATION_EMAIL_URL)
+                .setDynamicLinkDomain(CONFIRMATION_EMAIL_DYNAMIC)
                 .build()
         )
             ?.addOnFailureListener {
