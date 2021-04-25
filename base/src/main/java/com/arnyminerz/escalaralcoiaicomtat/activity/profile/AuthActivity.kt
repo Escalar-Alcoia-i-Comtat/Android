@@ -35,6 +35,7 @@ class AuthActivity : LanguageFragmentActivity() {
 
             override fun createFragment(position: Int): Fragment = authPages[position]!!
         }
+        binding.authViewPager.isUserInputEnabled = false
         changePage(PAGE_LOGIN, false)
     }
 
