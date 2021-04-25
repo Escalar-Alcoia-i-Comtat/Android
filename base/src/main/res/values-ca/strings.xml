@@ -304,4 +304,5 @@
     <string name="dialog_logout_message">Segur que vols tancar la sessió?</string>
     <string name="action_resend_email">Tornar a enviar correu</string>
     <string name="toast_confirmation_sent">Confirmació enviada!</string>
+    <string name="toast_error_confirmation">No s\'ha pogut confirmar el correu!</string>
 </resources>
