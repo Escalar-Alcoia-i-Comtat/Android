@@ -12,6 +12,7 @@ import androidx.core.widget.ImageViewCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
@@ -27,7 +28,9 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
-import com.arnyminerz.escalaralcoiaicomtat.shared.LOGGED_IN_REQUEST_CODE
+import com.arnyminerz.escalaralcoiaicomtat.shared.REQUEST_CODE_LOGIN
+import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_LOGGED_IN
+import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_DOWNLOADS
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_HOME
@@ -219,7 +222,7 @@ class MainActivity : LanguageAppCompatActivity() {
         }
 
         binding.authFab.setOnClickListener {
-            startActivityForResult(Intent(this, AuthActivity::class.java), LOGGED_IN_REQUEST_CODE)
+            startActivityForResult(Intent(this, AuthActivity::class.java), REQUEST_CODE_LOGIN)
         }
 
         updateBottomAppBar()
@@ -268,10 +271,13 @@ class MainActivity : LanguageAppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Timber.v("Got activity result. Code: %s", resultCode)
-        when (requestCode) {
-            LOGGED_IN_REQUEST_CODE -> refreshLoginStatus()
-            else -> super.onActivityResult(requestCode, resultCode, data)
-        }
+        if (requestCode == REQUEST_CODE_LOGIN)
+            when (resultCode) {
+                RESULT_CODE_LOGGED_IN -> refreshLoginStatus()
+                RESULT_CODE_WAITING_EMAIL_CONFIRMATION ->
+                    startActivity(Intent(this, EmailConfirmationActivity::class.java))
+            }
+        else super.onActivityResult(requestCode, resultCode, data)
     }
 
     /**
