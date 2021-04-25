@@ -170,9 +170,6 @@ class MainActivity : LanguageAppCompatActivity() {
         setContentView(view)
         setSupportActionBar(binding.bottomAppBar)
 
-        binding.spaceAuth.visibility(ENABLE_AUTHENTICATION)
-        binding.authFab.visibility(ENABLE_AUTHENTICATION)
-
         areasViewFragment = AreasViewFragment()
         mapFragment = MapFragment()
         downloadsFragment = DownloadsFragment()
@@ -308,14 +305,19 @@ class MainActivity : LanguageAppCompatActivity() {
      */
     @UiThread
     private fun refreshLoginStatus() {
-        val user = Firebase.auth.currentUser
+        binding.spaceAuth.visibility(ENABLE_AUTHENTICATION)
+        binding.authFab.visibility(ENABLE_AUTHENTICATION)
 
-        binding.profileCardView.visibility(user != null)
+        if (ENABLE_AUTHENTICATION) {
+            val user = Firebase.auth.currentUser
 
-        if (user != null)
-            if (!user.isEmailVerified) {
-                PREF_WAITING_EMAIL_CONFIRMATION.put(true)
-                startActivity(Intent(this, EmailConfirmationActivity::class.java))
-            }
+            binding.profileCardView.visibility(user != null)
+
+            if (user != null)
+                if (!user.isEmailVerified) {
+                    PREF_WAITING_EMAIL_CONFIRMATION.put(true)
+                    startActivity(Intent(this, EmailConfirmationActivity::class.java))
+                }
+        }
     }
 }
