@@ -55,6 +55,8 @@
     <string name="action_export_kmz">Export KMZ</string>
     <string name="action_export_gpx">Export GPX</string>
     <string name="action_enable_location">Enable Location</string>
+    <string name="action_register">Register</string>
+    <string name="action_login">Login</string>
 
     <string name="status_updating">Updating…</string>
     <string name="status_loading">Loading…</string>
@@ -206,6 +208,7 @@
     <string name="toast_error_storage_cancelled">The request was cancelled</string>
     <string name="toast_error_storage_corrupt">The downloaded file is corrupt, contact an administrator</string>
     <string name="toast_error_storage_authentication">Could not access private file</string>
+    <string name="toast_error_confirmation_send">Could not send confirmation mail</string>
     <string name="toast_location_not_shown">Current location won\'t be shown</string>
     <string name="toast_stored_gpx">GPX stored!</string>
     <string name="toast_stored_kmz">KMZ stored!</string>
@@ -263,6 +266,7 @@
     <string name="image_desc_downloaded">Downloaded</string>
     <string name="image_desc_no_internet">No Internet</string>
     <string name="image_desc_app_icon">@string/app_name</string>
+    <string name="image_desc_logo_cea">Centre Excursionista d\'Alcoi\'s Logo</string>
     <string name="image_desc_zone_image">Zone image</string>
     <string name="image_desc_area_image">Area image</string>
     <string name="image_desc_fixed_equipment">Fixed Equipment</string>
@@ -282,6 +286,29 @@
     <string name="image_desc_nav_map">View areas map</string>
     <string name="image_desc_nav_downloads">View downloads</string>
     <string name="image_desc_nav_extra">Extra options</string>
+    <string name="image_desc_authenticate">Authenticate</string>
+    <string name="image_desc_profile_image">Profile Image</string>
+    <string name="image_desc_check_inbox">Check inbox icon</string>
+
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_condition">When clicking "Login" you are accepting our <a href="https://escalaralcoiaicomtat.centrexcursionistalcoi.org">Terms of use and service</a>.</string>
+    <string name="login_error_user_not_found">The email doesn\'t exist</string>
+    <string name="login_error_invalid_credentials">Wrong password</string>
+    <string name="login_error_user_disabled">The user has disabled. Contact an administrator</string>
+
+    <string name="register_email">Email</string>
+    <string name="register_display_name">Display Name</string>
+    <string name="register_password">Password</string>
+    <string name="register_password_confirm">Password Confirm</string>
+    <string name="register_error_passwords_not_match">Passwords do not match</string>
+    <string name="register_error_weak_password">The password is too weak</string>
+    <string name="register_error_invalid_email">The email introduced is not valid</string>
+    <string name="register_error_already_exists">The email has already been registered</string>
+    <string name="register_error_display_name_required">The display name is required</string>
+
+    <string name="register_result_inbox_title">Check your inbox</string>
+    <string name="register_result_inbox_message">We have sent you a confirmation email, please, follow the instructions there. Also check your spam folder.</string>
 
     <string name="button_desc_view_download">View Download</string>
     <string name="button_desc_download">Download</string>
