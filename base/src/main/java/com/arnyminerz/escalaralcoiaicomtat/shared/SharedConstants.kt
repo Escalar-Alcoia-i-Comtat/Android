@@ -104,11 +104,25 @@ const val LOCATION_PERMISSION_REQUEST_CODE = 3 // This number was chosen by Dono
 const val FOLDER_ACCESS_PERMISSION_REQUEST_CODE = 7
 
 /**
- * When a log in request has been completed.
+ * Requests the user to get logged in
  * @author Arnau Mora
  * @since 20210425
  */
-const val LOGGED_IN_REQUEST_CODE = 5
+const val REQUEST_CODE_LOGIN = 5
+
+/**
+ * When the user has just been registered and the confirmation email has been sent.
+ * @author Arnau Mora
+ * @since 20210425
+ */
+const val RESULT_CODE_WAITING_EMAIL_CONFIRMATION = 1
+
+/**
+ * When the user has successfully been logged in.
+ * @author Arnau Mora
+ * @since 20210425
+ */
+const val RESULT_CODE_LOGGED_IN = 2
 
 const val PERMISSION_DIALOG_TAG = "PERM_TAG"
 
