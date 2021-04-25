@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.LoadingActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityEmailConfirmationBinding
@@ -36,6 +37,8 @@ class EmailConfirmationActivity : AppCompatActivity() {
                 ActionCodeSettings.newBuilder()
                     .setUrl(CONFIRMATION_EMAIL_URL)
                     .setDynamicLinkDomain(CONFIRMATION_EMAIL_DYNAMIC)
+                    .setHandleCodeInApp(true)
+                    .setAndroidPackageName(BuildConfig.APPLICATION_ID, true, null)
                     .build()
             )
                 ?.addOnSuccessListener {

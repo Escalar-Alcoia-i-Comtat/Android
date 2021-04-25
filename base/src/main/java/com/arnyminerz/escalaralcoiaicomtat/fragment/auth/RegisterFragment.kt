@@ -10,6 +10,7 @@ import androidx.annotation.UiThread
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthRegisterBinding
@@ -295,6 +296,8 @@ class RegisterFragment private constructor() : Fragment() {
             ActionCodeSettings.newBuilder()
                 .setUrl(CONFIRMATION_EMAIL_URL)
                 .setDynamicLinkDomain(CONFIRMATION_EMAIL_DYNAMIC)
+                .setHandleCodeInApp(true)
+                .setAndroidPackageName(BuildConfig.APPLICATION_ID, true, null)
                 .build()
         )
             ?.addOnFailureListener {
