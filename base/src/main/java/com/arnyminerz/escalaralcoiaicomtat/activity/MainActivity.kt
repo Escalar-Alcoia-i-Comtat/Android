@@ -224,6 +224,10 @@ class MainActivity : LanguageAppCompatActivity() {
         binding.authFab.setOnClickListener {
             startActivityForResult(Intent(this, AuthActivity::class.java), REQUEST_CODE_LOGIN)
         }
+        binding.profileCardView.setOnLongClickListener {
+            Firebase.auth.signOut()
+            true
+        }
 
         updateBottomAppBar()
         refreshLoginStatus()
