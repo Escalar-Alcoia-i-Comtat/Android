@@ -299,4 +299,7 @@
     <string name="register_error_display_name_required">El nom és necessari</string>
     <string name="register_result_inbox_title">Comprova la teua safata d\'entrada</string>
     <string name="register_result_inbox_message">T\'hem enviat un correu electrònic de confirmació, per favor, segueix les instruccions indicades. Revisa també la carpeta de correu brossa.</string>
+    <string name="action_logout">Tancar la sessió</string>
+    <string name="dialog_logout_title">Tancar la sessió</string>
+    <string name="dialog_logout_message">Segur que vols tancar la sessió?</string>
 </resources>

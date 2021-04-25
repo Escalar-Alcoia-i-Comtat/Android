@@ -57,6 +57,7 @@
     <string name="action_enable_location">Enable Location</string>
     <string name="action_register">Register</string>
     <string name="action_login">Login</string>
+    <string name="action_logout">Log out</string>
 
     <string name="status_updating">Updating…</string>
     <string name="status_loading">Loading…</string>
@@ -90,6 +91,8 @@
     <string name="dialog_high_data_usage_message">You are about to do something that usually requires a high amount of Internet communication, and we have detected that you don\'t have a WiFi connection, are you sure that you want to continue?</string>
     <string name="dialog_gps_disabled_title">GPS disabled</string>
     <string name="dialog_gps_disabled_message">You have the device\'s location provider turned off.</string>
+    <string name="dialog_logout_title">Log out</string>
+    <string name="dialog_logout_message">Are you sure that you want to get logged out?</string>
 
     <string name="path_ending_plate">Plate</string>
     <string name="path_ending_plate_ring">Plate Ring</string>
