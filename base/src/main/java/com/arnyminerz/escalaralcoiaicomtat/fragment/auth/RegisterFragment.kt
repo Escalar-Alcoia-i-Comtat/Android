@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthRegisterBinding
@@ -22,6 +23,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_WAITING_EMAIL_CONF
 import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
@@ -259,15 +261,39 @@ class RegisterFragment private constructor() : Fragment() {
             }
         )
             ?.addOnSuccessListener {
-                PREF_WAITING_EMAIL_CONFIRMATION.put(true)
-                activity.finishActivityWithResult(RESULT_CODE_WAITING_EMAIL_CONFIRMATION, null)
+                sendConfirmationMail(result)
             }
             ?.addOnFailureListener {
+                Timber.e(it, "Could not update profile data.")
                 // TODO: Handle individual exceptions
                 toast(R.string.toast_error_internal)
             }
             ?.addOnCompleteListener {
                 binding.progressIndicator.visibility(false)
+            }
+    }
+
+    /**
+     * Sends a confirmation email to the just registered user.
+     * @author Arnau Mora
+     * @since 20210425
+     * @param result The result that the user creation has given.
+     */
+    private fun sendConfirmationMail(result: AuthResult) {
+        result.user?.sendEmailVerification(
+            ActionCodeSettings.newBuilder()
+                .setUrl("app:escalaralcoiaicomtat.org/email")
+                .setHandleCodeInApp(true)
+                .setAndroidPackageName(BuildConfig.APPLICATION_ID, true, null)
+                .build()
+        )
+            ?.addOnFailureListener {
+                Timber.e(it, "Could not send confirmation mail.")
+                toast(R.string.toast_error_confirmation_send)
+            }
+            ?.addOnCompleteListener {
+                PREF_WAITING_EMAIL_CONFIRMATION.put(true)
+                activity.finishActivityWithResult(RESULT_CODE_WAITING_EMAIL_CONFIRMATION, null)
             }
     }
 
