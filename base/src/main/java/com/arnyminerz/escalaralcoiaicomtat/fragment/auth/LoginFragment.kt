@@ -23,7 +23,8 @@ import timber.log.Timber
 class LoginFragment private constructor() : Fragment() {
     private var _binding: FragmentAuthLoginBinding? = null
 
-    private val binding: FragmentAuthLoginBinding = _binding!!
+    private val binding: FragmentAuthLoginBinding
+        get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,

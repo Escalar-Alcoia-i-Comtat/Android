@@ -39,7 +39,8 @@ import java.io.ByteArrayOutputStream
 class RegisterFragment private constructor() : Fragment() {
     private var _binding: FragmentAuthRegisterBinding? = null
 
-    private val binding: FragmentAuthRegisterBinding = _binding!!
+    private val binding: FragmentAuthRegisterBinding
+        get() = _binding!!
 
     /**
      * Specifies all the fields of the register form
