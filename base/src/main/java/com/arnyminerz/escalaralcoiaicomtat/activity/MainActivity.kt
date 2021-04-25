@@ -225,7 +225,7 @@ class MainActivity : LanguageAppCompatActivity() {
         binding.authFab.setOnClickListener {
             startActivityForResult(Intent(this, AuthActivity::class.java), REQUEST_CODE_LOGIN)
         }
-        binding.profileCardView.setOnLongClickListener {
+        binding.profileImageView.setOnLongClickListener {
             MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.dialog_logout_title)
                 .setMessage(R.string.dialog_logout_message)
