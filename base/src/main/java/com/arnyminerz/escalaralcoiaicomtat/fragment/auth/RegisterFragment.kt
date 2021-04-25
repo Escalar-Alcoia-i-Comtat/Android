@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.auth
 
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,11 +12,13 @@ import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthRegisterBinding
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSY_LEGACY
+import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.viewListOf
-import com.arnyminerz.escalaralcoiaicomtat.shared.LOGGED_IN_REQUEST_CODE
 import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_COMPRESSION_QUALITY
+import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.textfield.TextInputLayout
@@ -24,6 +27,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
@@ -34,6 +38,17 @@ class RegisterFragment private constructor() : Fragment() {
     private var _binding: FragmentAuthRegisterBinding? = null
 
     private val binding: FragmentAuthRegisterBinding = _binding!!
+
+    /**
+     * Specifies all the fields of the register form
+     */
+    private val fields
+        get() = viewListOf(
+            binding.emailEditText,
+            binding.passwordEditText,
+            binding.loginButton,
+            binding.registerButton
+        )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -102,17 +117,9 @@ class RegisterFragment private constructor() : Fragment() {
         }
 
         binding.registerButton.setOnClickListener {
-            val fields = viewListOf(
-                binding.emailEditText,
-                binding.passwordEditText,
-                binding.loginButton,
-                binding.registerButton
-            )
+
             fields.clearFocus()
             fields.disable()
-            binding.progressIndicator.visibility(false)
-            binding.progressIndicator.isIndeterminate = true
-            binding.progressIndicator.visibility(true)
 
             val email = binding.emailEditText.text.toString()
             val password = binding.passwordEditText.text.toString()
@@ -130,7 +137,11 @@ class RegisterFragment private constructor() : Fragment() {
                         binding.passwordConfirmTextField,
                         R.string.register_error_passwords_not_match
                     )
-                else ->
+                else -> {
+                    binding.progressIndicator.visibility(false)
+                    binding.progressIndicator.isIndeterminate = true
+                    binding.progressIndicator.visibility(true)
+
                     Firebase.auth.createUserWithEmailAndPassword(email, password)
                         .addOnSuccessListener { result ->
                             uploadProfileImage(result)
@@ -155,10 +166,10 @@ class RegisterFragment private constructor() : Fragment() {
                                     )
                                 else -> toast(context, R.string.toast_error_internal)
                             }
-                        }
-                        .addOnCompleteListener {
                             fields.enable()
+                            binding.progressIndicator.visibility(false)
                         }
+                }
             }
         }
         binding.loginButton.setOnClickListener {
@@ -210,18 +221,54 @@ class RegisterFragment private constructor() : Fragment() {
                     binding.progressIndicator.max = task.totalByteCount.toInt()
                 }
                 .addOnSuccessListener {
-                    requireActivity().finishActivity(LOGGED_IN_REQUEST_CODE)
+                    binding.progressIndicator.visibility(false)
+                    binding.progressIndicator.isIndeterminate = true
+                    binding.progressIndicator.visibility(true)
+
+                    updateProfileData(
+                        result,
+                        "gs://escalaralcoiaicomtat.appspot.com/" + profileImageRef.path
+                    )
                 }
                 .addOnFailureListener {
                     Timber.e(it, "Could not upload profile image")
                     val e = handleStorageException(it as StorageException)
                         ?: return@addOnFailureListener
                     toast(requireContext(), e.first)
-                }
-                .addOnCompleteListener {
                     binding.progressIndicator.visibility(false)
+                    fields.enable()
                 }
         }
+    }
+
+    /**
+     * Updates the profile image address after the user has been created, and the image uploaded.
+     * Also changes the user's display name to the contents of
+     * [FragmentAuthRegisterBinding.displayNameEditText].
+     * @author Arnau Mora
+     * @since 20210425
+     * @param result The result that the user creation has given,
+     * @param imageDownloadUrl The uploaded image url.
+     */
+    @UiThread
+    private fun updateProfileData(result: AuthResult, imageDownloadUrl: String) {
+        result.user?.updateProfile(
+            userProfileChangeRequest {
+                photoUri = Uri.parse(imageDownloadUrl)
+                displayName = binding.displayNameEditText.text.toString()
+            }
+        )
+            ?.addOnSuccessListener {
+                PREF_WAITING_EMAIL_CONFIRMATION.put(true)
+                activity.finishActivityWithResult(RESULT_CODE_WAITING_EMAIL_CONFIRMATION, null)
+            }
+            ?.addOnFailureListener {
+                // TODO: Handle individual exceptions
+                toast(R.string.toast_error_internal)
+            }
+            ?.addOnCompleteListener {
+                binding.progressIndicator.visibility(false)
+            }
     }
 
     companion object {
