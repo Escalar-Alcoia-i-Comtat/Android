@@ -295,6 +295,7 @@
     <string name="image_desc_authenticate">Authenticate</string>
     <string name="image_desc_profile_image">Profile Image</string>
     <string name="image_desc_check_inbox">Check inbox icon</string>
+    <string name="image_desc_change_profile_image">Change profile image indicator</string>
 
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>

@@ -306,4 +306,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="action_resend_email">Volver a enviar el correo</string>
     <string name="toast_confirmation_sent">Confirmación enviada!</string>
     <string name="toast_error_confirmation">No se ha podido verificar el email!</string>
+    <string name="image_desc_change_profile_image">Indicador de cambio de imagen de perfil</string>
 </resources>
