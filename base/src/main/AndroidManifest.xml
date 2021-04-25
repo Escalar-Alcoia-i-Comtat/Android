@@ -32,7 +32,19 @@
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute,LockedOrientationActivity">
         <activity
             android:name=".activity.isolated.EmailConfirmationActivity"
-            android:exported="true" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="escalaralcoiaicomtat.org"
+                    android:pathPrefix="/email"
+                    android:scheme="app" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".activity.profile.AuthActivity"
             android:exported="true" />
