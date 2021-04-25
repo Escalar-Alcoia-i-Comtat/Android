@@ -10,7 +10,6 @@ import androidx.annotation.UiThread
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
-import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthRegisterBinding
@@ -53,6 +52,8 @@ class RegisterFragment private constructor() : Fragment() {
         get() = viewListOf(
             binding.emailEditText,
             binding.passwordEditText,
+            binding.passwordConfirmEditText,
+            binding.displayNameEditText,
             binding.loginButton,
             binding.registerButton
         )
@@ -273,11 +274,10 @@ class RegisterFragment private constructor() : Fragment() {
             }
             ?.addOnFailureListener {
                 Timber.e(it, "Could not update profile data.")
+                binding.progressIndicator.visibility(false)
+                fields.enable()
                 // TODO: Handle individual exceptions
                 cancelRegistration(result)
-            }
-            ?.addOnCompleteListener {
-                binding.progressIndicator.visibility(false)
             }
     }
 
@@ -288,18 +288,20 @@ class RegisterFragment private constructor() : Fragment() {
      * @param result The result that the user creation has given.
      */
     private fun sendConfirmationMail(result: AuthResult) {
+        Firebase.auth.useAppLanguage()
         result.user?.sendEmailVerification(
             ActionCodeSettings.newBuilder()
-                .setUrl("app://escalaralcoiaicomtat.org/email")
-                .setHandleCodeInApp(true)
-                .setAndroidPackageName(BuildConfig.APPLICATION_ID, true, null)
+                .setUrl("https://escalaralcoiaicomtat.page.link/email")
+                .setDynamicLinkDomain("escalaralcoiaicomtat.page.link")
                 .build()
         )
             ?.addOnFailureListener {
                 Timber.e(it, "Could not send confirmation mail.")
                 toast(R.string.toast_error_confirmation_send)
+                binding.progressIndicator.visibility(false)
+                fields.enable()
             }
-            ?.addOnCompleteListener {
+            ?.addOnSuccessListener {
                 PREF_WAITING_EMAIL_CONFIRMATION.put(true)
                 activity.finishActivityWithResult(RESULT_CODE_WAITING_EMAIL_CONFIRMATION, null)
             }
