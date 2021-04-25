@@ -27,8 +27,7 @@
 
     <color name="path_description_button_color">#0033FF</color>
 
-    <color name="loading_overlay_dark">#30ffffff</color>
-    <color name="loading_overlay_light">#30000000</color>
+    <color name="overlay_color">#44000000</color>
 
     <color name="intro_green">#8BC34A</color>
 </resources>
