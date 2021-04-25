@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.auth
 
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -209,10 +210,8 @@ class RegisterFragment private constructor() : Fragment() {
             Timber.v("Starting profile image upload...")
             val storageRef = Firebase.storage.reference
             val profileImageRef = storageRef.child("profile/${user.uid}.webp")
-            val profileImage = BitmapFactory.decodeResource(
-                requireContext().resources,
-                R.drawable.ic_profile_image
-            )
+            val d = ContextCompat.getDrawable(requireContext(), R.drawable.ic_profile_image)
+            val profileImage = d!!.toBitmap()
             val baos = ByteArrayOutputStream()
             profileImage.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
             val data = baos.toByteArray()
