@@ -4,12 +4,17 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.LoadingActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityEmailConfirmationBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.shared.CONFIRMATION_EMAIL_DYNAMIC
+import com.arnyminerz.escalaralcoiaicomtat.shared.CONFIRMATION_EMAIL_URL
+import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.dynamiclinks.ktx.dynamicLinks
@@ -23,6 +28,25 @@ class EmailConfirmationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityEmailConfirmationBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.resendConfirmationMailButton.setOnClickListener {
+            binding.resendConfirmationMailButton.isEnabled = false
+            val user = Firebase.auth.currentUser
+            user?.sendEmailVerification(
+                ActionCodeSettings.newBuilder()
+                    .setUrl(CONFIRMATION_EMAIL_URL)
+                    .setDynamicLinkDomain(CONFIRMATION_EMAIL_DYNAMIC)
+                    .build()
+            )
+                ?.addOnSuccessListener {
+                    toast(R.string.toast_confirmation_sent)
+                }
+                ?.addOnFailureListener {
+                    Timber.e(it, "Could not send verification mail")
+                    toast(R.string.toast_error_confirmation_send)
+                    binding.resendConfirmationMailButton.isEnabled = true
+                }
+        }
 
         Firebase.dynamicLinks
             .getDynamicLink(intent)

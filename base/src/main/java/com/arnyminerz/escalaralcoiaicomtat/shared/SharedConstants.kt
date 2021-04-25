@@ -170,3 +170,17 @@ const val DOWNLOAD_MARKER_MAX_ZOOM = 20.0
  * @since 20210417
  */
 const val DATACLASS_WAIT_CHILDREN_DELAY = 10L
+
+/**
+ * Specifies the redirect url for the confirmation mails
+ * @author Arnau Mora
+ * @since 20210425
+ */
+const val CONFIRMATION_EMAIL_URL = "https://escalaralcoiaicomtat.page.link/email"
+
+/**
+ * Specifies the dynamic links domain for the confirmation mails
+ * @author Arnau Mora
+ * @since 20210425
+ */
+const val CONFIRMATION_EMAIL_DYNAMIC = "escalaralcoiaicomtat.page.link"
