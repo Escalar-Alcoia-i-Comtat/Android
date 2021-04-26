@@ -143,6 +143,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-perf-ktx'
     implementation 'com.google.firebase:firebase-dynamic-links-ktx'
     implementation 'com.google.firebase:firebase-auth-ktx'
+    implementation 'com.google.firebase:firebase-messaging-ktx'
 
     // MapBox SDK
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.6.1'
