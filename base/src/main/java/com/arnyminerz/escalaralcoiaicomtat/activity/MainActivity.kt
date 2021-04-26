@@ -1,9 +1,13 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.PopupMenu
 import androidx.annotation.UiThread
 import androidx.core.app.ActivityOptionsCompat
@@ -23,6 +27,8 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.SettingsFragmentManager
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.AreasViewFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFragment.Companion.SettingsPage
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WARN_BATTERY
+import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ALERT_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
@@ -49,6 +55,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import com.mapbox.android.core.permissions.PermissionsManager
 import timber.log.Timber
+
 
 class MainActivity : LanguageAppCompatActivity() {
 
@@ -242,6 +249,25 @@ class MainActivity : LanguageAppCompatActivity() {
 
             true
         }
+
+        val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && PREF_WARN_BATTERY.get())
+            if (am.isBackgroundRestricted)
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.dialog_background_restricted_title)
+                    .setMessage(R.string.dialog_background_restricted_message)
+                    .setPositiveButton(R.string.action_open_settings) { _, _ ->
+                        startActivity(Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS))
+                    }
+                    .setNegativeButton(R.string.action_cancel) { dialog, _ ->
+                        SETTINGS_ALERT_PREF.put(false)
+                        dialog.dismiss()
+                    }
+                    .setNeutralButton(R.string.action_do_not_remind) { dialog, _ ->
+                        PREF_WARN_BATTERY.put(false)
+                        dialog.dismiss()
+                    }
+                    .show()
 
         updateBottomAppBar()
         refreshLoginStatus()

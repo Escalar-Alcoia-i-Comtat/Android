@@ -59,6 +59,9 @@
     <string name="action_login">Login</string>
     <string name="action_logout">Log out</string>
     <string name="action_resend_email">Resend confirmation email</string>
+    <string name="action_open_settings">Open Settings</string>
+    <string name="action_disable">Disable</string>
+    <string name="action_do_not_remind">Do not remind</string>
 
     <string name="status_updating">Updating…</string>
     <string name="status_loading">Loading…</string>
@@ -94,6 +97,8 @@
     <string name="dialog_gps_disabled_message">You have the device\'s location provider turned off.</string>
     <string name="dialog_logout_title">Log out</string>
     <string name="dialog_logout_message">Are you sure that you want to get logged out?</string>
+    <string name="dialog_background_restricted_title">Background restricted</string>
+    <string name="dialog_background_restricted_message">You, or your system have blocked the application for being executed in the background, so you may not be able to receive alert notifications. Please, go to your system\'s settings and disable battery optimization for Escalar Alcoià i Comtat, or you can disable the alerts system completely.</string>
 
     <string name="path_ending_plate">Plate</string>
     <string name="path_ending_plate_ring">Plate Ring</string>

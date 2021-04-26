@@ -310,4 +310,9 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="toast_error_profile_image_update">No se ha podido actualizar la imagen de perfil</string>
     <string name="toast_profile_image_updated">Imagen de perfil actualizada!</string>
     <string name="image_desc_mark_completed">Marcar vía como completada</string>
+    <string name="action_open_settings">Abrir Configuración</string>
+    <string name="action_disable">Deshabilitar</string>
+    <string name="action_do_not_remind">No recordar</string>
+    <string name="dialog_background_restricted_title">Ejecución restringida</string>
+    <string name="dialog_background_restricted_message">Tu, o tu sistema habeis bloqueado la aplicación para que se ejecute en segundo plano, esto puede evitar que recibas notificaciones de alerta. Por favor, ve a tus ajustes del sistema, y deshabilita la optimización de batería para Escalar Alcoià i Comtat.</string>
 </resources>
