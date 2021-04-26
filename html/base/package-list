@@ -824,6 +824,7 @@ $dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.preferences//DOWNLO
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.preferences//PREF_DISABLE_NEARBY/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.preferences/-p-r-e-f_-d-i-s-a-b-l-e_-n-e-a-r-b-y.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.preferences//PREF_SHOWN_INTRO/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.preferences/-p-r-e-f_-s-h-o-w-n_-i-n-t-r-o.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.preferences//PREF_WAITING_EMAIL_CONFIRMATION/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.preferences/-p-r-e-f_-w-a-i-t-i-n-g_-e-m-a-i-l_-c-o-n-f-i-r-m-a-t-i-o-n.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.preferences//PREF_WARN_BATTERY/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.preferences/-p-r-e-f_-w-a-r-n_-b-a-t-t-e-r-y.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.preferences//SETTINGS_ALERT_PREF/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.preferences/-s-e-t-t-i-n-g-s_-a-l-e-r-t_-p-r-e-f.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.preferences//SETTINGS_CENTER_MARKER_PREF/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.preferences/-s-e-t-t-i-n-g-s_-c-e-n-t-e-r_-m-a-r-k-e-r_-p-r-e-f.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.preferences//SETTINGS_ERROR_REPORTING_PREF/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.preferences/-s-e-t-t-i-n-g-s_-e-r-r-o-r_-r-e-p-o-r-t-i-n-g_-p-r-e-f.html
@@ -1275,6 +1276,11 @@ $dokka.location:com.arnyminerz.escalaralcoiaicomtat.notification/NotificationBut
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.notification/NotificationButton/clickListener/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.notification/-notification-button/click-listener.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.notification/NotificationButton/icon/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.notification/-notification-button/icon.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.notification/NotificationButton/text/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.notification/-notification-button/text.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.service////PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.service/index.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.service/MessagingService///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.service/-messaging-service/index.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.service/MessagingService/MessagingService/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.service/-messaging-service/-messaging-service.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.service/MessagingService/onMessageReceived/#com.google.firebase.messaging.RemoteMessage/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.service/-messaging-service/on-message-received.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.service/MessagingService/onNewToken/#kotlin.String/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.service/-messaging-service/on-new-token.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler////PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler/index.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler//handleStorageException/#com.google.firebase.storage.StorageException/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler/handle-storage-exception.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.shared////PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.shared/index.html
@@ -1469,6 +1475,7 @@ com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass
 com.arnyminerz.escalaralcoiaicomtat.network
 com.arnyminerz.escalaralcoiaicomtat.network.base
 com.arnyminerz.escalaralcoiaicomtat.notification
+com.arnyminerz.escalaralcoiaicomtat.service
 com.arnyminerz.escalaralcoiaicomtat.shared
 com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler
 com.arnyminerz.escalaralcoiaicomtat.storage
