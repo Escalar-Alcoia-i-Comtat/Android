@@ -309,4 +309,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="image_desc_change_profile_image">Indicador de cambio de imagen de perfil</string>
     <string name="toast_error_profile_image_update">No se ha podido actualizar la imagen de perfil</string>
     <string name="toast_profile_image_updated">Imagen de perfil actualizada!</string>
+    <string name="image_desc_mark_completed">Marcar vía como completada</string>
 </resources>
