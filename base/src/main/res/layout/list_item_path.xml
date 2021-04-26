@@ -147,6 +147,20 @@
                 app:layout_constraintStart_toEndOf="@+id/safesChipGroup"
                 app:layout_constraintTop_toTopOf="@+id/safesChipGroup" />
 
+            <ImageButton
+                android:id="@+id/mark_imageButton"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginTop="8dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/image_desc_path_info"
+                android:scaleType="fitCenter"
+                android:src="@drawable/notebook_edit"
+                android:tint="@color/path_mark_button_color"
+                app:layout_constraintEnd_toEndOf="@+id/info_imageButton"
+                app:layout_constraintStart_toStartOf="@+id/info_imageButton"
+                app:layout_constraintTop_toBottomOf="@+id/info_imageButton" />
+
             <ImageView
                 android:id="@+id/alert_imageView"
                 android:layout_width="24dp"
