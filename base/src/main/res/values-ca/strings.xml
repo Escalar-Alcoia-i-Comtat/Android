@@ -308,4 +308,9 @@
     <string name="image_desc_change_profile_image">Indicador de canvi d\'imatge de perfil</string>
     <string name="toast_error_profile_image_update">No s\'ha pogut actualitzar la imatge de perfil</string>
     <string name="toast_profile_image_updated">Imatge de perfil actualitzada!</string>
+    <string name="action_open_settings">Obrir Configuració</string>
+    <string name="action_disable">Deshabilitar</string>
+    <string name="action_do_not_remind">No recordar</string>
+    <string name="dialog_background_restricted_title">Execució restringida</string>
+    <string name="dialog_background_restricted_message">Tu, o el teu sistema heu bloquejat l\'aplicació per a que no s\'execute en segon pla, això pot fer que no rebes les notificacions d\'alerta. Per favor, ves a la teua configuració del sistema, i deshabilita l\'optimització de bateria per a Escalar Alcoià i Comtat.</string>
 </resources>
