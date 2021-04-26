@@ -29,6 +29,7 @@ val DOWNLOADS_QUALITY_PREF = PreferenceData("downloads_quality", DOWNLOAD_QUALIT
 val PREF_DISABLE_NEARBY = PreferenceData("NearbyZonesDisable", false)
 val PREF_SHOWN_INTRO = PreferenceData("ShownIntro", false)
 val PREF_WAITING_EMAIL_CONFIRMATION = PreferenceData("WaitingEmail", false)
+val PREF_WARN_BATTERY = PreferenceData("WarnBatteryOptimization", true)
 
 class MainSettingsFragment : PreferenceFragmentCompat() {
     companion object {
