@@ -50,8 +50,6 @@ const val ROTATION_PIVOT_Y = 0.5f
 
 const val ANIMATION_DURATION = 300L
 
-const val SMALL_CARD_HEIGHT = 73f
-
 class PathsAdapter(private val paths: List<Path>, private val activity: Activity) :
     RecyclerView.Adapter<SectorViewHolder>() {
     private val toggled = arrayListOf<Boolean>()
@@ -98,9 +96,9 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
         heights: Pair<String?, String?>,
         holder: SectorViewHolder
     ) {
-        visibility(holder.safesChipGroup, toggled)
-        visibility(holder.infoImageButton, toggled && hasInfo)
-        visibility(holder.warningCardView, toggled && blockStatus != BlockingType.UNKNOWN)
+        visibility(holder.expandedLayout, toggled)
+        visibility(holder.infoImageButton, hasInfo)
+        visibility(holder.warningCardView, blockStatus != BlockingType.UNKNOWN)
         if (toggled) {
             holder.titleTextView.ellipsize = null
             holder.titleTextView.isSingleLine = false
@@ -187,7 +185,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                 val safesChipGroup = holder.safesChipGroup
                 val warningCardView = holder.warningCardView
 
-                visibility(holder.warningImageView, false)
+                visibility(holder.warningNameImageView, false)
                 visibility(warningCardView, false)
 
                 if (hasInfo)
@@ -275,11 +273,11 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
 
                 val anyBlocking = blocked != BlockingType.UNKNOWN
                 if (anyBlocking) {
-                    setTextColor(holder.titleTextView, activity, R.color.grade_red)
+                    setTextColor(holder.titleTextView, activity, R.color.path_blocked_text_color)
+                    setTextColor(holder.idTextView, activity, R.color.path_blocked_text_color)
                     holder.warningTextView.text =
                         activity.resources.getStringArray(R.array.path_warnings)[blocked.index]
                 }
-                visibility(holder.warningImageView, anyBlocking)
                 visibility(holder.warningCardView, anyBlocking)
                 visibility(holder.warningNameImageView, anyBlocking)
             }
