@@ -639,41 +639,44 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val scale = imageLoadParameters?.resultImageScale ?: 1f
 
         fun loadImage(imageLoadRequest: RequestBuilder<Bitmap>) =
-            activity.runOnUiThread {
-                imageLoadRequest.placeholder(uiMetadata.placeholderDrawable)
-                    .error(uiMetadata.errorPlaceholderDrawable)
-                    .fallback(uiMetadata.errorPlaceholderDrawable)
-                    .thumbnail(scale)
-                    .apply(imageLoadParameters)
-                    .addListener(object : RequestListener<Bitmap> {
-                        override fun onLoadFailed(
-                            e: GlideException?,
-                            model: Any?,
-                            target: Target<Bitmap>?,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            Timber.e(e, "Finished loading bitmap with error!")
-                            if (e != null)
-                                cont.resumeWithException(e)
-                            else
-                                cont.resume(null)
-                            return false
-                        }
+            imageLoadRequest.placeholder(uiMetadata.placeholderDrawable)
+                .error(uiMetadata.errorPlaceholderDrawable)
+                .fallback(uiMetadata.errorPlaceholderDrawable)
+                .thumbnail(scale)
+                .apply(imageLoadParameters)
+                .addListener(object : RequestListener<Bitmap> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Bitmap>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        Timber.e(e, "Finished loading bitmap with error!")
+                        if (e != null)
+                            cont.resumeWithException(e)
+                        return false
+                    }
 
-                        override fun onResourceReady(
-                            resource: Bitmap?,
-                            model: Any?,
-                            target: Target<Bitmap>?,
-                            dataSource: DataSource?,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            Timber.v("Finished loading bitmap!")
+                    override fun onResourceReady(
+                        resource: Bitmap?,
+                        model: Any?,
+                        target: Target<Bitmap>?,
+                        dataSource: DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        Timber.v("Finished loading bitmap!")
+                        try {
                             cont.resume(resource)
-                            return false
+                        } catch (_: IllegalStateException) {
+                            Timber.w("Tried to resume with result, but it has already been resumed.")
                         }
-                    })
-                    .into(imageView)
-            }
+                        return false
+                    }
+                }).also { requestBuilder ->
+                    activity.runOnUiThread {
+                        requestBuilder.into(imageView)
+                    }
+                }
 
         val imageLoadRequest = Glide.with(activity)
             .asBitmap()
