@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.holder
 
+import android.app.Activity
 import android.text.SpannableString
 import android.text.TextUtils
 import android.view.View
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.view.setTextColor
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.chip.ChipGroup
 
@@ -38,6 +40,7 @@ class SectorViewHolder(view: View) : RecyclerView.ViewHolder(view) {
      * Updates the toggle status of the [CardView]: Changes the card's size according to [toggled].
      * @author Arnau Mora
      * @since 20210406
+     * @param activity The activity that is requesting the refresh
      * @param toggled If the card should be toggled or not. If true, the card will be large, and more
      * info will be shown.
      * @param hasInfo If true, the [Path] has a description
@@ -48,6 +51,7 @@ class SectorViewHolder(view: View) : RecyclerView.ViewHolder(view) {
      */
     @UiThread
     fun updateCardToggleStatus(
+        activity: Activity,
         toggled: Boolean,
         hasInfo: Boolean,
         blockStatus: BlockingType,
@@ -56,7 +60,6 @@ class SectorViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     ) {
         visibility(expandedLayout, toggled)
         visibility(infoImageButton, hasInfo)
-        visibility(warningCardView, blockStatus != BlockingType.UNKNOWN)
         if (toggled) {
             titleTextView.ellipsize = null
             titleTextView.isSingleLine = false
@@ -67,7 +70,7 @@ class SectorViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                 TextView.BufferType.SPANNABLE
             )
 
-            heightTextView.text = heights.second ?: heights.first
+            heightTextView.text = heights.second ?: heights.first ?: ""
         } else {
             titleTextView.ellipsize = TextUtils.TruncateAt.END
             titleTextView.isSingleLine = true
@@ -78,7 +81,28 @@ class SectorViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                 TextView.BufferType.SPANNABLE
             )
 
-            heightTextView.text = heights.first
+            heightTextView.text = heights.first ?: ""
         }
+        updateBlockedStatus(activity, blockStatus)
+    }
+
+    /**
+     * Updates the blocking status of the view holder.
+     * @author Arnau Mora
+     * @since 20210427
+     * @param activity The activity that is requesting the refresh
+     * @param status The blocking status to set
+     */
+    @UiThread
+    fun updateBlockedStatus(activity: Activity, status: BlockingType) {
+        val anyBlocking = status != BlockingType.UNKNOWN
+        if (anyBlocking) {
+            setTextColor(titleTextView, activity, R.color.path_blocked_text_color)
+            setTextColor(idTextView, activity, R.color.path_blocked_text_color)
+            warningTextView.text =
+                activity.resources.getStringArray(R.array.path_warnings)[status.index]
+        }
+        visibility(warningCardView, anyBlocking)
+        visibility(warningNameImageView, anyBlocking)
     }
 }

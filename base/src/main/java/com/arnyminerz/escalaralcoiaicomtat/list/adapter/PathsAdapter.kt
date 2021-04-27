@@ -6,10 +6,10 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
-import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.ChangeBounds
@@ -31,7 +31,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.view.setTextColor
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -47,14 +46,41 @@ const val ROTATION_PIVOT_Y = 0.5f
 
 const val ANIMATION_DURATION = 300L
 
+/**
+ * Specifies the [RecyclerView]'s adapter for the paths list.
+ * @author Arnau Mora
+ * @since 20210427
+ * @param paths The paths list
+ * @param activity the activity that is loading the recycler view
+ * @see SectorViewHolder
+ */
 class PathsAdapter(private val paths: List<Path>, private val activity: Activity) :
     RecyclerView.Adapter<SectorViewHolder>() {
+    /**
+     * Specifies the toggled status of all the paths.
+     * @author Arnau Mora
+     * @since 20210427
+     */
     private val toggled = arrayListOf<Boolean>()
+
+    /**
+     * Specifies the blocking status of all the paths.
+     * @author Arnau Mora
+     * @since 20210427
+     * @see BlockingType
+     */
     private val blockStatuses = arrayListOf<BlockingType>()
 
+    /**
+     * Stores the Firestore instance.
+     * @author Arnau Mora
+     * @since 20210427
+     */
+    private val firestore = Firebase.firestore
+
     init {
+        // Initialize [toggled] and [blockStatuses] with the default values.
         val pathsSize = paths.size
-        // if (pathsSize > 0) paths.sort()
         Timber.d("Created with %d paths", pathsSize)
         (0 until pathsSize).forEach { _ ->
             toggled.add(false)
@@ -79,153 +105,152 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
         }
         val path = paths[position]
 
-        val firestore = Firebase.firestore
-
         Timber.d("Loading path data")
         doAsync {
-            val toggled = this@PathsAdapter.toggled[position]
-            val blockStatus = blockStatuses[position]
-            val hasInfo = path.hasInfo()
-            val pathSpannable = path.grade().getSpannable(activity)
-            val toggledPathSpannable =
-                if (path.grades.size > 1)
-                    Grade.GradesList(
-                        path.grades.subList(
-                            1,
-                            path.grades.size
-                        ) // Remove first line
-                    ).getSpannable(activity)
-                else
-                    pathSpannable
+            loadPathData(path, position, holder)
+        }
+    }
 
-            // This determines if there are more than 1 line, so that means that the path has multiple
-            //   pitches, and they should be shown when the arrow is tapped.
-            val shouldShowHeight = path.heights.isNotEmpty() && path.heights[0] > 0
-            val heightFull =
-                if (shouldShowHeight)
-                    String.format(
-                        activity.getString(R.string.sector_height),
-                        path.heights[0]
-                    ) else null
-            val heightOther =
-                if (shouldShowHeight && path.heights.size > 1)
-                    path.heights.toStringLineJumping(
+    /**
+     * Loads the [Path]'s data, and shows it through the UI.
+     * @author Arnau Mora
+     * @since 20210427
+     * @param path The [Path]'s data to load.
+     * @param position The index of the path element
+     * @param holder The view holder to update
+     */
+    @WorkerThread
+    private suspend fun loadPathData(path: Path, position: Int, holder: SectorViewHolder) {
+        // First load all the required data
+        val toggled = this@PathsAdapter.toggled[position]
+        val blockStatus = blockStatuses[position]
+        val hasInfo = path.hasInfo()
+        val pathSpannable = path.grade().getSpannable(activity)
+        val toggledPathSpannable =
+            if (path.grades.size > 1)
+                Grade.GradesList(
+                    path.grades.subList(
                         1,
-                        LinePattern(activity, R.string.sector_height)
-                    ) else null
+                        path.grades.size
+                    ) // Remove first line
+                ).getSpannable(activity)
+            else
+                pathSpannable
 
-            val descriptionDialog = DescriptionDialog.create(activity, path)
+        // This determines if there are more than 1 line, so that means that the path has multiple
+        //   pitches, and they should be shown when the arrow is tapped.
+        val shouldShowHeight = path.heights.isNotEmpty() && path.heights[0] > 0
+        val heightFull =
+            if (shouldShowHeight)
+                String.format(
+                    activity.getString(R.string.sector_height),
+                    path.heights[0]
+                ) else null
+        val heightOther =
+            if (shouldShowHeight && path.heights.size > 1)
+                path.heights.toStringLineJumping(
+                    1,
+                    LinePattern(activity, R.string.sector_height)
+                ) else null
 
-            val chips = createChips(
-                path.endings,
-                path.pitches,
-                path.fixedSafesData,
-                path.requiredSafesData
+        val descriptionDialog = DescriptionDialog.create(activity, path)
+
+        val chips = createChips(
+            path.endings,
+            path.pitches,
+            path.fixedSafesData,
+            path.requiredSafesData
+        )
+
+        // Now, with all the data loaded, update the UI
+        uiContext {
+            val cardView = holder.cardView
+            val titleTextView = holder.titleTextView
+            val infoImageButton = holder.infoImageButton
+            val heightTextView = holder.heightTextView
+            val safesChipGroup = holder.safesChipGroup
+            val warningCardView = holder.warningCardView
+
+            visibility(holder.warningNameImageView, false)
+            visibility(warningCardView, false)
+
+            if (hasInfo)
+                infoImageButton.setOnClickListener {
+                    descriptionDialog?.show()
+                        ?: Timber.e("Could not create dialog")
+                }
+            else visibility(infoImageButton, false)
+
+            titleTextView.text = path.displayName
+            heightTextView.text = heightFull
+            visibility(holder.heightTextView, shouldShowHeight)
+
+            holder.idTextView.text = path.sketchId.toString()
+
+            holder.toggleImageButton.rotation =
+                if (toggled) ROTATION_B else ROTATION_A
+            holder.updateCardToggleStatus(
+                activity,
+                toggled,
+                hasInfo,
+                blockStatus,
+                pathSpannable to toggledPathSpannable,
+                heightFull to heightOther
             )
 
-            uiContext {
-                val cardView = holder.cardView
-                val titleTextView = holder.titleTextView
-                val difficultyTextView = holder.difficultyTextView
-                val infoImageButton = holder.infoImageButton
-                val heightTextView = holder.heightTextView
-                val safesChipGroup = holder.safesChipGroup
-                val warningCardView = holder.warningCardView
+            safesChipGroup.removeAllViews()
+            for (chip in chips)
+                safesChipGroup.addView(chip)
 
-                visibility(holder.warningNameImageView, false)
-                visibility(warningCardView, false)
+            holder.toggleImageButton.setOnClickListener { toggleImageButton ->
+                // Switch the toggled status
+                val newToggled = !this@PathsAdapter.toggled[position]
+                this@PathsAdapter.toggled[position] = newToggled
 
-                if (hasInfo)
-                    infoImageButton.setOnClickListener {
-                        descriptionDialog?.show()
-                            ?: Timber.e("Could not create dialog")
-                    }
-                else visibility(infoImageButton, false)
+                Timber.d("Toggling card. Now it's $newToggled")
+                val newBlockStatus = blockStatuses[position]
 
-                titleTextView.text = path.displayName
-                difficultyTextView.setText(
-                    pathSpannable,
-                    TextView.BufferType.SPANNABLE
+                TransitionManager.beginDelayedTransition(
+                    cardView, TransitionSet().addTransition(ChangeBounds())
                 )
-                difficultyTextView.maxLines = 1
 
-                heightTextView.text = heightFull
-                visibility(holder.heightTextView, shouldShowHeight)
-
-                holder.idTextView.text = path.sketchId.toString()
-
-                holder.toggleImageButton.rotation =
-                    if (toggled) ROTATION_B else ROTATION_A
                 holder.updateCardToggleStatus(
-                    toggled,
+                    activity,
+                    newToggled,
                     hasInfo,
-                    blockStatus,
+                    newBlockStatus,
                     pathSpannable to toggledPathSpannable,
                     heightFull to heightOther
                 )
 
-                safesChipGroup.removeAllViews()
-                for (chip in chips)
-                    safesChipGroup.addView(chip)
-
-                holder.toggleImageButton.setOnClickListener { toggleImageButton ->
-                    // Switch the toggled status
-                    val newToggled = !this@PathsAdapter.toggled[position]
-                    this@PathsAdapter.toggled[position] = newToggled
-
-                    Timber.d("Toggling card. Now it's $newToggled")
-                    val newBlockStatus = blockStatuses[position]
-
-                    TransitionManager.beginDelayedTransition(
-                        cardView, TransitionSet().addTransition(ChangeBounds())
-                    )
-
-                    holder.updateCardToggleStatus(
-                        newToggled,
-                        hasInfo,
-                        newBlockStatus,
-                        pathSpannable to toggledPathSpannable,
-                        heightFull to heightOther
-                    )
-
-                    val fromRotation = if (toggled) ROTATION_A else ROTATION_B
-                    val toRotation = if (toggled) ROTATION_B else ROTATION_A
-                    toggleImageButton.startAnimation(
-                        RotateAnimation(
-                            fromRotation,
-                            toRotation,
-                            Animation.RELATIVE_TO_SELF,
-                            ROTATION_PIVOT_X,
-                            Animation.RELATIVE_TO_SELF,
-                            ROTATION_PIVOT_Y
-                        ).apply {
-                            duration = ANIMATION_DURATION
-                            interpolator = LinearInterpolator()
-                            isFillEnabled = true
-                            fillAfter = true
-                        }
-                    )
-                }
+                val fromRotation = if (toggled) ROTATION_A else ROTATION_B
+                val toRotation = if (toggled) ROTATION_B else ROTATION_A
+                toggleImageButton.startAnimation(
+                    RotateAnimation(
+                        fromRotation,
+                        toRotation,
+                        Animation.RELATIVE_TO_SELF,
+                        ROTATION_PIVOT_X,
+                        Animation.RELATIVE_TO_SELF,
+                        ROTATION_PIVOT_Y
+                    ).apply {
+                        duration = ANIMATION_DURATION
+                        interpolator = LinearInterpolator()
+                        isFillEnabled = true
+                        fillAfter = true
+                    }
+                )
             }
+        }
 
-            Timber.v("Checking if blocked...")
-            val blocked = path.isBlocked(firestore)
-            Timber.d("Path ${path.objectId} block status: $blocked")
-            blockStatuses[position] = blocked
+        Timber.v("Checking if blocked...")
+        val blocked = path.isBlocked(firestore)
+        Timber.d("Path ${path.objectId} block status: $blocked")
+        blockStatuses[position] = blocked
 
-            uiContext {
-                Timber.d("Binding ViewHolder for path $position: ${path.displayName}. Blocked: $blocked")
-
-                val anyBlocking = blocked != BlockingType.UNKNOWN
-                if (anyBlocking) {
-                    setTextColor(holder.titleTextView, activity, R.color.path_blocked_text_color)
-                    setTextColor(holder.idTextView, activity, R.color.path_blocked_text_color)
-                    holder.warningTextView.text =
-                        activity.resources.getStringArray(R.array.path_warnings)[blocked.index]
-                }
-                visibility(holder.warningCardView, anyBlocking)
-                visibility(holder.warningNameImageView, anyBlocking)
-            }
+        uiContext {
+            Timber.d("Binding ViewHolder for path $position: ${path.displayName}. Blocked: $blocked")
+            holder.updateBlockedStatus(activity, blocked)
         }
     }
 
