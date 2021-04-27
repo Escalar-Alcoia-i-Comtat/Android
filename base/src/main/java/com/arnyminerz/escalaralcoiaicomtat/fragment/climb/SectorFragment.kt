@@ -90,7 +90,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             binding.sectorProgressBar.visibility(true)
         }
         sector.loadImage(
-            requireContext(),
+            requireActivity(),
             storage,
             firestore,
             binding.sectorImageView,
