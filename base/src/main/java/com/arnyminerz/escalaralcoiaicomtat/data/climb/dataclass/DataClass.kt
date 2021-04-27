@@ -20,10 +20,8 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.allTrue
-import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.DATACLASS_WAIT_CHILDREN_DELAY
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
@@ -39,10 +37,12 @@ import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadWorker
 import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
@@ -55,7 +55,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 import java.io.File
-import java.util.Date
+import java.util.*
+import java.util.concurrent.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -197,7 +198,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     private fun kmzFile(context: Context, permanent: Boolean): File =
         File(
-            if(permanent) dataDir(context) else context.cacheDir,
+            if (permanent) dataDir(context) else context.cacheDir,
             pin
         )
 
@@ -612,7 +613,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @date 2020/09/11
      * @patch 2020/09/12 - Arnau Mora: Added function loadImage into this
-     * @param context The context to run from
+     * @param activity The [Activity] that is showing the image
      * @param firestore The [FirebaseFirestore] instance to update data in case there's something wrong.
      * @param imageView The Image View for loading the image into
      * @param imageLoadParameters The parameters to use for loading the image
@@ -623,61 +624,21 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     @UiThread
     @Throws(StorageException::class, IllegalArgumentException::class)
     suspend fun loadImage(
-        context: Context,
+        activity: Activity,
         storage: FirebaseStorage,
         firestore: FirebaseFirestore,
         imageView: ImageView,
         imageLoadParameters: ImageLoadParameters<Bitmap>? = null
-    ) {
-        if (context is Activity)
-            if (context.isDestroyed) {
-                Timber.e("The activity is destroyed, won't load image.")
-                return
-            }
+    ): Bitmap? = suspendCoroutine { cont ->
+        if (activity.isDestroyed) {
+            Timber.e("The activity is destroyed, won't load image.")
+            cont.resume(null)
+            return@suspendCoroutine
+        }
 
         val scale = imageLoadParameters?.resultImageScale ?: 1f
 
-        var imageLoadRequest = Glide.with(context)
-            .asBitmap()
-        val downloadedImageFile = imageFile(context)
-        imageLoadRequest = if (downloadedImageFile.exists()) {
-            Timber.d("Loading image from storage: ${downloadedImageFile.path}")
-            imageLoadRequest
-                .load(readBitmap(downloadedImageFile))
-        } else {
-            Timber.d("Getting image from Firebase: $imageReferenceUrl")
-            var image = imageReferenceUrl
-            if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/")) {
-                Timber.w("Fixing zone image reference ($image)...")
-                val i = image.lastIndexOf('/') + 1
-                val newImage =
-                    "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
-                Timber.w("Changing image address to \"$newImage\"...")
-                firestore
-                    .document(metadata.documentPath)
-                    .update(mapOf("image" to newImage))
-                    .awaitTask()
-                Timber.w("Image address updated.")
-                image = newImage
-            }
-            try {
-                val ref = storage.getReferenceFromUrl(image)
-                val url = ref.downloadUrl.awaitTask()
-                imageLoadRequest
-                    .load(url)
-            } catch (e: IllegalArgumentException) {
-                Timber.e(
-                    e,
-                    "Image reference ($imageReferenceUrl) doesn't exist in Firebase Storage"
-                )
-                throw e
-            } catch (e: StorageException) {
-                Timber.e(e, "Could not load image from Firebase ($image)")
-                imageLoadRequest
-                    .load(uiMetadata.errorPlaceholderDrawable)
-            }
-        }
-        uiContext {
+        fun loadImage(imageLoadRequest: RequestBuilder<Bitmap>) =
             imageLoadRequest.placeholder(uiMetadata.placeholderDrawable)
                 .error(uiMetadata.errorPlaceholderDrawable)
                 .fallback(uiMetadata.errorPlaceholderDrawable)
@@ -691,6 +652,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         isFirstResource: Boolean
                     ): Boolean {
                         Timber.e(e, "Finished loading bitmap with error!")
+                        if (e != null)
+                            cont.resumeWithException(e)
                         return false
                     }
 
@@ -702,11 +665,75 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         isFirstResource: Boolean
                     ): Boolean {
                         Timber.v("Finished loading bitmap!")
+                        try {
+                            cont.resume(resource)
+                        } catch (_: IllegalStateException) {
+                            Timber.w("Tried to resume with result, but it has already been resumed.")
+                        }
                         return false
                     }
-                })
-                .into(imageView)
+                }).also { requestBuilder ->
+                    activity.runOnUiThread {
+                        requestBuilder.into(imageView)
+                    }
+                }
+
+        val imageLoadRequest = Glide.with(activity)
+            .asBitmap()
+        val downloadedImageFile = imageFile(activity)
+        if (downloadedImageFile.exists()) {
+            Timber.d("Loading image from storage: ${downloadedImageFile.path}")
+            loadImage(
+                imageLoadRequest
+                    .load(readBitmap(downloadedImageFile))
+            )
+        } else {
+            fun fetchImageLoadRequest(image: String) =
+                try {
+                    val ref = storage.getReferenceFromUrl(image)
+                    val url = Tasks.await(ref.downloadUrl)
+                    imageLoadRequest
+                        .load(url)
+                } catch (e: IllegalArgumentException) {
+                    Timber.e(
+                        e,
+                        "Image reference ($imageReferenceUrl) doesn't exist in Firebase Storage"
+                    )
+                    throw e
+                } catch (e: StorageException) {
+                    Timber.e(e, "Could not load image from Firebase ($image)")
+                    imageLoadRequest
+                        .load(uiMetadata.errorPlaceholderDrawable)
+                } catch (e: ExecutionException) {
+                    Timber.w(e, "Reached retry limit. Loading error placeholder.")
+                    imageLoadRequest
+                        .load(uiMetadata.errorPlaceholderDrawable)
+                }
+
+            Timber.d("Getting image from Firebase: $imageReferenceUrl")
+            val image = imageReferenceUrl
+            if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/")) {
+                Timber.w("Fixing zone image reference ($image)...")
+                val i = image.lastIndexOf('/') + 1
+                val newImage =
+                    "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
+                Timber.w("Changing image address to \"$newImage\"...")
+                firestore
+                    .document(metadata.documentPath)
+                    .update(mapOf("image" to newImage))
+                    .addOnSuccessListener {
+                        Timber.w("Image address updated.")
+                        loadImage(
+                            fetchImageLoadRequest(newImage)
+                        )
+                    }
+                    .addOnFailureListener { cont.resumeWithException(it) }
+            } else
+                loadImage(
+                    fetchImageLoadRequest(image)
+                )
         }
+
     }
 
     override fun hashCode(): Int {

@@ -308,6 +308,7 @@
     <string name="image_desc_change_profile_image">Indicador de canvi d\'imatge de perfil</string>
     <string name="toast_error_profile_image_update">No s\'ha pogut actualitzar la imatge de perfil</string>
     <string name="toast_profile_image_updated">Imatge de perfil actualitzada!</string>
+    <string name="image_desc_mark_completed">Marcar via com a completada</string>
     <string name="action_open_settings">Obrir Configuració</string>
     <string name="action_disable">Deshabilitar</string>
     <string name="action_do_not_remind">No recordar</string>
