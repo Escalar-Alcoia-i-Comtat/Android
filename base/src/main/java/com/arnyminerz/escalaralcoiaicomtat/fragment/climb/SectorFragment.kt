@@ -190,10 +190,12 @@ class SectorFragment : NetworkChangeListenerFragment() {
             sector.getChildren(sectorActivity.firestore).toCollection(children)
             Timber.v("Finished loading children sectors")
 
+            Timber.v("Loading sector fragment")
+            loadImage()
+
             uiContext {
                 Timber.v("Finished loading paths, performing UI updates")
                 (this as? SectorActivity?)?.updateTitle(sector.displayName, isDownloaded)
-                loadImage()
 
                 binding.sizeChangeFab.setOnClickListener {
                     maximized = !maximized
