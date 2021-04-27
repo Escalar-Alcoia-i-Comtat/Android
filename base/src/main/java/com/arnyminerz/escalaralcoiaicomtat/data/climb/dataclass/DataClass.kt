@@ -56,6 +56,7 @@ import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 import java.io.File
 import java.util.*
+import java.util.concurrent.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -698,6 +699,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     throw e
                 } catch (e: StorageException) {
                     Timber.e(e, "Could not load image from Firebase ($image)")
+                    imageLoadRequest
+                        .load(uiMetadata.errorPlaceholderDrawable)
+                } catch (e: ExecutionException) {
+                    Timber.w(e, "Reached retry limit. Loading error placeholder.")
                     imageLoadRequest
                         .load(uiMetadata.errorPlaceholderDrawable)
                 }
