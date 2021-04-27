@@ -1,13 +1,19 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.holder
 
+import android.text.SpannableString
+import android.text.TextUtils
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.UiThread
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.BlockingType
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.chip.ChipGroup
 
 class SectorViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -27,4 +33,52 @@ class SectorViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val infoImageButton: ImageButton = view.findViewById(R.id.info_imageButton)
 
     val safesChipGroup: ChipGroup = view.findViewById(R.id.safesChipGroup)
+
+    /**
+     * Updates the toggle status of the [CardView]: Changes the card's size according to [toggled].
+     * @author Arnau Mora
+     * @since 20210406
+     * @param toggled If the card should be toggled or not. If true, the card will be large, and more
+     * info will be shown.
+     * @param hasInfo If true, the [Path] has a description
+     * @param blockStatus The [Path]'s [BlockingType]
+     * @param pathSpannables The first element should be pathSpannable, the second one, toggledPathSpannable.
+     * @param heights The first element should be the full height, the second one, the other cases'
+     * height.
+     */
+    @UiThread
+    fun updateCardToggleStatus(
+        toggled: Boolean,
+        hasInfo: Boolean,
+        blockStatus: BlockingType,
+        pathSpannables: Pair<SpannableString, SpannableString>,
+        heights: Pair<String?, String?>
+    ) {
+        visibility(expandedLayout, toggled)
+        visibility(infoImageButton, hasInfo)
+        visibility(warningCardView, blockStatus != BlockingType.UNKNOWN)
+        if (toggled) {
+            titleTextView.ellipsize = null
+            titleTextView.isSingleLine = false
+
+            difficultyTextView.isSingleLine = false
+            difficultyTextView.setText(
+                pathSpannables.second,
+                TextView.BufferType.SPANNABLE
+            )
+
+            heightTextView.text = heights.second ?: heights.first
+        } else {
+            titleTextView.ellipsize = TextUtils.TruncateAt.END
+            titleTextView.isSingleLine = true
+
+            difficultyTextView.isSingleLine = true
+            difficultyTextView.setText(
+                pathSpannables.first,
+                TextView.BufferType.SPANNABLE
+            )
+
+            heightTextView.text = heights.first
+        }
+    }
 }

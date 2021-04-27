@@ -1,8 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 
 import android.app.Activity
-import android.text.SpannableString
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.animation.Animation
@@ -12,7 +10,6 @@ import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
-import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.ChangeBounds
@@ -73,56 +70,6 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                 R.layout.list_item_path, parent, false
             )
         )
-
-    /**
-     * Updates the toggle status of the [CardView]: Changes the card's size according to [toggled].
-     * @author Arnau Mora
-     * @since 20210406
-     * @param toggled If the card should be toggled or not. If true, the card will be large, and more
-     * info will be shown.
-     * @param hasInfo If true, the [Path] has a description
-     * @param blockStatus The [Path]'s [BlockingType]
-     * @param pathSpannables The first element should be pathSpannable, the second one, toggledPathSpannable.
-     * @param heights The first element should be the full height, the second one, the other cases'
-     * height.
-     * @param holder The [SectorViewHolder] that holds the item's views
-     */
-    @UiThread
-    private fun updateCardToggleStatus(
-        toggled: Boolean,
-        hasInfo: Boolean,
-        blockStatus: BlockingType,
-        pathSpannables: Pair<SpannableString, SpannableString>,
-        heights: Pair<String?, String?>,
-        holder: SectorViewHolder
-    ) {
-        visibility(holder.expandedLayout, toggled)
-        visibility(holder.infoImageButton, hasInfo)
-        visibility(holder.warningCardView, blockStatus != BlockingType.UNKNOWN)
-        if (toggled) {
-            holder.titleTextView.ellipsize = null
-            holder.titleTextView.isSingleLine = false
-
-            holder.difficultyTextView.isSingleLine = false
-            holder.difficultyTextView.setText(
-                pathSpannables.second,
-                TextView.BufferType.SPANNABLE
-            )
-
-            holder.heightTextView.text = heights.second ?: heights.first
-        } else {
-            holder.titleTextView.ellipsize = TextUtils.TruncateAt.END
-            holder.titleTextView.isSingleLine = true
-
-            holder.difficultyTextView.isSingleLine = true
-            holder.difficultyTextView.setText(
-                pathSpannables.first,
-                TextView.BufferType.SPANNABLE
-            )
-
-            holder.heightTextView.text = heights.first
-        }
-    }
 
     override fun onBindViewHolder(holder: SectorViewHolder, position: Int) {
         if (position >= paths.size) {
@@ -209,13 +156,12 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
 
                 holder.toggleImageButton.rotation =
                     if (toggled) ROTATION_B else ROTATION_A
-                updateCardToggleStatus(
+                holder.updateCardToggleStatus(
                     toggled,
                     hasInfo,
                     blockStatus,
                     pathSpannable to toggledPathSpannable,
-                    heightFull to heightOther,
-                    holder
+                    heightFull to heightOther
                 )
 
                 safesChipGroup.removeAllViews()
@@ -234,13 +180,12 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                         cardView, TransitionSet().addTransition(ChangeBounds())
                     )
 
-                    updateCardToggleStatus(
+                    holder.updateCardToggleStatus(
                         newToggled,
                         hasInfo,
                         newBlockStatus,
                         pathSpannable to toggledPathSpannable,
-                        heightFull to heightOther,
-                        holder
+                        heightFull to heightOther
                     )
 
                     val fromRotation = if (toggled) ROTATION_A else ROTATION_B
@@ -284,18 +229,84 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
         }
     }
 
-    private enum class ChipType {
+    internal enum class ChipType {
         SAFE, ENDING, ENDING_MULTIPLE, REQUIRED
     }
 
-    private data class ChipData(
+    internal data class ChipData(
         val chipType: ChipType,
         @DrawableRes val icon: Int? = null,
         val endings: List<EndingType>,
         val pitches: List<Pitch>,
         val fixedSafesData: FixedSafesData,
         val requiredSafesData: RequiredSafesData
-    )
+    ) {
+        /**
+         * Creates a new chip with the provided parameters.
+         * @author Arnau Mora
+         * @since 20210427
+         * @param string The text of the chip
+         * @param count The count of the chip to add
+         */
+        fun createChip(
+            activity: Activity,
+            string: String?,
+            count: Long?
+        ): Chip {
+            val chip = Chip(activity)
+            val icon = icon
+            val chipType = chipType
+            val endings = endings
+            val pitches = pitches
+            val fixedSafesData = fixedSafesData
+            val requiredSafesData = requiredSafesData
+
+            chip.text = string?.let {
+                if (count == null) it
+                else String.format(it, count.toString())
+            } ?: ""
+
+            chip.isClickable = true
+            if (icon != null)
+                chip.chipIcon = ContextCompat.getDrawable(activity, icon)
+            chip.isCloseIconVisible = true
+            chip.setOnCloseIconClickListener { chip.performClick() }
+            chip.closeIcon = ContextCompat.getDrawable(activity, R.drawable.round_launch_24)
+
+            chip.setOnClickListener {
+                when (chipType) {
+                    ChipType.ENDING_MULTIPLE -> ArtifoPathEndingDialog(
+                        activity,
+                        endings,
+                        pitches
+                    )
+                    ChipType.SAFE -> PathEquipmentDialog(
+                        activity,
+                        fixedSafesData,
+                        requiredSafesData
+                    )
+                    else -> MaterialAlertDialogBuilder(
+                        activity,
+                        R.style.ThemeOverlay_App_MaterialAlertDialog
+                    )
+                        .setTitle(activity.getString(R.string.path_chip_safe))
+                        .setMessage(
+                            activity.getString(
+                                if (chipType == ChipType.REQUIRED)
+                                    R.string.path_chip_required
+                                else
+                                // We can assume this can only be ENDING, since SAFE and
+                                //   ENDING_MULTIPLE can't happen since they are catched before
+                                    R.string.path_chip_ending
+                            )
+                        )
+                        .setPositiveButton(R.string.action_ok, null)
+                        .create()
+                }.show()
+            }
+            return chip
+        }
+    }
 
     /**
      * Gets a [String] from the resources of [activity].
@@ -321,30 +332,30 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
         if (fixedSafesData.sum() > 0)
             add(
                 if (!fixedSafesData.hasSafeCount())
-                    createChip(
+                    ChipData(
+                        ChipType.SAFE,
+                        R.drawable.ic_icona_express,
+                        endings,
+                        pitches,
+                        fixedSafesData,
+                        requiredSafesData
+                    ).createChip(
+                        activity,
                         getString(R.string.safe_strings),
-                        fixedSafesData.stringCount,
-                        ChipData(
-                            ChipType.SAFE,
-                            R.drawable.ic_icona_express,
-                            endings,
-                            pitches,
-                            fixedSafesData,
-                            requiredSafesData
-                        )
+                        fixedSafesData.stringCount
                     )
                 else
-                    createChip(
+                    ChipData(
+                        ChipType.SAFE,
+                        R.drawable.ic_icona_express,
+                        endings,
+                        pitches,
+                        fixedSafesData,
+                        requiredSafesData
+                    ).createChip(
+                        activity,
                         getString(R.string.safe_strings_plural),
                         null,
-                        ChipData(
-                            ChipType.SAFE,
-                            R.drawable.ic_icona_express,
-                            endings,
-                            pitches,
-                            fixedSafesData,
-                            requiredSafesData
-                        )
                     )
             )
 
@@ -353,109 +364,50 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
             val endingVal = ending.index
 
             add(
-                createChip(
+                ChipData(
+                    ChipType.ENDING,
+                    ending.getImage(),
+                    endings,
+                    pitches,
+                    fixedSafesData,
+                    requiredSafesData
+                ).createChip(
+                    activity,
                     activity.resources.getStringArray(R.array.path_endings)[endingVal],
-                    null,
-                    ChipData(
-                        ChipType.ENDING,
-                        ending.getImage(),
-                        endings,
-                        pitches,
-                        fixedSafesData,
-                        requiredSafesData
-                    )
+                    null
                 )
             )
         } else if (endings.size > 1)
             add(
-                createChip(
-                    getString(R.string.path_ending_multiple),
+                ChipData(
+                    ChipType.ENDING_MULTIPLE,
                     null,
-                    ChipData(
-                        ChipType.ENDING_MULTIPLE,
-                        null,
-                        endings,
-                        pitches,
-                        fixedSafesData,
-                        requiredSafesData
-                    )
+                    endings,
+                    pitches,
+                    fixedSafesData,
+                    requiredSafesData
+                ).createChip(
+                    activity,
+                    getString(R.string.path_ending_multiple),
+                    null
                 )
             )
         else
             add(
-                createChip(
+                ChipData(
+                    ChipType.ENDING,
+                    R.drawable.round_close_24,
+                    endings,
+                    pitches,
+                    fixedSafesData,
+                    requiredSafesData
+                ).createChip(
+                    activity,
                     getString(R.string.path_ending_none),
-                    null,
-                    ChipData(
-                        ChipType.ENDING,
-                        R.drawable.round_close_24,
-                        endings,
-                        pitches,
-                        fixedSafesData,
-                        requiredSafesData
-                    )
+                    null
                 )
             )
 
         this
-    }
-
-    private fun createChip(
-        string: String?,
-        count: Long?,
-        chipData: ChipData
-    ): Chip {
-        val chip = Chip(activity)
-        val icon = chipData.icon
-        val chipType = chipData.chipType
-        val endings = chipData.endings
-        val pitches = chipData.pitches
-        val fixedSafesData = chipData.fixedSafesData
-        val requiredSafesData = chipData.requiredSafesData
-
-        chip.text = string?.let {
-            if (count == null) it
-            else String.format(it, count.toString())
-        } ?: ""
-
-        chip.isClickable = true
-        if (icon != null)
-            chip.chipIcon = ContextCompat.getDrawable(activity, icon)
-        chip.isCloseIconVisible = true
-        chip.setOnCloseIconClickListener { chip.performClick() }
-        chip.closeIcon = ContextCompat.getDrawable(activity, R.drawable.round_launch_24)
-
-        chip.setOnClickListener {
-            when (chipType) {
-                ChipType.ENDING_MULTIPLE -> ArtifoPathEndingDialog(
-                    activity,
-                    endings,
-                    pitches
-                )
-                ChipType.SAFE -> PathEquipmentDialog(
-                    activity,
-                    fixedSafesData,
-                    requiredSafesData
-                )
-                else -> MaterialAlertDialogBuilder(
-                    activity,
-                    R.style.ThemeOverlay_App_MaterialAlertDialog
-                )
-                    .setTitle(activity.getString(R.string.path_chip_safe))
-                    .setMessage(
-                        activity.getString(
-                            if (chipType == ChipType.REQUIRED)
-                                R.string.path_chip_required
-                            else
-                            // We can assume this can only be ENDING, since SAFE and
-                            //   ENDING_MULTIPLE can't happen since they are catched before
-                                R.string.path_chip_ending
-                        )
-                    )
-                    .setPositiveButton(R.string.action_ok, null)
-                    .create()
-            }.show()
-        }
-        return chip
     }
 }
