@@ -31,6 +31,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.CROSSFADE_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.SECTOR_THUMBNAIL_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.view.show
+import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
@@ -85,12 +86,14 @@ class SectorFragment : NetworkChangeListenerFragment() {
      * @since 20210323
      */
     private suspend fun loadImage() {
+        uiContext {
+            binding.sectorProgressBar.visibility(true)
+        }
         sector.loadImage(
             requireContext(),
             storage,
             firestore,
             binding.sectorImageView,
-            //binding.sectorProgressBar,
             ImageLoadParameters<Bitmap>().apply {
                 withTransitionOptions(BitmapTransitionOptions.withCrossFade(CROSSFADE_DURATION))
                 withThumbnailSize(SECTOR_THUMBNAIL_SIZE)
@@ -103,6 +106,9 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 )
                 setShowPlaceholder(false)
             })
+        uiContext {
+            binding.sectorProgressBar.visibility(false)
+        }
         Timber.v("Finished loading image")
     }
 
