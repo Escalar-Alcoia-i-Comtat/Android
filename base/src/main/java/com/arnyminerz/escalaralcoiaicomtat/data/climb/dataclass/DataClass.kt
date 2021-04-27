@@ -613,7 +613,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @date 2020/09/11
      * @patch 2020/09/12 - Arnau Mora: Added function loadImage into this
-     * @param context The context to run from
+     * @param activity The [Activity] that is showing the image
      * @param firestore The [FirebaseFirestore] instance to update data in case there's something wrong.
      * @param imageView The Image View for loading the image into
      * @param imageLoadParameters The parameters to use for loading the image
@@ -624,60 +624,60 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     @UiThread
     @Throws(StorageException::class, IllegalArgumentException::class)
     suspend fun loadImage(
-        context: Context,
+        activity: Activity,
         storage: FirebaseStorage,
         firestore: FirebaseFirestore,
         imageView: ImageView,
         imageLoadParameters: ImageLoadParameters<Bitmap>? = null
     ): Bitmap? = suspendCoroutine { cont ->
-        if (context is Activity)
-            if (context.isDestroyed) {
-                Timber.e("The activity is destroyed, won't load image.")
-                cont.resume(null)
-                return@suspendCoroutine
-            }
+        if (activity.isDestroyed) {
+            Timber.e("The activity is destroyed, won't load image.")
+            cont.resume(null)
+            return@suspendCoroutine
+        }
 
         val scale = imageLoadParameters?.resultImageScale ?: 1f
 
-        fun loadImage(imageLoadRequest: RequestBuilder<Bitmap>) {
-            imageLoadRequest.placeholder(uiMetadata.placeholderDrawable)
-                .error(uiMetadata.errorPlaceholderDrawable)
-                .fallback(uiMetadata.errorPlaceholderDrawable)
-                .thumbnail(scale)
-                .apply(imageLoadParameters)
-                .addListener(object : RequestListener<Bitmap> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Bitmap>?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        Timber.e(e, "Finished loading bitmap with error!")
-                        if (e != null)
-                            cont.resumeWithException(e)
-                        else
-                            cont.resume(null)
-                        return false
-                    }
+        fun loadImage(imageLoadRequest: RequestBuilder<Bitmap>) =
+            activity.runOnUiThread {
+                imageLoadRequest.placeholder(uiMetadata.placeholderDrawable)
+                    .error(uiMetadata.errorPlaceholderDrawable)
+                    .fallback(uiMetadata.errorPlaceholderDrawable)
+                    .thumbnail(scale)
+                    .apply(imageLoadParameters)
+                    .addListener(object : RequestListener<Bitmap> {
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Bitmap>?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            Timber.e(e, "Finished loading bitmap with error!")
+                            if (e != null)
+                                cont.resumeWithException(e)
+                            else
+                                cont.resume(null)
+                            return false
+                        }
 
-                    override fun onResourceReady(
-                        resource: Bitmap?,
-                        model: Any?,
-                        target: Target<Bitmap>?,
-                        dataSource: DataSource?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        Timber.v("Finished loading bitmap!")
-                        cont.resume(resource)
-                        return false
-                    }
-                })
-                .into(imageView)
-        }
+                        override fun onResourceReady(
+                            resource: Bitmap?,
+                            model: Any?,
+                            target: Target<Bitmap>?,
+                            dataSource: DataSource?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            Timber.v("Finished loading bitmap!")
+                            cont.resume(resource)
+                            return false
+                        }
+                    })
+                    .into(imageView)
+            }
 
-        val imageLoadRequest = Glide.with(context)
+        val imageLoadRequest = Glide.with(activity)
             .asBitmap()
-        val downloadedImageFile = imageFile(context)
+        val downloadedImageFile = imageFile(activity)
         if (downloadedImageFile.exists()) {
             Timber.d("Loading image from storage: ${downloadedImageFile.path}")
             loadImage(
