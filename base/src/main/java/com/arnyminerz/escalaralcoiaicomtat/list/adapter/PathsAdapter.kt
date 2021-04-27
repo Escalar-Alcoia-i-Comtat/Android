@@ -92,6 +92,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SectorViewHolder =
         SectorViewHolder(
+            activity,
             LayoutInflater.from(activity).inflate(
                 R.layout.list_item_path, parent, false
             )
@@ -190,7 +191,6 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
             holder.toggleImageButton.rotation =
                 if (toggled) ROTATION_B else ROTATION_A
             holder.updateCardToggleStatus(
-                activity,
                 toggled,
                 hasInfo,
                 blockStatus,
@@ -215,7 +215,6 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                 )
 
                 holder.updateCardToggleStatus(
-                    activity,
                     newToggled,
                     hasInfo,
                     newBlockStatus,
@@ -250,7 +249,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
 
         uiContext {
             Timber.d("Binding ViewHolder for path $position: ${path.displayName}. Blocked: $blocked")
-            holder.updateBlockedStatus(activity, blocked)
+            holder.updateBlockedStatus(blocked)
         }
     }
 
