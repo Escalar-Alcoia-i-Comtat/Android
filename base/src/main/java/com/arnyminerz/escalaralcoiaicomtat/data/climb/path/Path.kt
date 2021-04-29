@@ -221,15 +221,23 @@ class Path(
      * @author Arnau Mora
      * @since 20210430
      * @param firestore The [FirebaseFirestore] instance to update the data.
+     * @param data The data for the marking.
      */
-    suspend fun markProject(firestore: FirebaseFirestore) {
+    suspend fun markProject(firestore: FirebaseFirestore, data: MarkProjectData) {
+        val user = data.user
+        val comment = data.comment
+        val notes = data.notes
+
         firestore
             .document(documentPath)
             .collection("Completions")
             .add(
                 hashMapOf(
                     "timestamp" to FieldValue.serverTimestamp(),
-                    "project" to true
+                    "user" to user.uid,
+                    "comment" to comment,
+                    "notes" to notes,
+                    "project" to true,
                 )
             )
             .awaitTask()
