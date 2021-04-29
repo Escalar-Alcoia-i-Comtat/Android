@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 
 import android.app.Activity
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.animation.Animation
@@ -16,6 +17,8 @@ import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.profile.MarkCompletedActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Grade
@@ -29,8 +32,13 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.PathEquipmentDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -54,7 +62,7 @@ const val ANIMATION_DURATION = 300L
  * @param activity the activity that is loading the recycler view
  * @see SectorViewHolder
  */
-class PathsAdapter(private val paths: List<Path>, private val activity: Activity) :
+class PathsAdapter(private val paths: List<Path>, private val activity: SectorActivity) :
     RecyclerView.Adapter<SectorViewHolder>() {
     /**
      * Specifies the toggled status of all the paths.
@@ -237,6 +245,16 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                         interpolator = LinearInterpolator()
                         isFillEnabled = true
                         fillAfter = true
+                    }
+                )
+            }
+            holder.markCompletedButton.setOnClickListener {
+                activity.startActivity(
+                    Intent(activity, MarkCompletedActivity::class.java).apply {
+                        putExtra(EXTRA_AREA, activity.areaId)
+                        putExtra(EXTRA_ZONE, activity.zoneId)
+                        putExtra(EXTRA_SECTOR_INDEX, activity.currentPage)
+                        putExtra(EXTRA_PATH, path.objectId)
                     }
                 )
             }
