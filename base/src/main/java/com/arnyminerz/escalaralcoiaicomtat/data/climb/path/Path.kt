@@ -209,9 +209,31 @@ class Path(
                     "falls" to falls,
                     "comment" to comment,
                     "notes" to notes,
+                    "project" to false
                 )
             )
             .awaitTask()
+        Timber.i("Marked \"$documentPath\" as complete!")
+    }
+
+    /**
+     * Requests the server to mark a path as project.
+     * @author Arnau Mora
+     * @since 20210430
+     * @param firestore The [FirebaseFirestore] instance to update the data.
+     */
+    suspend fun markProject(firestore: FirebaseFirestore) {
+        firestore
+            .document(documentPath)
+            .collection("Completions")
+            .add(
+                hashMapOf(
+                    "timestamp" to FieldValue.serverTimestamp(),
+                    "project" to true
+                )
+            )
+            .awaitTask()
+        Timber.i("Marked \"$documentPath\" as complete!")
     }
 
     override fun describeContents(): Int = 0
