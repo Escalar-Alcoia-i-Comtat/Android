@@ -27,3 +27,12 @@ const val RESULT_CODE_NOT_LOGGED_IN = 3
  * @since 20210425
  */
 const val RESULT_CODE_MISSING_DATA = 4
+
+/**
+ * When a path has been marked as complete, this will be returned, and the Intent data will contain
+ * [EXTRA_PATH].
+ * @author Arnau Mora
+ * @since 20210425
+ * @see EXTRA_PATH
+ */
+const val RESULT_CODE_MARKED_AS_COMPLETE = 5
