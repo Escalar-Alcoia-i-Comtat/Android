@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
@@ -185,8 +186,10 @@ class MarkCompletedActivity : AppCompatActivity() {
             // Request to load the Path data
             loadPath()
 
-            // Update the UI
-            initializeUI()
+            uiContext {
+                // Update the UI
+                initializeUI()
+            }
         }
     }
 
