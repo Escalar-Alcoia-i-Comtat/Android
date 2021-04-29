@@ -283,8 +283,8 @@ class MarkCompletedActivity : AppCompatActivity() {
         binding.gradeTextView.setAdapter(
             ArrayAdapter(
                 this,
-                android.R.layout.simple_list_item_1,
-                listOf(GRADES_LIST)
+                R.layout.list_item,
+                GRADES_LIST
             )
         )
 
