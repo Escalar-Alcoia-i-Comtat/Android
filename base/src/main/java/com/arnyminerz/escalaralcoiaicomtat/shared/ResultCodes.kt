@@ -36,3 +36,12 @@ const val RESULT_CODE_MISSING_DATA = 4
  * @see EXTRA_PATH
  */
 const val RESULT_CODE_MARKED_AS_COMPLETE = 5
+
+/**
+ * When a path has been marked as project, this will be returned, and the Intent data will contain
+ * [EXTRA_PATH].
+ * @author Arnau Mora
+ * @since 20210425
+ * @see EXTRA_PATH
+ */
+const val RESULT_CODE_MARKED_AS_PROJECT = 6
