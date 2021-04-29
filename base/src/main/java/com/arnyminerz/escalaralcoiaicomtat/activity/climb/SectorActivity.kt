@@ -35,9 +35,13 @@ import timber.log.Timber
 class SectorActivity : LanguageAppCompatActivity() {
     private var transitionName: String? = null
 
-    private lateinit var areaId: String
-    private lateinit var zoneId: String
+    lateinit var areaId: String
+        private set
+    lateinit var zoneId: String
+        private set
     private var sectorCount: Int = -1
+    var currentPage: Int = 0
+        private set
 
     private val fragments = arrayListOf<SectorFragment>()
 
@@ -168,6 +172,7 @@ class SectorActivity : LanguageAppCompatActivity() {
 
             val defaultPosition = savedInstanceState?.getInt(EXTRA_POSITION.key)
                 ?: intent.getExtra(EXTRA_SECTOR_INDEX, 0)
+            currentPage = defaultPosition
             fragments[defaultPosition].load()
 
             uiContext {
@@ -185,6 +190,7 @@ class SectorActivity : LanguageAppCompatActivity() {
                     override fun onPageSelected(position: Int) {
                         super.onPageSelected(position)
                         Timber.d("Selected page #$position")
+                        currentPage = position
 
                         // Minimize all fragments
                         for (fragment in fragments)
