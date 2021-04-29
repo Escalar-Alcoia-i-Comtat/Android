@@ -10,6 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.get
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.GRADES_LIST
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.MarkCompletedData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.MarkProjectData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
@@ -368,60 +369,79 @@ class MarkCompletedActivity : AppCompatActivity() {
      * @author Arnau Mora
      * @since 20210430
      */
+    @UiThread
     private fun submitForm() {
         Timber.v("Checking form...")
         loadingStatus(true)
 
-        var error = false
-
-        val attemptsText = binding.attemptsEditText.text?.toString()
-        val attempts = attemptsText?.toIntOrNull()
-        val fallsText = binding.fallsEditText.text?.toString()
-        val falls = fallsText?.toIntOrNull()
-        val grade = binding.gradeTextView.text?.toString()
-
-        if (attempts == null || attemptsText.isBlank()) {
-            binding.attemptsTextField.isErrorEnabled = true
-            binding.attemptsTextField.error = getString(R.string.mark_completed_attempts_required)
-            error = true
-        } else if (attempts < 0) {
-            binding.attemptsTextField.isErrorEnabled = true
-            binding.attemptsTextField.error = getString(R.string.mark_completed_attempts_size)
-            error = true
-        }
-
-        if (falls == null || fallsText.isBlank()) {
-            binding.fallsTextField.isErrorEnabled = true
-            binding.fallsTextField.error = getString(R.string.mark_completed_attempts_required)
-            error = true
-        } else if (falls < 0) {
-            binding.fallsTextField.isErrorEnabled = true
-            binding.fallsTextField.error = getString(R.string.mark_completed_attempts_size)
-            error = true
-        }
-
-        if (grade == null || grade.isBlank()) {
-            binding.gradeTextField.isErrorEnabled = true
-            binding.gradeTextField.error = getString(R.string.mark_completed_attempts_required)
-            error = true
-        }
-
+        val isProject = binding.projectCheckbox.isChecked
         val comment = binding.commentEditText.text?.toString()
         val notes = binding.notesEditText.text?.toString()
 
-        if (!error)
+        if (isProject) {
+            Timber.v("Marking path as project.")
             doAsync {
                 Timber.v("Preparing data...")
-                val data = MarkCompletedData(user!!, attempts!!, falls!!, comment, notes)
-                Timber.v("Running mark completed request...")
-                path?.markCompleted(firestore, data)
+                val data = MarkProjectData(user!!, comment, notes)
+                Timber.v("Running mark project request...")
+                path?.markProject(firestore, data)
                 finishActivityWithResult(
                     RESULT_CODE_MARKED_AS_COMPLETE,
                     Intent()
                         .putExtra(EXTRA_PATH, pathId!!)
                 )
             }
-        else
-            loadingStatus(false)
+        } else {
+            var error = false
+
+            val attemptsText = binding.attemptsEditText.text?.toString()
+            val attempts = attemptsText?.toIntOrNull()
+            val fallsText = binding.fallsEditText.text?.toString()
+            val falls = fallsText?.toIntOrNull()
+            val grade = binding.gradeTextView.text?.toString()
+
+            if (attempts == null || attemptsText.isBlank()) {
+                binding.attemptsTextField.isErrorEnabled = true
+                binding.attemptsTextField.error =
+                    getString(R.string.mark_completed_attempts_required)
+                error = true
+            } else if (attempts < 0) {
+                binding.attemptsTextField.isErrorEnabled = true
+                binding.attemptsTextField.error = getString(R.string.mark_completed_attempts_size)
+                error = true
+            }
+
+            if (falls == null || fallsText.isBlank()) {
+                binding.fallsTextField.isErrorEnabled = true
+                binding.fallsTextField.error = getString(R.string.mark_completed_attempts_required)
+                error = true
+            } else if (falls < 0) {
+                binding.fallsTextField.isErrorEnabled = true
+                binding.fallsTextField.error = getString(R.string.mark_completed_attempts_size)
+                error = true
+            }
+
+            if (grade == null || grade.isBlank()) {
+                binding.gradeTextField.isErrorEnabled = true
+                binding.gradeTextField.error = getString(R.string.mark_completed_attempts_required)
+                error = true
+            }
+
+            if (!error) {
+                Timber.v("Marking path as completed.")
+                doAsync {
+                    Timber.v("Preparing data...")
+                    val data = MarkCompletedData(user!!, attempts!!, falls!!, comment, notes)
+                    Timber.v("Running mark completed request...")
+                    path?.markCompleted(firestore, data)
+                    finishActivityWithResult(
+                        RESULT_CODE_MARKED_AS_COMPLETE,
+                        Intent()
+                            .putExtra(EXTRA_PATH, pathId!!)
+                    )
+                }
+            } else
+                loadingStatus(false)
+        }
     }
 }
