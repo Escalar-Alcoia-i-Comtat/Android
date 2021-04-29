@@ -116,7 +116,10 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
         val path = paths[position]
 
         val auth = Firebase.auth
-        holder.markCompletedButton.visibility(auth.currentUser != null)
+        val user = auth.currentUser
+        val loggedIn = user != null
+        Timber.v("Updating Mark completed button visibility: $loggedIn")
+        holder.markCompletedButton.visibility(loggedIn)
 
         Timber.d("Loading path data")
         doAsync {
