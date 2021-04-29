@@ -43,6 +43,7 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
@@ -113,6 +114,9 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
             return
         }
         val path = paths[position]
+
+        val auth = Firebase.auth
+        holder.markCompletedButton.visibility(auth.currentUser != null)
 
         Timber.d("Loading path data")
         doAsync {
