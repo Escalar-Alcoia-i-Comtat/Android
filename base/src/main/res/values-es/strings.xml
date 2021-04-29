@@ -315,4 +315,16 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="action_do_not_remind">No recordar</string>
     <string name="dialog_background_restricted_title">Ejecución restringida</string>
     <string name="dialog_background_restricted_message">Tu, o tu sistema habeis bloqueado la aplicación para que se ejecute en segundo plano, esto puede evitar que recibas notificaciones de alerta. Por favor, ve a tus ajustes del sistema, y deshabilita la optimización de batería para Escalar Alcoià i Comtat.</string>
+    <string name="action_mark_completed">Marcar</string>
+    <string name="mark_completed_title">Marcar Vía</string>
+    <string name="mark_completed_name">Nombre de la vía</string>
+    <string name="mark_completed_project">Proyecto</string>
+    <string name="mark_completed_notes">Notas (Opcional)</string>
+    <string name="mark_completed_notes_info">Las notas son personales y solo las verás tu</string>
+    <string name="mark_completed_comment">Comentario (Opcional)</string>
+    <string name="mark_completed_comment_info">El comentario será público y se mostrará a cualquiera que busque la vía.</string>
+    <string name="mark_completed_falls">Caigudes</string>
+    <string name="mark_completed_attempts">Intentos</string>
+    <string name="mark_completed_grade">Grado</string>
+    <string name="toast_error_login_required">Debes tener la sesión iniciada</string>
 </resources>

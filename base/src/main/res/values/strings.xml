@@ -62,6 +62,7 @@
     <string name="action_open_settings">Open Settings</string>
     <string name="action_disable">Disable</string>
     <string name="action_do_not_remind">Do not remind</string>
+    <string name="action_mark_completed">Mark</string>
 
     <string name="status_updating">Updating…</string>
     <string name="status_loading">Loading…</string>
@@ -112,6 +113,17 @@
     <string name="path_ending_none">No ending</string>
     <string name="path_ending_unknown">Unknown Ending</string>
     <string name="path_ending_multiple">Endings</string>
+
+    <string name="mark_completed_title">Mark Path</string>
+    <string name="mark_completed_name">Path Name</string>
+    <string name="mark_completed_project">Project</string>
+    <string name="mark_completed_notes">Notes (Optional)</string>
+    <string name="mark_completed_notes_info">The notes will be personal, and won\'t be shown to anybody</string>
+    <string name="mark_completed_comment">Comment (Optional)</string>
+    <string name="mark_completed_comment_info">The comment will be public, and will be shown to anyone that accesses the path.</string>
+    <string name="mark_completed_falls">Falls</string>
+    <string name="mark_completed_attempts">Attempts</string>
+    <string name="mark_completed_grade">Grade</string>
 
     <string name="pref_main_title">General</string>
     <string name="pref_main_sum">General settings of the app</string>
@@ -220,6 +232,7 @@
     <string name="toast_error_confirmation_send">Could not send confirmation mail</string>
     <string name="toast_error_confirmation">Could not verify email!</string>
     <string name="toast_error_profile_image_update">Could not update profile image</string>
+    <string name="toast_error_login_required">You must be logged in to do this</string>
     <string name="toast_profile_image_updated">Updated profile image successfully</string>
     <string name="toast_location_not_shown">Current location won\'t be shown</string>
     <string name="toast_stored_gpx">GPX stored!</string>

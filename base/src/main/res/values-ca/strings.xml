@@ -314,4 +314,16 @@
     <string name="action_do_not_remind">No recordar</string>
     <string name="dialog_background_restricted_title">Execució restringida</string>
     <string name="dialog_background_restricted_message">Tu, o el teu sistema heu bloquejat l\'aplicació per a que no s\'execute en segon pla, això pot fer que no rebes les notificacions d\'alerta. Per favor, ves a la teua configuració del sistema, i deshabilita l\'optimització de bateria per a Escalar Alcoià i Comtat.</string>
+    <string name="action_mark_completed">Marcar</string>
+    <string name="mark_completed_title">Marcar Via</string>
+    <string name="mark_completed_name">Nom de la via</string>
+    <string name="mark_completed_project">Projecte</string>
+    <string name="mark_completed_notes">Notes (Opcional)</string>
+    <string name="mark_completed_notes_info">Les notes són personals, i sols les veuràs tu</string>
+    <string name="mark_completed_comment">Comentari (Opcional)</string>
+    <string name="mark_completed_comment_info">El comentari serà públic, i serà mostrat a qualsevol que veja la via.</string>
+    <string name="mark_completed_falls">Caigudes</string>
+    <string name="mark_completed_attempts">Intents</string>
+    <string name="mark_completed_grade">Grau</string>
+    <string name="toast_error_login_required">Has de tindre la sessió iniciada</string>
 </resources>
