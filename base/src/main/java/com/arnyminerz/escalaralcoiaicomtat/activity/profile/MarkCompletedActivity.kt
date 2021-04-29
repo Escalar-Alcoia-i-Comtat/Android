@@ -22,6 +22,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MISSING_DATA
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_NOT_LOGGED_IN
+import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
@@ -150,6 +151,9 @@ class MarkCompletedActivity : AppCompatActivity() {
         binding = ActivityMarkCompletedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        Timber.v("Showing progress indicator...")
+        binding.progressIndicator.visibility(true)
+
         // Load the data from the intent, and if it's not complete, exit the activity and show a
         //   toast message.
         if (!getFromIntent()) {
@@ -179,6 +183,9 @@ class MarkCompletedActivity : AppCompatActivity() {
         doAsync {
             // Request to load the Path data
             loadPath()
+
+            // Update the UI
+            initializeUI()
         }
     }
 
@@ -257,5 +264,30 @@ class MarkCompletedActivity : AppCompatActivity() {
             toast(R.string.toast_error_internal)
             return
         }
+    }
+
+    /**
+     * Refreshes the UI from the parameters loaded in [loadPath]. Also will initialize the grade
+     * dropdown.
+     * @author Arnau Mora
+     * @since 20210429
+     */
+    private fun initializeUI() {
+        // Initialize the grades list
+        Timber.v("Initializing grades list...")
+        binding.gradeTextView.setAdapter(
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_list_item_1,
+                listOf(GRADES_LIST)
+            )
+        )
+
+        // Update the path name indicator
+        Timber.v("Updating path name...")
+        binding.pathNameEditText.setText(path?.displayName)
+
+        Timber.v("Hiding progress indicator...")
+        binding.progressIndicator.visibility(false)
     }
 }
