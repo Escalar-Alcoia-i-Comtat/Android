@@ -58,8 +58,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/pathName_editText"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:imeOptions="actionNext" />
+                    android:layout_height="wrap_content" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -90,7 +89,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:layout_weight="1"
-                        android:enabled="false"
                         android:hint="@string/mark_completed_attempts">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -109,7 +107,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:layout_weight="1"
-                        android:enabled="false"
                         android:hint="@string/mark_completed_falls">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -148,7 +145,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
-                android:enabled="false"
                 android:hint="@string/mark_completed_notes"
                 app:helperText="@string/mark_completed_notes_info">
 
@@ -168,7 +164,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
-                android:enabled="false"
                 android:hint="@string/mark_completed_comment"
                 app:helperText="@string/mark_completed_comment_info">
 
