@@ -156,7 +156,9 @@ class SectorFragment : NetworkChangeListenerFragment() {
         if (loaded && this::sector.isInitialized) {
             uiContext {
                 sectorActivity.updateTitle(sector.displayName, isDownloaded)
-                loadImage()
+                doAsync {
+                    loadImage()
+                }
             }
             return
         }
