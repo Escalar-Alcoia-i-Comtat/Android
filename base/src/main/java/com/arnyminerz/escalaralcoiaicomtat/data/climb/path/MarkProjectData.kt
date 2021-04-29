@@ -11,4 +11,4 @@ data class MarkProjectData(
     val user: FirebaseUser,
     val comment: String?,
     val notes: String?
-)
+) : MarkingDataInt

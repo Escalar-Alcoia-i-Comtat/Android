@@ -13,4 +13,4 @@ data class MarkCompletedData(
     val falls: Int,
     val comment: String?,
     val notes: String?
-)
+) : MarkingDataInt
