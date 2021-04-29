@@ -355,4 +355,52 @@ class MarkCompletedActivity : AppCompatActivity() {
         binding.progressIndicator.visibility(isLoading)
         binding.formLayout.visibility(!isLoading)
     }
+
+    /**
+     * Checks that all the required fields of the form are filled up, and generates a bundle of data
+     * for marking the path as complete.
+     * Then, if everything is fine, submits the request.
+     * @author Arnau Mora
+     * @since 20210430
+     */
+    private fun submitForm() {
+        Timber.v("Checking form...")
+        loadingStatus(true)
+
+        var error = false
+
+        val attempts = binding.attemptsEditText.text.toString().toIntOrNull()
+        val falls = binding.fallsEditText.text.toString().toIntOrNull()
+        val grade = binding.gradeTextView.text?.toString()
+
+        if (attempts == null) {
+            binding.attemptsTextField.isErrorEnabled = true
+            binding.attemptsTextField.error = getString(R.string.mark_completed_attempts_required)
+            error = true
+        } else if (attempts < 0) {
+            binding.attemptsTextField.isErrorEnabled = true
+            binding.attemptsTextField.error = getString(R.string.mark_completed_attempts_size)
+            error = true
+        }
+
+        if (falls == null) {
+            binding.fallsTextField.isErrorEnabled = true
+            binding.fallsTextField.error = getString(R.string.mark_completed_attempts_required)
+            error = true
+        } else if (falls < 0) {
+            binding.fallsTextField.isErrorEnabled = true
+            binding.fallsTextField.error = getString(R.string.mark_completed_attempts_size)
+            error = true
+        }
+
+        if (grade == null || grade.isBlank()) {
+            binding.gradeTextField.isErrorEnabled = true
+            binding.gradeTextField.error = getString(R.string.mark_completed_attempts_required)
+            error = true
+        }
+
+        if (!error) {
+
+        }
+    }
 }
