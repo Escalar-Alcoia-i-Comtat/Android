@@ -9,6 +9,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesDa
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import timber.log.Timber
 import java.util.Date
@@ -182,6 +183,36 @@ class Path(
 
     fun grade(): Grade =
         if (grades.size > 0) grades.first() else throw NoSuchElementException("Grades list is empty")
+
+    /**
+     * Requests the server to mark a path as completed.
+     * @author Arnau Mora
+     * @since 20210430
+     * @param firestore The [FirebaseFirestore] instance to update the data.
+     * @param data The data for the marking.
+     */
+    suspend fun markCompleted(firestore: FirebaseFirestore, data: MarkCompletedData) {
+        val user = data.user
+        val attempts = data.attempts
+        val falls = data.falls
+        val comment = data.comment
+        val notes = data.notes
+
+        firestore
+            .document(documentPath)
+            .collection("Completions")
+            .add(
+                hashMapOf(
+                    "timestamp" to FieldValue.serverTimestamp(),
+                    "user" to user.uid,
+                    "attempts" to attempts,
+                    "falls" to falls,
+                    "comment" to comment,
+                    "notes" to notes,
+                )
+            )
+            .awaitTask()
+    }
 
     override fun describeContents(): Int = 0
     override fun writeToParcel(dest: Parcel?, flags: Int) {
