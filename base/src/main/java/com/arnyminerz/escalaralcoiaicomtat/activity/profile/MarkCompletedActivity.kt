@@ -302,6 +302,9 @@ class MarkCompletedActivity : AppCompatActivity() {
         // Add listener for project
         binding.projectCheckbox.setOnCheckedChangeListener { _, checked ->
             visibility(binding.noProjectLayout, !checked)
+            binding.attemptsEditText.clearFocus()
+            binding.fallsEditText.clearFocus()
+            binding.gradeTextView.clearFocus()
         }
 
         // Add all editor (ime) listeners
