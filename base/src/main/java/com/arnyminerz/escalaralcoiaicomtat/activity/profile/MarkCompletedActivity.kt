@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.profile
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import androidx.annotation.UiThread
@@ -8,6 +9,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.get
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.GRADES_LIST
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.MarkCompletedData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
@@ -15,6 +17,7 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMarkCompletedBind
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
@@ -22,6 +25,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MARKED_AS_COMPLETE
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MISSING_DATA
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_NOT_LOGGED_IN
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -370,11 +374,13 @@ class MarkCompletedActivity : AppCompatActivity() {
 
         var error = false
 
-        val attempts = binding.attemptsEditText.text.toString().toIntOrNull()
-        val falls = binding.fallsEditText.text.toString().toIntOrNull()
+        val attemptsText = binding.attemptsEditText.text?.toString()
+        val attempts = attemptsText?.toIntOrNull()
+        val fallsText = binding.fallsEditText.text?.toString()
+        val falls = fallsText?.toIntOrNull()
         val grade = binding.gradeTextView.text?.toString()
 
-        if (attempts == null) {
+        if (attempts == null || attemptsText.isBlank()) {
             binding.attemptsTextField.isErrorEnabled = true
             binding.attemptsTextField.error = getString(R.string.mark_completed_attempts_required)
             error = true
@@ -384,7 +390,7 @@ class MarkCompletedActivity : AppCompatActivity() {
             error = true
         }
 
-        if (falls == null) {
+        if (falls == null || fallsText.isBlank()) {
             binding.fallsTextField.isErrorEnabled = true
             binding.fallsTextField.error = getString(R.string.mark_completed_attempts_required)
             error = true
@@ -400,8 +406,22 @@ class MarkCompletedActivity : AppCompatActivity() {
             error = true
         }
 
-        if (!error) {
+        val comment = binding.commentEditText.text?.toString()
+        val notes = binding.notesEditText.text?.toString()
 
-        }
+        if (!error)
+            doAsync {
+                Timber.v("Preparing data...")
+                val data = MarkCompletedData(user!!, attempts!!, falls!!, comment, notes)
+                Timber.v("Running mark completed request...")
+                path?.markCompleted(firestore, data)
+                finishActivityWithResult(
+                    RESULT_CODE_MARKED_AS_COMPLETE,
+                    Intent()
+                        .putExtra(EXTRA_PATH, pathId!!)
+                )
+            }
+        else
+            loadingStatus(false)
     }
 }
