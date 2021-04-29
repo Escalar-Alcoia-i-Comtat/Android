@@ -327,6 +327,12 @@ class MarkCompletedActivity : AppCompatActivity() {
 
         // Add the submit listener
         binding.markCompletedButton.setOnClickListener {
+            binding.attemptsEditText.clearFocus()
+            binding.fallsEditText.clearFocus()
+            binding.gradeTextView.clearFocus()
+            binding.notesEditText.clearFocus()
+            binding.commentEditText.clearFocus()
+
             submitForm()
         }
 
