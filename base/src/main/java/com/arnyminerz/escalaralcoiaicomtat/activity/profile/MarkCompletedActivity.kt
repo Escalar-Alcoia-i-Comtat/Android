@@ -298,6 +298,24 @@ class MarkCompletedActivity : AppCompatActivity() {
             visibility(binding.noProjectLayout, !checked)
         }
 
+        // Add all editor (ime) listeners
+        binding.attemptsEditText.setOnEditorActionListener { _, _, _ ->
+            binding.fallsEditText.requestFocus()
+            true
+        }
+        binding.fallsEditText.setOnEditorActionListener { _, _, _ ->
+            binding.gradeTextField.requestFocus()
+            true
+        }
+        binding.notesEditText.setOnEditorActionListener { _, _, _ ->
+            binding.commentEditText.requestFocus()
+            true
+        }
+        binding.commentEditText.setOnEditorActionListener { _, _, _ ->
+            binding.commentEditText.clearFocus()
+            true
+        }
+
         Timber.v("Hiding progress indicator...")
         loadingStatus(false)
     }
