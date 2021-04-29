@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.profile
 
 import android.os.Bundle
 import android.widget.ArrayAdapter
+import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
@@ -152,7 +153,7 @@ class MarkCompletedActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         Timber.v("Showing progress indicator...")
-        binding.progressIndicator.visibility(true)
+        loadingStatus(true)
 
         // Load the data from the intent, and if it's not complete, exit the activity and show a
         //   toast message.
@@ -272,6 +273,7 @@ class MarkCompletedActivity : AppCompatActivity() {
      * @author Arnau Mora
      * @since 20210429
      */
+    @UiThread
     private fun initializeUI() {
         // Initialize the grades list
         Timber.v("Initializing grades list...")
@@ -288,6 +290,19 @@ class MarkCompletedActivity : AppCompatActivity() {
         binding.pathNameEditText.setText(path?.displayName)
 
         Timber.v("Hiding progress indicator...")
-        binding.progressIndicator.visibility(false)
+        loadingStatus(false)
+    }
+
+    /**
+     * Updates the loading indicator and form visibility according to [isLoading].
+     * @author Arnau Mora
+     * @since 20210429
+     * @param isLoading If true, the loading indicator will be shown, and the form won't, if false,
+     * at the opposite.
+     */
+    @UiThread
+    private fun loadingStatus(isLoading: Boolean) {
+        binding.progressIndicator.visibility(isLoading)
+        binding.formLayout.visibility(!isLoading)
     }
 }
