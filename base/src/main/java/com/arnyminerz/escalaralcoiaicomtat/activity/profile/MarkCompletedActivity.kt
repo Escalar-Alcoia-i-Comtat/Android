@@ -316,6 +316,11 @@ class MarkCompletedActivity : AppCompatActivity() {
             true
         }
 
+        // Add the submit listener
+        binding.markCompletedButton.setOnClickListener {
+            submitForm()
+        }
+
         Timber.v("Hiding progress indicator...")
         loadingStatus(false)
     }
