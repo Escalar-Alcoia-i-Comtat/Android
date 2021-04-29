@@ -124,6 +124,11 @@
     <string name="mark_completed_falls">Falls</string>
     <string name="mark_completed_attempts">Attempts</string>
     <string name="mark_completed_grade">Grade</string>
+    <string name="mark_completed_attempts_required">Attempts number is required</string>
+    <string name="mark_completed_attempts_size">Attempts must be greater or equal to 0</string>
+    <string name="mark_completed_falls_required">Falls number is required</string>
+    <string name="mark_completed_falls_size">Falls must be greater or equal to 0</string>
+    <string name="mark_completed_grade_required">Your graduation is required</string>
 
     <string name="pref_main_title">General</string>
     <string name="pref_main_sum">General settings of the app</string>

@@ -326,4 +326,9 @@
     <string name="mark_completed_attempts">Intents</string>
     <string name="mark_completed_grade">Grau</string>
     <string name="toast_error_login_required">Has de tindre la sessió iniciada</string>
+    <string name="mark_completed_attempts_required">El nombre d\'intents és necessari</string>
+    <string name="mark_completed_attempts_size">El nombre d\'intents ha de ser major o igual a 0</string>
+    <string name="mark_completed_falls_required">El nombre de caigudes és necessari</string>
+    <string name="mark_completed_falls_size">El nombre de caigudes ha de ser major o igual a 0</string>
+    <string name="mark_completed_grade_required">La teua graduació és necessaria</string>
 </resources>
