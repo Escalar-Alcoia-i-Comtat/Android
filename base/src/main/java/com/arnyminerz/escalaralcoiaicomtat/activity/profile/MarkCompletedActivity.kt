@@ -321,6 +321,24 @@ class MarkCompletedActivity : AppCompatActivity() {
             submitForm()
         }
 
+        // Error clear listeners
+        binding.attemptsEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.attemptsTextField.isErrorEnabled = false
+                binding.attemptsTextField.error = null
+            }
+        }
+        binding.fallsEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.fallsTextField.isErrorEnabled = false
+                binding.fallsTextField.error = null
+            }
+        }
+        binding.gradeTextView.setOnItemClickListener { _, _, _, _ ->
+            binding.gradeTextField.isErrorEnabled = false
+            binding.gradeTextField.error = null
+        }
+
         Timber.v("Hiding progress indicator...")
         loadingStatus(false)
     }
