@@ -289,8 +289,14 @@ class MarkCompletedActivity : AppCompatActivity() {
         )
 
         // Update the path name indicator
-        Timber.v("Updating path name...")
-        binding.pathNameEditText.setText(path?.displayName)
+        val pathName = path?.displayName
+        Timber.v("Updating path name ($pathName)...")
+        binding.pathNameEditText.setText(pathName)
+
+        // Add listener for project
+        binding.projectCheckbox.setOnCheckedChangeListener { _, checked ->
+            visibility(binding.noProjectLayout, !checked)
+        }
 
         Timber.v("Hiding progress indicator...")
         loadingStatus(false)
