@@ -149,10 +149,31 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:enabled="false"
-                android:hint="@string/mark_completed_notes">
+                android:hint="@string/mark_completed_notes"
+                app:helperText="@string/mark_completed_notes_info">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/notes_editText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionNext"
+                    android:inputType="textMultiLine" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/comment_textField"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:enabled="false"
+                android:hint="@string/mark_completed_comment"
+                app:helperText="@string/mark_completed_comment_info">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/comment_editText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:imeOptions="actionDone"
@@ -165,6 +186,7 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:text="@string/action_continue"
                 android:textAllCaps="false" />
 
