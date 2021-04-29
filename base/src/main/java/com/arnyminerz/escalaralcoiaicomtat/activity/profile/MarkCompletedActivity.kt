@@ -287,6 +287,7 @@ class MarkCompletedActivity : AppCompatActivity() {
                 GRADES_LIST
             )
         )
+        binding.gradeTextView.setText(path?.grade()?.toString())
 
         // Update the path name indicator
         val pathName = path?.displayName
