@@ -24,6 +24,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MARKED_AS_COMPLETE
@@ -398,7 +399,7 @@ class MarkCompletedActivity : AppCompatActivity() {
                 finishActivityWithResult(
                     RESULT_CODE_MARKED_AS_PROJECT,
                     Intent()
-                        .putExtra(EXTRA_PATH, pathId!!)
+                        .putExtra(EXTRA_PATH_DOCUMENT, path!!.documentPath)
                 )
             }
         } else {
@@ -447,7 +448,7 @@ class MarkCompletedActivity : AppCompatActivity() {
                     finishActivityWithResult(
                         RESULT_CODE_MARKED_AS_COMPLETE,
                         Intent()
-                            .putExtra(EXTRA_PATH, pathId!!)
+                            .putExtra(EXTRA_PATH_DOCUMENT, path!!.documentPath)
                     )
                 }
             } else
