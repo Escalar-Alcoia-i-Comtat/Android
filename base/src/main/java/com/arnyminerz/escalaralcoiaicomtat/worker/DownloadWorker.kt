@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.worker
 
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.LiveData
 import androidx.work.Constraints
 import androidx.work.NetworkType
@@ -20,7 +21,6 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ROAMING
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
-import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
@@ -31,7 +31,6 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_OVERWRITE_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.METERS_PER_LAT_LON_DEGREE
 import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
@@ -329,7 +328,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val sectors = runBlocking {
             Timber.d("Downloading child sectors...")
             val sectors = arrayListOf<Sector>()
-            zone.getChildren(firestore).toCollection(sectors)
+            zone.getChildren(null, firestore)
+                .toCollection(sectors)
             sectors
         }
         val total = sectors.size
@@ -476,6 +476,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             if (downloadResult == Result.success()) {
                 val intent = runBlocking {
                     Timber.v("Getting intent...")
+                    Intent()
                     DataClass.getIntent(applicationContext, displayName, firestore)
                         ?.let { intent ->
                             PendingIntent.getActivity(

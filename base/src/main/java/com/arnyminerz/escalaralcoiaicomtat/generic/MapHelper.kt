@@ -103,14 +103,14 @@ class MapHelper
 constructor(context: Context) {
     companion object {
         suspend fun getTarget(
-            context: Context,
+            activity: Activity,
             marker: Symbol,
             firestore: FirebaseFirestore
         ): Intent? {
             Timber.d("Getting marker's title...")
             val title = marker.getWindow().title
             Timber.v("Searching in ${AREAS.size} cached areas...")
-            return getIntent(context, title, firestore)
+            return getIntent(activity, title, firestore)
         }
 
         fun getImageUrl(description: String?): String? {

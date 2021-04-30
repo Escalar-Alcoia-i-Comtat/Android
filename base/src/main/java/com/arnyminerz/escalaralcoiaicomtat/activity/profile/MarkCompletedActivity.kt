@@ -22,6 +22,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
@@ -239,7 +240,7 @@ class MarkCompletedActivity : AppCompatActivity() {
 
         Timber.v("Loading zone $zoneId...")
         val zones = arrayListOf<Zone>()
-        area!!.getChildren(firestore).toCollection(zones)
+        area!!.getChildren(application as App, firestore).toCollection(zones)
         try {
             zone = area!![zoneId!!]
         } catch (_: IndexOutOfBoundsException) {
@@ -252,7 +253,7 @@ class MarkCompletedActivity : AppCompatActivity() {
 
         Timber.v("Loading sector #$sectorIndex...")
         val sectors = arrayListOf<Sector>()
-        zone!!.getChildren(firestore).toCollection(sectors)
+        zone!!.getChildren(application as App, firestore).toCollection(sectors)
         try {
             sector = zone!![sectorIndex!!]
         } catch (_: IndexOutOfBoundsException) {
@@ -265,7 +266,7 @@ class MarkCompletedActivity : AppCompatActivity() {
 
         Timber.v("Loading path $pathId...")
         val paths = arrayListOf<Path>()
-        sector!!.getChildren(firestore).toCollection(paths)
+        sector!!.getChildren(application as App, firestore).toCollection(paths)
         try {
             path = sector!![pathId!!]
         } catch (_: IndexOutOfBoundsException) {
