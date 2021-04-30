@@ -6,6 +6,7 @@ import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.scale
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSY_LEGACY
@@ -45,7 +46,9 @@ suspend fun setDefaultProfileImage(
         val storageRef = Firebase.storage.reference
         val profileImageRef = storageRef.child("users/${user.uid}/profile.webp")
         val d = ContextCompat.getDrawable(context, R.drawable.ic_profile_image)
-        val profileImage = d!!.toBitmap().cropToSquare()
+        val profileImage = d!!.toBitmap()
+            .cropToSquare()
+            ?.scale(128, 128)
         val baos = ByteArrayOutputStream()
         profileImage?.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
         val data = baos.toByteArray()
