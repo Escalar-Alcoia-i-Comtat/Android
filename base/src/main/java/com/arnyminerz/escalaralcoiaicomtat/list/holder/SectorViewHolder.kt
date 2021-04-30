@@ -34,6 +34,7 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
 
     val toggleImageButton: ImageButton = view.findViewById(R.id.toggle_imageButton)
     val infoImageButton: ImageButton = view.findViewById(R.id.info_imageButton)
+    val commentsImageButton: ImageButton = view.findViewById(R.id.comments_imageButton)
 
     val safesChipGroup: ChipGroup = view.findViewById(R.id.safesChipGroup)
 
