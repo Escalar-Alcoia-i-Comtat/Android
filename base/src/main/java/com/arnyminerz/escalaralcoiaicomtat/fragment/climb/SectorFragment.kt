@@ -57,7 +57,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
     private var notMaximizedImageHeight = 0
 
     private var _binding: FragmentSectorBinding? = null
-    private val binding get() = _binding!!
+    internal val binding get() = _binding!!
 
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
