@@ -198,6 +198,7 @@ class RegisterFragment private constructor() : Fragment() {
     private fun showError(field: TextInputLayout, @StringRes error: Int) {
         field.isErrorEnabled = true
         field.error = getString(error)
+        fields.enable()
     }
 
     /**
