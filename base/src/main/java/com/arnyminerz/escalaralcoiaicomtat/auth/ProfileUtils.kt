@@ -14,6 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_COMPRESSION_QUAL
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.userProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
@@ -122,4 +123,25 @@ suspend fun updateDisplayName(user: FirebaseUser, displayName: String) =
             Timber.e(it, "Could not update profile data.")
             cont.resumeWithException(it)
         }
+    }
+
+/**
+ * Creates a reference in Firestore for getting a limited amount of user's data. Just display
+ * name and profile image.
+ * @author Arnau Mora
+ * @since 20210430
+ */
+@UiThread
+suspend fun createFirestoreUserReference(firestore: FirebaseFirestore, user: FirebaseUser) =
+    suspendCoroutine<Void> { cont ->
+        firestore.collection("Users")
+            .document(user.uid)
+            .set(
+                mapOf(
+                    "displayName" to user.displayName,
+                    "profileImage" to user.photoUrl
+                )
+            )
+            .addOnSuccessListener { cont.resume(it) }
+            .addOnFailureListener { cont.resumeWithException(it) }
     }
