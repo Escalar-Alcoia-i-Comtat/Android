@@ -322,6 +322,7 @@
     <string name="image_desc_check_inbox">Check inbox icon</string>
     <string name="image_desc_change_profile_image">Change profile image indicator</string>
     <string name="image_desc_mark_completed">Mark path as completed</string>
+    <string name="image_desc_comments">Comments</string>
 
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>
@@ -329,6 +330,10 @@
     <string name="login_error_user_not_found">The email doesn\'t exist</string>
     <string name="login_error_invalid_credentials">Wrong password</string>
     <string name="login_error_user_disabled">The user has disabled. Contact an administrator</string>
+    <string name="login_error_email_required">The email is required</string>
+    <string name="login_error_wrong_password">Wrong password</string>
+    <string name="login_error_password_required">The password can\'t be empty</string>
+    <string name="login_error_email_invalid">The email address is not valid</string>
 
     <string name="register_email">Email</string>
     <string name="register_display_name">Display Name</string>

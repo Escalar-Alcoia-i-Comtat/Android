@@ -331,4 +331,9 @@
     <string name="mark_completed_falls_required">El nombre de caigudes és necessari</string>
     <string name="mark_completed_falls_size">El nombre de caigudes ha de ser major o igual a 0</string>
     <string name="mark_completed_grade_required">La teua graduació és necessaria</string>
+    <string name="image_desc_comments">Comentaris</string>
+    <string name="login_error_email_required">El correu electrònic és necessari</string>
+    <string name="login_error_wrong_password">Contrassenya incorrecta</string>
+    <string name="login_error_password_required">La contrassenya no pot estar en blanc</string>
+    <string name="login_error_email_invalid">El correu electrònic no és vàlid</string>
 </resources>

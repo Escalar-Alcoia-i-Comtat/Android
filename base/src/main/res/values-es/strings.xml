@@ -332,4 +332,9 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="mark_completed_falls_required">El número de caídas es necesario</string>
     <string name="mark_completed_falls_size">El número de caídas debe ser igual o mayor a 0</string>
     <string name="mark_completed_grade_required">Tu graduación es necesaria</string>
+    <string name="image_desc_comments">Comentarios</string>
+    <string name="login_error_email_required">El correu electrónico es necesario</string>
+    <string name="login_error_wrong_password">Contraseña incorrecta</string>
+    <string name="login_error_password_required">La contraseña no puede estar en blanco</string>
+    <string name="login_error_email_invalid">El correo electrónico no es válido</string>
 </resources>
