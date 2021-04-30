@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.view.setTextColor
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.ChipGroup
 
 class SectorViewHolder(private val activity: Activity, view: View) : RecyclerView.ViewHolder(view) {
@@ -33,8 +34,11 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
 
     val toggleImageButton: ImageButton = view.findViewById(R.id.toggle_imageButton)
     val infoImageButton: ImageButton = view.findViewById(R.id.info_imageButton)
+    val commentsImageButton: ImageButton = view.findViewById(R.id.comments_imageButton)
 
     val safesChipGroup: ChipGroup = view.findViewById(R.id.safesChipGroup)
+
+    val markCompletedButton: MaterialButton = view.findViewById(R.id.markCompleted_button)
 
     /**
      * Updates the toggle status of the [CardView]: Changes the card's size according to [toggled].

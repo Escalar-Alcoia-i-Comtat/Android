@@ -14,6 +14,9 @@ const val SHOW_NON_DOWNLOADED_DEFAULT = false
 const val ENABLE_AUTHENTICATION_KEY = "ENABLE_AUTHENTICATION"
 const val ENABLE_AUTHENTICATION_DEFAULT = false
 
+const val PROFILE_IMAGE_SIZE_KEY = "PROFILE_IMAGE_SIZE"
+const val PROFILE_IMAGE_SIZE_DEFAULT = 512L
+
 /**
  * The maximum amount of days that will be allowed to the user not having updated the app
  * before forcing an update.
@@ -32,12 +35,19 @@ var SHOW_NON_DOWNLOADED = SHOW_NON_DOWNLOADED_DEFAULT
 var ENABLE_AUTHENTICATION = ENABLE_AUTHENTICATION_DEFAULT
 
 /**
+ * Sets the width and height that the profile images should be resized to
+ * @since 20210430
+ */
+var PROFILE_IMAGE_SIZE = PROFILE_IMAGE_SIZE_DEFAULT
+
+/**
  * Sets the default values for Remote Config
  */
 val REMOTE_CONFIG_DEFAULTS = mapOf(
     APP_UPDATE_MAX_TIME_DAYS_KEY to APP_UPDATE_MAX_TIME_DAYS_DEFAULT,
     SHOW_NON_DOWNLOADED_KEY to SHOW_NON_DOWNLOADED_DEFAULT,
     ENABLE_AUTHENTICATION_KEY to ENABLE_AUTHENTICATION_DEFAULT,
+    PROFILE_IMAGE_SIZE_KEY to PROFILE_IMAGE_SIZE_DEFAULT,
 )
 const val REMOTE_CONFIG_MIN_FETCH_INTERVAL = 3600L
 
@@ -45,6 +55,8 @@ val EXTRA_AREA = IntentExtra<String>("area")
 val EXTRA_ZONE = IntentExtra<String>("zone")
 val EXTRA_SECTOR_COUNT = IntentExtra<Int>("sector_count")
 val EXTRA_SECTOR_INDEX = IntentExtra<Int>("sector_index")
+val EXTRA_PATH = IntentExtra<String>("path")
+val EXTRA_PATH_DOCUMENT = IntentExtra<String>("path_document")
 
 val EXTRA_POSITION = IntentExtra<Int>("position")
 
@@ -116,20 +128,6 @@ const val REQUEST_CODE_LOGIN = 5
  * @since 20210425
  */
 const val REQUEST_CODE_SELECT_PROFILE_IMAGE = 3
-
-/**
- * When the user has just been registered and the confirmation email has been sent.
- * @author Arnau Mora
- * @since 20210425
- */
-const val RESULT_CODE_WAITING_EMAIL_CONFIRMATION = 1
-
-/**
- * When the user has successfully been logged in.
- * @author Arnau Mora
- * @since 20210425
- */
-const val RESULT_CODE_LOGGED_IN = 2
 
 const val PERMISSION_DIALOG_TAG = "PERM_TAG"
 

@@ -35,6 +35,7 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -43,6 +44,7 @@ import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
+@ExperimentalBadgeUtils
 class SectorFragment : NetworkChangeListenerFragment() {
     private lateinit var areaId: String
     private lateinit var zoneId: String
@@ -55,7 +57,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
     private var notMaximizedImageHeight = 0
 
     private var _binding: FragmentSectorBinding? = null
-    private val binding get() = _binding!!
+    internal val binding get() = _binding!!
 
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
@@ -156,7 +158,9 @@ class SectorFragment : NetworkChangeListenerFragment() {
         if (loaded && this::sector.isInitialized) {
             uiContext {
                 sectorActivity.updateTitle(sector.displayName, isDownloaded)
-                loadImage()
+                doAsync {
+                    loadImage()
+                }
             }
             return
         }
@@ -226,7 +230,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
                         requireContext(),
                         R.anim.item_enter_left_animator
                     )
-                binding.pathsRecyclerView.adapter = PathsAdapter(children, requireActivity())
+                binding.pathsRecyclerView.adapter =
+                    PathsAdapter(children, requireActivity() as SectorActivity)
                 binding.pathsRecyclerView.show()
 
                 // Load info bar

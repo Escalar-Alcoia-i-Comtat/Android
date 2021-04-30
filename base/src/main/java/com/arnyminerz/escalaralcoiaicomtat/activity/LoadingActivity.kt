@@ -23,6 +23,8 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.APP_UPDATE_MAX_TIME_DAYS_KEY
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION_KEY
+import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_SIZE
+import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_SIZE_KEY
 import com.arnyminerz.escalaralcoiaicomtat.shared.REMOTE_CONFIG_DEFAULTS
 import com.arnyminerz.escalaralcoiaicomtat.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
 import com.arnyminerz.escalaralcoiaicomtat.shared.SHOW_NON_DOWNLOADED
@@ -120,6 +122,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             APP_UPDATE_MAX_TIME_DAYS = remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
             SHOW_NON_DOWNLOADED = remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
             ENABLE_AUTHENTICATION = remoteConfig.getBoolean(ENABLE_AUTHENTICATION_KEY)
+            PROFILE_IMAGE_SIZE = remoteConfig.getLong(PROFILE_IMAGE_SIZE_KEY)
 
             Timber.v("APP_UPDATE_MAX_TIME_DAYS: $APP_UPDATE_MAX_TIME_DAYS")
             Timber.v("SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")

@@ -47,6 +47,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_SETTINGS
 import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -339,11 +340,17 @@ class MainActivity : LanguageAppCompatActivity() {
 
             binding.profileCardView.visibility(user != null)
 
-            if (user != null)
+            user?.reload()?.addOnSuccessListener {
                 if (!user.isEmailVerified) {
                     PREF_WAITING_EMAIL_CONFIRMATION.put(true)
                     startActivity(Intent(this, EmailConfirmationActivity::class.java))
                 }
+            }?.addOnFailureListener {
+                if (it is FirebaseAuthInvalidUserException) {
+                    Firebase.auth.signOut()
+                    refreshLoginStatus()
+                }
+            }
         }
     }
 }
