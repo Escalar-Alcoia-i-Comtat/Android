@@ -127,7 +127,7 @@ dependencies {
     implementation 'com.google.android.play:core-ktx:1.8.1'
 
     // Android Jetpack
-    def jetpack_work_version = "2.6.0-alpha01"
+    def jetpack_work_version = "2.6.0-alpha02"
     implementation "androidx.work:work-runtime-ktx:$jetpack_work_version"
     implementation "androidx.work:work-gcm:$jetpack_work_version"
     androidTestImplementation "androidx.work:work-testing:$jetpack_work_version"
@@ -151,8 +151,8 @@ dependencies {
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:0.9.0'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-offline-v9:0.8.0'
 
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3-native-mt'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3'
 
     implementation 'com.jakewharton.timber:timber:4.7.1'
 
