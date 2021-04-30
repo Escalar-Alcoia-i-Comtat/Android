@@ -13,6 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.generic.cropToSquare
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_COMPRESSION_QUALITY
+import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_SIZE
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.userProfileChangeRequest
@@ -48,7 +49,7 @@ suspend fun setDefaultProfileImage(
         val d = ContextCompat.getDrawable(context, R.drawable.ic_profile_image)
         val profileImage = d!!.toBitmap()
             .cropToSquare()
-            ?.scale(128, 128)
+            ?.scale(PROFILE_IMAGE_SIZE.toInt(), PROFILE_IMAGE_SIZE.toInt())
         val baos = ByteArrayOutputStream()
         profileImage?.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
         val data = baos.toByteArray()
