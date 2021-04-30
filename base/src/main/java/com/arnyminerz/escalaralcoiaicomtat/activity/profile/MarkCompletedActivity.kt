@@ -27,6 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MARKED_AS_COMPLETE
+import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MARKED_AS_PROJECT
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MISSING_DATA
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_NOT_LOGGED_IN
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -395,7 +396,7 @@ class MarkCompletedActivity : AppCompatActivity() {
                 Timber.v("Running mark project request...")
                 path?.markProject(firestore, data)
                 finishActivityWithResult(
-                    RESULT_CODE_MARKED_AS_COMPLETE,
+                    RESULT_CODE_MARKED_AS_PROJECT,
                     Intent()
                         .putExtra(EXTRA_PATH, pathId!!)
                 )
