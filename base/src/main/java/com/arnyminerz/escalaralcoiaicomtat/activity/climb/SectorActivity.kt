@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.UiThread
@@ -9,25 +10,30 @@ import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity.Companion.errorNotStored
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.SectorFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.list.adapter.PathsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_AREA_ID
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_ZONE_ID
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_POSITION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MARKED_AS_COMPLETE
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.badge.ExperimentalBadgeUtils
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -231,5 +237,40 @@ class SectorActivity : LanguageAppCompatActivity() {
             outState.putInt(EXTRA_POSITION.key, binding.sectorViewPager.currentItem)
         }
         super.onSaveInstanceState(outState)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == RESULT_CODE_MARKED_AS_COMPLETE || resultCode == RESULT_CODE_MARKED_AS_COMPLETE) {
+            Timber.v("Marked path. Getting document.")
+            val pathDocument = data?.getExtra(EXTRA_PATH_DOCUMENT)
+            if (pathDocument != null) {
+                Timber.v("The marked path's document is \"$pathDocument\".")
+                firestore.document(pathDocument)
+                    .get()
+                    .addOnSuccessListener { pathData ->
+                        Timber.v("Processing path data...")
+                        val path = Path(pathData)
+                        doAsync {
+                            Timber.v("Getting adapter...")
+                            val adapter =
+                                fragments[currentPage].binding.pathsRecyclerView.adapter as PathsAdapter
+                            Timber.v("Getting view holder...")
+                            val holder = adapter.viewHolders[path.objectId]
+                            if (holder != null) {
+                                Timber.v("Loading completed path data...")
+                                adapter.loadCompletedPathData(
+                                    Firebase.auth.currentUser,
+                                    path,
+                                    holder.commentsImageButton
+                                )
+                            } else Timber.w("Could not find view holder")
+                        }
+                    }
+                    .addOnFailureListener {
+                        Timber.e(it, "Could not get path data to refresh comments")
+                    }
+            } else Timber.w("Could not get the path's document.")
+        } else
+            super.onActivityResult(requestCode, resultCode, data)
     }
 }
