@@ -45,3 +45,10 @@ const val RESULT_CODE_MARKED_AS_COMPLETE = 5
  * @see EXTRA_PATH
  */
 const val RESULT_CODE_MARKED_AS_PROJECT = 6
+
+/**
+ * When an action was being ran on an Activity, but there was an exception.
+ * @author Arnau Mora
+ * @since 20210430
+ */
+const val RESULT_CODE_UNKNOWN_ERROR = 7
