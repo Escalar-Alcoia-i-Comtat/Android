@@ -96,3 +96,25 @@ suspend fun updateProfileImage(user: FirebaseUser, imageDownloadUrl: String) =
             cont.resumeWithException(it)
         }
     }
+
+/**
+ * Updates the user's profile image address.
+ * @author Arnau Mora
+ * @since 20210425
+ * @param user The user to update.
+ * @param displayName The new display name of the user.
+ */
+@UiThread
+suspend fun updateDisplayName(user: FirebaseUser, displayName: String) =
+    suspendCoroutine<Void> { cont ->
+        user.updateProfile(
+            userProfileChangeRequest {
+                this.displayName = displayName
+            }
+        ).addOnSuccessListener {
+            cont.resume(it)
+        }.addOnFailureListener {
+            Timber.e(it, "Could not update profile data.")
+            cont.resumeWithException(it)
+        }
+    }
