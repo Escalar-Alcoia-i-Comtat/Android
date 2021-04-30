@@ -9,19 +9,16 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
-import java.util.*
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
+import java.util.Date
 
 /**
  * Creates a new Area instance.
@@ -99,14 +96,9 @@ class Area(
             .document(metadata.documentPath)
             .collection("Zones")
             .orderBy("displayName")
-        val childTask = ref.get()
         try {
-            Timber.v("Awaiting results...")
-            val snapshot = suspendCoroutine<QuerySnapshot> { cont ->
-                childTask
-                    .addOnSuccessListener { cont.resume(it) }
-                    .addOnFailureListener { cont.resumeWithException(it) }
-            }
+            Timber.v("Getting zones of \"${metadata.documentPath}\"...")
+            val snapshot = ref.get().awaitTask()
             Timber.v("Got children result")
             val zones = snapshot.documents
             Timber.d("Got ${zones.size} elements. Processing result")
