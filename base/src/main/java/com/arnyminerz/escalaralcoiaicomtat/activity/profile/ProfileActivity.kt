@@ -131,8 +131,11 @@ class ProfileActivity : AppCompatActivity() {
                         toast(R.string.toast_profile_image_updated)
                     }
                 } catch (e: StorageException) {
-                    Timber.e(e, "Could not update profile image.")
-                    toast(R.string.toast_error_profile_image_update)
+                    uiContext {
+                        Timber.e(e, "Could not update profile image.")
+                        binding.profileProgressIndicator.visibility(false)
+                        toast(R.string.toast_error_profile_image_update)
+                    }
                 }
             }
         }
