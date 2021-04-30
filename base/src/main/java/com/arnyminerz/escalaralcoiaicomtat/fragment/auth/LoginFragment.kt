@@ -25,6 +25,14 @@ class LoginFragment private constructor() : Fragment() {
     private val binding: FragmentAuthLoginBinding
         get() = _binding!!
 
+    private val fields
+        get() = viewListOf(
+            binding.emailEditText,
+            binding.passwordEditText,
+            binding.loginButton,
+            binding.registerButton
+        )
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -70,12 +78,6 @@ class LoginFragment private constructor() : Fragment() {
             (activity as? AuthActivity?)?.changePage(AuthActivity.PAGE_REGISTER)
         }
         binding.loginButton.setOnClickListener {
-            val fields = viewListOf(
-                binding.emailEditText,
-                binding.passwordEditText,
-                binding.loginButton,
-                binding.registerButton
-            )
             fields.clearFocus()
             fields.disable()
 
@@ -111,7 +113,7 @@ class LoginFragment private constructor() : Fragment() {
                     .addOnCompleteListener {
                         fields.enable()
                     }
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 showError(
                     binding.emailTextField,
                     R.string.login_error_user_not_found
@@ -130,6 +132,7 @@ class LoginFragment private constructor() : Fragment() {
     private fun showError(field: TextInputLayout, @StringRes error: Int) {
         field.isErrorEnabled = true
         field.error = getString(error)
+        fields.enable()
     }
 
     companion object {
