@@ -4,14 +4,13 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.WorkerThread
 import androidx.collection.arrayMapOf
+import com.arnyminerz.escalaralcoiaicomtat.auth.VisibleUserData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
-import com.google.firebase.auth.UserRecord
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -255,24 +254,22 @@ class Path(
      * @author Arnau Mora
      * @since 20210430
      * @param firestore The [FirebaseFirestore] instance from where to load the data.
-     * @param auth The [FirebaseAuth] instance for fetching the user's data.
      * @throws FirebaseAuthException When there was an exception while loading an user from Firebase.
      */
     @Throws(FirebaseAuthException::class)
     suspend fun getCompletions(
-        firestore: FirebaseFirestore,
-        auth: FirebaseAuth
+        firestore: FirebaseFirestore
     ): Flow<MarkedDataInt> = flow {
         val completionsData = firestore
             .document(documentPath)
             .collection("Completions")
             .get()
             .awaitTask()
-        val cachedUsers = arrayMapOf<String, UserRecord>()
+        val cachedUsers = arrayMapOf<String, VisibleUserData>()
         if (completionsData != null)
             for (document in completionsData.documents) {
                 val timestamp = document.getTimestamp("timestamp")
-                val userUid = document.getString("user")
+                val userUid = document.getString("user")!!
                 val attempts = document.getLong("attempts") ?: 0
                 val falls = document.getLong("falls") ?: 0
                 val comment = document.getString("comment")
@@ -285,8 +282,14 @@ class Path(
                 else
                     try {
                         Timber.v("Loading user data from server...")
-                        val loadedUser = auth.getUser(userUid)
+                        val visibleUserData = firestore.collection("Users")
+                            .document(userUid)
+                            .get()
+                            .awaitTask()!!
+                        val displayName = visibleUserData.getString("displayName")!!
+                        val profileImage = visibleUserData.getString("profileImage")!!
                         Timber.v("Got user! Caching and returning...")
+                        val loadedUser = VisibleUserData(userUid, displayName, profileImage)
                         cachedUsers[userUid] = loadedUser
                         loadedUser
                     } catch (_: IllegalArgumentException) {
