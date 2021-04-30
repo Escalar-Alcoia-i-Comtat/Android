@@ -339,6 +339,7 @@ class MainActivity : LanguageAppCompatActivity() {
             val user = Firebase.auth.currentUser
 
             binding.profileCardView.visibility(user != null)
+            binding.profileImageView.visibility(user != null)
 
             user?.reload()?.addOnSuccessListener {
                 if (!user.isEmailVerified) {
@@ -351,6 +352,9 @@ class MainActivity : LanguageAppCompatActivity() {
                     refreshLoginStatus()
                 }
             }
+        } else {
+            binding.profileCardView.visibility(false)
+            binding.profileImageView.visibility(false)
         }
     }
 }

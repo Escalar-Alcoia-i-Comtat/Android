@@ -17,7 +17,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MAP_LOAD_PADDING
 import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
-import com.arnyminerz.escalaralcoiaicomtat.data.map.loadKMZ
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMapsBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAskerFragment
@@ -49,7 +48,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.android.gestures.MoveGestureDetector
-import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import timber.log.Timber
@@ -349,7 +347,9 @@ class MapsActivity : LanguageAppCompatActivity() {
                             firestore,
                             this,
                             binding.root
-                        ).show()
+                        ).also {
+                            doAsync { it.show() }
+                        }
 
                         true
                     } else
