@@ -7,10 +7,12 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toDrawable
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.auth.setDefaultProfileImage
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityProfileBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.MEGABYTE
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.generic.cropToSquare
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getBitmapFromUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_COMPRESSION_QUALITY
@@ -18,6 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.REQUEST_CODE_SELECT_PROFILE_IM
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
@@ -48,7 +51,24 @@ class ProfileActivity : AppCompatActivity() {
                     binding.profileImageImageView.background = bitmap.toDrawable(resources)
                 }
                 .addOnFailureListener {
-                    Timber.e(it, "Could not load profile image")
+                    val e = it as StorageException
+                    if (e.errorCode == StorageException.ERROR_OBJECT_NOT_FOUND) {
+                        binding.profileProgressIndicator.visibility(false)
+                        binding.profileProgressIndicator.isIndeterminate = false
+                        binding.profileProgressIndicator.max = 100
+                        binding.profileProgressIndicator.visibility(true)
+                        binding.profileImageImageView.setBackgroundResource(R.drawable.ic_profile_image)
+                        doAsync {
+                            Timber.e(e, "Could not find the profile image. Setting default...")
+                            setDefaultProfileImage(this@ProfileActivity, user) { progress ->
+                                runOnUiThread {
+                                    binding.profileProgressIndicator.progress =
+                                        progress.percentage()
+                                }
+                            }
+                        }
+                    } else
+                        Timber.e(it, "Could not load profile image")
                 }
                 .addOnCompleteListener {
                     binding.profileProgressIndicator.visibility(false)
