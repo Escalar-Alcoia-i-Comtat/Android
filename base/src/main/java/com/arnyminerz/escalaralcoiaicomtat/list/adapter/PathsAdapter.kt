@@ -97,6 +97,13 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
     private val badges = arrayMapOf<String, BadgeDrawable>()
 
     /**
+     * Stores the view holders of all the elements once they get created.
+     * @author Arnau Mora
+     * @since 20210430
+     */
+    internal val viewHolders = arrayMapOf<String, SectorViewHolder>()
+
+    /**
      * Stores the Firestore instance.
      * @author Arnau Mora
      * @since 20210427
@@ -144,6 +151,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
             return
         }
         val path = paths[position]
+        viewHolders[path.objectId] = holder
 
         val auth = Firebase.auth
         val user = auth.currentUser
@@ -317,7 +325,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
      * @since 20210430
      * @param user The currently logged in user
      */
-    private suspend fun loadCompletedPathData(
+    suspend fun loadCompletedPathData(
         user: FirebaseUser?,
         path: Path,
         commentsImageButton: ImageButton
