@@ -32,6 +32,9 @@
         android:vmSafeMode="true"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute,LockedOrientationActivity">
         <activity
+            android:name=".activity.profile.CommentsActivity"
+            android:exported="true" />
+        <activity
             android:name=".activity.profile.MarkCompletedActivity"
             android:exported="true" />
         <activity
