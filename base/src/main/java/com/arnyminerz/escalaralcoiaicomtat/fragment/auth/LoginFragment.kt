@@ -81,35 +81,42 @@ class LoginFragment private constructor() : Fragment() {
 
             val email = binding.emailEditText.text.toString()
             val password = binding.passwordEditText.text.toString()
-            Firebase.auth.signInWithEmailAndPassword(email, password)
-                .addOnSuccessListener { _ ->
-                    activity.finishActivityWithResult(RESULT_CODE_LOGGED_IN, null)
-                }
-                .addOnFailureListener { exception ->
-                    Timber.w(exception, "Could not login.")
-                    val e = exception as FirebaseAuthException
-                    when (e.errorCode) {
-                        "ERROR_USER_NOT_FOUND" ->
-                            showError(
-                                binding.emailTextField,
-                                R.string.login_error_user_not_found
-                            )
-                        "ERROR_INVALID_CREDENTIAL" ->
-                            showError(
-                                binding.passwordTextField,
-                                R.string.login_error_invalid_credentials
-                            )
-                        "ERROR_USER_DISABLED" ->
-                            showError(
-                                binding.emailTextField,
-                                R.string.login_error_user_disabled
-                            )
-                        else -> toast(context, R.string.toast_error_internal)
+            try {
+                Firebase.auth.signInWithEmailAndPassword(email, password)
+                    .addOnSuccessListener { _ ->
+                        activity.finishActivityWithResult(RESULT_CODE_LOGGED_IN, null)
                     }
-                }
-                .addOnCompleteListener {
-                    fields.enable()
-                }
+                    .addOnFailureListener { exception ->
+                        Timber.w(exception, "Could not login.")
+                        val e = exception as FirebaseAuthException
+                        when (e.errorCode) {
+                            "ERROR_USER_NOT_FOUND" ->
+                                showError(
+                                    binding.emailTextField,
+                                    R.string.login_error_user_not_found
+                                )
+                            "ERROR_INVALID_CREDENTIAL" ->
+                                showError(
+                                    binding.passwordTextField,
+                                    R.string.login_error_invalid_credentials
+                                )
+                            "ERROR_USER_DISABLED" ->
+                                showError(
+                                    binding.emailTextField,
+                                    R.string.login_error_user_disabled
+                                )
+                            else -> toast(context, R.string.toast_error_internal)
+                        }
+                    }
+                    .addOnCompleteListener {
+                        fields.enable()
+                    }
+            } catch (e: IllegalArgumentException) {
+                showError(
+                    binding.emailTextField,
+                    R.string.login_error_user_not_found
+                )
+            }
         }
     }
 
