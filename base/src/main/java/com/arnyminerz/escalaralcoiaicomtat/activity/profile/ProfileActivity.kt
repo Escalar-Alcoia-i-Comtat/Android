@@ -8,25 +8,27 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toDrawable
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.auth.setDefaultProfileImage
+import com.arnyminerz.escalaralcoiaicomtat.auth.setProfileImage
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityProfileBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.MEGABYTE
-import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSY_LEGACY
-import com.arnyminerz.escalaralcoiaicomtat.generic.cropToSquare
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getBitmapFromUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
-import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_COMPRESSION_QUALITY
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.shared.REQUEST_CODE_SELECT_PROFILE_IMAGE
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
-import java.io.ByteArrayOutputStream
 
 class ProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityProfileBinding
+
+    private lateinit var firestore: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +40,8 @@ class ProfileActivity : AppCompatActivity() {
             Timber.w("Not logged in.")
             return
         }
+
+        firestore = Firebase.firestore
 
         binding.profileNameTextView.text = user.displayName
 
@@ -60,7 +64,11 @@ class ProfileActivity : AppCompatActivity() {
                         binding.profileImageImageView.setBackgroundResource(R.drawable.ic_profile_image)
                         doAsync {
                             Timber.e(e, "Could not find the profile image. Setting default...")
-                            setDefaultProfileImage(this@ProfileActivity, user) { progress ->
+                            setDefaultProfileImage(
+                                this@ProfileActivity,
+                                firestore,
+                                user
+                            ) { progress ->
                                 runOnUiThread {
                                     binding.profileProgressIndicator.progress =
                                         progress.percentage()
@@ -108,26 +116,25 @@ class ProfileActivity : AppCompatActivity() {
         if (user != null) {
             binding.profileProgressIndicator.visibility(false)
             binding.profileProgressIndicator.isIndeterminate = false
+            binding.profileProgressIndicator.max = 100
             binding.profileProgressIndicator.visibility(true)
 
-            val profileImageRef = Firebase.storage.getReference("users/${user.uid}/profile.webp")
-            val baos = ByteArrayOutputStream()
-            bitmap.cropToSquare()
-                ?.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
-            val bitmapBytes = baos.toByteArray()
-            bitmap.recycle()
-            profileImageRef.putBytes(bitmapBytes)
-                .addOnProgressListener { task ->
-                    binding.profileProgressIndicator.progress = task.bytesTransferred.toInt()
-                    binding.profileProgressIndicator.max = task.totalByteCount.toInt()
-                }
-                .addOnSuccessListener {
-                    binding.profileProgressIndicator.visibility(false)
-                    toast(R.string.toast_profile_image_updated)
-                }
-                .addOnFailureListener {
+            doAsync {
+                try {
+                    setProfileImage(firestore, user, bitmap) { progress ->
+                        runOnUiThread {
+                            binding.profileProgressIndicator.progress = progress.percentage()
+                        }
+                    }
+                    uiContext {
+                        binding.profileProgressIndicator.visibility(false)
+                        toast(R.string.toast_profile_image_updated)
+                    }
+                } catch (e: StorageException) {
+                    Timber.e(e, "Could not update profile image.")
                     toast(R.string.toast_error_profile_image_update)
                 }
+            }
         }
     }
 }
