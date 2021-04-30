@@ -12,6 +12,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.collection.arrayMapOf
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.ChangeBounds
@@ -87,6 +88,13 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
      * @see BlockingType
      */
     private val blockStatuses = arrayListOf<BlockingType>()
+
+    /**
+     * Stores the badges loaded for each path. The key stores the path id, and the value the badge set.
+     * @author Arnau Mora
+     * @since 20210430
+     */
+    private val badges = arrayMapOf<String, BadgeDrawable>()
 
     /**
      * Stores the Firestore instance.
@@ -332,10 +340,16 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
             }*/
         }
         uiContext {
+            if (badges.containsKey(path.objectId)) {
+                Timber.v("Dettaching old badge...")
+                BadgeUtils.detachBadgeDrawable(badges[path.objectId], commentsImageButton)
+            }
             Timber.v("Creating comments badge...")
             val badge = BadgeDrawable.create(activity)
             badge.number = comments.size
             badge.isVisible = true
+            Timber.v("Storing abdge...")
+            badges[path.objectId] = badge
             Timber.v("Attaching badge...")
             BadgeUtils.attachBadgeDrawable(badge, commentsImageButton)
         }
