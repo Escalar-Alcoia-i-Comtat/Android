@@ -8,9 +8,9 @@ import com.google.firebase.Timestamp
  * @author Arnau Mora
  * @since 20210430
  */
-data class MarkedProjectData(
+class MarkedProjectData(
     val timestamp: Timestamp?,
-    val user: VisibleUserData,
-    val comment: String?,
-    val notes: String?
-) : MarkedDataInt
+    user: VisibleUserData,
+    comment: String?,
+    notes: String?
+) : MarkedDataInt(user, comment, notes)

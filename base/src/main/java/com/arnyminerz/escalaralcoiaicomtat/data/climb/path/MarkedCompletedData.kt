@@ -8,11 +8,11 @@ import com.google.firebase.Timestamp
  * @author Arnau Mora
  * @since 20210430
  */
-data class MarkedCompletedData(
+class MarkedCompletedData(
     val timestamp: Timestamp?,
-    val user: VisibleUserData,
+    user: VisibleUserData,
     val attempts: Long,
     val falls: Long,
-    val comment: String?,
-    val notes: String?
-) : MarkedDataInt
+    comment: String?,
+    notes: String?
+) : MarkedDataInt(user, comment, notes)
