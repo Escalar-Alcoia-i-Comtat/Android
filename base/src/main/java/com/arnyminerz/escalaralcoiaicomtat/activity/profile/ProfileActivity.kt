@@ -90,7 +90,7 @@ class ProfileActivity : AppCompatActivity() {
             binding.profileProgressIndicator.isIndeterminate = false
             binding.profileProgressIndicator.visibility(true)
 
-            val profileImageRef = Firebase.storage.getReference("profile/")
+            val profileImageRef = Firebase.storage.getReference("users/${user.uid}/profile.webp")
             val baos = ByteArrayOutputStream()
             bitmap.cropToSquare()
                 ?.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)

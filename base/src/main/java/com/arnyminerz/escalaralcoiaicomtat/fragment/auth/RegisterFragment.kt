@@ -217,7 +217,7 @@ class RegisterFragment private constructor() : Fragment() {
             result.user?.let { user ->
                 Timber.v("Starting profile image upload...")
                 val storageRef = Firebase.storage.reference
-                val profileImageRef = storageRef.child("profile/${user.uid}.webp")
+                val profileImageRef = storageRef.child("users/${user.uid}/profile.webp")
                 val d = ContextCompat.getDrawable(requireContext(), R.drawable.ic_profile_image)
                 val profileImage = d!!.toBitmap().cropToSquare()
                 val baos = ByteArrayOutputStream()
