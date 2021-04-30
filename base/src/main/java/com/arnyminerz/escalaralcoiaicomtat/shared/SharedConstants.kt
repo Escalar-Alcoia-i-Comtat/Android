@@ -56,6 +56,7 @@ val EXTRA_ZONE = IntentExtra<String>("zone")
 val EXTRA_SECTOR_COUNT = IntentExtra<Int>("sector_count")
 val EXTRA_SECTOR_INDEX = IntentExtra<Int>("sector_index")
 val EXTRA_PATH = IntentExtra<String>("path")
+val EXTRA_PATH_DOCUMENT = IntentExtra<String>("path_document")
 
 val EXTRA_POSITION = IntentExtra<Int>("position")
 
