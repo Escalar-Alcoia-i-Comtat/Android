@@ -35,6 +35,7 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -43,6 +44,7 @@ import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
+@ExperimentalBadgeUtils
 class SectorFragment : NetworkChangeListenerFragment() {
     private lateinit var areaId: String
     private lateinit var zoneId: String
