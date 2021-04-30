@@ -1,6 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb
 
-import android.content.Context
+import android.app.Activity
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageButton
@@ -33,7 +33,7 @@ data class DownloadedSection(val section: DataClass<*, *>) {
          * @date 14/05/2020
          * @patch Arnau Mora - 2020/09/11
          * @author ArnyminerZ
-         * @param context The [Context] where the function is being ran on.
+         * @param activity The [Activity] where the function is being ran on.
          * @param firestore The [FirebaseFirestore] instance to load the data from.
          * @param showNonDownloaded If the non-downloaded sections should be added.
          * @param progressListener A listener for the progress of the load.
@@ -41,7 +41,7 @@ data class DownloadedSection(val section: DataClass<*, *>) {
          */
         @WorkerThread
         suspend fun list(
-            context: Context,
+            activity: Activity,
             firestore: FirebaseFirestore,
             showNonDownloaded: Boolean,
             progressListener: suspend (current: Int, max: Int) -> Unit
@@ -50,7 +50,7 @@ data class DownloadedSection(val section: DataClass<*, *>) {
             for (area in AREAS)
                 emitAll(
                     area.downloadedSectionList(
-                        context,
+                        activity,
                         firestore,
                         showNonDownloaded,
                         progressListener

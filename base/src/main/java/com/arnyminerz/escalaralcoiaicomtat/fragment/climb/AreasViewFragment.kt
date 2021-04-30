@@ -41,8 +41,10 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_CENTER_CURRENT_LOCATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.mapbox.android.core.permissions.PermissionsManager
-import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
 import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
@@ -55,6 +57,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         get() = !PREF_DISABLE_NEARBY.get()
 
     internal lateinit var mapHelper: MapHelper
+
+    private lateinit var firestore: FirebaseFirestore
 
     private var areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null
 
@@ -167,7 +171,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
             doAsync {
                 val zones = arrayListOf<Zone>()
-                AREAS.getZones((requireActivity() as MainActivity).firestore).toCollection(zones)
+                AREAS.getZones(requireActivity(), firestore).toCollection(zones)
                 Timber.v("Iterating through ${zones.size} zones.")
                 Timber.v("Current Location: [${location.latitude},${location.longitude}]")
                 for (zone in zones) {
@@ -244,6 +248,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         mapHelper = MapHelper(requireContext())
 
         _binding = FragmentViewAreasBinding.inflate(inflater, container, false)
+
+        firestore = Firebase.firestore
 
         mapHelper.withMapView(binding.mapView)
         mapHelper.onCreate(savedInstanceState)
