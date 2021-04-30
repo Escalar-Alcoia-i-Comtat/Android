@@ -276,22 +276,27 @@ class Path(
                 val notes = document.getString("notes")
                 val project = document.getBoolean("project") ?: false
 
-                Timber.v("Got completion data.")
+                Timber.v("Got completion data for \"$documentPath\".")
                 val user = if (cachedUsers.containsKey(userUid))
                     cachedUsers[userUid]!!
                 else
                     try {
-                        Timber.v("Loading user data from server...")
+                        Timber.v("Loading user data ($userUid) from server...")
                         val visibleUserData = firestore.collection("Users")
                             .document(userUid)
                             .get()
                             .awaitTask()!!
-                        val displayName = visibleUserData.getString("displayName")!!
-                        val profileImage = visibleUserData.getString("profileImage")!!
-                        Timber.v("Got user! Caching and returning...")
-                        val loadedUser = VisibleUserData(userUid, displayName, profileImage)
-                        cachedUsers[userUid] = loadedUser
-                        loadedUser
+                        val data = visibleUserData.data
+                        if (data != null) {
+                            Timber.v("Got visible user data: $data")
+                            val displayName = visibleUserData.getString("displayName")!!
+                            val profileImage = visibleUserData.getString("profileImage")!!
+                            Timber.v("Got user! Caching and returning...")
+                            val loadedUser = VisibleUserData(userUid, displayName, profileImage)
+                            cachedUsers[userUid] = loadedUser
+                            loadedUser
+                        } else
+                            continue
                     } catch (_: IllegalArgumentException) {
                         continue
                     }
