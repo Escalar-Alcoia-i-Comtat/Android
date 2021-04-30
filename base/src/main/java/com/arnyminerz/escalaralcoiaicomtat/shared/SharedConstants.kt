@@ -14,6 +14,9 @@ const val SHOW_NON_DOWNLOADED_DEFAULT = false
 const val ENABLE_AUTHENTICATION_KEY = "ENABLE_AUTHENTICATION"
 const val ENABLE_AUTHENTICATION_DEFAULT = false
 
+const val PROFILE_IMAGE_SIZE_KEY = "PROFILE_IMAGE_SIZE"
+const val PROFILE_IMAGE_SIZE_DEFAULT = 512L
+
 /**
  * The maximum amount of days that will be allowed to the user not having updated the app
  * before forcing an update.
@@ -32,12 +35,19 @@ var SHOW_NON_DOWNLOADED = SHOW_NON_DOWNLOADED_DEFAULT
 var ENABLE_AUTHENTICATION = ENABLE_AUTHENTICATION_DEFAULT
 
 /**
+ * Sets the width and height that the profile images should be resized to
+ * @since 20210430
+ */
+var PROFILE_IMAGE_SIZE = PROFILE_IMAGE_SIZE_DEFAULT
+
+/**
  * Sets the default values for Remote Config
  */
 val REMOTE_CONFIG_DEFAULTS = mapOf(
     APP_UPDATE_MAX_TIME_DAYS_KEY to APP_UPDATE_MAX_TIME_DAYS_DEFAULT,
     SHOW_NON_DOWNLOADED_KEY to SHOW_NON_DOWNLOADED_DEFAULT,
     ENABLE_AUTHENTICATION_KEY to ENABLE_AUTHENTICATION_DEFAULT,
+    PROFILE_IMAGE_SIZE_KEY to PROFILE_IMAGE_SIZE_DEFAULT,
 )
 const val REMOTE_CONFIG_MIN_FETCH_INTERVAL = 3600L
 
