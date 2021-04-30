@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
@@ -135,7 +136,7 @@ suspend fun updateProfileImage(
             }
         Timber.v("Submitting change request...")
         user.updateProfile(changeRequest)
-            .addOnSuccessListener {
+            .addOnSuccessListener { void ->
                 Timber.v("Updated profile image successfully. Updating Firestore reference...")
                 firestore.collection("Users")
                     .document(user.uid)
@@ -146,7 +147,19 @@ suspend fun updateProfileImage(
                     }
                     .addOnFailureListener {
                         Timber.e(it, "Could not update reference.")
-                        cont.resumeWithException(it)
+                        if (it is FirebaseFirestoreException && it.code == FirebaseFirestoreException.Code.NOT_FOUND) {
+                            Timber.i("There's no firestore reference for user")
+                            doAsync {
+                                try {
+                                    createFirestoreUserReference(firestore, user)
+                                    cont.resume(void)
+                                } catch (e: Exception) {
+                                    cont.resumeWithException(e)
+                                }
+                            }
+                        } else {
+                            cont.resumeWithException(it)
+                        }
                     }
             }
             .addOnFailureListener {
