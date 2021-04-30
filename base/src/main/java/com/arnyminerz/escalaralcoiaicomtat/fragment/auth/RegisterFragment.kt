@@ -228,7 +228,9 @@ class RegisterFragment private constructor() : Fragment() {
                     binding.progressIndicator.visibility(true)
                 }
 
+                Timber.v("Updating display name...")
                 updateDisplayName(firestore, user, binding.displayNameEditText.text.toString())
+                Timber.v("Creating firestore reference...")
                 createFirestoreUserReference(firestore, user)
 
                 sendConfirmationMail(result)
