@@ -10,6 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.generic.cropToSquare
 import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_COMPRESSION_QUALITY
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.ktx.Firebase
@@ -103,8 +104,11 @@ suspend fun updateProfileImage(user: FirebaseUser, imageDownloadUrl: String) =
  * @since 20210425
  * @param user The user to update.
  * @param displayName The new display name of the user.
+ * @throws FirebaseAuthInvalidUserException Thrown if the current user's account has been disabled,
+ * deleted, or its credentials are no longer valid.
  */
 @UiThread
+@Throws(FirebaseAuthInvalidUserException::class)
 suspend fun updateDisplayName(user: FirebaseUser, displayName: String) =
     suspendCoroutine<Void> { cont ->
         user.updateProfile(
