@@ -217,7 +217,7 @@ class RegisterFragment private constructor() : Fragment() {
             try {
                 val user = result.user!!
                 Timber.v("Registration has been successful, setting default profile image...")
-                setDefaultProfileImage(requireContext(), user) { progress ->
+                setDefaultProfileImage(requireContext(), firestore, user) { progress ->
                     binding.progressIndicator.progress = progress.percentage()
                     binding.progressIndicator.max = 100
                 }
@@ -228,7 +228,7 @@ class RegisterFragment private constructor() : Fragment() {
                     binding.progressIndicator.visibility(true)
                 }
 
-                updateDisplayName(user, binding.displayNameEditText.text.toString())
+                updateDisplayName(firestore, user, binding.displayNameEditText.text.toString())
                 createFirestoreUserReference(firestore, user)
 
                 sendConfirmationMail(result)
