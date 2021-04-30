@@ -1,7 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.path
 
+import com.arnyminerz.escalaralcoiaicomtat.auth.VisibleUserData
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.UserRecord
 
 /**
  * Contains the data for marking a Path as completed.
@@ -10,7 +10,7 @@ import com.google.firebase.auth.UserRecord
  */
 data class MarkedCompletedData(
     val timestamp: Timestamp?,
-    val user: UserRecord,
+    val user: VisibleUserData,
     val attempts: Long,
     val falls: Long,
     val comment: String?,
