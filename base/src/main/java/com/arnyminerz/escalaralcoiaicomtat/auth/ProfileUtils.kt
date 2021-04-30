@@ -56,9 +56,12 @@ suspend fun setDefaultProfileImage(
         Timber.v("Uploading profile image...")
         profileImageRef.putBytes(data)
             .addOnProgressListener { task ->
-                progressListener?.invoke(ValueMax(task.bytesTransferred, task.totalByteCount))
+                val progress = ValueMax(task.bytesTransferred, task.totalByteCount)
+                Timber.v("Upload: ${progress.percentage()}%")
+                progressListener?.invoke(progress)
             }
             .addOnSuccessListener {
+                Timber.v("Finished uploading image. Updating in profile...")
                 runBlocking {
                     try {
                         updateProfileImage(
@@ -69,6 +72,7 @@ suspend fun setDefaultProfileImage(
                         cont.resumeWithException(e)
                     }
                 }
+                Timber.v("Profile updated. Resuming...")
                 cont.resume(it)
             }
             .addOnFailureListener {
@@ -91,6 +95,7 @@ suspend fun setDefaultProfileImage(
 @UiThread
 suspend fun updateProfileImage(user: FirebaseUser, imageDownloadUrl: String) =
     suspendCoroutine<Void> { cont ->
+        Timber.v("Updating profile image of ${user.uid} to $imageDownloadUrl")
         user.updateProfile(
             userProfileChangeRequest {
                 photoUri = Uri.parse(imageDownloadUrl)
