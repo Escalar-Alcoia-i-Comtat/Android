@@ -11,6 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.generic.cropToSquare
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_COMPRESSION_QUALITY
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
@@ -19,7 +20,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import kotlin.coroutines.resume
@@ -62,11 +62,11 @@ suspend fun setDefaultProfileImage(
             }
             .addOnSuccessListener {
                 Timber.v("Finished uploading image. Updating in profile...")
-                runBlocking {
+                doAsync {
                     try {
                         updateProfileImage(
                             user,
-                            "gs://escalaralcoiaicomtat.appspot.com/" + profileImageRef.path
+                            "gs://escalaralcoiaicomtat.appspot.com" + profileImageRef.path
                         )
                     } catch (e: Exception) {
                         cont.resumeWithException(e)
@@ -95,17 +95,27 @@ suspend fun setDefaultProfileImage(
 @UiThread
 suspend fun updateProfileImage(user: FirebaseUser, imageDownloadUrl: String) =
     suspendCoroutine<Void> { cont ->
-        Timber.v("Updating profile image of ${user.uid} to $imageDownloadUrl")
-        user.updateProfile(
+        Timber.v("Processing uri...")
+        val profileImageUri = Uri.parse(imageDownloadUrl)
+        Timber.v("Updating profile image of ${user.uid} to $profileImageUri...")
+        Timber.v("Creating change request...")
+        val changeRequest =
             userProfileChangeRequest {
-                photoUri = Uri.parse(imageDownloadUrl)
+                photoUri = profileImageUri
             }
-        ).addOnSuccessListener {
-            cont.resume(it)
-        }.addOnFailureListener {
-            Timber.e(it, "Could not update profile data.")
-            cont.resumeWithException(it)
-        }
+        Timber.v("Submitting change request...")
+        user.updateProfile(changeRequest)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // TODO: Update Firestore reference
+                    Timber.v("Updated profile image successfully.")
+                    cont.resume(task.result)
+                } else {
+                    val e = task.exception!!
+                    Timber.e(e, "Could not update profile image.")
+                    cont.resumeWithException(e)
+                }
+            }
     }
 
 /**
@@ -145,9 +155,9 @@ suspend fun createFirestoreUserReference(firestore: FirebaseFirestore, user: Fir
         firestore.collection("Users")
             .document(user.uid)
             .set(
-                mapOf(
+                hashMapOf(
                     "displayName" to user.displayName,
-                    "profileImage" to user.photoUrl
+                    "profileImage" to user.photoUrl?.toString()
                 )
             )
             .addOnSuccessListener { cont.resume(it) }
