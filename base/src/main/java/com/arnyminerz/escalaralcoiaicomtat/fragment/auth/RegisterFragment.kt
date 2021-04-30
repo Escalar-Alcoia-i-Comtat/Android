@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
+import com.arnyminerz.escalaralcoiaicomtat.auth.createFirestoreUserReference
 import com.arnyminerz.escalaralcoiaicomtat.auth.setDefaultProfileImage
 import com.arnyminerz.escalaralcoiaicomtat.auth.updateDisplayName
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthRegisterBinding
@@ -33,6 +34,8 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageException
 import timber.log.Timber
@@ -42,6 +45,8 @@ class RegisterFragment private constructor() : Fragment() {
 
     private val binding: FragmentAuthRegisterBinding
         get() = _binding!!
+
+    private lateinit var firestore: FirebaseFirestore
 
     /**
      * Specifies all the fields of the register form
@@ -72,6 +77,7 @@ class RegisterFragment private constructor() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        firestore = Firebase.firestore
         binding.progressIndicator.visibility(false)
 
         binding.emailEditText.setOnEditorActionListener { _, _, _ ->
@@ -222,6 +228,7 @@ class RegisterFragment private constructor() : Fragment() {
                 }
 
                 updateDisplayName(user, binding.displayNameEditText.text.toString())
+                createFirestoreUserReference(firestore, user)
 
                 sendConfirmationMail(result)
             } catch (e: StorageException) {
