@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic.extension
 
+import android.util.Patterns
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -24,3 +25,6 @@ fun String?.toTimestamp(): Date? =
             null
         }
     }
+
+fun String.isEmail(): Boolean =
+    !isEmpty() && Patterns.EMAIL_ADDRESS.matcher(this).matches()
