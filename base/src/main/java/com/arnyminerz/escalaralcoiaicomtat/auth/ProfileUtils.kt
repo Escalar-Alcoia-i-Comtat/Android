@@ -7,6 +7,7 @@ import androidx.annotation.WorkerThread
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.generic.cropToSquare
 import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_COMPRESSION_QUALITY
@@ -35,7 +36,7 @@ import kotlin.coroutines.suspendCoroutine
 suspend fun setDefaultProfileImage(
     context: Context,
     user: FirebaseUser,
-    progressListener: ((progress: Long, total: Long) -> Unit)?
+    progressListener: ((progress: ValueMax<Long>) -> Unit)?
 ): UploadTask.TaskSnapshot = suspendCoroutine { cont ->
     try {
         Timber.v("Registration has been successful, setting default profile image...")
@@ -51,7 +52,7 @@ suspend fun setDefaultProfileImage(
         Timber.v("Uploading profile image...")
         profileImageRef.putBytes(data)
             .addOnProgressListener { task ->
-                progressListener?.invoke(task.bytesTransferred, task.totalByteCount)
+                progressListener?.invoke(ValueMax(task.bytesTransferred, task.totalByteCount))
             }
             .addOnSuccessListener {
                 runBlocking {

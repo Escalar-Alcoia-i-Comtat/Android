@@ -210,9 +210,8 @@ class RegisterFragment private constructor() : Fragment() {
             try {
                 val user = result.user!!
                 Timber.v("Registration has been successful, setting default profile image...")
-                setDefaultProfileImage(requireContext(), user) { progress, total ->
-                    val current: Int = ((progress.toDouble() / total.toDouble()) * 100.0).toInt()
-                    binding.progressIndicator.progress = current
+                setDefaultProfileImage(requireContext(), user) { progress ->
+                    binding.progressIndicator.progress = progress.percentage()
                     binding.progressIndicator.max = 100
                 }
 
