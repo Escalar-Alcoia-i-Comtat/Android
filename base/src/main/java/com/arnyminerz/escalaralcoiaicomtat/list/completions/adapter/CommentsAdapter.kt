@@ -3,7 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.list.completions.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -80,6 +80,7 @@ class CommentsAdapter(
         val profileImage = userData.profileImagePath
         val profileName = userData.displayName
         val profileUid = userData.uid
+        val documentPath = markedDataInt.documentPath
 
         val loggedUser = auth.currentUser
         val userLoggedIn = loggedUser != null
@@ -118,12 +119,13 @@ class CommentsAdapter(
 
         if (userLoggedIn) {
             holder.likesTextView.setOnClickListener {
+                Timber.v("Requested like change for $documentPath")
                 holder.likesTextView.isEnabled = false
                 if (likes.contains(loggedUserUid))
                     likes.remove(loggedUserUid)
                 else
                     likes.add(loggedUserUid!!)
-                firestore.document(markedDataInt.documentPath)
+                firestore.document(documentPath)
                     .update("likedBy", likes)
                     .addOnSuccessListener {
                         holder.likesTextView.isEnabled = true
@@ -149,12 +151,13 @@ class CommentsAdapter(
     private fun updateLikeStatus(holder: CommentsViewHolder, liked: Boolean, likeCount: Int) {
         holder.likesTextView.text = likeCount.toString()
         holder.likesTextView.setCompoundDrawables(
-            ContextCompat.getDrawable(
-                activity,
+            ResourcesCompat.getDrawable(
+                activity.resources,
                 if (liked)
                     R.drawable.ic_round_favorite_24
                 else
-                    R.drawable.ic_round_favorite_border_24
+                    R.drawable.ic_round_favorite_border_24,
+                activity.theme
             )?.apply {
                 DrawableCompat.setTint(
                     this,
@@ -168,6 +171,5 @@ class CommentsAdapter(
             null,
             null
         )
-        holder.likesTextView.compoundDrawableTintMode
     }
 }
