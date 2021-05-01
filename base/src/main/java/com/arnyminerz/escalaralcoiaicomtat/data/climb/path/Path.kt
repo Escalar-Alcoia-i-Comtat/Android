@@ -274,7 +274,9 @@ class Path(
                 val falls = document.getLong("falls") ?: 0
                 val comment = document.getString("comment")
                 val notes = document.getString("notes")
+                val grade = document.getString("grade") ?: ""
                 val project = document.getBoolean("project") ?: false
+                // TODO: Load liked by
 
                 Timber.v("Got completion data for \"$documentPath\".")
                 val user = if (cachedUsers.containsKey(userUid))
@@ -302,9 +304,18 @@ class Path(
                     }
 
                 val result = if (project)
-                    MarkedProjectData(timestamp, user, comment, notes)
+                    MarkedProjectData(timestamp, user, comment, notes, listOf())
                 else
-                    MarkedCompletedData(timestamp, user, attempts, falls, comment, notes)
+                    MarkedCompletedData(
+                        timestamp,
+                        user,
+                        attempts,
+                        falls,
+                        grade,
+                        comment,
+                        notes,
+                        listOf()
+                    )
                 Timber.v("Processed result. Emitting...")
                 emit(result)
             }
