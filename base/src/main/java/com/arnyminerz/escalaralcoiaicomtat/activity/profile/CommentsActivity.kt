@@ -47,6 +47,9 @@ class CommentsActivity : AppCompatActivity() {
             return
         }
 
+        Timber.v("Adding back listener")
+        binding.backFab.setOnClickListener { onBackPressed() }
+
         Timber.v("Initializing Firestore...")
         firestore = Firebase.firestore
 
