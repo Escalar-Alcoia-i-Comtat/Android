@@ -21,7 +21,7 @@ open class MarkedDataInt(
     val user: VisibleUserData,
     val comment: String?,
     val notes: String?,
-    val likedBy: List<String>
+    val likedBy: MutableList<String>
 ) {
     /**
      * Gets the amount of likes people have made on the publication.
