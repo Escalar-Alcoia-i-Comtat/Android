@@ -355,6 +355,7 @@
 
     <string name="placeholder">Placeholder</string>
     <string name="r_placeholder" translatable="false">R#:</string>
+    <string name="placeholder_number" translatable="false">0</string>
 
     <string name="intro_main_title">Welcome to %s</string>
     <string name="intro_main_message">We are going to walk you through a tiny configuration process. Don\'t worry it\'s fast and easy.</string>
