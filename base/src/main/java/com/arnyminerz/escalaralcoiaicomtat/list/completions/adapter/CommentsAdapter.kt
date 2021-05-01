@@ -3,6 +3,8 @@ package com.arnyminerz.escalaralcoiaicomtat.list.completions.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.CommentsActivity
@@ -13,10 +15,14 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.MarkedProjectData
 import com.arnyminerz.escalaralcoiaicomtat.generic.MEGABYTE
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.completions.holder.CommentsViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.view.getColor
+import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
@@ -45,6 +51,13 @@ class CommentsAdapter(
     private val storage: FirebaseStorage = Firebase.storage
 
     /**
+     * Stores the [FirebaseFirestore] reference to update likes and delete.
+     * @author Arnau Mora
+     * @since 20210501
+     */
+    private val firestore: FirebaseFirestore = Firebase.firestore
+
+    /**
      * Stores the [FirebaseAuth] reference to load the profile images.
      * @author Arnau Mora
      * @since 20210501
@@ -63,6 +76,7 @@ class CommentsAdapter(
         val comment = markedDataInt.comment
             ?: throw NullPointerException("The comment #$position is null")
         val userData = markedDataInt.user
+        val likes = markedDataInt.likedBy
         val profileImage = userData.profileImagePath
         val profileName = userData.displayName
         val profileUid = userData.uid
@@ -100,8 +114,60 @@ class CommentsAdapter(
             )
             holder.likesTextView.text = markedDataInt.likesCount.toString()
         }
+        updateLikeStatus(holder, likes.contains(loggedUserUid), likes.size)
 
-        // TODO: Like tap listener and liker
+        if (userLoggedIn) {
+            holder.likesTextView.setOnClickListener {
+                holder.likesTextView.isEnabled = false
+                if (likes.contains(loggedUserUid))
+                    likes.remove(loggedUserUid)
+                else
+                    likes.add(loggedUserUid!!)
+                firestore.document(markedDataInt.documentPath)
+                    .update("likedBy", likes)
+                    .addOnSuccessListener {
+                        holder.likesTextView.isEnabled = true
+                        updateLikeStatus(holder, likes.contains(loggedUserUid), likes.size)
+                    }
+                    .addOnSuccessListener {
+                        toast(activity, R.string.toast_error_like)
+                        holder.likesTextView.isEnabled = true
+                    }
+            }
+        }
         // TODO: Delete tap listener and deleter
+    }
+
+    /**
+     * Updates the [CommentsViewHolder.likesTextView] according to [liked].
+     * @author Arnau Mora
+     * @since 20210501
+     * @param holder The view holder to update.
+     * @param liked If the user has liked the comment.
+     * @param likeCount The amount of likes the comment has
+     */
+    private fun updateLikeStatus(holder: CommentsViewHolder, liked: Boolean, likeCount: Int) {
+        holder.likesTextView.text = likeCount.toString()
+        holder.likesTextView.setCompoundDrawables(
+            ContextCompat.getDrawable(
+                activity,
+                if (liked)
+                    R.drawable.ic_round_favorite_24
+                else
+                    R.drawable.ic_round_favorite_border_24
+            )?.apply {
+                DrawableCompat.setTint(
+                    this,
+                    if (liked)
+                        getColor(activity, R.color.color_like)
+                    else
+                        getColorFromAttribute(activity, R.attr.colorControlNormal)
+                )
+            },
+            null,
+            null,
+            null
+        )
+        holder.likesTextView.compoundDrawableTintMode
     }
 }
