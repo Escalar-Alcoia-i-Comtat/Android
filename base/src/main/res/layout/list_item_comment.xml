@@ -97,6 +97,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
                 android:text="@string/placeholder_number"
                 app:drawableStartCompat="@drawable/ic_round_favorite_border_24"
                 app:drawableTint="?attr/colorControlNormal" />
