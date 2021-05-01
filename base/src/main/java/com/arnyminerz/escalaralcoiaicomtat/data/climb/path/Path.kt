@@ -200,6 +200,7 @@ class Path(
         val user = data.user
         val attempts = data.attempts
         val falls = data.falls
+        val grade = data.grade
         val comment = data.comment
         val notes = data.notes
 
@@ -212,6 +213,7 @@ class Path(
                     "user" to user.uid,
                     "attempts" to attempts,
                     "falls" to falls,
+                    "grade" to grade,
                     "comment" to comment,
                     "notes" to notes,
                     "project" to false
