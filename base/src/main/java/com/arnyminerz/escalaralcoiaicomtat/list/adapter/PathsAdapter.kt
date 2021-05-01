@@ -363,13 +363,14 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
             Timber.v("Attaching badge...")
             BadgeUtils.attachBadgeDrawable(badge, commentsImageButton)
 
-            commentsImageButton.setOnClickListener {
-                activity.startActivity(
-                    Intent(activity, CommentsActivity::class.java).apply {
-                        putExtra(EXTRA_PATH_DOCUMENT, path.documentPath)
-                    }
-                )
-            }
+            if (comments.isNotEmpty())
+                commentsImageButton.setOnClickListener {
+                    activity.startActivity(
+                        Intent(activity, CommentsActivity::class.java).apply {
+                            putExtra(EXTRA_PATH_DOCUMENT, path.documentPath)
+                        }
+                    )
+                }
         }
     }
 
