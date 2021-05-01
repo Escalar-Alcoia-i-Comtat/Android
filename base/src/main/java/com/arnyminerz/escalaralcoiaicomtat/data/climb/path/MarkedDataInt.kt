@@ -21,6 +21,11 @@ open class MarkedDataInt(
     val notes: String?,
     val likedBy: List<String>
 ) {
-    val likes: Int
+    /**
+     * Gets the amount of likes people have made on the publication.
+     * @author Arnau Mora
+     * @since 20210501
+     */
+    val likesCount: Int
         get() = likedBy.size
 }
