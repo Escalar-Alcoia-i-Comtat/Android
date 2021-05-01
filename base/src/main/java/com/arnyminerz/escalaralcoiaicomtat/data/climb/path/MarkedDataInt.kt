@@ -8,6 +8,7 @@ import com.google.firebase.Timestamp
  * [MarkedProjectData]).
  * @author Arnau Mora
  * @since 20210501
+ * @param documentPath The path in Firestore where the completion is stored at
  * @param timestamp When the completion was marked
  * @param user The user data who made the comment.
  * @param comment The comment that the user made.
@@ -15,6 +16,7 @@ import com.google.firebase.Timestamp
  * @param likedBy The user uids that have liked the publication.
  */
 open class MarkedDataInt(
+    val documentPath: String,
     val timestamp: Timestamp?,
     val user: VisibleUserData,
     val comment: String?,
