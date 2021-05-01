@@ -9,8 +9,9 @@ import com.google.firebase.Timestamp
  * @since 20210430
  */
 class MarkedProjectData(
-    val timestamp: Timestamp?,
+    timestamp: Timestamp?,
     user: VisibleUserData,
     comment: String?,
-    notes: String?
-) : MarkedDataInt(user, comment, notes)
+    notes: String?,
+    likedBy: List<String>
+) : MarkedDataInt(timestamp, user, comment, notes, likedBy)
