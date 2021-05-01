@@ -130,6 +130,7 @@
     <string name="mark_completed_falls_size">Falls must be greater or equal to 0</string>
     <string name="mark_completed_grade_required">Your graduation is required</string>
 
+    <string name="comments_title">Comments</string>
     <string name="comments_project">Project</string>
 
     <string name="pref_main_title">General</string>
