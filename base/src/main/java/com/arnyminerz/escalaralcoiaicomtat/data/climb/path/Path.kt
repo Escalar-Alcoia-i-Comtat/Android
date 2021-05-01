@@ -299,16 +299,28 @@ class Path(
                             val loadedUser = VisibleUserData(userUid, displayName, profileImage)
                             cachedUsers[userUid] = loadedUser
                             loadedUser
-                        } else
-                            continue
+                        } else {
+                            null
+                        }
                     } catch (_: IllegalArgumentException) {
-                        continue
+                        null
                     }
 
+                if (user == null)
+                    continue
+
                 val result = if (project)
-                    MarkedProjectData(timestamp, user, comment, notes, listOf())
+                    MarkedProjectData(
+                        document.reference.path,
+                        timestamp,
+                        user,
+                        comment,
+                        notes,
+                        listOf()
+                    )
                 else
                     MarkedCompletedData(
+                        document.reference.path,
                         timestamp,
                         user,
                         attempts,
