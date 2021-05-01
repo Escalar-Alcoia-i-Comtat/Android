@@ -443,7 +443,8 @@ class MarkCompletedActivity : AppCompatActivity() {
                 Timber.v("Marking path as completed.")
                 doAsync {
                     Timber.v("Preparing data...")
-                    val data = MarkCompletedData(user!!, attempts!!, falls!!, comment, notes)
+                    val data =
+                        MarkCompletedData(user!!, attempts!!, falls!!, grade!!, comment, notes)
                     Timber.v("Running mark completed request...")
                     path?.markCompleted(firestore, data)
                     finishActivityWithResult(
