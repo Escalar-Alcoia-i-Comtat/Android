@@ -20,6 +20,7 @@ import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.profile.CommentsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.MarkCompletedActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.EndingType
@@ -40,6 +41,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -360,6 +362,14 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
             badges[path.objectId] = badge
             Timber.v("Attaching badge...")
             BadgeUtils.attachBadgeDrawable(badge, commentsImageButton)
+
+            commentsImageButton.setOnClickListener {
+                activity.startActivity(
+                    Intent(activity, CommentsActivity::class.java).apply {
+                        putExtra(EXTRA_PATH_DOCUMENT, path.documentPath)
+                    }
+                )
+            }
         }
     }
 
