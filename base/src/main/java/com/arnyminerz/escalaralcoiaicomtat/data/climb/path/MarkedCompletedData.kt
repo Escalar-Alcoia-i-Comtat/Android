@@ -9,6 +9,7 @@ import com.google.firebase.Timestamp
  * @since 20210430
  */
 class MarkedCompletedData(
+    documentPath: String,
     timestamp: Timestamp?,
     user: VisibleUserData,
     val attempts: Long,
@@ -17,4 +18,4 @@ class MarkedCompletedData(
     comment: String?,
     notes: String?,
     likedBy: List<String>,
-) : MarkedDataInt(timestamp, user, comment, notes, likedBy)
+) : MarkedDataInt(documentPath, timestamp, user, comment, notes, likedBy.toMutableList())
