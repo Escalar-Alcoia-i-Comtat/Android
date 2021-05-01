@@ -336,4 +336,6 @@
     <string name="login_error_wrong_password">Contrassenya incorrecta</string>
     <string name="login_error_password_required">La contrassenya no pot estar en blanc</string>
     <string name="login_error_email_invalid">El correu electrònic no és vàlid</string>
+    <string name="comments_project">Projecte</string>
+    <string name="toast_error_profile_image_load">No s\'ha pogut carregar la imatge de perfil</string>
 </resources>
