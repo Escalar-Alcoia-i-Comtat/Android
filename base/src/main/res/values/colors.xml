@@ -30,6 +30,8 @@
     <color name="path_blocked_card_color">#FFCDD2</color>
     <color name="path_blocked_text_color">#D32F2F</color>
 
+    <color name="color_like">#E57373</color>
+
     <color name="overlay_color">#44000000</color>
 
     <color name="intro_green">#8BC34A</color>
