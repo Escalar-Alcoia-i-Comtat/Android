@@ -11,6 +11,7 @@ data class MarkCompletedData(
     val user: FirebaseUser,
     val attempts: Int,
     val falls: Int,
+    val grade: String,
     val comment: String?,
     val notes: String?
 ) : MarkingDataInt
