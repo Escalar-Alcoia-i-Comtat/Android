@@ -536,8 +536,7 @@ class MarkCompletedActivity : AppCompatActivity() {
                 Timber.v("Preparing data...")
                 val data = MarkCompletedData(
                     user!!,
-                    attempts,
-                    falls,
+                    attempts to falls,
                     grade,
                     completionType,
                     comment,
