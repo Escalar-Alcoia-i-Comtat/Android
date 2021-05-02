@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.path
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion
 
 /**
  * Sets the type of completion the user made of a path.
@@ -7,6 +7,5 @@ package com.arnyminerz.escalaralcoiaicomtat.data.climb.path
  */
 enum class CompletionType {
     FIRST,
-    TOP_ROPE,
-    LEAD
+    TOP_ROPE
 }
