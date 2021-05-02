@@ -30,6 +30,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Pitch
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.ArtifoPathEndingDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DescriptionDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.PathEquipmentDialog
@@ -44,6 +45,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.shared.INFO_VIBRATION
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.badge.BadgeUtils
@@ -363,14 +365,16 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
             Timber.v("Attaching badge...")
             BadgeUtils.attachBadgeDrawable(badge, commentsImageButton)
 
-            if (comments.isNotEmpty())
-                commentsImageButton.setOnClickListener {
+            commentsImageButton.setOnClickListener {
+                if (comments.isNotEmpty())
                     activity.startActivity(
                         Intent(activity, CommentsActivity::class.java).apply {
                             putExtra(EXTRA_PATH_DOCUMENT, path.documentPath)
                         }
                     )
-                }
+                else
+                    vibrate(activity, INFO_VIBRATION)
+            }
         }
     }
 
