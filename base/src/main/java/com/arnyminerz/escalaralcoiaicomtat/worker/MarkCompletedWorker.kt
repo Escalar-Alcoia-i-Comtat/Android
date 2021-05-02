@@ -10,9 +10,12 @@ import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
+import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.request.MarkCompletedData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.request.MarkingDataInt
+import com.arnyminerz.escalaralcoiaicomtat.notification.ALERT_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import timber.log.Timber
 
 /**
@@ -72,6 +75,14 @@ private const val MARK_COMPLETED_GRADE = "grade"
 private const val MARK_COMPLETED_TYPE = "type"
 
 /**
+ * Stores the key for passing the worker parameter of the notification id that tells the user there's
+ * an scheduled mark as completed.
+ * @author Arnau Mora
+ * @since 20210502
+ */
+private const val MARK_COMPLETED_NOTIFICATION_ID = "notification_id"
+
+/**
  * Stores the data required to mark a path as completed
  */
 class MarkCompletedWorkerData(
@@ -106,6 +117,15 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
 
+            Timber.v("Showing waiting notification...")
+            val notificationBuilder = Notification.Builder(context)
+                .withChannelId(ALERT_CHANNEL_ID)
+                .withIcon(R.drawable.ic_notifications)
+                .withTitle(R.string.notification_mark_completed_waiting_title)
+                .withText(R.string.notification_mark_completed_waiting_message)
+            val notificationId = notificationBuilder.id
+            notificationBuilder.buildAndShow()
+
             val completionData = data.data
 
             Timber.v("Processing request parameters...")
@@ -115,6 +135,8 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
                 MARK_COMPLETED_USER_UID to completionData.user.uid,
                 MARK_COMPLETED_COMMENT to completionData.comment,
                 MARK_COMPLETED_NOTES to completionData.notes,
+
+                MARK_COMPLETED_NOTIFICATION_ID to notificationId
             )
             if (completionData is MarkCompletedData)
                 inputDataPairs.apply {
