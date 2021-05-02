@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage
 
 import com.arnyminerz.escalaralcoiaicomtat.auth.VisibleUserData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.CompletionType
 import com.google.firebase.Timestamp
 
 /**
@@ -15,6 +16,7 @@ class MarkedCompletedData(
     val attempts: Long,
     val falls: Long,
     val grade: String,
+    val type: CompletionType,
     comment: String?,
     notes: String?,
     likedBy: List<String>,
