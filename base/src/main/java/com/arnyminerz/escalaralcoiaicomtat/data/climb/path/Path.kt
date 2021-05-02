@@ -6,6 +6,11 @@ import androidx.annotation.WorkerThread
 import androidx.collection.arrayMapOf
 import com.arnyminerz.escalaralcoiaicomtat.auth.VisibleUserData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.request.MarkCompletedData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.request.MarkProjectData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedCompletedData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedDataInt
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedProjectData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask

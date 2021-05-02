@@ -4,8 +4,8 @@ import android.os.Bundle
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityCommentsBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult

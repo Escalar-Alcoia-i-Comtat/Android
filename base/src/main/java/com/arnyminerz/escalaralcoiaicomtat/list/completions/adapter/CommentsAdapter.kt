@@ -9,9 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.CommentsActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Grade
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.MarkedCompletedData
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.MarkedDataInt
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.MarkedProjectData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedCompletedData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedDataInt
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedProjectData
 import com.arnyminerz.escalaralcoiaicomtat.generic.MEGABYTE
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.completions.holder.CommentsViewHolder

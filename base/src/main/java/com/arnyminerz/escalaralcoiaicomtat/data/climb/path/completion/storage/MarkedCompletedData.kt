@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.path
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage
 
 import com.arnyminerz.escalaralcoiaicomtat.auth.VisibleUserData
 import com.google.firebase.Timestamp

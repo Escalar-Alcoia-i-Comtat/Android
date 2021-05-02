@@ -25,9 +25,9 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.profile.MarkCompletedActivit
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Grade
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Pitch
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
