@@ -6,6 +6,7 @@ import androidx.annotation.WorkerThread
 import androidx.collection.arrayMapOf
 import com.arnyminerz.escalaralcoiaicomtat.auth.VisibleUserData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.CompletionType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.request.MarkCompletedData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.request.MarkProjectData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedCompletedData
@@ -283,7 +284,13 @@ class Path(
                 val notes = document.getString("notes")
                 val grade = document.getString("grade") ?: ""
                 val project = document.getBoolean("project") ?: false
+                val typeRaw = document.getString("type")
                 // TODO: Load liked by
+
+                var type: CompletionType? = null
+                for (t in CompletionType.values())
+                    if (t.id.equals(typeRaw, true))
+                        type = t
 
                 Timber.v("Got completion data for \"$documentPath\".")
                 val user = if (cachedUsers.containsKey(userUid))
@@ -331,6 +338,7 @@ class Path(
                         attempts,
                         falls,
                         grade,
+                        type!!,
                         comment,
                         notes,
                         listOf()
