@@ -124,11 +124,16 @@
     <string name="mark_completed_falls">Falls</string>
     <string name="mark_completed_attempts">Attempts</string>
     <string name="mark_completed_grade">Grade</string>
+    <string name="mark_completed_type">Type</string>
+    <string name="mark_completed_type_first">First</string>
+    <string name="mark_completed_type_top_rope">Top-rope</string>
     <string name="mark_completed_attempts_required">Attempts number is required</string>
     <string name="mark_completed_attempts_size">Attempts must be greater or equal to 0</string>
     <string name="mark_completed_falls_required">Falls number is required</string>
     <string name="mark_completed_falls_size">Falls must be greater or equal to 0</string>
     <string name="mark_completed_grade_required">Your graduation is required</string>
+    <string name="mark_completed_type_required">Attempts number is required</string>
+    <string name="mark_completed_type_invalid">A valid completion type must be selected</string>
 
     <string name="comments_title">Comments</string>
     <string name="comments_project">Project</string>
@@ -217,6 +222,10 @@
     <string name="notification_gpx_stored_message">Press to open</string>
     <string name="notification_kmz_stored_title">KMZ Stored correctly</string>
     <string name="notification_kmz_stored_message">Press to open</string>
+    <string name="notification_mark_completed_waiting_title">Mark as completed scheduled</string>
+    <string name="notification_mark_completed_waiting_message">Waiting to have internet connection to send the comment and mark the path as complete.</string>
+    <string name="notification_mark_completed_error_title">Could not mark as completed</string>
+    <string name="notification_mark_completed_error_message">The path \"%1$s\" was scheduled to be marked as completed, but an error occurred. Error code: %2$s</string>
 
     <string name="no_internet_title">You have no Internet access</string>
     <string name="no_internet_message">You can access the downloaded content, or try again.</string>
