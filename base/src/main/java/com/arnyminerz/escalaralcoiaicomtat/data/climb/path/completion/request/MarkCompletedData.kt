@@ -1,6 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.request
 
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.CompletionType
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.CompletionType
 import com.google.firebase.auth.FirebaseUser
 
 /**
@@ -10,10 +10,15 @@ import com.google.firebase.auth.FirebaseUser
  */
 class MarkCompletedData(
     user: FirebaseUser,
-    val attempts: Int,
-    val falls: Int,
+    private val attemptsFalls: Pair<Int, Int>,
     val grade: String,
     val type: CompletionType,
     comment: String?,
     notes: String?
-) : MarkingDataInt(user, comment, notes)
+) : MarkingDataInt(user, comment, notes) {
+    val attempts: Int
+        get() = attemptsFalls.first
+
+    val falls: Int
+        get() = attemptsFalls.second
+}
