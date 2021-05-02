@@ -16,7 +16,13 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.request.Ma
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.request.MarkingDataInt
 import com.arnyminerz.escalaralcoiaicomtat.notification.ALERT_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Stores the key for passing the worker parameter of the [Path]'s Firestore document path.
@@ -75,12 +81,30 @@ private const val MARK_COMPLETED_GRADE = "grade"
 private const val MARK_COMPLETED_TYPE = "type"
 
 /**
+ * Stores the key for passing the worker parameter for if the completion the user made on the path
+ * is a project.
+ * @author Arnau Mora
+ * @since 20210502
+ */
+private const val MARK_COMPLETED_IS_PROJECT = "is_project"
+
+/**
  * Stores the key for passing the worker parameter of the notification id that tells the user there's
  * an scheduled mark as completed.
  * @author Arnau Mora
  * @since 20210502
  */
 private const val MARK_COMPLETED_NOTIFICATION_ID = "notification_id"
+
+/**
+ * Notifies that the worker was called with missing data
+ */
+private const val MARK_COMPLETED_ERROR_MISSING_DATA = "missing_data"
+
+/**
+ * Notifies that the worker had an error while uploading data to the server
+ */
+private const val MARK_COMPLETED_ERROR_SERVER_UPLOAD = "server_upload"
 
 /**
  * Stores the data required to mark a path as completed
@@ -93,8 +117,101 @@ class MarkCompletedWorkerData(
 class MarkCompletedWorker private constructor(appContext: Context, workerParams: WorkerParameters) :
     Worker(appContext, workerParams) {
 
+    private var notificationId: Int = -1
+
+    private var pathDisplayName: String? = null
+
+    fun showError(error: String): Result {
+        val notification = Notification.get(notificationId)
+        notification?.build()?.destroy()
+
+        Notification.Builder(applicationContext)
+            .withChannelId(ALERT_CHANNEL_ID)
+            .withIcon(R.drawable.ic_notifications)
+            .withTitle(R.string.notification_mark_completed_error_title)
+            .withText(
+                applicationContext.getString(
+                    R.string.notification_mark_completed_error_message,
+                    pathDisplayName,
+                    error
+                )
+            )
+            .buildAndShow()
+        return failure(error)
+    }
+
     override fun doWork(): Result {
-        TODO("Not yet implemented")
+        val pathDocument = inputData.getString(MARK_COMPLETED_PATH_DOCUMENT)
+        val userUid = inputData.getString(MARK_COMPLETED_USER_UID)
+        val comment = inputData.getString(MARK_COMPLETED_COMMENT)
+        val notes = inputData.getString(MARK_COMPLETED_NOTES)
+        notificationId = inputData.getInt(MARK_COMPLETED_NOTIFICATION_ID, -1)
+        val attempts = inputData.getInt(MARK_COMPLETED_ATTEMPTS, -1)
+        val falls = inputData.getInt(MARK_COMPLETED_FALLS, -1)
+        val grade = inputData.getString(MARK_COMPLETED_GRADE)
+        val type = inputData.getString(MARK_COMPLETED_TYPE)
+        val isProject = inputData.getBoolean(MARK_COMPLETED_IS_PROJECT, false)
+
+        pathDisplayName = pathDocument
+
+        return if (userUid == null || pathDocument == null || notificationId < 0)
+            showError(MARK_COMPLETED_ERROR_MISSING_DATA)
+        else {
+            val firestore = Firebase.firestore
+            runBlocking {
+                suspendCoroutine { cont ->
+                    if (isProject) {
+                        Timber.v("Marking \"$pathDocument\" as project...")
+                        firestore
+                            .document(pathDocument)
+                            .collection("Completions")
+                            .add(
+                                hashMapOf(
+                                    "timestamp" to FieldValue.serverTimestamp(),
+                                    "user" to userUid,
+                                    "comment" to comment,
+                                    "notes" to notes,
+                                    "project" to true,
+                                )
+                            )
+                            .addOnSuccessListener {
+                                Timber.i("Marked \"$pathDocument\" as project!")
+                                cont.resume(Result.success())
+                            }
+                            .addOnFailureListener { e ->
+                                Timber.e(e, "Could not mark \"$pathDocument\" as project!")
+                                cont.resume(showError(MARK_COMPLETED_ERROR_SERVER_UPLOAD))
+                            }
+                    } else {
+                        Timber.v("Marking \"$pathDocument\" as completed...")
+                        firestore
+                            .document(pathDocument)
+                            .collection("Completions")
+                            .add(
+                                hashMapOf(
+                                    "timestamp" to FieldValue.serverTimestamp(),
+                                    "user" to userUid,
+                                    "attempts" to attempts,
+                                    "falls" to falls,
+                                    "grade" to grade,
+                                    "type" to type,
+                                    "comment" to comment,
+                                    "notes" to notes,
+                                    "project" to false
+                                )
+                            )
+                            .addOnSuccessListener {
+                                Timber.i("Marked \"$pathDocument\" as completed!")
+                                cont.resume(Result.success())
+                            }
+                            .addOnFailureListener { e ->
+                                Timber.e(e, "Could not mark \"$pathDocument\" as completed!")
+                                cont.resume(showError(MARK_COMPLETED_ERROR_SERVER_UPLOAD))
+                            }
+                    }
+                }
+            }
+        }
     }
 
     companion object {
@@ -123,6 +240,7 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
                 .withIcon(R.drawable.ic_notifications)
                 .withTitle(R.string.notification_mark_completed_waiting_title)
                 .withText(R.string.notification_mark_completed_waiting_message)
+                .setPersistent(true)
             val notificationId = notificationBuilder.id
             notificationBuilder.buildAndShow()
 
@@ -144,7 +262,9 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
                     add(MARK_COMPLETED_FALLS to completionData.falls.toString())
                     add(MARK_COMPLETED_GRADE to completionData.grade)
                     add(MARK_COMPLETED_TYPE to completionData.type.id)
+                    add(MARK_COMPLETED_IS_PROJECT to true)
                 }
+            else inputDataPairs.add(MARK_COMPLETED_IS_PROJECT to false)
             val workData = workDataOf(*inputDataPairs.toTypedArray())
 
             Timber.v("Building MarkCompletedWorker request...")
