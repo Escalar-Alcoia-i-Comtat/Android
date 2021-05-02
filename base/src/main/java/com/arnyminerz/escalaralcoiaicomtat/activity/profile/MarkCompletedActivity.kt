@@ -20,6 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMarkCompletedBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
+import com.arnyminerz.escalaralcoiaicomtat.generic.generateUUID
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
@@ -36,6 +37,8 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MARKED_AS_PROJECT
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MISSING_DATA
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_NOT_LOGGED_IN
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.worker.MarkCompletedWorker
+import com.arnyminerz.escalaralcoiaicomtat.worker.MarkCompletedWorkerData
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -452,7 +455,11 @@ class MarkCompletedActivity : AppCompatActivity() {
             Timber.v("Preparing data...")
             val data = MarkProjectData(user!!, comment, notes)
             Timber.v("Running mark project request...")
-            path?.markProject(firestore, data)
+            MarkCompletedWorker.schedule(
+                this@MarkCompletedActivity,
+                generateUUID(),
+                MarkCompletedWorkerData(path!!, data)
+            )
             finishActivityWithResult(
                 RESULT_CODE_MARKED_AS_PROJECT,
                 Intent()
@@ -544,7 +551,11 @@ class MarkCompletedActivity : AppCompatActivity() {
                 )
 
                 Timber.v("Running mark completed request...")
-                path?.markCompleted(firestore, data)
+                MarkCompletedWorker.schedule(
+                    this@MarkCompletedActivity,
+                    generateUUID(),
+                    MarkCompletedWorkerData(path!!, data)
+                )
 
                 finishActivityWithResult(
                     RESULT_CODE_MARKED_AS_COMPLETE,
