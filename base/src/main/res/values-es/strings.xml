@@ -340,4 +340,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="comments_project">Proyecto</string>
     <string name="toast_error_profile_image_load">No se ha podido cargar la imagen de perfil</string>
     <string name="comments_title">Comentarios</string>
+    <string name="toast_error_like">No se ha podido marcar que te gusta</string>
 </resources>
