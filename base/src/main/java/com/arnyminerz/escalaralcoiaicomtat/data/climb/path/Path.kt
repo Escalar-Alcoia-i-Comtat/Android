@@ -7,8 +7,6 @@ import androidx.collection.arrayMapOf
 import com.arnyminerz.escalaralcoiaicomtat.auth.VisibleUserData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.CompletionType
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.request.MarkCompletedData
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.request.MarkProjectData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedCompletedData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedProjectData
@@ -18,7 +16,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -194,68 +191,6 @@ class Path(
 
     fun grade(): Grade =
         if (grades.size > 0) grades.first() else throw NoSuchElementException("Grades list is empty")
-
-    /**
-     * Requests the server to mark a path as completed.
-     * @author Arnau Mora
-     * @since 20210430
-     * @param firestore The [FirebaseFirestore] instance to update the data.
-     * @param data The data for the marking.
-     */
-    suspend fun markCompleted(firestore: FirebaseFirestore, data: MarkCompletedData) {
-        val user = data.user
-        val attempts = data.attempts
-        val falls = data.falls
-        val grade = data.grade
-        val comment = data.comment
-        val notes = data.notes
-
-        firestore
-            .document(documentPath)
-            .collection("Completions")
-            .add(
-                hashMapOf(
-                    "timestamp" to FieldValue.serverTimestamp(),
-                    "user" to user.uid,
-                    "attempts" to attempts,
-                    "falls" to falls,
-                    "grade" to grade,
-                    "comment" to comment,
-                    "notes" to notes,
-                    "project" to false
-                )
-            )
-            .awaitTask()
-        Timber.i("Marked \"$documentPath\" as complete!")
-    }
-
-    /**
-     * Requests the server to mark a path as project.
-     * @author Arnau Mora
-     * @since 20210430
-     * @param firestore The [FirebaseFirestore] instance to update the data.
-     * @param data The data for the marking.
-     */
-    suspend fun markProject(firestore: FirebaseFirestore, data: MarkProjectData) {
-        val user = data.user
-        val comment = data.comment
-        val notes = data.notes
-
-        firestore
-            .document(documentPath)
-            .collection("Completions")
-            .add(
-                hashMapOf(
-                    "timestamp" to FieldValue.serverTimestamp(),
-                    "user" to user.uid,
-                    "comment" to comment,
-                    "notes" to notes,
-                    "project" to true,
-                )
-            )
-            .awaitTask()
-        Timber.i("Marked \"$documentPath\" as complete!")
-    }
 
     /**
      * Fetches all the completions that have been requested by the users.
