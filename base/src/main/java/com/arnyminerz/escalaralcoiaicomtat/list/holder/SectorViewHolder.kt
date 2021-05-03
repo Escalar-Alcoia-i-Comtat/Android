@@ -97,7 +97,7 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
         if (anyBlocking) {
             setTextColor(titleTextView, activity, R.color.path_blocked_text_color)
             setTextColor(idTextView, activity, R.color.path_blocked_text_color)
-            warningCardView.setCardBackgroundColor(
+            cardView.setCardBackgroundColor(
                 activity.resources.getColor(R.color.path_blocked_card_color, activity.theme)
             )
             warningTextView.text =
