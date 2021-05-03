@@ -58,6 +58,7 @@ import timber.log.Timber
 import java.io.File
 import java.util.*
 import java.util.concurrent.*
+import kotlin.collections.ArrayList
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -179,7 +180,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             when {
                 app != null && app.dataClassChildrenCache.containsKey(metadata.documentPath) -> {
                     loadingChildren = true
-                    val children = app.dataClassChildrenCache[metadata.documentPath]!!
+                    val children = ArrayList(app.dataClassChildrenCache[metadata.documentPath]!!)
                     for (child in children)
                         (child as? A)?.let { data ->
                             innerChildren.add(data)

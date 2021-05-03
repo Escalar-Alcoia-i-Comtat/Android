@@ -6,13 +6,16 @@ import androidx.annotation.WorkerThread
 import androidx.collection.arrayMapOf
 import com.arnyminerz.escalaralcoiaicomtat.auth.VisibleUserData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.CompletionType
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedCompletedData
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedDataInt
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedProjectData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -190,66 +193,6 @@ class Path(
         if (grades.size > 0) grades.first() else throw NoSuchElementException("Grades list is empty")
 
     /**
-     * Requests the server to mark a path as completed.
-     * @author Arnau Mora
-     * @since 20210430
-     * @param firestore The [FirebaseFirestore] instance to update the data.
-     * @param data The data for the marking.
-     */
-    suspend fun markCompleted(firestore: FirebaseFirestore, data: MarkCompletedData) {
-        val user = data.user
-        val attempts = data.attempts
-        val falls = data.falls
-        val comment = data.comment
-        val notes = data.notes
-
-        firestore
-            .document(documentPath)
-            .collection("Completions")
-            .add(
-                hashMapOf(
-                    "timestamp" to FieldValue.serverTimestamp(),
-                    "user" to user.uid,
-                    "attempts" to attempts,
-                    "falls" to falls,
-                    "comment" to comment,
-                    "notes" to notes,
-                    "project" to false
-                )
-            )
-            .awaitTask()
-        Timber.i("Marked \"$documentPath\" as complete!")
-    }
-
-    /**
-     * Requests the server to mark a path as project.
-     * @author Arnau Mora
-     * @since 20210430
-     * @param firestore The [FirebaseFirestore] instance to update the data.
-     * @param data The data for the marking.
-     */
-    suspend fun markProject(firestore: FirebaseFirestore, data: MarkProjectData) {
-        val user = data.user
-        val comment = data.comment
-        val notes = data.notes
-
-        firestore
-            .document(documentPath)
-            .collection("Completions")
-            .add(
-                hashMapOf(
-                    "timestamp" to FieldValue.serverTimestamp(),
-                    "user" to user.uid,
-                    "comment" to comment,
-                    "notes" to notes,
-                    "project" to true,
-                )
-            )
-            .awaitTask()
-        Timber.i("Marked \"$documentPath\" as complete!")
-    }
-
-    /**
      * Fetches all the completions that have been requested by the users.
      * @author Arnau Mora
      * @since 20210430
@@ -274,7 +217,15 @@ class Path(
                 val falls = document.getLong("falls") ?: 0
                 val comment = document.getString("comment")
                 val notes = document.getString("notes")
+                val grade = document.getString("grade") ?: ""
                 val project = document.getBoolean("project") ?: false
+                val typeRaw = document.getString("type")
+                // TODO: Load liked by
+
+                var type: CompletionType? = null
+                for (t in CompletionType.values())
+                    if (t.id.equals(typeRaw, true))
+                        type = t
 
                 Timber.v("Got completion data for \"$documentPath\".")
                 val user = if (cachedUsers.containsKey(userUid))
@@ -295,16 +246,38 @@ class Path(
                             val loadedUser = VisibleUserData(userUid, displayName, profileImage)
                             cachedUsers[userUid] = loadedUser
                             loadedUser
-                        } else
-                            continue
+                        } else {
+                            null
+                        }
                     } catch (_: IllegalArgumentException) {
-                        continue
+                        null
                     }
 
+                if (user == null)
+                    continue
+
                 val result = if (project)
-                    MarkedProjectData(timestamp, user, comment, notes)
+                    MarkedProjectData(
+                        document.reference.path,
+                        timestamp,
+                        user,
+                        comment,
+                        notes,
+                        listOf()
+                    )
                 else
-                    MarkedCompletedData(timestamp, user, attempts, falls, comment, notes)
+                    MarkedCompletedData(
+                        document.reference.path,
+                        timestamp,
+                        user,
+                        attempts,
+                        falls,
+                        grade,
+                        type!!,
+                        comment,
+                        notes,
+                        listOf()
+                    )
                 Timber.v("Processed result. Emitting...")
                 emit(result)
             }

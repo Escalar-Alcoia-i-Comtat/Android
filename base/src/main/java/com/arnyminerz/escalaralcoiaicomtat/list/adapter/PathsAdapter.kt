@@ -20,15 +20,17 @@ import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.profile.CommentsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.MarkCompletedActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Grade
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Pitch
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.ArtifoPathEndingDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DescriptionDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.PathEquipmentDialog
@@ -38,10 +40,13 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.shared.INFO_VIBRATION
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.badge.BadgeUtils
@@ -157,7 +162,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
         val user = auth.currentUser
         val loggedIn = user != null
         Timber.v("Updating Mark completed button visibility: $loggedIn")
-        holder.markCompletedButton.visibility(loggedIn)
+        holder.markCompletedButton.visibility(loggedIn && ENABLE_AUTHENTICATION)
 
         Timber.d("Loading path data")
         doAsync {
@@ -330,6 +335,11 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
         path: Path,
         commentsImageButton: ImageButton
     ) {
+        if (!ENABLE_AUTHENTICATION)
+            return uiContext {
+                visibility(commentsImageButton, false)
+            }
+
         val completions = arrayListOf<MarkedDataInt>()
         path.getCompletions(firestore).toCollection(completions)
         val comments = arrayListOf<String>()
@@ -360,6 +370,17 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
             badges[path.objectId] = badge
             Timber.v("Attaching badge...")
             BadgeUtils.attachBadgeDrawable(badge, commentsImageButton)
+
+            commentsImageButton.setOnClickListener {
+                if (comments.isNotEmpty())
+                    activity.startActivity(
+                        Intent(activity, CommentsActivity::class.java).apply {
+                            putExtra(EXTRA_PATH_DOCUMENT, path.documentPath)
+                        }
+                    )
+                else
+                    vibrate(activity, INFO_VIBRATION)
+            }
         }
     }
 

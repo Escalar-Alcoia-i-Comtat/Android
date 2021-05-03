@@ -22,6 +22,19 @@ private fun generateNotificationId(): Int = notificationIdCounter++
 private val builders = arrayMapOf<Int, Notification.Builder>()
 
 class Notification private constructor(private val builder: Builder) {
+    companion object {
+        /**
+         * Fetches a notification from its id.
+         * @author Arnau Mora
+         * @since 20210502
+         * @param id The id of the notification to search for.
+         * @return The notification builder if [id] was found, or null.
+         */
+        fun get(id: Int): Builder? {
+            return builders[id]
+        }
+    }
+
     /**
      * Returns [android.app.Notification] if the [show] method has been ran, or null if the notification
      * is not ready.

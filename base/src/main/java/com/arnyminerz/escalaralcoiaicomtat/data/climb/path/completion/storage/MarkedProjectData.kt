@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb.path
+package com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage
 
 import com.arnyminerz.escalaralcoiaicomtat.auth.VisibleUserData
 import com.google.firebase.Timestamp
@@ -9,8 +9,10 @@ import com.google.firebase.Timestamp
  * @since 20210430
  */
 class MarkedProjectData(
-    val timestamp: Timestamp?,
+    documentPath: String,
+    timestamp: Timestamp?,
     user: VisibleUserData,
     comment: String?,
-    notes: String?
-) : MarkedDataInt(user, comment, notes)
+    notes: String?,
+    likedBy: List<String>
+) : MarkedDataInt(documentPath, timestamp, user, comment, notes, likedBy.toMutableList())

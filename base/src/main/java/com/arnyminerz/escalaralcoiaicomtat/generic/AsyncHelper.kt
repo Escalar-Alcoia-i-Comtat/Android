@@ -1,6 +1,8 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
 import android.app.Activity
+import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +20,7 @@ import kotlin.coroutines.suspendCoroutine
  * @param block The code to run
  * @see doOnMain Use this for updating UI elements.
  */
-fun doAsync(block: suspend CoroutineScope.() -> Unit) =
+fun doAsync(@WorkerThread block: suspend CoroutineScope.() -> Unit) =
     CoroutineScope(Dispatchers.Default).launch {
         block(this)
     }
@@ -29,7 +31,7 @@ fun doAsync(block: suspend CoroutineScope.() -> Unit) =
  * @since 20210413
  * @param block The code to run
  */
-fun doOnMain(block: suspend CoroutineScope.() -> Unit) =
+fun doOnMain(@UiThread block: suspend CoroutineScope.() -> Unit) =
     CoroutineScope(Dispatchers.Main).launch {
         block(this)
     }
@@ -40,7 +42,7 @@ fun doOnMain(block: suspend CoroutineScope.() -> Unit) =
  * @since 20210413
  * @param block The code to run
  */
-suspend fun <T> uiContext(block: suspend CoroutineScope.() -> T) =
+suspend fun <T> uiContext(@UiThread block: suspend CoroutineScope.() -> T) =
     withContext(Dispatchers.Main, block)
 
 /**
@@ -49,7 +51,7 @@ suspend fun <T> uiContext(block: suspend CoroutineScope.() -> T) =
  * @since 20210413
  * @param block The code to run
  */
-suspend fun <T, A : Activity> A.uiContext(block: suspend A.() -> T) =
+suspend fun <T, A : Activity> A.uiContext(@UiThread block: suspend A.() -> T) =
     withContext(Dispatchers.Main) {
         block(this@uiContext)
     }
