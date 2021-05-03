@@ -47,7 +47,6 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
      * @param toggled If the card should be toggled or not. If true, the card will be large, and more
      * info will be shown.
      * @param hasInfo If true, the [Path] has a description
-     * @param blockStatus The [Path]'s [BlockingType]
      * @param pathSpannables The first element should be pathSpannable, the second one, toggledPathSpannable.
      * @param heights The first element should be the full height, the second one, the other cases'
      * height.
@@ -56,7 +55,6 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
     fun updateCardToggleStatus(
         toggled: Boolean,
         hasInfo: Boolean,
-        blockStatus: BlockingType,
         pathSpannables: Pair<SpannableString, SpannableString>,
         heights: Pair<String?, String?>
     ) {
@@ -85,7 +83,6 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
 
             heightTextView.text = heights.first ?: ""
         }
-        updateBlockedStatus(blockStatus)
     }
 
     /**

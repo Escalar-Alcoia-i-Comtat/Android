@@ -22,7 +22,6 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.CommentsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.MarkCompletedActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Grade
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
@@ -40,6 +39,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
@@ -87,14 +87,6 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
     private val toggled = arrayListOf<Boolean>()
 
     /**
-     * Specifies the blocking status of all the paths.
-     * @author Arnau Mora
-     * @since 20210427
-     * @see BlockingType
-     */
-    private val blockStatuses = arrayListOf<BlockingType>()
-
-    /**
      * Stores the badges loaded for each path. The key stores the path id, and the value the badge set.
      * @author Arnau Mora
      * @since 20210430
@@ -135,7 +127,6 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
         Timber.d("Created with %d paths", pathsSize)
         (0 until pathsSize).forEach { _ ->
             toggled.add(false)
-            blockStatuses.add(BlockingType.UNKNOWN)
         }
     }
 
@@ -182,7 +173,6 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
     private suspend fun loadPathData(path: Path, position: Int, holder: SectorViewHolder) {
         // First load all the required data
         val toggled = this@PathsAdapter.toggled[position]
-        val blockStatus = blockStatuses[position]
         val hasInfo = path.hasInfo()
         val pathSpannable = path.grade().getSpannable(activity)
         val toggledPathSpannable =
@@ -251,7 +241,6 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
             holder.updateCardToggleStatus(
                 toggled,
                 hasInfo,
-                blockStatus,
                 pathSpannable to toggledPathSpannable,
                 heightFull to heightOther
             )
@@ -266,7 +255,6 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
                 this@PathsAdapter.toggled[position] = newToggled
 
                 Timber.d("Toggling card. Now it's $newToggled")
-                val newBlockStatus = blockStatuses[position]
 
                 TransitionManager.beginDelayedTransition(
                     cardView, TransitionSet().addTransition(ChangeBounds())
@@ -275,7 +263,6 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
                 holder.updateCardToggleStatus(
                     newToggled,
                     hasInfo,
-                    newBlockStatus,
                     pathSpannable to toggledPathSpannable,
                     heightFull to heightOther
                 )
@@ -311,9 +298,8 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
         }
 
         Timber.v("Checking if blocked...")
-        val blocked = path.isBlocked(firestore)
+        val blocked = path.isBlocked(activity.application as App, firestore)
         Timber.d("Path ${path.objectId} block status: $blocked")
-        blockStatuses[position] = blocked
 
         uiContext {
             Timber.d("Binding ViewHolder for path $position: ${path.displayName}. Blocked: $blocked")
