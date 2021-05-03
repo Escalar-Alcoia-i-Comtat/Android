@@ -13,4 +13,12 @@ data class ValueMax<T : Number>
 constructor(val value: T, val max: T) {
     fun <R> let(block: (value: T, max: T) -> R) =
         block(value, max)
+
+    /**
+     * Returns the percentage of [value] in [max].
+     * @author Arnau Mora
+     * @since 20210430
+     */
+    fun percentage(): Int =
+        ((value.toDouble() / max.toDouble()) * 100.0).toInt()
 }

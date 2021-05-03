@@ -23,6 +23,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.shared.DATACLASS_WAIT_CHILDREN_DELAY
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_COUNT
@@ -87,6 +88,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             firestore: FirebaseFirestore
         ): Intent? {
             var result: Intent? = null
+            val app = (context as? Activity)?.application as? App
             Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
             for (area in AREAS) {
                 Timber.d("  Finding in ${area.displayName}.")
@@ -98,12 +100,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 else {
                     Timber.d("  Iterating area's children...")
                     val zones = arrayListOf<Zone>()
-                    area.getChildren(firestore).toCollection(zones)
+                    area.getChildren(app, firestore).toCollection(zones)
                     for (zone in zones) {
                         Timber.d("    Finding in ${zone.displayName}.")
                         // Children must be loaded so `count` is fetched correctly.
                         val sectors = arrayListOf<Sector>()
-                        zone.getChildren(firestore).toCollection(sectors)
+                        zone.getChildren(app, firestore)
+                            .toCollection(sectors)
 
                         if (zone.displayName.equals(queryName, true))
                             result = Intent(context, ZoneActivity::class.java).apply {
@@ -116,19 +119,17 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                             for ((counter, sector) in sectors.withIndex()) {
                                 Timber.d("      Finding in ${sector.displayName}.")
                                 if (sector.displayName.equals(queryName, true))
-                                    result = Intent(
-                                        context,
-                                        SectorActivity::class.java
-                                    ).apply {
-                                        Timber.d("Found Sector id ${sector.objectId} at $counter!")
-                                        putExtra(EXTRA_AREA, area.objectId)
-                                        putExtra(EXTRA_ZONE, zone.objectId)
-                                        putExtra(
-                                            EXTRA_SECTOR_COUNT,
-                                            zone.count()
-                                        )
-                                        putExtra(EXTRA_SECTOR_INDEX, counter)
-                                    }
+                                    result = Intent(context, SectorActivity::class.java)
+                                        .apply {
+                                            Timber.d("Found Sector id ${sector.objectId} at $counter!")
+                                            putExtra(EXTRA_AREA, area.objectId)
+                                            putExtra(EXTRA_ZONE, zone.objectId)
+                                            putExtra(
+                                                EXTRA_SECTOR_COUNT,
+                                                zone.count()
+                                            )
+                                            putExtra(EXTRA_SECTOR_INDEX, counter)
+                                        }
 
                                 // If a result has been found, exit loop
                                 if (result != null) break
@@ -166,7 +167,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     @WorkerThread
     @Throws(NoInternetAccessException::class, IllegalStateException::class)
-    suspend fun getChildren(firestore: FirebaseFirestore?): Flow<A> = flow {
+    suspend fun getChildren(app: App?, firestore: FirebaseFirestore?): Flow<A> = flow {
         if (loadingChildren) {
             Timber.v("Waiting for children to finish loading")
             while (loadingChildren) {
@@ -175,15 +176,27 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             Timber.v("Finished loading children!")
         }
         if (innerChildren.isEmpty())
-            if (firestore == null)
-                throw IllegalStateException("There are no loaded children, and firestore is null.")
-            else {
-                loadingChildren = true
-                loadChildren(firestore).collect {
-                    innerChildren.add(it)
-                    emit(it)
+            when {
+                app != null && app.dataClassChildrenCache.containsKey(metadata.documentPath) -> {
+                    loadingChildren = true
+                    val children = app.dataClassChildrenCache[metadata.documentPath]!!
+                    for (child in children)
+                        (child as? A)?.let { data ->
+                            innerChildren.add(data)
+                            emit(data)
+                        }
+                    loadingChildren = false
                 }
-                loadingChildren = false
+                firestore == null -> throw IllegalStateException("There are no loaded children, and firestore is null.")
+                else -> {
+                    loadingChildren = true
+                    loadChildren(firestore).collect {
+                        innerChildren.add(it)
+                        emit(it)
+                    }
+                    app?.dataClassChildrenCache?.set(metadata.documentPath, innerChildren)
+                    loadingChildren = false
+                }
             }
         else
             for (a in innerChildren)
@@ -328,14 +341,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Generates a list of [DownloadedSection].
      * @author Arnau Mora
      * @since 20210412
-     * @param context The [Context] where the function is being ran on.
+     * @param activity The [Activity] where the function is being ran on.
      * @param firestore The [FirebaseFirestore] instance to load the data from.
      * @param showNonDownloaded If the non-downloaded sections should be added.
      * @param progressListener A listener for the progress of the load.
      */
     @WorkerThread
     suspend fun downloadedSectionList(
-        context: Context,
+        activity: Activity,
         firestore: FirebaseFirestore,
         showNonDownloaded: Boolean,
         progressListener: (suspend (current: Int, max: Int) -> Unit)? = null
@@ -343,10 +356,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         Timber.v("Getting downloaded sections...")
         val downloadedSectionsList = arrayListOf<DownloadedSection>()
         val children = arrayListOf<DataClassImpl>()
-        getChildren(firestore).toCollection(children)
+        getChildren(activity.application as App, firestore).toCollection(children)
         for ((c, child) in children.withIndex())
             (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
-                val downloadStatus = dataClass.downloadStatus(context, firestore)
+                val downloadStatus = dataClass.downloadStatus(activity, firestore)
                 progressListener?.invoke(c, children.size)
                 if (showNonDownloaded ||
                     downloadStatus.isDownloaded() || downloadStatus.partialDownload()
@@ -390,24 +403,24 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Gets the DownloadStatus of the DataClass
      * @author Arnau Mora
      * @since 20210313
-     * @param context The context to run from
+     * @param activity The activity to run from
      * @param firestore The [FirebaseFirestore] instance to load children from
      * @param progressListener A progress updater
      * @return a matching DownloadStatus representing the Data Class' download status
      */
     @WorkerThread
     suspend fun downloadStatus(
-        context: Context,
+        activity: Activity,
         firestore: FirebaseFirestore,
         progressListener: ((current: Int, max: Int) -> Unit)? = null
     ): DownloadStatus {
         Timber.d("$pin Checking if downloaded")
 
-        val downloadWorkInfo = downloadWorkInfo(context)
+        val downloadWorkInfo = downloadWorkInfo(activity)
         val result = if (downloadWorkInfo != null)
             DownloadStatus.DOWNLOADING
         else {
-            val imageFile = imageFile(context)
+            val imageFile = imageFile(activity)
             Timber.v("Checking if image file exists...")
             val imageFileExists = imageFile.exists()
             if (!imageFileExists)
@@ -422,7 +435,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
             Timber.v("$pin Getting children elements download status...")
             val children = arrayListOf<DataClassImpl>()
-            getChildren(firestore).toCollection(children)
+            getChildren(activity.application as App, firestore).toCollection(children)
 
             Timber.v("$pin Finding for a downloaded children in ${children.size}...")
             var allChildrenDownloaded = true
@@ -430,7 +443,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             for ((c, child) in children.withIndex()) {
                 if (child is DataClass<*, *>) {
                     progressListener?.invoke(c, children.size)
-                    val childDownloadStatus = child.downloadStatus(context, firestore)
+                    val childDownloadStatus = child.downloadStatus(activity, firestore)
                     if (childDownloadStatus != DownloadStatus.DOWNLOADED) {
                         Timber.d(
                             "$pin has a non-downloaded children (${child.pin}): $childDownloadStatus"
@@ -456,18 +469,21 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Checks if the data class has any children that has been downloaded
      * @author Arnau Mora
      * @date 2020/09/14
-     * @param context The context to run from
+     * @param activity The activity to run from
      * @param firestore A [FirebaseFirestore] instance to load new data from.
      *
      * @return If the data class has any downloaded children
      */
     @WorkerThread
-    suspend fun hasAnyDownloadedChildren(context: Context, firestore: FirebaseFirestore): Boolean {
+    suspend fun hasAnyDownloadedChildren(
+        activity: Activity,
+        firestore: FirebaseFirestore
+    ): Boolean {
         val children = arrayListOf<DataClassImpl>()
-        getChildren(firestore).toCollection(children)
+        getChildren(activity.application as App, firestore).toCollection(children)
         for (child in children)
             if (child is DataClass<*, *> &&
-                child.downloadStatus(context, firestore) == DownloadStatus.DOWNLOADED
+                child.downloadStatus(activity, firestore) == DownloadStatus.DOWNLOADED
             )
                 return true
         return false
@@ -477,15 +493,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Deletes the downloaded content if downloaded
      * @author Arnau Mora
      * @date 2020/09/11
-     * @param context The context to run from
+     * @param activity The activity to run from
      * @return If the content was deleted successfully. Note: returns true if not downloaded
      */
-    suspend fun delete(context: Context): Boolean {
+    suspend fun delete(activity: Activity): Boolean {
         Timber.v("Deleting $objectId")
-        val imgFile = imageFile(context)
+        val imgFile = imageFile(activity)
         val lst = arrayListOf<Boolean>()
 
-        val kmzFile = kmzFile(context, true)
+        val kmzFile = kmzFile(activity, true)
         if (kmzFile.exists()) {
             Timber.v("Deleting \"$kmzFile\"")
             kmzFile.deleteIfExists()
@@ -495,12 +511,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         lst.add(imgFile.deleteIfExists())
         val children = arrayListOf<DataClassImpl>()
         try {
-            getChildren(null).toCollection(children)
+            getChildren(activity.application as App, null).toCollection(children)
         } catch (_: IllegalStateException) {
         }
         for (child in children)
             (child as? DataClass<*, *>)?.let {
-                lst.add(it.delete(context))
+                lst.add(it.delete(activity))
             }
         return lst.allTrue()
     }
@@ -510,14 +526,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @date 2020/09/11
      * @patch 2020/09/12 - Arnau Mora: Added child space computation
-     * @param context The context to run from
+     * @param activity The activity to run from
      * @return The size in bytes that is used by the downloaded data
      *
      * @throws NotDownloadedException If tried to get size when not downloaded
      */
     @Throws(NotDownloadedException::class)
-    suspend fun size(context: Context): Long {
-        val imgFile = imageFile(context)
+    suspend fun size(activity: Activity): Long {
+        val imgFile = imageFile(activity)
 
         if (!imgFile.exists()) throw NotDownloadedException(this)
 
@@ -525,12 +541,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
         val children = arrayListOf<DataClassImpl>()
         try {
-            getChildren(null).toCollection(children)
+            getChildren(activity.application as App, null).toCollection(children)
         } catch (_: IllegalStateException) {
         }
         for (child in children)
             if (child is DataClass<*, *>)
-                size += child.size(context)
+                size += child.size(activity)
 
         Timber.v("\"$displayName\" storage usage: $size")
 
@@ -541,15 +557,16 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Returns the amount of children the data class has
      * @author Arnau Mora
      * @date 20210413
+     * @param activity The activity to run from
      * @return The amount of children the data class has
      * @throws IllegalStateException When the children has not been loaded and [firestore] is null.
      * @see getChildren
      */
     @Throws(IllegalStateException::class)
     @WorkerThread
-    suspend fun count(firestore: FirebaseFirestore?): Int {
+    suspend fun count(activity: Activity, firestore: FirebaseFirestore?): Int {
         val children = arrayListOf<DataClassImpl>()
-        getChildren(firestore).toCollection(children)
+        getChildren(activity.application as App, firestore).toCollection(children)
         return children.size
     }
 

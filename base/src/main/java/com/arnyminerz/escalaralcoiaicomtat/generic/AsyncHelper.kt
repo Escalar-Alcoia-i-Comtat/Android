@@ -54,12 +54,11 @@ suspend fun <T, A : Activity> A.uiContext(block: suspend A.() -> T) =
         block(this@uiContext)
     }
 
-suspend fun <T> Task<T>.awaitTask(): T? = suspendCoroutine { continuation ->
+suspend fun <T> Task<T>.awaitTask(): T = suspendCoroutine { continuation ->
     this.addOnCompleteListener { task ->
-        if (task.isSuccessful) {
+        if (task.isSuccessful)
             continuation.resume(task.result)
-        } else {
+        else
             continuation.resumeWithException(task.exception!!)
-        }
     }
 }

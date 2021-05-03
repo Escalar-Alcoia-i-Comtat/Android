@@ -19,6 +19,34 @@ fun Collection<Grade>.toGradesList(): Grade.GradesList = Grade.GradesList(this)
 
 private const val PATH_GRADE_SPAN_PADDING = 3
 
+/**
+ * Contains a list of all the possible grades there are.
+ * @author Arnau Mora
+ * @since 20210429
+ */
+val GRADES_LIST = listOf(
+    "5º",
+    "5+",
+    "6a",
+    "6a+",
+    "6b",
+    "6b+",
+    "6c",
+    "6c+",
+    "7a",
+    "7a+",
+    "7b",
+    "7b+",
+    "7c",
+    "7c+",
+    "8a",
+    "8a+",
+    "8b",
+    "8b+",
+    "8c",
+    "8c+"
+)
+
 @Suppress("unused")
 class Grade(val displayName: String) : Parcelable {
     constructor(parcel: Parcel) : this(parcel.readString()!!)

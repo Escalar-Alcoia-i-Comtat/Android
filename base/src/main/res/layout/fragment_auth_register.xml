@@ -106,7 +106,7 @@
                     android:id="@+id/password_editText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:imeOptions="actionGo"
+                    android:imeOptions="actionNext"
                     android:inputType="textPassword" />
 
             </com.google.android.material.textfield.TextInputLayout>

@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.area
 
+import android.app.Activity
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.WorkerThread
@@ -9,19 +10,17 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
+import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
-import java.util.*
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
+import java.util.Date
 
 /**
  * Creates a new Area instance.
@@ -99,14 +98,9 @@ class Area(
             .document(metadata.documentPath)
             .collection("Zones")
             .orderBy("displayName")
-        val childTask = ref.get()
         try {
-            Timber.v("Awaiting results...")
-            val snapshot = suspendCoroutine<QuerySnapshot> { cont ->
-                childTask
-                    .addOnSuccessListener { cont.resume(it) }
-                    .addOnFailureListener { cont.resumeWithException(it) }
-            }
+            Timber.v("Getting zones of \"${metadata.documentPath}\"...")
+            val snapshot = ref.get().awaitTask()
             Timber.v("Got children result")
             val zones = snapshot.documents
             Timber.d("Got ${zones.size} elements. Processing result")
@@ -163,10 +157,11 @@ class Area(
  * @since 20210411
  */
 @WorkerThread
-suspend fun Iterable<Area>.getZones(firestore: FirebaseFirestore): Flow<Zone> = flow {
-    for (area in this@getZones)
-        emitAll(area.getChildren(firestore))
-}
+suspend fun Iterable<Area>.getZones(activity: Activity, firestore: FirebaseFirestore): Flow<Zone> =
+    flow {
+        for (area in this@getZones)
+            emitAll(area.getChildren(activity.application as App, firestore))
+    }
 
 /**
  * Checks if an [Area] list contains an [Area] with an specific id.

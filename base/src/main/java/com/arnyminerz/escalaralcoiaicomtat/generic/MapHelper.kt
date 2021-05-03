@@ -54,7 +54,11 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.includeAll
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
-import com.arnyminerz.escalaralcoiaicomtat.shared.*
+import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
+import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
+import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.storage.zipFile
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
@@ -84,7 +88,6 @@ import com.mapbox.mapboxsdk.plugins.annotation.LineManager
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
-import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
@@ -100,14 +103,14 @@ class MapHelper
 constructor(context: Context) {
     companion object {
         suspend fun getTarget(
-            context: Context,
+            activity: Activity,
             marker: Symbol,
             firestore: FirebaseFirestore
         ): Intent? {
             Timber.d("Getting marker's title...")
             val title = marker.getWindow().title
             Timber.v("Searching in ${AREAS.size} cached areas...")
-            return getIntent(context, title, firestore)
+            return getIntent(activity, title, firestore)
         }
 
         fun getImageUrl(description: String?): String? {
@@ -164,7 +167,6 @@ constructor(context: Context) {
     }
 
     private lateinit var mapView: MapView
-        private set
 
     private var startingPosition: LatLng = LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
     private var startingZoom: Double = DEFAULT_ZOOM
@@ -1211,54 +1213,59 @@ constructor(context: Context) {
          * @author Arnau Mora
          * @since 20210416
          */
-        fun show() = also {
-            val anim = AnimationUtils.loadAnimation(activity, R.anim.enter_bottom)
-            anim.duration = MARKER_WINDOW_SHOW_DURATION
-            cardView.show()
-            cardView.startAnimation(anim)
+        suspend fun show() {
+            uiContext {
+                val anim = AnimationUtils.loadAnimation(activity, R.anim.enter_bottom)
+                anim.duration = MARKER_WINDOW_SHOW_DURATION
+                cardView.show()
+                cardView.startAnimation(anim)
+            }
 
             val window = marker.getWindow()
             val title = window.title
             val description = window.message
-            // TODO: May not be convenient to run blocking
-            val activityIntent =
-                runBlocking { getTarget(activity, marker, firestore) } // Info Window Data Class
+            val activityIntent = getTarget(activity, marker, firestore) // Info Window Data Class
 
             Timber.v("Marker title: $title")
             Timber.v("Marker description: $description")
 
-            titleTextView.text = title
-
-            val imageUrl = getImageUrl(description)
-            if (imageUrl == null)
-                descriptionTextView.text = description
-            else
-                Glide.with(activity)
-                    .load(imageUrl)
-                    .into(imageView)
-
-            visibility(enterButton, activityIntent != null)
-            visibility(imageView, imageUrl != null)
-            visibility(descriptionTextView, imageUrl == null)
-
-            val gmmIntentUri = marker.latLng.toUri(true, title)
-            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-            mapButton.visibility(true)
-            mapButton.setOnClickListener {
-                activity.startActivity(mapIntent)
+            uiContext {
+                titleTextView.text = title
             }
 
-            if (activityIntent != null)
-                enterButton.setOnClickListener {
-                    Timber.v("Launching intent...")
-                    activity.startActivity(activityIntent)
+            val imageUrl = getImageUrl(description)
+
+            uiContext {
+                if (imageUrl == null)
+                    descriptionTextView.text = description
+                else
+                    Glide.with(activity)
+                        .load(imageUrl)
+                        .into(imageView)
+
+                visibility(enterButton, activityIntent != null)
+                visibility(imageView, imageUrl != null)
+                visibility(descriptionTextView, imageUrl == null)
+
+                val gmmIntentUri = marker.latLng.toUri(true, title)
+                val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                mapButton.visibility(true)
+                mapButton.setOnClickListener {
+                    activity.startActivity(mapIntent)
                 }
 
-            buttonsLayout.orientation =
-                if (imageUrl != null) LinearLayout.VERTICAL
-                else LinearLayout.HORIZONTAL
+                if (activityIntent != null)
+                    enterButton.setOnClickListener {
+                        Timber.v("Launching intent...")
+                        activity.startActivity(activityIntent)
+                    }
 
-            rootView.addView(cardView, view.layoutParams)
+                buttonsLayout.orientation =
+                    if (imageUrl != null) LinearLayout.VERTICAL
+                    else LinearLayout.HORIZONTAL
+
+                rootView.addView(cardView, view.layoutParams)
+            }
             shown = true
             destroyed = false
         }

@@ -1,24 +1,30 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 
 import android.app.Activity
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
+import android.widget.ImageButton
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.collection.arrayMapOf
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.profile.MarkCompletedActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Grade
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Pitch
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
@@ -29,14 +35,25 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.PathEquipmentDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.android.material.badge.BadgeDrawable
+import com.google.android.material.badge.BadgeUtils
+import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
 const val ROTATION_A = 0f
@@ -54,7 +71,8 @@ const val ANIMATION_DURATION = 300L
  * @param activity the activity that is loading the recycler view
  * @see SectorViewHolder
  */
-class PathsAdapter(private val paths: List<Path>, private val activity: Activity) :
+@ExperimentalBadgeUtils
+class PathsAdapter(private val paths: List<Path>, private val activity: SectorActivity) :
     RecyclerView.Adapter<SectorViewHolder>() {
     /**
      * Specifies the toggled status of all the paths.
@@ -72,11 +90,39 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
     private val blockStatuses = arrayListOf<BlockingType>()
 
     /**
+     * Stores the badges loaded for each path. The key stores the path id, and the value the badge set.
+     * @author Arnau Mora
+     * @since 20210430
+     */
+    private val badges = arrayMapOf<String, BadgeDrawable>()
+
+    /**
+     * Stores the view holders of all the elements once they get created.
+     * @author Arnau Mora
+     * @since 20210430
+     */
+    internal val viewHolders = arrayMapOf<String, SectorViewHolder>()
+
+    /**
      * Stores the Firestore instance.
      * @author Arnau Mora
      * @since 20210427
      */
     private val firestore = Firebase.firestore
+
+    /**
+     * Stores the Firebase Auth instance.
+     * @author Arnau Mora
+     * @since 20210430
+     */
+    private val auth = Firebase.auth
+
+    /**
+     * Stores the currently logged in user
+     * @author Arnau Mora
+     * @since 20210430
+     */
+    private val user = auth.currentUser
 
     init {
         // Initialize [toggled] and [blockStatuses] with the default values.
@@ -105,6 +151,13 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
             return
         }
         val path = paths[position]
+        viewHolders[path.objectId] = holder
+
+        val auth = Firebase.auth
+        val user = auth.currentUser
+        val loggedIn = user != null
+        Timber.v("Updating Mark completed button visibility: $loggedIn")
+        holder.markCompletedButton.visibility(loggedIn)
 
         Timber.d("Loading path data")
         doAsync {
@@ -240,6 +293,16 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
                     }
                 )
             }
+            holder.markCompletedButton.setOnClickListener {
+                activity.startActivity(
+                    Intent(activity, MarkCompletedActivity::class.java).apply {
+                        putExtra(EXTRA_AREA, activity.areaId)
+                        putExtra(EXTRA_ZONE, activity.zoneId)
+                        putExtra(EXTRA_SECTOR_INDEX, activity.currentPage)
+                        putExtra(EXTRA_PATH, path.objectId)
+                    }
+                )
+            }
         }
 
         Timber.v("Checking if blocked...")
@@ -250,6 +313,53 @@ class PathsAdapter(private val paths: List<Path>, private val activity: Activity
         uiContext {
             Timber.d("Binding ViewHolder for path $position: ${path.displayName}. Blocked: $blocked")
             holder.updateBlockedStatus(blocked)
+        }
+
+        loadCompletedPathData(user, path, holder.commentsImageButton)
+    }
+
+    /**
+     * Loads the completed path data, which contains the user's completions, and all the comments
+     * people have posted in the path.
+     * @author Arnau Mora
+     * @since 20210430
+     * @param user The currently logged in user
+     */
+    suspend fun loadCompletedPathData(
+        user: FirebaseUser?,
+        path: Path,
+        commentsImageButton: ImageButton
+    ) {
+        val completions = arrayListOf<MarkedDataInt>()
+        path.getCompletions(firestore).toCollection(completions)
+        val comments = arrayListOf<String>()
+        val notes = arrayListOf<String>()
+        for (completion in completions) {
+            if (completion.comment != null)
+                comments.add(completion.comment)
+            if (completion.notes != null)
+                if (user != null)
+                    if (completion.user.uid == user.uid)
+                        notes.add(completion.notes)
+            /*if (completion is MarkedCompletedData) {
+
+            } else if (completion is MarkedProjectData) {
+
+            }*/
+        }
+        uiContext {
+            if (badges.containsKey(path.objectId)) {
+                Timber.v("Dettaching old badge...")
+                BadgeUtils.detachBadgeDrawable(badges[path.objectId], commentsImageButton)
+            }
+            Timber.v("Creating comments badge...")
+            val badge = BadgeDrawable.create(activity)
+            badge.number = comments.size
+            badge.isVisible = true
+            Timber.v("Storing abdge...")
+            badges[path.objectId] = badge
+            Timber.v("Attaching badge...")
+            BadgeUtils.attachBadgeDrawable(badge, commentsImageButton)
         }
     }
 

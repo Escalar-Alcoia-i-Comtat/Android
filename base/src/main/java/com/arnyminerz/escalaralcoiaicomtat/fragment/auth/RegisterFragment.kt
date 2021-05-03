@@ -1,23 +1,21 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.auth
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
+import com.arnyminerz.escalaralcoiaicomtat.auth.createFirestoreUserReference
+import com.arnyminerz.escalaralcoiaicomtat.auth.setDefaultProfileImage
+import com.arnyminerz.escalaralcoiaicomtat.auth.updateDisplayName
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthRegisterBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
-import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
-import com.arnyminerz.escalaralcoiaicomtat.generic.cropToSquare
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
@@ -25,7 +23,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.viewListOf
 import com.arnyminerz.escalaralcoiaicomtat.shared.CONFIRMATION_EMAIL_DYNAMIC
 import com.arnyminerz.escalaralcoiaicomtat.shared.CONFIRMATION_EMAIL_URL
-import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_COMPRESSION_QUALITY
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -33,21 +30,23 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.auth.ktx.userProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageException
-import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
-import java.io.ByteArrayOutputStream
 
 class RegisterFragment private constructor() : Fragment() {
     private var _binding: FragmentAuthRegisterBinding? = null
 
     private val binding: FragmentAuthRegisterBinding
         get() = _binding!!
+
+    private lateinit var firestore: FirebaseFirestore
 
     /**
      * Specifies all the fields of the register form
@@ -78,6 +77,7 @@ class RegisterFragment private constructor() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        firestore = Firebase.firestore
         binding.progressIndicator.visibility(false)
 
         binding.emailEditText.setOnEditorActionListener { _, _, _ ->
@@ -198,6 +198,7 @@ class RegisterFragment private constructor() : Fragment() {
     private fun showError(field: TextInputLayout, @StringRes error: Int) {
         field.isErrorEnabled = true
         field.error = getString(error)
+        fields.enable()
     }
 
     /**
@@ -212,77 +213,47 @@ class RegisterFragment private constructor() : Fragment() {
         binding.progressIndicator.isIndeterminate = false
         binding.progressIndicator.visibility(true)
 
-        try {
-            Timber.v("Registration has been successful, setting default profile image...")
-            result.user?.let { user ->
-                Timber.v("Starting profile image upload...")
-                val storageRef = Firebase.storage.reference
-                val profileImageRef = storageRef.child("profile/${user.uid}.webp")
-                val d = ContextCompat.getDrawable(requireContext(), R.drawable.ic_profile_image)
-                val profileImage = d!!.toBitmap().cropToSquare()
-                val baos = ByteArrayOutputStream()
-                profileImage?.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
-                val data = baos.toByteArray()
+        doAsync {
+            try {
+                val user = result.user!!
+                Timber.v("Registration has been successful, setting default profile image...")
+                setDefaultProfileImage(requireContext(), firestore, user) { progress ->
+                    binding.progressIndicator.progress = progress.percentage()
+                    binding.progressIndicator.max = 100
+                }
 
-                Timber.v("Uploading profile image...")
-                profileImageRef.putBytes(data)
-                    .addOnProgressListener { task ->
-                        binding.progressIndicator.progress = task.bytesTransferred.toInt()
-                        binding.progressIndicator.max = task.totalByteCount.toInt()
-                    }
-                    .addOnSuccessListener {
-                        binding.progressIndicator.visibility(false)
-                        binding.progressIndicator.isIndeterminate = true
-                        binding.progressIndicator.visibility(true)
+                uiContext {
+                    binding.progressIndicator.visibility(false)
+                    binding.progressIndicator.isIndeterminate = true
+                    binding.progressIndicator.visibility(true)
+                }
 
-                        updateProfileData(
-                            result,
-                            "gs://escalaralcoiaicomtat.appspot.com/" + profileImageRef.path
-                        )
-                    }
-                    .addOnFailureListener {
-                        Timber.e(it, "Could not upload profile image")
-                        cancelRegistration(result)
-                        val e = handleStorageException(it as StorageException)
-                            ?: return@addOnFailureListener
-                        toast(requireContext(), e.first)
+                Timber.v("Updating display name...")
+                updateDisplayName(firestore, user, binding.displayNameEditText.text.toString())
+                Timber.v("Creating firestore reference...")
+                createFirestoreUserReference(firestore, user)
+
+                sendConfirmationMail(result)
+            } catch (e: StorageException) {
+                uiContext {
+                    Timber.e(e, "Could not upload profile image")
+                    cancelRegistration(result)
+                    handleStorageException(e)?.let { handling ->
+                        toast(requireContext(), handling.first)
                         binding.progressIndicator.visibility(false)
                         fields.enable()
                     }
+                }
+            } catch (e: FirebaseAuthInvalidUserException) {
+                uiContext {
+                    Timber.e(e, "Could not update profile data.")
+                    binding.progressIndicator.visibility(false)
+                    fields.enable()
+                    // TODO: Handle individual exceptions
+                    cancelRegistration(result)
+                }
             }
-        } catch (e: Exception) {
-            Timber.e(e, "Could not update profile image.")
-            cancelRegistration(result)
         }
-    }
-
-    /**
-     * Updates the profile image address after the user has been created, and the image uploaded.
-     * Also changes the user's display name to the contents of
-     * [FragmentAuthRegisterBinding.displayNameEditText].
-     * @author Arnau Mora
-     * @since 20210425
-     * @param result The result that the user creation has given,
-     * @param imageDownloadUrl The uploaded image url.
-     */
-    @UiThread
-    private fun updateProfileData(result: AuthResult, imageDownloadUrl: String) {
-        result.user?.updateProfile(
-            userProfileChangeRequest {
-                photoUri = Uri.parse(imageDownloadUrl)
-                displayName = binding.displayNameEditText.text.toString()
-            }
-        )
-            ?.addOnSuccessListener {
-                sendConfirmationMail(result)
-            }
-            ?.addOnFailureListener {
-                Timber.e(it, "Could not update profile data.")
-                binding.progressIndicator.visibility(false)
-                fields.enable()
-                // TODO: Handle individual exceptions
-                cancelRegistration(result)
-            }
     }
 
     /**

@@ -3,13 +3,19 @@ package com.arnyminerz.escalaralcoiaicomtat.data.climb.path
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.WorkerThread
+import androidx.collection.arrayMapOf
+import com.arnyminerz.escalaralcoiaicomtat.auth.VisibleUserData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
+import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -182,6 +188,127 @@ class Path(
 
     fun grade(): Grade =
         if (grades.size > 0) grades.first() else throw NoSuchElementException("Grades list is empty")
+
+    /**
+     * Requests the server to mark a path as completed.
+     * @author Arnau Mora
+     * @since 20210430
+     * @param firestore The [FirebaseFirestore] instance to update the data.
+     * @param data The data for the marking.
+     */
+    suspend fun markCompleted(firestore: FirebaseFirestore, data: MarkCompletedData) {
+        val user = data.user
+        val attempts = data.attempts
+        val falls = data.falls
+        val comment = data.comment
+        val notes = data.notes
+
+        firestore
+            .document(documentPath)
+            .collection("Completions")
+            .add(
+                hashMapOf(
+                    "timestamp" to FieldValue.serverTimestamp(),
+                    "user" to user.uid,
+                    "attempts" to attempts,
+                    "falls" to falls,
+                    "comment" to comment,
+                    "notes" to notes,
+                    "project" to false
+                )
+            )
+            .awaitTask()
+        Timber.i("Marked \"$documentPath\" as complete!")
+    }
+
+    /**
+     * Requests the server to mark a path as project.
+     * @author Arnau Mora
+     * @since 20210430
+     * @param firestore The [FirebaseFirestore] instance to update the data.
+     * @param data The data for the marking.
+     */
+    suspend fun markProject(firestore: FirebaseFirestore, data: MarkProjectData) {
+        val user = data.user
+        val comment = data.comment
+        val notes = data.notes
+
+        firestore
+            .document(documentPath)
+            .collection("Completions")
+            .add(
+                hashMapOf(
+                    "timestamp" to FieldValue.serverTimestamp(),
+                    "user" to user.uid,
+                    "comment" to comment,
+                    "notes" to notes,
+                    "project" to true,
+                )
+            )
+            .awaitTask()
+        Timber.i("Marked \"$documentPath\" as complete!")
+    }
+
+    /**
+     * Fetches all the completions that have been requested by the users.
+     * @author Arnau Mora
+     * @since 20210430
+     * @param firestore The [FirebaseFirestore] instance from where to load the data.
+     * @throws FirebaseAuthException When there was an exception while loading an user from Firebase.
+     */
+    @Throws(FirebaseAuthException::class)
+    suspend fun getCompletions(
+        firestore: FirebaseFirestore
+    ): Flow<MarkedDataInt> = flow {
+        val completionsData = firestore
+            .document(documentPath)
+            .collection("Completions")
+            .get()
+            .awaitTask()
+        val cachedUsers = arrayMapOf<String, VisibleUserData>()
+        if (completionsData != null)
+            for (document in completionsData.documents) {
+                val timestamp = document.getTimestamp("timestamp")
+                val userUid = document.getString("user")!!
+                val attempts = document.getLong("attempts") ?: 0
+                val falls = document.getLong("falls") ?: 0
+                val comment = document.getString("comment")
+                val notes = document.getString("notes")
+                val project = document.getBoolean("project") ?: false
+
+                Timber.v("Got completion data for \"$documentPath\".")
+                val user = if (cachedUsers.containsKey(userUid))
+                    cachedUsers[userUid]!!
+                else
+                    try {
+                        Timber.v("Loading user data ($userUid) from server...")
+                        val visibleUserData = firestore.collection("Users")
+                            .document(userUid)
+                            .get()
+                            .awaitTask()!!
+                        val data = visibleUserData.data
+                        if (data != null) {
+                            Timber.v("Got visible user data: $data")
+                            val displayName = visibleUserData.getString("displayName")!!
+                            val profileImage = visibleUserData.getString("profileImage")!!
+                            Timber.v("Got user! Caching and returning...")
+                            val loadedUser = VisibleUserData(userUid, displayName, profileImage)
+                            cachedUsers[userUid] = loadedUser
+                            loadedUser
+                        } else
+                            continue
+                    } catch (_: IllegalArgumentException) {
+                        continue
+                    }
+
+                val result = if (project)
+                    MarkedProjectData(timestamp, user, comment, notes)
+                else
+                    MarkedCompletedData(timestamp, user, attempts, falls, comment, notes)
+                Timber.v("Processed result. Emitting...")
+                emit(result)
+            }
+    }
 
     override fun describeContents(): Int = 0
     override fun writeToParcel(dest: Parcel?, flags: Int) {

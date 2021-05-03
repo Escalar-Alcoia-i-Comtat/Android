@@ -27,6 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_AREA_ID
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_ZONE_ID
+import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.shared.CROSSFADE_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.SECTOR_THUMBNAIL_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
@@ -35,6 +36,7 @@ import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -43,6 +45,7 @@ import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
+@ExperimentalBadgeUtils
 class SectorFragment : NetworkChangeListenerFragment() {
     private lateinit var areaId: String
     private lateinit var zoneId: String
@@ -55,7 +58,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
     private var notMaximizedImageHeight = 0
 
     private var _binding: FragmentSectorBinding? = null
-    private val binding get() = _binding!!
+    internal val binding get() = _binding!!
 
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
@@ -156,7 +159,9 @@ class SectorFragment : NetworkChangeListenerFragment() {
         if (loaded && this::sector.isInitialized) {
             uiContext {
                 sectorActivity.updateTitle(sector.displayName, isDownloaded)
-                loadImage()
+                doAsync {
+                    loadImage()
+                }
             }
             return
         }
@@ -166,7 +171,9 @@ class SectorFragment : NetworkChangeListenerFragment() {
             sectorActivity.setLoading(true)
         }
         val sectors = arrayListOf<Sector>()
-        AREAS[areaId]!![zoneId].getChildren(sectorActivity.firestore).toCollection(sectors)
+        AREAS[areaId]!![zoneId]
+            .getChildren(requireActivity().application as App, sectorActivity.firestore)
+            .toCollection(sectors)
         sector = sectors[sectorIndex]
 
         uiContext {
@@ -174,7 +181,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
         }
 
         isDownloaded =
-            sector.downloadStatus(requireContext(), sectorActivity.firestore).isDownloaded()
+            sector.downloadStatus(requireActivity(), sectorActivity.firestore).isDownloaded()
 
         val size = getDisplaySize(requireActivity())
         notMaximizedImageHeight = size.second / 2
@@ -187,7 +194,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
         if (activity != null) {
             Timber.v("Loading paths...")
             val children = arrayListOf<Path>()
-            sector.getChildren(sectorActivity.firestore).toCollection(children)
+            sector.getChildren(requireActivity().application as App, sectorActivity.firestore)
+                .toCollection(children)
             Timber.v("Finished loading children sectors")
 
             Timber.v("Loading sector fragment")
@@ -226,7 +234,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
                         requireContext(),
                         R.anim.item_enter_left_animator
                     )
-                binding.pathsRecyclerView.adapter = PathsAdapter(children, requireActivity())
+                binding.pathsRecyclerView.adapter =
+                    PathsAdapter(children, requireActivity() as SectorActivity)
                 binding.pathsRecyclerView.show()
 
                 // Load info bar

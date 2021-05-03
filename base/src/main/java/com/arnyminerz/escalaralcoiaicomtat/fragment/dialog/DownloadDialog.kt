@@ -1,6 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.dialog
 
-import android.content.Context
+import android.app.Activity
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
@@ -10,6 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.toCollection
@@ -17,7 +18,7 @@ import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 class DownloadDialog<T : DataClass<*, *>>(
-    private val context: Context,
+    private val activity: Activity,
     private val data: T,
     private val firestore: FirebaseFirestore,
     private val partialDownload: Boolean,
@@ -25,12 +26,12 @@ class DownloadDialog<T : DataClass<*, *>>(
 ) {
     fun show(deleteCallback: (() -> Unit)? = null) {
         var builder =
-            MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_App_MaterialAlertDialog)
+            MaterialAlertDialogBuilder(activity, R.style.ThemeOverlay_App_MaterialAlertDialog)
                 .setTitle(data.displayName)
         if (partialDownload) {
             builder = builder
                 .setMessage(
-                    context.getString(
+                    activity.getString(
                         R.string.dialog_downloaded_partially_msg,
                         data.displayName
                     )
@@ -40,19 +41,19 @@ class DownloadDialog<T : DataClass<*, *>>(
                     dialog.dismiss()
                 }
         } else {
-            val date = data.downloadDate(context)
+            val date = data.downloadDate(activity)
 
-            val message = context.getString(
+            val message = activity.getString(
                 R.string.dialog_downloaded_msg,
                 date?.let {
                     android.text.format.DateFormat.format(
-                        context.getString(R.string.date_format),
+                        activity.getString(R.string.date_format),
                         date
                     )
                 } ?: "N/A"
-            ) + '\n' + context.getString(
+            ) + '\n' + activity.getString(
                 R.string.dialog_uses_storage_msg,
-                runBlocking { humanReadableByteCountBin(data.size(context)) }
+                runBlocking { humanReadableByteCountBin(data.size(activity)) }
             )
 
             builder = builder
@@ -60,12 +61,12 @@ class DownloadDialog<T : DataClass<*, *>>(
                 .setNeutralButton(R.string.action_delete) { dialog, _ ->
                     dialog.dismiss()
                     MaterialAlertDialogBuilder(
-                        context,
+                        activity,
                         R.style.ThemeOverlay_App_MaterialAlertDialog
                     )
                         .setTitle(R.string.downloads_delete_dialog_title)
                         .setMessage(
-                            context.getString(
+                            activity.getString(
                                 R.string.downloads_delete_dialog_msg,
                                 data.displayName
                             )
@@ -76,12 +77,14 @@ class DownloadDialog<T : DataClass<*, *>>(
                                 is Area, is Zone, is Sector ->
                                     doAsync {
                                         val children = arrayListOf<DataClassImpl>()
-                                        data.getChildren(firestore).toCollection(children)
+                                        data
+                                            .getChildren(activity.application as App, firestore)
+                                            .toCollection(children)
                                         for (child in children)
                                             if (child is DataClass<*, *>)
-                                                child.delete(context)
+                                                child.delete(activity)
 
-                                        data.delete(context)
+                                        data.delete(activity)
                                         uiContext {
                                             deleteCallback?.invoke()
                                         }

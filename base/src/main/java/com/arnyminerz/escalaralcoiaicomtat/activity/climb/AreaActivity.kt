@@ -19,6 +19,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass.DwDataClassAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_POSITION
@@ -98,7 +99,7 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
             try {
                 Timber.v("Getting children zones...")
                 val zones = arrayListOf<Zone>()
-                dataClass.getChildren(firestore).toCollection(zones)
+                dataClass.getChildren(application as App, firestore).toCollection(zones)
                 Timber.v("Got zones.")
 
                 uiContext {
