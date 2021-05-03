@@ -40,6 +40,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
@@ -161,7 +162,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
         val user = auth.currentUser
         val loggedIn = user != null
         Timber.v("Updating Mark completed button visibility: $loggedIn")
-        holder.markCompletedButton.visibility(loggedIn)
+        holder.markCompletedButton.visibility(loggedIn && ENABLE_AUTHENTICATION)
 
         Timber.d("Loading path data")
         doAsync {
@@ -334,6 +335,11 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
         path: Path,
         commentsImageButton: ImageButton
     ) {
+        if (!ENABLE_AUTHENTICATION)
+            return uiContext {
+                visibility(commentsImageButton, false)
+            }
+
         val completions = arrayListOf<MarkedDataInt>()
         path.getCompletions(firestore).toCollection(completions)
         val comments = arrayListOf<String>()
