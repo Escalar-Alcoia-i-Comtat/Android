@@ -4,6 +4,8 @@
     <!-- This is the color of the background of the icons in the right of the list_item_artifo_ending items -->
     <attr name="artifo_ending_badge_color" format="color" />
 
+    <attr name="pathBlockedCardColor" format="color" />
+
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
@@ -20,6 +22,7 @@
 
         <item name="text_dark">@color/bg_color_dark</item>
         <item name="artifo_ending_badge_color">@color/artifo_ending_badge_color_light</item>
+        <item name="pathBlockedCardColor">@color/path_blocked_card_color_light</item>
 
         <item name="android:windowContentTransitions">true</item>
         <item name="fontFamily">@font/cabin</item>

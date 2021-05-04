@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.setTextColor
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.button.MaterialButton
@@ -98,7 +99,7 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
             setTextColor(titleTextView, activity, R.color.path_blocked_text_color)
             setTextColor(idTextView, activity, R.color.path_blocked_text_color)
             cardView.setCardBackgroundColor(
-                activity.resources.getColor(R.color.path_blocked_card_color, activity.theme)
+                getColorFromAttribute(activity, R.attr.pathBlockedCardColor)
             )
             warningTextView.text =
                 activity.resources.getStringArray(R.array.path_warnings)[status.index]
