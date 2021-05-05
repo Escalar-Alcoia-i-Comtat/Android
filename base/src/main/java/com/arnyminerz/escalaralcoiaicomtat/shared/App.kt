@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.collection.arrayMapOf
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
@@ -28,6 +29,14 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      * @since 20210430
      */
     val dataClassChildrenCache = arrayMapOf<String, List<DataClassImpl>>()
+
+    /**
+     * Stores while the application is running the path's blocked status.
+     * @author Arnau Mora
+     * @since 20210503
+     * @see BlockingType
+     */
+    val blockStatuses = arrayMapOf<String, BlockingType>()
 
     override fun onCreate() {
         super.onCreate()

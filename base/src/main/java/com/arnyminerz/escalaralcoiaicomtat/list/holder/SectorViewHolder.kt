@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.setTextColor
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.button.MaterialButton
@@ -47,7 +48,6 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
      * @param toggled If the card should be toggled or not. If true, the card will be large, and more
      * info will be shown.
      * @param hasInfo If true, the [Path] has a description
-     * @param blockStatus The [Path]'s [BlockingType]
      * @param pathSpannables The first element should be pathSpannable, the second one, toggledPathSpannable.
      * @param heights The first element should be the full height, the second one, the other cases'
      * height.
@@ -56,7 +56,6 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
     fun updateCardToggleStatus(
         toggled: Boolean,
         hasInfo: Boolean,
-        blockStatus: BlockingType,
         pathSpannables: Pair<SpannableString, SpannableString>,
         heights: Pair<String?, String?>
     ) {
@@ -85,7 +84,6 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
 
             heightTextView.text = heights.first ?: ""
         }
-        updateBlockedStatus(blockStatus)
     }
 
     /**
@@ -100,8 +98,8 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
         if (anyBlocking) {
             setTextColor(titleTextView, activity, R.color.path_blocked_text_color)
             setTextColor(idTextView, activity, R.color.path_blocked_text_color)
-            warningCardView.setCardBackgroundColor(
-                activity.resources.getColor(R.color.path_blocked_card_color, activity.theme)
+            cardView.setCardBackgroundColor(
+                getColorFromAttribute(activity, R.attr.pathBlockedCardColor)
             )
             warningTextView.text =
                 activity.resources.getStringArray(R.array.path_warnings)[status.index]

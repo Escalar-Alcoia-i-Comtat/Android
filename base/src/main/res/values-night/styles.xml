@@ -14,6 +14,7 @@
 
         <item name="text_dark">@color/bg_color</item>
         <item name="artifo_ending_badge_color">@color/artifo_ending_badge_color_dark</item>
+        <item name="pathBlockedCardColor">@color/path_blocked_card_color_dark</item>
 
         <item name="android:windowContentTransitions">true</item>
         <item name="fontFamily">@font/cabin</item>

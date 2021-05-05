@@ -27,7 +27,8 @@
 
     <color name="path_description_button_color">#0033FF</color>
     <color name="path_mark_button_color">#558B2F</color>
-    <color name="path_blocked_card_color">#FFCDD2</color>
+    <color name="path_blocked_card_color_light">#FFCDD2</color>
+    <color name="path_blocked_card_color_dark">#e57373</color>
     <color name="path_blocked_text_color">#D32F2F</color>
 
     <color name="color_like">#E57373</color>

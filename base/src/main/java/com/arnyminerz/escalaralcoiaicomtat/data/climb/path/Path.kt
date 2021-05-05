@@ -14,14 +14,29 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
+import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
-import java.util.Date
-import java.util.concurrent.TimeUnit
+import java.util.*
+import java.util.concurrent.*
+import kotlin.Array
+import kotlin.Boolean
+import kotlin.Comparable
+import kotlin.IllegalArgumentException
+import kotlin.Int
+import kotlin.Long
+import kotlin.NoSuchElementException
+import kotlin.String
+import kotlin.Throws
+import kotlin.apply
+import kotlin.arrayOfNulls
+import kotlin.let
+import kotlin.to
+import kotlin.toString
 
 class Path(
     objectId: String,
@@ -136,15 +151,6 @@ class Path(
         rebuiltBy = d
     }
 
-    /**
-     * Checks if the Path has safe count. This doesn't include the safe types marked with a 1, since
-     * the 1 is used to mark as "undetermined amount".
-     * @author Arnau Mora
-     * @since 20210316
-     * @return If the path has safes count.
-     */
-    fun hasSafeCount(): Boolean = fixedSafesData.hasSafeCount()
-
     override fun toString(): String = displayName
 
     override fun compareTo(other: Path): Int =
@@ -158,25 +164,35 @@ class Path(
      * Checks if the path is blocked or not
      * @author Arnau Mora
      * @since 20210316
+     * @param app The Application instance to access cached block status
+     * @param firestore The Firestore instance to fetch new data
      * @return A matching BlockingType class
      */
     @WorkerThread
-    suspend fun isBlocked(firestore: FirebaseFirestore): BlockingType {
-        Timber.d("Fetching...")
-        val ref = firestore.document(documentPath)
-
-        Timber.v("Checking if \"$documentPath\" is blocked...")
-        val task = ref.get()
-        val result = task.awaitTask()
-        return if (!task.isSuccessful) {
-            val e = task.exception!!
-            Timber.w(e, "Could not check if path is blocked")
-            BlockingType.UNKNOWN
+    suspend fun isBlocked(app: App, firestore: FirebaseFirestore): BlockingType {
+        var blockStatus = app.blockStatuses[objectId]
+        return if (blockStatus != null) {
+            Timber.v("There's already an stored block status for $objectId: $blockStatus")
+            blockStatus
         } else {
-            val blocked = result!!.getString("blocked")
-            val blockingType = BlockingType.find(blocked)
-            Timber.v("Blocking status for \"$displayName\": $blockingType")
-            blockingType
+            Timber.d("Fetching...")
+            val ref = firestore.document(documentPath)
+
+            Timber.v("Checking if \"$documentPath\" is blocked...")
+            val task = ref.get()
+            val result = task.awaitTask()
+            blockStatus = if (!task.isSuccessful) {
+                val e = task.exception!!
+                Timber.w(e, "Could not check if path is blocked")
+                BlockingType.UNKNOWN
+            } else {
+                val blocked = result!!.getString("blocked")
+                val blockingType = BlockingType.find(blocked)
+                Timber.v("Blocking status for \"$displayName\": $blockingType")
+                blockingType
+            }
+            app.blockStatuses[objectId] = blockStatus
+            blockStatus
         }
     }
 
