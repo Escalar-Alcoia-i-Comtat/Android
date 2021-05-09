@@ -13,7 +13,6 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ERROR_REPORTING_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -39,8 +38,10 @@ import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigClientException
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
 class LoadingActivity : NetworkChangeListenerActivity() {
@@ -116,9 +117,13 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             val configSettings = remoteConfigSettings {
                 minimumFetchIntervalInSeconds = REMOTE_CONFIG_MIN_FETCH_INTERVAL
             }
-            remoteConfig.setConfigSettingsAsync(configSettings).awaitTask()
-            remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS).awaitTask()
-            remoteConfig.fetchAndActivate().awaitTask()
+            remoteConfig.setConfigSettingsAsync(configSettings).await()
+            remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS).await()
+            try {
+                remoteConfig.fetchAndActivate().await()
+            } catch (e: FirebaseRemoteConfigClientException) {
+                Timber.e(e, "Could not get remote config.")
+            }
             APP_UPDATE_MAX_TIME_DAYS = remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
             SHOW_NON_DOWNLOADED = remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
             ENABLE_AUTHENTICATION = remoteConfig.getBoolean(ENABLE_AUTHENTICATION_KEY)
