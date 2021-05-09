@@ -682,12 +682,16 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         dataSource: DataSource?,
                         isFirstResource: Boolean
                     ): Boolean {
-                        Timber.v("Finished loading bitmap!")
-                        try {
-                            cont.resume(resource)
-                        } catch (_: IllegalStateException) {
-                            Timber.w("Tried to resume with result, but it has already been resumed.")
-                        }
+                        if (resource != null) {
+                            Timber.v("Finished loading bitmap!")
+                            try {
+                                cont.resume(resource)
+                            } catch (_: IllegalStateException) {
+                                Timber.w("Tried to resume with result, but it has already been resumed.")
+                            }
+                        } else
+                            Timber.w("Returned null resource to onResourceReady")
+
                         return false
                     }
                 }).also { requestBuilder ->
