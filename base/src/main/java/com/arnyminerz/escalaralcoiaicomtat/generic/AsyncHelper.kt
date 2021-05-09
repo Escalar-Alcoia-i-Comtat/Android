@@ -3,14 +3,10 @@ package com.arnyminerz.escalaralcoiaicomtat.generic
 import android.app.Activity
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
-import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * Runs some code asyncronously.
@@ -55,12 +51,3 @@ suspend fun <T, A : Activity> A.uiContext(@UiThread block: suspend A.() -> T) =
     withContext(Dispatchers.Main) {
         block(this@uiContext)
     }
-
-suspend fun <T> Task<T>.awaitTask(): T = suspendCoroutine { continuation ->
-    this.addOnCompleteListener { task ->
-        if (task.isSuccessful)
-            continuation.resume(task.result)
-        else
-            continuation.resumeWithException(task.exception!!)
-    }
-}
