@@ -55,12 +55,13 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
 
         firestore = Firebase.firestore
         storage = Firebase.storage
+        mapHelper = MapHelper(this)
 
         binding = LayoutListBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
 
-        mapHelper = MapHelper(this)
+        mapHelper = mapHelper
             .withMapView(binding.map)
             .withIconSizeMultiplier(iconSizeMultiplier)
         mapHelper.onCreate(savedInstanceState)

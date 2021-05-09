@@ -15,7 +15,6 @@ import com.arnyminerz.escalaralcoiaicomtat.auth.setDefaultProfileImage
 import com.arnyminerz.escalaralcoiaicomtat.auth.updateDisplayName
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthRegisterBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
-import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
@@ -38,6 +37,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageException
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
 class RegisterFragment private constructor() : Fragment() {
@@ -295,7 +295,7 @@ class RegisterFragment private constructor() : Fragment() {
     private fun cancelRegistration(result: AuthResult) {
         doAsync {
             Timber.i("Deleting just created user...")
-            result.user?.delete()?.awaitTask()
+            result.user?.delete()?.await()
 
             uiContext {
                 toast(R.string.toast_error_internal)

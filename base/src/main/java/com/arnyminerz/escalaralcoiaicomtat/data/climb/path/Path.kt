@@ -12,31 +12,19 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.Ma
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedProjectData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
-import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.*
-import kotlin.Array
-import kotlin.Boolean
-import kotlin.Comparable
-import kotlin.IllegalArgumentException
-import kotlin.Int
-import kotlin.Long
 import kotlin.NoSuchElementException
-import kotlin.String
-import kotlin.Throws
-import kotlin.apply
-import kotlin.arrayOfNulls
-import kotlin.let
-import kotlin.to
-import kotlin.toString
 
 class Path(
     objectId: String,
@@ -180,7 +168,7 @@ class Path(
 
             Timber.v("Checking if \"$documentPath\" is blocked...")
             val task = ref.get()
-            val result = task.awaitTask()
+            val result = task.await()
             blockStatus = if (!task.isSuccessful) {
                 val e = task.exception!!
                 Timber.w(e, "Could not check if path is blocked")
@@ -214,8 +202,9 @@ class Path(
      * @since 20210430
      * @param firestore The [FirebaseFirestore] instance from where to load the data.
      * @throws FirebaseAuthException When there was an exception while loading an user from Firebase.
+     * @throws FirebaseFirestoreException When there was an exception while loading data from Firestore.
      */
-    @Throws(FirebaseAuthException::class)
+    @Throws(FirebaseAuthException::class, FirebaseFirestoreException::class)
     suspend fun getCompletions(
         firestore: FirebaseFirestore
     ): Flow<MarkedDataInt> = flow {
@@ -223,7 +212,7 @@ class Path(
             .document(documentPath)
             .collection("Completions")
             .get()
-            .awaitTask()
+            .await()
         val cachedUsers = arrayMapOf<String, VisibleUserData>()
         if (completionsData != null)
             for (document in completionsData.documents) {
@@ -252,7 +241,7 @@ class Path(
                         val visibleUserData = firestore.collection("Users")
                             .document(userUid)
                             .get()
-                            .awaitTask()!!
+                            .await()!!
                         val data = visibleUserData.data
                         if (data != null) {
                             Timber.v("Got visible user data: $data")

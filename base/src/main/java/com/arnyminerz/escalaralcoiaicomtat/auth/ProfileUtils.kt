@@ -178,7 +178,7 @@ suspend fun updateProfileImage(
  * @throws FirebaseAuthInvalidUserException Thrown if the current user's account has been disabled,
  * deleted, or its credentials are no longer valid.
  */
-@UiThread
+@WorkerThread
 @Throws(FirebaseAuthInvalidUserException::class)
 suspend fun updateDisplayName(
     firestore: FirebaseFirestore,
@@ -216,7 +216,7 @@ suspend fun updateDisplayName(
  * @param firestore The Firestore instance to update references.
  * @param user The user to store the reference of
  */
-@UiThread
+@WorkerThread
 suspend fun createFirestoreUserReference(firestore: FirebaseFirestore, user: FirebaseUser) =
     suspendCoroutine<Void> { cont ->
         firestore.collection("Users")
