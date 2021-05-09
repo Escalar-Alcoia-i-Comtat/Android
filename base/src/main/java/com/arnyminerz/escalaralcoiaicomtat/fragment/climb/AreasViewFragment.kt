@@ -56,7 +56,10 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     private val nearbyEnabled: Boolean
         get() = !PREF_DISABLE_NEARBY.get()
 
-    internal lateinit var mapHelper: MapHelper
+    private lateinit var mapHelper: MapHelper
+
+    val mapHelperInstance: MapHelper?
+        get() = if (this::mapHelper.isInitialized) mapHelper else null
 
     private lateinit var firestore: FirebaseFirestore
 

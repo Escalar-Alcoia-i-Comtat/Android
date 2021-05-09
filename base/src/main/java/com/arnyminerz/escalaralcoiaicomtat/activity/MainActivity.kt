@@ -307,7 +307,7 @@ class MainActivity : LanguageAppCompatActivity() {
         when (requestCode) {
             LOCATION_PERMISSION_REQUEST_CODE -> {
                 if (PermissionsManager.areLocationPermissionsGranted(this))
-                    areasViewFragment.mapHelper.enableLocationComponent(this)
+                    areasViewFragment.mapHelperInstance?.enableLocationComponent(this)
                 areasViewFragment.updateNearbyZones()
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
