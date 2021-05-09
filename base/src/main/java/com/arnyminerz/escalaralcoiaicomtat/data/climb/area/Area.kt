@@ -10,17 +10,18 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
-import java.util.Date
+import java.util.*
 
 /**
  * Creates a new Area instance.
@@ -100,7 +101,7 @@ class Area(
             .orderBy("displayName")
         try {
             Timber.v("Getting zones of \"${metadata.documentPath}\"...")
-            val snapshot = ref.get().awaitTask()
+            val snapshot = ref.get().await()
             Timber.v("Got children result")
             val zones = snapshot.documents
             Timber.d("Got ${zones.size} elements. Processing result")
@@ -111,7 +112,7 @@ class Area(
                 emit(zone)
             }
             Timber.d("Finished loading zones")
-        } catch (e: Exception) {
+        } catch (e: FirebaseFirestoreException) {
             Timber.w(e, "Could not get.")
             e.let { throw it }
         }

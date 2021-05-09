@@ -19,7 +19,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MOBILE_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ROAMING_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
-import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
@@ -48,6 +47,7 @@ import com.mapbox.mapboxsdk.plugins.offline.offline.OfflinePlugin
 import com.mapbox.mapboxsdk.plugins.offline.utils.OfflineUtils
 import kotlinx.coroutines.flow.toCollection
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.io.File
 
@@ -215,7 +215,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         try {
             runBlocking {
                 Timber.d("Downloading image from Firebase Storage: $imageReferenceUrl...")
-                storage.getReferenceFromUrl(imageReferenceUrl).getFile(imageFile).awaitTask()
+                storage.getReferenceFromUrl(imageReferenceUrl).getFile(imageFile).await()
             }
         } catch (e: StorageException) {
             Timber.w(e, "Could not get image")
@@ -240,7 +240,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                     firestore
                         .document(path)
                         .update(mapOf("image" to newImage))
-                        .awaitTask()
+                        .await()
                     Timber.w("Image address updated.")
                     newImage to null
                 }

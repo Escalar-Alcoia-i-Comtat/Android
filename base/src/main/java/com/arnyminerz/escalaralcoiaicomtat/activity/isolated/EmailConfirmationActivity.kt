@@ -8,7 +8,6 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.LoadingActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityEmailConfirmationBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
-import com.arnyminerz.escalaralcoiaicomtat.generic.awaitTask
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
@@ -18,6 +17,7 @@ import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
 class EmailConfirmationActivity : AppCompatActivity() {
@@ -57,7 +57,7 @@ class EmailConfirmationActivity : AppCompatActivity() {
             Timber.v("Getting currently logged in user...")
             val user = Firebase.auth.currentUser
             try {
-                user?.reload()?.awaitTask()
+                user?.reload()?.await()
             } catch (_: FirebaseAuthInvalidUserException) {
                 uiContext {
                     Timber.w("The user has been removed, loading app...")
