@@ -1015,7 +1015,6 @@ $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//MEGABYTE/#/Pointing
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//WEBP_LOSSLESS_LEGACY/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/-w-e-b-p_-l-o-s-s-l-e-s-s_-l-e-g-a-c-y.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//WEBP_LOSSY_LEGACY/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/-w-e-b-p_-l-o-s-s-y_-l-e-g-a-c-y.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//allTrue/kotlin.collections.Collection[kotlin.Boolean]#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/all-true.html
-$dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//awaitTask/com.google.android.gms.tasks.Task[TypeParam(bounds=[kotlin.Any?])]#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/await-task.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//cropToSquare/android.graphics.Bitmap#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/crop-to-square.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//deleteDir/#java.io.File?/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/delete-dir.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.generic//deleteDirAndContents/java.io.File#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.generic/delete-dir-and-contents.html
