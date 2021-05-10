@@ -18,6 +18,15 @@ private const val CRASHLYTICS_KEY_PRIORITY = "priority"
 private const val CRASHLYTICS_KEY_TAG = "tag"
 
 class App : Application(), ConnectivityProvider.ConnectivityStateListener {
+    companion object {
+        /**
+         * Stores the [dataClassChildrenCache] usage so multiple threads won't collide.
+         * @author Arnau Mora
+         * @since 20210510
+         */
+        var usingChildren = false
+    }
+
     private val provider: ConnectivityProvider
         get() = appNetworkProvider
 

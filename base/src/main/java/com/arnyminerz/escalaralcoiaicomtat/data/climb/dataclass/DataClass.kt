@@ -24,6 +24,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.shared.App.Companion.usingChildren
 import com.arnyminerz.escalaralcoiaicomtat.shared.DATACLASS_WAIT_CHILDREN_DELAY
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_COUNT
@@ -155,8 +156,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
     val transitionName = objectId + displayName.replace(" ", "_")
 
-    private var loadingChildren = false
-
     /**
      * Returns the data classes' children. May fetch them from storage, or return the cached items
      * @author Arnau Mora
@@ -169,9 +168,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     @WorkerThread
     @Throws(NoInternetAccessException::class, IllegalStateException::class)
     suspend fun getChildren(app: App?, firestore: FirebaseFirestore?): Flow<A> = flow {
-        if (loadingChildren) {
+        if (usingChildren) {
             Timber.v("Waiting for children to finish loading")
-            while (loadingChildren) {
+            while (usingChildren) {
                 delay(DATACLASS_WAIT_CHILDREN_DELAY)
             }
             Timber.v("Finished loading children!")
@@ -179,29 +178,35 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         if (innerChildren.isEmpty())
             when {
                 app != null && app.dataClassChildrenCache.containsKey(metadata.documentPath) -> {
-                    loadingChildren = true
+                    // Loads children from cache
+                    usingChildren = true
                     val children = ArrayList(app.dataClassChildrenCache[metadata.documentPath]!!)
                     for (child in children)
                         (child as? A)?.let { data ->
                             innerChildren.add(data)
                             emit(data)
                         }
-                    loadingChildren = false
+                    usingChildren = false
                 }
-                firestore == null -> throw IllegalStateException("There are no loaded children, and firestore is null.")
-                else -> {
-                    loadingChildren = true
+                firestore != null -> {
+                    // Loads children from server
+                    usingChildren = true
                     loadChildren(firestore).collect {
                         innerChildren.add(it)
                         emit(it)
                     }
                     app?.dataClassChildrenCache?.set(metadata.documentPath, innerChildren)
-                    loadingChildren = false
+                    usingChildren = false
                 }
+                else -> throw IllegalStateException("There are no loaded children, and firestore is null.")
             }
-        else
+        else {
+            // Loads children from class memory
+            usingChildren = true
             for (a in innerChildren)
                 emit(a)
+            usingChildren = false
+        }
     }
 
     /**
