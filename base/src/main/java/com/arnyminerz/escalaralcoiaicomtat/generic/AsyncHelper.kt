@@ -9,6 +9,22 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
+ * The [CoroutineScope] used in functions such as [doAsync].
+ * @author Arnau Mora
+ * @since 20210510
+ */
+val asyncCoroutineScope
+    get() = CoroutineScope(Dispatchers.Default)
+
+/**
+ * The [CoroutineScope] used in functions such as [doOnMain].
+ * @author Arnau Mora
+ * @since 20210510
+ */
+val mainCoroutineScope
+    get() = CoroutineScope(Dispatchers.Default)
+
+/**
  * Runs some code asyncronously.
  * Use [doOnMain] for updating UI elements.
  * @author Arnau Mora
@@ -17,7 +33,7 @@ import kotlinx.coroutines.withContext
  * @see doOnMain Use this for updating UI elements.
  */
 fun doAsync(@WorkerThread block: suspend CoroutineScope.() -> Unit) =
-    CoroutineScope(Dispatchers.Default).launch {
+    asyncCoroutineScope.launch {
         block(this)
     }
 
@@ -28,7 +44,7 @@ fun doAsync(@WorkerThread block: suspend CoroutineScope.() -> Unit) =
  * @param block The code to run
  */
 fun doOnMain(@UiThread block: suspend CoroutineScope.() -> Unit) =
-    CoroutineScope(Dispatchers.Main).launch {
+    mainCoroutineScope.launch {
         block(this)
     }
 
