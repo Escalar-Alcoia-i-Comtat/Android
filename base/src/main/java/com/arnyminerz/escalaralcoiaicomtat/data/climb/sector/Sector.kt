@@ -30,10 +30,8 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.mapbox.mapboxsdk.geometry.LatLng
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import timber.log.Timber
-import java.util.Date
+import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -121,7 +119,8 @@ class Sector constructor(
      * @see Path
      */
     @WorkerThread
-    override suspend fun loadChildren(firestore: FirebaseFirestore): Flow<Path> = flow {
+    override suspend fun loadChildren(firestore: FirebaseFirestore): List<Path> {
+        val paths = arrayListOf<Path>()
         Timber.v("Loading Sector's children.")
 
         Timber.d("Fetching...")
@@ -138,19 +137,20 @@ class Sector constructor(
                     .addOnFailureListener { cont.resumeWithException(it) }
             }
             Timber.v("Got children result")
-            val paths = snapshot.documents
-            Timber.d("Got ${paths.size} elements. Processing result")
-            for (l in paths.indices) {
-                val pathData = paths[l]
+            val pathsDocs = snapshot.documents
+            Timber.d("Got ${pathsDocs.size} elements. Processing result")
+            for (l in pathsDocs.indices) {
+                val pathData = pathsDocs[l]
                 Timber.d("Processing sector #$l")
                 val path = Path(pathData)
-                emit(path)
+                paths.add(path)
             }
             Timber.d("Finished loading zones")
         } catch (e: Exception) {
             Timber.w(e, "Could not get.")
             e.let { throw it }
         }
+        return paths
     }
 
     override fun describeContents(): Int = 0

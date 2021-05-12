@@ -52,14 +52,14 @@ import com.google.firebase.storage.StorageException
 import com.mapbox.mapboxsdk.maps.Style
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.toCollection
+import kotlinx.coroutines.isActive
 import timber.log.Timber
 import java.io.File
 import java.util.*
 import java.util.concurrent.*
 import kotlin.collections.ArrayList
+import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -167,7 +167,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     @WorkerThread
     @Throws(NoInternetAccessException::class, IllegalStateException::class)
-    suspend fun getChildren(app: App?, firestore: FirebaseFirestore?): Flow<A> = flow {
+    suspend fun getChildren(app: App?, firestore: FirebaseFirestore?): List<A> {
         if (usingChildren) {
             Timber.v("Waiting for children to finish loading")
             while (usingChildren) {
@@ -175,38 +175,34 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             }
             Timber.v("Finished loading children!")
         }
-        if (innerChildren.isEmpty())
+        if (innerChildren.isEmpty()) {
+            usingChildren = true
             when {
                 app != null && app.dataClassChildrenCache.containsKey(metadata.documentPath) -> {
                     // Loads children from cache
-                    usingChildren = true
                     val children = ArrayList(app.dataClassChildrenCache[metadata.documentPath]!!)
                     for (child in children)
-                        (child as? A)?.let { data ->
-                            innerChildren.add(data)
-                            emit(data)
-                        }
-                    usingChildren = false
+                        if (coroutineContext.isActive)
+                            (child as? A)?.let { data ->
+                                innerChildren.add(data)
+                            }
+                        else break
                 }
                 firestore != null -> {
                     // Loads children from server
-                    usingChildren = true
-                    loadChildren(firestore).collect {
-                        innerChildren.add(it)
-                        emit(it)
-                    }
+                    innerChildren.addAll(
+                        loadChildren(firestore)
+                    )
                     app?.dataClassChildrenCache?.set(metadata.documentPath, innerChildren)
-                    usingChildren = false
                 }
-                else -> throw IllegalStateException("There are no loaded children, and firestore is null.")
+                else -> {
+                    usingChildren = false
+                    throw IllegalStateException("There are no loaded children, and firestore is null.")
+                }
             }
-        else {
-            // Loads children from class memory
-            usingChildren = true
-            for (a in innerChildren)
-                emit(a)
             usingChildren = false
         }
+        return innerChildren
     }
 
     /**
@@ -299,7 +295,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     operator fun get(index: Int): A = innerChildren[index]
 
     @WorkerThread
-    protected abstract suspend fun loadChildren(firestore: FirebaseFirestore): Flow<A>
+    protected abstract suspend fun loadChildren(firestore: FirebaseFirestore): Collection<A>
 
     /**
      * Gets an object based on objectId

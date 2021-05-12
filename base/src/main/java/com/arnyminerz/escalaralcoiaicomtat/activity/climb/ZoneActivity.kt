@@ -10,6 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.get
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.get
 import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
@@ -29,8 +30,6 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
 class ZoneActivity : DataClassListActivity<Zone>() {
@@ -68,8 +67,8 @@ class ZoneActivity : DataClassListActivity<Zone>() {
         zoneId = zoneIdExtra
         doAsync {
             val area = AREAS[areaId]!!
-            area.getChildren(application as App, firestore).collect()
-            dataClass = area[zoneId]
+            val zones = area.getChildren(application as App, firestore)
+            dataClass = zones[zoneId]!!
 
             val transitionName = intent.getExtra(EXTRA_ZONE_TRANSITION_NAME)
             position = intent.getExtra(EXTRA_POSITION, 0)
