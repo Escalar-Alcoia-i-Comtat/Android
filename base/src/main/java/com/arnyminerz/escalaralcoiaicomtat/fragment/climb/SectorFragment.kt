@@ -42,7 +42,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
 @ExperimentalBadgeUtils
@@ -57,8 +56,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
     private var maximized = false
     private var notMaximizedImageHeight = 0
 
-    private var _binding: FragmentSectorBinding? = null
-    internal val binding get() = _binding!!
+    private var binding: FragmentSectorBinding? = null
 
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
@@ -68,7 +66,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
     @UiThread
     private fun refreshMaximizeStatus() {
-        binding.sizeChangeFab.setImageResource(
+        binding?.sizeChangeFab?.setImageResource(
             if (maximized) R.drawable.round_flip_to_front_24
             else R.drawable.round_flip_to_back_24
         )
@@ -79,7 +77,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
     @UiThread
     fun minimize() {
         maximized = false
-        if (_binding != null)
+        if (binding != null)
             refreshMaximizeStatus()
     }
 
@@ -89,14 +87,15 @@ class SectorFragment : NetworkChangeListenerFragment() {
      * @since 20210323
      */
     private suspend fun loadImage() {
+        val iv = binding?.sectorImageView ?: return
         uiContext {
-            binding.sectorProgressBar.visibility(true)
+            binding?.sectorProgressBar?.visibility(true)
         }
         sector.loadImage(
             requireActivity(),
             storage,
             firestore,
-            binding.sectorImageView,
+            iv,
             ImageLoadParameters<Bitmap>().apply {
                 withTransitionOptions(BitmapTransitionOptions.withCrossFade(CROSSFADE_DURATION))
                 withThumbnailSize(SECTOR_THUMBNAIL_SIZE)
@@ -110,7 +109,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 setShowPlaceholder(false)
             })
         uiContext {
-            binding.sectorProgressBar.visibility(false)
+            binding?.sectorProgressBar?.visibility(false)
         }
         Timber.v("Finished loading image")
     }
@@ -120,8 +119,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSectorBinding.inflate(inflater, container, false)
-        return binding.root
+        binding = FragmentSectorBinding.inflate(inflater, container, false)
+        return binding!!.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -136,7 +135,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        binding = null
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
@@ -177,7 +176,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
         sector = sectors[sectorIndex]
 
         uiContext {
-            binding.sectorTextView.text = sector.displayName
+            binding?.sectorTextView?.text = sector.displayName
         }
 
         isDownloaded =
@@ -187,8 +186,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
         notMaximizedImageHeight = size.second / 2
 
         uiContext {
-            binding.sectorImageViewLayout.layoutParams.height = notMaximizedImageHeight
-            binding.sectorImageViewLayout.requestLayout()
+            binding?.sectorImageViewLayout?.layoutParams?.height = notMaximizedImageHeight
+            binding?.sectorImageViewLayout?.requestLayout()
         }
 
         if (activity != null) {
@@ -205,10 +204,10 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 Timber.v("Finished loading paths, performing UI updates")
                 (this as? SectorActivity?)?.updateTitle(sector.displayName, isDownloaded)
 
-                binding.sizeChangeFab.setOnClickListener {
+                binding?.sizeChangeFab?.setOnClickListener {
                     maximized = !maximized
 
-                    (binding.sectorImageViewLayout.layoutParams as ViewGroup.MarginLayoutParams).apply {
+                    (binding?.sectorImageViewLayout?.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
                         val tv = TypedValue()
                         requireContext().theme.resolveAttribute(
                             android.R.attr.actionBarSize,
@@ -220,31 +219,39 @@ class SectorFragment : NetworkChangeListenerFragment() {
                         height =
                             if (maximized) LinearLayout.LayoutParams.MATCH_PARENT else notMaximizedImageHeight
                     }
-                    binding.sectorImageViewLayout.requestLayout()
+                    binding?.sectorImageViewLayout?.requestLayout()
 
                     refreshMaximizeStatus()
                 }
-                binding.dataScrollView.show()
+                binding?.dataScrollView?.show()
                 refreshMaximizeStatus()
 
                 // Load Paths
-                binding.pathsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-                binding.pathsRecyclerView.layoutAnimation =
+                binding?.pathsRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+                binding?.pathsRecyclerView?.layoutAnimation =
                     AnimationUtils.loadLayoutAnimation(
                         requireContext(),
                         R.anim.item_enter_left_animator
                     )
-                binding.pathsRecyclerView.adapter =
+                binding?.pathsRecyclerView?.adapter =
                     PathsAdapter(children, requireActivity() as SectorActivity)
-                binding.pathsRecyclerView.show()
+                binding?.pathsRecyclerView?.show()
 
                 // Load info bar
-                sector.sunTime.appendChip(requireContext(), binding.sunChip)
-                sector.kidsAptChip(requireContext(), binding.kidsAptChip)
-                sector.walkingTimeView(requireContext(), binding.walkingTimeTextView)
+                binding?.sunChip?.let {
+                    sector.sunTime.appendChip(requireContext(), it)
+                }
+                binding?.kidsAptChip?.let {
+                    sector.kidsAptChip(requireContext(), it)
+                }
+                binding?.walkingTimeTextView?.let {
+                    sector.walkingTimeView(requireContext(), it)
+                }
 
                 // Load chart
-                sector.loadChart(requireActivity(), binding.sectorBarChart, children)
+                binding?.sectorBarChart?.let {
+                    sector.loadChart(requireActivity(), it, children)
+                }
 
                 (this as? SectorActivity?)?.setLoading(false)
             }
