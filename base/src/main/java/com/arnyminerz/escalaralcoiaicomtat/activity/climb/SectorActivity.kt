@@ -253,17 +253,19 @@ class SectorActivity : LanguageAppCompatActivity() {
                         doAsync {
                             Timber.v("Getting adapter...")
                             val adapter =
-                                fragments[currentPage].binding.pathsRecyclerView.adapter as PathsAdapter
-                            Timber.v("Getting view holder...")
-                            val holder = adapter.viewHolders[path.objectId]
-                            if (holder != null) {
-                                Timber.v("Loading completed path data...")
-                                adapter.loadCompletedPathData(
-                                    Firebase.auth.currentUser,
-                                    path,
-                                    holder.commentsImageButton
-                                )
-                            } else Timber.w("Could not find view holder")
+                                fragments[currentPage].binding?.pathsRecyclerView?.adapter as PathsAdapter?
+                            if (adapter != null) {
+                                Timber.v("Getting view holder...")
+                                val holder = adapter.viewHolders[path.objectId]
+                                if (holder != null) {
+                                    Timber.v("Loading completed path data...")
+                                    adapter.loadCompletedPathData(
+                                        Firebase.auth.currentUser,
+                                        path,
+                                        holder.commentsImageButton
+                                    )
+                                } else Timber.w("Could not find view holder")
+                            } else Timber.w("Could not fetch adapter.")
                         }
                     }
                     .addOnFailureListener {
