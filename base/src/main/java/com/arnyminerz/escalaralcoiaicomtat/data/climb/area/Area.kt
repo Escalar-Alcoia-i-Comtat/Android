@@ -16,9 +16,6 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.util.*
@@ -91,7 +88,8 @@ class Area(
      * @see Zone
      */
     @WorkerThread
-    override suspend fun loadChildren(firestore: FirebaseFirestore): Flow<Zone> = flow {
+    override suspend fun loadChildren(firestore: FirebaseFirestore): List<Zone> {
+        val zones = arrayListOf<Zone>()
         Timber.v("Loading Area's children.")
 
         Timber.d("Fetching...")
@@ -103,19 +101,20 @@ class Area(
             Timber.v("Getting zones of \"${metadata.documentPath}\"...")
             val snapshot = ref.get().await()
             Timber.v("Got children result")
-            val zones = snapshot.documents
-            Timber.d("Got ${zones.size} elements. Processing result")
-            for (l in zones.indices) {
-                val zoneData = zones[l]
+            val zonesDocs = snapshot.documents
+            Timber.d("Got ${zonesDocs.size} elements. Processing result")
+            for (l in zonesDocs.indices) {
+                val zoneData = zonesDocs[l]
                 Timber.d("Processing zone #$l")
                 val zone = Zone(zoneData)
-                emit(zone)
+                zones.add(zone)
             }
             Timber.d("Finished loading zones")
         } catch (e: FirebaseFirestoreException) {
             Timber.w(e, "Could not get.")
             e.let { throw it }
         }
+        return zones
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -158,11 +157,15 @@ class Area(
  * @since 20210411
  */
 @WorkerThread
-suspend fun Iterable<Area>.getZones(activity: Activity, firestore: FirebaseFirestore): Flow<Zone> =
-    flow {
-        for (area in this@getZones)
-            emitAll(area.getChildren(activity.application as App, firestore))
-    }
+suspend fun Iterable<Area>.getZones(
+    activity: Activity,
+    firestore: FirebaseFirestore
+): List<Zone> {
+    val zones = arrayListOf<Zone>()
+    for (area in this@getZones)
+        zones.addAll(area.getChildren(activity.application as App, firestore))
+    return zones
+}
 
 /**
  * Checks if an [Area] list contains an [Area] with an specific id.
