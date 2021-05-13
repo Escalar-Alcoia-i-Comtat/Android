@@ -51,14 +51,13 @@ import com.google.firebase.storage.StorageException
 import com.mapbox.mapboxsdk.maps.Style
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.toCollection
+import kotlinx.coroutines.isActive
 import timber.log.Timber
 import java.io.File
-import java.util.*
-import java.util.concurrent.*
-import kotlin.collections.ArrayList
+import java.util.Date
+import java.util.concurrent.ExecutionException
+import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -89,7 +88,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             firestore: FirebaseFirestore
         ): Intent? {
             var result: Intent? = null
-            val app = (context as? Activity)?.application as? App
             Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
             for (area in AREAS) {
                 Timber.d("  Finding in ${area.displayName}.")
@@ -101,12 +99,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 else {
                     Timber.d("  Iterating area's children...")
                     val zones = arrayListOf<Zone>()
-                    area.getChildren(app, firestore).toCollection(zones)
+                    area.getChildren(firestore).toCollection(zones)
                     for (zone in zones) {
                         Timber.d("    Finding in ${zone.displayName}.")
                         // Children must be loaded so `count` is fetched correctly.
                         val sectors = arrayListOf<Sector>()
-                        zone.getChildren(app, firestore)
+                        zone.getChildren(firestore)
                             .toCollection(sectors)
 
                         if (zone.displayName.equals(queryName, true))
@@ -146,6 +144,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         }
     }
 
+    /**
+     * Stores if the children are currently being loaded.
+     * @author Arnau Mora
+     * @since 20210514
+     */
+    private var loadingChildren = false
+
     protected val innerChildren = arrayListOf<A>()
 
     var imageReferenceUrl: String = imageReferenceUrl
@@ -154,8 +159,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     private val pin = "${namespace}_$objectId"
 
     val transitionName = objectId + displayName.replace(" ", "_")
-
-    private var loadingChildren = false
 
     /**
      * Returns the data classes' children. May fetch them from storage, or return the cached items
@@ -168,7 +171,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     @WorkerThread
     @Throws(NoInternetAccessException::class, IllegalStateException::class)
-    suspend fun getChildren(app: App?, firestore: FirebaseFirestore?): Flow<A> = flow {
+    suspend fun getChildren(firestore: FirebaseFirestore?): List<A> {
         if (loadingChildren) {
             Timber.v("Waiting for children to finish loading")
             while (loadingChildren) {
@@ -176,32 +179,35 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             }
             Timber.v("Finished loading children!")
         }
-        if (innerChildren.isEmpty())
+        val dataClassId = metadata.documentPath
+        if (innerChildren.isEmpty()) {
+            loadingChildren = true
             when {
-                app != null && app.dataClassChildrenCache.containsKey(metadata.documentPath) -> {
-                    loadingChildren = true
-                    val children = ArrayList(app.dataClassChildrenCache[metadata.documentPath]!!)
+                App.cache.hasChild(dataClassId) -> {
+                    // Loads children from cache
+                    val children = App.cache.getChildren(dataClassId)!!
                     for (child in children)
-                        (child as? A)?.let { data ->
-                            innerChildren.add(data)
-                            emit(data)
-                        }
-                    loadingChildren = false
+                        if (coroutineContext.isActive)
+                            (child as? A)?.let { data ->
+                                innerChildren.add(data)
+                            }
+                        else break
                 }
-                firestore == null -> throw IllegalStateException("There are no loaded children, and firestore is null.")
+                firestore != null -> {
+                    // Loads children from server
+                    innerChildren.addAll(
+                        loadChildren(firestore)
+                    )
+                    App.cache.storeChild(dataClassId, innerChildren)
+                }
                 else -> {
-                    loadingChildren = true
-                    loadChildren(firestore).collect {
-                        innerChildren.add(it)
-                        emit(it)
-                    }
-                    app?.dataClassChildrenCache?.set(metadata.documentPath, innerChildren)
                     loadingChildren = false
+                    throw IllegalStateException("There are no loaded children, and firestore is null.")
                 }
             }
-        else
-            for (a in innerChildren)
-                emit(a)
+            loadingChildren = false
+        }
+        return innerChildren
     }
 
     /**
@@ -294,7 +300,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     operator fun get(index: Int): A = innerChildren[index]
 
     @WorkerThread
-    protected abstract suspend fun loadChildren(firestore: FirebaseFirestore): Flow<A>
+    protected abstract suspend fun loadChildren(firestore: FirebaseFirestore): Collection<A>
 
     /**
      * Gets an object based on objectId
@@ -357,7 +363,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         Timber.v("Getting downloaded sections...")
         val downloadedSectionsList = arrayListOf<DownloadedSection>()
         val children = arrayListOf<DataClassImpl>()
-        getChildren(activity.application as App, firestore).toCollection(children)
+        getChildren(firestore).toCollection(children)
         for ((c, child) in children.withIndex())
             (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
                 val downloadStatus = dataClass.downloadStatus(activity, firestore)
@@ -436,7 +442,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
             Timber.v("$pin Getting children elements download status...")
             val children = arrayListOf<DataClassImpl>()
-            getChildren(activity.application as App, firestore).toCollection(children)
+            getChildren(firestore).toCollection(children)
 
             Timber.v("$pin Finding for a downloaded children in ${children.size}...")
             var allChildrenDownloaded = true
@@ -481,7 +487,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         firestore: FirebaseFirestore
     ): Boolean {
         val children = arrayListOf<DataClassImpl>()
-        getChildren(activity.application as App, firestore).toCollection(children)
+        getChildren(firestore).toCollection(children)
         for (child in children)
             if (child is DataClass<*, *> &&
                 child.downloadStatus(activity, firestore) == DownloadStatus.DOWNLOADED
@@ -512,7 +518,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         lst.add(imgFile.deleteIfExists())
         val children = arrayListOf<DataClassImpl>()
         try {
-            getChildren(activity.application as App, null).toCollection(children)
+            getChildren(null).toCollection(children)
         } catch (_: IllegalStateException) {
         }
         for (child in children)
@@ -542,7 +548,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
         val children = arrayListOf<DataClassImpl>()
         try {
-            getChildren(activity.application as App, null).toCollection(children)
+            getChildren(null).toCollection(children)
         } catch (_: IllegalStateException) {
         }
         for (child in children)
@@ -558,16 +564,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Returns the amount of children the data class has
      * @author Arnau Mora
      * @date 20210413
-     * @param activity The activity to run from
      * @return The amount of children the data class has
      * @throws IllegalStateException When the children has not been loaded and [firestore] is null.
      * @see getChildren
      */
     @Throws(IllegalStateException::class)
     @WorkerThread
-    suspend fun count(activity: Activity, firestore: FirebaseFirestore?): Int {
+    suspend fun count(firestore: FirebaseFirestore?): Int {
         val children = arrayListOf<DataClassImpl>()
-        getChildren(activity.application as App, firestore).toCollection(children)
+        getChildren(firestore).toCollection(children)
         return children.size
     }
 

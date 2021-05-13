@@ -22,9 +22,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
-import java.util.*
-import java.util.concurrent.*
-import kotlin.NoSuchElementException
+import java.util.Date
+import java.util.concurrent.TimeUnit
 
 class Path(
     objectId: String,
@@ -152,13 +151,12 @@ class Path(
      * Checks if the path is blocked or not
      * @author Arnau Mora
      * @since 20210316
-     * @param app The Application instance to access cached block status
      * @param firestore The Firestore instance to fetch new data
      * @return A matching BlockingType class
      */
     @WorkerThread
-    suspend fun isBlocked(app: App, firestore: FirebaseFirestore): BlockingType {
-        var blockStatus = app.blockStatuses[objectId]
+    suspend fun isBlocked(firestore: FirebaseFirestore): BlockingType {
+        var blockStatus = App.cache.getBlockStatus(objectId)
         return if (blockStatus != null) {
             Timber.v("There's already an stored block status for $objectId: $blockStatus")
             blockStatus
@@ -179,7 +177,7 @@ class Path(
                 Timber.v("Blocking status for \"$displayName\": $blockingType")
                 blockingType
             }
-            app.blockStatuses[objectId] = blockStatus
+            App.cache.storeBlockStatus(objectId, blockStatus)
             blockStatus
         }
     }

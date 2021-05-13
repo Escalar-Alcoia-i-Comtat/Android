@@ -16,10 +16,8 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.mapbox.mapboxsdk.geometry.LatLng
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import timber.log.Timber
-import java.util.Date
+import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -85,7 +83,8 @@ class Zone(
      * @see Sector
      */
     @WorkerThread
-    override suspend fun loadChildren(firestore: FirebaseFirestore): Flow<Sector> = flow {
+    override suspend fun loadChildren(firestore: FirebaseFirestore): List<Sector> {
+        val sectors = arrayListOf<Sector>()
         Timber.v("Loading Zone's children.")
 
         Timber.d("Fetching...")
@@ -102,19 +101,20 @@ class Zone(
                     .addOnFailureListener { cont.resumeWithException(it) }
             }
             Timber.v("Got children result")
-            val sectors = snapshot.documents
-            Timber.d("Got ${sectors.size} elements. Processing result")
-            for (l in sectors.indices) {
-                val sectorData = sectors[l]
+            val sectorsDocs = snapshot.documents
+            Timber.d("Got ${sectorsDocs.size} elements. Processing result")
+            for (l in sectorsDocs.indices) {
+                val sectorData = sectorsDocs[l]
                 Timber.d("Processing sector #$l")
                 val sector = Sector(sectorData)
-                emit(sector)
+                sectors.add(sector)
             }
             Timber.d("Finished loading sectors")
         } catch (e: Exception) {
             Timber.w(e, "Could not get.")
             e.let { throw it }
         }
+        return sectors
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -137,4 +137,11 @@ class Zone(
 
         const val NAMESPACE = "Zone"
     }
+}
+
+operator fun Collection<Zone>.get(id: String): Zone? {
+    for (zone in this)
+        if (zone.objectId == id)
+            return zone
+    return null
 }

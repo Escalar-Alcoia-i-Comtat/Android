@@ -19,13 +19,11 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass.DwDataClassAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_POSITION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_TRANSITION_NAME
-import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
 class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
@@ -99,7 +97,7 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
             try {
                 Timber.v("Getting children zones...")
                 val zones = arrayListOf<Zone>()
-                dataClass.getChildren(application as App, firestore).toCollection(zones)
+                dataClass.getChildren(firestore).toCollection(zones)
                 Timber.v("Got zones.")
 
                 uiContext {

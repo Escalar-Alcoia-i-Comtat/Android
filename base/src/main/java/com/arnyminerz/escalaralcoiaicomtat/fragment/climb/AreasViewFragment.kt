@@ -46,7 +46,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.geometry.LatLng
-import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
 class AreasViewFragment : NetworkChangeListenerFragment() {
@@ -174,7 +173,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
             doAsync {
                 val zones = arrayListOf<Zone>()
-                AREAS.getZones(requireActivity(), firestore).toCollection(zones)
+                AREAS.getZones(firestore).toCollection(zones)
                 Timber.v("Iterating through ${zones.size} zones.")
                 Timber.v("Current Location: [${location.latitude},${location.longitude}]")
                 for (zone in zones) {

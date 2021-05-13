@@ -3,10 +3,8 @@ package com.arnyminerz.escalaralcoiaicomtat.shared
 import android.app.Application
 import android.content.Context
 import android.util.Log
-import androidx.collection.arrayMapOf
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.BlockingType
+import com.arnyminerz.escalaralcoiaicomtat.data.Cache
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
@@ -18,25 +16,14 @@ private const val CRASHLYTICS_KEY_PRIORITY = "priority"
 private const val CRASHLYTICS_KEY_TAG = "tag"
 
 class App : Application(), ConnectivityProvider.ConnectivityStateListener {
+    companion object {
+        val cache = Cache()
+    }
+
     private val provider: ConnectivityProvider
         get() = appNetworkProvider
 
     private lateinit var firestore: FirebaseFirestore
-
-    /**
-     * Stores while the application is running the data class' children data.
-     * @author Arnau Mora
-     * @since 20210430
-     */
-    val dataClassChildrenCache = arrayMapOf<String, List<DataClassImpl>>()
-
-    /**
-     * Stores while the application is running the path's blocked status.
-     * @author Arnau Mora
-     * @since 20210503
-     * @see BlockingType
-     */
-    val blockStatuses = arrayMapOf<String, BlockingType>()
 
     override fun onCreate() {
         super.onCreate()
@@ -59,8 +46,6 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     override fun onTerminate() {
         Timber.v("Removing network listener...")
         provider.removeListener(this)
-        Timber.v("Clearing DataClass children cache...")
-        dataClassChildrenCache.clear()
         super.onTerminate()
     }
 

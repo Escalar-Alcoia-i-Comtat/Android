@@ -149,6 +149,14 @@ const val DOWNLOAD_MARKER_MAX_ZOOM = 20.0
 const val DATACLASS_WAIT_CHILDREN_DELAY = 10L
 
 /**
+ * The time that will be delayed inside the Path block status load, for not overflowing the thread.
+ * In millis
+ * @author Arnau Mora
+ * @since 20210514
+ */
+const val DATACLASS_WAIT_BLOCK_STATUS_DELAY = 10L
+
+/**
  * Specifies the redirect url for the confirmation mails
  * @author Arnau Mora
  * @since 20210425

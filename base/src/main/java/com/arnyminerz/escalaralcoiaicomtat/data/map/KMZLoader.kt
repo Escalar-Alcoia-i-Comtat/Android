@@ -18,9 +18,7 @@ import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
-import java.util.Locale
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
+import java.util.zip.*
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -46,7 +44,7 @@ fun loadKMZ(
     val result = MapFeatures()
 
     Timber.v("Loading KMZ (${kmzFile.path})...")
-    val tempName = kmzFile.name.replace(" ", "_").toLowerCase(Locale.getDefault())
+    val tempName = kmzFile.name.replace(" ", "_").lowercase()
     val tempDir = File(context.cacheDir, tempName)
 
     // If tempDir already exists, but it's not a dir, delete it

@@ -113,7 +113,8 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
 
         updateIcon()
 
-        if (this::mapHelper.isInitialized && !mapHelper.isLoaded && hasInternet) {
+        val initializationCheck = this::dataClass.isInitialized && this::mapHelper.isInitialized
+        if (initializationCheck && !mapHelper.isLoaded && hasInternet) {
             Timber.v("Loading map...")
             mapHelper
                 .show()

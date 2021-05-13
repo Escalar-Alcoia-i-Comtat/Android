@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.UiThread
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
@@ -34,6 +35,7 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.ActivityResult.RESULT_IN_APP_UPDATE_FAILED
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
+import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -60,8 +62,10 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         setContentView(binding.root)
 
         val enableErrorReporting = SETTINGS_ERROR_REPORTING_PREF.get()
-        Firebase.crashlytics.setCrashlyticsCollectionEnabled(enableErrorReporting)
+        Firebase.crashlytics.setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
         Timber.v("Set Crashlytics collection enabled to $enableErrorReporting")
+        Firebase.analytics.setAnalyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
+        Timber.v("Set Analytics collection enabled to $enableErrorReporting")
 
         Timber.v("Getting Firestore instance...")
         firestore = Firebase.firestore
