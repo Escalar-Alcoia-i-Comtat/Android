@@ -45,7 +45,6 @@ import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition
 import com.mapbox.mapboxsdk.plugins.offline.model.OfflineDownloadOptions
 import com.mapbox.mapboxsdk.plugins.offline.offline.OfflinePlugin
 import com.mapbox.mapboxsdk.plugins.offline.utils.OfflineUtils
-import kotlinx.coroutines.flow.toCollection
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -328,7 +327,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val sectors = runBlocking {
             Timber.d("Downloading child sectors...")
             val sectors = arrayListOf<Sector>()
-            zone.getChildren(null, firestore)
+            zone.getChildren(firestore)
                 .toCollection(sectors)
             sectors
         }

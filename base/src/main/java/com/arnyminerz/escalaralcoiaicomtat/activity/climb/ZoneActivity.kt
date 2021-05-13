@@ -20,7 +20,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass.DwDataClassAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_POSITION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_COUNT
@@ -67,7 +66,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
         zoneId = zoneIdExtra
         doAsync {
             val area = AREAS[areaId]!!
-            val zones = area.getChildren(application as App, firestore)
+            val zones = area.getChildren(firestore)
             dataClass = zones[zoneId]!!
 
             val transitionName = intent.getExtra(EXTRA_ZONE_TRANSITION_NAME)
@@ -105,7 +104,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
         if (!loaded && dataClassInitialized)
             try {
                 val sectors = arrayListOf<Sector>()
-                dataClass.getChildren(application as App, firestore).toCollection(sectors)
+                dataClass.getChildren(firestore).toCollection(sectors)
 
                 Timber.v("Got ${sectors.size} sectors.")
 

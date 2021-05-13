@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.area
 
-import android.app.Activity
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.WorkerThread
@@ -12,7 +11,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
-import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -158,12 +156,11 @@ class Area(
  */
 @WorkerThread
 suspend fun Iterable<Area>.getZones(
-    activity: Activity,
     firestore: FirebaseFirestore
 ): List<Zone> {
     val zones = arrayListOf<Zone>()
     for (area in this@getZones)
-        zones.addAll(area.getChildren(activity.application as App, firestore))
+        zones.addAll(area.getChildren(firestore))
     return zones
 }
 

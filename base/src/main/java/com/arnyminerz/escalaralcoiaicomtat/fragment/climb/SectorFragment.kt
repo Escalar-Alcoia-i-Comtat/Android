@@ -27,7 +27,6 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_AREA_ID
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_ZONE_ID
-import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.shared.CROSSFADE_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.SECTOR_THUMBNAIL_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
@@ -171,7 +170,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
         }
         val sectors = arrayListOf<Sector>()
         AREAS[areaId]!![zoneId]
-            .getChildren(requireActivity().application as App, sectorActivity.firestore)
+            .getChildren(sectorActivity.firestore)
             .toCollection(sectors)
         sector = sectors[sectorIndex]
 
@@ -193,7 +192,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
         if (activity != null) {
             Timber.v("Loading paths...")
             val children = arrayListOf<Path>()
-            sector.getChildren(requireActivity().application as App, sectorActivity.firestore)
+            sector.getChildren(sectorActivity.firestore)
                 .toCollection(children)
             Timber.v("Finished loading children sectors")
 

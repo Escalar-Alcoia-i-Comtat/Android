@@ -10,7 +10,6 @@ import android.view.animation.RotateAnimation
 import android.widget.ImageButton
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.collection.arrayMapOf
 import androidx.core.content.ContextCompat
@@ -39,7 +38,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
@@ -298,7 +296,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
         }
 
         Timber.v("Checking if blocked...")
-        val blocked = path.isBlocked(activity.application as App, firestore)
+        val blocked = path.isBlocked(firestore)
         Timber.d("Path ${path.objectId} block status: $blocked")
 
         uiContext {
@@ -463,7 +461,6 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
      * @author Arnau Mora
      * @since 20210406
      */
-    @UiThread
     private fun createChips(
         endings: List<EndingType>,
         pitches: List<Pitch>,

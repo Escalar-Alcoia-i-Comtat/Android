@@ -10,10 +10,8 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
-import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.toCollection
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
@@ -78,7 +76,7 @@ class DownloadDialog<T : DataClass<*, *>>(
                                     doAsync {
                                         val children = arrayListOf<DataClassImpl>()
                                         data
-                                            .getChildren(activity.application as App, firestore)
+                                            .getChildren(firestore)
                                             .toCollection(children)
                                         for (child in children)
                                             if (child is DataClass<*, *>)
