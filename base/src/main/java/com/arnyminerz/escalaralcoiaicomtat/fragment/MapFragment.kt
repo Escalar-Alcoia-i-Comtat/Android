@@ -26,6 +26,8 @@ import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
+import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.crashlytics.ktx.crashlytics
@@ -74,6 +76,7 @@ class MapFragment : NetworkChangeListenerFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         Timber.d("onActivityCreated()")
+        binding.loadingMapCardView.show()
 
         firebaseStorage = Firebase.storage
         firestore = Firebase.firestore
@@ -263,6 +266,7 @@ class MapFragment : NetworkChangeListenerFragment() {
             Timber.d("Displaying and centering map...")
             mapHelper.display()
             mapHelper.center()
+            binding.loadingMapCardView.hide()
         }
 
         mapLoading = false
