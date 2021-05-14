@@ -233,7 +233,7 @@ class MapFragment : NetworkChangeListenerFragment() {
                 )
                 if (features != null) {
                     Timber.v("Adding features to map...")
-                    mapHelper.add(features, center = false, display = false)
+                    mapHelper.add(features)
                 }
             } catch (e: FileNotFoundException) {
                 Timber.e(e, "Could not load KML")

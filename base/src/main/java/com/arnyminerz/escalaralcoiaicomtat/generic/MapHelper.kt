@@ -607,16 +607,13 @@ constructor(context: Context) {
     /**
      * Adds the map features to the map
      * @param result The [MapFeatures] to add
-     * @param center If the camera should be centered on the features after loading them
-     * @param display If the added features should be displayed. This is ignored if [center] is true.
      * @see MapFeatures
      * @see GeoGeometry
      * @see GeoMarker
      * @throws MapNotInitializedException If the map has not been initialized
      */
-    @UiThread
     @Throws(MapNotInitializedException::class)
-    fun add(result: MapFeatures, center: Boolean = true, display: Boolean = true) {
+    fun add(result: MapFeatures) {
         Timber.v("Loading features...")
         with(result) {
             Timber.v("  Loading ${markers.size} markers...")
@@ -625,9 +622,6 @@ constructor(context: Context) {
             addGeometries(polygons)
             Timber.v("  Loading ${polylines.size} polylines...")
             addGeometries(polylines)
-
-            if (display || center) display()
-            if (center) center()
         }
     }
 
