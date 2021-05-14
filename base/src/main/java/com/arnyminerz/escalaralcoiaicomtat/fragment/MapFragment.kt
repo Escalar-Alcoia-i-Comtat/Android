@@ -228,8 +228,7 @@ class MapFragment : NetworkChangeListenerFragment() {
                 val features = mapHelper.loadKMZ(
                     requireContext(),
                     kmzFile,
-                    addToMap = false,
-                    display = false
+                    addToMap = false
                 )
                 if (features != null) {
                     Timber.v("Adding features to map...")
