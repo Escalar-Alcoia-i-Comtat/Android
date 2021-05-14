@@ -66,23 +66,27 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
 
             onItemSelected?.let { it(data, holder, position) }
         }
-        holder.mapImageButton.setOnClickListener {
-            try {
-                Timber.v("Showing map for $data.")
-                showMap(data)
-            } catch (e: IllegalStateException) {
-                Firebase.crashlytics.recordException(e)
-                Timber.w("The DataClass ($data) does not contain a KMZ address")
-                toast(activity, R.string.toast_error_no_kmz)
-            } catch (e: StorageException) {
-                Firebase.crashlytics.recordException(e)
-                val handler = handleStorageException(e)
-                if (handler != null) {
-                    Timber.e(e, handler.second)
-                    toast(activity, handler.first)
+
+        holder.mapImageButton.visibility(data.kmzReferenceUrl != null)
+        if (data.kmzReferenceUrl != null)
+            holder.mapImageButton.setOnClickListener {
+                try {
+                    Timber.v("Showing map for $data.")
+                    showMap(data)
+                } catch (e: IllegalStateException) {
+                    Firebase.crashlytics.recordException(e)
+                    Timber.w("The DataClass ($data) does not contain a KMZ address")
+                    toast(activity, R.string.toast_error_no_kmz)
+                } catch (e: StorageException) {
+                    Firebase.crashlytics.recordException(e)
+                    val handler = handleStorageException(e)
+                    if (handler != null) {
+                        Timber.e(e, handler.second)
+                        toast(activity, handler.first)
+                    }
                 }
             }
-        }
+
         holder.downloadImageButton.setOnClickListener {
             if (!appNetworkState.hasInternet)
                 activity.toast(R.string.toast_error_no_internet)
