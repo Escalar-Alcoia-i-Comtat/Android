@@ -4,17 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/loading_indicator"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"
-        app:hideAnimationBehavior="none"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/actionBar_cardView"
-        app:showAnimationBehavior="none" />
-
     <androidx.cardview.widget.CardView
         android:id="@+id/actionBar_cardView"
         android:layout_width="match_parent"

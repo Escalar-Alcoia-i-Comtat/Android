@@ -31,7 +31,6 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MARKED_AS_COMPLETE
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -103,18 +102,6 @@ class SectorActivity : LanguageAppCompatActivity() {
     @UiThread
     fun userInputEnabled(enabled: Boolean) {
         binding.sectorViewPager.isUserInputEnabled = enabled
-    }
-
-    /**
-     * Sets the loading status of the activity
-     * @author Arnau Mora
-     * @since 20210314
-     * @param loading If the activity should be loading
-     */
-    @UiThread
-    fun setLoading(loading: Boolean) {
-        binding.loadingIndicator.visibility(loading)
-        binding.titleTextView.visibility(!loading)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -218,16 +205,8 @@ class SectorActivity : LanguageAppCompatActivity() {
                 binding.sectorViewPager.setCurrentItem(defaultPosition, false)
 
                 loadComplete = true
-                Timber.d("Load completed, hiding loading layout")
-                setLoading(false)
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (loadComplete && this::binding.isInitialized)
-            setLoading(false)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
