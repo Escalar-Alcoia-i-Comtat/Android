@@ -30,20 +30,18 @@ import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
     private val activity: DataClassListActivity<P>,
     val items: List<T>,
     val itemsPerRow: Int = 1,
-    val itemHeightDp: Int? = null,
+    val itemHeightPx: Int? = null,
     private val onItemSelected: ((data: T, holder: DwDataClassViewHolder, position: Int) -> Unit)?
 ) : RecyclerView.Adapter<DwDataClassViewHolder>() {
     private val storage = Firebase.storage
 
     private val downloadStatuses = arrayMapOf<String, DownloadStatus>()
-    private val downloadObservers = arrayMapOf<String, () -> Unit>()
 
     override fun getItemCount(): Int = items.size
 
@@ -104,6 +102,9 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
             }
         }
 
+        val itemHeightDp = itemHeightPx?.let {
+            itemHeightPx / activity.resources.displayMetrics.density
+        }?.toInt()
         if (itemHeightDp != null)
             holder.imageView.layoutParams = holder.imageView.layoutParams.apply {
                 height = itemHeightDp
