@@ -121,7 +121,7 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
                                 this@AreaActivity,
                                 zones,
                                 1,
-                                resources.getDimension(R.dimen.dataclass_item_height).toInt()
+                                resources.getDimension(R.dimen.area_item_height).toInt()
                             ) { _, holder, position ->
                                 binding.loadingIndicator.show()
 
