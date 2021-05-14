@@ -262,7 +262,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val kmzFile = kmzFile(context, permanent)
 
         if (!kmzFile.exists()) {
-            storeKmz(storage, kmzFile)
+            Timber.v("Storing KMZ file...")
+            val kmzTaskSnapshot = storeKmz(storage, kmzFile)
+            if (kmzTaskSnapshot == null)
+                Timber.e("Could not store KMZ File ($kmzReferenceUrl).")
+            else
+                Timber.e(kmzTaskSnapshot.error, "Could not store KMZ File ($kmzReferenceUrl).")
         }
 
         return kmzFile
