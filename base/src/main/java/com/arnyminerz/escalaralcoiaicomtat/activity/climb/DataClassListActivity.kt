@@ -136,6 +136,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
 
                             uiContext {
                                 mapHelper.display()
+                                mapHelper.center(animate = false)
                                 binding.map.show()
 
                                 map.addOnMapClickListener {
