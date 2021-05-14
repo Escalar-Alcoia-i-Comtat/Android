@@ -16,11 +16,13 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.data.map.SMALL_ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
@@ -199,10 +201,8 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
         uiContext {
             activity.startActivity(
                 Intent(activity, MapsActivity::class.java)
-                    .putExtra(
-                        EXTRA_KMZ_FILE,
-                        kmzFile.path
-                    )
+                    .putExtra(EXTRA_KMZ_FILE, kmzFile.path)
+                    .putExtra(EXTRA_ICON_SIZE_MULTIPLIER, SMALL_ICON_SIZE_MULTIPLIER)
             )
         }
     }
