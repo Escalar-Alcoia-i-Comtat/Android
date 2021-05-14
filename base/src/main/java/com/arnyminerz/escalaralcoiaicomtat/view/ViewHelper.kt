@@ -72,6 +72,7 @@ fun visibility(view: View?): Boolean =
  * @since 07/09/2020
  */
 @JvmName("visibility_own")
+@UiThread
 fun View.visibility(
     visible: Boolean,
     setGone: Boolean = true,
