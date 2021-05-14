@@ -1,3 +1,3 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
-class IntentExtra<T>(val key: String)
+class DataExtra<T>(val key: String)

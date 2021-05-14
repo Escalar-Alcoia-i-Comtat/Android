@@ -18,7 +18,7 @@ fun Intent.hasExtras(vararg extras: String): Boolean {
     return !hases.contains(false)
 }
 
-fun <T> Intent.putExtra(key: IntentExtra<T>, value: T): Intent {
+fun <T> Intent.putExtra(key: DataExtra<T>, value: T): Intent {
     when (value) {
         is Parcelable -> putExtra(key.key, value)
         is LongArray -> putExtra(key.key, value)
@@ -60,7 +60,7 @@ fun Activity.shareString(text: String) {
         .startChooser()
 }
 
-inline fun <reified T> Intent.getExtra(key: IntentExtra<T>): T? {
+inline fun <reified T> Intent.getExtra(key: DataExtra<T>): T? {
     if (extras?.containsKey(key.key) != true)
         return null
 
@@ -70,7 +70,7 @@ inline fun <reified T> Intent.getExtra(key: IntentExtra<T>): T? {
     else null
 }
 
-inline fun <reified T> Intent.getExtra(key: IntentExtra<T>, default: T): T {
+inline fun <reified T> Intent.getExtra(key: DataExtra<T>, default: T): T {
     val result = extras?.get(key.key)
     return if (result is T)
         result
