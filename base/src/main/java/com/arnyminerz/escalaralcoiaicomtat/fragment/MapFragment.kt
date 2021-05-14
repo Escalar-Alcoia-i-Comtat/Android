@@ -54,8 +54,7 @@ class MapFragment : NetworkChangeListenerFragment() {
             mapHelper.style
         else null
 
-    private var _binding: FragmentMapBinding? = null
-    private val binding get() = _binding!!
+    private var binding: FragmentMapBinding? = null
 
     private lateinit var firebaseStorage: FirebaseStorage
     private lateinit var firestore: FirebaseFirestore
@@ -65,8 +64,8 @@ class MapFragment : NetworkChangeListenerFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentMapBinding.inflate(inflater, container, false)
-        return binding.root
+        binding = FragmentMapBinding.inflate(inflater, container, false)
+        return binding!!.root
     }
 
     private var map: MapboxMap? = null
@@ -76,14 +75,14 @@ class MapFragment : NetworkChangeListenerFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         Timber.d("onActivityCreated()")
-        binding.loadingMapCardView.show()
+        binding!!.loadingMapCardView.show()
 
         firebaseStorage = Firebase.storage
         firestore = Firebase.firestore
 
         Timber.v("Preparing MapHelper...")
         mapHelper = MapHelper(requireContext())
-            .withMapView(binding.pageMapView)
+            .withMapView(binding!!.pageMapView)
         mapHelper.onCreate(savedInstanceState)
         mapHelper
             .withIconSizeMultiplier(ICON_SIZE_MULTIPLIER)
@@ -132,14 +131,16 @@ class MapFragment : NetworkChangeListenerFragment() {
                             it.binding.bottomAppBar.performHide()
 
                         Timber.v("Creating marker window...")
-                        markerWindow = mapHelper.infoCard(it, firestore, this, binding.root)
-                            .also { markerWindow ->
-                                doAsync { markerWindow.show() }
-                                markerWindow.listenHide {
-                                    if (it is MainActivity)
-                                        it.binding.bottomAppBar.performShow()
+                        binding?.root?.let { viewRoot ->
+                            markerWindow = mapHelper.infoCard(it, firestore, this, viewRoot)
+                                .also { markerWindow ->
+                                    doAsync { markerWindow.show() }
+                                    markerWindow.listenHide {
+                                        if (it is MainActivity)
+                                            it.binding.bottomAppBar.performShow()
+                                    }
                                 }
-                            }
+                        }
                     } ?: Timber.w("Could not get activity")
 
                     true
@@ -195,7 +196,7 @@ class MapFragment : NetworkChangeListenerFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        binding = null
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
@@ -203,8 +204,8 @@ class MapFragment : NetworkChangeListenerFragment() {
         val hasInternet = state.hasInternet
 
         if (isResumed) {
-            visibility(binding.pageMapView, hasInternet)
-            visibility(binding.mapsNoInternetCardView.noInternetCardView, !hasInternet)
+            visibility(binding?.pageMapView, hasInternet)
+            visibility(binding?.mapsNoInternetCardView?.noInternetCardView, !hasInternet)
             doAsync {
                 loadMap()
             }
@@ -240,36 +241,42 @@ class MapFragment : NetworkChangeListenerFragment() {
             } catch (e: FileNotFoundException) {
                 Timber.e(e, "Could not load KML")
                 Firebase.crashlytics.recordException(e)
-                uiContext { toast(requireContext(), R.string.toast_error_internal) }
+                uiContext { toast(context, R.string.toast_error_internal) }
             } catch (e: NoInternetAccessException) {
                 Timber.e(e, "Could not load KML")
                 Firebase.crashlytics.recordException(e)
-                uiContext { toast(requireContext(), R.string.toast_error_no_internet) }
+                uiContext { toast(context, R.string.toast_error_no_internet) }
             } catch (e: MapNotInitializedException) {
                 Timber.e(e, "Could not load KML")
                 Firebase.crashlytics.recordException(e)
-                uiContext { toast(requireContext(), R.string.toast_error_internal) }
+                uiContext { toast(context, R.string.toast_error_internal) }
             } catch (e: IllegalStateException) {
                 Timber.e("Could not load KML")
                 Firebase.crashlytics.recordException(e)
-                uiContext { toast(requireContext(), R.string.toast_error_no_kmz) }
+                uiContext { toast(context, R.string.toast_error_no_kmz) }
             } catch (e: StorageException) {
                 Firebase.crashlytics.recordException(e)
                 val handler = handleStorageException(e)
                 if (handler != null) {
                     Timber.e(e, handler.second)
-                    toast(requireContext(), handler.first)
+                    toast(context, handler.first)
                 }
             }
 
-        uiContext {
-            Timber.d("Displaying and centering map...")
-            mapHelper.display()
-            mapHelper.center()
-            binding.loadingMapCardView.hide()
-        }
+        try {
+            uiContext {
+                binding?.loadingMapCardView?.hide()
+                Timber.d("Displaying and centering map...")
+                mapHelper.display()
+                mapHelper.center()
+            }
 
-        mapLoading = false
-        mapLoaded = true
+            mapLoading = false
+            mapLoaded = true
+        } catch (e: MapNotInitializedException) {
+            Timber.e(e, "Could not display and center map.")
+            mapLoading = false
+            mapLoaded = false
+        }
     }
 }
