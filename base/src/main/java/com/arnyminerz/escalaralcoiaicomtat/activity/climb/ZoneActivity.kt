@@ -134,7 +134,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                         this,
                         sectors,
                         2,
-                        resources.getDimension(R.dimen.dataclass_item_height).toInt()
+                        resources.getDimension(R.dimen.zone_item_height).toInt()
                     ) { _, viewHolder, index ->
                         binding.loadingIndicator.show()
 
