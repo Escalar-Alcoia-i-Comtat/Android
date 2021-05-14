@@ -43,9 +43,8 @@
             android:layout_height="match_parent" />
     </LinearLayout>
 
-    <ProgressBar
+    <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/sectorProgressBar"
-        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:indeterminate="true"

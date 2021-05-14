@@ -15,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.put
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass.DwDataClassAdapter
@@ -55,8 +56,8 @@ class ZoneActivity : DataClassListActivity<Zone>() {
             return
         }
 
-        val areaIdExtra = intent.getExtra(EXTRA_AREA)
-        val zoneIdExtra = intent.getExtra(EXTRA_ZONE)
+        val areaIdExtra = intent.getExtra(EXTRA_AREA) ?: savedInstanceState?.getExtra(EXTRA_AREA)
+        val zoneIdExtra = intent.getExtra(EXTRA_ZONE) ?: savedInstanceState?.getExtra(EXTRA_ZONE)
         if (areaIdExtra == null || zoneIdExtra == null) {
             Timber.e("Area or Zone index wasn't specified")
             onBackPressed()
@@ -65,9 +66,15 @@ class ZoneActivity : DataClassListActivity<Zone>() {
         areaId = areaIdExtra
         zoneId = zoneIdExtra
         doAsync {
-            val area = AREAS[areaId]!!
+            val area = AREAS[areaId] ?: kotlin.run {
+                Timber.w("Could not find area \"$areaId\" in AREAS.")
+                return@doAsync
+            }
             val zones = area.getChildren(firestore)
-            dataClass = zones[zoneId]!!
+            dataClass = zones[zoneId] ?: kotlin.run {
+                Timber.w("Could not find zone \"$zoneId\" in \"$areaId\".")
+                return@doAsync
+            }
 
             val transitionName = intent.getExtra(EXTRA_ZONE_TRANSITION_NAME)
             position = intent.getExtra(EXTRA_POSITION, 0)
@@ -79,8 +86,8 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                 binding.backImageButton.setOnClickListener { onBackPressed() }
 
                 dataClassInitialized = true
-                onStateChangeAsync(appNetworkState)
             }
+            onStateChangeAsync(appNetworkState)
         }
     }
 
@@ -96,6 +103,12 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                 .show()
             errorNotStored = false
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.put(EXTRA_AREA, areaId)
+        outState.put(EXTRA_ZONE, zoneId)
+        super.onSaveInstanceState(outState)
     }
 
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
@@ -117,29 +130,33 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                                 this,
                                 R.anim.item_enter_left_animator
                             )
-                    r.adapter =
-                        DwDataClassAdapter(this, sectors, 2, 500) { _, viewHolder, index ->
-                            binding.loadingIndicator.show()
+                    r.adapter = DwDataClassAdapter(
+                        this,
+                        sectors,
+                        2,
+                        resources.getDimension(R.dimen.zone_item_height).toInt()
+                    ) { _, viewHolder, index ->
+                        binding.loadingIndicator.show()
 
-                            Timber.v("Clicked item $index")
-                            val trn =
-                                ViewCompat.getTransitionName(viewHolder.titleTextView)
-                                    .toString()
-                            Timber.v("Transition name: $trn")
-                            val intent =
-                                Intent(this, SectorActivity()::class.java)
-                                    .putExtra(EXTRA_AREA, areaId)
-                                    .putExtra(EXTRA_ZONE, zoneId)
-                                    .putExtra(EXTRA_SECTOR_COUNT, sectors.size)
-                                    .putExtra(EXTRA_SECTOR_INDEX, index)
-                                    .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
-                            val options =
-                                ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                    this, viewHolder.titleTextView, trn
-                                )
+                        Timber.v("Clicked item $index")
+                        val trn =
+                            ViewCompat.getTransitionName(viewHolder.titleTextView)
+                                .toString()
+                        Timber.v("Transition name: $trn")
+                        val intent =
+                            Intent(this, SectorActivity()::class.java)
+                                .putExtra(EXTRA_AREA, areaId)
+                                .putExtra(EXTRA_ZONE, zoneId)
+                                .putExtra(EXTRA_SECTOR_COUNT, sectors.size)
+                                .putExtra(EXTRA_SECTOR_INDEX, index)
+                                .putExtra(EXTRA_SECTOR_TRANSITION_NAME, trn)
+                        val options =
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                this, viewHolder.titleTextView, trn
+                            )
 
-                            startActivity(intent, options.toBundle())
-                        }
+                        startActivity(intent, options.toBundle())
+                    }
                 }
 
                 loaded = true

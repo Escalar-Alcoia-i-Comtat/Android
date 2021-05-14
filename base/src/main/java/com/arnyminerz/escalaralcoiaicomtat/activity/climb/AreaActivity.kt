@@ -14,6 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.put
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass.DwDataClassAdapter
@@ -49,6 +50,10 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
         intent.getExtra(EXTRA_AREA)?.let {
             areaId = it
             Timber.d("Area id: $areaId")
+        } ?: kotlin.run {
+            savedInstanceState?.getExtra(EXTRA_AREA)?.let { areaId ->
+                this.areaId = areaId
+            }
         }
         if (!this::areaId.isInitialized) {
             Timber.e("Area extra is null")
@@ -79,6 +84,7 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt(EXTRA_POSITION.key, position)
+        outState.put(EXTRA_AREA, areaId)
         super.onSaveInstanceState(outState)
     }
 
@@ -114,7 +120,8 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
                             DwDataClassAdapter(
                                 this@AreaActivity,
                                 zones,
-                                itemHeightDp = 700
+                                1,
+                                resources.getDimension(R.dimen.area_item_height).toInt()
                             ) { _, holder, position ->
                                 binding.loadingIndicator.show()
 

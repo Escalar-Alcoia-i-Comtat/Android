@@ -4,4 +4,7 @@
 
     <dimen name="artifo_ending_icon_size">28dp</dimen>
     <dimen name="artifo_ending_text_size">18sp</dimen>
+
+    <dimen name="area_item_height">700dp</dimen>
+    <dimen name="zone_item_height">500dp</dimen>
 </resources>

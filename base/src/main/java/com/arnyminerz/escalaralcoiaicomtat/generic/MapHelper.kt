@@ -25,6 +25,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import androidx.cardview.widget.CardView
 import androidx.collection.arrayMapOf
 import androidx.core.content.res.ResourcesCompat
@@ -352,28 +353,21 @@ constructor(context: Context) {
      * @param context The context to call from
      * @param kmzFile The file to load
      * @param addToMap If true, the loaded features will be added automatically to the map
-     * @param display If true, the loaded features will be shown automatically to the map. Note that
-     * this parameter is ignored if [addToMap] is false.
      */
-    suspend fun loadKMZ(
+    @WorkerThread
+    fun loadKMZ(
         context: Context,
         kmzFile: File,
-        addToMap: Boolean = true,
-        display: Boolean = true
+        addToMap: Boolean = true
     ): MapFeatures? =
         try {
             Timber.v("Getting map features...")
             val features = com.arnyminerz.escalaralcoiaicomtat.data.map.loadKMZ(context, kmzFile)
             loadedKmzFile = kmzFile
 
-            uiContext {
-                if (addToMap) {
-                    Timber.v("Adding features to the map...")
-                    add(features)
-
-                    if (display)
-                        display()
-                }
+            if (addToMap) {
+                Timber.v("Adding features to the map...")
+                add(features)
             }
 
             features
@@ -607,16 +601,13 @@ constructor(context: Context) {
     /**
      * Adds the map features to the map
      * @param result The [MapFeatures] to add
-     * @param center If the camera should be centered on the features after loading them
-     * @param display If the added features should be displayed. This is ignored if [center] is true.
      * @see MapFeatures
      * @see GeoGeometry
      * @see GeoMarker
      * @throws MapNotInitializedException If the map has not been initialized
      */
-    @UiThread
     @Throws(MapNotInitializedException::class)
-    fun add(result: MapFeatures, center: Boolean = true, display: Boolean = true) {
+    fun add(result: MapFeatures) {
         Timber.v("Loading features...")
         with(result) {
             Timber.v("  Loading ${markers.size} markers...")
@@ -625,9 +616,6 @@ constructor(context: Context) {
             addGeometries(polygons)
             Timber.v("  Loading ${polylines.size} polylines...")
             addGeometries(polylines)
-
-            if (display || center) display()
-            if (center) center()
         }
     }
 

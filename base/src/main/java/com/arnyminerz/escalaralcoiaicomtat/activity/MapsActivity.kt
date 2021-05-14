@@ -290,7 +290,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                     val kmlResult = kmzFile?.let { mapHelper.loadKMZ(this@MapsActivity, it) }
 
                     if (kmlResult != null)
-                        mapHelper.add(kmlResult, center = false, display = false)
+                        mapHelper.add(kmlResult)
 
                     // Add the features from the intent
                     Timber.v(
