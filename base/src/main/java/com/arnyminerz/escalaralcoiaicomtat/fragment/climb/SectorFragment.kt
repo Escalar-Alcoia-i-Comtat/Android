@@ -63,8 +63,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
 
-    private val sectorActivity: SectorActivity
-        get() = (requireActivity() as SectorActivity)
+    private val sectorActivity: SectorActivity?
+        get() = (activity as? SectorActivity?)
 
     @UiThread
     private fun refreshMaximizeStatus() {
@@ -73,7 +73,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             else R.drawable.round_flip_to_back_24
         )
 
-        sectorActivity.userInputEnabled(!maximized)
+        sectorActivity?.userInputEnabled(!maximized)
     }
 
     @UiThread
@@ -151,6 +151,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
     @WorkerThread
     suspend fun load() {
         var error = false
+        val sectorActivity = this.sectorActivity
         if (!this::zoneId.isInitialized) {
             Timber.w("Could not load since class is not initialized")
             error = true
@@ -163,6 +164,10 @@ class SectorFragment : NetworkChangeListenerFragment() {
             Timber.i("Already loading.")
             error = true
         }
+        if (sectorActivity == null) {
+            Timber.w("Activity is null")
+            error = true
+        }
         if (error)
             return
         loading = true
@@ -173,14 +178,14 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
         if (loaded && this::sector.isInitialized) {
             uiContext {
-                sectorActivity.updateTitle(sector.displayName, isDownloaded)
+                sectorActivity?.updateTitle(sector.displayName, isDownloaded)
             }
             loadImage()
         } else {
             Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
             val sectors = arrayListOf<Sector>()
             AREAS[areaId]!![zoneId]
-                .getChildren(sectorActivity.firestore)
+                .getChildren(sectorActivity?.firestore)
                 .toCollection(sectors)
             sector = sectors[sectorIndex]
 
@@ -188,8 +193,9 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 binding?.sectorTextView?.text = sector.displayName
             }
 
-            isDownloaded =
-                sector.downloadStatus(requireActivity(), sectorActivity.firestore).isDownloaded()
+            isDownloaded = if (sectorActivity != null)
+                sector.downloadStatus(sectorActivity, sectorActivity.firestore).isDownloaded()
+            else false
 
             val size = getDisplaySize(requireActivity())
             notMaximizedImageHeight = size.second / 2
@@ -202,7 +208,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             if (activity != null) {
                 Timber.v("Loading paths...")
                 val children = arrayListOf<Path>()
-                sector.getChildren(sectorActivity.firestore)
+                sector.getChildren(sectorActivity?.firestore)
                     .toCollection(children)
                 Timber.v("Finished loading children sectors")
 
