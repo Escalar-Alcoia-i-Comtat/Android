@@ -22,6 +22,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.shared.DATACLASS_WAIT_CHILDREN_DELAY
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
@@ -32,6 +33,7 @@ import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.delay
 import timber.log.Timber
 
 class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
@@ -43,6 +45,19 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
 ) : RecyclerView.Adapter<DwDataClassViewHolder>() {
     private val storage = Firebase.storage
 
+    /**
+     * Stores the step that is currently updating the UI, this is, the one that is using [downloadStatuses].
+     * @author Arnau Mora
+     * @since 20210516
+     */
+    private var updatingUiStep = 1
+
+    /**
+     * Stores the amount of update UI steps.
+     * @author Arnau Mora
+     * @since 20210516
+     */
+    private var updatingUiStepCount = 0
     private val downloadStatuses = arrayMapOf<String, DownloadStatus>()
 
     override fun getItemCount(): Int = items.size
@@ -135,9 +150,17 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
         data: T,
         updateDownloadStatus: Boolean
     ) {
+        val step = ++updatingUiStepCount
         holder.progressIndicator.visibility(true)
         holder.downloadImageButton.visibility(false, setGone = false)
+
         doAsync {
+            Timber.v("Waiting for other threads to free up downloadStatuses...")
+            while (updatingUiStep > step) {
+                delay(DATACLASS_WAIT_CHILDREN_DELAY)
+            }
+            Timber.v("updatingUiStep reached $step. Updating UI...")
+
             val lastDownloadStatus = downloadStatuses[data.objectId]
             if (!downloadStatuses.containsKey(data.objectId) || updateDownloadStatus) {
                 val newStatus = data.downloadStatus(activity, activity.firestore)
@@ -186,6 +209,8 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
                 holder.downloadImageButton.show()
                 holder.progressIndicator.visibility(status == DownloadStatus.DOWNLOADING)
             }
+
+            updatingUiStep++
         }
     }
 
