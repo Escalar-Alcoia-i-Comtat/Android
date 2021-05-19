@@ -340,4 +340,15 @@
     <string name="toast_error_profile_image_load">No s\'ha pogut carregar la imatge de perfil</string>
     <string name="comments_title">Comentaris</string>
     <string name="toast_error_like">No s\'ha pogut marcar que t\'agrada</string>
+    <string name="mark_completed_type">Tipus</string>
+    <string name="mark_completed_type">T</string>
+    <string name="mark_completed_type_first">Primer</string>
+    <string name="mark_completed_type_top_rope">Top-rope</string>
+    <string name="mark_completed_type_required">El nombre d\'intents és necessari</string>
+    <string name="mark_completed_type_invalid">Un tipus de marcatge vàlid és necessari</string>
+    <string name="notification_mark_completed_waiting_title">Programat marcatge com a completat</string>
+    <string name="notification_mark_completed_waiting_message">Esperant fins a tenir connexió a Internet per a enviar el comentari i marcar la via com a completada.</string>
+    <string name="notification_mark_completed_waiting_message">E</string>
+    <string name="notification_mark_completed_error_title">No s\'ha pogut marcar com a completada</string>
+    <string name="notification_mark_completed_error_message">La via \"%1$s\" ha sigut marcada com a completada, però ha ocorregut un erorr. Codi d\'error: %2$s</string>
 </resources>

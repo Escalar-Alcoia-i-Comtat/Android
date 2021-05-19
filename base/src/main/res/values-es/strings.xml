@@ -341,4 +341,16 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="toast_error_profile_image_load">No se ha podido cargar la imagen de perfil</string>
     <string name="comments_title">Comentarios</string>
     <string name="toast_error_like">No se ha podido marcar que te gusta</string>
+    <string name="mark_completed_type">Tipo</string>
+    <string name="mark_completed_type">T</string>
+    <string name="mark_completed_type_first">Primero</string>
+    <string name="mark_completed_type_top_rope">Top-rope</string>
+    <string name="mark_completed_type_required">El número de intentos es necesario</string>
+    <string name="mark_completed_type_invalid">Un tipo de marcado válido es necesario</string>
+    <string name="notification_mark_completed_waiting_title">Programado el marcado como completado</string>
+    <string name="notification_mark_completed_waiting_message">Esperando hasta tener una conexión a Internet activa para enviar el comentario y marcar la vía como completada.</string>
+    <string name="notification_mark_completed_waiting_message">E</string>
+    <string name="notification_mark_completed_error_title">No se ha podido marcar como completada</string>
+    <string name="notification_mark_completed_error_message">La vía \"%1$s\" ha sido marcada como completada, pero ha ocurrido un error en el proceso. Código de error: %2$s</string>
+    <string name="notification_mark_completed_error_message">L</string>
 </resources>
