@@ -2,10 +2,13 @@ package com.arnyminerz.escalaralcoiaicomtat.fragment.auth
 
 import android.accounts.Account
 import android.accounts.AccountManager
+import android.content.ActivityNotFoundException
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
@@ -18,9 +21,13 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.intent.GoogleLoginRequestContract
 import com.arnyminerz.escalaralcoiaicomtat.list.viewListOf
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_LOGGED_IN
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.AuthResult
@@ -48,7 +55,15 @@ class LoginFragment private constructor() : Fragment() {
             binding.googleButton
         )
 
+    /**
+     * The client for handling Google Sign-Ins.
+     * @author Arnau Mora
+     * @since 20210519
+     */
     private lateinit var googleSignInClient: GoogleSignInClient
+
+    private lateinit var oneTapClient: SignInClient
+    private lateinit var signInRequest: BeginSignInRequest
 
     private val googleLoginRequest =
         registerForActivityResult(GoogleLoginRequestContract()) { intent ->
@@ -63,6 +78,42 @@ class LoginFragment private constructor() : Fragment() {
                     toast(R.string.toast_error_login_google)
                     fields.enable()
                 }
+        }
+
+    private val oneTapRequest =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            try {
+                val data = result.data
+                val credential = oneTapClient.getSignInCredentialFromIntent(data)
+                val idToken = credential.googleIdToken
+                val username = credential.id
+                val password = credential.password
+                when {
+                    idToken != null -> {
+                        Timber.v("Got token ID from One-Tap. Logging in...")
+                        auth.signInWithCustomToken(idToken)
+                            .addOnSuccessListener(requireActivity(), loginSuccessListener)
+                            .addOnFailureListener { e ->
+                                Timber.e(e, "Could not login with One tap.")
+                                toast(R.string.toast_error_login_one_tap)
+                            }
+                    }
+                    username != null && password != null -> {
+                        Timber.v("Got username and password from One-Tap. Logging in...")
+                        auth.signInWithEmailAndPassword(username, password)
+                            .addOnSuccessListener(requireActivity(), loginSuccessListener)
+                            .addOnFailureListener { e ->
+                                Timber.e(e, "Could not login with One tap.")
+                            }
+                    }
+                    else -> {
+                        // This should never happen, but let's send a message
+                        Timber.w("Both token and username-password are null for one-tap.")
+                    }
+                }
+            } catch (e: ApiException) {
+                Timber.e(e, "Could not get credentials from One-Tap.")
+            }
         }
 
     private fun firebaseAuthWithGoogle(idToken: String) {
@@ -127,6 +178,26 @@ class LoginFragment private constructor() : Fragment() {
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+
+        oneTapClient = Identity.getSignInClient(requireActivity())
+        signInRequest = BeginSignInRequest.builder()
+            .setPasswordRequestOptions(
+                BeginSignInRequest.PasswordRequestOptions.builder()
+                    .setSupported(true)
+                    .build()
+            )
+            .setGoogleIdTokenRequestOptions(
+                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                    .setSupported(true)
+                    // Your server's client ID, not your Android client ID.
+                    .setServerClientId(getString(R.string.google_auth_client_id))
+                    // Only show accounts previously used to sign in.
+                    .setFilterByAuthorizedAccounts(true)
+                    .build()
+            )
+            // Automatically sign in when exactly one credential is retrieved.
+            .setAutoSelectEnabled(true)
+            .build()
 
         binding.emailEditText.setOnEditorActionListener { _, _, _ ->
             binding.passwordEditText.requestFocus()
@@ -219,6 +290,23 @@ class LoginFragment private constructor() : Fragment() {
 
             googleLoginRequest.launch(googleSignInClient)
         }
+
+        oneTapClient.beginSignIn(signInRequest)
+            .addOnSuccessListener(requireActivity()) { result ->
+                try {
+                    oneTapRequest.launch(
+                        IntentSenderRequest.Builder(result.pendingIntent.intentSender)
+                            .build()
+                    )
+                } catch (e: ActivityNotFoundException) {
+                    Timber.e(e, "Could not found activity to launch OneTap.")
+                    toast(R.string.toast_error_login_one_tap)
+                }
+            }
+            .addOnFailureListener(requireActivity()) { e ->
+                Timber.e(e, "Could not begin One-Tap Sign In")
+                toast(R.string.toast_error_login_one_tap)
+            }
     }
 
     /**
