@@ -61,19 +61,5 @@ enum class EndingType(val idName: String, @StringRes val displayName: Int) {
             }
             return Unknown
         }
-
-        fun fromDB(obj: String): ArrayList<EndingType> {
-            val list = arrayListOf<EndingType>()
-
-            if (obj.contains("\n"))
-                for (ln in obj
-                    .replace("\r", "")
-                    .split("\n"))
-                    list.add(find(ln))
-            else
-                list.add(find(obj))
-
-            return list
-        }
     }
 }

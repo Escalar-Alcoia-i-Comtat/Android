@@ -4,13 +4,11 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.LocaleList
 import android.os.Looper
 import android.widget.Toast
 import androidx.annotation.StringRes
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_LANGUAGE_PREF
 import timber.log.Timber
@@ -55,9 +53,6 @@ fun loadLocale(context: Context): ContextWrapper {
     Timber.v("Set app locale to $langPref")
     return ContextUtils(context.createConfigurationContext(config))
 }
-
-fun Context.isPermissionGranted(permission: String): Boolean =
-    ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
 
 fun Activity?.finishActivityWithResult(resultCode: Int, data: Intent?) =
     this?.also {

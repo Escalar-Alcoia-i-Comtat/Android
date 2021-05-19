@@ -3,8 +3,8 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
+import androidx.fragment.app.FragmentActivity
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
@@ -18,8 +18,6 @@ import timber.log.Timber
 
 class IntroActivity : LanguageAppCompatActivity() {
     companion object {
-        var shouldChange = false
-
         fun shouldShow(): IntroShowReason {
             var result: IntroShowReason? = null
             if (!PREF_SHOWN_INTRO.get())
@@ -28,8 +26,7 @@ class IntroActivity : LanguageAppCompatActivity() {
         }
     }
 
-    var adapterViewPager: IntroPagerAdapter? = null
-        private set
+    private var adapterViewPager: IntroPagerAdapter? = null
 
     private lateinit var binding: ActivityIntroBinding
 
@@ -39,8 +36,9 @@ class IntroActivity : LanguageAppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        adapterViewPager = IntroPagerAdapter(supportFragmentManager)
+        adapterViewPager = IntroPagerAdapter(this)
         binding.viewPager.adapter = adapterViewPager
+        binding.viewPager.isUserInputEnabled = false
 
         binding.introNextFAB.setOnClickListener {
             next()
@@ -66,13 +64,13 @@ class IntroActivity : LanguageAppCompatActivity() {
         }
     }
 
-    class IntroPagerAdapter(fragmentManager: FragmentManager) :
-        FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+    class IntroPagerAdapter(fragmentActivity: FragmentActivity) :
+        FragmentStateAdapter(fragmentActivity) {
         val fragments = arrayListOf<Fragment>()
 
-        val mainIntroFragment = MainIntroFragment()
-        val warningIntroFragment = WarningIntroFragment()
-        val betaIntroFragment = BetaIntroFragment()
+        private val mainIntroFragment = MainIntroFragment()
+        private val warningIntroFragment = WarningIntroFragment()
+        private val betaIntroFragment = BetaIntroFragment()
 
         init {
             fragments.add(mainIntroFragment)
@@ -81,8 +79,8 @@ class IntroActivity : LanguageAppCompatActivity() {
                 fragments.add(betaIntroFragment)
         }
 
-        override fun getCount() = fragments.size
+        override fun getItemCount(): Int = fragments.size
 
-        override fun getItem(position: Int): Fragment = fragments[position]
+        override fun createFragment(position: Int): Fragment = fragments[position]
     }
 }

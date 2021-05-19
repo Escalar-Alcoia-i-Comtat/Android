@@ -87,32 +87,6 @@ fun Bitmap.storeToFile(
     fos.close()
 }
 
-/**
- * Stores a bitmap into the file
- * @param bitmap The image to store
- * @param overwrite If there's already a file, it should be deleted
- * @param mkdirs If the parent dirs of the file should be created
- * @param format The format to write with
- * @param quality The quality to use
- *
- * @throws FileAlreadyExistsException When the file already exists and overwrite is set to false
- * @throws CouldNotDeleteFileException If an error occurs while deleting the file if it exists
- * @throws CouldNotCreateNewFileException If an error occurs while trying to create the image file
- */
-@Throws(
-    FileAlreadyExistsException::class,
-    CouldNotDeleteFileException::class,
-    CouldNotCreateNewFileException::class
-)
-fun File.storeBitmap(
-    bitmap: Bitmap,
-    overwrite: Boolean = true,
-    mkdirs: Boolean = true,
-    format: CompressFormat = CompressFormat.JPEG,
-    quality: Int = 100
-) =
-    bitmap.storeToFile(this, overwrite, mkdirs, format, quality)
-
 fun Bitmap.cropToSquare(): Bitmap? {
     val newWidth = if (height > width) width else height
     val newHeight = if (height > width) height - (height - width) else height

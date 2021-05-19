@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.widget.ImageView
-import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
@@ -55,8 +54,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
 import timber.log.Timber
 import java.io.File
-import java.util.Date
-import java.util.concurrent.ExecutionException
+import java.util.*
+import java.util.concurrent.*
 import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -649,7 +648,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @throws IllegalArgumentException When the stored reference url ([imageReferenceUrl]) is not well formatted.
      * @see imageReferenceUrl
      */
-    @UiThread
+    @WorkerThread
     @Throws(StorageException::class, IllegalArgumentException::class)
     suspend fun loadImage(
         activity: Activity,

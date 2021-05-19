@@ -75,8 +75,6 @@ const val CROSSFADE_DURATION = 50
 const val ROTATION_A = 90f
 const val ROTATION_B = -90f
 
-const val DEFAULT_BITMAP_COMPRESSION = 100
-
 /**
  * The compression quality for a profile image.
  * @author Arnau Mora

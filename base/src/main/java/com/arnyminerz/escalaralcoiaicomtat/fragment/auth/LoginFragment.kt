@@ -103,7 +103,7 @@ class LoginFragment private constructor() : Fragment() {
             } else
                 try {
                     Firebase.auth.signInWithEmailAndPassword(email, password)
-                        .addOnSuccessListener { _ ->
+                        .addOnSuccessListener {
                             activity.finishActivityWithResult(RESULT_CODE_LOGGED_IN, null)
                         }
                         .addOnFailureListener { exception ->

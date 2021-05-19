@@ -121,7 +121,7 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
 
     private var pathDisplayName: String? = null
 
-    fun showError(error: String): Result {
+    private fun showError(error: String): Result {
         val notification = Notification.get(notificationId)
         notification?.build()?.destroy()
 

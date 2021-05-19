@@ -3,18 +3,6 @@ package com.arnyminerz.escalaralcoiaicomtat.generic.extension
 import android.content.Context
 import androidx.annotation.StringRes
 
-fun java.util.ArrayList<*>?.toJSONStringArray(): String {
-    var result = "["
-
-    if (this != null)
-        for (u in this)
-            result += "\"$u\","
-    result = result.substring(0, result.length - 1)
-
-    result += "]"
-    return result
-}
-
 fun ArrayList<String>.replace(find: String, replace: String): ArrayList<String> {
     for (u in this)
         u.replace(find, replace)
@@ -50,15 +38,6 @@ fun java.util.ArrayList<String>.split(delimiter: String): java.util.ArrayList<St
     for (item in this)
         list.addAll(item.split(delimiter))
     return list
-}
-
-@ExperimentalUnsignedTypes
-fun UIntArray.addAll(items: ArrayList<UInt>): UIntArray {
-    val offset = size
-    for (i in 0 until items.size)
-        set(offset + i, items[i])
-
-    return this
 }
 
 fun Collection<String>.join(glue: String): String {
