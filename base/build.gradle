@@ -23,6 +23,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         resValue "string", "mapbox_access_token", MAPBOX_PUBLIC_TOKEN
+        resValue "string", "google_auth_client_id", GOOGLE_AUTH_CLIENT_ID
     }
     signingConfigs {
         release {
