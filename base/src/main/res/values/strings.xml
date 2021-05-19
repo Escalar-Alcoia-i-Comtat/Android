@@ -40,7 +40,6 @@
     <string name="action_delete">Delete</string>
     <string name="action_ok">OK</string>
     <string name="action_grant">Grant</string>
-    <string name="action_grant_permission">Grant Permission</string>
     <string name="action_back">Go Back</string>
     <string name="action_open_maps">Open Google Maps</string>
     <string name="action_clear_cache">Clear Cache</string>
@@ -60,7 +59,6 @@
     <string name="action_logout">Log out</string>
     <string name="action_resend_email">Resend confirmation email</string>
     <string name="action_open_settings">Open Settings</string>
-    <string name="action_disable">Disable</string>
     <string name="action_do_not_remind">Do not remind</string>
     <string name="action_mark_completed">Mark</string>
 
@@ -70,14 +68,6 @@
     <string name="status_null_double" translatable="false">--</string>
     <string name="status_not_downloaded">Not downloaded</string>
     <string name="status_downloaded">Downloaded</string>
-    <string name="status_permission_granted">Permission Granted</string>
-    <string name="status_not_running">not Running</string>
-    <string name="status_running">Running</string>
-    <string name="status_enqueued">waiting</string>
-    <string name="status_succeeded">succeeded</string>
-    <string name="status_failed">failed</string>
-    <string name="status_blocked">blocked</string>
-    <string name="status_cancelled">Cancelled</string>
     <string name="status_downloading">Downloading…</string>
     <string name="status_storing">Storing…</string>
     <string name="status_loading_progress">Loading %d/%d</string>
@@ -129,8 +119,6 @@
     <string name="mark_completed_type_top_rope">Top-rope</string>
     <string name="mark_completed_attempts_required">Attempts number is required</string>
     <string name="mark_completed_attempts_size">Attempts must be greater or equal to 0</string>
-    <string name="mark_completed_falls_required">Falls number is required</string>
-    <string name="mark_completed_falls_size">Falls must be greater or equal to 0</string>
     <string name="mark_completed_grade_required">Your graduation is required</string>
     <string name="mark_completed_type_required">Attempts number is required</string>
     <string name="mark_completed_type_invalid">A valid completion type must be selected</string>
@@ -213,10 +201,8 @@
     <string name="notification_download_failed_title">Download failed!</string>
     <string name="notification_download_failed_message">Could not download %s.</string>
     <string name="notification_download_failed_message_long">There was an error while downloading %1$s. Error code: %2$s</string>
-    <string name="notification_download_progress_info_unpinning">Unpinning…</string>
     <string name="notification_download_progress_info_fetching">Downloading data…</string>
     <string name="notification_download_progress_info_downloading_image">Downloading image…</string>
-    <string name="notification_download_progress_info_decoding_image">Decoding image…</string>
     <string name="notification_download_progress_info_downloading_map">Downloading map…</string>
     <string name="notification_gpx_stored_title">GPX Stored correctly</string>
     <string name="notification_gpx_stored_message">Press to open</string>
@@ -256,9 +242,7 @@
     <string name="toast_location_not_shown">Current location won\'t be shown</string>
     <string name="toast_stored_gpx">GPX stored!</string>
     <string name="toast_stored_kmz">KMZ stored!</string>
-    <string name="toast_downloading">Downloading…</string>
     <string name="toast_clear_ok">Cleared correctly</string>
-    <string name="toast_permission_required">This permission is required</string>
     <string name="toast_message_sent">Message sent!</string>
     <string name="toast_confirmation_sent">Confirmation sent!</string>
 
@@ -325,7 +309,6 @@
     <string name="image_desc_maximize_minimize_img">Maximize or minimize image</string>
     <string name="image_desc_marker_image">Marker image</string>
     <string name="image_desc_ending_type">Ending type</string>
-    <string name="image_desc_storage">Storage icon</string>
     <string name="image_desc_rappel">Rappel</string>
     <string name="image_desc_nav_explore">Explore areas</string>
     <string name="image_desc_nav_map">View areas map</string>
@@ -335,7 +318,6 @@
     <string name="image_desc_profile_image">Profile Image</string>
     <string name="image_desc_check_inbox">Check inbox icon</string>
     <string name="image_desc_change_profile_image">Change profile image indicator</string>
-    <string name="image_desc_mark_completed">Mark path as completed</string>
     <string name="image_desc_comments">Comments</string>
 
     <string name="login_email">Email</string>
@@ -345,7 +327,6 @@
     <string name="login_error_invalid_credentials">Wrong password</string>
     <string name="login_error_user_disabled">The user has disabled. Contact an administrator</string>
     <string name="login_error_email_required">The email is required</string>
-    <string name="login_error_wrong_password">Wrong password</string>
     <string name="login_error_password_required">The password can\'t be empty</string>
     <string name="login_error_email_invalid">The email address is not valid</string>
 

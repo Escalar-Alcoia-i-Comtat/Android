@@ -107,7 +107,6 @@
     <string name="toast_location_not_shown">"La ubicació actual no es mostrarà"</string>
     <string name="toast_stored_gpx">"GPX Desat!"</string>
     <string name="toast_stored_kmz">"KMZ Desat!"</string>
-    <string name="toast_downloading">"Baixant…"</string>
     <string name="toast_clear_ok">"Buidat correctament"</string>
     <string name="path_warning_dry">"S'estàn secant els segurs d'aquesta via. Açò és possible que estiga causat perquè els segurs han sigut col·locats mitjançant algun tipus de procés químic. Aquesta alerta deuria mostrar-se durant 2 dies o menys."</string>
     <string name="path_warning_build">"Aquesta via està baix revisió o reequipació. Açò pot tardar des de dies fins a setmanes. Per favor, tingues paciència. Pots habilitar les alertes en la configuració, i t'avisarem quan s'haja completat el procés."</string>
@@ -150,9 +149,7 @@
     <string name="intro_main_title">"Benvingut a %s"</string>
     <string name="intro_main_message">"Anem a guiar-te per un procés curt de configuració. No et preocupes, és ràpid i ben senzill"</string>
     <string name="date_format">"dd-MM-yyy kk:mm:ss"</string>
-    <string name="action_grant_permission">Donar Permís</string>
     <string name="action_clear_settings">Netejar Configuració</string>
-    <string name="status_permission_granted">Permís Donat</string>
     <string name="pref_gene_preview_scale_title">Escala de Previsualització d\'Imatges</string>
     <string name="pref_gene_preview_scale_sum">L\'escala de les imatges en previsualització</string>
     <string name="pref_gene_section_advanced">Avançat</string>
@@ -160,7 +157,6 @@
     <string name="pref_down_mobile_sum">Fes ús de les dades mòbils per a les descàrregues</string>
     <string name="pref_down_roaming_title">Roaming</string>
     <string name="pref_down_roaming_sum">Fes ús de connexions d\'ús mesurat (Roaming) per a baixar</string>
-    <string name="toast_permission_required">El permís és necessari</string>
     <string name="item_map">Mapa</string>
     <string name="item_downloads">Baixades</string>
     <string name="item_settings">Configuració</string>
@@ -219,15 +215,7 @@
     <string name="pref_info_git_title">Github</string>
     <string name="pref_info_git_sum">Veure el repositori de Github</string>
     <string name="image_desc_ending_type">Tipus de reunió</string>
-    <string name="image_desc_storage">Icona d\'emmagatzematge</string>
     <string name="image_desc_rappel">Rappel</string>
-    <string name="status_not_running">no en execució</string>
-    <string name="status_running">executant-se</string>
-    <string name="status_enqueued">esperant</string>
-    <string name="status_succeeded">finalitzat</string>
-    <string name="status_failed">fallat</string>
-    <string name="status_blocked">bloquejat</string>
-    <string name="status_cancelled">cancel·lat</string>
     <string name="status_downloading">Baixant…</string>
     <string name="status_storing">Desant…</string>
     <string name="status_loading_progress">Carregant %d/%d</string>
@@ -247,12 +235,10 @@
     <string name="image_desc_nav_map">Veure mapa d\'àrees</string>
     <string name="image_desc_nav_downloads">Veure baixades</string>
     <string name="image_desc_nav_extra">Opcions extra</string>
-    <string name="notification_download_progress_info_unpinning">Eliminant…</string>
     <string name="pref_down_quality_sum">Selecciona la qualitat de compressió de les imatges baixades. Quant més gran, més qualitat, però també ocuparan més.</string>
     <string name="pref_down_quality_title">Qualitat de baixades</string>
     <string name="notification_download_progress_info_fetching">Baixant dades…</string>
     <string name="notification_download_progress_info_downloading_image">Baixant imatge…</string>
-    <string name="notification_download_progress_info_decoding_image">Decodificant imatge…</string>
     <string name="notification_download_complete_title">Baixada completa!</string>
     <string name="notification_download_complete_message">Baixat %s. Toca per a obrir.</string>
     <string name="action_enable_location">Habilitar Ubicació</string>
@@ -308,9 +294,7 @@
     <string name="image_desc_change_profile_image">Indicador de canvi d\'imatge de perfil</string>
     <string name="toast_error_profile_image_update">No s\'ha pogut actualitzar la imatge de perfil</string>
     <string name="toast_profile_image_updated">Imatge de perfil actualitzada!</string>
-    <string name="image_desc_mark_completed">Marcar via com a completada</string>
     <string name="action_open_settings">Obrir Configuració</string>
-    <string name="action_disable">Deshabilitar</string>
     <string name="action_do_not_remind">No recordar</string>
     <string name="dialog_background_restricted_title">Execució restringida</string>
     <string name="dialog_background_restricted_message">Tu, o el teu sistema heu bloquejat l\'aplicació per a que no s\'execute en segon pla, això pot fer que no rebes les notificacions d\'alerta. Per favor, ves a la teua configuració del sistema, i deshabilita l\'optimització de bateria per a Escalar Alcoià i Comtat.</string>
@@ -328,12 +312,9 @@
     <string name="toast_error_login_required">Has de tindre la sessió iniciada</string>
     <string name="mark_completed_attempts_required">El nombre d\'intents és necessari</string>
     <string name="mark_completed_attempts_size">El nombre d\'intents ha de ser major o igual a 0</string>
-    <string name="mark_completed_falls_required">El nombre de caigudes és necessari</string>
-    <string name="mark_completed_falls_size">El nombre de caigudes ha de ser major o igual a 0</string>
     <string name="mark_completed_grade_required">La teua graduació és necessaria</string>
     <string name="image_desc_comments">Comentaris</string>
     <string name="login_error_email_required">El correu electrònic és necessari</string>
-    <string name="login_error_wrong_password">Contrassenya incorrecta</string>
     <string name="login_error_password_required">La contrassenya no pot estar en blanc</string>
     <string name="login_error_email_invalid">El correu electrònic no és vàlid</string>
     <string name="comments_project">Projecte</string>
@@ -341,14 +322,12 @@
     <string name="comments_title">Comentaris</string>
     <string name="toast_error_like">No s\'ha pogut marcar que t\'agrada</string>
     <string name="mark_completed_type">Tipus</string>
-    <string name="mark_completed_type">T</string>
     <string name="mark_completed_type_first">Primer</string>
     <string name="mark_completed_type_top_rope">Top-rope</string>
     <string name="mark_completed_type_required">El nombre d\'intents és necessari</string>
     <string name="mark_completed_type_invalid">Un tipus de marcatge vàlid és necessari</string>
     <string name="notification_mark_completed_waiting_title">Programat marcatge com a completat</string>
     <string name="notification_mark_completed_waiting_message">Esperant fins a tenir connexió a Internet per a enviar el comentari i marcar la via com a completada.</string>
-    <string name="notification_mark_completed_waiting_message">E</string>
     <string name="notification_mark_completed_error_title">No s\'ha pogut marcar com a completada</string>
     <string name="notification_mark_completed_error_message">La via \"%1$s\" ha sigut marcada com a completada, però ha ocorregut un erorr. Codi d\'error: %2$s</string>
 </resources>
