@@ -3,7 +3,6 @@ package com.arnyminerz.escalaralcoiaicomtat.auth
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -119,7 +118,7 @@ suspend fun setProfileImage(
  * @param user The user to update.
  * @param imageDownloadUrl The uploaded image url.
  */
-@UiThread
+@WorkerThread
 suspend fun updateProfileImage(
     firestore: FirebaseFirestore,
     user: FirebaseUser,
