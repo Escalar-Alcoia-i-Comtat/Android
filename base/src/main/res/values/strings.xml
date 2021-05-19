@@ -58,6 +58,7 @@
     <string name="action_register">Register</string>
     <string name="action_login">Login</string>
     <string name="action_logout">Log out</string>
+    <string name="action_google_auth">Login with Google</string>
     <string name="action_resend_email">Resend confirmation email</string>
     <string name="action_open_settings">Open Settings</string>
     <string name="action_do_not_remind">Do not remind</string>
@@ -238,6 +239,7 @@
     <string name="toast_error_profile_image_update">Could not update profile image</string>
     <string name="toast_error_profile_image_load">Could not load profile image</string>
     <string name="toast_error_login_required">You must be logged in to do this</string>
+    <string name="toast_error_login_google">Could not login with Google</string>
     <string name="toast_error_like">Could not like comment</string>
     <string name="toast_error_account_manager_store">Could not store account data</string>
     <string name="toast_profile_image_updated">Updated profile image successfully</string>
