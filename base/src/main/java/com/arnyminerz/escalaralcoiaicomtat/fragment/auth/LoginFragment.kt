@@ -1,11 +1,14 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.auth
 
+import android.accounts.Account
+import android.accounts.AccountManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthLoginBinding
@@ -104,6 +107,20 @@ class LoginFragment private constructor() : Fragment() {
                 try {
                     Firebase.auth.signInWithEmailAndPassword(email, password)
                         .addOnSuccessListener {
+                            val user = it.user
+                            val am = AccountManager.get(requireContext())
+                            val account = Account(email, BuildConfig.APPLICATION_ID)
+                            val accountAdded =
+                                am.addAccountExplicitly(account, password, Bundle().apply {
+                                    putString("profileImage", user?.photoUrl?.toString())
+                                    putString("displayName", user?.displayName)
+                                })
+                            if (accountAdded)
+                                am.notifyAccountAuthenticated(account)
+                            else {
+                                toast(R.string.toast_error_account_manager_store)
+                                Timber.e("Could not store the account's data in AccountManager")
+                            }
                             activity.finishActivityWithResult(RESULT_CODE_LOGGED_IN, null)
                         }
                         .addOnFailureListener { exception ->
