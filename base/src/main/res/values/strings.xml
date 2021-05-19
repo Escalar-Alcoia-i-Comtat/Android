@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Escalar Alcoia i Comtat</string>
+    <string name="package_name" translatable="false">com.arnyminerz.escalaralcoiaicomtat</string>
 
     <string name="sector_sun_morning">Morning Sun</string>
     <string name="sector_sun_afternoon">Afternoon Sun</string>
