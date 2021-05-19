@@ -134,7 +134,7 @@ dependencies {
     implementation "androidx.startup:startup-runtime:1.0.0"
 
     // Google Firebase
-    implementation platform('com.google.firebase:firebase-bom:28.0.0')
+    implementation platform('com.google.firebase:firebase-bom:28.0.1')
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-firestore-ktx'
     implementation 'com.google.firebase:firebase-storage-ktx'
@@ -145,6 +145,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation 'com.google.firebase:firebase-messaging-ktx'
     implementation 'com.google.firebase:firebase-messaging-directboot:22.0.0'
+
+    // Firebase Auth Google Sign-In
+    implementation 'com.google.android.gms:play-services-auth:19.0.0'
 
     // MapBox SDK
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.6.1'
