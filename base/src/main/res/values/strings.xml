@@ -240,6 +240,7 @@
     <string name="toast_error_profile_image_load">Could not load profile image</string>
     <string name="toast_error_login_required">You must be logged in to do this</string>
     <string name="toast_error_login_google">Could not login with Google</string>
+    <string name="toast_error_login_one_tap">Could not launch One-Tap login</string>
     <string name="toast_error_like">Could not like comment</string>
     <string name="toast_error_account_manager_store">Could not store account data</string>
     <string name="toast_profile_image_updated">Updated profile image successfully</string>
