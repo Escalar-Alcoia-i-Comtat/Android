@@ -15,15 +15,25 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthLoginBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.isEmail
 import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.arnyminerz.escalaralcoiaicomtat.intent.GoogleLoginRequestContract
 import com.arnyminerz.escalaralcoiaicomtat.list.viewListOf
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_LOGGED_IN
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 
 class LoginFragment private constructor() : Fragment() {
+    private lateinit var auth: FirebaseAuth
+
     private var _binding: FragmentAuthLoginBinding? = null
 
     private val binding: FragmentAuthLoginBinding
@@ -34,8 +44,65 @@ class LoginFragment private constructor() : Fragment() {
             binding.emailEditText,
             binding.passwordEditText,
             binding.loginButton,
-            binding.registerButton
+            binding.registerButton,
+            binding.googleButton
         )
+
+    private lateinit var googleSignInClient: GoogleSignInClient
+
+    private val googleLoginRequest =
+        registerForActivityResult(GoogleLoginRequestContract()) { intent ->
+            GoogleSignIn.getSignedInAccountFromIntent(intent)
+                .addOnSuccessListener { account ->
+                    Timber.d("firebaseAuthWithGoogle:${account.id}")
+                    firebaseAuthWithGoogle(account.idToken!!)
+                }
+                .addOnFailureListener { e ->
+                    // Google Sign In failed, update UI appropriately
+                    Timber.e(e, "Google sign in failed")
+                    toast(R.string.toast_error_login_google)
+                    fields.enable()
+                }
+        }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnSuccessListener(requireActivity(), loginSuccessListener)
+            .addOnFailureListener {
+                fields.enable()
+                Timber.e(it, "Could not login with Google.")
+                toast(R.string.toast_error_login_google)
+            }
+    }
+
+    private val loginSuccessListener: OnSuccessListener<AuthResult> =
+        OnSuccessListener { authResult ->
+            val user = authResult.user ?: return@OnSuccessListener Timber.e("Auth result is null")
+            val am = AccountManager.get(requireContext())
+            val account = Account(user.email, BuildConfig.APPLICATION_ID)
+            user.getIdToken(false)
+                .addOnSuccessListener { tokenResult ->
+                    val token = tokenResult.token
+                    val accountAdded =
+                        am.addAccountExplicitly(account, token, Bundle().apply {
+                            putString("profileImage", user.photoUrl.toString())
+                            putString("displayName", user.displayName)
+                        })
+                    if (accountAdded)
+                        am.notifyAccountAuthenticated(account)
+                    else {
+                        toast(R.string.toast_error_account_manager_store)
+                        Timber.e("Could not store the account's data in AccountManager")
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Timber.e(e, "Could not get user's token.")
+                }
+                .addOnCompleteListener {
+                    activity.finishActivityWithResult(RESULT_CODE_LOGGED_IN, null)
+                }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,6 +120,13 @@ class LoginFragment private constructor() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        auth = Firebase.auth
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.google_auth_client_id))
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
         binding.emailEditText.setOnEditorActionListener { _, _, _ ->
             binding.passwordEditText.requestFocus()
@@ -105,24 +179,8 @@ class LoginFragment private constructor() : Fragment() {
                 )
             } else
                 try {
-                    Firebase.auth.signInWithEmailAndPassword(email, password)
-                        .addOnSuccessListener {
-                            val user = it.user
-                            val am = AccountManager.get(requireContext())
-                            val account = Account(email, BuildConfig.APPLICATION_ID)
-                            val accountAdded =
-                                am.addAccountExplicitly(account, password, Bundle().apply {
-                                    putString("profileImage", user?.photoUrl?.toString())
-                                    putString("displayName", user?.displayName)
-                                })
-                            if (accountAdded)
-                                am.notifyAccountAuthenticated(account)
-                            else {
-                                toast(R.string.toast_error_account_manager_store)
-                                Timber.e("Could not store the account's data in AccountManager")
-                            }
-                            activity.finishActivityWithResult(RESULT_CODE_LOGGED_IN, null)
-                        }
+                    auth.signInWithEmailAndPassword(email, password)
+                        .addOnSuccessListener(loginSuccessListener)
                         .addOnFailureListener { exception ->
                             Timber.w(exception, "Could not login.")
                             val e = exception as FirebaseAuthException
@@ -154,6 +212,12 @@ class LoginFragment private constructor() : Fragment() {
                         R.string.login_error_email_invalid
                     )
                 }
+        }
+        binding.googleButton.setOnClickListener {
+            fields.clearFocus()
+            fields.disable()
+
+            googleLoginRequest.launch(googleSignInClient)
         }
     }
 
