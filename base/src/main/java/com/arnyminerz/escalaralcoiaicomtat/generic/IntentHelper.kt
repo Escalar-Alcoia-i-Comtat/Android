@@ -1,22 +1,11 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
-import androidx.core.app.ShareCompat
-import com.arnyminerz.escalaralcoiaicomtat.R
 import timber.log.Timber
 import java.io.Serializable
-
-fun Intent.hasExtras(vararg extras: String): Boolean {
-    val hases = arrayListOf<Boolean>()
-    for (extra in extras)
-        hases.add(hasExtra(extra))
-
-    return !hases.contains(false)
-}
 
 fun <T> Intent.putExtra(key: DataExtra<T>, value: T): Intent {
     when (value) {
@@ -46,18 +35,6 @@ fun <T> Intent.putExtra(key: DataExtra<T>, value: T): Intent {
     }
 
     return this
-}
-
-fun Activity.shareString(text: String) {
-    ShareCompat.IntentBuilder
-        // getActivity() or activity field if within Fragment
-        .from(this)
-        // The text that will be shared
-        .setText(text)
-        // most general text sharing MIME type
-        .setType("text/plain")
-        .setChooserTitle(R.string.action_share_with)
-        .startChooser()
 }
 
 inline fun <reified T> Intent.getExtra(key: DataExtra<T>): T? {

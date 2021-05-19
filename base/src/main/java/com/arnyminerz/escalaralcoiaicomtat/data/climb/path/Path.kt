@@ -22,8 +22,20 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
-import java.util.Date
-import java.util.concurrent.TimeUnit
+import java.util.*
+import kotlin.Array
+import kotlin.Boolean
+import kotlin.Comparable
+import kotlin.IllegalArgumentException
+import kotlin.Int
+import kotlin.Long
+import kotlin.NoSuchElementException
+import kotlin.String
+import kotlin.Throws
+import kotlin.apply
+import kotlin.arrayOfNulls
+import kotlin.let
+import kotlin.toString
 
 class Path(
     objectId: String,
@@ -311,7 +323,6 @@ class Path(
         override fun createFromParcel(parcel: Parcel): Path = Path(parcel)
         override fun newArray(size: Int): Array<Path?> = arrayOfNulls(size)
 
-        val BLOCKED_TIMEOUT = 10L to TimeUnit.SECONDS
         const val NAMESPACE = "Path"
     }
 }

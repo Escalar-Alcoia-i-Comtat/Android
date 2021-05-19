@@ -47,8 +47,8 @@ import java.io.FileNotFoundException
 
 class MapFragment : NetworkChangeListenerFragment() {
     private lateinit var mapHelper: MapHelper
-    var mapLoaded = false
-    var mapLoading = false
+    private var mapLoaded = false
+    private var mapLoading = false
     val mapStyle: Style?
         get() = if (this::mapHelper.isInitialized)
             mapHelper.style

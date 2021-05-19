@@ -18,8 +18,6 @@ import timber.log.Timber
 
 class IntroActivity : LanguageAppCompatActivity() {
     companion object {
-        var shouldChange = false
-
         fun shouldShow(): IntroShowReason {
             var result: IntroShowReason? = null
             if (!PREF_SHOWN_INTRO.get())
@@ -28,8 +26,7 @@ class IntroActivity : LanguageAppCompatActivity() {
         }
     }
 
-    var adapterViewPager: IntroPagerAdapter? = null
-        private set
+    private var adapterViewPager: IntroPagerAdapter? = null
 
     private lateinit var binding: ActivityIntroBinding
 
@@ -66,13 +63,14 @@ class IntroActivity : LanguageAppCompatActivity() {
         }
     }
 
+    // TODO: Fix deprecation
     class IntroPagerAdapter(fragmentManager: FragmentManager) :
         FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
         val fragments = arrayListOf<Fragment>()
 
-        val mainIntroFragment = MainIntroFragment()
-        val warningIntroFragment = WarningIntroFragment()
-        val betaIntroFragment = BetaIntroFragment()
+        private val mainIntroFragment = MainIntroFragment()
+        private val warningIntroFragment = WarningIntroFragment()
+        private val betaIntroFragment = BetaIntroFragment()
 
         init {
             fragments.add(mainIntroFragment)

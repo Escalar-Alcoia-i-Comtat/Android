@@ -58,9 +58,6 @@ const val DOWNLOAD_NAMESPACE = "namespace"
 const val DOWNLOAD_PATH = "path"
 const val DOWNLOAD_OVERWRITE = "overwrite"
 const val DOWNLOAD_QUALITY = "quality"
-const val DOWNLOAD_INTENT_AREA_ID = "area_id"
-const val DOWNLOAD_INTENT_ZONE_ID = "zone_id"
-const val DOWNLOAD_INTENT_SECTOR_ID = "sector_id"
 const val DOWNLOAD_STYLE_URL = "style_url"
 
 /**
@@ -193,7 +190,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         )
     }
 
-    fun downloadImageFile(imageReferenceUrl: String, imageFile: File): Result {
+    private fun downloadImageFile(imageReferenceUrl: String, imageFile: File): Result {
         val dataDir = imageFile.parentFile!!
 
         var error: Result? = null

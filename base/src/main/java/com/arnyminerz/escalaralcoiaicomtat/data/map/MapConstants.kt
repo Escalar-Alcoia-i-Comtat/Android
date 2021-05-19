@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.data.map
 
 import com.arnyminerz.escalaralcoiaicomtat.R
 
-const val LOCATION_UPDATE_INTERVAL_MILLIS = 1000L // 1 second
 const val LOCATION_UPDATE_MIN_TIME: Long = 10 * 1000 // 10 seconds
 const val LOCATION_UPDATE_MIN_DIST: Float = 1.5f // 1.5 meters
 
@@ -21,7 +20,6 @@ const val DEFAULT_ZOOM = 12.0
 const val ICON_SIZE_MULTIPLIER = .2f
 const val SMALL_ICON_SIZE_MULTIPLIER = .35f
 const val LINE_WIDTH_MULTIPLIER = .5f
-const val CURRENT_LOCATION_DEFAULT_ZOOM = 17.0
 const val MAP_LOAD_PADDING = 50
 
 const val WINDOW_DATA_KEY = "window_data"

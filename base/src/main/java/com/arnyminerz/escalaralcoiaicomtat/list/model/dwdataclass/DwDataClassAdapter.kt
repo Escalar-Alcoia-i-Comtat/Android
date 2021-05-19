@@ -39,8 +39,8 @@ import timber.log.Timber
 class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
     private val activity: DataClassListActivity<P>,
     val items: List<T>,
-    val itemsPerRow: Int = 1,
-    val itemHeightPx: Int? = null,
+    private val itemsPerRow: Int = 1,
+    private val itemHeightPx: Int? = null,
     private val onItemSelected: ((data: T, holder: DwDataClassViewHolder, position: Int) -> Unit)?
 ) : RecyclerView.Adapter<DwDataClassViewHolder>() {
     private val storage = Firebase.storage

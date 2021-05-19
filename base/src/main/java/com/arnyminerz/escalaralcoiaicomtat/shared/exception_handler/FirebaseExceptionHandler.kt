@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler
 
-import androidx.annotation.StringRes
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.google.firebase.storage.StorageException
 
