@@ -334,7 +334,4 @@
     <string name="action_google_auth">Accedir amb Google</string>
     <string name="toast_error_login_google">No s\'ha pogut accedir amb Google</string>
     <string name="toast_error_login_one_tap">No s\'ha pogut carregar l\'inici de sessió amb un clic</string>
-    <string name="toast_error_login_one_tap">N</string>
-    <string name="toast_error_login_one_tap">No</string>
-    <string name="toast_error_login_one_tap">"No "</string>
 </resources>
