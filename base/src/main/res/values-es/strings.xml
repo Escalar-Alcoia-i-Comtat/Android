@@ -333,6 +333,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="notification_mark_completed_error_message">La vía \"%1$s\" ha sido marcada como completada, pero ha ocurrido un error en el proceso. Código de error: %2$s</string>
     <string name="toast_error_account_manager_store">No se han podido guardar los datos de la cuenta</string>
     <string name="action_google_auth">Acceder con Google</string>
-    <string name="action_google_auth">A</string>
     <string name="toast_error_login_google">No se ha podido acceder con Google</string>
 </resources>
