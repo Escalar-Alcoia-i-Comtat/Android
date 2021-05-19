@@ -18,7 +18,6 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.ProfileActivity
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMainBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.DownloadsFragment
@@ -30,13 +29,13 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMA
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WARN_BATTERY
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ALERT_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.intent.LoginRequestContract
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
-import com.arnyminerz.escalaralcoiaicomtat.shared.REQUEST_CODE_LOGIN
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_LOGGED_IN
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_DOWNLOADS
@@ -72,6 +71,15 @@ class MainActivity : LanguageAppCompatActivity() {
 
     internal lateinit var firestore: FirebaseFirestore
     internal lateinit var storage: FirebaseStorage
+
+    private val loginRequest = registerForActivityResult(LoginRequestContract()) { resultCode ->
+        Timber.i("Got login result: $resultCode")
+        when (resultCode) {
+            RESULT_CODE_LOGGED_IN -> refreshLoginStatus()
+            RESULT_CODE_WAITING_EMAIL_CONFIRMATION ->
+                startActivity(Intent(this, EmailConfirmationActivity::class.java))
+        }
+    }
 
     private fun updateBottomAppBar() {
         Timber.d("Updating bottom app bar...")
@@ -230,7 +238,7 @@ class MainActivity : LanguageAppCompatActivity() {
         }
 
         binding.authFab.setOnClickListener {
-            startActivityForResult(Intent(this, AuthActivity::class.java), REQUEST_CODE_LOGIN)
+            loginRequest.launch(null)
         }
         binding.profileImageView.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
@@ -312,17 +320,6 @@ class MainActivity : LanguageAppCompatActivity() {
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Timber.v("Got activity result. Code: %s", resultCode)
-        if (requestCode == REQUEST_CODE_LOGIN)
-            when (resultCode) {
-                RESULT_CODE_LOGGED_IN -> refreshLoginStatus()
-                RESULT_CODE_WAITING_EMAIL_CONFIRMATION ->
-                    startActivity(Intent(this, EmailConfirmationActivity::class.java))
-            }
-        else super.onActivityResult(requestCode, resultCode, data)
     }
 
     /**
