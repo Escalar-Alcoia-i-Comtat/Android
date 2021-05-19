@@ -238,6 +238,7 @@
     <string name="toast_error_profile_image_load">Could not load profile image</string>
     <string name="toast_error_login_required">You must be logged in to do this</string>
     <string name="toast_error_like">Could not like comment</string>
+    <string name="toast_error_account_manager_store">Could not store account data</string>
     <string name="toast_profile_image_updated">Updated profile image successfully</string>
     <string name="toast_location_not_shown">Current location won\'t be shown</string>
     <string name="toast_stored_gpx">GPX stored!</string>

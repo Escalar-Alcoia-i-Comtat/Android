@@ -330,4 +330,5 @@
     <string name="notification_mark_completed_waiting_message">Esperant fins a tenir connexió a Internet per a enviar el comentari i marcar la via com a completada.</string>
     <string name="notification_mark_completed_error_title">No s\'ha pogut marcar com a completada</string>
     <string name="notification_mark_completed_error_message">La via \"%1$s\" ha sigut marcada com a completada, però ha ocorregut un erorr. Codi d\'error: %2$s</string>
+    <string name="toast_error_account_manager_store">No s\'han pogut desar les dades del compte</string>
 </resources>
