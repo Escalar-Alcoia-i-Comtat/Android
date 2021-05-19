@@ -200,7 +200,7 @@
                         android:contentDescription="@string/image_desc_path_info"
                         android:scaleType="fitCenter"
                         android:src="@drawable/round_info_24"
-                        android:tint="@color/path_description_button_color" />
+                        app:tint="@color/path_description_button_color" />
 
                     <ImageButton
                         android:id="@+id/comments_imageButton"
@@ -211,7 +211,7 @@
                         android:contentDescription="@string/image_desc_comments"
                         android:scaleType="fitCenter"
                         android:src="@drawable/ic_round_comment_24"
-                        android:tint="?attr/colorControlNormal" />
+                        app:tint="?attr/colorControlNormal" />
 
                 </LinearLayout>
 
