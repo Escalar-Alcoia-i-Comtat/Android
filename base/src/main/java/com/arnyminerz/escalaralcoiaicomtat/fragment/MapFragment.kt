@@ -72,9 +72,9 @@ class MapFragment : NetworkChangeListenerFragment() {
     private var markerWindow: MapHelper.MarkerWindow? = null
 
     @SuppressLint("MissingPermission")
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        Timber.d("onActivityCreated()")
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        Timber.d("onViewCreated()")
         binding!!.loadingMapCardView.show()
 
         firebaseStorage = Firebase.storage
