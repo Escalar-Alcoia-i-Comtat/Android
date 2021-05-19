@@ -10,8 +10,8 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
  * @author Arnau Mora
  * @since 20210519
  */
-class LoginRequestContract : ActivityResultContract<Any, Int>() {
-    override fun createIntent(context: Context, input: Any): Intent =
+class LoginRequestContract : ActivityResultContract<Any?, Int>() {
+    override fun createIntent(context: Context, input: Any?): Intent =
         Intent(context, AuthActivity::class.java)
 
     override fun parseResult(resultCode: Int, intent: Intent?): Int = resultCode
