@@ -51,7 +51,11 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
                 val am = AccountManager.get(this)
                 for (account in am.accounts) {
                     Timber.v("Removing account \"${account.name}\"...")
-                    am.removeAccountExplicitly(account)
+                    try {
+                        am.removeAccountExplicitly(account)
+                    } catch (e: SecurityException) {
+                        Timber.e(e, "Could not remove account.")
+                    }
                 }
             }
         }
