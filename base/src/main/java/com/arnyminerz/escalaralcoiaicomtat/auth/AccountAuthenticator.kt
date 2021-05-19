@@ -10,11 +10,11 @@ class AccountAuthenticator(context: Context) : AbstractAccountAuthenticator(cont
     override fun editProperties(p0: AccountAuthenticatorResponse?, p1: String?): Bundle? = null
 
     override fun addAccount(
-        p0: AccountAuthenticatorResponse?,
-        p1: String?,
-        p2: String?,
-        p3: Array<out String>?,
-        p4: Bundle?
+        response: AccountAuthenticatorResponse,
+        accountType: String,
+        authTokenType: String?,
+        requiredFeatures: Array<out String>?,
+        options: Bundle
     ): Bundle? = null
 
     override fun confirmCredentials(
@@ -31,6 +31,7 @@ class AccountAuthenticator(context: Context) : AbstractAccountAuthenticator(cont
     ): Bundle? = null
 
     override fun getAuthTokenLabel(p0: String?): String? = null
+
     override fun updateCredentials(
         p0: AccountAuthenticatorResponse?,
         p1: Account?,
