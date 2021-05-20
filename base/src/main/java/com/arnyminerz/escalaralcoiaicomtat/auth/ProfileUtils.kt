@@ -24,6 +24,8 @@ import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -42,7 +44,7 @@ suspend fun setDefaultProfileImage(
     context: Context,
     firestore: FirebaseFirestore,
     user: FirebaseUser,
-    progressListener: ((progress: ValueMax<Long>) -> Unit)?
+    progressListener: (@WorkerThread suspend CoroutineContext.(progress: ValueMax<Long>) -> Unit)?
 ): UploadTask.TaskSnapshot = setProfileImage(
     firestore,
     user,
@@ -64,49 +66,53 @@ suspend fun setProfileImage(
     firestore: FirebaseFirestore,
     user: FirebaseUser,
     image: Bitmap,
-    progressListener: ((progress: ValueMax<Long>) -> Unit)?
-): UploadTask.TaskSnapshot = suspendCoroutine { cont ->
-    try {
-        Timber.v("Starting profile image upload...")
-        val storageRef = Firebase.storage.reference
-        val profileImageRef = storageRef.child("users/${user.uid}/profile.webp")
-        val profileImage = image
-            .cropToSquare()
-            ?.scale(PROFILE_IMAGE_SIZE.toInt(), PROFILE_IMAGE_SIZE.toInt())
-        val baos = ByteArrayOutputStream()
-        profileImage?.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
-        val data = baos.toByteArray()
+    progressListener: (@WorkerThread suspend CoroutineContext.(progress: ValueMax<Long>) -> Unit)?
+): UploadTask.TaskSnapshot {
+    val c = coroutineContext
+    return suspendCoroutine { cont ->
+        try {
+            Timber.v("Starting profile image upload...")
+            val storageRef = Firebase.storage.reference
+            val profileImageRef = storageRef.child("users/${user.uid}/profile.webp")
+            val profileImage = image
+                .cropToSquare()
+                ?.scale(PROFILE_IMAGE_SIZE.toInt(), PROFILE_IMAGE_SIZE.toInt())
+            val baos = ByteArrayOutputStream()
+            profileImage?.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
+            val data = baos.toByteArray()
 
-        Timber.v("Uploading profile image...")
-        profileImageRef.putBytes(data)
-            .addOnProgressListener { task ->
-                val progress = ValueMax(task.bytesTransferred, task.totalByteCount)
-                Timber.v("Upload: ${progress.percentage()}%")
-                progressListener?.invoke(progress)
-            }
-            .addOnSuccessListener {
-                Timber.v("Finished uploading image. Updating in profile...")
-                doAsync {
-                    try {
-                        updateProfileImage(
-                            firestore,
-                            user,
-                            "gs://escalaralcoiaicomtat.appspot.com" + profileImageRef.path
-                        )
-                    } catch (e: Exception) {
-                        cont.resumeWithException(e)
-                    }
+            Timber.v("Uploading profile image...")
+            profileImageRef.putBytes(data)
+                .addOnProgressListener { task ->
+                    val progress = ValueMax(task.bytesTransferred, task.totalByteCount)
+                    Timber.v("Upload: ${progress.percentage()}%")
+                    // TODO: Find another way of doing this, seems a bit jenky
+                    doAsync { progressListener?.invoke(c, progress) }
                 }
-                Timber.v("Profile updated. Resuming...")
-                cont.resume(it)
-            }
-            .addOnFailureListener {
-                Timber.e(it, "Could not upload profile image")
-                cont.resumeWithException(it)
-            }
-    } catch (e: Exception) {
-        Timber.e(e, "Could not update profile image.")
-        cont.resumeWithException(e)
+                .addOnSuccessListener {
+                    Timber.v("Finished uploading image. Updating in profile...")
+                    doAsync {
+                        try {
+                            updateProfileImage(
+                                firestore,
+                                user,
+                                "gs://escalaralcoiaicomtat.appspot.com" + profileImageRef.path
+                            )
+                        } catch (e: Exception) {
+                            cont.resumeWithException(e)
+                        }
+                    }
+                    Timber.v("Profile updated. Resuming...")
+                    cont.resume(it)
+                }
+                .addOnFailureListener {
+                    Timber.e(it, "Could not upload profile image")
+                    cont.resumeWithException(it)
+                }
+        } catch (e: Exception) {
+            Timber.e(e, "Could not update profile image.")
+            cont.resumeWithException(e)
+        }
     }
 }
 
