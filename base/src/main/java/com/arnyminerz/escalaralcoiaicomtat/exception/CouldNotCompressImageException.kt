@@ -1,5 +1,3 @@
 package com.arnyminerz.escalaralcoiaicomtat.exception
 
-import java.io.IOException
-
-class CouldNotCompressImageException(msg: String) : IOException(msg)
+class CouldNotCompressImageException(msg: String) : RuntimeException(msg)

@@ -23,13 +23,10 @@ jobs:
           echo 'ext {' >> base/secure.gradle
           echo 'MAPBOX_DOWNLOADS_TOKEN="${{ secrets.MAPBOX_TOKEN_SECRET }}"' >> base/secure.gradle
           echo 'MAPBOX_PUBLIC_TOKEN="${{ secrets.MAPBOX_TOKEN_PUBLIC }}"' >> base/secure.gradle
-          echo 'SENTRY_DNS="${{ secrets.SENTRY_DNS }}"' >> base/secure.gradle
           echo 'SIGNING_KEYSTORE_PASSWORD="${{ secrets.SIGNING_KEYSTORE_PASSWORD }}"' >> base/secure.gradle
           echo 'SIGNING_KEY_ALIAS="${{ secrets.SIGNING_KEY_ALIAS }}"' >> base/secure.gradle
           echo 'SIGNING_KEY_PASSWORD="${{ secrets.SIGNING_KEY_PASSWORD }}"' >> base/secure.gradle
-          echo 'PARSE_SERVER="${{ secrets.PARSE_SERVER }}"' >> base/secure.gradle
-          echo 'PARSE_KEY="${{ secrets.PARSE_KEY }}"' >> base/secure.gradle
-          echo 'PARSE_APPLICATION_ID="${{ secrets.PARSE_APPLICATION_ID }}"' >> base/secure.gradle
+          echo 'GOOGLE_AUTH_CLIENT_ID="${{ secrets.GOOGLE_AUTH_CLIENT_ID }}"' >> base/secure.gradle
           echo '}' >> base/secure.gradle
       - name: Prepare sentry.properties
         run: |

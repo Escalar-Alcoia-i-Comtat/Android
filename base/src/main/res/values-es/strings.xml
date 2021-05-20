@@ -331,4 +331,8 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="notification_mark_completed_waiting_message">Esperando hasta tener una conexión a Internet activa para enviar el comentario y marcar la vía como completada.</string>
     <string name="notification_mark_completed_error_title">No se ha podido marcar como completada</string>
     <string name="notification_mark_completed_error_message">La vía \"%1$s\" ha sido marcada como completada, pero ha ocurrido un error en el proceso. Código de error: %2$s</string>
+    <string name="toast_error_account_manager_store">No se han podido guardar los datos de la cuenta</string>
+    <string name="action_google_auth">Acceder con Google</string>
+    <string name="toast_error_login_google">No se ha podido acceder con Google</string>
+    <string name="toast_error_login_one_tap">No se ha podido cargar el inicio de sesión con un click</string>
 </resources>

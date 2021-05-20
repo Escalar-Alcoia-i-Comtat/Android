@@ -87,6 +87,15 @@ fun Bitmap.storeToFile(
     fos.close()
 }
 
+/**
+ * Crops the Bitmap into a square image.
+ * @author Arnau Mora
+ * @since 20210520
+ * @return The new cropped image, or null if there has been an error.
+ * @throws IllegalArgumentException When there has been an error while processing the new image's
+ * size.
+ */
+@Throws(IllegalArgumentException::class)
 fun Bitmap.cropToSquare(): Bitmap? {
     val newWidth = if (height > width) width else height
     val newHeight = if (height > width) height - (height - width) else height

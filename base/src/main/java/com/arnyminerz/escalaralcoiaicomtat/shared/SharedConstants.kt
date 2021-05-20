@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.shared
 
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.generic.MEGABYTE
 
 const val APP_UPDATE_MAX_TIME_DAYS_KEY = "APP_UPDATE_MAX_TIME_DAYS"
 const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7L
@@ -81,6 +82,13 @@ const val ROTATION_B = -90f
  * @since 20210425
  */
 const val PROFILE_IMAGE_COMPRESSION_QUALITY = 85
+
+/**
+ * The maximum download size allowed for the profile image.
+ * @author Arnau Mora
+ * @since 20210519
+ */
+const val PROFILE_IMAGE_MAX_SIZE = MEGABYTE * 5
 
 const val LOCATION_PERMISSION_REQUEST_CODE = 3 // This number was chosen by Dono
 const val FOLDER_ACCESS_PERMISSION_REQUEST_CODE = 7
@@ -167,3 +175,10 @@ const val CONFIRMATION_EMAIL_URL = "https://escalaralcoiaicomtat.page.link/email
  * @since 20210425
  */
 const val CONFIRMATION_EMAIL_DYNAMIC = "escalaralcoiaicomtat.page.link"
+
+/**
+ * This is used as constant for any place that requires a 100, just for making the compiler happy :)
+ * @author Arnau Mora
+ * @since 20210519
+ */
+const val HUNDRED = 100

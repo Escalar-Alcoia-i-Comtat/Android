@@ -5,12 +5,14 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.PopupMenu
 import androidx.annotation.UiThread
 import androidx.core.app.ActivityOptionsCompat
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.viewpager2.widget.ViewPager2
@@ -29,6 +31,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMA
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WARN_BATTERY
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ALERT_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.intent.LoginRequestContract
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
@@ -36,6 +39,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
+import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_MAX_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_LOGGED_IN
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.TAB_ITEM_DOWNLOADS
@@ -342,6 +346,20 @@ class MainActivity : LanguageAppCompatActivity() {
                 if (!user.isEmailVerified) {
                     PREF_WAITING_EMAIL_CONFIRMATION.put(true)
                     startActivity(Intent(this, EmailConfirmationActivity::class.java))
+                }
+
+                user.photoUrl?.also { photoUrl ->
+                    storage.getReferenceFromUrl(photoUrl.toString())
+                        .getBytes(PROFILE_IMAGE_MAX_SIZE)
+                        .addOnSuccessListener { bytes ->
+                            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                            binding.profileImageView.setImageResource(0)
+                            binding.profileImageView.background = bitmap.toDrawable(resources)
+                        }
+                        .addOnFailureListener { e ->
+                            Timber.e(e, "Could not load profile image.")
+                            toast(R.string.toast_error_profile_image_load)
+                        }
                 }
             }?.addOnFailureListener {
                 if (it is FirebaseAuthInvalidUserException) {

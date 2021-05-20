@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Escalar Alcoia i Comtat</string>
+    <string name="package_name" translatable="false">com.arnyminerz.escalaralcoiaicomtat</string>
 
     <string name="sector_sun_morning">Morning Sun</string>
     <string name="sector_sun_afternoon">Afternoon Sun</string>
@@ -57,6 +58,7 @@
     <string name="action_register">Register</string>
     <string name="action_login">Login</string>
     <string name="action_logout">Log out</string>
+    <string name="action_google_auth">Login with Google</string>
     <string name="action_resend_email">Resend confirmation email</string>
     <string name="action_open_settings">Open Settings</string>
     <string name="action_do_not_remind">Do not remind</string>
@@ -237,7 +239,10 @@
     <string name="toast_error_profile_image_update">Could not update profile image</string>
     <string name="toast_error_profile_image_load">Could not load profile image</string>
     <string name="toast_error_login_required">You must be logged in to do this</string>
+    <string name="toast_error_login_google">Could not login with Google</string>
+    <string name="toast_error_login_one_tap">Could not launch One-Tap login</string>
     <string name="toast_error_like">Could not like comment</string>
+    <string name="toast_error_account_manager_store">Could not store account data</string>
     <string name="toast_profile_image_updated">Updated profile image successfully</string>
     <string name="toast_location_not_shown">Current location won\'t be shown</string>
     <string name="toast_stored_gpx">GPX stored!</string>

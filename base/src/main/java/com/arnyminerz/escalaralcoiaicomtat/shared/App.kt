@@ -1,11 +1,13 @@
 package com.arnyminerz.escalaralcoiaicomtat.shared
 
+import android.accounts.AccountManager
 import android.app.Application
 import android.content.Context
 import android.util.Log
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.data.Cache
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -41,6 +43,22 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         appNetworkProvider = ConnectivityProvider.createProvider(this)
         Timber.v("Adding network listener...")
         provider.addListener(this)
+
+        Firebase.auth.addAuthStateListener {
+            val user = it.currentUser
+            Timber.v("Auth State updated. Logged in: ${user != null}")
+            if (user == null) {
+                val am = AccountManager.get(this)
+                for (account in am.accounts) {
+                    Timber.v("Removing account \"${account.name}\"...")
+                    try {
+                        am.removeAccountExplicitly(account)
+                    } catch (e: SecurityException) {
+                        Timber.e(e, "Could not remove account.")
+                    }
+                }
+            }
+        }
     }
 
     override fun onTerminate() {

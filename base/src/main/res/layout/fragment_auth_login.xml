@@ -76,6 +76,23 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/google_button"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="48dp"
+            android:layout_marginEnd="48dp"
+            android:layout_weight="1"
+            android:shadowColor="@color/google_auth_color_background"
+            android:text="@string/action_google_auth"
+            android:textAllCaps="false"
+            android:textColor="@color/google_auth_color"
+            app:icon="@drawable/googleg_standard_color_18"
+            app:iconTint="@color/google_auth_color"
+            app:rippleColor="@color/google_auth_color"
+            app:strokeColor="@color/google_auth_color" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
