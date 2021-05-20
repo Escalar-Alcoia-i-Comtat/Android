@@ -27,6 +27,10 @@ import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
 class ProfileActivity : AppCompatActivity() {
+    companion object {
+        var hasProfileImageBeenChanged: Boolean = false
+    }
+
     private lateinit var binding: ActivityProfileBinding
 
     private lateinit var firestore: FirebaseFirestore
@@ -135,6 +139,7 @@ class ProfileActivity : AppCompatActivity() {
                         progressIndicator.visibility(false)
                         toast(R.string.toast_profile_image_updated)
                     }
+                    hasProfileImageBeenChanged = true
                 } catch (e: StorageException) {
                     uiContext {
                         Timber.e(e, "Could not update profile image.")
