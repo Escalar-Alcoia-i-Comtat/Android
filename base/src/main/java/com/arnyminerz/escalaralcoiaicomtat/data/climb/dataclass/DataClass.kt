@@ -743,7 +743,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
             Timber.d("Getting image from Firebase: $imageReferenceUrl")
             val image = imageReferenceUrl
-            if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/")) {
+            /*if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/")) {
                 Timber.w("Fixing zone image reference ($image)...")
                 val i = image.lastIndexOf('/') + 1
                 val newImage =
@@ -759,10 +759,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         )
                     }
                     .addOnFailureListener { cont.resumeWithException(it) }
-            } else
-                loadImage(
-                    fetchImageLoadRequest(image)
-                )
+            } else*/
+            loadImage(
+                fetchImageLoadRequest(image)
+            )
         }
 
     }
