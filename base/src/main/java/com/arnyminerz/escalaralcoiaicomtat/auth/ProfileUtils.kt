@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.scale
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCompressImageException
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.generic.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.generic.cropToSquare
@@ -20,6 +21,7 @@ import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
@@ -60,8 +62,23 @@ suspend fun setDefaultProfileImage(
  * @param user The user to update.
  * @param image The image to use
  * @param progressListener This will notify you about the image upload progress.
+ * @throws IllegalArgumentException When there has been an error while processing the image crop size.
+ * @throws CouldNotCompressImageException When the image could not have been compressed.
+ * @throws StorageException When there has been an error while uploading the new profile image.
+ * @throws IllegalStateException If launched incorrectly.
+ * @throws FirebaseAuthInvalidUserException When the current user's account has been disabled,
+ * deleted, or its credentials are no longer valid.
+ * @throws FirebaseFirestoreException When there has been an error updating the profile's data.
  */
 @WorkerThread
+@Throws(
+    IllegalArgumentException::class,
+    CouldNotCompressImageException::class,
+    StorageException::class,
+    FirebaseAuthInvalidUserException::class,
+    IllegalStateException::class,
+    FirebaseFirestoreException::class
+)
 suspend fun setProfileImage(
     firestore: FirebaseFirestore,
     user: FirebaseUser,
@@ -78,7 +95,10 @@ suspend fun setProfileImage(
                 .cropToSquare()
                 ?.scale(PROFILE_IMAGE_SIZE.toInt(), PROFILE_IMAGE_SIZE.toInt())
             val baos = ByteArrayOutputStream()
-            profileImage?.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
+            val compressed =
+                profileImage?.compress(WEBP_LOSSY_LEGACY, PROFILE_IMAGE_COMPRESSION_QUALITY, baos)
+            if (compressed != true)
+                throw CouldNotCompressImageException("Could not compress the image to WebP.")
             val data = baos.toByteArray()
 
             Timber.v("Uploading profile image...")
@@ -98,7 +118,11 @@ suspend fun setProfileImage(
                                 user,
                                 "gs://escalaralcoiaicomtat.appspot.com" + profileImageRef.path
                             )
-                        } catch (e: Exception) {
+                        } catch (e: IllegalStateException) {
+                            cont.resumeWithException(e)
+                        } catch (e: FirebaseAuthInvalidUserException) {
+                            cont.resumeWithException(e)
+                        } catch (e: FirebaseFirestoreException) {
                             cont.resumeWithException(e)
                         }
                     }
@@ -109,8 +133,7 @@ suspend fun setProfileImage(
                     Timber.e(it, "Could not upload profile image")
                     cont.resumeWithException(it)
                 }
-        } catch (e: Exception) {
-            Timber.e(e, "Could not update profile image.")
+        } catch (e: IllegalArgumentException) {
             cont.resumeWithException(e)
         }
     }
@@ -123,8 +146,17 @@ suspend fun setProfileImage(
  * @param firestore The Firestore instance to update references.
  * @param user The user to update.
  * @param imageDownloadUrl The uploaded image url.
+ * @throws IllegalStateException If launched incorrectly.
+ * @throws FirebaseAuthInvalidUserException When the current user's account has been disabled,
+ * deleted, or its credentials are no longer valid.
+ * @throws FirebaseFirestoreException When there has been an error updating the profile's data.
  */
 @WorkerThread
+@Throws(
+    IllegalStateException::class,
+    FirebaseAuthInvalidUserException::class,
+    FirebaseFirestoreException::class
+)
 suspend fun updateProfileImage(
     firestore: FirebaseFirestore,
     user: FirebaseUser,
@@ -158,7 +190,8 @@ suspend fun updateProfileImage(
                                 try {
                                     createFirestoreUserReference(firestore, user)
                                     cont.resume(void)
-                                } catch (e: Exception) {
+                                } catch (e: FirebaseFirestoreException) {
+                                    Timber.e(e, "Could not update the user's profile.")
                                     cont.resumeWithException(e)
                                 }
                             }
@@ -167,9 +200,9 @@ suspend fun updateProfileImage(
                         }
                     }
             }
-            .addOnFailureListener {
-                Timber.e(it, "Could not update profile image.")
-                cont.resumeWithException(it)
+            .addOnFailureListener { e ->
+                Timber.e(e, "Could not update profile image.")
+                cont.resumeWithException(e)
             }
     }
 
@@ -219,9 +252,11 @@ suspend fun updateDisplayName(
  * @author Arnau Mora
  * @since 20210430
  * @param firestore The Firestore instance to update references.
- * @param user The user to store the reference of
+ * @param user The user to store the reference of.
+ * @throws FirebaseFirestoreException When there has been an exception while setting the user's data.
  */
 @WorkerThread
+@Throws(FirebaseFirestoreException::class)
 suspend fun createFirestoreUserReference(firestore: FirebaseFirestore, user: FirebaseUser) =
     suspendCoroutine<Void> { cont ->
         firestore.collection("Users")
