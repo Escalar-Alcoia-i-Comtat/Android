@@ -47,6 +47,11 @@ jobs:
       - name: Run dokka 📝
         id: test
         run: bash ./gradlew :base:dokkaHtml
+      - name: Add redirect 🔁
+        id: redirection
+        run: |
+          touch index.html
+          echo '<html><head><meta http-equiv="refresh" content="0; URL=https://escalar-alcoia-i-comtat.github.io/Android/html/index.html" /></head><body><p>Redirecting...</p></body></html>' > index.html
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@4.1.0
         with:
