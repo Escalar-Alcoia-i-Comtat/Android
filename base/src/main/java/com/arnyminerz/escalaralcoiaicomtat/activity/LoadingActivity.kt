@@ -207,7 +207,12 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                 }
             }) {
                 if (AREAS.size > 0) {
-                    if (deepLinkPath != null)
+                    if (deepLinkPath != null) {
+                        binding.progressTextView.setText(R.string.status_loading_deep_link)
+                        binding.progressBar.visibility(false)
+                        binding.progressBar.isIndeterminate = true
+                        binding.progressBar.visibility(true)
+
                         doAsync {
                             val intent =
                                 DataClass.getIntent(this@LoadingActivity, deepLinkPath!!, firestore)
@@ -218,7 +223,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                                     launch(MainActivity::class.java)
                             }
                         }
-                    else
+                    } else
                         launch(MainActivity::class.java)
                 } else if (!appNetworkState.hasInternet)
                     noInternetAccess()
