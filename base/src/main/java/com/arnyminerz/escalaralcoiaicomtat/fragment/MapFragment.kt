@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
@@ -216,6 +217,14 @@ class MapFragment : NetworkChangeListenerFragment() {
         }
     }
 
+    /**
+     * Loads all the map features from [AREAS]. Note that [mapHelper] must be loaded before running.
+     * @author Arnau Mora
+     * @since 20210521
+     * @see mapLoaded
+     * @see mapLoading
+     * @see [MapHelper.isLoaded]
+     */
     private suspend fun loadMap() {
         if (mapLoaded || mapLoading || !mapHelper.isLoaded) {
             Timber.v("Skipping map load ($mapLoaded, $mapLoading, ${mapHelper.isLoaded}).")
@@ -228,48 +237,13 @@ class MapFragment : NetworkChangeListenerFragment() {
         mapLoading = true
 
         Timber.v("Loading map...")
-        for (area in AREAS)
-            try {
-                if (context == null) {
-                    Timber.w("Stopped loading map areas' since context is null.")
-                    break
-                }
-                Timber.v("Getting KMZ file of $area...")
-                val kmzFile = area.kmzFile(requireContext(), firebaseStorage, false)
-                Timber.v("Loading KMZ features...")
-                val features = mapHelper.loadKMZ(
-                    requireContext(),
-                    kmzFile,
-                    addToMap = false
-                )
-                if (features != null) {
-                    Timber.v("Adding features to map...")
-                    mapHelper.add(features)
-                }
-            } catch (e: FileNotFoundException) {
-                Timber.e(e, "Could not load KML")
-                Firebase.crashlytics.recordException(e)
-                uiContext { toast(context, R.string.toast_error_internal) }
-            } catch (e: NoInternetAccessException) {
-                Timber.e(e, "Could not load KML")
-                Firebase.crashlytics.recordException(e)
-                uiContext { toast(context, R.string.toast_error_no_internet) }
-            } catch (e: MapNotInitializedException) {
-                Timber.e(e, "Could not load KML")
-                Firebase.crashlytics.recordException(e)
-                uiContext { toast(context, R.string.toast_error_internal) }
-            } catch (e: IllegalStateException) {
-                Timber.e("Could not load KML")
-                Firebase.crashlytics.recordException(e)
-                uiContext { toast(context, R.string.toast_error_no_kmz) }
-            } catch (e: StorageException) {
-                Firebase.crashlytics.recordException(e)
-                val handler = handleStorageException(e)
-                if (handler != null) {
-                    Timber.e(e, handler.second)
-                    toast(context, handler.first)
-                }
+        for (area in AREAS) {
+            if (context == null) {
+                Timber.w("Stopped loading map areas' since context is null.")
+                break
             }
+            loadAreaOnMap(area)
+        }
 
         try {
             uiContext {
@@ -285,6 +259,53 @@ class MapFragment : NetworkChangeListenerFragment() {
             Timber.e(e, "Could not display and center map.")
             mapLoading = false
             mapLoaded = false
+        }
+    }
+
+    /**
+     * Loads an area into the map, using [mapHelper]. Note that [mapHelper] must have been initialized,
+     * and loaded.
+     * @author Arnau Mora
+     * @since 20210521
+     * @param area The [Area] to load the map's contents from.
+     */
+    private suspend fun loadAreaOnMap(area: Area) {
+        try {
+            Timber.v("Getting KMZ file of $area...")
+            val kmzFile = area.kmzFile(requireContext(), firebaseStorage, false)
+            Timber.v("Loading KMZ features...")
+            val features = mapHelper.loadKMZ(
+                requireContext(),
+                kmzFile,
+                addToMap = false
+            )
+            if (features != null) {
+                Timber.v("Adding features to map...")
+                mapHelper.add(features)
+            }
+        } catch (e: FileNotFoundException) {
+            Timber.e(e, "Could not load KML")
+            Firebase.crashlytics.recordException(e)
+            uiContext { toast(context, R.string.toast_error_internal) }
+        } catch (e: NoInternetAccessException) {
+            Timber.e(e, "Could not load KML")
+            Firebase.crashlytics.recordException(e)
+            uiContext { toast(context, R.string.toast_error_no_internet) }
+        } catch (e: MapNotInitializedException) {
+            Timber.e(e, "Could not load KML")
+            Firebase.crashlytics.recordException(e)
+            uiContext { toast(context, R.string.toast_error_internal) }
+        } catch (e: IllegalStateException) {
+            Timber.e("Could not load KML")
+            Firebase.crashlytics.recordException(e)
+            uiContext { toast(context, R.string.toast_error_no_kmz) }
+        } catch (e: StorageException) {
+            Firebase.crashlytics.recordException(e)
+            val handler = handleStorageException(e)
+            if (handler != null) {
+                Timber.e(e, handler.second)
+                toast(context, handler.first)
+            }
         }
     }
 }
