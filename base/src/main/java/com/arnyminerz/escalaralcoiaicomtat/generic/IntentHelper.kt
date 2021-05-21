@@ -68,6 +68,34 @@ fun Intent.getSize(): Int {
     return size
 }
 
+inline fun <reified T> Activity.getExtra(key: DataExtra<T>): T? {
+    val extras = intent?.extras
+    return when {
+        extras == null -> null
+        !extras.containsKey(key.key) -> null
+        else -> {
+            val result = extras.get(key.key)
+            if (result is T)
+                result
+            else null
+        }
+    }
+}
+
+inline fun <reified T> Activity.getExtra(key: DataExtra<T>, default: T): T {
+    val extras = intent?.extras
+    return when {
+        extras == null -> default
+        !extras.containsKey(key.key) -> default
+        else -> {
+            val result = extras.get(key.key)
+            if (result is T)
+                result
+            else default
+        }
+    }
+}
+
 /**
  * Starts an activity with the specified properties for the Intent.
  * @author Arnau Mora
@@ -76,5 +104,7 @@ fun Intent.getSize(): Int {
  * @param properties The setter for the properties of the Intent.
  */
 @UiThread
-fun Activity.launch(target: Class<*>, properties: Intent.() -> Unit) =
-    startActivity(Intent(this, target).also(properties))
+fun Activity.launch(target: Class<*>, properties: (Intent.() -> Unit)? = null) =
+    startActivity(Intent(this, target).also {
+        properties?.invoke(it)
+    })
