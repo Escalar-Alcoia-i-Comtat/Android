@@ -43,7 +43,7 @@ from the link specified, or through the repository's button.
 
 ---
 
-[pages]: https://arnyminerz.github.io/EscalarAlcoiaIComtat-Android/base/
+[pages]: https://escalar-alcoia-i-comtat.github.io/Android/html/index.html
 
 [sponsors]: https://github.com/sponsors/ArnyminerZ
 [play-store]: https://play.google.com/store/apps/details?id=com.arnyminerz.escalaralcoiaicomtat
