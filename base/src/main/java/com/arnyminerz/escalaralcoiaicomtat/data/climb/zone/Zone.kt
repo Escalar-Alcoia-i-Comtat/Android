@@ -29,7 +29,8 @@ class Zone(
     val image: String,
     kmzReferenceUrl: String,
     val position: LatLng,
-    documentPath: String
+    documentPath: String,
+    webUrl: String?
 ) : DataClass<Sector, Area>(
     displayName,
     timestamp,
@@ -42,7 +43,8 @@ class Zone(
     DataClassMetadata(
         objectId,
         NAMESPACE,
-        documentPath
+        documentPath,
+        webUrl
     )
 ) {
     @WorkerThread
@@ -53,7 +55,8 @@ class Zone(
         parcel.readString()!!,
         parcel.readString()!!,
         LatLng(parcel.readDouble(), parcel.readDouble()),
-        parcel.readString()!!
+        parcel.readString()!!,
+        parcel.readString()
     ) {
         parcel.readList(innerChildren, Sector::class.java.classLoader)
     }
@@ -72,7 +75,8 @@ class Zone(
         data.getString("image")!!,
         data.getString("kmz")!!,
         data.getGeoPoint("location")!!.toLatLng(),
-        documentPath = data.reference.path
+        documentPath = data.reference.path,
+        data.getString("webURL")
     )
 
     /**
@@ -127,6 +131,7 @@ class Zone(
         parcel.writeDouble(position.longitude)
         parcel.writeString(metadata.documentPath)
         parcel.writeList(innerChildren)
+        parcel.writeString(metadata.webURL)
     }
 
     override fun describeContents(): Int = 0

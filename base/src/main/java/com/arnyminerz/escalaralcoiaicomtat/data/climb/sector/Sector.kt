@@ -47,6 +47,7 @@ class Sector constructor(
     val weight: String,
     imageUrl: String,
     documentPath: String,
+    webUrl: String?
 ) : DataClass<Path, Zone>(
     displayName,
     timestamp,
@@ -59,7 +60,8 @@ class Sector constructor(
     DataClassMetadata(
         objectId,
         NAMESPACE,
-        documentPath
+        documentPath,
+        webUrl
     )
 ) {
     /**
@@ -79,7 +81,8 @@ class Sector constructor(
         data.getGeoPoint("location")?.toLatLng(),
         data.getString("weight")!!,
         data.getString("image")!!,
-        documentPath = data.reference.path
+        documentPath = data.reference.path,
+        data.getString("webURL")
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -94,6 +97,7 @@ class Sector constructor(
         parcel.writeString(imageReferenceUrl)
         parcel.writeString(metadata.documentPath)
         parcel.writeList(innerChildren)
+        parcel.writeString(metadata.webURL)
     }
 
     constructor(parcel: Parcel) : this(
@@ -107,6 +111,7 @@ class Sector constructor(
         parcel.readString()!!,
         parcel.readString()!!, // Image Url
         parcel.readString()!!, // Pointer
+        parcel.readString(), // Web URL
     ) {
         parcel.readList(innerChildren, Path::class.java.classLoader)
     }
