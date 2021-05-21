@@ -27,6 +27,7 @@ import java.util.*
  * @param timestamp The update date of the Area
  * @param kmzReferenceUrl The reference url from Firebase Storage for the Area's KMZ file
  * @param documentPath The path in Firebase Firestore of the Area
+ * @param webUrl The url for the Area on the website
  */
 class Area(
     objectId: String,
@@ -35,6 +36,7 @@ class Area(
     image: String,
     kmzReferenceUrl: String,
     documentPath: String,
+    webUrl: String?,
 ) : DataClass<Zone, DataClassImpl>(
     displayName,
     timestamp,
@@ -47,7 +49,8 @@ class Area(
     DataClassMetadata(
         objectId,
         NAMESPACE,
-        documentPath
+        documentPath,
+        webUrl
     )
 ) {
     @WorkerThread
@@ -57,7 +60,8 @@ class Area(
         parcel.readString().toTimestamp()!!,
         parcel.readString()!!,
         parcel.readString()!!,
-        parcel.readString()!!
+        parcel.readString()!!,
+        parcel.readString()
     ) {
         parcel.readList(innerChildren, Zone::class.java.classLoader)
     }
@@ -75,7 +79,8 @@ class Area(
         data.getDate("created")!!,
         data.getString("image")!!,
         data.getString("kmz")!!,
-        documentPath = data.reference.path
+        documentPath = data.reference.path,
+        data.getString("webURL")
     )
 
     /**
@@ -123,6 +128,7 @@ class Area(
         parcel.writeString(kmzReferenceUrl)
         parcel.writeString(metadata.documentPath)
         parcel.writeList(innerChildren)
+        parcel.writeString(metadata.webURL)
     }
 
     override fun describeContents(): Int = 0

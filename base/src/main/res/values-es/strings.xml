@@ -335,4 +335,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="action_google_auth">Acceder con Google</string>
     <string name="toast_error_login_google">No se ha podido acceder con Google</string>
     <string name="toast_error_login_one_tap">No se ha podido cargar el inicio de sesión con un click</string>
+    <string name="status_loading_deep_link">Procesando enlace…</string>
 </resources>

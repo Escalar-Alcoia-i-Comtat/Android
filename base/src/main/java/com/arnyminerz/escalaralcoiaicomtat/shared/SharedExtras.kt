@@ -1,6 +1,9 @@
 package com.arnyminerz.escalaralcoiaicomtat.shared
 
+import com.arnyminerz.escalaralcoiaicomtat.activity.LoadingActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.DynamicLinkHandler
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.DataExtra
@@ -28,3 +31,19 @@ val QUIET_UPDATE = DataExtra<Boolean>("quiet_update")
 val EXTRA_KMZ_FILE = DataExtra<String>("KMZFle")
 val EXTRA_ICON_SIZE_MULTIPLIER = DataExtra<Float>("IconSize")
 val EXTRA_CENTER_CURRENT_LOCATION = DataExtra<Boolean>("CenterLocation")
+
+/**
+ * Used in [DynamicLinkHandler] for passing [LoadingActivity] the link that is wanted to be launched
+ * once the data is loaded.
+ * @author Arnau Mora
+ * @since 20210521
+ */
+val EXTRA_LINK_PATH = DataExtra<String>("Link")
+
+/**
+ * If true, informs that the Activity wasn't launched from the "normal" navigation flow, it has been
+ * launched after [DataClass.getIntent], for example.
+ * @author Arnau Mora
+ * @since 20210521
+ */
+val EXTRA_STATIC = DataExtra<Boolean>("Static")

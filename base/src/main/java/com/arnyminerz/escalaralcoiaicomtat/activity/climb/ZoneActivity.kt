@@ -15,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.launch
 import com.arnyminerz.escalaralcoiaicomtat.generic.put
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
@@ -26,6 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_POSITION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_TRANSITION_NAME
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
@@ -109,6 +111,14 @@ class ZoneActivity : DataClassListActivity<Zone>() {
         outState.put(EXTRA_AREA, areaId)
         outState.put(EXTRA_ZONE, zoneId)
         super.onSaveInstanceState(outState)
+    }
+
+    override fun onBackPressed() {
+        if (getExtra(EXTRA_STATIC, false))
+            launch(AreaActivity::class.java) {
+                putExtra(EXTRA_AREA, areaId)
+            }
+        else super.onBackPressed()
     }
 
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {

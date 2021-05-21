@@ -7,6 +7,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.ensureGet
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.has
@@ -14,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.launch
 import com.arnyminerz.escalaralcoiaicomtat.generic.put
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
@@ -23,6 +25,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_POSITION
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_TRANSITION_NAME
 import timber.log.Timber
@@ -86,6 +89,12 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
         outState.putInt(EXTRA_POSITION.key, position)
         outState.put(EXTRA_AREA, areaId)
         super.onSaveInstanceState(outState)
+    }
+
+    override fun onBackPressed() {
+        if (getExtra(EXTRA_STATIC, false))
+            launch(MainActivity::class.java)
+        else super.onBackPressed()
     }
 
     override fun onResume() {
