@@ -230,6 +230,10 @@ class MapFragment : NetworkChangeListenerFragment() {
         Timber.v("Loading map...")
         for (area in AREAS)
             try {
+                if (context == null) {
+                    Timber.w("Stopped loading map areas' since context is null.")
+                    break
+                }
                 Timber.v("Getting KMZ file of $area...")
                 val kmzFile = area.kmzFile(requireContext(), firebaseStorage, false)
                 Timber.v("Loading KMZ features...")
