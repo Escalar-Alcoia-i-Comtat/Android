@@ -86,7 +86,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
          * @author Arnau Mora
          * @since 20210416
          * @param context The context to initialize the [Intent]
-         * @param queryName What to search
+         * @param queryName What to search. May be [DataClass.displayName] or [DataClassMetadata.webURL].
          * @param firestore The [FirebaseFirestore] instance.
          * @return An [Intent] if the [DataClass] was found, or null.
          */
@@ -99,7 +99,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
             for (area in AREAS) {
                 Timber.d("  Finding in ${area.displayName}.")
-                if (area.displayName.equals(queryName, true))
+                if (area.displayName.equals(queryName, true) ||
+                    area.metadata.webURL.equals(queryName, true)
+                )
                     result = Intent(context, AreaActivity::class.java).apply {
                         Timber.d("Found Area id ${area.objectId}!")
                         putExtra(EXTRA_AREA, area.objectId)
@@ -115,7 +117,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         zone.getChildren(firestore)
                             .toCollection(sectors)
 
-                        if (zone.displayName.equals(queryName, true))
+                        if (zone.displayName.equals(queryName, true) ||
+                            zone.metadata.webURL.equals(queryName, true)
+                        )
                             result = Intent(context, ZoneActivity::class.java).apply {
                                 Timber.d("Found Zone id ${zone.objectId}!")
                                 putExtra(EXTRA_AREA, area.objectId)
@@ -125,7 +129,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         else
                             for ((counter, sector) in sectors.withIndex()) {
                                 Timber.d("      Finding in ${sector.displayName}.")
-                                if (sector.displayName.equals(queryName, true))
+                                if (sector.displayName.equals(queryName, true) ||
+                                    sector.metadata.webURL.equals(queryName, true)
+                                )
                                     result = Intent(context, SectorActivity::class.java)
                                         .apply {
                                             Timber.d("Found Sector id ${sector.objectId} at $counter!")
