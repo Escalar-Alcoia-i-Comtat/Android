@@ -7,7 +7,11 @@ import android.os.Bundle
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.LoadingActivity
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
+import com.arnyminerz.escalaralcoiaicomtat.generic.launch
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.arnyminerz.escalaralcoiaicomtat.shared.ESCALAR_ALCOIA_I_COMTAT_HOSTNAME
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_LINK_PATH
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.dynamiclinks.ktx.dynamicLinks
 import com.google.firebase.ktx.Firebase
@@ -31,7 +35,7 @@ class DynamicLinkHandler : Activity() {
                     return@addOnSuccessListener
                 }
 
-                Timber.v("Got deep link: $deepLink. Path: ${deepLink.path}")
+                Timber.v("Got deep link: $deepLink. Path: ${deepLink.path}. Host: ${deepLink.host}")
 
                 val mode = deepLink.getQueryParameter("mode")
                 val actionCode = deepLink.getQueryParameter("oobCode")
@@ -49,6 +53,11 @@ class DynamicLinkHandler : Activity() {
                             finish()
                         }
                 }
+
+                if (ESCALAR_ALCOIA_I_COMTAT_HOSTNAME == deepLink.host)
+                    launch(LoadingActivity::class.java) {
+                        putExtra(EXTRA_LINK_PATH, deepLink.toString())
+                    }
             }
             .addOnFailureListener(this) { e ->
                 Timber.w(e, "getDynamicLink:onFailure")
