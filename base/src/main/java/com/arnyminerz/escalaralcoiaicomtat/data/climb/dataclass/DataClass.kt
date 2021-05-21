@@ -4,11 +4,13 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
 import android.widget.ImageView
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
@@ -16,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCreateDynamicLinkException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.allTrue
@@ -24,6 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.shared.DATACLASS_WAIT_CHILDREN_DELAY
+import com.arnyminerz.escalaralcoiaicomtat.shared.DYNAMIC_LINKS_DOMAIN
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
@@ -43,6 +47,11 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
+import com.google.firebase.dynamiclinks.ShortDynamicLink
+import com.google.firebase.dynamiclinks.ktx.androidParameters
+import com.google.firebase.dynamiclinks.ktx.shortLinkAsync
+import com.google.firebase.dynamiclinks.ktx.socialMetaTagParameters
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
@@ -634,6 +643,62 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @return The path of the image file that can be downloaded
      */
     fun imageFile(context: Context): File = File(dataDir(context), "$namespace-$objectId.webp")
+
+    /**
+     * Creates a dynamic link access for the DataClass
+     * @author Arnau Mora
+     * @since 20210521
+     * @param dynamicLinks The Firebase Dynamic Links instance to create the link from.
+     * @param firebaseStorage The Firebase Storage instance to fetch the image from
+     * @throws IllegalStateException When the DataClass doesn't have a [DataClassMetadata.webURL]
+     * defined in [metadata].
+     * @throws CouldNotCreateDynamicLinkException When there was an unknown exception while creating
+     * the dynamic link.
+     */
+    @Throws(IllegalStateException::class, CouldNotCreateDynamicLinkException::class)
+    suspend fun getDynamicLink(
+        dynamicLinks: FirebaseDynamicLinks,
+        firebaseStorage: FirebaseStorage
+    ): Uri = suspendCoroutine { cont ->
+        Timber.v("Processing dynamic links for areas...")
+        val webUrl = metadata.webURL
+        if (webUrl != null) {
+            Timber.i("Dynamic link not found for A/$objectId. Creating one...")
+            Timber.i("Getting image URL...")
+            firebaseStorage
+                .getReferenceFromUrl(imageReferenceUrl)
+                .downloadUrl
+                .addOnSuccessListener { imageDownloadUri ->
+                    Timber.i("Creating dynamic link...")
+                    dynamicLinks.shortLinkAsync(ShortDynamicLink.Suffix.SHORT) {
+                        link = Uri.parse("$webUrl/?area=$objectId")
+                        domainUriPrefix = DYNAMIC_LINKS_DOMAIN
+                        androidParameters(BuildConfig.APPLICATION_ID) {
+                            fallbackUrl =
+                                Uri.parse("https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}")
+                            minimumVersion =
+                                192 // This is when the dynamic link handling was introduced
+                        }
+                        socialMetaTagParameters {
+                            title = "Escalar Alcoià i Comtat - $displayName"
+                            description = displayName
+                            imageUrl = imageDownloadUri
+                        }
+                    }.addOnSuccessListener { shortDynLink ->
+                        val link = shortDynLink.shortLink
+                        if (link != null)
+                            cont.resume(link)
+                        else
+                            cont.resumeWithException(
+                                CouldNotCreateDynamicLinkException(
+                                    "There was an unknown error while creating the dynamic link"
+                                )
+                            )
+                    }.addOnFailureListener { e -> cont.resumeWithException(e) }
+                }
+                .addOnFailureListener { e -> cont.resumeWithException(e) }
+        } else cont.resumeWithException(IllegalStateException("The webUrl in the DataClass' metadata is null."))
+    }
 
     /**
      * Loads the image of the Data Class
