@@ -147,7 +147,11 @@ class MapFragment : NetworkChangeListenerFragment() {
                 }
 
                 map.addOnMapClickListener {
-                    markerWindow?.hide()
+                    try {
+                        markerWindow?.hide()
+                    } catch (e: IllegalStateException) {
+                        Timber.i(e, "The card has already been hidden.")
+                    }
                     markerWindow = null
                     true
                 }
