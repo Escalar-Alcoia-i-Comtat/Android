@@ -182,3 +182,17 @@ const val CONFIRMATION_EMAIL_DYNAMIC = "escalaralcoiaicomtat.page.link"
  * @since 20210519
  */
 const val HUNDRED = 100
+
+/**
+ * The domain used in Firebase Dynamic Links.
+ * @author Arnau Mora
+ * @since 20210521
+ */
+const val DYNAMIC_LINKS_DOMAIN = "https://escalaralcoiaicomtat.page.link"
+
+/**
+ * The hostname of the website.
+ * @author Arnau Mora
+ * @since 20210521
+ */
+const val ESCALAR_ALCOIA_I_COMTAT_HOSTNAME = "escalaralcoiaicomtat.centrexcursionistalcoi.org"
