@@ -1226,10 +1226,11 @@ constructor(context: Context) {
             uiContext {
                 if (imageUrl == null)
                     descriptionTextView.text = description
-                else
+                else if (!activity.isDestroyed)
                     Glide.with(activity)
                         .load(imageUrl)
                         .into(imageView)
+                else Timber.w("Will not load image since there is not an attached Activity.")
 
                 visibility(enterButton, activityIntent != null)
                 visibility(imageView, imageUrl != null)
