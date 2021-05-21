@@ -10,11 +10,14 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationAc
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.loadAreasFromCache
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ERROR_REPORTING_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.launch
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChannels
@@ -23,6 +26,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.APP_UPDATE_MAX_TIME_DAYS_KEY
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION_KEY
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_LINK_PATH
 import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_SIZE_KEY
 import com.arnyminerz.escalaralcoiaicomtat.shared.REMOTE_CONFIG_DEFAULTS
@@ -54,6 +58,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     private lateinit var binding: ActivityLoadingBinding
     private var loading = false
 
+    private var deepLinkPath: String? = null
+
     private lateinit var firestore: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,6 +87,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             createNotificationChannels()
+
+        deepLinkPath = getExtra(EXTRA_LINK_PATH)
 
         Timber.v("Searching for updates...")
         val appUpdateManager = AppUpdateManagerFactory.create(this)
@@ -198,9 +206,21 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                     }
                 }
             }) {
-                if (AREAS.size > 0)
-                    startActivity(Intent(this, MainActivity::class.java))
-                else if (!appNetworkState.hasInternet)
+                if (AREAS.size > 0) {
+                    if (deepLinkPath != null)
+                        doAsync {
+                            val intent =
+                                DataClass.getIntent(this@LoadingActivity, deepLinkPath!!, firestore)
+                            uiContext {
+                                if (intent != null)
+                                    startActivity(intent)
+                                else
+                                    launch(MainActivity::class.java)
+                            }
+                        }
+                    else
+                        launch(MainActivity::class.java)
+                } else if (!appNetworkState.hasInternet)
                     noInternetAccess()
             }
         } catch (_: NoInternetAccessException) {
