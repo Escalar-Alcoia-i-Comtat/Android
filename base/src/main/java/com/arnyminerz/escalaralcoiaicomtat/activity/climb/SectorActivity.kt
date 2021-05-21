@@ -28,6 +28,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_POSITION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_TRANSITION_NAME
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MARKED_AS_COMPLETE
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
@@ -221,10 +222,12 @@ class SectorActivity : LanguageAppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        launch(ZoneActivity::class.java) {
-            putExtra(EXTRA_AREA, areaId)
-            putExtra(EXTRA_ZONE, zoneId)
-        }
+        if (getExtra(EXTRA_STATIC, false))
+            launch(ZoneActivity::class.java) {
+                putExtra(EXTRA_AREA, areaId)
+                putExtra(EXTRA_ZONE, zoneId)
+            }
+        else super.onBackPressed()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

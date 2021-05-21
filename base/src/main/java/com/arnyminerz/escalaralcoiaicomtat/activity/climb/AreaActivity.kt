@@ -25,6 +25,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_POSITION
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_TRANSITION_NAME
 import timber.log.Timber
@@ -91,7 +92,9 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
     }
 
     override fun onBackPressed() {
-        launch(MainActivity::class.java)
+        if (getExtra(EXTRA_STATIC, false))
+            launch(MainActivity::class.java)
+        else super.onBackPressed()
     }
 
     override fun onResume() {

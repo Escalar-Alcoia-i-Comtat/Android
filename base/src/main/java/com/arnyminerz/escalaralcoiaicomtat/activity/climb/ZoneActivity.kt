@@ -27,6 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_POSITION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_TRANSITION_NAME
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
@@ -113,9 +114,11 @@ class ZoneActivity : DataClassListActivity<Zone>() {
     }
 
     override fun onBackPressed() {
-        launch(AreaActivity::class.java) {
-            putExtra(EXTRA_AREA, areaId)
-        }
+        if (getExtra(EXTRA_STATIC, false))
+            launch(AreaActivity::class.java) {
+                putExtra(EXTRA_AREA, areaId)
+            }
+        else super.onBackPressed()
     }
 
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
