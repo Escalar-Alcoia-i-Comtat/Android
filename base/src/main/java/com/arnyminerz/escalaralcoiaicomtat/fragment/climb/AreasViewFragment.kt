@@ -239,6 +239,9 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         justAttached = true
+
+        Timber.d("Initializing MapHelper...")
+        mapHelper = MapHelper(context)
     }
 
     override fun onCreateView(
@@ -246,9 +249,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        Timber.d("Initializing MapHelper...")
-        mapHelper = MapHelper(requireContext())
-
         _binding = FragmentViewAreasBinding.inflate(inflater, container, false)
 
         firestore = Firebase.firestore
