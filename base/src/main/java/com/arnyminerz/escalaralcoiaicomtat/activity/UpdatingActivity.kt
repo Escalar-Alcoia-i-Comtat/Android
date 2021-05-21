@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.annotation.WorkerThread
 import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
@@ -13,6 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityUpdatingBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.ERROR_VIBRATE
@@ -149,6 +151,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             (if (updateSector != null) 1 else 0)
     private var updatesCounter = 0
 
+    @WorkerThread
     private suspend fun iterateUpdate(dataClass: DataClass<*, *>) {
         Timber.v("Deleting area #$updateArea...")
         dataClass.delete(this@UpdatingActivity)
@@ -156,24 +159,26 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
         Timber.v("Downloading area #$updateArea...")
         // TODO: The map won't be downloaded again
         val result = dataClass.download(this, null)
-        result.observe(this) { workInfo ->
-            val state = workInfo.state
-            val data = workInfo.outputData
-            Timber.v("Current download status: ${workInfo.state}")
-            if (state == WorkInfo.State.FAILED) {
-                vibrate(this, ERROR_VIBRATE)
-                visibility(binding.progressBar, false, setGone = false)
-                binding.updatingTextView.setText(R.string.update_progress_error)
-                Timber.w("Download failed! Error: ${data.getString("error")}")
-            } else if (state == WorkInfo.State.SUCCEEDED) {
-                updatesCounter++
-                if (updatesCounter >= updatesToDo)
-                    if (quietUpdate)
-                        Timber.v("Finished downloading everything, quiet mode enabled, won't launch anything...")
-                    else {
-                        Timber.v("Finished downloading everything, launching MainActivity...")
-                        startActivity(Intent(this, MainActivity::class.java))
-                    }
+        uiContext {
+            result.observe(this) { workInfo ->
+                val state = workInfo.state
+                val data = workInfo.outputData
+                Timber.v("Current download status: ${workInfo.state}")
+                if (state == WorkInfo.State.FAILED) {
+                    vibrate(this, ERROR_VIBRATE)
+                    visibility(binding.progressBar, false, setGone = false)
+                    binding.updatingTextView.setText(R.string.update_progress_error)
+                    Timber.w("Download failed! Error: ${data.getString("error")}")
+                } else if (state == WorkInfo.State.SUCCEEDED) {
+                    updatesCounter++
+                    if (updatesCounter >= updatesToDo)
+                        if (quietUpdate)
+                            Timber.v("Finished downloading everything, quiet mode enabled, won't launch anything...")
+                        else {
+                            Timber.v("Finished downloading everything, launching MainActivity...")
+                            startActivity(Intent(this, MainActivity::class.java))
+                        }
+                }
             }
         }
     }
