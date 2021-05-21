@@ -15,6 +15,8 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.SectorFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.launch
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.PathsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_AREA_ID
@@ -216,6 +218,13 @@ class SectorActivity : LanguageAppCompatActivity() {
             outState.putInt(EXTRA_POSITION.key, binding.sectorViewPager.currentItem)
         }
         super.onSaveInstanceState(outState)
+    }
+
+    override fun onBackPressed() {
+        launch(ZoneActivity::class.java) {
+            putExtra(EXTRA_AREA, areaId)
+            putExtra(EXTRA_ZONE, zoneId)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

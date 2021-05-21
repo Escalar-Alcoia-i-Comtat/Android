@@ -7,6 +7,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.ensureGet
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.has
@@ -14,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.launch
 import com.arnyminerz.escalaralcoiaicomtat.generic.put
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
@@ -86,6 +88,10 @@ class AreaActivity : DataClassListActivity<Area>(ICON_SIZE_MULTIPLIER, true) {
         outState.putInt(EXTRA_POSITION.key, position)
         outState.put(EXTRA_AREA, areaId)
         super.onSaveInstanceState(outState)
+    }
+
+    override fun onBackPressed() {
+        launch(MainActivity::class.java)
     }
 
     override fun onResume() {

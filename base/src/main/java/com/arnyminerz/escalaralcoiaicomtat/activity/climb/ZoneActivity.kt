@@ -15,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.launch
 import com.arnyminerz.escalaralcoiaicomtat.generic.put
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
@@ -109,6 +110,12 @@ class ZoneActivity : DataClassListActivity<Zone>() {
         outState.put(EXTRA_AREA, areaId)
         outState.put(EXTRA_ZONE, zoneId)
         super.onSaveInstanceState(outState)
+    }
+
+    override fun onBackPressed() {
+        launch(AreaActivity::class.java) {
+            putExtra(EXTRA_AREA, areaId)
+        }
     }
 
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
