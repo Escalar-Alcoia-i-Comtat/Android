@@ -1,9 +1,11 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.UiThread
 import timber.log.Timber
 import java.io.Serializable
 
@@ -65,3 +67,14 @@ fun Intent.getSize(): Int {
     parcel.recycle()
     return size
 }
+
+/**
+ * Starts an activity with the specified properties for the Intent.
+ * @author Arnau Mora
+ * @since 20210521
+ * @param target The target activity's class.
+ * @param properties The setter for the properties of the Intent.
+ */
+@UiThread
+fun Activity.launch(target: Class<*>, properties: Intent.() -> Unit) =
+    startActivity(Intent(this, target).also(properties))
