@@ -31,6 +31,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.DYNAMIC_LINKS_DOMAIN
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
@@ -153,8 +154,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 }
                 if (result != null) break
             }
-            Timber.w("Could not generate intent")
-            return result
+            return result?.also {
+                it.putExtra(EXTRA_STATIC, true)
+            }
         }
     }
 

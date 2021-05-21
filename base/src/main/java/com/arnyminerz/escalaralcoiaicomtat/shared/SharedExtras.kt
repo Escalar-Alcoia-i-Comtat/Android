@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.shared
 import com.arnyminerz.escalaralcoiaicomtat.activity.LoadingActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.DynamicLinkHandler
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.generic.DataExtra
@@ -38,3 +39,11 @@ val EXTRA_CENTER_CURRENT_LOCATION = DataExtra<Boolean>("CenterLocation")
  * @since 20210521
  */
 val EXTRA_LINK_PATH = DataExtra<String>("Link")
+
+/**
+ * If true, informs that the Activity wasn't launched from the "normal" navigation flow, it has been
+ * launched after [DataClass.getIntent], for example.
+ * @author Arnau Mora
+ * @since 20210521
+ */
+val EXTRA_STATIC = DataExtra<Boolean>("Static")
