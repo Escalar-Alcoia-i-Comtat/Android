@@ -10,6 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityCommentsBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.completions.adapter.CommentsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
@@ -111,5 +112,8 @@ class CommentsActivity : AppCompatActivity() {
         Timber.v("Setting comments recycler view's adapter and layout.")
         binding.commentsRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.commentsRecyclerView.adapter = commentsAdapter
+
+        if (comments.isEmpty() && notes.isNotEmpty())
+            toast("There are no comments, but there are notes. WIP")
     }
 }
