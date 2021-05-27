@@ -27,7 +27,7 @@ jobs:
         run: |
           echo 'MAPBOX_DOWNLOADS_TOKEN=${{ secrets.MAPBOX_TOKEN_SECRET }}' >> local.properties
           echo 'MAPBOX_PUBLIC_TOKEN=${{ secrets.MAPBOX_TOKEN_PUBLIC }}' >> local.properties
-          echo 'SIGNING_KEYSTORE_PASSWORD=${{ secrets.SIGNING_KEYSTORE_PASSWORD }}' >> base/secure.gradle
+          echo 'SIGNING_KEYSTORE_PASSWORD=${{ secrets.SIGNING_KEYSTORE_PASSWORD }}' >> local.properties
           echo 'SIGNING_KEY_ALIAS=${{ secrets.SIGNING_KEY_ALIAS }}' >> local.properties
           echo 'SIGNING_KEY_PASSWORD=${{ secrets.SIGNING_KEY_PASSWORD }}' >> local.properties
           echo 'GOOGLE_AUTH_CLIENT_ID=${{ secrets.GOOGLE_AUTH_CLIENT_ID }}' >> local.properties
