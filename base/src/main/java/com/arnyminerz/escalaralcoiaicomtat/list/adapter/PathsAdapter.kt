@@ -1,12 +1,14 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 
 import android.app.Activity
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
 import android.widget.ImageButton
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.WorkerThread
@@ -72,10 +74,15 @@ const val ANIMATION_DURATION = 300L
  * @since 20210427
  * @param paths The paths list
  * @param activity the activity that is loading the recycler view
+ * @param markAsCompleteRequestHandler The request handler when it's asked to mark a path as complete
  * @see SectorViewHolder
  */
 @ExperimentalBadgeUtils
-class PathsAdapter(private val paths: List<Path>, private val activity: SectorActivity) :
+class PathsAdapter(
+    private val paths: List<Path>,
+    private val activity: SectorActivity,
+    private val markAsCompleteRequestHandler: ActivityResultLauncher<Intent>
+) :
     RecyclerView.Adapter<SectorViewHolder>() {
     /**
      * Specifies the toggled status of all the paths.
@@ -284,12 +291,14 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
                 )
             }
             holder.markCompletedButton.setOnClickListener {
-                activity.launch(MarkCompletedActivity::class.java) {
-                    putExtra(EXTRA_AREA, activity.areaId)
-                    putExtra(EXTRA_ZONE, activity.zoneId)
-                    putExtra(EXTRA_SECTOR_INDEX, activity.currentPage)
-                    putExtra(EXTRA_PATH, path.objectId)
-                }
+                markAsCompleteRequestHandler.launch(
+                    Intent(activity, MarkCompletedActivity::class.java).apply {
+                        putExtra(EXTRA_AREA, activity.areaId)
+                        putExtra(EXTRA_ZONE, activity.zoneId)
+                        putExtra(EXTRA_SECTOR_INDEX, activity.currentPage)
+                        putExtra(EXTRA_PATH, path.objectId)
+                    }
+                )
             }
         }
 

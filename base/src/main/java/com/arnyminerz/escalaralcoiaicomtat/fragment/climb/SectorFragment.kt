@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getDisplaySize
+import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.PathsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -28,6 +30,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_AREA_ID
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_ZONE_ID
 import com.arnyminerz.escalaralcoiaicomtat.shared.CROSSFADE_DURATION
+import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
 import com.arnyminerz.escalaralcoiaicomtat.shared.SECTOR_THUMBNAIL_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.view.show
@@ -36,6 +39,7 @@ import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.badge.ExperimentalBadgeUtils
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -65,6 +69,42 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
     private val sectorActivity: SectorActivity?
         get() = (activity as? SectorActivity?)
+
+    val markAsCompleteRequest =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            val data = it.data
+
+            Timber.v("Marked path. Getting document.")
+            val pathDocument = data?.getExtra(EXTRA_PATH_DOCUMENT)
+            if (pathDocument != null) {
+                Timber.v("The marked path's document is \"$pathDocument\".")
+                firestore.document(pathDocument)
+                    .get()
+                    .addOnSuccessListener { pathData ->
+                        Timber.v("Processing path data...")
+                        val path = Path(pathData)
+                        doAsync {
+                            Timber.v("Getting adapter...")
+                            val adapter = binding?.pathsRecyclerView?.adapter as PathsAdapter?
+                            if (adapter != null) {
+                                Timber.v("Getting view holder...")
+                                val holder = adapter.viewHolders[path.objectId]
+                                if (holder != null) {
+                                    Timber.v("Loading completed path data...")
+                                    adapter.loadCompletedPathData(
+                                        Firebase.auth.currentUser,
+                                        path,
+                                        holder.commentsImageButton
+                                    )
+                                } else Timber.w("Could not find view holder")
+                            } else Timber.w("Could not fetch adapter.")
+                        }
+                    }
+                    .addOnFailureListener {
+                        Timber.e(it, "Could not get path data to refresh comments")
+                    }
+            } else Timber.w("Could not get the path's document.")
+        }
 
     @UiThread
     private fun refreshMaximizeStatus() {
@@ -250,7 +290,11 @@ class SectorFragment : NetworkChangeListenerFragment() {
                             R.anim.item_enter_left_animator
                         )
                     binding?.pathsRecyclerView?.adapter =
-                        PathsAdapter(children, requireActivity() as SectorActivity)
+                        PathsAdapter(
+                            children,
+                            requireActivity() as SectorActivity,
+                            markAsCompleteRequest
+                        )
                     binding?.pathsRecyclerView?.show()
 
                     // Load info bar
