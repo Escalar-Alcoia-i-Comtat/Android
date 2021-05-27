@@ -253,15 +253,16 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
         firestore = Firebase.firestore
 
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         mapHelper.withMapView(binding.mapView)
         mapHelper.onCreate(savedInstanceState)
         initializeMap()
 
-        return binding.root
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
         Timber.v("Refreshing areas...")
         Timber.d("Initializing area adapter for AreasViewFragment...")
         binding.areasRecyclerView.layoutManager = LinearLayoutManager(requireContext())
