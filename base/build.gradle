@@ -5,9 +5,9 @@ plugins {
     id('com.google.firebase.crashlytics')
     id('com.google.firebase.firebase-perf')
     id('org.jetbrains.dokka')
+    id('com.google.secrets_gradle_plugin') version '0.6'
 }
 
-apply from: './secure.gradle'
 apply from: './version.gradle'
 
 android {
@@ -21,16 +21,16 @@ android {
         versionCode findProperty("android.versionCode") as Integer
         versionName VERSION_NAME
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        resValue "string", "mapbox_access_token", MAPBOX_PUBLIC_TOKEN
-        resValue "string", "google_auth_client_id", GOOGLE_AUTH_CLIENT_ID
     }
     signingConfigs {
         release {
+            def props = new Properties()
+            file("${rootDir}/local.properties").withInputStream { props.load(it) }
+
             storeFile file("keystore.jks")
-            storePassword SIGNING_KEYSTORE_PASSWORD
-            keyAlias SIGNING_KEY_ALIAS
-            keyPassword SIGNING_KEY_PASSWORD
+            storePassword props.getProperty("SIGNING_KEYSTORE_PASSWORD")
+            keyAlias props.getProperty("SIGNING_KEY_ALIAS")
+            keyPassword props.getProperty("SIGNING_KEY_PASSWORD")
         }
     }
     buildTypes {
@@ -40,7 +40,7 @@ android {
             signingConfig signingConfigs.release
 
             kotlinOptions {
-                freeCompilerArgs = [ '-Xuse-experimental=kotlin.Experimental' ]
+                freeCompilerArgs = ['-Xuse-experimental=kotlin.Experimental']
             }
 
             ndk.debugSymbolLevel = 'FULL'
@@ -81,8 +81,8 @@ tasks.named("dokkaHtml") {
     }
 }
 
-android.applicationVariants.all {  variant ->
-    if ( variant.buildType.name == "release"){
+android.applicationVariants.all { variant ->
+    if (variant.buildType.name == "release") {
         variant.assemble.doLast {
             // This increases version code on release
             def versionPropsFile = file("../gradle.properties")
@@ -94,6 +94,14 @@ android.applicationVariants.all {  variant ->
             logger.lifecycle("Increased version code to $code")
         }
     }
+}
+
+secrets {
+    propertiesFileName 'local.properties'
+
+    ignoreList.add("SIGNING_KEYSTORE_PASSWORD")
+    ignoreList.add("SIGNING_KEY_ALIAS")
+    ignoreList.add("SIGNING_KEY_PASSWORD")
 }
 
 configurations {

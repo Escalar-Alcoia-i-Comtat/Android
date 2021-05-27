@@ -29,6 +29,7 @@ import androidx.annotation.WorkerThread
 import androidx.cardview.widget.CardView
 import androidx.collection.arrayMapOf
 import androidx.core.content.res.ResourcesCompat
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass.Companion.getIntent
@@ -193,7 +194,7 @@ constructor(context: Context) {
 
     init {
         Timber.v("Getting Mapbox instance...")
-        Mapbox.getInstance(context, context.getString(R.string.mapbox_access_token))
+        Mapbox.getInstance(context, BuildConfig.MAPBOX_PUBLIC_TOKEN)
     }
 
     fun onCreate(savedInstanceState: Bundle?) = mapView.onCreate(savedInstanceState)

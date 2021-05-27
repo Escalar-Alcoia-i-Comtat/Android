@@ -174,7 +174,7 @@ class LoginFragment private constructor() : Fragment() {
         auth = Firebase.auth
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.google_auth_client_id))
+            .requestIdToken(BuildConfig.GOOGLE_AUTH_CLIENT_ID)
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
@@ -190,7 +190,7 @@ class LoginFragment private constructor() : Fragment() {
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                     .setSupported(true)
                     // Your server's client ID, not your Android client ID.
-                    .setServerClientId(getString(R.string.google_auth_client_id))
+                    .setServerClientId(BuildConfig.GOOGLE_AUTH_CLIENT_ID)
                     // Only show accounts previously used to sign in.
                     .setFilterByAuthorizedAccounts(true)
                     .build()
