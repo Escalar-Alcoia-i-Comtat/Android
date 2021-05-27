@@ -131,7 +131,8 @@ class CommentsAdapter(
                         holder.likesTextView.isEnabled = true
                         updateLikeStatus(holder, likes.contains(loggedUserUid), likes.size)
                     }
-                    .addOnSuccessListener {
+                    .addOnFailureListener { e ->
+                        Timber.e(e, "Could not like comment.")
                         toast(activity, R.string.toast_error_like)
                         holder.likesTextView.isEnabled = true
                     }
