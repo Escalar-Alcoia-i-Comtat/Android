@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.View
 import android.widget.PopupMenu
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
@@ -35,7 +36,6 @@ import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_CENTER_CURRENT_LOCATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
-import com.arnyminerz.escalaralcoiaicomtat.shared.FOLDER_ACCESS_PERMISSION_REQUEST_CODE
 import com.arnyminerz.escalaralcoiaicomtat.shared.INFO_VIBRATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
 import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
@@ -68,6 +68,76 @@ class MapsActivity : LanguageAppCompatActivity() {
     private var showingPolyline: GeoGeometry? = null
 
     private lateinit var binding: ActivityMapsBinding
+
+    val accessFolderRequest =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val data = result.data
+            val resultCode = result.resultCode
+
+            if (resultCode != Activity.RESULT_OK) {
+                Timber.w("Result code was not OK: $resultCode")
+                return@registerForActivityResult
+            }
+
+            // The document selected by the user won't be returned in the intent.
+            // Instead, a URI to that document will be contained in the return intent
+            // provided to this method as a parameter.
+            // Pull that URI using resultData.getData().
+            data?.data?.also { uri ->
+                val mime = uri.mime(this)
+                Timber.i("Uri: $uri. File name: ${uri.fileName(this)}. Mime: $mime")
+
+                when (mime) {
+                    MIME_TYPE_GPX -> {
+                        mapHelper.storeGPX(this, uri)
+                        val notificationBuilder = Notification.Builder(this)
+                            .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
+                            .withTitle(R.string.notification_gpx_stored_title)
+                            .withText(R.string.notification_gpx_stored_message)
+                            .withIcon(R.drawable.ic_notifications)
+                            .withIntent(
+                                PendingIntent.getActivity(
+                                    this,
+                                    0,
+                                    Intent().apply {
+                                        action = Intent.ACTION_VIEW
+                                        setDataAndType(uri, mime)
+                                    },
+                                    PendingIntent.FLAG_IMMUTABLE
+                                )
+                            )
+                        Timber.d("Notification title: ${notificationBuilder.title}")
+                        val notification = notificationBuilder.build()
+                        notification.show()
+                        toast(R.string.toast_stored_gpx)
+                    }
+                    MIME_TYPE_KMZ -> {
+                        mapHelper.storeKMZ(this, uri)
+                        val notificationBuilder = Notification.Builder(this)
+                            .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
+                            .withTitle(R.string.notification_kmz_stored_title)
+                            .withText(R.string.notification_kmz_stored_message)
+                            .withIcon(R.drawable.ic_notifications)
+                            .withIntent(
+                                PendingIntent.getActivity(
+                                    this,
+                                    0,
+                                    Intent().apply {
+                                        action = Intent.ACTION_VIEW
+                                        setDataAndType(uri, mime)
+                                    },
+                                    PendingIntent.FLAG_IMMUTABLE
+                                )
+                            )
+                        Timber.d("Notification title: ${notificationBuilder.title}")
+                        val notification = notificationBuilder.build()
+                        notification.show()
+                        toast(R.string.toast_stored_kmz)
+                    }
+                    else -> Timber.w("Got unkown mime: $mime")
+                }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -135,7 +205,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                             "*.$extension"
                         )
                     }
-                    startActivityForResult(intent, FOLDER_ACCESS_PERMISSION_REQUEST_CODE)
+                    accessFolderRequest.launch(intent)
                     true
                 } else
                     false
@@ -211,70 +281,6 @@ class MapsActivity : LanguageAppCompatActivity() {
                 // Ignore all other requests.
             }
         }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == FOLDER_ACCESS_PERMISSION_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            // The document selected by the user won't be returned in the intent.
-            // Instead, a URI to that document will be contained in the return intent
-            // provided to this method as a parameter.
-            // Pull that URI using resultData.getData().
-            data?.data?.also { uri ->
-                val mime = uri.mime(this)
-                Timber.i("Uri: $uri. File name: ${uri.fileName(this)}. Mime: $mime")
-
-                when (mime) {
-                    MIME_TYPE_GPX -> {
-                        mapHelper.storeGPX(this, uri)
-                        val notificationBuilder = Notification.Builder(this)
-                            .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
-                            .withTitle(R.string.notification_gpx_stored_title)
-                            .withText(R.string.notification_gpx_stored_message)
-                            .withIcon(R.drawable.ic_notifications)
-                            .withIntent(
-                                PendingIntent.getActivity(
-                                    this,
-                                    0,
-                                    Intent().apply {
-                                        action = Intent.ACTION_VIEW
-                                        setDataAndType(uri, mime)
-                                    },
-                                    PendingIntent.FLAG_IMMUTABLE
-                                )
-                            )
-                        Timber.d("Notification title: ${notificationBuilder.title}")
-                        val notification = notificationBuilder.build()
-                        notification.show()
-                        toast(R.string.toast_stored_gpx)
-                    }
-                    MIME_TYPE_KMZ -> {
-                        mapHelper.storeKMZ(this, uri)
-                        val notificationBuilder = Notification.Builder(this)
-                            .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
-                            .withTitle(R.string.notification_kmz_stored_title)
-                            .withText(R.string.notification_kmz_stored_message)
-                            .withIcon(R.drawable.ic_notifications)
-                            .withIntent(
-                                PendingIntent.getActivity(
-                                    this,
-                                    0,
-                                    Intent().apply {
-                                        action = Intent.ACTION_VIEW
-                                        setDataAndType(uri, mime)
-                                    },
-                                    PendingIntent.FLAG_IMMUTABLE
-                                )
-                            )
-                        Timber.d("Notification title: ${notificationBuilder.title}")
-                        val notification = notificationBuilder.build()
-                        notification.show()
-                        toast(R.string.toast_stored_kmz)
-                    }
-                    else -> Timber.w("Got unkown mime: $mime")
-                }
-            }
-        }
-        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onBackPressed() {
