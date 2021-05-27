@@ -7,6 +7,7 @@ import android.util.Log
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.data.Cache
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
@@ -27,6 +28,22 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
 
     private lateinit var firestore: FirebaseFirestore
 
+    val authStateListener: FirebaseAuth.AuthStateListener = FirebaseAuth.AuthStateListener {
+        val user = it.currentUser
+        Timber.v("Auth State updated. Logged in: ${user != null}")
+        if (user == null) {
+            val am = AccountManager.get(this)
+            for (account in am.accounts) {
+                Timber.v("Removing account \"${account.name}\"...")
+                try {
+                    am.removeAccountExplicitly(account)
+                } catch (e: SecurityException) {
+                    Timber.w(e, "Could not remove account.")
+                }
+            }
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
 
@@ -44,21 +61,8 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         Timber.v("Adding network listener...")
         provider.addListener(this)
 
-        Firebase.auth.addAuthStateListener {
-            val user = it.currentUser
-            Timber.v("Auth State updated. Logged in: ${user != null}")
-            if (user == null) {
-                val am = AccountManager.get(this)
-                for (account in am.accounts) {
-                    Timber.v("Removing account \"${account.name}\"...")
-                    try {
-                        am.removeAccountExplicitly(account)
-                    } catch (e: SecurityException) {
-                        Timber.e(e, "Could not remove account.")
-                    }
-                }
-            }
-        }
+        Timber.v("Adding auth state listener...")
+        Firebase.auth.addAuthStateListener(authStateListener)
     }
 
     override fun onTerminate() {
