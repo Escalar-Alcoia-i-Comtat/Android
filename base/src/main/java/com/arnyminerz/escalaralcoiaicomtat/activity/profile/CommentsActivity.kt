@@ -107,7 +107,7 @@ class CommentsActivity : AppCompatActivity() {
         }
 
         Timber.v("Preparing comments recycler view's adapter.")
-        val commentsAdapter = CommentsAdapter(this, completions)
+        val commentsAdapter = CommentsAdapter(this, comments)
         Timber.v("Setting comments recycler view's adapter and layout.")
         binding.commentsRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.commentsRecyclerView.adapter = commentsAdapter
