@@ -22,20 +22,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
-import java.util.*
-import kotlin.Array
-import kotlin.Boolean
-import kotlin.Comparable
-import kotlin.IllegalArgumentException
-import kotlin.Int
-import kotlin.Long
-import kotlin.NoSuchElementException
-import kotlin.String
-import kotlin.Throws
-import kotlin.apply
-import kotlin.arrayOfNulls
-import kotlin.let
-import kotlin.toString
+import java.util.ArrayList
+import java.util.Date
 
 class Path(
     objectId: String,
@@ -242,35 +230,40 @@ class Path(
                     if (t.id.equals(typeRaw, true))
                         type = t
 
-                Timber.v("Got completion data for \"$documentPath\".")
+                Timber.v("$objectId > Got completion data for \"$documentPath\".")
                 val user = if (cachedUsers.containsKey(userUid))
                     cachedUsers[userUid]!!
                 else
                     try {
-                        Timber.v("Loading user data ($userUid) from server...")
+                        Timber.v("$objectId > Loading user data ($userUid) from server...")
                         val visibleUserData = firestore.collection("Users")
                             .document(userUid)
                             .get()
                             .await()!!
                         val data = visibleUserData.data
                         if (data != null) {
-                            Timber.v("Got visible user data: $data")
+                            Timber.v("$objectId > Got visible user data: $data")
                             val displayName = visibleUserData.getString("displayName")!!
                             val profileImage = visibleUserData.getString("profileImage")!!
-                            Timber.v("Got user! Caching and returning...")
+                            Timber.v("$objectId > Got user! Caching and returning...")
                             val loadedUser = VisibleUserData(userUid, displayName, profileImage)
                             cachedUsers[userUid] = loadedUser
                             loadedUser
                         } else {
+                            Timber.i("$objectId > Visible user data is null.")
                             null
                         }
-                    } catch (_: IllegalArgumentException) {
+                    } catch (e: IllegalArgumentException) {
+                        Timber.w(e)
                         null
                     }
 
-                if (user == null)
+                if (user == null) {
+                    Timber.i("$objectId > Could not find user, continuing loop.")
                     continue
+                }
 
+                Timber.i("$objectId > Processing path completed data result...")
                 val result = if (project)
                     MarkedProjectData(
                         document.reference.path,
@@ -293,7 +286,7 @@ class Path(
                         notes,
                         listOf()
                     )
-                Timber.v("Processed result. Emitting...")
+                Timber.v("$objectId > Processed result. Emitting...")
                 emit(result)
             }
     }
