@@ -25,22 +25,6 @@ class Cache {
     private val blockStatuses = arrayMapOf<String, BlockingType>()
 
     /**
-     * The index for the next turn for using [dataClassChildrenCache]
-     * @author Arnau Mora
-     * @since 20210514
-     */
-    private var childrenTurn = 0
-    private var childrenTurnCount = -1
-
-    /**
-     * The index for the next turn for using [blockStatuses]
-     * @author Arnau Mora
-     * @since 20210514
-     */
-    private var blockStatusTurn = 0
-    private var blockStatusTurnCount = 0
-
-    /**
      * Gets a [DataClassImpl] children from the cache storage.
      * @author Arnau Mora
      * @since 20210514
@@ -48,13 +32,16 @@ class Cache {
      */
     @WorkerThread
     suspend fun getChildren(objectId: String): List<DataClassImpl>? {
-        val turn = ++childrenTurnCount
-        while (childrenTurn != turn) {
-            // Wait for the turn to arrive
-            delay(DATACLASS_WAIT_CHILDREN_DELAY)
+        var success = false
+        var result: List<DataClassImpl>? = listOf()
+        while (!success) {
+            try {
+                result = dataClassChildrenCache[objectId]
+                success = true
+            } catch (_: ConcurrentModificationException) {
+                delay(DATACLASS_WAIT_CHILDREN_DELAY)
+            }
         }
-        val result = dataClassChildrenCache[objectId]
-        childrenTurnCount++
         return result
     }
 
@@ -67,13 +54,15 @@ class Cache {
      */
     @WorkerThread
     suspend fun storeChild(objectId: String, children: List<DataClassImpl>) {
-        val turn = ++childrenTurnCount
-        while (childrenTurn != turn) {
-            // Wait for the turn to arrive
-            delay(DATACLASS_WAIT_CHILDREN_DELAY)
+        var success = false
+        while (!success) {
+            try {
+                dataClassChildrenCache[objectId] = children
+                success = true
+            } catch (_: ConcurrentModificationException) {
+                delay(DATACLASS_WAIT_CHILDREN_DELAY)
+            }
         }
-        dataClassChildrenCache[objectId] = children
-        childrenTurn++
     }
 
     /**
@@ -84,13 +73,16 @@ class Cache {
      */
     @WorkerThread
     suspend fun hasChild(objectId: String): Boolean {
-        val turn = ++childrenTurnCount
-        while (childrenTurn != turn) {
-            // Wait for the turn to arrive
-            delay(DATACLASS_WAIT_CHILDREN_DELAY)
+        var success = false
+        var result = false
+        while (!success) {
+            try {
+                result = dataClassChildrenCache.containsKey(objectId)
+                success = true
+            } catch (_: ConcurrentModificationException) {
+                delay(DATACLASS_WAIT_CHILDREN_DELAY)
+            }
         }
-        val result = dataClassChildrenCache.containsKey(objectId)
-        childrenTurn++
         return result
     }
 
@@ -102,13 +94,16 @@ class Cache {
      */
     @WorkerThread
     suspend fun getBlockStatus(pathId: String): BlockingType? {
-        val turn = ++blockStatusTurnCount
-        while (blockStatusTurn != turn) {
-            // Wait for the turn to arrive
-            delay(DATACLASS_WAIT_BLOCK_STATUS_DELAY)
+        var success = false
+        var result: BlockingType? = null
+        while (!success) {
+            try {
+                result = blockStatuses[pathId]
+                success = true
+            } catch (_: ConcurrentModificationException) {
+                delay(DATACLASS_WAIT_BLOCK_STATUS_DELAY)
+            }
         }
-        val result = blockStatuses[pathId]
-        blockStatusTurn++
         return result
     }
 
@@ -121,13 +116,15 @@ class Cache {
      */
     @WorkerThread
     suspend fun storeBlockStatus(pathId: String, blockStatus: BlockingType) {
-        val turn = ++blockStatusTurnCount
-        while (blockStatusTurn != turn) {
-            // Wait for the turn to arrive
-            delay(DATACLASS_WAIT_BLOCK_STATUS_DELAY)
+        var success = false
+        while (!success) {
+            try {
+                blockStatuses[pathId] = blockStatus
+                success = true
+            } catch (_: ConcurrentModificationException) {
+                delay(DATACLASS_WAIT_BLOCK_STATUS_DELAY)
+            }
         }
-        blockStatuses[pathId] = blockStatus
-        blockStatusTurn++
     }
 
     /**
@@ -138,13 +135,16 @@ class Cache {
      */
     @WorkerThread
     suspend fun hasBlockStatus(pathId: String): Boolean {
-        val turn = ++blockStatusTurnCount
-        while (blockStatusTurn != turn) {
-            // Wait for the turn to arrive
-            delay(DATACLASS_WAIT_BLOCK_STATUS_DELAY)
+        var success = false
+        var result = false
+        while (!success) {
+            try {
+                result = blockStatuses.containsKey(pathId)
+                success = true
+            } catch (_: ConcurrentModificationException) {
+                delay(DATACLASS_WAIT_BLOCK_STATUS_DELAY)
+            }
         }
-        val result = blockStatuses.containsKey(pathId)
-        blockStatusTurn++
         return result
     }
 }
