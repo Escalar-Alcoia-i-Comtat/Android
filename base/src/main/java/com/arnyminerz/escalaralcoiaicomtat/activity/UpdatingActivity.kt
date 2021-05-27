@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.WorkerThread
 import androidx.work.WorkInfo
@@ -14,6 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityUpdatingBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.launch
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
@@ -176,7 +176,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
                             Timber.v("Finished downloading everything, quiet mode enabled, won't launch anything...")
                         else {
                             Timber.v("Finished downloading everything, launching MainActivity...")
-                            startActivity(Intent(this, MainActivity::class.java))
+                            launch(MainActivity::class.java)
                         }
                 }
             }

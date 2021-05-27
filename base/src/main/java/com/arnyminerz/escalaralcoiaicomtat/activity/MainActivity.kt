@@ -30,6 +30,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFrag
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WARN_BATTERY
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ALERT_PREF
+import com.arnyminerz.escalaralcoiaicomtat.generic.launch
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.intent.LoginRequestContract
@@ -80,8 +81,7 @@ class MainActivity : LanguageAppCompatActivity() {
         Timber.i("Got login result: $resultCode")
         when (resultCode) {
             RESULT_CODE_LOGGED_IN -> refreshLoginStatus()
-            RESULT_CODE_WAITING_EMAIL_CONFIRMATION ->
-                startActivity(Intent(this, EmailConfirmationActivity::class.java))
+            RESULT_CODE_WAITING_EMAIL_CONFIRMATION -> launch(EmailConfirmationActivity::class.java)
         }
     }
 
@@ -245,7 +245,7 @@ class MainActivity : LanguageAppCompatActivity() {
             loginRequest.launch(null)
         }
         binding.profileImageView.setOnClickListener {
-            startActivity(Intent(this, ProfileActivity::class.java))
+            launch(ProfileActivity::class.java)
         }
         binding.profileImageView.setOnLongClickListener {
             MaterialAlertDialogBuilder(this)
@@ -345,7 +345,7 @@ class MainActivity : LanguageAppCompatActivity() {
             user?.reload()?.addOnSuccessListener {
                 if (!user.isEmailVerified) {
                     PREF_WAITING_EMAIL_CONFIRMATION.put(true)
-                    startActivity(Intent(this, EmailConfirmationActivity::class.java))
+                    launch(EmailConfirmationActivity::class.java)
                 }
 
                 user.photoUrl?.also { photoUrl ->

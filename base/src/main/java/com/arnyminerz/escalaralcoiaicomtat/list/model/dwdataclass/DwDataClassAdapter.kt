@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass
 
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.MainThread
@@ -19,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.map.SMALL_ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.launch
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
@@ -228,11 +228,10 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
     private fun showMap(data: T) = doAsync {
         val kmzFile = data.kmzFile(activity, storage, false)
         uiContext {
-            activity.startActivity(
-                Intent(activity, MapsActivity::class.java)
-                    .putExtra(EXTRA_KMZ_FILE, kmzFile.path)
-                    .putExtra(EXTRA_ICON_SIZE_MULTIPLIER, SMALL_ICON_SIZE_MULTIPLIER)
-            )
+            activity.launch(MapsActivity::class.java) {
+                putExtra(EXTRA_KMZ_FILE, kmzFile.path)
+                putExtra(EXTRA_ICON_SIZE_MULTIPLIER, SMALL_ICON_SIZE_MULTIPLIER)
+            }
         }
     }
 

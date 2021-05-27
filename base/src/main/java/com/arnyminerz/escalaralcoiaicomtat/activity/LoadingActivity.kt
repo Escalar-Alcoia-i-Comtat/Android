@@ -82,7 +82,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         if (showIntro != IntroShowReason.OK) {
             Timber.w("  Showing intro! Reason: ${showIntro.msg}")
             finish()
-            startActivity(Intent(this, IntroActivity::class.java))
+            launch(IntroActivity::class.java)
             return
         } else
             Timber.v("  Won't show intro.")
@@ -186,7 +186,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     private fun load() {
         val waitingForEmailConfirmation = PREF_WAITING_EMAIL_CONFIRMATION.get()
         if (waitingForEmailConfirmation) {
-            startActivity(Intent(this, EmailConfirmationActivity::class.java))
+            launch(EmailConfirmationActivity::class.java)
             return
         }
 

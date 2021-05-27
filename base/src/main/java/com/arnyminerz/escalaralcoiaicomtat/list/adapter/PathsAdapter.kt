@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 
 import android.app.Activity
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.animation.Animation
@@ -35,6 +34,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.PathEquipmentDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
+import com.arnyminerz.escalaralcoiaicomtat.generic.launch
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
@@ -284,14 +284,12 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
                 )
             }
             holder.markCompletedButton.setOnClickListener {
-                activity.startActivity(
-                    Intent(activity, MarkCompletedActivity::class.java).apply {
-                        putExtra(EXTRA_AREA, activity.areaId)
-                        putExtra(EXTRA_ZONE, activity.zoneId)
-                        putExtra(EXTRA_SECTOR_INDEX, activity.currentPage)
-                        putExtra(EXTRA_PATH, path.objectId)
-                    }
-                )
+                activity.launch(MarkCompletedActivity::class.java) {
+                    putExtra(EXTRA_AREA, activity.areaId)
+                    putExtra(EXTRA_ZONE, activity.zoneId)
+                    putExtra(EXTRA_SECTOR_INDEX, activity.currentPage)
+                    putExtra(EXTRA_PATH, path.objectId)
+                }
             }
         }
 
@@ -357,11 +355,9 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
 
             commentsImageButton.setOnClickListener {
                 if (comments.isNotEmpty())
-                    activity.startActivity(
-                        Intent(activity, CommentsActivity::class.java).apply {
-                            putExtra(EXTRA_PATH_DOCUMENT, path.documentPath)
-                        }
-                    )
+                    activity.launch(CommentsActivity::class.java) {
+                        putExtra(EXTRA_PATH_DOCUMENT, path.documentPath)
+                    }
                 else
                     vibrate(activity, INFO_VIBRATION)
             }

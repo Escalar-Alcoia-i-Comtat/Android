@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.isolated
 
 import android.app.Activity
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -45,7 +44,7 @@ class DynamicLinkHandler : Activity() {
                         .addOnSuccessListener {
                             Timber.i("Verified email successfully.")
                             PREF_WAITING_EMAIL_CONFIRMATION.put(false)
-                            startActivity(Intent(this, LoadingActivity::class.java))
+                            launch(LoadingActivity::class.java)
                         }
                         .addOnFailureListener {
                             Timber.e(it, "Could not verify account.")
