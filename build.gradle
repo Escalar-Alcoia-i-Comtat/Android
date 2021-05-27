@@ -1,7 +1,5 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-apply from: './base/secure.gradle'
-
 buildscript {
     repositories {
         google()
@@ -39,11 +37,14 @@ allprojects {
                 basic(BasicAuthentication)
             }
             credentials {
+                def props = new Properties()
+                file("${rootDir}/local.properties").withInputStream { props.load(it) }
+
                 // Do not change the username below.
                 // This should always be `mapbox` (not your username).
                 username = 'mapbox'
                 // Use the secret token you stored in gradle.properties as the password
-                password = MAPBOX_DOWNLOADS_TOKEN
+                password = props.getProperty("MAPBOX_DOWNLOADS_TOKEN")
             }
         }
     }

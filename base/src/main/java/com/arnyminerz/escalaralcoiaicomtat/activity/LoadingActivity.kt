@@ -24,6 +24,7 @@ import com.arnyminerz.escalaralcoiaicomtat.notification.createNotificationChanne
 import com.arnyminerz.escalaralcoiaicomtat.shared.APP_UPDATE_MAX_TIME_DAYS
 import com.arnyminerz.escalaralcoiaicomtat.shared.APP_UPDATE_MAX_TIME_DAYS_KEY
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION_KEY
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_LINK_PATH
@@ -40,6 +41,7 @@ import com.google.android.play.core.install.model.ActivityResult.RESULT_IN_APP_U
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
 import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -144,6 +146,11 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             Timber.v("APP_UPDATE_MAX_TIME_DAYS: $APP_UPDATE_MAX_TIME_DAYS")
             Timber.v("SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
             Timber.v("ENABLE_AUTHENTICATION: $ENABLE_AUTHENTICATION")
+
+            if (!ENABLE_AUTHENTICATION) {
+                Timber.v("Removing auth state listener...")
+                Firebase.auth.removeAuthStateListener((application as App).authStateListener)
+            }
 
             uiContext {
                 Timber.v("Finished preparing App...")
