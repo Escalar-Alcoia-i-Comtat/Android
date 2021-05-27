@@ -91,7 +91,6 @@ const val PROFILE_IMAGE_COMPRESSION_QUALITY = 85
 const val PROFILE_IMAGE_MAX_SIZE = MEGABYTE * 5
 
 const val LOCATION_PERMISSION_REQUEST_CODE = 3 // This number was chosen by Dono
-const val FOLDER_ACCESS_PERMISSION_REQUEST_CODE = 7
 
 /**
  * Requests the user to get logged in

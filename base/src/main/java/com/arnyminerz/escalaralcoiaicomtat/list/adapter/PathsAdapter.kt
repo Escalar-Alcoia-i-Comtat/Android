@@ -8,6 +8,7 @@ import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
 import android.widget.ImageButton
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.WorkerThread
@@ -35,6 +36,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.PathEquipmentDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
+import com.arnyminerz.escalaralcoiaicomtat.generic.launch
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
@@ -72,10 +74,15 @@ const val ANIMATION_DURATION = 300L
  * @since 20210427
  * @param paths The paths list
  * @param activity the activity that is loading the recycler view
+ * @param markAsCompleteRequestHandler The request handler when it's asked to mark a path as complete
  * @see SectorViewHolder
  */
 @ExperimentalBadgeUtils
-class PathsAdapter(private val paths: List<Path>, private val activity: SectorActivity) :
+class PathsAdapter(
+    private val paths: List<Path>,
+    private val activity: SectorActivity,
+    private val markAsCompleteRequestHandler: ActivityResultLauncher<Intent>
+) :
     RecyclerView.Adapter<SectorViewHolder>() {
     /**
      * Specifies the toggled status of all the paths.
@@ -284,7 +291,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
                 )
             }
             holder.markCompletedButton.setOnClickListener {
-                activity.startActivity(
+                markAsCompleteRequestHandler.launch(
                     Intent(activity, MarkCompletedActivity::class.java).apply {
                         putExtra(EXTRA_AREA, activity.areaId)
                         putExtra(EXTRA_ZONE, activity.zoneId)
@@ -321,11 +328,15 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
     ) {
         if (!ENABLE_AUTHENTICATION)
             return uiContext {
+                Timber.i("Won't load completions since ENABLE_AUTHENTICATION is false.")
                 visibility(commentsImageButton, false)
             }
 
+        Timber.v("Loading path ${path.objectId} (${path.documentPath}) completions...")
         val completions = arrayListOf<MarkedDataInt>()
         path.getCompletions(firestore).toCollection(completions)
+
+        Timber.v("Got completions for ${path.objectId}. Processing comments and notes...")
         val comments = arrayListOf<String>()
         val notes = arrayListOf<String>()
         for (completion in completions) {
@@ -341,6 +352,7 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
 
             }*/
         }
+        Timber.v("Got ${comments.size} comments and ${notes.size} notes.")
         uiContext {
             if (badges.containsKey(path.objectId)) {
                 Timber.v("Dettaching old badge...")
@@ -356,12 +368,10 @@ class PathsAdapter(private val paths: List<Path>, private val activity: SectorAc
             BadgeUtils.attachBadgeDrawable(badge, commentsImageButton)
 
             commentsImageButton.setOnClickListener {
-                if (comments.isNotEmpty())
-                    activity.startActivity(
-                        Intent(activity, CommentsActivity::class.java).apply {
-                            putExtra(EXTRA_PATH_DOCUMENT, path.documentPath)
-                        }
-                    )
+                if (comments.isNotEmpty() || notes.isNotEmpty())
+                    activity.launch(CommentsActivity::class.java) {
+                        putExtra(EXTRA_PATH_DOCUMENT, path.documentPath)
+                    }
                 else
                     vibrate(activity, INFO_VIBRATION)
             }

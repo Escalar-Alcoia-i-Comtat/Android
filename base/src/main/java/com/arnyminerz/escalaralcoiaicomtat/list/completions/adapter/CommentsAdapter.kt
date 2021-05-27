@@ -12,9 +12,9 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Grade
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedCompletedData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedProjectData
-import com.arnyminerz.escalaralcoiaicomtat.generic.MEGABYTE
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.completions.holder.CommentsViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_MAX_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.view.getColor
 import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -90,7 +90,7 @@ class CommentsAdapter(
         Timber.v("Comment: $comment")
 
         storage.getReferenceFromUrl(profileImage)
-            .getBytes(MEGABYTE * 5)
+            .getBytes(PROFILE_IMAGE_MAX_SIZE)
             .addOnSuccessListener { bytes ->
                 Glide.with(activity)
                     .load(bytes)
@@ -131,7 +131,8 @@ class CommentsAdapter(
                         holder.likesTextView.isEnabled = true
                         updateLikeStatus(holder, likes.contains(loggedUserUid), likes.size)
                     }
-                    .addOnSuccessListener {
+                    .addOnFailureListener { e ->
+                        Timber.e(e, "Could not like comment.")
                         toast(activity, R.string.toast_error_like)
                         holder.likesTextView.isEnabled = true
                     }

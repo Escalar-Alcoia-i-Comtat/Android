@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass
 
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.MainThread
@@ -19,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.data.map.SMALL_ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.launch
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
@@ -34,6 +34,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
@@ -164,7 +165,17 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
             val lastDownloadStatus = downloadStatuses[data.objectId]
             if (!downloadStatuses.containsKey(data.objectId) || updateDownloadStatus) {
                 val newStatus = data.downloadStatus(activity, activity.firestore)
-                downloadStatuses[data.objectId] = newStatus
+                runBlocking {
+                    var success = false
+                    while (!success) {
+                        try {
+                            downloadStatuses[data.objectId] = newStatus
+                            success = true
+                        } catch (_: ConcurrentModificationException) {
+                            delay(10)
+                        }
+                    }
+                }
                 Timber.v("$data download status: $newStatus")
             }
             val status = downloadStatuses[data.objectId]!!
@@ -228,11 +239,10 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
     private fun showMap(data: T) = doAsync {
         val kmzFile = data.kmzFile(activity, storage, false)
         uiContext {
-            activity.startActivity(
-                Intent(activity, MapsActivity::class.java)
-                    .putExtra(EXTRA_KMZ_FILE, kmzFile.path)
-                    .putExtra(EXTRA_ICON_SIZE_MULTIPLIER, SMALL_ICON_SIZE_MULTIPLIER)
-            )
+            activity.launch(MapsActivity::class.java) {
+                putExtra(EXTRA_KMZ_FILE, kmzFile.path)
+                putExtra(EXTRA_ICON_SIZE_MULTIPLIER, SMALL_ICON_SIZE_MULTIPLIER)
+            }
         }
     }
 
