@@ -328,11 +328,15 @@ class PathsAdapter(
     ) {
         if (!ENABLE_AUTHENTICATION)
             return uiContext {
+                Timber.i("Won't load completions since ENABLE_AUTHENTICATION is false.")
                 visibility(commentsImageButton, false)
             }
 
+        Timber.v("Loading path ${path.objectId} (${path.documentPath}) completions...")
         val completions = arrayListOf<MarkedDataInt>()
         path.getCompletions(firestore).toCollection(completions)
+
+        Timber.v("Got completions for ${path.objectId}. Processing comments and notes...")
         val comments = arrayListOf<String>()
         val notes = arrayListOf<String>()
         for (completion in completions) {
@@ -348,6 +352,7 @@ class PathsAdapter(
 
             }*/
         }
+        Timber.v("Got ${comments.size} comments and ${notes.size} notes.")
         uiContext {
             if (badges.containsKey(path.objectId)) {
                 Timber.v("Dettaching old badge...")
@@ -363,7 +368,7 @@ class PathsAdapter(
             BadgeUtils.attachBadgeDrawable(badge, commentsImageButton)
 
             commentsImageButton.setOnClickListener {
-                if (comments.isNotEmpty())
+                if (comments.isNotEmpty() || notes.isNotEmpty())
                     activity.launch(CommentsActivity::class.java) {
                         putExtra(EXTRA_PATH_DOCUMENT, path.documentPath)
                     }
