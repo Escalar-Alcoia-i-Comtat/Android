@@ -99,35 +99,41 @@ class DownloadSectionsAdapter(
             Timber.v("Downloading section \"$section\"")
             val downloadStatus = section.downloadStatus(mainActivity, firestore)
 
-            if (!appNetworkState.hasInternet) {
-                Timber.v("Cannot download, there's no internet connection.")
-                toast(mainActivity, R.string.toast_error_no_internet)
-            } else if (downloadStatus == DownloadStatus.NOT_DOWNLOADED)
-                section.download(mainActivity, mapUri)
-                    .observe(mainActivity) { workInfo ->
-                        val state = workInfo.state
-                        val data = workInfo.outputData
-                        Timber.v("Current download status: ${workInfo.state}")
-                        mainActivity.runOnUiThread {
-                            when (state) {
-                                WorkInfo.State.FAILED -> {
-                                    mainActivity.toast(R.string.toast_error_internal)
-                                    visibility(holder.downloadProgressBar, false)
-                                    Timber.w("Download failed! Error: ${data.getString("error")}")
+            uiContext {
+                if (!appNetworkState.hasInternet) {
+                    Timber.v("Cannot download, there's no internet connection.")
+                    toast(mainActivity, R.string.toast_error_no_internet)
+                } else if (downloadStatus == DownloadStatus.NOT_DOWNLOADED)
+                    section.download(mainActivity, mapUri)
+                        .observe(mainActivity) { workInfo ->
+                            val state = workInfo.state
+                            val data = workInfo.outputData
+                            Timber.v("Current download status: ${workInfo.state}")
+                            mainActivity.runOnUiThread {
+                                when (state) {
+                                    WorkInfo.State.FAILED -> {
+                                        mainActivity.toast(R.string.toast_error_internal)
+                                        visibility(holder.downloadProgressBar, false)
+                                        Timber.w("Download failed! Error: ${data.getString("error")}")
+                                    }
+                                    WorkInfo.State.SUCCEEDED -> {
+                                        visibility(holder.downloadProgressBar, false)
+                                        Timber.v("Finished downloading. Updating Downloads Recycler View...")
+                                        mainActivity.downloadsFragment.reloadSizeTextView()
+                                        updateDownloadStatus(
+                                            holder,
+                                            DownloadStatus.DOWNLOADED,
+                                            section
+                                        )
+                                    }
+                                    else -> holder.downloadProgressBar.isIndeterminate = true
                                 }
-                                WorkInfo.State.SUCCEEDED -> {
-                                    visibility(holder.downloadProgressBar, false)
-                                    Timber.v("Finished downloading. Updating Downloads Recycler View...")
-                                    mainActivity.downloadsFragment.reloadSizeTextView()
-                                    updateDownloadStatus(holder, DownloadStatus.DOWNLOADED, section)
-                                }
-                                else -> holder.downloadProgressBar.isIndeterminate = true
                             }
                         }
-                    }
-            else if (downloadStatus == DownloadStatus.DOWNLOADING) {
-                Timber.v("Already downloading.")
-                toast(mainActivity, R.string.message_already_downloading)
+                else if (downloadStatus == DownloadStatus.DOWNLOADING) {
+                    Timber.v("Already downloading.")
+                    toast(mainActivity, R.string.message_already_downloading)
+                }
             }
         }
     }
