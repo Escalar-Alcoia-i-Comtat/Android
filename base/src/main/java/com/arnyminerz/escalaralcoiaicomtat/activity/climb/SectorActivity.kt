@@ -108,38 +108,7 @@ class SectorActivity : LanguageAppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        val extras = intent.extras
-        if (extras == null && savedInstanceState == null) {
-            Timber.e("Extras is null and there's no savedInstanceState")
-            onBackPressed()
-            return
-        }
-
-        val areaIdExtra = intent.getExtra(EXTRA_AREA)
-        val zoneIdExtra = intent.getExtra(EXTRA_ZONE)
-        val sectorCountExtra = intent.getExtra(EXTRA_SECTOR_COUNT, -1)
-        val areaIdInstanceState = savedInstanceState?.getString(EXTRA_AREA.key, null)
-        val zoneIdInstanceState = savedInstanceState?.getString(EXTRA_ZONE.key, null)
-        val sectorCountInstanceState = savedInstanceState?.getInt(EXTRA_SECTOR_COUNT.key, -1)
-        val areaIdBothInvalid = areaIdInstanceState == null && areaIdExtra == null
-        val zoneIdBothInvalid = zoneIdInstanceState == null && zoneIdExtra == null
-        val sectorCountBothInvalid =
-            (sectorCountInstanceState == null || sectorCountInstanceState < 0) && sectorCountExtra < 0
-        if (areaIdBothInvalid || zoneIdBothInvalid || sectorCountBothInvalid) {
-            Timber.e("No loaded data for activity")
-            errorNotStored = true
-            onBackPressed()
-            return
-        }
-
-        areaId = areaIdInstanceState ?: areaIdExtra!!
-        zoneId = zoneIdInstanceState ?: zoneIdExtra!!
-        sectorCount = sectorCountInstanceState ?: sectorCountExtra
-        Timber.d("Loading sectors from area $areaId, zone $zoneId...")
-
-        transitionName = intent.getExtra(EXTRA_SECTOR_TRANSITION_NAME)
-        if (transitionName == null)
-            Timber.w("Transition name is null")
+        loadExtras(savedInstanceState)
 
         binding.backImageButton.bringToFront()
         updateTitle()
@@ -222,5 +191,49 @@ class SectorActivity : LanguageAppCompatActivity() {
                 putExtra(EXTRA_ZONE, zoneId)
             }
         else super.onBackPressed()
+    }
+
+    /**
+     * Initializes all the variables from the Activity's intent's extras.
+     * @author Arnau Mora
+     * @since 20210527
+     * @param savedInstanceState The savedInstanceState from the `onCreate` method.
+     * @return True if everything was loaded correctly, false otherwise.
+     */
+    private fun loadExtras(savedInstanceState: Bundle?): Boolean {
+        val extras = intent.extras
+        return if (extras == null && savedInstanceState == null) {
+            Timber.e("Extras is null and there's no savedInstanceState")
+            onBackPressed()
+            false
+        } else {
+            val areaIdExtra = intent.getExtra(EXTRA_AREA)
+            val zoneIdExtra = intent.getExtra(EXTRA_ZONE)
+            val sectorCountExtra = intent.getExtra(EXTRA_SECTOR_COUNT, -1)
+            val areaIdInstanceState = savedInstanceState?.getString(EXTRA_AREA.key, null)
+            val zoneIdInstanceState = savedInstanceState?.getString(EXTRA_ZONE.key, null)
+            val sectorCountInstanceState = savedInstanceState?.getInt(EXTRA_SECTOR_COUNT.key, -1)
+            val areaIdBothInvalid = areaIdInstanceState == null && areaIdExtra == null
+            val zoneIdBothInvalid = zoneIdInstanceState == null && zoneIdExtra == null
+            val sectorCountBothInvalid =
+                (sectorCountInstanceState == null || sectorCountInstanceState < 0) && sectorCountExtra < 0
+            if (areaIdBothInvalid || zoneIdBothInvalid || sectorCountBothInvalid) {
+                Timber.e("No loaded data for activity")
+                errorNotStored = true
+                onBackPressed()
+                false
+            } else {
+                areaId = areaIdInstanceState ?: areaIdExtra!!
+                zoneId = zoneIdInstanceState ?: zoneIdExtra!!
+                sectorCount = sectorCountInstanceState ?: sectorCountExtra
+                Timber.d("Loading sectors from area $areaId, zone $zoneId...")
+
+                transitionName = intent.getExtra(EXTRA_SECTOR_TRANSITION_NAME)
+                if (transitionName == null)
+                    Timber.w("Transition name is null")
+
+                true
+            }
+        }
     }
 }
