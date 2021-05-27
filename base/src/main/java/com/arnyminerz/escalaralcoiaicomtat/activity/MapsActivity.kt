@@ -328,7 +328,10 @@ class MapsActivity : LanguageAppCompatActivity() {
                 map.addOnMapClickListener {
                     showingPolyline = null
 
-                    markerWindow?.hide()
+                    try {
+                        markerWindow?.hide()
+                    } catch (_: IllegalStateException) {
+                    }
                     markerWindow = null
 
                     true
