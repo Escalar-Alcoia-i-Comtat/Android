@@ -320,16 +320,20 @@ constructor(context: Context) {
     }
 
     /**
-     * Initializes the map
+     * Initializes [mapView] and loads the desired [style]. Then runs [mapSetUp] for preparing all
+     * the required variables for the rest of the functions of [MapHelper].
      * @author Arnau Mora
      * @param context The context to call from
      * @param style A Mapbox map style to set
      * @param callback What to call when the map gets loaded
+     * @throws IllegalStateException When prepared map and [isLoaded] is false.
      * @see MapHelper
      * @see MapView
      * @see MapboxMap
      * @see Style
+     * @see isLoaded
      */
+    @Throws(IllegalStateException::class)
     fun loadMap(
         context: Context,
         style: String = Style.SATELLITE,
@@ -340,6 +344,8 @@ constructor(context: Context) {
             Timber.d("Setting map style...")
             map.setStyle(style) { style ->
                 mapSetup(context, map, style)
+                if (!isLoaded)
+                    throw IllegalStateException("There was an issue while initializing MapHelper.")
                 callback(mapView, map, style)
             }
         }

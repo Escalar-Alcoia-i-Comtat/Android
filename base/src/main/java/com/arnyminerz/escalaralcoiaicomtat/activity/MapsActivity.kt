@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.View
 import android.widget.PopupMenu
+import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
@@ -142,7 +143,14 @@ class MapsActivity : LanguageAppCompatActivity() {
             popup.show()
         }
 
-        loadMap(savedInstanceState, kmzFile, centerCurrentLocation)
+        try {
+            loadMap(savedInstanceState, kmzFile, centerCurrentLocation)
+        } catch (e: IllegalStateException) {
+            Timber.e(e, "Could not load map. Exitting activity")
+            toast(R.string.toast_error_map_load)
+            finish()
+            return
+        }
     }
 
     override fun onStart() {
@@ -274,6 +282,22 @@ class MapsActivity : LanguageAppCompatActivity() {
         finish()
     }
 
+    /**
+     * Prepares the map configuration, initializes it, and loads the features.
+     * @author Arnau Mora
+     * @since 20210527
+     * @param savedInstanceState The [Activity]'s saved instance state bundle.
+     * @param kmzFile The KMZ file to load the features from.
+     * @param centerCurrentLocation If the map should be centered in the current location.
+     * @throws IllegalStateException When there was an unknown exception while initializing the map.
+     * @see iconSizeMultiplier
+     * @see markers
+     * @see geometries
+     * @see MAP_LOAD_PADDING
+     * @see mapHelper
+     */
+    @UiThread
+    @Throws(IllegalStateException::class)
     private fun loadMap(
         savedInstanceState: Bundle?,
         kmzFile: File?,
