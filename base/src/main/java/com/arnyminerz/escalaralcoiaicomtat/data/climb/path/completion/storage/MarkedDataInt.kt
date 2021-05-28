@@ -39,6 +39,7 @@ open class MarkedDataInt(
      * it won't be liked anymore, and in the other way.
      * @author Arnau Mora
      * @since 20210528
+     * @param firestore The Firestore instance where the post is stored at.
      * @param user The user that has to make the like.
      * @return The task that runs the like.
      */
@@ -51,4 +52,14 @@ open class MarkedDataInt(
         return firestore.document(documentPath)
             .update("likedBy", likedBy)
     }
+
+    /**
+     * Deletes the post.
+     * @author Arnau Mora
+     * @since 20210528
+     * @param firestore The Firestore instance where the post is stored at.
+     */
+    fun delete(firestore: FirebaseFirestore) =
+        firestore.document(documentPath)
+            .delete()
 }
