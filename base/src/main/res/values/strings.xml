@@ -357,6 +357,7 @@
 
     <string name="placeholder">Placeholder</string>
     <string name="r_placeholder" translatable="false">R#:</string>
+    <string name="placeholder_date" translatable="false">01/12/1997</string>
     <string name="placeholder_number" translatable="false">0</string>
 
     <string name="intro_main_title">Welcome to %s</string>
