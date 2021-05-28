@@ -17,7 +17,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.mapbox.mapboxsdk.geometry.LatLng
 import timber.log.Timber
-import java.util.*
+import java.util.Date
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -142,11 +142,4 @@ class Zone(
 
         const val NAMESPACE = "Zone"
     }
-}
-
-operator fun Collection<Zone>.get(id: String): Zone? {
-    for (zone in this)
-        if (zone.objectId == id)
-            return zone
-    return null
 }

@@ -198,16 +198,3 @@ fun Iterable<Area>.ensureGet(areaId: String): Area {
             return area
     throw ClassNotFoundException("Could not find an area with id $areaId")
 }
-
-/**
- * Finds an [Area] inside a list with an specific id. If it's not found, null is returned.
- * @author Arnau Mora
- * @since 20210413
- * @param areaId The id to search
- */
-operator fun Iterable<Area>.get(areaId: String): Area? {
-    for (area in this)
-        if (area.objectId == areaId)
-            return area
-    return null
-}

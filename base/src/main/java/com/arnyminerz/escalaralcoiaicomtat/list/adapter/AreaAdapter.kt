@@ -47,7 +47,6 @@ class AreaAdapter(
             area.loadImage(
                 activity,
                 activity.storage,
-                activity.firestore,
                 holder.imageView,
                 imageLoadParameters =
                 ImageLoadParameters<Bitmap>().withThumbnailSize(

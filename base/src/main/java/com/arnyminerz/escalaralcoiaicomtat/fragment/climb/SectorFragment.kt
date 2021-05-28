@@ -14,7 +14,7 @@ import androidx.annotation.WorkerThread
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.get
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
@@ -134,7 +134,6 @@ class SectorFragment : NetworkChangeListenerFragment() {
         sector.loadImage(
             requireActivity(),
             storage,
-            firestore,
             iv,
             ImageLoadParameters<Bitmap>().apply {
                 withTransitionOptions(BitmapTransitionOptions.withCrossFade(CROSSFADE_DURATION))
@@ -224,7 +223,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
         } else {
             Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
             val sectors = arrayListOf<Sector>()
-            AREAS[areaId]!![zoneId]
+            AREAS[areaId]!!
+                .getChildren(sectorActivity?.firestore)[zoneId]!!
                 .getChildren(sectorActivity?.firestore)
                 .toCollection(sectors)
             sector = sectors[sectorIndex]
