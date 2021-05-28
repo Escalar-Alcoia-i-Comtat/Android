@@ -3,10 +3,12 @@ package com.arnyminerz.escalaralcoiaicomtat.list.completions.holder
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 
 class CommentsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    val cardView: CardView = view.findViewById(R.id.comment_cardView)
     val profileImageView: ImageView = view.findViewById(R.id.profileImage_imageView)
 
     val profileNameTextView: TextView = view.findViewById(R.id.profileName_textView)
