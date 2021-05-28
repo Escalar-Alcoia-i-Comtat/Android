@@ -160,8 +160,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
         return binding!!.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         areaId = requireArguments().getString(ARGUMENT_AREA_ID)!!
         zoneId = requireArguments().getString(ARGUMENT_ZONE_ID)!!
         sectorIndex = requireArguments().getInt(ARGUMENT_SECTOR_INDEX, 0)
