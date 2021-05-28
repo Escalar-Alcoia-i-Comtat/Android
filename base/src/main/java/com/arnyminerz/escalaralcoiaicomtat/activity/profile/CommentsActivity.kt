@@ -10,9 +10,9 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityCommentsBinding
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.completions.adapter.CommentsAdapter
+import com.arnyminerz.escalaralcoiaicomtat.list.completions.adapter.NotesAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MISSING_DATA
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_UNKNOWN_ERROR
@@ -107,13 +107,16 @@ class CommentsActivity : AppCompatActivity() {
                 notes.add(completion)
         }
 
-        Timber.v("Preparing comments recycler view's adapter.")
+        Timber.v("Preparing comments recycler view's adapter...")
         val commentsAdapter = CommentsAdapter(this, comments)
         Timber.v("Setting comments recycler view's adapter and layout.")
         binding.commentsRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.commentsRecyclerView.adapter = commentsAdapter
 
-        if (comments.isEmpty() && notes.isNotEmpty())
-            toast("There are no comments, but there are notes. WIP")
+        Timber.v("Preparing notes recycler view's adapter...")
+        val notesAdapter = NotesAdapter(this, notes)
+        Timber.v("Settings notes recycler view's adapter and layout.")
+        binding.notesRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.notesRecyclerView.adapter = notesAdapter
     }
 }
