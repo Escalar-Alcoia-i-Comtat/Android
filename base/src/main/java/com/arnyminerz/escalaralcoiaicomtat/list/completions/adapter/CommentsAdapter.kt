@@ -126,20 +126,16 @@ class CommentsAdapter(
             holder.likesTextView.setOnClickListener {
                 Timber.v("Requested like change for $documentPath")
                 holder.likesTextView.isEnabled = false
-                if (likes.contains(loggedUserUid))
-                    likes.remove(loggedUserUid)
-                else
-                    likes.add(loggedUserUid!!)
-                firestore.document(documentPath)
-                    .update("likedBy", likes)
-                    .addOnSuccessListener {
+                markedDataInt.like(firestore, loggedUser!!)
+                    .addOnCompleteListener {
                         holder.likesTextView.isEnabled = true
+                    }
+                    .addOnSuccessListener {
                         updateLikeStatus(holder, likes.contains(loggedUserUid), likes.size)
                     }
                     .addOnFailureListener { e ->
                         Timber.e(e, "Could not like comment.")
                         toast(activity, R.string.toast_error_like)
-                        holder.likesTextView.isEnabled = true
                     }
             }
         }
