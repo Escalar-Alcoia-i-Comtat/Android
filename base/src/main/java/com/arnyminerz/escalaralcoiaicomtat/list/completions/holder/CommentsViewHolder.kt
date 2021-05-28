@@ -14,4 +14,5 @@ class CommentsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val commentTextView: TextView = view.findViewById(R.id.comment_textView)
     val likesTextView: TextView = view.findViewById(R.id.likes_textView)
     val deleteTextView: TextView = view.findViewById(R.id.delete_textView)
+    val dateTextView: TextView = view.findViewById(R.id.date_textView)
 }
