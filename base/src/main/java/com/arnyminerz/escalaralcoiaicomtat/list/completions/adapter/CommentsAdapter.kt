@@ -27,6 +27,8 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 /**
  * The RecyclerView adapter for showing the comments that people have published into a Path.
@@ -75,6 +77,7 @@ class CommentsAdapter(
         val markedDataInt = items[position]
         val comment = markedDataInt.comment
             ?: throw NullPointerException("The comment #$position is null")
+        val timestamp = markedDataInt.timestamp
         val userData = markedDataInt.user
         val likes = markedDataInt.likedBy
         val profileImage = userData.profileImagePath
@@ -102,6 +105,8 @@ class CommentsAdapter(
             }
         holder.profileNameTextView.text = userData.displayName
         holder.commentTextView.text = comment
+        holder.dateTextView.text =
+            SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(timestamp)
 
         holder.deleteTextView.visibility(userLoggedIn && loggedUserUid == profileUid)
 
