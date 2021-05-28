@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.list.completions.adapter.NotesAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MISSING_DATA
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_UNKNOWN_ERROR
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -42,6 +43,20 @@ class CommentsActivity : AppCompatActivity() {
      * @since 20210501
      */
     private val completions = arrayListOf<MarkedDataInt>()
+
+    /**
+     * The adapter for the comments list.
+     * @author Arnau Mora
+     * @since 20210528
+     */
+    private var commentsAdapter: CommentsAdapter? = null
+
+    /**
+     * The adapter for the notes list.
+     * @author Arnau Mora
+     * @since 20210528
+     */
+    private var notesAdapter: NotesAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,15 +123,32 @@ class CommentsActivity : AppCompatActivity() {
         }
 
         Timber.v("Preparing comments recycler view's adapter...")
-        val commentsAdapter = CommentsAdapter(this, comments)
+        commentsAdapter = CommentsAdapter(this, comments)
         Timber.v("Setting comments recycler view's adapter and layout.")
         binding.commentsRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.commentsRecyclerView.adapter = commentsAdapter
 
         Timber.v("Preparing notes recycler view's adapter...")
-        val notesAdapter = NotesAdapter(this, notes)
+        notesAdapter = NotesAdapter(this, notes)
         Timber.v("Settings notes recycler view's adapter and layout.")
         binding.notesRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.notesRecyclerView.adapter = notesAdapter
+    }
+
+    /**
+     * Notifies the Activity that an element has been deleted, so the UI can be updated consequently.
+     * If there are any more comments or notes, the Activity is exitted.
+     * @author Arnau Mora
+     * @since 20210528
+     */
+    fun notifyDeletion() {
+        val commentsCount = commentsAdapter?.itemCount ?: 0
+        val notesCount = notesAdapter?.itemCount ?: 0
+        val count = commentsCount + notesCount
+
+        if (count <= 0)
+            finish()
+        else if (notesCount <= 0)
+            binding.notesCardView.hide()
     }
 }
