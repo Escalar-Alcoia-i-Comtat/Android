@@ -9,7 +9,7 @@ import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.get
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.GRADES_LIST
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.CompletionType

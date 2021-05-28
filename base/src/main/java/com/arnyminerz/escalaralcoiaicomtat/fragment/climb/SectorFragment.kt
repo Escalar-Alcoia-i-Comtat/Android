@@ -14,7 +14,7 @@ import androidx.annotation.WorkerThread
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.get
+import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
@@ -134,7 +134,6 @@ class SectorFragment : NetworkChangeListenerFragment() {
         sector.loadImage(
             requireActivity(),
             storage,
-            firestore,
             iv,
             ImageLoadParameters<Bitmap>().apply {
                 withTransitionOptions(BitmapTransitionOptions.withCrossFade(CROSSFADE_DURATION))
@@ -161,8 +160,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
         return binding!!.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         areaId = requireArguments().getString(ARGUMENT_AREA_ID)!!
         zoneId = requireArguments().getString(ARGUMENT_ZONE_ID)!!
         sectorIndex = requireArguments().getInt(ARGUMENT_SECTOR_INDEX, 0)
@@ -224,7 +223,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
         } else {
             Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
             val sectors = arrayListOf<Sector>()
-            AREAS[areaId]!![zoneId]
+            AREAS[areaId]!!
+                .getChildren(sectorActivity?.firestore)[zoneId]!!
                 .getChildren(sectorActivity?.firestore)
                 .toCollection(sectors)
             sector = sectors[sectorIndex]
@@ -247,9 +247,10 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
             if (activity != null) {
                 Timber.v("Loading paths...")
-                val children = arrayListOf<Path>()
+                val paths = arrayListOf<Path>()
                 sector.getChildren(sectorActivity?.firestore)
-                    .toCollection(children)
+                    .toCollection(paths)
+                paths.sortBy { it.sketchId }
                 Timber.v("Finished loading children sectors")
 
                 Timber.v("Loading sector fragment")
@@ -291,7 +292,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
                         )
                     binding?.pathsRecyclerView?.adapter =
                         PathsAdapter(
-                            children,
+                            paths,
                             requireActivity() as SectorActivity,
                             markAsCompleteRequest
                         )
@@ -310,7 +311,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
                     // Load chart
                     binding?.sectorBarChart?.let {
-                        sector.loadChart(requireActivity(), it, children)
+                        sector.loadChart(requireActivity(), it, paths)
                     }
                 }
             } else

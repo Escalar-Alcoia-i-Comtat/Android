@@ -714,7 +714,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @date 2020/09/11
      * @patch 2020/09/12 - Arnau Mora: Added function loadImage into this
      * @param activity The [Activity] that is showing the image
-     * @param firestore The [FirebaseFirestore] instance to update data in case there's something wrong.
      * @param imageView The Image View for loading the image into
      * @param imageLoadParameters The parameters to use for loading the image
      * @throws StorageException When there was an error while loading from [storage].
@@ -726,7 +725,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     suspend fun loadImage(
         activity: Activity,
         storage: FirebaseStorage,
-        firestore: FirebaseFirestore,
         imageView: ImageView,
         imageLoadParameters: ImageLoadParameters<Bitmap>? = null
     ): Bitmap? = suspendCoroutine { cont ->
@@ -815,29 +813,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 }
 
             Timber.d("Getting image from Firebase: $imageReferenceUrl")
-            val image = imageReferenceUrl
-            /*if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/")) {
-                Timber.w("Fixing zone image reference ($image)...")
-                val i = image.lastIndexOf('/') + 1
-                val newImage =
-                    "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
-                Timber.w("Changing image address to \"$newImage\"...")
-                firestore
-                    .document(metadata.documentPath)
-                    .update(mapOf("image" to newImage))
-                    .addOnSuccessListener {
-                        Timber.w("Image address updated.")
-                        loadImage(
-                            fetchImageLoadRequest(newImage)
-                        )
-                    }
-                    .addOnFailureListener { cont.resumeWithException(it) }
-            } else*/
             loadImage(
-                fetchImageLoadRequest(image)
+                fetchImageLoadRequest(imageReferenceUrl)
             )
         }
-
     }
 
     override fun hashCode(): Int {
@@ -850,4 +829,17 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         result = 31 * result + namespace.hashCode()
         return result
     }
+}
+
+/**
+ * Finds an [DataClass] inside a list with an specific id. If it's not found, null is returned.
+ * @author Arnau Mora
+ * @since 20210413
+ * @param objectId The id to search
+ */
+operator fun <A : DataClassImpl, B : DataClassImpl, D : DataClass<A, B>> Iterable<D>.get(objectId: String): D? {
+    for (o in this)
+        if (o.objectId == objectId)
+            return o
+    return null
 }

@@ -337,4 +337,8 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="toast_error_login_one_tap">No se ha podido cargar el inicio de sesión con un click</string>
     <string name="status_loading_deep_link">Procesando enlace…</string>
     <string name="toast_error_map_load">No se ha podido cargar el mapa</string>
+    <string name="comments_notes">Notas:</string>
+    <string name="comments_delete_dialog_title">Eliminar comentario</string>
+    <string name="comments_delete_dialog_message">Seguro que quieres eliminar el comentario?</string>
+    <string name="toast_error_delete_post">No se ha podido eliminar el post</string>
 </resources>

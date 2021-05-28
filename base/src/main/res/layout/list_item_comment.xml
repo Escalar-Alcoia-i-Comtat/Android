@@ -2,6 +2,7 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/comment_cardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardCornerRadius="10dp"
@@ -21,8 +22,8 @@
             android:orientation="horizontal">
 
             <androidx.cardview.widget.CardView
-                android:layout_width="96dp"
-                android:layout_height="96dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 app:cardCornerRadius="48dp"
                 app:cardElevation="0dp"
                 app:cardPreventCornerOverlap="true"
@@ -57,7 +58,7 @@
                 <TextView
                     android:id="@+id/grade_textView"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="@string/placeholder"
                     android:textColor="?attr/colorOnBackground"
                     android:textSize="18sp" />
@@ -83,6 +84,13 @@
             android:layout_height="wrap_content"
             android:gravity="end"
             android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/date_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/placeholder_date" />
 
             <TextView
                 android:id="@+id/delete_textView"

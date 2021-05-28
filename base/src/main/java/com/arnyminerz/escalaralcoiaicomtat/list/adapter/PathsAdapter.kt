@@ -336,7 +336,7 @@ class PathsAdapter(
         val completions = arrayListOf<MarkedDataInt>()
         path.getCompletions(firestore).toCollection(completions)
 
-        Timber.v("Got completions for ${path.objectId}. Processing comments and notes...")
+        Timber.v("Got completions for ${path.objectId}. ${completions.size} elements...")
         val comments = arrayListOf<String>()
         val notes = arrayListOf<String>()
         for (completion in completions) {
@@ -346,6 +346,8 @@ class PathsAdapter(
                 if (user != null)
                     if (completion.user.uid == user.uid)
                         notes.add(completion.notes)
+                    else Timber.v("Got note which the user (${user.uid}) is not the author of.")
+                else Timber.v("User not logged in")
             /*if (completion is MarkedCompletedData) {
 
             } else if (completion is MarkedProjectData) {
@@ -360,7 +362,11 @@ class PathsAdapter(
             }
             Timber.v("Creating comments badge...")
             val badge = BadgeDrawable.create(activity)
-            badge.number = comments.size
+
+            val commentsCount = comments.size
+            val notesCount = notes.size
+            badge.number = commentsCount + notesCount
+
             badge.isVisible = true
             Timber.v("Storing abdge...")
             badges[path.objectId] = badge

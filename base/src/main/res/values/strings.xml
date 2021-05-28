@@ -128,6 +128,9 @@
 
     <string name="comments_title">Comments</string>
     <string name="comments_project">Project</string>
+    <string name="comments_notes">Notes:</string>
+    <string name="comments_delete_dialog_title">Delete comment</string>
+    <string name="comments_delete_dialog_message">Are you sure that you want to delete the comment?</string>
 
     <string name="pref_main_title">General</string>
     <string name="pref_main_sum">General settings of the app</string>
@@ -245,6 +248,7 @@
     <string name="toast_error_like">Could not like comment</string>
     <string name="toast_error_account_manager_store">Could not store account data</string>
     <string name="toast_error_map_load">Could not load map</string>
+    <string name="toast_error_delete_post">Could not delete post</string>
     <string name="toast_profile_image_updated">Updated profile image successfully</string>
     <string name="toast_location_not_shown">Current location won\'t be shown</string>
     <string name="toast_stored_gpx">GPX stored!</string>
@@ -357,6 +361,7 @@
 
     <string name="placeholder">Placeholder</string>
     <string name="r_placeholder" translatable="false">R#:</string>
+    <string name="placeholder_date" translatable="false">01/12/1997</string>
     <string name="placeholder_number" translatable="false">0</string>
 
     <string name="intro_main_title">Welcome to %s</string>

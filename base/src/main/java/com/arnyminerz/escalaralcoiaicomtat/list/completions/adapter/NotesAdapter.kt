@@ -3,8 +3,6 @@ package com.arnyminerz.escalaralcoiaicomtat.list.completions.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.CommentsActivity
@@ -14,12 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.Ma
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedProjectData
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.completions.holder.CommentsViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_MAX_SIZE
-import com.arnyminerz.escalaralcoiaicomtat.view.getColor
-import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -43,7 +36,7 @@ import java.util.Locale
  * @param items The [MarkedDataInt] elements to show.
  * @throws NullPointerException When an element doesn't have a valid comment
  */
-class CommentsAdapter(
+class NotesAdapter(
     private val activity: CommentsActivity,
     private val items: ArrayList<MarkedDataInt>
 ) : RecyclerView.Adapter<CommentsViewHolder>() {
@@ -77,106 +70,35 @@ class CommentsAdapter(
 
     override fun onBindViewHolder(holder: CommentsViewHolder, position: Int) {
         val markedDataInt = items[position]
-        val comment = markedDataInt.comment
+        val notes = markedDataInt.notes
             ?: throw NullPointerException("The comment #$position is null")
         val timestamp = markedDataInt.timestamp
         val userData = markedDataInt.user
-        val likes = markedDataInt.likedBy
-        val profileImage = userData.profileImagePath
         val profileName = userData.displayName
         val profileUid = userData.uid
-        val documentPath = markedDataInt.documentPath
 
-        val loggedUser = auth.currentUser
-        val userLoggedIn = loggedUser != null
-        val loggedUserUid = loggedUser?.uid
+        Timber.v("Loading notes made by $profileName ($profileUid)...")
+        Timber.v("Notes: $notes")
 
-        Timber.v("Loading comment made by $profileName ($profileUid)...")
-        Timber.v("Comment: $comment")
+        holder.likesTextView.hide()
+        holder.profileImageView.hide()
+        holder.profileNameTextView.hide()
 
-        storage.getReferenceFromUrl(profileImage)
-            .getBytes(PROFILE_IMAGE_MAX_SIZE)
-            .addOnSuccessListener { bytes ->
-                Glide.with(activity)
-                    .load(bytes)
-                    .into(holder.profileImageView)
-            }
-            .addOnFailureListener { e ->
-                Timber.e(e, "Could not load profile image ($profileImage).")
-                toast(activity, R.string.toast_error_profile_image_load)
-            }
-        holder.profileNameTextView.text = userData.displayName
-        holder.commentTextView.text = comment
+        holder.commentTextView.text = notes
         holder.dateTextView.text =
-            SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(timestamp)
-
-        holder.deleteTextView.visibility(userLoggedIn && loggedUserUid == profileUid)
+            SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(timestamp!!.toDate())
 
         if (markedDataInt is MarkedProjectData)
             holder.gradeTextView.setText(R.string.comments_project)
-        else if (markedDataInt is MarkedCompletedData) {
-            val grade = markedDataInt.grade
+        else if (markedDataInt is MarkedCompletedData)
             holder.gradeTextView.setText(
-                Grade(grade).getSpannable(activity, 1),
+                Grade(markedDataInt.grade).getSpannable(activity, 1),
                 TextView.BufferType.SPANNABLE
             )
-            holder.likesTextView.text = markedDataInt.likesCount.toString()
-        }
-        updateLikeStatus(holder, likes.contains(loggedUserUid), likes.size)
 
-        if (userLoggedIn) {
-            holder.likesTextView.setOnClickListener {
-                Timber.v("Requested like change for $documentPath")
-                holder.likesTextView.isEnabled = false
-                markedDataInt.like(firestore, loggedUser!!)
-                    .addOnCompleteListener {
-                        holder.likesTextView.isEnabled = true
-                    }
-                    .addOnSuccessListener {
-                        updateLikeStatus(holder, likes.contains(loggedUserUid), likes.size)
-                    }
-                    .addOnFailureListener { e ->
-                        Timber.e(e, "Could not like comment.")
-                        toast(activity, R.string.toast_error_like)
-                    }
-            }
-            holder.deleteTextView.setOnClickListener {
-                askForDeletion(holder, markedDataInt)
-            }
+        holder.deleteTextView.setOnClickListener {
+            askForDeletion(holder, markedDataInt)
         }
-    }
-
-    /**
-     * Updates the [CommentsViewHolder.likesTextView] according to [liked].
-     * @author Arnau Mora
-     * @since 20210501
-     * @param holder The view holder to update.
-     * @param liked If the user has liked the comment.
-     * @param likeCount The amount of likes the comment has
-     */
-    private fun updateLikeStatus(holder: CommentsViewHolder, liked: Boolean, likeCount: Int) {
-        holder.likesTextView.text = likeCount.toString()
-        holder.likesTextView.setCompoundDrawables(
-            ResourcesCompat.getDrawable(
-                activity.resources,
-                if (liked)
-                    R.drawable.ic_round_favorite_24
-                else
-                    R.drawable.ic_round_favorite_border_24,
-                activity.theme
-            )?.apply {
-                DrawableCompat.setTint(
-                    this,
-                    if (liked)
-                        getColor(activity, R.color.color_like)
-                    else
-                        getColorFromAttribute(activity, R.attr.colorControlNormal)
-                )
-            },
-            null,
-            null,
-            null
-        )
     }
 
     /**

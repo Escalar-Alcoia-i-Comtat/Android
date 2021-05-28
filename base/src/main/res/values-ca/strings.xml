@@ -336,4 +336,8 @@
     <string name="toast_error_login_one_tap">No s\'ha pogut carregar l\'inici de sessió amb un clic</string>
     <string name="status_loading_deep_link">Processant enllaç…</string>
     <string name="toast_error_map_load">No s\'ha pogut carregar el mapa</string>
+    <string name="comments_notes">Notes:</string>
+    <string name="comments_delete_dialog_title">Eliminar comentari</string>
+    <string name="comments_delete_dialog_message">Segur que vols eliminar el comentari?</string>
+    <string name="toast_error_delete_post">No s\'ha pogut eliminar la publicació</string>
 </resources>

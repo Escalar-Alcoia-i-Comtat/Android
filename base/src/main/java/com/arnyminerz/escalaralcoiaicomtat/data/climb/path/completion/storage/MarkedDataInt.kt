@@ -1,7 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage
 
 import com.arnyminerz.escalaralcoiaicomtat.auth.VisibleUserData
+import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
 
 /**
  * Serves as a model for all the types of completions available ([MarkedCompletedData] and
@@ -30,4 +33,33 @@ open class MarkedDataInt(
      */
     val likesCount: Int
         get() = likedBy.size
+
+    /**
+     * Makes a user like the post. It toggles the current status, so if the user has liked the post,
+     * it won't be liked anymore, and in the other way.
+     * @author Arnau Mora
+     * @since 20210528
+     * @param firestore The Firestore instance where the post is stored at.
+     * @param user The user that has to make the like.
+     * @return The task that runs the like.
+     */
+    fun like(firestore: FirebaseFirestore, user: FirebaseUser): Task<Void> {
+        val userUid = user.uid
+        if (likedBy.contains(userUid))
+            likedBy.remove(userUid)
+        else
+            likedBy.add(userUid)
+        return firestore.document(documentPath)
+            .update("likedBy", likedBy)
+    }
+
+    /**
+     * Deletes the post.
+     * @author Arnau Mora
+     * @since 20210528
+     * @param firestore The Firestore instance where the post is stored at.
+     */
+    fun delete(firestore: FirebaseFirestore) =
+        firestore.document(documentPath)
+            .delete()
 }
