@@ -273,7 +273,7 @@ class Path(
                         notes,
                         listOf()
                     )
-                else
+                else if (type != null)
                     MarkedCompletedData(
                         document.reference.path,
                         timestamp,
@@ -281,13 +281,15 @@ class Path(
                         attempts,
                         falls,
                         grade,
-                        type!!,
+                        type,
                         comment,
                         notes,
                         listOf()
                     )
+                else null
                 Timber.v("$objectId > Processed result. Emitting...")
-                emit(result)
+                if (result != null)
+                    emit(result)
             }
     }
 
