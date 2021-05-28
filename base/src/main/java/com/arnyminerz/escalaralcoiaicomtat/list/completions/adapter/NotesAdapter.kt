@@ -10,8 +10,10 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Grade
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedCompletedData
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedProjectData
+import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.list.completions.holder.CommentsViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -36,7 +38,7 @@ import java.util.Locale
  */
 class NotesAdapter(
     private val activity: CommentsActivity,
-    private val items: List<MarkedDataInt>
+    private val items: ArrayList<MarkedDataInt>
 ) : RecyclerView.Adapter<CommentsViewHolder>() {
     /**
      * Stores the [FirebaseStorage] reference to load the profile images.
@@ -94,6 +96,39 @@ class NotesAdapter(
                 TextView.BufferType.SPANNABLE
             )
 
-        // TODO: Delete tap listener and deleter
+        holder.deleteTextView.setOnClickListener {
+            askForDeletion(holder, markedDataInt)
+        }
+    }
+
+    /**
+     * Shows the user a prompt for comfirming a post deletion.
+     * @author Arnau Mora
+     * @since 20210528
+     * @param holder The [CommentsViewHolder] for the element.
+     * @param item The item to be deleted.
+     */
+    private fun askForDeletion(holder: CommentsViewHolder, item: MarkedDataInt) {
+        MaterialAlertDialogBuilder(activity)
+            .setTitle(R.string.comments_delete_dialog_title)
+            .setMessage(R.string.comments_delete_dialog_message)
+            .setPositiveButton(R.string.action_delete) { dialog, _ ->
+                dialog.dismiss()
+                holder.cardView.hide()
+                item.delete(firestore)
+                    .addOnSuccessListener {
+                        Timber.v("Post deleted successfully.")
+                        items.remove(item)
+                        activity.notifyDeletion()
+                    }
+                    .addOnFailureListener { e ->
+                        Timber.e(e, "Could not delete post.")
+                        toast(activity, R.string.toast_error_delete_post)
+                    }
+            }
+            .setNegativeButton(R.string.action_cancel) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 }
