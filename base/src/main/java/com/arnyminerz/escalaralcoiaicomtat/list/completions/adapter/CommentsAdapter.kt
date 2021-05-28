@@ -45,7 +45,7 @@ import java.util.Locale
  */
 class CommentsAdapter(
     private val activity: CommentsActivity,
-    private val items: List<MarkedDataInt>
+    private val items: ArrayList<MarkedDataInt>
 ) : RecyclerView.Adapter<CommentsViewHolder>() {
     /**
      * Stores the [FirebaseStorage] reference to load the profile images.
@@ -196,6 +196,8 @@ class CommentsAdapter(
                 item.delete(firestore)
                     .addOnSuccessListener {
                         Timber.v("Post deleted successfully.")
+                        items.remove(item)
+                        activity.notifyDeletion()
                     }
                     .addOnFailureListener { e ->
                         Timber.e(e, "Could not delete post.")
