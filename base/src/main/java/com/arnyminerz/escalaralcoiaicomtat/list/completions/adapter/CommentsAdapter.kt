@@ -17,8 +17,10 @@ import com.arnyminerz.escalaralcoiaicomtat.list.completions.holder.CommentsViewH
 import com.arnyminerz.escalaralcoiaicomtat.shared.PROFILE_IMAGE_MAX_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.view.getColor
 import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
+import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.Glide
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -138,8 +140,10 @@ class CommentsAdapter(
                         toast(activity, R.string.toast_error_like)
                     }
             }
+            holder.deleteTextView.setOnClickListener {
+                askForDeletion(holder, markedDataInt)
+            }
         }
-        // TODO: Delete tap listener and deleter
     }
 
     /**
@@ -173,5 +177,34 @@ class CommentsAdapter(
             null,
             null
         )
+    }
+
+    /**
+     * Shows the user a prompt for comfirming a post deletion.
+     * @author Arnau Mora
+     * @since 20210528
+     * @param holder The [CommentsViewHolder] for the element.
+     * @param item The item to be deleted.
+     */
+    private fun askForDeletion(holder: CommentsViewHolder, item: MarkedDataInt) {
+        MaterialAlertDialogBuilder(activity)
+            .setTitle(R.string.comments_delete_dialog_title)
+            .setMessage(R.string.comments_delete_dialog_message)
+            .setPositiveButton(R.string.action_delete) { dialog, _ ->
+                dialog.dismiss()
+                holder.cardView.hide()
+                item.delete(firestore)
+                    .addOnSuccessListener {
+                        Timber.v("Post deleted successfully.")
+                    }
+                    .addOnFailureListener { e ->
+                        Timber.e(e, "Could not delete post.")
+                        toast(activity, R.string.toast_error_delete_post)
+                    }
+            }
+            .setNegativeButton(R.string.action_cancel) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 }
