@@ -1041,6 +1041,8 @@ class MapHelper
             visibility(imageView, imageUrl != null)
             visibility(descriptionTextView, imageUrl == null)
 
+            enterButton.isEnabled = false
+
             val gmmIntentUri = marker.position.toUri(true, title)
             val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
             mapButton.visibility(true)
@@ -1060,6 +1062,7 @@ class MapHelper
 
                 uiContext {
                     visibility(enterButton, activityIntent != null)
+                    enterButton.isEnabled = true
 
                     if (activityIntent != null)
                         enterButton.setOnClickListener {
