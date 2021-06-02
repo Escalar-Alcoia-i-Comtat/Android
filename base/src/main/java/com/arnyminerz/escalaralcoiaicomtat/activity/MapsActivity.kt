@@ -368,7 +368,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                             this,
                             binding.root
                         ).also {
-                            doAsync { it.show() }
+                            it.show()
                         }
 
                         true
