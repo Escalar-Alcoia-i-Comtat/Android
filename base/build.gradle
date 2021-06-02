@@ -6,6 +6,7 @@ plugins {
     id('com.google.firebase.firebase-perf')
     id('org.jetbrains.dokka')
     id('com.google.secrets_gradle_plugin') version '0.6'
+    id('com.huawei.agconnect')
 }
 
 apply from: './version.gradle'
@@ -162,6 +163,9 @@ dependencies {
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.6.1'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:0.9.0'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-offline-v9:0.8.0'
+
+    // Maps SDK
+    implementation 'com.github.iDroidDev:MapKit:1.0.1'
 
     // KotlinX Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3'
