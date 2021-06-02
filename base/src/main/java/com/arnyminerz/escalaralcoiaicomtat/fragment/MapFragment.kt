@@ -13,7 +13,6 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
-import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentMapBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
@@ -21,6 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapNotInitializedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.isLocationPermissionGranted
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -30,6 +30,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorag
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
@@ -38,11 +39,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
-import com.mapbox.android.core.permissions.PermissionsManager
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.maps.Style
+import idroid.android.mapskit.factory.Maps
 import timber.log.Timber
 import java.io.FileNotFoundException
 
@@ -50,10 +47,6 @@ class MapFragment : NetworkChangeListenerFragment() {
     private lateinit var mapHelper: MapHelper
     private var mapLoaded = false
     private var mapLoading = false
-    val mapStyle: Style?
-        get() = if (this::mapHelper.isInitialized)
-            mapHelper.style
-        else null
 
     private var binding: FragmentMapBinding? = null
 
@@ -69,7 +62,7 @@ class MapFragment : NetworkChangeListenerFragment() {
         return binding!!.root
     }
 
-    private var map: MapboxMap? = null
+    private var map: Maps? = null
     private var markerWindow: MapHelper.MarkerWindow? = null
 
     @SuppressLint("MissingPermission")
@@ -82,25 +75,23 @@ class MapFragment : NetworkChangeListenerFragment() {
         firestore = Firebase.firestore
 
         Timber.v("Preparing MapHelper...")
-        mapHelper = MapHelper(requireContext())
+        mapHelper = MapHelper()
             .withMapView(binding!!.pageMapView)
-        mapHelper.onCreate(savedInstanceState)
         mapHelper
-            .withIconSizeMultiplier(ICON_SIZE_MULTIPLIER)
             .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
-            .loadMap(requireContext()) { _, map, _ ->
+            .loadMap { _, map ->
                 this.map = map
 
                 if (context != null)
                     try {
                         val permissionGranted = try {
-                            PermissionsManager.areLocationPermissionsGranted(requireContext())
+                            requireContext().isLocationPermissionGranted()
                         } catch (_: IllegalStateException) {
                             Timber.w("Tried to check location permission without being attached to a context.")
                             false
                         }
                         if (permissionGranted)
-                            mapHelper.enableLocationComponent(requireContext())
+                            mapHelper.locationComponent?.enable(requireContext())
                         else
                             Timber.w("User hasn't granted the location permission. Marker won't be enabled.")
                     } catch (_: IllegalStateException) {
@@ -120,10 +111,10 @@ class MapFragment : NetworkChangeListenerFragment() {
                             .show()
                     }
 
-                mapHelper.addSymbolClickListener {
+                mapHelper.addMarkerClickListener {
                     Timber.v("Tapped on symbol.")
                     if (SETTINGS_CENTER_MARKER_PREF.get())
-                        map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+                        map.animateCamera(position, DEFAULT_ZOOM)
 
                     markerWindow?.hide()
                     activity?.let {
@@ -147,15 +138,16 @@ class MapFragment : NetworkChangeListenerFragment() {
                     true
                 }
 
-                map.addOnMapClickListener {
-                    try {
-                        markerWindow?.hide()
-                    } catch (e: IllegalStateException) {
-                        Timber.i(e, "The card has already been hidden.")
+                map.setOnMapClickListener(object : Maps.MapClickListener {
+                    override fun onMapClick(point: LatLng) {
+                        try {
+                            markerWindow?.hide()
+                        } catch (e: IllegalStateException) {
+                            Timber.i(e, "The card has already been hidden.")
+                        }
+                        markerWindow = null
                     }
-                    markerWindow = null
-                    true
-                }
+                })
 
                 Timber.v("Finished loading map. Calling loadMap...")
                 doAsync {
@@ -177,11 +169,6 @@ class MapFragment : NetworkChangeListenerFragment() {
     override fun onStop() {
         super.onStop()
         mapHelper.onStop()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        mapHelper.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {

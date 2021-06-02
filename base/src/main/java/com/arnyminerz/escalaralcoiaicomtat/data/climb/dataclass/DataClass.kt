@@ -57,7 +57,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
-import com.mapbox.mapboxsdk.maps.Style
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -412,7 +411,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     @Throws(IllegalArgumentException::class)
     fun download(
         context: Context,
-        styleUri: String?,
         overwrite: Boolean = true,
         quality: Int = 100
     ): LiveData<WorkInfo> {
@@ -422,7 +420,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             )
         Timber.v("Downloading $namespace \"$displayName\"...")
         Timber.v("Preparing DownloadData...")
-        val downloadData = DownloadData(this, styleUri, overwrite, quality)
+        val downloadData = DownloadData(this, overwrite, quality)
         Timber.v("Scheduling download...")
         return DownloadWorker.schedule(context, pin, downloadData)
     }

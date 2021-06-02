@@ -1,16 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat.generic
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.net.Uri
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
@@ -23,13 +17,10 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.annotation.RequiresPermission
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.cardview.widget.CardView
 import androidx.collection.arrayMapOf
-import androidx.core.content.res.ResourcesCompat
-import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass.Companion.getIntent
@@ -37,12 +28,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
-import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoIcon
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
-import com.arnyminerz.escalaralcoiaicomtat.data.map.ICONS
-import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
-import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_MIN_DIST
-import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_MIN_TIME
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MARKER_WINDOW_HIDE_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MARKER_WINDOW_SHOW_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
@@ -51,13 +37,11 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCompressImageException
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCreateDirException
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotOpenStreamException
-import com.arnyminerz.escalaralcoiaicomtat.exception.MissingPermissionException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.includeAll
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
+import com.arnyminerz.escalaralcoiaicomtat.generic.maps.LocationComponent
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
 import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
@@ -66,30 +50,17 @@ import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.bumptech.glide.Glide
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.perf.FirebasePerformance
-import com.mapbox.android.core.permissions.PermissionsManager
-import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.camera.CameraPosition
-import com.mapbox.mapboxsdk.camera.CameraUpdate
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.geometry.LatLngBounds
-import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
-import com.mapbox.mapboxsdk.location.LocationUpdate
-import com.mapbox.mapboxsdk.location.modes.CameraMode
-import com.mapbox.mapboxsdk.location.modes.RenderMode
-import com.mapbox.mapboxsdk.maps.MapView
-import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.plugins.annotation.Fill
-import com.mapbox.mapboxsdk.plugins.annotation.FillManager
-import com.mapbox.mapboxsdk.plugins.annotation.Line
-import com.mapbox.mapboxsdk.plugins.annotation.LineManager
-import com.mapbox.mapboxsdk.plugins.annotation.Symbol
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
+import idroid.android.mapskit.factory.Maps
+import idroid.android.mapskit.model.CommonMarker
+import idroid.android.mapskit.model.CommonMarkerOptions
+import idroid.android.mapskit.model.CommonPolygon
+import idroid.android.mapskit.model.CommonPolyline
+import idroid.android.mapskit.ui.HuaweiGoogleMapView
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
@@ -100,13 +71,13 @@ class MapHelper
  * Note that this should be called before any map view inflation.
  * @author Arnau Mora
  * @since 20210421
- * @see R.string.mapbox_access_token
  */
-constructor(context: Context) {
+{
+
     companion object {
         suspend fun getTarget(
             activity: Activity,
-            marker: Symbol,
+            marker: CommonMarker,
             firestore: FirebaseFirestore
         ): Intent? {
             Timber.d("Getting marker's title...")
@@ -133,71 +104,42 @@ constructor(context: Context) {
         }
     }
 
-    private var map: MapboxMap? = null
-    var style: Style? = null
+    var map: Maps? = null
+
+    private lateinit var mapView: HuaweiGoogleMapView
+
+    var locationComponent: LocationComponent? = null
         private set
-    private var symbolManager: SymbolManager? = null
-    private var fillManager: FillManager? = null
-    private var lineManager: LineManager? = null
 
-    private lateinit var locationManager: LocationManager
-    var lastKnownLocation: LatLng? = null
-        private set
-    private val locationUpdateCallbacks = arrayListOf<(location: Location) -> Unit>()
-    private val locationUpdateCallback = object : LocationListener {
-        override fun onLocationChanged(location: Location) {
-            Timber.v("Got new location: $location")
-            lastKnownLocation = location.toLatLng()
-            map?.locationComponent?.forceLocationUpdate(
-                LocationUpdate.Builder().location(location).build()
-            )
-            for (callback in locationUpdateCallbacks)
-                callback(location)
-        }
+    /**
+     * Stores the last zoom amount the map has had.
+     * @author Arnau Mora
+     * @since 20210602
+     */
+    private var lastZoom: Float = DEFAULT_ZOOM
 
-        override fun onProviderEnabled(provider: String) {
-            Timber.d("The location provider has been enabled")
-        }
+    /**
+     * Stores the last position the map has had.
+     * @author Arnau Mora
+     * @since 20210602
+     */
+    private var lastPosition: LatLng = LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
 
-        override fun onProviderDisabled(provider: String) {
-            Timber.d("The location provider has been disabled")
-        }
-
-        override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-            Timber.d("The status of provider $provider has been changed to $status.")
-        }
-    }
-
-    private lateinit var mapView: MapView
-
-    private var startingPosition: LatLng = LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
-    private var startingZoom: Double = DEFAULT_ZOOM
-    private var markerSizeMultiplier: Float = ICON_SIZE_MULTIPLIER
     private var allGesturesEnabled: Boolean = true
 
     private val markers = arrayListOf<GeoMarker>()
     private val geometries = arrayListOf<GeoGeometry>()
-    private val symbols = arrayListOf<Symbol>()
-    private val lines = arrayListOf<Line>()
-    private val fills = arrayListOf<Fill>()
+    private val commonMarkers = arrayListOf<CommonMarker>()
+    private val polylines = arrayListOf<CommonPolyline>()
+    private val polygons = arrayListOf<CommonPolygon>()
 
     private var loadedKmzFile: File? = null
 
-    private val addedImages = arrayListOf<String>()
-
-    private val symbolClickListeners = arrayListOf<Symbol.() -> Boolean>()
+    private val markerClickListeners = arrayListOf<CommonMarker.() -> Boolean>()
 
     private var mapSetUp = false
     val isLoaded: Boolean
-        get() = symbolManager != null && fillManager != null && lineManager != null &&
-                map != null && style != null && style!!.isFullyLoaded && mapSetUp
-
-    init {
-        Timber.v("Getting Mapbox instance...")
-        Mapbox.getInstance(context, BuildConfig.MAPBOX_PUBLIC_TOKEN)
-    }
-
-    fun onCreate(savedInstanceState: Bundle?) = mapView.onCreate(savedInstanceState)
+        get() = map != null && mapSetUp && locationComponent != null
 
     fun onStart() {
         mapView.onStart()
@@ -219,37 +161,26 @@ constructor(context: Context) {
         Timber.d("onStop()")
     }
 
-    fun onSaveInstanceState(outState: Bundle) {
-        mapView.onSaveInstanceState(outState)
-        Timber.d("onSaveInstanceState(outState)")
-    }
-
     fun onLowMemory() {
         mapView.onLowMemory()
         Timber.d("onLowMemory()")
     }
 
     fun onDestroy() {
-        if (this::locationManager.isInitialized)
-            locationManager.removeUpdates(locationUpdateCallback)
+        locationComponent?.destroy()
         mapView.onDestroy()
         Timber.d("onDestroy()")
     }
 
-    fun withMapView(mapView: MapView): MapHelper {
+    fun withMapView(mapView: HuaweiGoogleMapView): MapHelper {
         this.mapView = mapView
         return this
     }
 
-    fun withStartingPosition(startingPosition: LatLng?, zoom: Double = DEFAULT_ZOOM): MapHelper {
+    fun withStartingPosition(startingPosition: LatLng?, zoom: Float = DEFAULT_ZOOM): MapHelper {
         if (startingPosition != null)
-            this.startingPosition = startingPosition
-        this.startingZoom = zoom
-        return this
-    }
-
-    fun withIconSizeMultiplier(multiplier: Float): MapHelper {
-        this.markerSizeMultiplier = multiplier
+            lastPosition = startingPosition
+        this.lastZoom = zoom
         return this
     }
 
@@ -261,94 +192,64 @@ constructor(context: Context) {
     fun withControllable(controllable: Boolean): MapHelper {
         allGesturesEnabled = controllable
         if (map != null)
-            map?.uiSettings?.setAllGesturesEnabled(allGesturesEnabled)
+            map?.setAllGesturesEnabled(allGesturesEnabled)
         return this
     }
 
-    private fun mapSetup(context: Context, map: MapboxMap, style: Style) {
+    private fun mapSetup(map: Maps) {
         this.map = map
-        this.style = style
 
-        Timber.d("Loading managers...")
-        fillManager = FillManager(mapView, map, style)
-        lineManager = LineManager(mapView, map, style)
-        symbolManager = SymbolManager(mapView, map, style)
-
-        Timber.d("Configuring SymbolManager...")
-        symbolManager!!.apply {
-            iconAllowOverlap = true
-            addClickListener {
-                Timber.d("Clicked symbol!")
+        map.setOnMarkerClickListener(object : Maps.OnMapMarkerClickListener {
+            override fun onMarkerClick(marker: CommonMarker): Boolean {
+                Timber.d("Clicked marker!")
                 var anyFalse = false
-                for (list in symbolClickListeners)
-                    if (!list(it))
+                for (list in markerClickListeners)
+                    if (!list(marker))
                         anyFalse = true
-                !anyFalse
+                return !anyFalse
             }
-        }
-        loadDefaultIcons(context)
+        })
 
-        map.uiSettings.apply {
-            isCompassEnabled = false
-            setAllGesturesEnabled(allGesturesEnabled)
-        }
+        map.setCompassEnabled(false)
+        map.setAllGesturesEnabled(allGesturesEnabled)
+
+        locationComponent = LocationComponent(this)
 
         mapSetUp = true
-        move(startingPosition, startingZoom, false)
+        move(lastPosition, lastZoom, false)
     }
 
     /**
-     * Loads the icons defined in ICONS into the map
-     * @param context The context to call from
-     * @see ICONS
-     * @author Arnau Mora
-     */
-    private fun loadDefaultIcons(context: Context) {
-        Timber.d("Loading default icons...")
-        for (icon in ICONS) {
-            val drawable = ResourcesCompat.getDrawable(
-                context.resources,
-                icon.drawable,
-                context.theme
-            )
-            if (drawable == null) {
-                Timber.d("Icon ${icon.name} doesn't have a valid drawable.")
-                continue
-            }
-            style!!.addImage(icon.name, drawable)
-        }
-    }
-
-    /**
-     * Initializes [mapView] and loads the desired [style]. Then runs [mapSetUp] for preparing all
+     * Initializes [mapView] and sets the desired [type]. Then runs [mapSetUp] for preparing all
      * the required variables for the rest of the functions of [MapHelper].
      * @author Arnau Mora
-     * @param context The context to call from
-     * @param style A Mapbox map style to set
+     * @param context The context to call from.
+     * @param type The [Maps.Type] to set to the map.
      * @param callback What to call when the map gets loaded
      * @throws IllegalStateException When prepared map and [isLoaded] is false.
      * @see MapHelper
-     * @see MapView
-     * @see MapboxMap
-     * @see Style
+     * @see HuaweiGoogleMapView
+     * @see Maps.Type
+     * @see Maps
      * @see isLoaded
      */
     @Throws(IllegalStateException::class)
     fun loadMap(
-        context: Context,
-        style: String = Style.SATELLITE,
-        callback: (mapView: MapView, map: MapboxMap, style: Style) -> Unit
+        type: Maps.Type = Maps.Type.SATALLITE,
+        callback: (mapView: HuaweiGoogleMapView, map: Maps) -> Unit
     ): MapHelper {
         Timber.d("Loading map...")
-        mapView.getMapAsync { map ->
-            Timber.d("Setting map style...")
-            map.setStyle(style) { style ->
-                mapSetup(context, map, style)
+        mapView.getMapAsync(object : Maps.OnMapReadyListener {
+            override fun onMapReady(map: Maps) {
+                Timber.d("Setting map type...")
+                map.setMapType(type)
+
+                mapSetup(map)
                 if (!isLoaded)
                     throw IllegalStateException("There was an issue while initializing MapHelper.")
-                callback(mapView, map, style)
+                callback(mapView, map)
             }
-        }
+        })
 
         return this
     }
@@ -418,7 +319,6 @@ constructor(context: Context) {
                 Timber.d("  Putting $geometriesCount geometries...")
                 putParcelableArrayListExtra(MAP_GEOMETRIES_BUNDLE_EXTRA, geometries)
             }
-            putExtra(EXTRA_ICON_SIZE_MULTIPLIER, markerSizeMultiplier)
         }
         val elementsIntentSize = elementsIntent.getSize()
         val size = humanReadableByteCountBin(elementsIntentSize.toLong())
@@ -437,7 +337,7 @@ constructor(context: Context) {
     /**
      * Moves the camera position
      * @param position The target position
-     * @param zoom The target zoomo
+     * @param zoom The target zoom
      * @param animate If the movement should be animated
      * @author Arnau Mora
      * @see LatLng
@@ -445,151 +345,60 @@ constructor(context: Context) {
      * @return The instance
      */
     @Throws(MapNotInitializedException::class)
-    fun move(position: LatLng? = null, zoom: Double? = null, animate: Boolean = true): MapHelper {
+    fun move(position: LatLng? = null, zoom: Float? = null, animate: Boolean = true): MapHelper {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
-        return move(
-            CameraUpdateFactory.newCameraPosition(
-                CameraPosition.Builder().apply {
-                    position?.let { target(it) }
-                    zoom?.let { zoom(it) }
-                }.build()
-            ),
-            animate
-        )
-    }
+        if (animate) {
+            if (position != null && zoom != null) {
+                map?.animateCamera(position, zoom)
+                lastZoom = zoom
+                lastPosition = position
+            } else if (position != null && zoom == null) {
+                map?.animateCamera(position, lastZoom)
+                lastPosition = position
+            } else if (position == null && zoom != null) {
+                map?.animateCamera(zoom)
+                lastZoom = zoom
+            }
+        } else {
+            if (position != null && zoom != null) {
+                map?.moveCamera(position, zoom)
+                lastZoom = zoom
+                lastPosition = position
+            } else if (position != null && zoom == null) {
+                map?.moveCamera(position, lastZoom)
+                lastPosition = position
+            } else if (position == null && zoom != null) {
+                map?.moveCamera(lastPosition, zoom)
+                lastZoom = zoom
+            }
+        }
 
-    /**
-     * Moves the camera position
-     * @param update The movement to make
-     * @param animate If the movement should be animated
-     * @author Arnau Mora
-     * @see CameraUpdate
-     * @see CameraUpdateFactory
-     * @throws MapNotInitializedException If the map has not been initialized
-     * @return The instance
-     */
-    @Throws(MapNotInitializedException::class)
-    fun move(update: CameraUpdate, animate: Boolean = true): MapHelper {
-        if (!isLoaded)
-            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
-
-        if (animate)
-            map?.easeCamera(update)
-        else
-            map?.moveCamera(update)
         return this
     }
 
     /**
-     * Enables the current location pointer. Requires the location permission to be granted
-     * @param context The context to initialize the location component from
-     * @param provider The location provider from [LocationManager] for location updates
-     * @param cameraMode The camera mode to set
-     * @param renderMode The pointer render mode to set
+     * Moves the camera position.
+     * @param bounds The bounds to move the camera to.
+     * @param padding The padding to leave to the sides from the bounds.
+     * @param animate If the movement should be animated.
      * @author Arnau Mora
-     * @see CameraMode
-     * @see RenderMode
-     * @see PermissionsManager
-     * @see LocationManager.GPS_PROVIDER
-     * @see LocationManager.NETWORK_PROVIDER
-     * @see LocationManager.PASSIVE_PROVIDER
-     * @throws MissingPermissionException If the location permission is not granted
+     * @see LatLng
      * @throws MapNotInitializedException If the map has not been initialized
-     * @throws IllegalStateException If the [provider] is not enabled
-     */
-    @SuppressLint("MissingPermission")
-    @RequiresPermission(
-        anyOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION]
-    )
-    @Throws(
-        MissingPermissionException::class,
-        MapNotInitializedException::class,
-        IllegalStateException::class
-    )
-    fun enableLocationComponent(
-        context: Context,
-        provider: String = LocationManager.GPS_PROVIDER,
-        cameraMode: Int = CameraMode.TRACKING,
-        renderMode: Int = RenderMode.COMPASS
-    ) {
-        if (!isLoaded)
-            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
-
-        if (!PermissionsManager.areLocationPermissionsGranted(context))
-            throw MissingPermissionException("Location permission not granted")
-
-        if (this::locationManager.isInitialized) {
-            Timber.v("Location component already enabled")
-            return
-        }
-
-        locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-        if (!locationManager.isProviderEnabled(provider))
-            throw IllegalStateException("The specified provider ($provider) is not enabled.")
-
-        locationManager.requestLocationUpdates(
-            provider,
-            LOCATION_UPDATE_MIN_TIME,
-            LOCATION_UPDATE_MIN_DIST,
-            locationUpdateCallback
-        )
-
-        map!!.locationComponent.apply {
-            activateLocationComponent(
-                LocationComponentActivationOptions.builder(context, style!!)
-                    .useDefaultLocationEngine(false)
-                    .build()
-            )
-            isLocationComponentEnabled = true
-            this.cameraMode = cameraMode
-            this.renderMode = renderMode
-        }
-        Timber.i("Enabled location component for MapHelper")
-    }
-
-    /**
-     * Adds a new location update callback
-     * @author Arnau Mora
-     * @since 20210319
-     * @param callback What to run when location is updated
-     */
-    fun addLocationUpdateCallback(callback: (location: Location) -> Unit) =
-        locationUpdateCallbacks.add(callback)
-
-    /**
-     * Gets the last location the location engine got.
-     * @author Arnau Mora
-     * @since 20210322
-     * @param provider The location provider from [LocationManager]
-     * @throws IllegalStateException When the location engine is not initialized. This may be because
-     * the location is not enabled.
-     * @see LocationManager.GPS_PROVIDER
-     * @see LocationManager.NETWORK_PROVIDER
-     * @see LocationManager.PASSIVE_PROVIDER
-     */
-    @Throws(IllegalStateException::class)
-    @SuppressLint("MissingPermission")
-    fun getLocation(provider: String = LocationManager.GPS_PROVIDER): Location? =
-        if (this::locationManager.isInitialized)
-            locationManager.getLastKnownLocation(provider)
-        else throw IllegalStateException("Location Engine is not initialized.")
-
-    /**
-     * Changes the map's tracking camera mode
-     * @author Arnau Mora
-     * @since 20210319
-     * @param cameraMode The new Camera Mode
-     * @see CameraMode
-     * @throws MapNotInitializedException If the map has not been initialized
+     * @return The instance
      */
     @Throws(MapNotInitializedException::class)
-    fun track(cameraMode: Int = CameraMode.TRACKING) {
+    fun move(bounds: LatLngBounds, padding: Int, animate: Boolean = true): MapHelper {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
-        map!!.locationComponent.cameraMode = cameraMode
+
+        if (animate)
+            map?.animateCamera(bounds, padding)
+        else
+            map?.moveCamera(bounds.center, lastZoom)
+
+        return this
     }
 
     /**
@@ -598,11 +407,11 @@ constructor(context: Context) {
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @Throws(MapNotInitializedException::class)
-    fun addSymbolClickListener(call: Symbol.() -> Boolean) {
+    fun addMarkerClickListener(call: CommonMarker.() -> Boolean) {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
-        symbolClickListeners.add(call)
+        markerClickListeners.add(call)
     }
 
     /**
@@ -642,7 +451,6 @@ constructor(context: Context) {
      * @see GeoMarker
      */
     fun addMarker(marker: GeoMarker) {
-        marker.iconSizeMultiplier = markerSizeMultiplier
         markers.add(marker)
     }
 
@@ -682,8 +490,7 @@ constructor(context: Context) {
     /**
      * Clears all the symbols from the map
      * @author Arnau Mora
-     * @see SymbolManager
-     * @see Symbol
+     * @see CommonMarker
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @UiThread
@@ -692,15 +499,15 @@ constructor(context: Context) {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
         Timber.d("Clearing symbols from map...")
-        symbolManager!!.delete(symbols)
-        symbols.clear()
+        for (marker in commonMarkers)
+            marker.remove()
+        commonMarkers.clear()
     }
 
     /**
      * Clears all the lines from the map
      * @author Arnau Mora
-     * @see LineManager
-     * @see Line
+     * @since 20210602
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @UiThread
@@ -709,29 +516,32 @@ constructor(context: Context) {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
         Timber.d("Clearing lines from map...")
-        lineManager!!.delete(lines)
-        lines.clear()
+        for (line in polylines)
+            line.remove()
+        polylines.clear()
     }
 
     /**
-     * Clears all the lines from the map
+     * Clears all the polygons from the map
      * @author Arnau Mora
-     * @see LineManager
-     * @see Line
+     * @since 20210602
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @UiThread
     @Throws(MapNotInitializedException::class)
-    fun clearFills() {
+    fun clearPolygons() {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
-        Timber.d("Clearing fills from map...")
-        fillManager!!.delete(fills)
-        fills.clear()
+        Timber.d("Clearing polygons from map...")
+        for (fill in polygons)
+            fill.remove()
+        polygons.clear()
     }
 
     /**
      * Makes effective all the additions to the map through the add methods
+     * @author Arnau Mora
+     * @since 20210602
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @UiThread
@@ -743,17 +553,17 @@ constructor(context: Context) {
         Timber.d("Displaying map features...")
         Timber.d("Clearing old features...")
         clearSymbols()
-        clearFills()
+        clearPolygons()
         clearLines()
 
-        val geometries = geometries.addToMap(fillManager!!, lineManager!!)
-        for ((line, fill) in geometries) {
-            lines.add(line)
-            fill?.let { fills.add(it) }
+        val geometries = geometries.addToMap(map!!)
+        for (geometry in geometries) {
+            geometry.first?.let { polylines.add(it) }
+            geometry.second?.let { polygons.add(it) }
         }
 
         val symbols = markers.addToMap(this)
-        this.symbols.addAll(symbols)
+        this.commonMarkers.addAll(symbols)
     }
 
     /**
@@ -779,32 +589,21 @@ constructor(context: Context) {
             points.addAll(geometry.points)
 
         if (includeCurrentLocation)
-            if (lastKnownLocation != null) {
-                Timber.d("Including current location ($lastKnownLocation)")
-                points.add(lastKnownLocation!!)
+            if (locationComponent?.lastKnownLocation != null) {
+                val loc = locationComponent!!.lastKnownLocation
+                Timber.d("Including current location ($loc)")
+                points.add(loc!!)
             } else
                 Timber.d("Could not include current location since it's null")
 
         if (points.isNotEmpty())
             if (points.size == 1)
-                move(
-                    CameraUpdateFactory.newCameraPosition(
-                        CameraPosition.Builder()
-                            .target(markers.first().position)
-                            .zoom(DEFAULT_ZOOM)
-                            .build()
-                    )
-                )
+                move(markers.first().position, DEFAULT_ZOOM)
             else {
                 val boundsBuilder = LatLngBounds.Builder()
                 boundsBuilder.includeAll(points)
 
-                move(
-                    CameraUpdateFactory.newLatLngBounds(
-                        boundsBuilder.build(),
-                        padding
-                    ), animate
-                )
+                move(boundsBuilder.build(), padding, animate)
             }
     }
 
@@ -817,45 +616,11 @@ constructor(context: Context) {
      * @return The created symbol
      */
     @Throws(MapNotInitializedException::class)
-    fun createSymbol(options: SymbolOptions): Symbol {
+    fun createMarker(options: CommonMarkerOptions): CommonMarker {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
-        return symbolManager!!.create(options)
+        return map!!.addMarker(options)
     }
-
-    /**
-     * Adds an image to the style of the map
-     * @author Arnau Mora
-     * @since 20210319
-     * @param name The name of the image
-     * @param bitmap The image
-     * @param sdf The flag indicating image is an SDF or template image
-     * @return If the image was added. If false, the image has already been added
-     * @throws MapNotInitializedException If the map has not been initialized
-     */
-    @Throws(MapNotInitializedException::class)
-    fun addImage(name: String, bitmap: Bitmap, sdf: Boolean = false): Boolean {
-        if (!isLoaded)
-            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
-        return if (addedImages.contains(name))
-            false
-        else {
-            style!!.addImage(name, bitmap, sdf)
-            true
-        }
-    }
-
-    /**
-     * Adds an image to the style of the map
-     * @author Arnau Mora
-     * @since 20210319
-     * @param geoIcon The icon to add
-     * @return If the image was added. If false, the image has already been added
-     * @throws MapNotInitializedException If the map has not been initialized
-     */
-    @Throws(MapNotInitializedException::class)
-    fun addImage(geoIcon: GeoIcon): Boolean =
-        addImage(geoIcon.name, geoIcon.icon, false)
 
     /**
      * Stores the map's features into a GPX file
@@ -976,30 +741,28 @@ constructor(context: Context) {
             val window = marker.windowData
             val position = marker.position
             val id = generateUUID()
-            var iconId: String? = null
-            if (icon != null) {
-                iconId = marker.icon!!.name
-                Timber.d("Storing icon image for $iconId")
-                val iconFileName = "$iconId.png"
-                val iconFile = File(imagesDir, iconFileName)
-                if (!iconFile.exists()) {
-                    val iconFileOutputStream = iconFile.outputStream()
-                    if (!icon.icon.compress(
-                            Bitmap.CompressFormat.PNG,
-                            imageCompressionQuality,
-                            iconFileOutputStream
-                        )
+
+            val iconId: String = marker.icon.name
+            Timber.d("Storing icon image for $iconId")
+            val iconFileName = "$iconId.png"
+            val iconFile = File(imagesDir, iconFileName)
+            if (!iconFile.exists()) {
+                val iconFileOutputStream = iconFile.outputStream()
+                if (!icon.icon.compress(
+                        Bitmap.CompressFormat.PNG,
+                        imageCompressionQuality,
+                        iconFileOutputStream
                     )
-                        throw CouldNotCompressImageException("The marker's icon could not be compressed")
-                    if (!icons.containsKey(iconId))
-                        icons[iconId] = iconFileName
-                }
+                )
+                    throw CouldNotCompressImageException("The marker's icon could not be compressed")
+                if (!icons.containsKey(iconId))
+                    icons[iconId] = iconFileName
             }
+
             val title = window?.title ?: id
             val message = window?.message ?: id
             val lat = position.latitude
             val lon = position.longitude
-            val alt = position.altitude
             placemarksBuilder.append(
                 "<Placemark>" +
                         "<name><![CDATA[$title]]></name>" +
@@ -1007,7 +770,7 @@ constructor(context: Context) {
                         "<styleUrl>#$iconId</styleUrl>" +
                         "<Point>" +
                         "<coordinates>" +
-                        "$lon,$lat,$alt" +
+                        "$lon,$lat" +
                         "</coordinates>" +
                         "</Point>" +
                         "</Placemark>"
@@ -1049,7 +812,7 @@ constructor(context: Context) {
                             "<coordinates>"
                 )
                 for (point in geometry.points)
-                    polygonBuilder.appendLine("${point.longitude},${point.latitude},${point.altitude}")
+                    polygonBuilder.appendLine("${point.longitude},${point.latitude}")
                 polygonBuilder.append(
                     "</coordinates>" +
                             "</LinearRing>" +
@@ -1071,7 +834,7 @@ constructor(context: Context) {
                             "<coordinates>"
                 )
                 for (point in geometry.points)
-                    linesBuilder.appendLine("${point.longitude},${point.latitude},${point.altitude}")
+                    linesBuilder.appendLine("${point.longitude},${point.latitude}")
                 linesBuilder.append(
                     "</coordinates>" +
                             "</LineString>"
@@ -1145,7 +908,7 @@ constructor(context: Context) {
     fun infoCard(
         activity: Activity,
         firestore: FirebaseFirestore,
-        marker: Symbol,
+        marker: CommonMarker,
         rootView: ViewGroup
     ): MarkerWindow = MarkerWindow(activity, marker, rootView, firestore)
 
@@ -1184,7 +947,7 @@ constructor(context: Context) {
     inner class MarkerWindow
     @UiThread constructor(
         private val activity: Activity,
-        private val marker: Symbol,
+        private val marker: CommonMarker,
         private val rootView: ViewGroup,
         private val firestore: FirebaseFirestore
     ) {
@@ -1243,7 +1006,7 @@ constructor(context: Context) {
                 visibility(imageView, imageUrl != null)
                 visibility(descriptionTextView, imageUrl == null)
 
-                val gmmIntentUri = marker.latLng.toUri(true, title)
+                val gmmIntentUri = marker.position.toUri(true, title)
                 val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
                 mapButton.visibility(true)
                 mapButton.setOnClickListener {

@@ -5,18 +5,18 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
 import android.widget.PopupMenu
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.UiThread
+import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoGeometry
 import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
-import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MAP_LOAD_PADDING
 import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMapsBinding
@@ -28,13 +28,14 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.MapNotInitializedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.fileName
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.isLocationPermissionGranted
+import com.arnyminerz.escalaralcoiaicomtat.generic.maps.TrackMode
 import com.arnyminerz.escalaralcoiaicomtat.generic.mime
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_CENTER_CURRENT_LOCATION
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
 import com.arnyminerz.escalaralcoiaicomtat.shared.INFO_VIBRATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
@@ -43,14 +44,12 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.MIME_TYPE_GPX
 import com.arnyminerz.escalaralcoiaicomtat.shared.MIME_TYPE_KMZ
 import com.arnyminerz.escalaralcoiaicomtat.shared.PERMISSION_DIALOG_TAG
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.mapbox.android.core.permissions.PermissionsManager
-import com.mapbox.android.gestures.MoveGestureDetector
-import com.mapbox.mapboxsdk.location.modes.CameraMode
-import com.mapbox.mapboxsdk.maps.MapboxMap
+import idroid.android.mapskit.factory.Maps
 import timber.log.Timber
 import java.io.File
 
@@ -58,7 +57,6 @@ class MapsActivity : LanguageAppCompatActivity() {
 
     private var markers = arrayListOf<GeoMarker>()
     private var geometries = arrayListOf<GeoGeometry>()
-    private var iconSizeMultiplier = ICON_SIZE_MULTIPLIER
 
     private lateinit var mapHelper: MapHelper
     private lateinit var firestore: FirebaseFirestore
@@ -161,9 +159,6 @@ class MapsActivity : LanguageAppCompatActivity() {
             geometriesList?.let { geometries.addAll(it) }
             Timber.d("Got ${markers.size} markers and ${geometries.size} geometries.")
 
-            iconSizeMultiplier =
-                intent.getExtra(EXTRA_ICON_SIZE_MULTIPLIER) ?: ICON_SIZE_MULTIPLIER
-
             kmzFile = intent.getExtra(EXTRA_KMZ_FILE)?.let { File(it) }
             centerCurrentLocation = intent.getExtra(EXTRA_CENTER_CURRENT_LOCATION, false)
         } else
@@ -214,7 +209,7 @@ class MapsActivity : LanguageAppCompatActivity() {
         }
 
         try {
-            loadMap(savedInstanceState, kmzFile, centerCurrentLocation)
+            loadMap(kmzFile, centerCurrentLocation)
         } catch (e: IllegalStateException) {
             Timber.e(e, "Could not load map. Exitting activity")
             toast(R.string.toast_error_map_load)
@@ -243,11 +238,6 @@ class MapsActivity : LanguageAppCompatActivity() {
         mapHelper.onStop()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        mapHelper.onSaveInstanceState(outState)
-    }
-
     override fun onLowMemory() {
         super.onLowMemory()
         mapHelper.onLowMemory()
@@ -267,8 +257,15 @@ class MapsActivity : LanguageAppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             LOCATION_PERMISSION_REQUEST_CODE -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) &&
-                    PermissionsManager.areLocationPermissionsGranted(this)
+                if ((grantResults.isNotEmpty() && grantResults[0] == PERMISSION_GRANTED) &&
+                    (ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) == PERMISSION_GRANTED ||
+                            ContextCompat.checkSelfPermission(
+                                this,
+                                Manifest.permission.ACCESS_FINE_LOCATION
+                            ) == PERMISSION_GRANTED)
                 )
                     tryToShowCurrentLocation()
                 else {
@@ -305,16 +302,13 @@ class MapsActivity : LanguageAppCompatActivity() {
     @UiThread
     @Throws(IllegalStateException::class)
     private fun loadMap(
-        savedInstanceState: Bundle?,
         kmzFile: File?,
         centerCurrentLocation: Boolean
     ) {
-        mapHelper = MapHelper(this)
+        mapHelper = MapHelper()
         mapHelper.withMapView(binding.map)
-        mapHelper.onCreate(savedInstanceState)
         mapHelper
-            .withIconSizeMultiplier(iconSizeMultiplier)
-            .loadMap(this) { _, map, _ ->
+            .loadMap { _, map ->
                 Timber.v("Map loaded successfully")
                 doAsync {
                     val kmlResult = kmzFile?.let { mapHelper.loadKMZ(this@MapsActivity, it) }
@@ -341,37 +335,29 @@ class MapsActivity : LanguageAppCompatActivity() {
                 Timber.v("Loading current location")
                 tryToShowCurrentLocation()
 
-                map.uiSettings.apply {
-                    isCompassEnabled = true
-                    isDoubleTapGesturesEnabled = true
+                map.setCompassEnabled(true)
+
+                map.setOnCameraMoveListener {
+                    if (mapHelper.locationComponent?.lastKnownLocation != null)
+                        binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
                 }
+                map.setOnMapClickListener(object : Maps.MapClickListener {
+                    override fun onMapClick(point: LatLng) {
+                        showingPolyline = null
 
-                map.addOnMoveListener(object : MapboxMap.OnMoveListener {
-                    override fun onMoveBegin(detector: MoveGestureDetector) {
-                        if (mapHelper.lastKnownLocation != null)
-                            binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
+                        try {
+                            markerWindow?.hide()
+                        } catch (_: IllegalStateException) {
+                        }
+                        markerWindow = null
                     }
-
-                    override fun onMove(detector: MoveGestureDetector) {}
-                    override fun onMoveEnd(detector: MoveGestureDetector) {}
                 })
-                map.addOnMapClickListener {
-                    showingPolyline = null
 
-                    try {
-                        markerWindow?.hide()
-                    } catch (_: IllegalStateException) {
-                    }
-                    markerWindow = null
-
-                    true
-                }
-
-                mapHelper.addSymbolClickListener {
+                mapHelper.addMarkerClickListener {
                     if (SETTINGS_CENTER_MARKER_PREF.get())
-                        mapHelper.move(latLng)
+                        mapHelper.move(position)
                     markerWindow?.hide()
-                    val window = getWindow()
+                    val window = this.getWindow()
                     val title = window.title
 
                     if (title.isNotEmpty()) {
@@ -399,7 +385,7 @@ class MapsActivity : LanguageAppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun tryToShowCurrentLocation(): Boolean {
         var result = false
-        if (!PermissionsManager.areLocationPermissionsGranted(this)) {
+        if (!this.isLocationPermissionGranted()) {
             binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_off_24)
             binding.fabCurrentLocation.setOnClickListener {
                 tryToShowCurrentLocation()
@@ -420,13 +406,14 @@ class MapsActivity : LanguageAppCompatActivity() {
             )
         } else {
             try {
-                mapHelper.enableLocationComponent(this, cameraMode = CameraMode.NONE)
+                mapHelper.locationComponent?.enable(this)
 
                 binding.fabCurrentLocation.setOnClickListener {
-                    val loc = mapHelper.lastKnownLocation
+                    val locationComponent = mapHelper.locationComponent
+                    val loc = locationComponent?.lastKnownLocation
                     if (loc != null) {
                         Timber.d("Moving camera to current location ($loc)...")
-                        mapHelper.track()
+                        locationComponent.trackMode = TrackMode.ANIMATED
                         binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_fixed_24)
                     } else {
                         Timber.w("No known location!")

@@ -9,11 +9,9 @@ import androidx.annotation.StringRes
 import androidx.collection.arrayMapOf
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.exception.notification.NullChannelIdException
 import com.arnyminerz.escalaralcoiaicomtat.exception.notification.NullIconException
 import com.arnyminerz.escalaralcoiaicomtat.generic.ValueMax
-import com.mapbox.mapboxsdk.plugins.offline.model.NotificationOptions
 import timber.log.Timber
 
 private var notificationIdCounter = 0
@@ -436,15 +434,5 @@ class Notification private constructor(private val builder: Builder) {
         )
         fun buildAndShow(): Notification =
             build().show()
-
-        val notificationOptions: NotificationOptions
-            get() {
-                val builder = NotificationOptions.builder(context)
-                builder.smallIconRes(icon!!)
-                builder.contentTitle(title)
-                builder.contentText(text)
-                builder.returnActivity(MainActivity::class.java.name)
-                return builder.build()
-            }
     }
 }

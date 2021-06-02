@@ -5,12 +5,16 @@ import android.os.Parcelable
 import android.util.MalformedJsonException
 import com.arnyminerz.escalaralcoiaicomtat.generic.generateUUID
 import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import com.mapbox.mapboxsdk.plugins.annotation.Symbol
+import idroid.android.mapskit.model.CommonMarker
 import timber.log.Timber
 import java.io.InvalidObjectException
-fun load(symbol: Symbol): MapObjectWindowData {
-    val json = symbol.data ?: throw InvalidObjectException("Symbol doesn't have any data")
+
+fun load(symbol: CommonMarker): MapObjectWindowData {
+    // TODO: Tag is not getting stored
+    val json =
+        symbol.tag as? JsonObject ?: throw InvalidObjectException("Symbol doesn't have any data")
     if (!json.isJsonObject)
         throw MalformedJsonException("Data is not a json object")
     val obj = json.asJsonObject

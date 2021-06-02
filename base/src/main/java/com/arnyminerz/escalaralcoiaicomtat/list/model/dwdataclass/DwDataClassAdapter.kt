@@ -15,7 +15,6 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassListActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.data.map.SMALL_ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.launch
@@ -23,7 +22,6 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.shared.DATACLASS_WAIT_CHILDREN_DELAY
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
@@ -241,7 +239,6 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
         uiContext {
             activity.launch(MapsActivity::class.java) {
                 putExtra(EXTRA_KMZ_FILE, kmzFile.path)
-                putExtra(EXTRA_ICON_SIZE_MULTIPLIER, SMALL_ICON_SIZE_MULTIPLIER)
             }
         }
     }
@@ -255,10 +252,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
      */
     @UiThread
     fun requestDownload(data: T, holder: DwDataClassViewHolder) {
-        val result = data.download(
-            activity,
-            activity.mapStyle?.uri
-        )
+        val result = data.download(activity)
         updateUi(holder, data, true)
         result.observe(activity) { workInfo ->
             val state = workInfo.state

@@ -30,7 +30,9 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.distanceTo
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
+import com.arnyminerz.escalaralcoiaicomtat.generic.isLocationPermissionGranted
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
@@ -40,12 +42,13 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_CENTER_CURRENT_LOCATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.mapbox.android.core.permissions.PermissionsManager
-import com.mapbox.mapboxsdk.geometry.LatLng
+import idroid.android.mapskit.factory.Maps
+import idroid.android.mapskit.model.CommonMarker
 import timber.log.Timber
 
 class AreasViewFragment : NetworkChangeListenerFragment() {
@@ -80,9 +83,9 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 errors.add(NearbyZonesError.NEARBY_ZONES_CONTEXT)
             else if (!nearbyEnabled)
                 errors.add(NearbyZonesError.NEARBY_ZONES_NOT_ENABLED)
-            else if (PermissionsManager.areLocationPermissionsGranted(requireContext())) {
+            else if (requireContext().isLocationPermissionGranted()) {
                 try {
-                    mapHelper.enableLocationComponent(requireContext())
+                    mapHelper.locationComponent?.enable(requireContext())
 
                     if (!isResumed)
                         errors.add(NearbyZonesError.NEARBY_ZONES_RESUMED)
@@ -182,7 +185,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         Timber.d("Adding zone #${zone.objectId}. Creating marker...")
                         val marker = GeoMarker(
                             zoneLocation,
-                            windowData = MapObjectWindowData(zone.displayName, null)
+                            windowData = MapObjectWindowData(zone.displayName, null),
+                            icon = ICON_WAYPOINT_ESCALADOR_BLANC.toGeoIcon(requireContext())!!
                         ).apply {
                             val icon = ICON_WAYPOINT_ESCALADOR_BLANC.toGeoIcon(requireContext())
                             if (icon != null)
@@ -212,10 +216,10 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         mapHelper
             .withControllable(false)
             .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE))
-            .loadMap(requireContext()) { _, map, _ ->
+            .loadMap { _, map ->
                 Timber.d("Map is ready.")
 
-                mapHelper.addLocationUpdateCallback { location ->
+                mapHelper.locationComponent?.addLocationUpdateCallback { location ->
                     Timber.v("Got new location: [${location.latitude}, ${location.longitude}]")
 
                     updateNearbyZones(location)
@@ -225,12 +229,17 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     }
                 }
 
-                map.addOnMapClickListener {
-                    nearbyZonesClick()
-                }
-                mapHelper.addSymbolClickListener {
-                    nearbyZonesClick()
-                }
+                map.setOnMapClickListener(object : Maps.MapClickListener {
+                    override fun onMapClick(point: LatLng) {
+                        nearbyZonesClick()
+                    }
+                })
+                map.setOnMarkerClickListener(object : Maps.OnMapMarkerClickListener {
+                    override fun onMarkerClick(marker: CommonMarker): Boolean {
+                        nearbyZonesClick()
+                        return true
+                    }
+                })
 
                 updateNearbyZones()
             }
@@ -241,7 +250,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         justAttached = true
 
         Timber.d("Initializing MapHelper...")
-        mapHelper = MapHelper(context)
+        mapHelper = MapHelper()
     }
 
     override fun onCreateView(
@@ -260,7 +269,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         mapHelper.withMapView(binding.mapView)
-        mapHelper.onCreate(savedInstanceState)
         initializeMap()
 
         Timber.v("Refreshing areas...")
@@ -313,12 +321,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         super.onStop()
         if (this::mapHelper.isInitialized)
             mapHelper.onStop()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        if (this::mapHelper.isInitialized)
-            mapHelper.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {

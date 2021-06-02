@@ -4,31 +4,26 @@ import android.graphics.Bitmap
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Base64
-import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_MARKER_SIZE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.plugins.annotation.Symbol
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
+import com.google.android.gms.maps.model.LatLng
+import idroid.android.mapskit.model.CommonMarker
+import idroid.android.mapskit.model.CommonMarkerOptions
 import timber.log.Timber
 
 @Suppress("unused")
 class GeoMarker(
     val position: LatLng,
     id: String? = null,
-    var iconSizeMultiplier: Float = ICON_SIZE_MULTIPLIER,
     val windowData: MapObjectWindowData? = null,
-    icon: GeoIcon? = null
+    var icon: GeoIcon
 ) : Parcelable {
-    val id = id ?: extractUUID(position, iconSizeMultiplier, windowData)
-    var icon: GeoIcon? = icon
-        private set
+    val id = id ?: extractUUID(position, windowData)
 
     constructor(parcel: Parcel) : this(
         parcel.readParcelable(LatLng::class.java.classLoader)!!,
         parcel.readString()!!,
-        parcel.readFloat(),
         parcel.readParcelable(MapObjectWindowData::class.java.classLoader),
-        parcel.readParcelable(GeoIcon::class.java.classLoader),
+        parcel.readParcelable(GeoIcon::class.java.classLoader)!!,
     )
 
     fun withImage(bitmap: Bitmap, id: String? = null): GeoMarker =
@@ -40,30 +35,14 @@ class GeoMarker(
         return this
     }
 
-    fun addToMap(mapHelper: MapHelper): Symbol {
-        var symbolOptions = SymbolOptions()
-            .withLatLng(LatLng(position.latitude, position.longitude))
+    fun addToMap(mapHelper: MapHelper): CommonMarker {
+        val symbolOptions = CommonMarkerOptions(
+            position,
+            windowData?.title ?: "",
+            icon.icon
+        )
 
-        if (icon != null) {
-            Timber.d("Adding image to Style...")
-            if (!mapHelper.addImage(icon!!))
-                Timber.d("The image has already been added")
-        }
-
-        if (icon != null) {
-            Timber.d("Marker $id has an icon named ${icon!!.name}")
-            val iconSize =
-                SETTINGS_MARKER_SIZE_PREF.get() * iconSizeMultiplier
-            symbolOptions = symbolOptions
-                .withIconImage(icon!!.name)
-                .withIconSize(iconSize)
-        } else
-            Timber.d("Marker $id doesn't have an icon.")
-
-        if (windowData != null)
-            symbolOptions.withData(windowData.data())
-
-        return mapHelper.createSymbol(symbolOptions)
+        return mapHelper.createMarker(symbolOptions)
     }
 
     override fun describeContents(): Int = 0
@@ -71,7 +50,6 @@ class GeoMarker(
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeParcelable(position, 0)
         dest.writeString(id)
-        dest.writeFloat(iconSizeMultiplier)
         dest.writeParcelable(windowData, 0)
         dest.writeParcelable(icon, 0)
     }
@@ -87,21 +65,20 @@ class GeoMarker(
 
         private fun extractUUID(
             position: LatLng,
-            iconSizeMultiplier: Float,
             windowData: MapObjectWindowData?
         ): String {
             val text = position.latitude.toString() + position.longitude.toString() +
-                    iconSizeMultiplier.toString() + windowData?.title
+                    windowData?.title
             return Base64.encodeToString(text.toByteArray(), Base64.DEFAULT)
         }
     }
 }
 
-fun Symbol.getWindow(): MapObjectWindowData =
+fun CommonMarker.getWindow(): MapObjectWindowData =
     load(this)
 
-fun Collection<GeoMarker>.addToMap(mapHelper: MapHelper): List<Symbol> {
-    val symbols = arrayListOf<Symbol>()
+fun Collection<GeoMarker>.addToMap(mapHelper: MapHelper): List<CommonMarker> {
+    val symbols = arrayListOf<CommonMarker>()
     for (marker in this) {
         val symbol = marker.addToMap(mapHelper)
         symbols.add(symbol)

@@ -93,8 +93,6 @@ class DownloadSectionsAdapter(
         section: DataClass<*, *>,
         holder: DownloadSectionViewHolder
     ) {
-        val mapStyle = mainActivity.mapFragment.mapStyle
-        val mapUri = mapStyle?.uri
         doAsync {
             Timber.v("Downloading section \"$section\"")
             val downloadStatus = section.downloadStatus(mainActivity, firestore)
@@ -104,7 +102,7 @@ class DownloadSectionsAdapter(
                     Timber.v("Cannot download, there's no internet connection.")
                     toast(mainActivity, R.string.toast_error_no_internet)
                 } else if (downloadStatus == DownloadStatus.NOT_DOWNLOADED)
-                    section.download(mainActivity, mapUri)
+                    section.download(mainActivity)
                         .observe(mainActivity) { workInfo ->
                             val state = workInfo.state
                             val data = workInfo.outputData

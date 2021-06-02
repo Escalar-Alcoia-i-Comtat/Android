@@ -29,7 +29,6 @@ val UPDATE_IMAGES = DataExtra<Boolean>("update_images")
 val QUIET_UPDATE = DataExtra<Boolean>("quiet_update")
 
 val EXTRA_KMZ_FILE = DataExtra<String>("KMZFle")
-val EXTRA_ICON_SIZE_MULTIPLIER = DataExtra<Float>("IconSize")
 val EXTRA_CENTER_CURRENT_LOCATION = DataExtra<Boolean>("CenterLocation")
 
 /**

@@ -24,12 +24,11 @@ import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNE
 import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_MARKER_MARGIN
-import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_MARKER_MAX_ZOOM
-import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_MARKER_MIN_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_OVERWRITE_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.shared.METERS_PER_LAT_LON_DEGREE
 import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
@@ -39,12 +38,6 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.geometry.LatLngBounds
-import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition
-import com.mapbox.mapboxsdk.plugins.offline.model.OfflineDownloadOptions
-import com.mapbox.mapboxsdk.plugins.offline.offline.OfflinePlugin
-import com.mapbox.mapboxsdk.plugins.offline.utils.OfflineUtils
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -58,7 +51,6 @@ const val DOWNLOAD_NAMESPACE = "namespace"
 const val DOWNLOAD_PATH = "path"
 const val DOWNLOAD_OVERWRITE = "overwrite"
 const val DOWNLOAD_QUALITY = "quality"
-const val DOWNLOAD_STYLE_URL = "style_url"
 
 /**
  * When the DownloadWorker was ran with missing data
@@ -118,7 +110,6 @@ class DownloadData
 /**
  * Initializes the class with specific parameters
  * @param dataClass The [DataClass] to download.
- * @param styleUrl The Mapbox Map style url.
  * @param overwrite If the download should be overwritten if already downloaded. Note that if this
  * is false, if the download already exists the task will fail.
  * @param quality The compression quality of the image
@@ -127,7 +118,6 @@ class DownloadData
  */
 constructor(
     val dataClass: DataClass<*, *>,
-    val styleUrl: String?,
     val overwrite: Boolean = DOWNLOAD_OVERWRITE_DEFAULT,
     val quality: Int = DOWNLOAD_QUALITY_DEFAULT
 )
@@ -139,12 +129,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
     private var downloadPath: String? = null
     private var overwrite: Boolean = false
     private var quality: Int = -1
-    private var styleUrl: String? = null
 
     private lateinit var storage: FirebaseStorage
-
-    private val objectId: String?
-        get() = downloadPath?.split('/')?.last()
 
     /**
      * Specifies the downloading notification. For modifying it later.
@@ -161,33 +147,13 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @since 20210406
      * @param location The [LatLng] to download.
      */
-    private fun downloadMapRegion(
-        location: LatLng
-    ) {
+    private fun downloadMapRegion(location: LatLng) {
         Timber.d("Downloading map region...")
         notification
             .edit()
             .withInfoText(R.string.notification_download_progress_info_downloading_map)
             .buildAndShow()
-        val margin = DOWNLOAD_MARKER_MARGIN / METERS_PER_LAT_LON_DEGREE
-        val displayDensity = applicationContext.resources.displayMetrics.density
-        val definition = OfflineTilePyramidRegionDefinition(
-            styleUrl,
-            LatLngBounds.Builder()
-                .include(LatLng(location.latitude - margin, location.longitude - margin))
-                .include(LatLng(location.latitude + margin, location.longitude + margin))
-                .build(),
-            DOWNLOAD_MARKER_MIN_ZOOM,
-            DOWNLOAD_MARKER_MAX_ZOOM,
-            displayDensity
-        )
-        OfflinePlugin.getInstance(applicationContext).startDownload(
-            OfflineDownloadOptions.builder()
-                .definition(definition)
-                .metadata(OfflineUtils.convertRegionName("${namespace}_$objectId"))
-                .notificationOptions(notification.edit().notificationOptions)
-                .build()
-        )
+        // TODO: Download map region
     }
 
     private fun downloadImageFile(imageReferenceUrl: String, imageFile: File): Result {
@@ -299,13 +265,6 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val imageFile = zone.imageFile(applicationContext)
         downloadImageFile(imageRef, imageFile)
 
-        Timber.d("Preparing map region download...")
-        val position = zone.position
-        if (styleUrl != null)
-            downloadMapRegion(position)
-        else
-            Timber.d("Won't download map. Style url ($styleUrl) or location ($position) is null.")
-
         try {
             Timber.d("Downloading KMZ file...")
             runBlocking {
@@ -403,13 +362,6 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 Timber.e(e, handler.second)
         }
 
-        Timber.d("Preparing map region download...")
-        val position = sector.location
-        if (styleUrl != null && position != null)
-            downloadMapRegion(position)
-        else
-            Timber.d("Won't download map. Style url ($styleUrl) or location ($position) is null.")
-
         return Result.success()
     }
 
@@ -420,7 +372,6 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val displayName = inputData.getString(DOWNLOAD_DISPLAY_NAME)
         overwrite = inputData.getBoolean(DOWNLOAD_OVERWRITE, DOWNLOAD_OVERWRITE_DEFAULT)
         quality = inputData.getInt(DOWNLOAD_OVERWRITE, DOWNLOAD_QUALITY_DEFAULT)
-        styleUrl = inputData.getString(DOWNLOAD_STYLE_URL)
 
         Timber.v("Starting download for %s".format(displayName))
 
@@ -560,7 +511,6 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                             DOWNLOAD_NAMESPACE to dataClass.namespace,
                             DOWNLOAD_PATH to dataClass.metadata.documentPath,
                             DOWNLOAD_DISPLAY_NAME to dataClass.displayName,
-                            DOWNLOAD_STYLE_URL to styleUrl,
                             DOWNLOAD_OVERWRITE to overwrite,
                             DOWNLOAD_QUALITY to quality
                         )
