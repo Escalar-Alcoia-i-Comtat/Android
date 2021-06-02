@@ -159,11 +159,6 @@ dependencies {
     // Firebase Auth Google Sign-In
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
 
-    // MapBox SDK
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.6.1'
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:0.9.0'
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-offline-v9:0.8.0'
-
     // Maps SDK
     implementation 'com.github.iDroidDev:MapKit:1.0.1'
 
