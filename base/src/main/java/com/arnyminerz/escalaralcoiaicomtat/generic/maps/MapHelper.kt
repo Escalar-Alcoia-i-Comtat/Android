@@ -66,6 +66,7 @@ import idroid.android.mapskit.ui.HuaweiGoogleMapView
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
+import java.io.InvalidObjectException
 
 class MapHelper
 /**
@@ -1006,60 +1007,68 @@ class MapHelper
          * @author Arnau Mora
          * @since 20210416
          */
-        suspend fun show() {
-            uiContext {
-                val anim = AnimationUtils.loadAnimation(activity, R.anim.enter_bottom)
-                anim.duration = MARKER_WINDOW_SHOW_DURATION
-                cardView.show()
-                cardView.startAnimation(anim)
-            }
+        @UiThread
+        fun show() {
+            val anim = AnimationUtils.loadAnimation(activity, R.anim.enter_bottom)
+            anim.duration = MARKER_WINDOW_SHOW_DURATION
+            cardView.show()
+            cardView.startAnimation(anim)
 
-            val window = marker.getWindow()
-            val title = window.title
-            val description = window.message
-            val activityIntent = getTarget(activity, marker, firestore) // Info Window Data Class
+            val window = try {
+                marker.getWindow()
+            } catch (e: InvalidObjectException) {
+                Timber.e(e, "Could not get marker window data.")
+                null
+            }
+            val title = window?.title
+            val description = window?.message
 
             Timber.v("Marker title: $title")
             Timber.v("Marker description: $description")
 
-            uiContext {
-                titleTextView.text = title
-            }
+            titleTextView.text = title
 
             val imageUrl = getImageUrl(description)
 
-            uiContext {
-                if (imageUrl == null)
-                    descriptionTextView.text = description
-                else if (!activity.isDestroyed)
-                    Glide.with(activity)
-                        .load(imageUrl)
-                        .into(imageView)
-                else Timber.w("Will not load image since there is not an attached Activity.")
+            if (imageUrl == null)
+                descriptionTextView.text = description
+            else if (!activity.isDestroyed)
+                Glide.with(activity)
+                    .load(imageUrl)
+                    .into(imageView)
+            else Timber.w("Will not load image since there is not an attached Activity.")
 
-                visibility(enterButton, activityIntent != null)
-                visibility(imageView, imageUrl != null)
-                visibility(descriptionTextView, imageUrl == null)
+            visibility(imageView, imageUrl != null)
+            visibility(descriptionTextView, imageUrl == null)
 
-                val gmmIntentUri = marker.position.toUri(true, title)
-                val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-                mapButton.visibility(true)
-                mapButton.setOnClickListener {
-                    activity.startActivity(mapIntent)
-                }
-
-                if (activityIntent != null)
-                    enterButton.setOnClickListener {
-                        Timber.v("Launching intent...")
-                        activity.startActivity(activityIntent)
-                    }
-
-                buttonsLayout.orientation =
-                    if (imageUrl != null) LinearLayout.VERTICAL
-                    else LinearLayout.HORIZONTAL
-
-                rootView.addView(cardView, view.layoutParams)
+            val gmmIntentUri = marker.position.toUri(true, title)
+            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+            mapButton.visibility(true)
+            mapButton.setOnClickListener {
+                activity.startActivity(mapIntent)
             }
+
+            buttonsLayout.orientation =
+                if (imageUrl != null) LinearLayout.VERTICAL
+                else LinearLayout.HORIZONTAL
+
+            rootView.addView(cardView, view.layoutParams)
+
+            doAsync {
+                // Info Window Data Class
+                val activityIntent = getTarget(activity, marker, firestore)
+
+                uiContext {
+                    visibility(enterButton, activityIntent != null)
+
+                    if (activityIntent != null)
+                        enterButton.setOnClickListener {
+                            Timber.v("Launching intent...")
+                            activity.startActivity(activityIntent)
+                        }
+                }
+            }
+
             shown = true
             destroyed = false
         }

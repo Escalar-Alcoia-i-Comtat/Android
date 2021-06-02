@@ -25,6 +25,7 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
@@ -120,17 +121,22 @@ class MapFragment : NetworkChangeListenerFragment() {
                     markerWindow?.hide()
                     activity?.let {
                         Timber.v("There's an available activity")
-                        if (it is MainActivity)
+                        if (it is MainActivity) {
                             it.binding.bottomAppBar.performHide()
+                            it.binding.authFab.hide()
+                        }
 
                         Timber.v("Creating marker window...")
                         binding?.root?.let { viewRoot ->
                             markerWindow = mapHelper.infoCard(it, firestore, this, viewRoot)
                                 .also { markerWindow ->
-                                    doAsync { markerWindow.show() }
+                                    markerWindow.show()
                                     markerWindow.listenHide {
-                                        if (it is MainActivity)
+                                        if (it is MainActivity) {
                                             it.binding.bottomAppBar.performShow()
+                                            if (ENABLE_AUTHENTICATION)
+                                                it.binding.authFab.show()
+                                        }
                                     }
                                 }
                         }
