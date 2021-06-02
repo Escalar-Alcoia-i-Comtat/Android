@@ -209,7 +209,7 @@ class MapsActivity : LanguageAppCompatActivity() {
         }
 
         try {
-            loadMap(kmzFile, centerCurrentLocation)
+            loadMap(savedInstanceState ?: Bundle.EMPTY, kmzFile, centerCurrentLocation)
         } catch (e: IllegalStateException) {
             Timber.e(e, "Could not load map. Exitting activity")
             toast(R.string.toast_error_map_load)
@@ -293,7 +293,6 @@ class MapsActivity : LanguageAppCompatActivity() {
      * @param kmzFile The KMZ file to load the features from.
      * @param centerCurrentLocation If the map should be centered in the current location.
      * @throws IllegalStateException When there was an unknown exception while initializing the map.
-     * @see iconSizeMultiplier
      * @see markers
      * @see geometries
      * @see MAP_LOAD_PADDING
@@ -302,12 +301,14 @@ class MapsActivity : LanguageAppCompatActivity() {
     @UiThread
     @Throws(IllegalStateException::class)
     private fun loadMap(
+        savedInstanceState: Bundle,
         kmzFile: File?,
         centerCurrentLocation: Boolean
     ) {
         mapHelper = MapHelper()
-        mapHelper.withMapView(binding.map)
-        mapHelper
+            .withMapView(binding.map)
+        mapHelper.onCreate(savedInstanceState)
+        mapHelper = mapHelper
             .loadMap { _, map ->
                 Timber.v("Map loaded successfully")
                 doAsync {

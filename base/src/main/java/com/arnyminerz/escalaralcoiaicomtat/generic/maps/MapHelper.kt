@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
@@ -32,6 +33,7 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MARKER_WINDOW_HIDE_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MARKER_WINDOW_SHOW_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
+import com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData
 import com.arnyminerz.escalaralcoiaicomtat.data.map.addToMap
 import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCompressImageException
@@ -106,7 +108,7 @@ class MapHelper
 
     var map: Maps? = null
 
-    private lateinit var mapView: HuaweiGoogleMapView
+    private var mapView: HuaweiGoogleMapView? = null
 
     var locationComponent: LocationComponent? = null
         private set
@@ -141,34 +143,60 @@ class MapHelper
     val isLoaded: Boolean
         get() = map != null && mapSetUp && locationComponent != null
 
+    fun onCreate(mapViewBundle: Bundle) {
+        if (mapView == null)
+            Timber.e("Could not call onStart() since mapView is null")
+        else
+            mapView!!.onCreate(mapViewBundle)
+        Timber.d("onCreate()")
+    }
+
     fun onStart() {
-        mapView.onStart()
+        if (mapView == null)
+            Timber.e("Could not call onStart() since mapView is null")
+        else
+            mapView!!.onStart()
         Timber.d("onStart()")
     }
 
     fun onResume() {
-        mapView.onResume()
+        if (mapView == null)
+            Timber.e("Could not call onResume() since mapView is null")
+        else
+            mapView!!.onResume()
         Timber.d("onResume()")
     }
 
     fun onPause() {
-        mapView.onPause()
+        if (mapView == null)
+            Timber.e("Could not call onPause() since mapView is null")
+        else
+            mapView!!.onPause()
         Timber.d("onPause()")
     }
 
     fun onStop() {
-        mapView.onStop()
+        if (mapView == null)
+            Timber.e("Could not call onStop() since mapView is null")
+        else
+            mapView!!.onStop()
         Timber.d("onStop()")
     }
 
     fun onLowMemory() {
-        mapView.onLowMemory()
+        if (mapView == null)
+            Timber.e("Could not call onLowMemory() since mapView is null")
+        else
+            mapView!!.onLowMemory()
         Timber.d("onLowMemory()")
     }
 
     fun onDestroy() {
         locationComponent?.destroy()
-        mapView.onDestroy()
+        if (mapView == null)
+            Timber.e("Could not call onDestroy() since mapView is null")
+        else
+            mapView!!.onDestroy()
         Timber.d("onDestroy()")
     }
 
@@ -239,7 +267,7 @@ class MapHelper
         callback: (mapView: HuaweiGoogleMapView, map: Maps) -> Unit
     ): MapHelper {
         Timber.d("Loading map...")
-        mapView.getMapAsync(object : Maps.OnMapReadyListener {
+        mapView?.getMapAsync(object : Maps.OnMapReadyListener {
             override fun onMapReady(map: Maps) {
                 Timber.d("Setting map type...")
                 map.setMapType(type)
@@ -247,9 +275,9 @@ class MapHelper
                 mapSetup(map)
                 if (!isLoaded)
                     throw IllegalStateException("There was an issue while initializing MapHelper.")
-                callback(mapView, map)
+                callback(mapView!!, map)
             }
-        })
+        }) ?: Timber.e("Could not call loadMap() since mapView is null")
 
         return this
     }
@@ -608,18 +636,25 @@ class MapHelper
     }
 
     /**
-     * Creates a new symbol with the SymbolManager
+     * Creates a new symbol with the SymbolManager.
      * @author Arnau Mora
      * @since 20210319
-     * @param options The symbol to add's options
-     * @throws MapNotInitializedException If the map has not been initialized
+     * @param options The symbol to add's options.
+     * @param window The window data for the marker.
+     * @throws MapNotInitializedException If the map has not been initialized.
      * @return The created symbol
      */
     @Throws(MapNotInitializedException::class)
-    fun createMarker(options: CommonMarkerOptions): CommonMarker {
+    fun createMarker(
+        options: CommonMarkerOptions,
+        window: MapObjectWindowData? = null
+    ): CommonMarker {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
-        return map!!.addMarker(options)
+        return map!!.addMarker(options).also {
+            if (window != null)
+                it.setMarkerTag(window)
+        }
     }
 
     /**
@@ -922,7 +957,7 @@ class MapHelper
      */
     @UiThread
     fun visibility(visible: Boolean): MapHelper {
-        mapView.visibility(visible)
+        mapView?.visibility(visible)
         return this
     }
 

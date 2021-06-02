@@ -2,36 +2,23 @@ package com.arnyminerz.escalaralcoiaicomtat.data.map
 
 import android.os.Parcel
 import android.os.Parcelable
-import android.util.MalformedJsonException
 import com.arnyminerz.escalaralcoiaicomtat.generic.generateUUID
 import com.google.gson.JsonElement
-import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import idroid.android.mapskit.model.CommonMarker
 import timber.log.Timber
 import java.io.InvalidObjectException
 
-fun load(symbol: CommonMarker): MapObjectWindowData {
-    // TODO: Tag is not getting stored
-    val json =
-        symbol.tag as? JsonObject ?: throw InvalidObjectException("Symbol doesn't have any data")
-    if (!json.isJsonObject)
-        throw MalformedJsonException("Data is not a json object")
-    val obj = json.asJsonObject
-    if (!obj.has(WINDOW_DATA_KEY))
-        throw MalformedJsonException("Data doesn't contain")
-    val windowData = obj.getAsJsonObject(WINDOW_DATA_KEY)
-    if (!windowData.has("title"))
-        throw MalformedJsonException("Window data doesn't contain title")
-    return MapObjectWindowData(
-        windowData.get("title").asString,
-        if (windowData.has("message"))
-            windowData.get("message").asString
-                .replace("\\\"", "\"")
-                .replace("\\\\", "\\")
-        else null
-    )
-}
+/**
+ * Extracts [MapObjectWindowData] from [symbol].
+ * @author Arnau Mora
+ * @since 20210602
+ * @param symbol The symbol to extract from
+ * @throws InvalidObjectException When [symbol] doesn't have any data (tag).
+ */
+fun load(symbol: CommonMarker): MapObjectWindowData =
+    symbol.tag as? MapObjectWindowData
+        ?: throw InvalidObjectException("Symbol doesn't have any data")
 
 data class MapObjectWindowData(
     var title: String,

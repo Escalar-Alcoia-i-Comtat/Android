@@ -213,7 +213,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
             return
 
         Timber.d("Loading map...")
-        mapHelper
+        mapHelper = mapHelper
+            .withMapView(binding.mapView)
             .withControllable(false)
             .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE))
             .loadMap { _, map ->
@@ -248,9 +249,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         justAttached = true
-
-        Timber.d("Initializing MapHelper...")
-        mapHelper = MapHelper()
     }
 
     override fun onCreateView(
@@ -262,13 +260,18 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
         firestore = Firebase.firestore
 
+        mapHelper = MapHelper()
+            .withMapView(binding.mapView)
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mapHelper.withMapView(binding.mapView)
+        Timber.v("Initializing MapHelper")
+        mapHelper.onCreate(savedInstanceState ?: Bundle.EMPTY)
+
         initializeMap()
 
         Timber.v("Refreshing areas...")

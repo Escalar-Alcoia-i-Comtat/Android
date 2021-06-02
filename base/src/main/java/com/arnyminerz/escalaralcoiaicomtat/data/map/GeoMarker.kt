@@ -9,6 +9,7 @@ import com.google.android.gms.maps.model.LatLng
 import idroid.android.mapskit.model.CommonMarker
 import idroid.android.mapskit.model.CommonMarkerOptions
 import timber.log.Timber
+import java.io.InvalidObjectException
 
 @Suppress("unused")
 class GeoMarker(
@@ -42,7 +43,7 @@ class GeoMarker(
             icon.icon
         )
 
-        return mapHelper.createMarker(symbolOptions)
+        return mapHelper.createMarker(symbolOptions, windowData)
     }
 
     override fun describeContents(): Int = 0
@@ -74,8 +75,13 @@ class GeoMarker(
     }
 }
 
-fun CommonMarker.getWindow(): MapObjectWindowData =
-    load(this)
+/**
+ * Extracts [MapObjectWindowData] from the marker.
+ * @author Arnau Mora
+ * @since 20210602
+ * @throws InvalidObjectException When the marker doesn't have any data (tag).
+ */
+fun CommonMarker.getWindow(): MapObjectWindowData = load(this)
 
 fun Collection<GeoMarker>.addToMap(mapHelper: MapHelper): List<CommonMarker> {
     val symbols = arrayListOf<CommonMarker>()

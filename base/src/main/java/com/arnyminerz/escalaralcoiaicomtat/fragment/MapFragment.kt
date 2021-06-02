@@ -77,6 +77,7 @@ class MapFragment : NetworkChangeListenerFragment() {
         Timber.v("Preparing MapHelper...")
         mapHelper = MapHelper()
             .withMapView(binding!!.pageMapView)
+        mapHelper.onCreate(savedInstanceState ?: Bundle.EMPTY)
         mapHelper
             .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
             .loadMap { _, map ->
