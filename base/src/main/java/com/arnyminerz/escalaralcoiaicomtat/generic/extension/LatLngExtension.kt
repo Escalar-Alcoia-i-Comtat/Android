@@ -26,7 +26,7 @@ fun LatLngBounds.Builder.includeAll(points: Collection<LatLng>): LatLngBounds.Bu
 }
 
 fun LatLng.distanceTo(other: LatLng): Float {
-    val results = floatArrayOf()
+    val results = floatArrayOf(0f, 0f, 0f)
     Location.distanceBetween(latitude, longitude, other.latitude, other.longitude, results)
     return results.first()
 }
