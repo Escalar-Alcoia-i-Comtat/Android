@@ -38,9 +38,9 @@ fun LatLngBounds.Builder.includeAll(points: Collection<LatLng>): LatLngBounds.Bu
 }
 
 fun LatLng.distanceTo(other: LatLng): Float {
-    val results = floatArrayOf(0f, 0f, 0f)
-    Location.distanceBetween(latitude, longitude, other.latitude, other.longitude, results)
-    return results.first()
+    val a = this.toLocation()
+    val b = other.toLocation()
+    return a.distanceTo(b)
 }
 
 fun GeoPoint.toLatLng(): LatLng = LatLng(latitude, longitude)
