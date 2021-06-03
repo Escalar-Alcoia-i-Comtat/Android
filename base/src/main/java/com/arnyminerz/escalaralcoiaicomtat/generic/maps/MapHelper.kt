@@ -331,17 +331,20 @@ class MapHelper
         TransactionTooLargeException::class
     )
     fun mapsActivityIntent(context: Context, overrideLoadedValues: Boolean = false): Intent {
-        val loadedElements = markers.isNotEmpty() || geometries.isNotEmpty()
+        val loadedElements =
+            synchronized(markers) { markers.isNotEmpty() } || synchronized(geometries) { geometries.isNotEmpty() }
         if (!loadedElements)
             throw MapAnyDataToLoadException("Map doesn't have any loaded data.")
 
         Timber.d("Preparing MapsActivity intent...")
         val elementsIntent = Intent(context, MapsActivity::class.java).apply {
             Timber.v("Passing to MapsActivity with parcelable list.")
-            val markersCount = markers.size
+            val markersCount = synchronized(markers) { markers.size }
             if (markersCount > 0) {
                 Timber.d("  Putting $markersCount markers...")
-                putParcelableArrayListExtra(MAP_MARKERS_BUNDLE_EXTRA, markers)
+                synchronized(markers) {
+                    putParcelableArrayListExtra(MAP_MARKERS_BUNDLE_EXTRA, markers)
+                }
             }
             val geometriesCount = geometries.size
             if (geometriesCount > 0) {
@@ -480,7 +483,9 @@ class MapHelper
      * @see GeoMarker
      */
     fun addMarker(marker: GeoMarker) {
-        markers.add(marker)
+        synchronized(markers) {
+            markers.add(marker)
+        }
     }
 
     /**
@@ -591,8 +596,10 @@ class MapHelper
             geometry.second?.let { polygons.add(it) }
         }
 
-        val symbols = markers.addToMap(this)
-        this.commonMarkers.addAll(symbols)
+        synchronized(markers) {
+            val symbols = markers.addToMap(this)
+            this.commonMarkers.addAll(symbols)
+        }
     }
 
     /**
@@ -604,16 +611,22 @@ class MapHelper
     @UiThread
     @Throws(MapNotInitializedException::class)
     fun center(padding: Int = 11, animate: Boolean = true, includeCurrentLocation: Boolean = true) {
-        if (markers.isEmpty())
-            return
+        var ret = false
+        synchronized(markers) {
+            if (markers.isEmpty())
+                ret = true
+        }
+        if (ret) return
 
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
         Timber.d("Centering map in features...")
         val points = arrayListOf<LatLng>()
-        for (marker in markers)
-            points.add(marker.position)
+        synchronized(markers) {
+            for (marker in markers)
+                points.add(marker.position)
+        }
         for (geometry in geometries)
             points.addAll(geometry.points)
 
@@ -627,7 +640,9 @@ class MapHelper
 
         if (points.isNotEmpty())
             if (points.size == 1)
-                move(markers.first().position, DEFAULT_ZOOM)
+                synchronized(markers) {
+                    move(markers.first().position, DEFAULT_ZOOM)
+                }
             else {
                 val boundsBuilder = LatLngBounds.Builder()
                 boundsBuilder.includeAll(points)
