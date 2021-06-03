@@ -19,6 +19,18 @@ fun LatLng.toUri(showMarker: Boolean = false, markerTitle: String? = null): Uri 
 
 fun Location.toLatLng(): LatLng = LatLng(latitude, longitude)
 
+/**
+ * Converts a [LatLng] object into a [Location].
+ * @author Arnau Mora
+ * @since 20210603
+ */
+fun LatLng.toLocation(): Location {
+    val location = Location(this.toString())
+    location.latitude = this.latitude
+    location.longitude = this.longitude
+    return location
+}
+
 fun LatLngBounds.Builder.includeAll(points: Collection<LatLng>): LatLngBounds.Builder {
     for (point in points)
         include(point)
