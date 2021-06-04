@@ -86,7 +86,7 @@ class MapsActivity : LanguageAppCompatActivity() {
 
                 when (mime) {
                     MIME_TYPE_GPX -> {
-                        mapHelper.storeGPX(this, uri)
+                        mapHelper.export?.storeGPX(this, uri)
                         val notificationBuilder = Notification.Builder(this)
                             .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
                             .withTitle(R.string.notification_gpx_stored_title)
@@ -109,7 +109,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                         toast(R.string.toast_stored_gpx)
                     }
                     MIME_TYPE_KMZ -> {
-                        mapHelper.storeKMZ(this, uri)
+                        mapHelper.export?.storeKMZ(this, uri)
                         val notificationBuilder = Notification.Builder(this)
                             .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
                             .withTitle(R.string.notification_kmz_stored_title)
