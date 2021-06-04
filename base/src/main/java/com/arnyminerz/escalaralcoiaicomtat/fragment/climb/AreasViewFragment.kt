@@ -27,12 +27,12 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_DISABLE_NEARBY
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.distanceTo
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.isLocationPermissionGranted
+import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapAnyDataToLoadException
+import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter

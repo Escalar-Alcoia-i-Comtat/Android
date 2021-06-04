@@ -17,10 +17,10 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentMapBinding
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapNotInitializedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.isLocationPermissionGranted
+import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapNotInitializedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider

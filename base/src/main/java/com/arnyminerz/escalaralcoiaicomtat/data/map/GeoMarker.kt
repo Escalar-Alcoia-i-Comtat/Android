@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Base64
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapHelper
 import com.google.android.gms.maps.model.LatLng
 import idroid.android.mapskit.model.CommonMarker
 import idroid.android.mapskit.model.CommonMarkerOptions

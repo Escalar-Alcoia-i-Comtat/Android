@@ -10,9 +10,9 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapAnyDataToLoadException
+import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider

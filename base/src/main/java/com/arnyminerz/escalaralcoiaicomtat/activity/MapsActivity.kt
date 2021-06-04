@@ -22,12 +22,12 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMapsBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAskerFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_MARKER_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapNotInitializedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.fileName
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.isLocationPermissionGranted
+import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapNotInitializedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.maps.TrackMode
 import com.arnyminerz.escalaralcoiaicomtat.generic.mime
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast

@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.generic
+package com.arnyminerz.escalaralcoiaicomtat.generic.maps
 
 import android.app.Activity
 import android.content.Context

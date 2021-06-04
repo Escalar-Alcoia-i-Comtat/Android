@@ -11,8 +11,6 @@ import androidx.annotation.RequiresPermission
 import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_MIN_DIST
 import com.arnyminerz.escalaralcoiaicomtat.data.map.LOCATION_UPDATE_MIN_TIME
 import com.arnyminerz.escalaralcoiaicomtat.exception.MissingPermissionException
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapNotInitializedException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.isLocationPermissionGranted
 import com.google.android.gms.maps.model.LatLng
