@@ -4,7 +4,6 @@ import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
 import android.os.ParcelFileDescriptor
@@ -142,13 +141,7 @@ fun Bitmap.resize(size: Int): Bitmap = resize(size, size)
  * @return The resized [Bitmap].
  */
 fun Bitmap.resize(width: Int, height: Int): Bitmap {
-    val scaleWidth = width.toFloat() / this.width
-    val scaleHeight = height.toFloat() / this.height
-
-    val matrix = Matrix()
-    matrix.postScale(scaleWidth, scaleHeight)
-
-    val resizedBitmap = Bitmap.createBitmap(this, 0, 0, width, height, matrix, false)
+    val resizedBitmap = Bitmap.createScaledBitmap(this, width, height, false)
     recycle()
     return resizedBitmap
 }
