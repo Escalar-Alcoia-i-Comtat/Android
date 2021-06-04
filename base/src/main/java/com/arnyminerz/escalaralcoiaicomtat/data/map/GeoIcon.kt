@@ -7,9 +7,20 @@ import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.generic.drawableToBitmap
+import com.arnyminerz.escalaralcoiaicomtat.generic.resize
 import timber.log.Timber
 
-class GeoIcon(val name: String, val icon: Bitmap) : Parcelable {
+/**
+ * Represents an icon that will be displayed on a Map.
+ * @author Arnau Mora
+ * @since 20210604
+ * @param name The name of the icon, can be anything.
+ * @param icon The [Bitmap] that will be shown in the map.
+ * @see GeoMarker
+ */
+class GeoIcon(val name: String, icon: Bitmap) : Parcelable {
+    val icon: Bitmap = icon.resize(MARKER_SIZE)
+
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readParcelable(Bitmap::class.java.classLoader)!!
