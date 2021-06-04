@@ -3,8 +3,6 @@ package com.arnyminerz.escalaralcoiaicomtat.generic.maps
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -21,7 +19,6 @@ import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.cardview.widget.CardView
-import androidx.collection.arrayMapOf
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass.Companion.getIntent
@@ -36,18 +33,18 @@ import com.arnyminerz.escalaralcoiaicomtat.data.map.MapFeatures
 import com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData
 import com.arnyminerz.escalaralcoiaicomtat.data.map.addToMap
 import com.arnyminerz.escalaralcoiaicomtat.data.map.getWindow
-import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCompressImageException
-import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCreateDirException
-import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotOpenStreamException
+import com.arnyminerz.escalaralcoiaicomtat.generic.MBYTE
+import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.includeAll
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toUri
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.write
-import com.arnyminerz.escalaralcoiaicomtat.generic.maps.LocationComponent
+import com.arnyminerz.escalaralcoiaicomtat.generic.getSize
+import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
+import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_KMZ_FILE
 import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.storage.zipFile
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
@@ -56,7 +53,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.perf.FirebasePerformance
 import idroid.android.mapskit.factory.Maps
 import idroid.android.mapskit.model.CommonMarker
 import idroid.android.mapskit.model.CommonMarkerOptions
@@ -68,14 +64,13 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.InvalidObjectException
 
-class MapHelper
 /**
  * Initializes the MapHelper instance. This also prepares the Mapbox interface with the access token.
  * Note that this should be called before any map view inflation.
  * @author Arnau Mora
  * @since 20210421
  */
-{
+class MapHelper {
 
     companion object {
         suspend fun getTarget(
@@ -133,10 +128,42 @@ class MapHelper
 
     private var allGesturesEnabled: Boolean = true
 
-    private val markers = arrayListOf<GeoMarker>()
-    private val geometries = arrayListOf<GeoGeometry>()
+    /**
+     * Stores all the markers that should be shown in the map when [display] is called.
+     * @author Arnau Mora
+     * @since 20210604
+     */
+    internal val markers = arrayListOf<GeoMarker>()
+
+    /**
+     * Stores all the geometries that should be shown in the map when [display] is called.
+     * @author Arnau Mora
+     * @since 20210604
+     */
+    internal val geometries = arrayListOf<GeoGeometry>()
+
+    /**
+     * Stores all the markers that have been added to the map, as references, for manipulating them
+     * later.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     private val commonMarkers = arrayListOf<CommonMarker>()
+
+    /**
+     * Stores all the polylines that have been added to the map, as references, for manipulating them
+     * later.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     private val polylines = arrayListOf<CommonPolyline>()
+
+    /**
+     * Stores all the polygons that have been added to the map, as references, for manipulating them
+     * later.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     private val polygons = arrayListOf<CommonPolygon>()
 
     private var loadedKmzFile: File? = null
@@ -144,6 +171,12 @@ class MapHelper
     private val markerClickListeners = arrayListOf<CommonMarker.() -> Boolean>()
 
     private var mapSetUp = false
+
+    /**
+     * Checks if the map has been completely loaded, so it can be used.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     val isLoaded: Boolean
         get() = map != null && mapSetUp && locationComponent != null
 
@@ -241,11 +274,13 @@ class MapHelper
                 return !anyFalse
             }
         })
+        map.setOnCameraMoveListener { position -> lastPosition = position }
 
         map.setCompassEnabled(false)
         map.setAllGesturesEnabled(allGesturesEnabled)
 
         locationComponent = LocationComponent(this)
+        export = MapExportModule(this)
 
         mapSetUp = true
         move(lastPosition, lastZoom, false)
@@ -255,7 +290,6 @@ class MapHelper
      * Initializes [mapView] and sets the desired [type]. Then runs [mapSetUp] for preparing all
      * the required variables for the rest of the functions of [MapHelper].
      * @author Arnau Mora
-     * @param context The context to call from.
      * @param type The [Maps.Type] to set to the map.
      * @param callback What to call when the map gets loaded
      * @throws IllegalStateException When prepared map and [isLoaded] is false.
@@ -380,34 +414,68 @@ class MapHelper
      * @return The instance
      */
     @Throws(MapNotInitializedException::class)
-    fun move(position: LatLng? = null, zoom: Float? = null, animate: Boolean = true): MapHelper {
+    fun move(position: LatLng, zoom: Float, animate: Boolean = true): MapHelper {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
         if (animate) {
-            if (position != null && zoom != null) {
-                map?.animateCamera(position, zoom)
-                lastZoom = zoom
-                lastPosition = position
-            } else if (position != null && zoom == null) {
-                map?.animateCamera(position, lastZoom)
-                lastPosition = position
-            } else if (position == null && zoom != null) {
-                map?.animateCamera(zoom)
-                lastZoom = zoom
-            }
+            map?.animateCamera(position, zoom)
+            lastZoom = zoom
+            lastPosition = position
         } else {
-            if (position != null && zoom != null) {
-                map?.moveCamera(position, zoom)
-                lastZoom = zoom
-                lastPosition = position
-            } else if (position != null && zoom == null) {
-                map?.moveCamera(position, lastZoom)
-                lastPosition = position
-            } else if (position == null && zoom != null) {
-                map?.moveCamera(lastPosition, zoom)
-                lastZoom = zoom
-            }
+            map?.moveCamera(position, zoom)
+            lastZoom = zoom
+            lastPosition = position
+        }
+
+        return this
+    }
+
+    /**
+     * Moves the camera position
+     * @param position The target position
+     * @param animate If the movement should be animated
+     * @author Arnau Mora
+     * @see LatLng
+     * @throws MapNotInitializedException If the map has not been initialized
+     * @return The instance
+     */
+    @Throws(MapNotInitializedException::class)
+    fun move(position: LatLng, animate: Boolean = true): MapHelper {
+        if (!isLoaded)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+
+        lastPosition = if (animate) {
+            map?.animateCamera(position, lastZoom)
+            position
+        } else {
+            map?.moveCamera(position, lastZoom)
+            position
+        }
+
+        return this
+    }
+
+    /**
+     * Moves the camera position
+     * @param zoom The target zoom
+     * @param animate If the movement should be animated
+     * @author Arnau Mora
+     * @see LatLng
+     * @throws MapNotInitializedException If the map has not been initialized
+     * @return The instance
+     */
+    @Throws(MapNotInitializedException::class)
+    fun move(zoom: Float, animate: Boolean = true): MapHelper {
+        if (!isLoaded)
+            throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
+
+        lastZoom = if (animate) {
+            map?.animateCamera(zoom)
+            zoom
+        } else {
+            map?.moveCamera(lastPosition, zoom)
+            zoom
         }
 
         return this
