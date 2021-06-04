@@ -36,11 +36,39 @@ import java.io.FileNotFoundException
 abstract class DataClassListActivity<T : DataClass<*, *>>(
     private val overrideLoadedMapData: Boolean = false,
 ) : NetworkChangeListenerActivity() {
+    /**
+     * The ViewBinding object for the Activity's view.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     protected lateinit var binding: LayoutListBinding
+
+    /**
+     * The [T] object that stores the data to show to the user.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     protected lateinit var dataClass: T
+
+    /**
+     * The [MapHelper] instance for doing map-stuff.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     private lateinit var mapHelper: MapHelper
 
+    /**
+     * The Firestore reference for getting data from the server.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     lateinit var firestore: FirebaseFirestore
+
+    /**
+     * The Firebase Storage reference for getting images and KMZs from the server.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     lateinit var storage: FirebaseStorage
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -167,6 +195,11 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         }
     }
 
+    /**
+     * Updates the status icon at the actionbar.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     @UiThread
     private fun updateIcon() {
         val i = binding.statusImageView
