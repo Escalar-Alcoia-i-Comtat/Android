@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
 import android.os.ParcelFileDescriptor
@@ -121,4 +122,33 @@ fun getBitmapFromUri(contentResolver: ContentResolver, uri: Uri): Bitmap? {
     val image: Bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor)
     parcelFileDescriptor.close()
     return image
+}
+
+/**
+ * Resizes the Bitmap to the selected size. Note that this will set all the sides to the same size.
+ * @author Arnau Mora
+ * @since 20210604
+ * @param size The desired width and height for the new image.
+ * @return The resized [Bitmap].
+ */
+fun Bitmap.resize(size: Int): Bitmap = resize(size, size)
+
+/**
+ * Resizes the Bitmap to the selected size.
+ * @author Arnau Mora
+ * @since 20210604
+ * @param width The desired width for the new image.
+ * @param height The desired height for the new image.
+ * @return The resized [Bitmap].
+ */
+fun Bitmap.resize(width: Int, height: Int): Bitmap {
+    val scaleWidth = width.toFloat() / this.width
+    val scaleHeight = height.toFloat() / this.height
+
+    val matrix = Matrix()
+    matrix.postScale(scaleWidth, scaleHeight)
+
+    val resizedBitmap = Bitmap.createBitmap(this, 0, 0, width, height, matrix, false)
+    recycle()
+    return resizedBitmap
 }
