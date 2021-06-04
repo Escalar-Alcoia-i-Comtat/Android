@@ -17,6 +17,13 @@ const val DEFAULT_LATITUDE = 38.7284401
 const val DEFAULT_LONGITUDE = -0.43821
 const val DEFAULT_ZOOM = 12.0f
 
+/**
+ * The size of the images from the map.
+ * @author Arnau Mora
+ * @since 20210604
+ * @see GeoIcon
+ */
+const val MARKER_SIZE = 56
 const val SMALL_ICON_SIZE_MULTIPLIER = .35f
 const val LINE_WIDTH_MULTIPLIER = 1f
 const val MAP_LOAD_PADDING = 50
