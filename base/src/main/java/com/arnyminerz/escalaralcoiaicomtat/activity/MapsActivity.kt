@@ -208,7 +208,7 @@ class MapsActivity : LanguageAppCompatActivity() {
         }
 
         try {
-            loadMap(savedInstanceState ?: Bundle.EMPTY, kmzFile, centerCurrentLocation)
+            loadMap(savedInstanceState, kmzFile, centerCurrentLocation)
         } catch (e: IllegalStateException) {
             Timber.e(e, "Could not load map. Exitting activity")
             toast(R.string.toast_error_map_load)
@@ -293,7 +293,7 @@ class MapsActivity : LanguageAppCompatActivity() {
     @UiThread
     @Throws(IllegalStateException::class)
     private fun loadMap(
-        savedInstanceState: Bundle,
+        savedInstanceState: Bundle?,
         kmzFile: File?,
         centerCurrentLocation: Boolean
     ) {

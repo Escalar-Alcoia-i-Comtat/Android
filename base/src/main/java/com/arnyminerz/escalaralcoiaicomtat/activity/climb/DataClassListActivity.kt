@@ -83,7 +83,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         setContentView(view)
 
         mapHelper = mapHelper.withMapView(binding.map)
-        mapHelper.onCreate(savedInstanceState ?: Bundle.EMPTY)
+        mapHelper.onCreate(savedInstanceState)
 
         binding.statusImageView.setOnClickListener { it.performLongClick() }
         updateIcon()

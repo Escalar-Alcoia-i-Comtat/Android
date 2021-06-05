@@ -180,7 +180,7 @@ class MapHelper {
     val isLoaded: Boolean
         get() = map != null && mapSetUp && locationComponent != null
 
-    fun onCreate(mapViewBundle: Bundle) {
+    fun onCreate(mapViewBundle: Bundle?) {
         if (mapView == null)
             Timber.e("Could not call onStart() since mapView is null")
         else
