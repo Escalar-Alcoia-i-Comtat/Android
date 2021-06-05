@@ -137,7 +137,7 @@ dependencies {
     implementation 'com.google.android.play:core-ktx:1.8.1'
 
     // Android Jetpack
-    def jetpack_work_version = '2.7.0-alpha03'
+    def jetpack_work_version = '2.7.0-alpha04'
     implementation "androidx.work:work-runtime-ktx:$jetpack_work_version"
     implementation "androidx.work:work-gcm:$jetpack_work_version"
     androidTestImplementation "androidx.work:work-testing:$jetpack_work_version"
@@ -160,7 +160,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
 
     // Maps SDK
-    implementation 'com.github.ArnyminerZ:MapKit:1.0.2-dev3'
+    implementation 'com.github.ArnyminerZ:MapKit:1.0.2-dev6'
     implementation 'com.google.android.gms:play-services-maps:17.0.1'
 
     // KotlinX Coroutines
