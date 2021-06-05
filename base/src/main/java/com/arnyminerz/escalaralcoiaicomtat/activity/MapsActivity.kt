@@ -25,6 +25,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_CENTER_
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.generic.fileName
 import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.getParcelableList
 import com.arnyminerz.escalaralcoiaicomtat.generic.isLocationPermissionGranted
 import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapNotInitializedException
@@ -43,12 +44,11 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.MAP_MARKERS_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.shared.MIME_TYPE_GPX
 import com.arnyminerz.escalaralcoiaicomtat.shared.MIME_TYPE_KMZ
 import com.arnyminerz.escalaralcoiaicomtat.shared.PERMISSION_DIALOG_TAG
-import com.google.android.gms.maps.model.LatLng
+import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import idroid.android.mapskit.factory.Maps
 import timber.log.Timber
 import java.io.File
 
@@ -150,15 +150,20 @@ class MapsActivity : LanguageAppCompatActivity() {
         if (intent != null) {
             Timber.d("Getting markers list...")
             val markersList =
-                intent.getParcelableArrayListExtra<GeoMarker>(MAP_MARKERS_BUNDLE_EXTRA)
-            markersList?.let { markers.addAll(it) }
+                sharedPreferences.getParcelableList<GeoMarker>(MAP_MARKERS_BUNDLE_EXTRA, listOf())
+            markers.addAll(markersList)
+
             Timber.d("Getting geometries list...")
-            val geometriesList =
-                intent.getParcelableArrayListExtra<GeoGeometry>(MAP_GEOMETRIES_BUNDLE_EXTRA)
-            geometriesList?.let { geometries.addAll(it) }
+            val geometriesList = sharedPreferences.getParcelableList<GeoGeometry>(
+                MAP_GEOMETRIES_BUNDLE_EXTRA,
+                listOf()
+            )
+            geometries.addAll(geometriesList)
+
             Timber.d("Got ${markers.size} markers and ${geometries.size} geometries.")
 
-            kmzFile = intent.getExtra(EXTRA_KMZ_FILE)?.let { File(it) }
+            if (markersList.isEmpty() && geometriesList.isEmpty())
+                kmzFile = intent.getExtra(EXTRA_KMZ_FILE)?.let { File(it) }
             centerCurrentLocation = intent.getExtra(EXTRA_CENTER_CURRENT_LOCATION, false)
         } else
             Timber.w("Intent is null")
@@ -334,17 +339,15 @@ class MapsActivity : LanguageAppCompatActivity() {
                     if (mapHelper.locationComponent?.lastKnownLocation != null)
                         binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
                 }
-                map.setOnMapClickListener(object : Maps.MapClickListener {
-                    override fun onMapClick(point: LatLng) {
-                        showingPolyline = null
+                map.setOnMapClickListener {
+                    showingPolyline = null
 
-                        try {
-                            markerWindow?.hide()
-                        } catch (_: IllegalStateException) {
-                        }
-                        markerWindow = null
+                    try {
+                        markerWindow?.hide()
+                    } catch (_: IllegalStateException) {
                     }
-                })
+                    markerWindow = null
+                }
 
                 mapHelper.addMarkerClickListener {
                     if (SETTINGS_CENTER_MARKER_PREF.get())
