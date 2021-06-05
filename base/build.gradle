@@ -160,7 +160,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
 
     // Maps SDK
-    implementation 'com.github.ArnyminerZ:MapKit:1.0.2-dev2'
+    implementation 'com.github.ArnyminerZ:MapKit:1.0.2-dev3'
     implementation 'com.google.android.gms:play-services-maps:17.0.1'
 
     // KotlinX Coroutines
