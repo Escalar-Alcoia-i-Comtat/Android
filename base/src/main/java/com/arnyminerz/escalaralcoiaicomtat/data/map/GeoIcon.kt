@@ -7,7 +7,6 @@ import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.generic.drawableToBitmap
-import com.arnyminerz.escalaralcoiaicomtat.generic.resize
 import timber.log.Timber
 
 /**
@@ -19,7 +18,7 @@ import timber.log.Timber
  * @see GeoMarker
  */
 class GeoIcon(val name: String, icon: Bitmap) : Parcelable {
-    val icon: Bitmap = icon.resize(MARKER_SIZE)
+    val icon: Bitmap = Bitmap.createScaledBitmap(icon, MARKER_SIZE, MARKER_SIZE, false)
 
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
