@@ -47,8 +47,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import idroid.android.mapskit.factory.Maps
-import idroid.android.mapskit.model.CommonMarker
 import timber.log.Timber
 
 class AreasViewFragment : NetworkChangeListenerFragment() {
@@ -230,17 +228,13 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                     }
                 }
 
-                map.setOnMapClickListener(object : Maps.MapClickListener {
-                    override fun onMapClick(point: LatLng) {
-                        nearbyZonesClick()
-                    }
-                })
-                map.setOnMarkerClickListener(object : Maps.OnMapMarkerClickListener {
-                    override fun onMarkerClick(marker: CommonMarker): Boolean {
-                        nearbyZonesClick()
-                        return true
-                    }
-                })
+                map.setOnMapClickListener {
+                    nearbyZonesClick()
+                }
+                map.setOnMarkerClickListener {
+                    nearbyZonesClick()
+                    true
+                }
 
                 updateNearbyZones()
             }

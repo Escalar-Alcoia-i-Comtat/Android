@@ -145,16 +145,14 @@ class MapFragment : NetworkChangeListenerFragment() {
                     true
                 }
 
-                map.setOnMapClickListener(object : Maps.MapClickListener {
-                    override fun onMapClick(point: LatLng) {
-                        try {
-                            markerWindow?.hide()
-                        } catch (e: IllegalStateException) {
-                            Timber.i(e, "The card has already been hidden.")
-                        }
-                        markerWindow = null
+                map.setOnMapClickListener {
+                    try {
+                        markerWindow?.hide()
+                    } catch (e: IllegalStateException) {
+                        Timber.i(e, "The card has already been hidden.")
                     }
-                })
+                    markerWindow = null
+                }
 
                 Timber.v("Finished loading map. Calling loadMap...")
                 doAsync {

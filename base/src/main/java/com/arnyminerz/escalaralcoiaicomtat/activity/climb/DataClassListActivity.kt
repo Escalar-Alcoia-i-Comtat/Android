@@ -29,7 +29,6 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
-import idroid.android.mapskit.factory.Maps
 import timber.log.Timber
 import java.io.FileNotFoundException
 
@@ -153,20 +152,17 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                                 mapHelper.center(animate = false)
                                 binding.map.show()
 
-                                map.setOnMapClickListener(object : Maps.MapClickListener {
-                                    override fun onMapClick(point: LatLng) {
-                                        try {
-                                            val intent = mapHelper.mapsActivityIntent(
-                                                this@DataClassListActivity,
-                                                overrideLoadedMapData
-                                            )
-                                            Timber.v("Starting MapsActivity...")
-                                            startActivity(intent)
-                                        } catch (_: MapAnyDataToLoadException) {
-                                            Timber.w("Clicked on map and any data has been loaded")
-                                        }
+                                map.setOnMapClickListener {
+                                    try {
+                                        val intent = mapHelper.mapsActivityIntent(
+                                            this@DataClassListActivity
+                                        )
+                                        Timber.v("Starting MapsActivity...")
+                                        startActivity(intent)
+                                    } catch (_: MapAnyDataToLoadException) {
+                                        Timber.w("Clicked on map and any data has been loaded")
                                     }
-                                })
+                                }
                             }
                         }
                     } catch (_: FileNotFoundException) {
