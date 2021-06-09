@@ -93,7 +93,7 @@
                 android:id="@+id/noInternetCard"
                 layout="@layout/no_internet_card" />
 
-            <com.mapbox.mapboxsdk.maps.MapView
+            <idroid.android.mapskit.ui.HuaweiGoogleMapView
                 android:id="@+id/map"
                 android:layout_width="match_parent"
                 android:layout_height="200dp" />

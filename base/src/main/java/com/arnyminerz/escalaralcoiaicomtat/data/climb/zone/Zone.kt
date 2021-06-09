@@ -12,10 +12,10 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toTimestamp
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
-import com.mapbox.mapboxsdk.geometry.LatLng
 import timber.log.Timber
 import java.util.Date
 import kotlin.coroutines.resume

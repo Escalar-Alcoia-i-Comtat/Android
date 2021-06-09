@@ -3,23 +3,41 @@ package com.arnyminerz.escalaralcoiaicomtat.data.map
 import android.graphics.Color
 import android.os.Parcel
 import android.os.Parcelable
-import com.mapbox.mapboxsdk.plugins.annotation.FillOptions
-import com.mapbox.mapboxsdk.plugins.annotation.LineOptions
-import com.mapbox.mapboxsdk.style.layers.Property
-import com.mapbox.mapboxsdk.utils.ColorUtils.colorToRgbaString
+import idroid.android.mapskit.model.CommonCap
+import idroid.android.mapskit.model.CommonJointType
+import idroid.android.mapskit.model.CommonPolygonOptions
+import idroid.android.mapskit.model.CommonPolylineOptions
 
 data class GeoStyle(
     val fillColor: String?,
     val strokeColor: String?,
     val lineWidth: Float?,
-    @Property.LINE_JOIN
-    val lineJoin: String?
+    val jointType: CommonJointType?,
+    val startEndCap: Pair<CommonCap?, CommonCap?> = Pair(null, null)
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString(),
         parcel.readString(),
         parcel.readFloat(),
-        parcel.readString()
+        when (parcel.readInt()) {
+            0 -> CommonJointType.ROUND
+            1 -> CommonJointType.BEVEL
+            else -> CommonJointType.DEFAULT
+        },
+        Pair(
+            when (parcel.readInt()) {
+                0 -> CommonCap.BUTT
+                1 -> CommonCap.ROUND
+                2 -> CommonCap.SQUARE
+                else -> null
+            },
+            when (parcel.readInt()) {
+                0 -> CommonCap.BUTT
+                1 -> CommonCap.ROUND
+                2 -> CommonCap.SQUARE
+                else -> null
+            },
+        )
     )
 
     private fun colorIsNull(color: String?) =
@@ -43,7 +61,30 @@ data class GeoStyle(
         dest.writeString(fillColor)
         dest.writeString(strokeColor)
         lineWidth?.let { dest.writeFloat(it) }
-        dest.writeString(lineJoin)
+        dest.writeInt(
+            when (jointType) {
+                CommonJointType.BEVEL -> 0
+                CommonJointType.ROUND -> 1
+                CommonJointType.DEFAULT -> 2
+                else -> 2
+            }
+        )
+        dest.writeInt(
+            when (startEndCap.first) {
+                CommonCap.BUTT -> 0
+                CommonCap.ROUND -> 1
+                CommonCap.SQUARE -> 2
+                else -> -1
+            }
+        )
+        dest.writeInt(
+            when (startEndCap.second) {
+                CommonCap.BUTT -> 0
+                CommonCap.ROUND -> 1
+                CommonCap.SQUARE -> 2
+                else -> -1
+            }
+        )
     }
 
     companion object CREATOR : Parcelable.Creator<GeoStyle> {
@@ -57,26 +98,41 @@ data class GeoStyle(
     }
 }
 
-fun FillOptions.apply(geoStyle: GeoStyle): FillOptions {
-    var modOptions = this
-
-    if (geoStyle.strokeColor != null)
-        modOptions = modOptions.withFillOutlineColor(colorToRgbaString(geoStyle.strokeColor()!!))
-    if (geoStyle.fillColor != null)
-        modOptions = modOptions.withFillColor(colorToRgbaString(geoStyle.fillColor()!!))
-
-    return modOptions
+fun CommonPolygonOptions.apply(geoStyle: GeoStyle): CommonPolygonOptions {
+    val strokeColor = geoStyle.strokeColor()
+    val strokeWidth = geoStyle.lineWidth
+    val jointType = geoStyle.jointType
+    return apply {
+        if (strokeColor != null)
+            this.strokeColor = strokeColor
+        this.strokeJointType = jointType
+        if (strokeWidth != null)
+            this.strokeWidth = strokeWidth
+    }
 }
 
-fun LineOptions.apply(geoStyle: GeoStyle): LineOptions {
+fun CommonPolylineOptions.apply(geoStyle: GeoStyle): CommonPolylineOptions {
     var modOptions = this
 
-    if (geoStyle.strokeColor != null)
-        modOptions = modOptions.withLineColor(colorToRgbaString(geoStyle.strokeColor()!!))
-    if (geoStyle.lineJoin != null)
-        modOptions = modOptions.withLineJoin(geoStyle.lineJoin)
-    if (geoStyle.lineWidth != null)
-        modOptions = modOptions.withLineWidth(geoStyle.lineWidth * LINE_WIDTH_MULTIPLIER)
+    val strokeColor = geoStyle.strokeColor()
+    if (strokeColor != null)
+        modOptions = modOptions.color(strokeColor)
+
+    val jointType = geoStyle.jointType
+    if (jointType != null)
+        modOptions = modOptions.jointType(jointType)
+
+    val caps = geoStyle.startEndCap
+    val startCap = caps.first
+    if (startCap != null)
+        modOptions = modOptions.startCap(startCap)
+    val endCap = caps.second
+    if (endCap != null)
+        modOptions = modOptions.startCap(endCap)
+
+    val lineWidth = geoStyle.lineWidth
+    if (lineWidth != null)
+        modOptions = modOptions.width(lineWidth * LINE_WIDTH_MULTIPLIER)
 
     return modOptions
 }

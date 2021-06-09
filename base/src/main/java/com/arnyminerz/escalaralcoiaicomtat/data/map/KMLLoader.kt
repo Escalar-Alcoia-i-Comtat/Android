@@ -2,23 +2,21 @@ package com.arnyminerz.escalaralcoiaicomtat.data.map
 
 import android.content.Context
 import androidx.annotation.WorkerThread
-import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.connection.web.download
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getElementByTagName
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.getElementByTagNameWithAttribute
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.hasChildNode
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.newLatLngBounds
+import com.arnyminerz.escalaralcoiaicomtat.generic.extension.includeAll
 import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toElementList
 import com.arnyminerz.escalaralcoiaicomtat.generic.onUiThread
 import com.arnyminerz.escalaralcoiaicomtat.storage.UnzipUtil
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.storage.storeFile
-import com.mapbox.mapboxsdk.camera.CameraPosition
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.style.layers.Property
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
+import idroid.android.mapskit.factory.Maps
+import idroid.android.mapskit.model.CommonJointType
 import org.w3c.dom.Element
 import org.xml.sax.InputSource
 import timber.log.Timber
@@ -46,7 +44,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 @WorkerThread
 fun loadKML(
     context: Context,
-    map: MapboxMap,
+    map: Maps,
     kmlAddress: String? = null,
     kmzFile: File? = null
 ): MapFeatures {
@@ -272,7 +270,8 @@ fun loadKML(
                                     it,
                                     description
                                 )
-                            }
+                            },
+                            icon = ICON_WAYPOINT_ESCALADOR_BLANC.toGeoIcon(context)!!
                         )
                         if (iconBitmap != null) {
                             m.withImage(iconBitmap, styleId)
@@ -319,7 +318,7 @@ fun loadKML(
                                     "#$polyColor",
                                     "#$lineColor",
                                     lineWidth?.toFloat(),
-                                    Property.LINE_JOIN_ROUND
+                                    CommonJointType.ROUND
                                 ),
                                 polygonPoints,
                                 (if (title != null)
@@ -362,7 +361,7 @@ fun loadKML(
                                 "#$polyColor",
                                 "#$lineColor",
                                 lineWidth?.toFloat(),
-                                Property.LINE_JOIN_ROUND
+                                CommonJointType.ROUND
                             ),
                             polygonPoints,
                             (if (title != null)
@@ -378,21 +377,12 @@ fun loadKML(
     Timber.v("Centering map...")
     context.onUiThread {
         if (addedPoints.size > 1)
-            newLatLngBounds(
-                addedPoints,
-                context.resources.getInteger(R.integer.marker_padding)
-            )?.let { bounds ->
-                map.moveCamera(bounds)
-            } ?: Timber.e("Could not find bounds:")
-        else if (addedPoints.size > 0)
             map.moveCamera(
-                CameraUpdateFactory.newCameraPosition(
-                    CameraPosition.Builder()
-                        .target(addedPoints.first())
-                        .zoom(DEFAULT_ZOOM)
-                        .build()
-                )
+                LatLngBounds.builder().includeAll(addedPoints).build().center,
+                DEFAULT_ZOOM
             )
+        else if (addedPoints.size > 0)
+            map.moveCamera(addedPoints.first(), DEFAULT_ZOOM)
     }
 
     tempDir?.deleteRecursively()

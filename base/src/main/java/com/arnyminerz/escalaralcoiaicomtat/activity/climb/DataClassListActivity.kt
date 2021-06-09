@@ -9,11 +9,10 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
-import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_SIZE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapAnyDataToLoadException
-import com.arnyminerz.escalaralcoiaicomtat.generic.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapAnyDataToLoadException
+import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
@@ -22,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorag
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -29,41 +29,59 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.maps.Style
 import timber.log.Timber
 import java.io.FileNotFoundException
 
 abstract class DataClassListActivity<T : DataClass<*, *>>(
-    private val iconSizeMultiplier: Float = ICON_SIZE_MULTIPLIER,
     private val overrideLoadedMapData: Boolean = false,
 ) : NetworkChangeListenerActivity() {
+    /**
+     * The ViewBinding object for the Activity's view.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     protected lateinit var binding: LayoutListBinding
+
+    /**
+     * The [T] object that stores the data to show to the user.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     protected lateinit var dataClass: T
+
+    /**
+     * The [MapHelper] instance for doing map-stuff.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     private lateinit var mapHelper: MapHelper
 
+    /**
+     * The Firestore reference for getting data from the server.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     lateinit var firestore: FirebaseFirestore
-    lateinit var storage: FirebaseStorage
 
-    val mapStyle: Style?
-        get() = if (this::mapHelper.isInitialized)
-            mapHelper.style
-        else null
+    /**
+     * The Firebase Storage reference for getting images and KMZs from the server.
+     * @author Arnau Mora
+     * @since 20210604
+     */
+    lateinit var storage: FirebaseStorage
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         firestore = Firebase.firestore
         storage = Firebase.storage
-        mapHelper = MapHelper(this)
+        mapHelper = MapHelper()
 
         binding = LayoutListBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
 
-        mapHelper = mapHelper
-            .withMapView(binding.map)
-            .withIconSizeMultiplier(iconSizeMultiplier)
+        mapHelper = mapHelper.withMapView(binding.map)
         mapHelper.onCreate(savedInstanceState)
 
         binding.statusImageView.setOnClickListener { it.performLongClick() }
@@ -92,11 +110,6 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         mapHelper.onStop()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        mapHelper.onSaveInstanceState(outState)
-    }
-
     override fun onLowMemory() {
         super.onLowMemory()
         mapHelper.onLowMemory()
@@ -120,7 +133,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                 .show()
                 .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
                 .withControllable(false)
-                .loadMap(this) { _, map, _ ->
+                .loadMap { _, map ->
                     try {
                         doAsync {
                             Timber.v("Getting KMZ file...")
@@ -139,18 +152,15 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                                 mapHelper.center(animate = false)
                                 binding.map.show()
 
-                                map.addOnMapClickListener {
+                                map.setOnMapClickListener {
                                     try {
                                         val intent = mapHelper.mapsActivityIntent(
-                                            this@DataClassListActivity,
-                                            overrideLoadedMapData
+                                            this@DataClassListActivity
                                         )
                                         Timber.v("Starting MapsActivity...")
                                         startActivity(intent)
-                                        true
                                     } catch (_: MapAnyDataToLoadException) {
                                         Timber.w("Clicked on map and any data has been loaded")
-                                        false
                                     }
                                 }
                             }
@@ -181,6 +191,11 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         }
     }
 
+    /**
+     * Updates the status icon at the actionbar.
+     * @author Arnau Mora
+     * @since 20210604
+     */
     @UiThread
     private fun updateIcon() {
         val i = binding.statusImageView

@@ -30,6 +30,7 @@ import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.MainSettingsFrag
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_WARN_BATTERY
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_ALERT_PREF
+import com.arnyminerz.escalaralcoiaicomtat.generic.isLocationPermissionGranted
 import com.arnyminerz.escalaralcoiaicomtat.generic.launch
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.generic.toast
@@ -58,9 +59,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
-import com.mapbox.android.core.permissions.PermissionsManager
 import timber.log.Timber
-
 
 class MainActivity : LanguageAppCompatActivity() {
 
@@ -318,8 +317,8 @@ class MainActivity : LanguageAppCompatActivity() {
         Timber.v("Got permissions result. Code: %s", requestCode)
         when (requestCode) {
             LOCATION_PERMISSION_REQUEST_CODE -> {
-                if (PermissionsManager.areLocationPermissionsGranted(this))
-                    areasViewFragment.mapHelperInstance?.enableLocationComponent(this)
+                if (this.isLocationPermissionGranted())
+                    areasViewFragment.mapHelperInstance?.locationComponent?.enable(this)
                 areasViewFragment.updateNearbyZones()
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)

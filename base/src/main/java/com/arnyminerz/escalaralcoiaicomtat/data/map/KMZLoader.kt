@@ -9,8 +9,8 @@ import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toElementList
 import com.arnyminerz.escalaralcoiaicomtat.generic.mkdirsIfNotExists
 import com.arnyminerz.escalaralcoiaicomtat.storage.UnzipUtil
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.style.layers.Property
+import com.google.android.gms.maps.model.LatLng
+import idroid.android.mapskit.model.CommonJointType
 import org.w3c.dom.Element
 import timber.log.Timber
 import java.io.BufferedInputStream
@@ -18,7 +18,8 @@ import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
-import java.util.zip.*
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -197,7 +198,8 @@ fun loadKMZ(
                                     it,
                                     description
                                 )
-                            }
+                            },
+                            icon = ICON_WAYPOINT_ESCALADOR_BLANC.toGeoIcon(context)!!
                         )
                         if (iconBitmap != null) {
                             m.withImage(iconBitmap, styleId)
@@ -244,7 +246,7 @@ fun loadKMZ(
                                     "#$polyColor",
                                     "#$lineColor",
                                     lineWidth?.toFloat(),
-                                    Property.LINE_JOIN_ROUND
+                                    CommonJointType.ROUND
                                 ),
                                 polygonPoints,
                                 (if (title != null)
@@ -287,7 +289,7 @@ fun loadKMZ(
                                 "#$polyColor",
                                 "#$lineColor",
                                 lineWidth?.toFloat(),
-                                Property.LINE_JOIN_ROUND
+                                CommonJointType.ROUND
                             ),
                             polygonPoints,
                             (if (title != null)
