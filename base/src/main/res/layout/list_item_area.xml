@@ -21,13 +21,13 @@
 
             <ImageView
                 android:id="@+id/area_imageView"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?android:attr/selectableItemBackground"
-                android:scaleType="fitCenter"
+                android:scaleType="centerCrop"
                 android:contentDescription="@string/image_desc_area_image"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
