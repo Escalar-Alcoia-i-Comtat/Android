@@ -129,9 +129,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
             holder.imageView.layoutParams = holder.imageView.layoutParams.apply {
                 height = itemHeightDp
             }
-        doAsync {
-            data.loadImage(activity, activity.storage, holder.imageView)
-        }
+        data.loadImage(activity, activity.storage, holder.imageView)
         updateUi(holder, data, true)
     }
 

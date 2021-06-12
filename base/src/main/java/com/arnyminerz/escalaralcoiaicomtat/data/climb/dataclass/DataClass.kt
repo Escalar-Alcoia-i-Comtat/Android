@@ -4,8 +4,11 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.ImageView
+import androidx.annotation.DrawableRes
+import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
@@ -21,9 +24,11 @@ import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.exception.CouldNotCreateDynamicLinkException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.exception.NotDownloadedException
+import com.arnyminerz.escalaralcoiaicomtat.generic.MEGABYTE
 import com.arnyminerz.escalaralcoiaicomtat.generic.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.generic.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.generic.scale
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.shared.DATACLASS_WAIT_CHILDREN_DELAY
@@ -36,18 +41,10 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
-import com.arnyminerz.escalaralcoiaicomtat.view.apply
 import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.worker.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadWorker
-import com.bumptech.glide.Glide
-import com.bumptech.glide.RequestBuilder
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.google.firebase.dynamiclinks.ShortDynamicLink
 import com.google.firebase.dynamiclinks.ktx.androidParameters
@@ -63,8 +60,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
 import timber.log.Timber
 import java.io.File
-import java.util.*
-import java.util.concurrent.*
+import java.util.Date
 import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -401,7 +397,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20210313
      * @param context The context to run from.
-     * @param styleUri The Mapbox Map's [Style] uri ([Style.getUri]).
      * @param overwrite If the new data should overwrite the old one
      * @param quality The quality in which do the codification
      * @return A LiveData object with the download work info
@@ -718,103 +713,54 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @throws IllegalArgumentException When the stored reference url ([imageReferenceUrl]) is not well formatted.
      * @see imageReferenceUrl
      */
-    @WorkerThread
+    @UiThread
     @Throws(StorageException::class, IllegalArgumentException::class)
-    suspend fun loadImage(
+    fun loadImage(
         activity: Activity,
         storage: FirebaseStorage,
         imageView: ImageView,
-        imageLoadParameters: ImageLoadParameters<Bitmap>? = null
-    ): Bitmap? = suspendCoroutine { cont ->
+        imageLoadParameters: ImageLoadParameters? = null
+    ) {
         if (activity.isDestroyed) {
             Timber.e("The activity is destroyed, won't load image.")
-            cont.resume(null)
-            return@suspendCoroutine
+            return
         }
 
-        val scale = imageLoadParameters?.resultImageScale ?: 1f
+        fun loadImage(bmp: Bitmap?, @DrawableRes resource: Int?) {
+            if (bmp != null)
+                imageView.setImageBitmap(bmp)
+            if (resource != null)
+                imageView.setImageResource(resource)
+            imageView.scaleType = imageLoadParameters?.scaleType ?: ImageView.ScaleType.CENTER_CROP
+        }
 
-        fun loadImage(imageLoadRequest: RequestBuilder<Bitmap>) =
-            imageLoadRequest.placeholder(uiMetadata.placeholderDrawable)
-                .error(uiMetadata.errorPlaceholderDrawable)
-                .fallback(uiMetadata.errorPlaceholderDrawable)
-                .thumbnail(scale)
-                .apply(imageLoadParameters)
-                .addListener(object : RequestListener<Bitmap> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Bitmap>?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        Timber.e(e, "Finished loading bitmap with error!")
-                        if (e != null)
-                            cont.resumeWithException(e)
-                        return false
-                    }
+        val showPlaceholder = imageLoadParameters?.showPlaceholder ?: true
+        if (showPlaceholder)
+            loadImage(null, uiMetadata.placeholderDrawable)
 
-                    override fun onResourceReady(
-                        resource: Bitmap?,
-                        model: Any?,
-                        target: Target<Bitmap>?,
-                        dataSource: DataSource?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        if (resource != null) {
-                            Timber.v("Finished loading bitmap!")
-                            try {
-                                cont.resume(resource)
-                            } catch (_: IllegalStateException) {
-                                Timber.w("Tried to resume with result, but it has already been resumed.")
-                            }
-                        } else
-                            Timber.w("Returned null resource to onResourceReady")
-
-                        return false
-                    }
-                }).also { requestBuilder ->
-                    activity.runOnUiThread {
-                        requestBuilder.into(imageView)
-                    }
-                }
-
-        val imageLoadRequest = Glide.with(activity)
-            .asBitmap()
         val downloadedImageFile = imageFile(activity)
         if (downloadedImageFile.exists()) {
             Timber.d("Loading image from storage: ${downloadedImageFile.path}")
-            loadImage(
-                imageLoadRequest
-                    .load(readBitmap(downloadedImageFile))
-            )
-        } else {
-            fun fetchImageLoadRequest(image: String) =
-                try {
-                    val ref = storage.getReferenceFromUrl(image)
-                    val url = Tasks.await(ref.downloadUrl)
-                    imageLoadRequest
-                        .load(url)
-                } catch (e: IllegalArgumentException) {
-                    Timber.e(
-                        e,
-                        "Image reference ($imageReferenceUrl) doesn't exist in Firebase Storage"
-                    )
-                    throw e
-                } catch (e: StorageException) {
-                    Timber.e(e, "Could not load image from Firebase ($image)")
-                    imageLoadRequest
-                        .load(uiMetadata.errorPlaceholderDrawable)
-                } catch (e: ExecutionException) {
-                    Timber.w(e, "Reached retry limit. Loading error placeholder.")
-                    imageLoadRequest
-                        .load(uiMetadata.errorPlaceholderDrawable)
-                }
+            val bmp = readBitmap(downloadedImageFile)
+            imageView.setImageBitmap(bmp)
+        } else
+            storage.getReferenceFromUrl(imageReferenceUrl)
+                .getBytes(MEGABYTE * 50)
+                .addOnSuccessListener { bytes ->
+                    Timber.v("Loaded image for $objectId. Decoding...")
+                    val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
 
-            Timber.d("Getting image from Firebase: $imageReferenceUrl")
-            loadImage(
-                fetchImageLoadRequest(imageReferenceUrl)
-            )
-        }
+                    Timber.v("Image decoded, scaling...")
+                    val scale = imageLoadParameters?.resultImageScale ?: 1f
+                    val bmp = bitmap.scale(scale)
+
+                    Timber.v("Setting image into imageView.")
+                    loadImage(bmp, null)
+                }
+                .addOnFailureListener { e ->
+                    Timber.e(e, "Could not load DataClass ($objectId) image.")
+                    loadImage(null, uiMetadata.errorPlaceholderDrawable)
+                }
     }
 
     override fun hashCode(): Int {

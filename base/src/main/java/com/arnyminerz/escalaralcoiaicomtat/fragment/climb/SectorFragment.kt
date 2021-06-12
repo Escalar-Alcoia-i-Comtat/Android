@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.climb
 
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -29,15 +28,10 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_AREA_ID
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.shared.ARGUMENT_ZONE_ID
-import com.arnyminerz.escalaralcoiaicomtat.shared.CROSSFADE_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
-import com.arnyminerz.escalaralcoiaicomtat.shared.SECTOR_THUMBNAIL_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.bumptech.glide.load.DecodeFormat
-import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
-import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -128,23 +122,16 @@ class SectorFragment : NetworkChangeListenerFragment() {
      * @author Arnau Mora
      * @since 20210323
      */
-    private suspend fun loadImage() {
+    @UiThread
+    private fun loadImage() {
         if (imageLoaded) return
         val iv = binding?.sectorImageView ?: return
         sector.loadImage(
             requireActivity(),
             storage,
             iv,
-            ImageLoadParameters<Bitmap>().apply {
-                withTransitionOptions(BitmapTransitionOptions.withCrossFade(CROSSFADE_DURATION))
-                withThumbnailSize(SECTOR_THUMBNAIL_SIZE)
+            ImageLoadParameters().apply {
                 withResultImageScale(1f)
-                withRequestOptions(
-                    RequestOptions().apply {
-                        centerInside()
-                        format(DecodeFormat.PREFER_RGB_565)
-                    }
-                )
                 setShowPlaceholder(false)
             })
         Timber.v("Finished loading image")
@@ -215,12 +202,12 @@ class SectorFragment : NetworkChangeListenerFragment() {
             binding?.sectorProgressBar?.visibility(true)
         }
 
-        if (loaded && this::sector.isInitialized) {
+        if (loaded && this::sector.isInitialized)
             uiContext {
                 sectorActivity?.updateTitle(sector.displayName, isDownloaded)
+                loadImage()
             }
-            loadImage()
-        } else {
+        else {
             Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
             val sectors = arrayListOf<Sector>()
             AREAS[areaId]!!
@@ -253,10 +240,10 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 paths.sortBy { it.sketchId }
                 Timber.v("Finished loading children sectors")
 
-                Timber.v("Loading sector fragment")
-                loadImage()
-
                 uiContext {
+                    Timber.v("Loading sector fragment")
+                    loadImage()
+
                     Timber.v("Finished loading paths, performing UI updates")
                     (this as? SectorActivity?)?.updateTitle(sector.displayName, isDownloaded)
 

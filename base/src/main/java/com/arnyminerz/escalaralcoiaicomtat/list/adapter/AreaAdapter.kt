@@ -1,14 +1,13 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 
-import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_PREVIEW_SCALE_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
@@ -43,16 +42,14 @@ class AreaAdapter(
         holder.imageView.setOnClickListener {
             clickListener?.invoke(holder, position) ?: Timber.w("Any click listener was set!")
         }
-        doAsync {
-            area.loadImage(
-                activity,
-                activity.storage,
-                holder.imageView,
-                imageLoadParameters =
-                ImageLoadParameters<Bitmap>().withThumbnailSize(
-                    SETTINGS_PREVIEW_SCALE_PREF.get()
-                )
-            )
-        }
+        area.loadImage(
+            activity,
+            activity.storage,
+            holder.imageView,
+            imageLoadParameters =
+            ImageLoadParameters()
+                .withResultImageScale(SETTINGS_PREVIEW_SCALE_PREF.get())
+                .withScaleType(ImageView.ScaleType.CENTER_CROP)
+        )
     }
 }

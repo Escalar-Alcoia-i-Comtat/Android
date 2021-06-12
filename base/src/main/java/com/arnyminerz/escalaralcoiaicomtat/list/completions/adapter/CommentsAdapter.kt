@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.completions.adapter
 
+import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -19,7 +20,6 @@ import com.arnyminerz.escalaralcoiaicomtat.view.getColor
 import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -97,9 +97,8 @@ class CommentsAdapter(
         storage.getReferenceFromUrl(profileImage)
             .getBytes(PROFILE_IMAGE_MAX_SIZE)
             .addOnSuccessListener { bytes ->
-                Glide.with(activity)
-                    .load(bytes)
-                    .into(holder.profileImageView)
+                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                holder.profileImageView.setImageBitmap(bitmap)
             }
             .addOnFailureListener { e ->
                 Timber.e(e, "Could not load profile image ($profileImage).")

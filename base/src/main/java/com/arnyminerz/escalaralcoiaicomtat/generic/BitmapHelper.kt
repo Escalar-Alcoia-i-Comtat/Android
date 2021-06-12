@@ -140,8 +140,17 @@ fun Bitmap.resize(size: Int): Bitmap = resize(size, size)
  * @param height The desired height for the new image.
  * @return The resized [Bitmap].
  */
-fun Bitmap.resize(width: Int, height: Int): Bitmap {
-    val resizedBitmap = Bitmap.createScaledBitmap(this, width, height, false)
-    recycle()
-    return resizedBitmap
+fun Bitmap.resize(width: Int, height: Int): Bitmap =
+    Bitmap.createScaledBitmap(this, width, height, false)
+
+/**
+ * Scales a [Bitmap] to the desired scale.
+ * @author Arnau Mora
+ * @since 20210612
+ * @param scale The desired scale for the new image.
+ */
+fun Bitmap.scale(scale: Float): Bitmap {
+    val newWidth = width * scale
+    val newHeight = height * scale
+    return resize(newWidth.toInt(), newHeight.toInt())
 }

@@ -51,8 +51,6 @@ from the link specified, or through the repository's button.
 | `org.jetbrains.kotlinx:kotlinx-coroutines-android` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.4.3-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx/kotlinx-coroutines-android?style=for-the-badge) |
 | `org.jetbrains.kotlinx:kotlinx-coroutines-play-services` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.1.1-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx/kotlinx-coroutines-play-services?style=for-the-badge) |
 | `com.jakewharton.timber:timber` | ![Installed version](https://img.shields.io/badge/Installed%20version-4.7.1-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/com.jakewharton.timber/timber?style=for-the-badge) |
-| `com.github.bumptech.glide:glide` | ![Installed version](https://img.shields.io/badge/Installed%20version-4.12.0-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/com.github.bumptech.glide/glide?style=for-the-badge) |
-| `com.github.bumptech.glide:compiler` | ![Installed version](https://img.shields.io/badge/Installed%20version-4.12.0-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/com.github.bumptech.glide/compiler?style=for-the-badge) |
 | `io.noties.markwon:core` | ![Installed version](https://img.shields.io/badge/Installed%20version-4.6.2-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/io.noties.markwon/core?style=for-the-badge) |
 ### Jitpack
 | Package | Installed Version | Latest version |
