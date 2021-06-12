@@ -402,7 +402,12 @@ class MapsActivity : LanguageAppCompatActivity() {
             )
         } else {
             try {
-                mapHelper.locationComponent?.enable(this)
+                try {
+                    mapHelper.locationComponent?.enable(this)
+                } catch (_: IllegalStateException) {
+                    Timber.w("The GPS is disabled.")
+                    toast(R.string.toast_error_gps_disabled)
+                }
 
                 binding.fabCurrentLocation.setOnClickListener {
                     val locationComponent = mapHelper.locationComponent

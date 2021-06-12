@@ -93,7 +93,12 @@ class MapFragment : NetworkChangeListenerFragment() {
                             false
                         }
                         if (permissionGranted)
-                            mapHelper.locationComponent?.enable(requireContext())
+                            try {
+                                mapHelper.locationComponent?.enable(requireContext())
+                            } catch (_: IllegalStateException) {
+                                Timber.w("The GPS is disabled.")
+                                toast(R.string.toast_error_gps_disabled)
+                            }
                         else
                             Timber.w("User hasn't granted the location permission. Marker won't be enabled.")
                     } catch (_: IllegalStateException) {
