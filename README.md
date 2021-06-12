@@ -47,8 +47,8 @@ from the link specified, or through the repository's button.
 |-|-|-|
 | `org.jetbrains.kotlin:kotlin-stdlib-jdk7` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.5.10-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/org.jetbrains.kotlin/kotlin-stdlib-jdk7?style=for-the-badge&label=kotlin-stdlib-jdk7) |
 | `junit:junit` | ![Installed version](https://img.shields.io/badge/Installed%20version-4.13.2-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/junit/junit?style=for-the-badge) |
-| `org.jetbrains.kotlinx:kotlinx-coroutines-core` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.4.3-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx/kotlinx-coroutines-core?style=for-the-badge) |
-| `org.jetbrains.kotlinx:kotlinx-coroutines-android` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.4.3-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx/kotlinx-coroutines-android?style=for-the-badge) |
+| `org.jetbrains.kotlinx:kotlinx-coroutines-core` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.5.0-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx/kotlinx-coroutines-core?style=for-the-badge) |
+| `org.jetbrains.kotlinx:kotlinx-coroutines-android` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.5.0-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx/kotlinx-coroutines-android?style=for-the-badge) |
 | `org.jetbrains.kotlinx:kotlinx-coroutines-play-services` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.1.1-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx/kotlinx-coroutines-play-services?style=for-the-badge) |
 | `com.jakewharton.timber:timber` | ![Installed version](https://img.shields.io/badge/Installed%20version-4.7.1-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/com.jakewharton.timber/timber?style=for-the-badge) |
 | `com.github.bumptech.glide:glide` | ![Installed version](https://img.shields.io/badge/Installed%20version-4.12.0-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/com.github.bumptech.glide/glide?style=for-the-badge) |
@@ -57,7 +57,7 @@ from the link specified, or through the repository's button.
 ### Jitpack
 | Package | Installed Version | Latest version |
 |-|-|-|
-| `com.github.ArnyminerZ:MapKit` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.0.2--dev3-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/jitpack/v/github/ArnyminerZ/MapKit?style=for-the-badge) |
+| `com.github.ArnyminerZ:MapKit` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.0.2--dev6-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/jitpack/v/github/ArnyminerZ/MapKit?style=for-the-badge) |
 | `com.github.PhilJay:MPAndroidChart` | ![Installed version](https://img.shields.io/badge/Installed%20version-v3.1.0-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/jitpack/v/github/PhilJay/MPAndroidChart?style=for-the-badge) |
 | `com.github.chrisbanes:PhotoView` | ![Installed version](https://img.shields.io/badge/Installed%20version-2.3.0-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/jitpack/v/github/Baseflow/PhotoView?style=for-the-badge) |
 ### Google
