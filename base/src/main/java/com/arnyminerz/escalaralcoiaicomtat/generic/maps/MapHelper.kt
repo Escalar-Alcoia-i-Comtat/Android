@@ -47,7 +47,6 @@ import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.view.show
 import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.bumptech.glide.Glide
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -818,9 +817,8 @@ class MapHelper {
             if (imageUrl == null)
                 descriptionTextView.text = description
             else if (!activity.isDestroyed)
-                Glide.with(activity)
-                    .load(imageUrl)
-                    .into(imageView)
+            // TODO: Load image
+                Timber.d("Loading \"$imageUrl\" into imageView...")
             else Timber.w("Will not load image since there is not an attached Activity.")
 
             visibility(imageView, imageUrl != null)
