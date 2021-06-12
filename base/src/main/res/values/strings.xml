@@ -249,6 +249,7 @@
     <string name="toast_error_account_manager_store">Could not store account data</string>
     <string name="toast_error_map_load">Could not load map</string>
     <string name="toast_error_delete_post">Could not delete post</string>
+    <string name="toast_error_gps_disabled">The GPS is disabled</string>
     <string name="toast_profile_image_updated">Updated profile image successfully</string>
     <string name="toast_location_not_shown">Current location won\'t be shown</string>
     <string name="toast_stored_gpx">GPX stored!</string>
