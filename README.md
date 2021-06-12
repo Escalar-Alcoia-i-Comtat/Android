@@ -73,7 +73,7 @@ from the link specified, or through the repository's button.
 | `com.google.android.material:material` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.3.0-brightgreen?style=for-the-badge) |
 | `com.google.android.play:core` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.10.0-brightgreen?style=for-the-badge) |
 | `com.google.android.play:core-ktx` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.8.1-brightgreen?style=for-the-badge) |
-| `com.google.firebase:firebase-bom` | ![Installed version](https://img.shields.io/badge/Installed%20version-28.0.1-brightgreen?style=for-the-badge) |
+| `com.google.firebase:firebase-bom` | ![Installed version](https://img.shields.io/badge/Installed%20version-28.1.0-brightgreen?style=for-the-badge) |
 | `com.google.firebase:firebase-analytics-ktx` | BOM |
 | `com.google.firebase:firebase-auth-ktx` | BOM |
 | `com.google.firebase:firebase-config-ktx` | BOM |
