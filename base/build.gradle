@@ -22,6 +22,7 @@ android {
         versionCode findProperty("android.versionCode") as Integer
         versionName VERSION_NAME
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        resConfigs "en", "US", "ca", "es"
     }
     signingConfigs {
         release {
