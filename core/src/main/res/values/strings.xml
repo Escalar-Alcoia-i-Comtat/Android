@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_close">Close</string>
+
+    <string name="path_ending_plate">Plate</string>
+    <string name="path_ending_plate_ring">Plate Ring</string>
+    <string name="path_ending_plate_lanyard">Plate Lanyard</string>
+    <string name="path_ending_chain_ring">Chain Ring</string>
+    <string name="path_ending_chain_carabiner">Chain Carabiner</string>
+    <string name="path_ending_piton">Piton</string>
+    <string name="path_ending_walking">Walking Descent</string>
+    <string name="path_ending_rappel">Rappel Descent</string>
+    <string name="path_ending_lanyard">Lanyard (Rock Bridge)</string>
+    <string name="path_ending_none">No ending</string>
+    <string name="path_ending_unknown">Unknown Ending</string>
+    <string name="path_ending_multiple">Endings</string>
+    <string name="path_ending_pitch_vertical">Vertical</string>
+    <string name="path_ending_pitch_shelf">Shelf</string>
+    <string name="path_ending_pitch_inclined">Inclined</string>
+    <string name="path_ending_pitch_rappeleable">Rappelable</string>
+    <string name="path_ending_pitch_clean">no equipment</string>
+
+    <string name="safe_strings">%1$s Strings</string>
+    <string name="safe_parabolt">%1$s Parabolts</string>
+    <string name="safe_spit">%1$s Spits</string>
+    <string name="safe_tensor">%1$s Tensors</string>
+    <string name="safe_piton">%1$s Pitons</string>
+    <string name="safe_buril">%1$s Burils</string>
+    <string name="safe_lanyard">Lanyard</string>
+    <string name="safe_cracker">Cracker</string>
+    <string name="safe_friend">Friend</string>
+    <string name="safe_strips">Strips</string>
+    <string name="safe_nail">Nails</string>
+
+    <!-- NC is for No Count -->
+    <string name="safe_strings_plural">Strings</string>
+
+    <string name="path_stats_chart_title">Grades</string>
+
+    <string name="sector_info_dialog_sun_morning_title">Morning Sun</string>
+    <string name="sector_info_dialog_sun_morning_msg">This sector gets shiny on the mornings. Cold walls on the morning, warm on the evening, you choose.</string>
+    <string name="sector_info_dialog_sun_afternoon_title">Afternoon Sun</string>
+    <string name="sector_info_dialog_sun_afternoon_msg">This sector gets shiny on the afternoons. In the morning this may get quite cold…</string>
+    <string name="sector_info_dialog_sun_all_title">All-day Sun</string>
+    <string name="sector_info_dialog_sun_all_msg">This sector is shiny all the day! This may get hot on summer. Please, take care.</string>
+    <string name="sector_info_dialog_sun_no_title">No Sun</string>
+    <string name="sector_info_dialog_sun_no_msg">This sector doesn\'t receive run in the whole day! Bring a jacket.</string>
+    <string name="sector_info_dialog_kids_title">Kids Apt</string>
+    <string name="sector_info_dialog_kids_msg">This sector has good places to sit nearby. Bringing young children may not be that bad, but please, have caution.</string>
+
+    <string name="sector_sun_morning">Morning Sun</string>
+    <string name="sector_sun_afternoon">Afternoon Sun</string>
+    <string name="sector_sun_day">All-day Sun</string>
+    <string name="sector_sun_no">No Sun</string>
+
+    <string name="error_chart_no_data">No Data</string>
+
+    <string name="toast_error_internal">An internal error occurred</string>
+    <string name="toast_error_storage_not_found">Could not find file</string>
+    <string name="toast_error_storage_cancelled">The request was cancelled</string>
+    <string name="toast_error_storage_corrupt">The downloaded file is corrupt, contact an administrator</string>
+    <string name="toast_error_storage_authentication">Could not access private file</string>
+
+    <string name="notification_download_progress_title">Downloading…</string>
+    <string name="notification_download_progress_message">Downloading %s</string>
+    <string name="notification_download_complete_title">Download complete!</string>
+    <string name="notification_download_complete_message">Downloaded %s. Tap to open.</string>
+    <string name="notification_download_failed_title">Download failed!</string>
+    <string name="notification_download_failed_message">Could not download %s.</string>
+    <string name="notification_download_failed_message_long">There was an error while downloading %1$s. Error code: %2$s</string>
+    <string name="notification_download_progress_info_fetching">Downloading data…</string>
+    <string name="notification_download_progress_info_downloading_image">Downloading image…</string>
+    <string name="notification_download_progress_info_downloading_map">Downloading map…</string>
+
+    <string name="attr_gpx">This GPX has been providen by Escalar Alcoià i Comtat. Download the app from https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
+</resources>

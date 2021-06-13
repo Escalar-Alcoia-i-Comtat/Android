@@ -226,11 +226,25 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                             uiContext {
                                 if (intent != null)
                                     startActivity(intent)
+                                /*else if (BuildConfig.DEBUG)
+                                    launch(SectorActivity::class.java) {
+                                        putExtra(EXTRA_AREA, "WWQME983XhriXVhtVxFu")
+                                        putExtra(EXTRA_ZONE, "LtYZWlzTPwqHsWbYIDTt")
+                                        putExtra(EXTRA_SECTOR_COUNT, 15)
+                                        putExtra(EXTRA_SECTOR_INDEX, 11)
+                                    }*/
                                 else
                                     launch(MainActivity::class.java)
                             }
                         }
-                    } else
+                    }/* else if (BuildConfig.DEBUG)
+                        launch(SectorActivity::class.java) {
+                            putExtra(EXTRA_AREA, "WWQME983XhriXVhtVxFu")
+                            putExtra(EXTRA_ZONE, "LtYZWlzTPwqHsWbYIDTt")
+                            putExtra(EXTRA_SECTOR_COUNT, 9)
+                            putExtra(EXTRA_SECTOR_INDEX, 6)
+                        }*/
+                    else
                         launch(MainActivity::class.java)
                 } else if (!appNetworkState.hasInternet)
                     noInternetAccess()

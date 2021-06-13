@@ -15,13 +15,6 @@
 
     <color name="image_card_label_bg">#50000000</color>
 
-    <color name="grade_red">#e53935</color>
-    <color name="grade_green">#43a047</color>
-    <color name="grade_blue">#1565c0</color>
-    <color name="grade_black">#000</color>
-    <color name="grade_yellow">#ffeb3b</color>
-    <color name="grade_purple">#7b1fa2</color>
-
     <color name="dialog_green">#c0ca33</color>
     <color name="dialog_blue">#039be5</color>
 

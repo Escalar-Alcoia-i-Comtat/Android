@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
+    id 'org.jetbrains.dokka'
 }
 
 android {
@@ -8,10 +9,10 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        minSdk 21
+        minSdk 24
         targetSdk 30
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -32,12 +33,65 @@ android {
     }
 }
 
-dependencies {
+tasks.named("dokkaHtml") {
+    dokkaSourceSets {
+        configureEach {
+            noAndroidSdkLink.set(false)
+        }
+    }
+}
 
+dependencies {
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.10'
     implementation 'androidx.core:core-ktx:1.5.0'
     implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'com.google.android.material:material:1.3.0'
+    implementation 'androidx.preference:preference-ktx:1.1.1'
+
+    // Testing
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    // KotlinX Coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.1.1'
+
+    // Android Jetpack
+    def jetpack_work_version = '2.7.0-alpha04'
+    implementation "androidx.work:work-runtime-ktx:$jetpack_work_version"
+    implementation "androidx.work:work-gcm:$jetpack_work_version"
+    androidTestImplementation "androidx.work:work-testing:$jetpack_work_version"
+    implementation "androidx.startup:startup-runtime:1.0.0"
+
+    // Google Play Core
+    implementation 'com.google.android.play:core:1.10.0'
+    implementation 'com.google.android.play:core-ktx:1.8.1'
+
+    // Google Firebase
+    implementation platform('com.google.firebase:firebase-bom:28.1.0')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-firestore-ktx'
+    implementation 'com.google.firebase:firebase-storage-ktx'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.firebase:firebase-config-ktx'
+    implementation 'com.google.firebase:firebase-perf-ktx'
+    implementation 'com.google.firebase:firebase-dynamic-links-ktx'
+    implementation 'com.google.firebase:firebase-auth-ktx'
+    implementation 'com.google.firebase:firebase-messaging-ktx'
+    implementation 'com.google.firebase:firebase-messaging-directboot:22.0.0'
+
+    // Google Firebase Auth Google Sign-In
+    implementation 'com.google.android.gms:play-services-auth:19.0.0'
+
+    // Maps SDK
+    implementation 'com.github.ArnyminerZ:MapKit:1.0.2-dev6'
+    implementation 'com.google.android.gms:play-services-maps:17.0.1'
+
+    // Timber
+    implementation 'com.jakewharton.timber:timber:4.7.1'
+
+    // Custom Views
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }
