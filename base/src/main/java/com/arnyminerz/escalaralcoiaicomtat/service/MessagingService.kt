@@ -4,9 +4,9 @@ import android.app.Notification
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.generic.generateUUID
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.generateUUID
+import com.arnyminerz.escalaralcoiaicomtat.core.view.getColor
 import com.arnyminerz.escalaralcoiaicomtat.notification.ALERT_CHANNEL_ID
-import com.arnyminerz.escalaralcoiaicomtat.view.getColor
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import timber.log.Timber

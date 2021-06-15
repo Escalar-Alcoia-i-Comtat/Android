@@ -8,19 +8,17 @@ import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.sizeString
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentDownloadsBinding
-import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
-import com.arnyminerz.escalaralcoiaicomtat.generic.sizeString
-import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.DownloadSectionsAdapter
-import com.arnyminerz.escalaralcoiaicomtat.shared.SHOW_NON_DOWNLOADED
-import com.arnyminerz.escalaralcoiaicomtat.storage.dataDir
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
-import java.util.concurrent.CompletableFuture.runAsync
 
 class DownloadsFragment : Fragment() {
     private var _binding: FragmentDownloadsBinding? = null
@@ -42,10 +40,10 @@ class DownloadsFragment : Fragment() {
      */
     @MainThread
     fun reloadSizeTextView() {
-        runAsync {
+        doAsync {
             val dataDir = dataDir(requireContext())
             val sizeString = dataDir.sizeString()
-            runOnUiThread { binding.downloadSizeTextView.text = sizeString }
+            uiContext { binding.downloadSizeTextView.text = sizeString }
         }
     }
 

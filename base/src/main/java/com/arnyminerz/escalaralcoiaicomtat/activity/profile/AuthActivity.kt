@@ -4,10 +4,10 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageFragmentActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_LOGIN
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityAuthBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.auth.LoginFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.auth.RegisterFragment
-import com.arnyminerz.escalaralcoiaicomtat.shared.REQUEST_CODE_LOGIN
 
 /**
  * Allows the user to get logged into the app, register, or get some help on a lost account.

@@ -162,10 +162,6 @@
     <string name="notification_gpx_stored_message">Press to open</string>
     <string name="notification_kmz_stored_title">KMZ Stored correctly</string>
     <string name="notification_kmz_stored_message">Press to open</string>
-    <string name="notification_mark_completed_waiting_title">Mark as completed scheduled</string>
-    <string name="notification_mark_completed_waiting_message">Waiting to have internet connection to send the comment and mark the path as complete.</string>
-    <string name="notification_mark_completed_error_title">Could not mark as completed</string>
-    <string name="notification_mark_completed_error_message">The path \"%1$s\" was scheduled to be marked as completed, but an error occurred. Error code: %2$s</string>
 
     <string name="no_internet_title">You have no Internet access</string>
     <string name="no_internet_message">You can access the downloaded content, or try again.</string>

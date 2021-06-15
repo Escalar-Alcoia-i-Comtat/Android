@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.utils
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.collection.ArrayMap
+import androidx.work.Data
 
 fun ArrayList<String>.replace(find: String, replace: String): ArrayList<String> {
     for (u in this)
@@ -51,8 +52,13 @@ fun Collection<String>.join(glue: String): String {
     return builder.toString()
 }
 
-fun <A: Any, B: Any> ArrayMap<A, B>.toArrayList(): ArrayList<Pair<A, B>> =
+fun <A, B> ArrayMap<A, B>.toArrayList(): ArrayList<Pair<A, B>> =
     arrayListOf<Pair<A, B>>().apply {
         for (e in this@toArrayList)
             add(e.key to e.value)
     }
+
+fun ArrayMap<String, Any?>.toWorkData(): Data =
+    Data.Builder().apply {
+        this.putAll(this@toWorkData as Map<String, Any?>)
+    }.build()

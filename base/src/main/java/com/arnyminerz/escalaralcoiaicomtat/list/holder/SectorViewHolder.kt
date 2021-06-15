@@ -12,11 +12,10 @@ import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.BlockingType
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.view.getColorFromAttribute
-import com.arnyminerz.escalaralcoiaicomtat.view.setTextColor
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingType
+import com.arnyminerz.escalaralcoiaicomtat.core.view.getColorFromAttribute
+import com.arnyminerz.escalaralcoiaicomtat.core.view.setTextColor
+import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.ChipGroup
 

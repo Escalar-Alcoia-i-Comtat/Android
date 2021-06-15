@@ -71,6 +71,10 @@
     <string name="notification_download_progress_info_fetching">Downloading data…</string>
     <string name="notification_download_progress_info_downloading_image">Downloading image…</string>
     <string name="notification_download_progress_info_downloading_map">Downloading map…</string>
+    <string name="notification_mark_completed_waiting_title">Mark as completed scheduled</string>
+    <string name="notification_mark_completed_waiting_message">Waiting to have internet connection to send the comment and mark the path as complete.</string>
+    <string name="notification_mark_completed_error_title">Could not mark as completed</string>
+    <string name="notification_mark_completed_error_message">The path \"%1$s\" was scheduled to be marked as completed, but an error occurred. Error code: %2$s</string>
 
     <string name="attr_gpx">This GPX has been providen by Escalar Alcoià i Comtat. Download the app from https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
 </resources>

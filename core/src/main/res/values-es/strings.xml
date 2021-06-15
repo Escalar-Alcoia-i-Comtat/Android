@@ -71,6 +71,10 @@
     <string name="notification_download_failed_title">La descarga ha fallado!</string>
     <string name="notification_download_failed_message">No se ha podido descargar %s.</string>
     <string name="notification_download_failed_message_long">Ha ocurrido un error al descargar %1$s. Código de error: %2$s</string>
+    <string name="notification_mark_completed_waiting_title">Programado el marcado como completado</string>
+    <string name="notification_mark_completed_waiting_message">Esperando hasta tener una conexión a Internet activa para enviar el comentario y marcar la vía como completada.</string>
+    <string name="notification_mark_completed_error_title">No se ha podido marcar como completada</string>
+    <string name="notification_mark_completed_error_message">La vía \"%1$s\" ha sido marcada como completada, pero ha ocurrido un error en el proceso. Código de error: %2$s</string>
 
     <string name="attr_gpx">Este GPX ha sido ofrecido por Escalar Alcoià i Comtat. Descarga la app desde https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
 </resources>

@@ -4,23 +4,24 @@ import android.os.Build
 import android.os.Bundle
 import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
-import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
-import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_ZOOM
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LATITUDE
+import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
+import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_ZOOM
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapAnyDataToLoadException
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
+import com.arnyminerz.escalaralcoiaicomtat.core.view.show
+import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
-import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapAnyDataToLoadException
-import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapHelper
-import com.arnyminerz.escalaralcoiaicomtat.generic.toast
-import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
-import com.arnyminerz.escalaralcoiaicomtat.shared.exception_handler.handleStorageException
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
-import com.arnyminerz.escalaralcoiaicomtat.view.show
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
@@ -155,7 +156,8 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                                 map.setOnMapClickListener {
                                     try {
                                         val intent = mapHelper.mapsActivityIntent(
-                                            this@DataClassListActivity
+                                            this@DataClassListActivity,
+                                            MapsActivity::class.java
                                         )
                                         Timber.v("Starting MapsActivity...")
                                         startActivity(intent)

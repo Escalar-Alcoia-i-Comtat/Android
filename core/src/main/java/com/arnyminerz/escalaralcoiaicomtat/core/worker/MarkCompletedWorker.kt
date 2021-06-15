@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.worker
 
 import android.content.Context
+import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
 import androidx.lifecycle.LiveData
 import androidx.work.Constraints
@@ -10,11 +11,11 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.request.MarkCompletedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.request.MarkingDataInt
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toWorkData
 import com.arnyminerz.escalaralcoiaicomtat.notification.ALERT_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.google.firebase.firestore.FieldValue
@@ -248,7 +249,7 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
             val completionData = data.data
 
             Timber.v("Processing request parameters...")
-            val inputDataPairs = arrayMapOf(
+            val inputDataPairs: ArrayMap<String, Any?> = arrayMapOf(
                 MARK_COMPLETED_PATH_DOCUMENT to data.path.documentPath,
 
                 MARK_COMPLETED_USER_UID to completionData.user.uid,
@@ -268,7 +269,7 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
                     put(MARK_COMPLETED_IS_PROJECT, true)
                 }
             else inputDataPairs[MARK_COMPLETED_IS_PROJECT] = false
-            val workData = workDataOf(inputDataPairs.toArrayList())
+            val workData = inputDataPairs.toWorkData()
 
             Timber.v("Building MarkCompletedWorker request...")
             val request = OneTimeWorkRequestBuilder<MarkCompletedWorker>()

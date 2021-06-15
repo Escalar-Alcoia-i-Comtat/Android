@@ -73,15 +73,12 @@ class MapHelper {
         suspend fun getTarget(
             activity: Activity,
             marker: CommonMarker,
-            firestore: FirebaseFirestore,
-            areaActivity: Class<Activity>,
-            zoneActivity: Class<Activity>,
-            sectorActivity: Class<Activity>,
+            firestore: FirebaseFirestore
         ): Intent? {
             Timber.d("Getting marker's title...")
             val title = marker.getWindow().title
             Timber.v("Searching in ${AREAS.size} cached areas...")
-            return getIntent(activity, title, firestore, areaActivity, zoneActivity, sectorActivity)
+            return getIntent(activity, title, firestore)
         }
 
         fun getImageUrl(description: String?): String? {
@@ -794,9 +791,7 @@ class MapHelper {
          * @since 20210416
          */
         @UiThread
-        fun show(areaActivity: Class<Activity>,
-                 zoneActivity: Class<Activity>,
-                 sectorActivity: Class<Activity>,) {
+        fun show() {
             val anim = AnimationUtils.loadAnimation(activity, R.anim.enter_bottom)
             anim.duration = MARKER_WINDOW_SHOW_DURATION
             cardView.show()
@@ -845,7 +840,7 @@ class MapHelper {
 
             doAsync {
                 // Info Window Data Class
-                val activityIntent = getTarget(activity, marker, firestore, areaActivity, zoneActivity, sectorActivity)
+                val activityIntent = getTarget(activity, marker, firestore)
 
                 uiContext {
                     visibility(enterButton, activityIntent != null)

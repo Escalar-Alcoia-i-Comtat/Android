@@ -2,14 +2,14 @@ package com.arnyminerz.escalaralcoiaicomtat.fragment.dialog
 
 import android.app.Activity
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.DataClassImpl
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.generic.humanReadableByteCountBin
-import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.runBlocking
