@@ -123,6 +123,15 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_api_key" />
+        <meta-data
+            android:name="com.arnyminerz.escalaralcoiaicomtat.core.activity.AreaActivity"
+            android:value="com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity" />
+        <meta-data
+            android:name="com.arnyminerz.escalaralcoiaicomtat.core.activity.ZoneActivity"
+            android:value="com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity" />
+        <meta-data
+            android:name="com.arnyminerz.escalaralcoiaicomtat.core.activity.SectorActivity"
+            android:value="com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

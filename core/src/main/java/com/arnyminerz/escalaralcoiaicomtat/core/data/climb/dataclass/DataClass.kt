@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -18,6 +19,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.CouldNotCreateDynamicLinkException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_AREA_META
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_SECTOR_META
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_ZONE_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APPLICATION_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATACLASS_WAIT_CHILDREN_DELAY
@@ -56,7 +60,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
 import timber.log.Timber
 import java.io.File
-import java.util.Date
+import java.util.*
 import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -85,19 +89,36 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         suspend fun getIntent(
             context: Context,
             queryName: String,
-            firestore: FirebaseFirestore,
-            areaActivity: Class<Activity>,
-            zoneActivity: Class<Activity>,
-            sectorActivity: Class<Activity>,
+            firestore: FirebaseFirestore
         ): Intent? {
             var result: Intent? = null
+
+            Timber.v("Getting Activities...")
+            val app = context.packageManager.getApplicationInfo(
+                context.packageName,
+                PackageManager.GET_META_DATA
+            )
+            val appBundle = app.metaData
+            val areaActivityPackage = appBundle.getString(ACTIVITY_AREA_META)
+            val zoneActivityPackage = appBundle.getString(ACTIVITY_ZONE_META)
+            val sectorActivityPackage = appBundle.getString(ACTIVITY_SECTOR_META)
+            if (areaActivityPackage == null)
+                throw IllegalArgumentException("$ACTIVITY_AREA_META was not specified in manifest")
+            if (zoneActivityPackage == null)
+                throw IllegalArgumentException("$ACTIVITY_ZONE_META was not specified in manifest")
+            if (sectorActivityPackage == null)
+                throw IllegalArgumentException("$ACTIVITY_SECTOR_META was not specified in manifest")
+            val areaActivityClass = Class.forName(areaActivityPackage)
+            val zoneActivityClass = Class.forName(zoneActivityPackage)
+            val sectorActivityClass = Class.forName(sectorActivityPackage)
+
             Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
             for (area in AREAS) {
                 Timber.d("  Finding in ${area.displayName}.")
                 if (area.displayName.equals(queryName, true) ||
                     area.metadata.webURL.equals(queryName, true)
                 )
-                    result = Intent(context, areaActivity).apply {
+                    result = Intent(context, areaActivityClass).apply {
                         Timber.d("Found Area id ${area.objectId}!")
                         putExtra(EXTRA_AREA, area.objectId)
                     }
@@ -115,7 +136,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         if (zone.displayName.equals(queryName, true) ||
                             zone.metadata.webURL.equals(queryName, true)
                         )
-                            result = Intent(context, zoneActivity).apply {
+                            result = Intent(context, zoneActivityClass).apply {
                                 Timber.d("Found Zone id ${zone.objectId}!")
                                 putExtra(EXTRA_AREA, area.objectId)
                                 putExtra(EXTRA_ZONE, zone.objectId)
@@ -127,7 +148,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                                 if (sector.displayName.equals(queryName, true) ||
                                     sector.metadata.webURL.equals(queryName, true)
                                 )
-                                    result = Intent(context, sectorActivity)
+                                    result = Intent(context, sectorActivityClass)
                                         .apply {
                                             Timber.d("Found Sector id ${sector.objectId} at $counter!")
                                             putExtra(EXTRA_AREA, area.objectId)
