@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data
 
 enum class NearbyZonesError(val message: String) {
-    NEARBY_ZONES_NOT_INITIALIZED("MapHelper is not initialized"),
     NEARBY_ZONES_NOT_LOADED("MapHelper is not loaded"),
     NEARBY_ZONES_CONTEXT("Not showing fragment (context is null)"),
     NEARBY_ZONES_NOT_ENABLED("Nearby Zones not enabled"),
