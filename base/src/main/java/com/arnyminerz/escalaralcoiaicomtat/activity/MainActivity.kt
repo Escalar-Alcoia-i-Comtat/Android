@@ -61,21 +61,75 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
+/**
+ * The Main Activity, shows a view pager with the areas view, a map, the downloads view, and the
+ * settings page.
+ * @author Arnau Mora
+ * @since 20210617
+ */
 class MainActivity : LanguageAppCompatActivity() {
 
+    /**
+     * The fragment that shows the Areas View.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     private lateinit var areasViewFragment: AreasViewFragment
+
+    /**
+     * The fragment that shows the map with all the zones loaded.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     lateinit var mapFragment: MapFragment
         private set
+
+    /**
+     * The fragment that shows the downloaded features.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     lateinit var downloadsFragment: DownloadsFragment
         private set
+
+    /**
+     * The fragment that shows the settings screen for configuring the app.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     private lateinit var settingsFragment: SettingsFragmentManager
 
+    /**
+     * The adapter for the main scroll view, and showing the correct fragment.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     var adapter: MainPagerAdapter? = null
+
+    /**
+     * The view binding for the MainActivity.v
+     */
     lateinit var binding: ActivityMainBinding
 
+    /**
+     * A reference for the Firebase Firestore instance.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     internal lateinit var firestore: FirebaseFirestore
+
+    /**
+     * A reference for the Firebase Storage instance.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     internal lateinit var storage: FirebaseStorage
 
+    /**
+     * The Request contract for making login requests.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     private val loginRequest = registerForActivityResult(LoginRequestContract()) { resultCode ->
         Timber.i("Got login result: $resultCode")
         when (resultCode) {
@@ -84,6 +138,11 @@ class MainActivity : LanguageAppCompatActivity() {
         }
     }
 
+    /**
+     * Updates the bottom app bar icons according to the position of the [ActivityMainBinding.mainViewPager].
+     * @author Arnau Mora
+     * @since 20210617
+     */
     private fun updateBottomAppBar() {
         Timber.d("Updating bottom app bar...")
         val position = binding.mainViewPager.currentItem
@@ -138,6 +197,7 @@ class MainActivity : LanguageAppCompatActivity() {
     }
 
     /**
+     * Moves the pager to the specified position.
      * @author Arnau Mora
      * @since 20210321
      * @param position The position to navigate to
@@ -211,57 +271,15 @@ class MainActivity : LanguageAppCompatActivity() {
             }
         })
 
-        binding.actionExplore.setOnClickListener { navigate(TAB_ITEM_HOME) }
-        binding.actionMap.setOnClickListener { navigate(TAB_ITEM_MAP) }
-        binding.actionDownloads.setOnClickListener { navigate(TAB_ITEM_DOWNLOADS) }
-        binding.actionExtra.setOnClickListener { navigate(TAB_ITEM_EXTRA) }
-
         Timber.v("  --- Found ${AREAS.size} areas ---")
 
         firestore = Firebase.firestore
         storage = Firebase.storage
 
-        areasViewFragment.setItemClickListener { holder, position ->
-            Timber.v("Clicked item %s", position)
-            val intent = Intent(this, AreaActivity()::class.java)
-                .putExtra(EXTRA_AREA, AREAS[position].objectId)
+        addListeners()
 
-            val optionsBundle =
-                ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->
-                    intent.putExtra(EXTRA_AREA_TRANSITION_NAME, transitionName)
-
-                    ActivityOptionsCompat.makeSceneTransitionAnimation(
-                        this,
-                        findViewById(R.id.title_textView),
-                        transitionName
-                    ).toBundle()
-                } ?: Bundle.EMPTY
-
-            startActivity(intent, optionsBundle)
-        }
-
-        binding.authFab.setOnClickListener {
-            loginRequest.launch(null)
-        }
-        binding.profileImageView.setOnClickListener {
-            launch(ProfileActivity::class.java)
-        }
-        binding.profileImageView.setOnLongClickListener {
-            MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.dialog_logout_title)
-                .setMessage(R.string.dialog_logout_message)
-                .setPositiveButton(R.string.action_logout) { _, _ ->
-                    Firebase.auth.signOut()
-                    refreshLoginStatus()
-                }
-                .setNegativeButton(R.string.action_cancel) { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .show()
-
-            true
-        }
-
+        // Check if battery optimization is disabled, if so, alerts can't be enabled, since
+        //   Firebase's notifications can't be received.
         val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && PREF_WARN_BATTERY.get())
             if (am.isBackgroundRestricted)
@@ -374,6 +392,60 @@ class MainActivity : LanguageAppCompatActivity() {
         } else {
             binding.profileCardView.visibility(false)
             binding.profileImageView.visibility(false)
+        }
+    }
+
+    /**
+     * Adds the corresponding listeners to the views.
+     * @author Arnau Mora
+     * @since 20210617
+     */
+    @UiThread
+    private fun addListeners() {
+        binding.actionExplore.setOnClickListener { navigate(TAB_ITEM_HOME) }
+        binding.actionMap.setOnClickListener { navigate(TAB_ITEM_MAP) }
+        binding.actionDownloads.setOnClickListener { navigate(TAB_ITEM_DOWNLOADS) }
+        binding.actionExtra.setOnClickListener { navigate(TAB_ITEM_EXTRA) }
+
+        areasViewFragment.setItemClickListener { holder, position ->
+            Timber.v("Clicked item %s", position)
+            val intent = Intent(this, AreaActivity()::class.java)
+                .putExtra(EXTRA_AREA, AREAS[position].objectId)
+
+            val optionsBundle =
+                ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->
+                    intent.putExtra(EXTRA_AREA_TRANSITION_NAME, transitionName)
+
+                    ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        this,
+                        findViewById(R.id.title_textView),
+                        transitionName
+                    ).toBundle()
+                } ?: Bundle.EMPTY
+
+            startActivity(intent, optionsBundle)
+        }
+
+        binding.authFab.setOnClickListener {
+            loginRequest.launch(null)
+        }
+        binding.profileImageView.setOnClickListener {
+            launch(ProfileActivity::class.java)
+        }
+        binding.profileImageView.setOnLongClickListener {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.dialog_logout_title)
+                .setMessage(R.string.dialog_logout_message)
+                .setPositiveButton(R.string.action_logout) { _, _ ->
+                    Firebase.auth.signOut()
+                    refreshLoginStatus()
+                }
+                .setNegativeButton(R.string.action_cancel) { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+
+            true
         }
     }
 }
