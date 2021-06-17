@@ -15,8 +15,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.request.MarkCompletedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.request.MarkingDataInt
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.ALERT_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toWorkData
-import com.arnyminerz.escalaralcoiaicomtat.notification.ALERT_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore

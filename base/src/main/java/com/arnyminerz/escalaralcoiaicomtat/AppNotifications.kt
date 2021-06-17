@@ -6,13 +6,13 @@ import android.app.NotificationChannelGroup
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import com.arnyminerz.escalaralcoiaicomtat.notification.ALERT_CHANNEL_ID
-import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOADS_NOTIFICATION_CHANNEL_GROUP
-import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
-import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
-import com.arnyminerz.escalaralcoiaicomtat.notification.PEOPLE_NOTIFICATION_CHANNEL_GROUP
-import com.arnyminerz.escalaralcoiaicomtat.notification.TASK_COMPLETED_CHANNEL_ID
-import com.arnyminerz.escalaralcoiaicomtat.notification.UPDATE_AVAILABLE_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.ALERT_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOADS_NOTIFICATION_CHANNEL_GROUP
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.PEOPLE_NOTIFICATION_CHANNEL_GROUP
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_COMPLETED_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.UPDATE_AVAILABLE_CHANNEL_ID
 
 @TargetApi(Build.VERSION_CODES.O)
 private fun Context.createAlertsChannel(): NotificationChannel {

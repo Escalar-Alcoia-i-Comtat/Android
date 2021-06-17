@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.data.climb
+package com.arnyminerz.escalaralcoiaicomtat.core.data.climb
 
 import android.app.Activity
 import android.view.ViewGroup

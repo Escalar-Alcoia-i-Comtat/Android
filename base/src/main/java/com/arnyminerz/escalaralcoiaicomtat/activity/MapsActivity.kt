@@ -18,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.map.GeoGeometry
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MAP_LOAD_PADDING
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.getWindow
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CENTER_CURRENT_LOCATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_KMZ_FILE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.INFO_VIBRATION
@@ -43,7 +44,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMapsBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAskerFragment
-import com.arnyminerz.escalaralcoiaicomtat.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore

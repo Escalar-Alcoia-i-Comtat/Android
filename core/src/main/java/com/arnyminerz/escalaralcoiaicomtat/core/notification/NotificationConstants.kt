@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.notification
+package com.arnyminerz.escalaralcoiaicomtat.core.notification
 
 const val DOWNLOAD_PROGRESS_CHANNEL_ID = "DownloadProgress"
 const val DOWNLOAD_COMPLETE_CHANNEL_ID = "DownloadComplete"
