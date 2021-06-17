@@ -69,11 +69,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         binding = ActivityLoadingBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val enableErrorReporting = SETTINGS_ERROR_REPORTING_PREF.get()
-        Firebase.crashlytics.setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
-        Timber.v("Set Crashlytics collection enabled to $enableErrorReporting")
-        Firebase.analytics.setAnalyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
-        Timber.v("Set Analytics collection enabled to $enableErrorReporting")
+        dataCollectionSetUp()
 
         Timber.v("Getting Firestore instance...")
         firestore = Firebase.firestore
@@ -172,6 +168,22 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             }
         else
             super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    /**
+     * Initializes the user-set data collection policy.
+     * If debugging, data collection will always be disabled.
+     * @author Arnau Mora
+     * @since 20210617
+     * @see SETTINGS_ERROR_REPORTING_PREF
+     */
+    @UiThread
+    private fun dataCollectionSetUp() {
+        val enableErrorReporting = SETTINGS_ERROR_REPORTING_PREF.get()
+        Firebase.crashlytics.setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
+        Timber.v("Set Crashlytics collection enabled to $enableErrorReporting")
+        Firebase.analytics.setAnalyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
+        Timber.v("Set Analytics collection enabled to $enableErrorReporting")
     }
 
     @UiThread
