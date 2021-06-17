@@ -88,38 +88,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
         deepLinkPath = getExtra(EXTRA_LINK_PATH)
 
-        Timber.v("Searching for updates...")
-        val appUpdateManager = AppUpdateManagerFactory.create(this)
-        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
-            val updateAvailability = appUpdateInfo.updateAvailability()
-            if (updateAvailability == UPDATE_AVAILABLE) {
-                Timber.v("There's an update available")
-                val updateSteless = appUpdateInfo.clientVersionStalenessDays()
-                if (updateSteless != null && updateSteless >= APP_UPDATE_MAX_TIME_DAYS) {
-                    if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
-                        // Request immediate update
-                        Timber.v("Requesting immediate update.")
-                        appUpdateManager.startUpdateFlowForResult(
-                            appUpdateInfo,
-                            AppUpdateType.IMMEDIATE,
-                            this,
-                            APP_UPDATE_REQUEST_CODE
-                        )
-                        loading = true
-                    } else Timber.w("Immediate update is not allowed")
-                } else if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
-                    // Request flexible update
-                    Timber.v("Requesting flexible update.")
-                    appUpdateManager.startUpdateFlowForResult(
-                        appUpdateInfo,
-                        AppUpdateType.FLEXIBLE,
-                        this,
-                        APP_UPDATE_REQUEST_CODE
-                    )
-                    loading = true
-                } else Timber.w("Flexible update is not allowed")
-            } else Timber.d("There's no update available. ($updateAvailability)")
-        }
+        updatesCheck()
 
         doAsync {
             Timber.v("Getting remote configuration...")
@@ -184,6 +153,47 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         Timber.v("Set Crashlytics collection enabled to $enableErrorReporting")
         Firebase.analytics.setAnalyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
         Timber.v("Set Analytics collection enabled to $enableErrorReporting")
+    }
+
+    /**
+     * Checks if there is any update available for the app at the Play Store.
+     * @author Arnau Mora
+     * @since 20210617
+     */
+    @UiThread
+    private fun updatesCheck() {
+        Timber.v("Searching for updates...")
+        val appUpdateManager = AppUpdateManagerFactory.create(this)
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+            val updateAvailability = appUpdateInfo.updateAvailability()
+            if (updateAvailability == UPDATE_AVAILABLE) {
+                Timber.v("There's an update available")
+                val updateStaleness = appUpdateInfo.clientVersionStalenessDays()
+                if (updateStaleness != null && updateStaleness >= APP_UPDATE_MAX_TIME_DAYS) {
+                    if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                        // Request immediate update
+                        Timber.v("Requesting immediate update.")
+                        appUpdateManager.startUpdateFlowForResult(
+                            appUpdateInfo,
+                            AppUpdateType.IMMEDIATE,
+                            this,
+                            APP_UPDATE_REQUEST_CODE
+                        )
+                        loading = true
+                    } else Timber.w("Immediate update is not allowed")
+                } else if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                    // Request flexible update
+                    Timber.v("Requesting flexible update.")
+                    appUpdateManager.startUpdateFlowForResult(
+                        appUpdateInfo,
+                        AppUpdateType.FLEXIBLE,
+                        this,
+                        APP_UPDATE_REQUEST_CODE
+                    )
+                    loading = true
+                } else Timber.w("Flexible update is not allowed")
+            } else Timber.d("There's no update available. ($updateAvailability)")
+        }
     }
 
     @UiThread
