@@ -14,12 +14,12 @@ import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.finishActivityWithResult
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.isEmail
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.view.viewListOf
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentAuthLoginBinding
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.isEmail
-import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
-import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.arnyminerz.escalaralcoiaicomtat.intent.GoogleLoginRequestContract
-import com.arnyminerz.escalaralcoiaicomtat.list.viewListOf
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_LOGGED_IN
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity

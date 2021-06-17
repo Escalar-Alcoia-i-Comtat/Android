@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_close">Cerrar</string>
+
+    <string name="path_ending_plate">"Placa"</string>
+    <string name="path_ending_plate_ring">"Placa con argolla"</string>
+    <string name="path_ending_plate_lanyard">"Placa y Cordino"</string>
+    <string name="path_ending_chain_ring">"Cadena y argolla"</string>
+    <string name="path_ending_chain_carabiner">"Cadena y Mosquetón"</string>
+    <string name="path_ending_piton">"Clavo"</string>
+    <string name="path_ending_walking">"Bajada andando"</string>
+    <string name="path_ending_rappel">"Bajada con Rappel"</string>
+    <string name="path_ending_lanyard">"Cordino (Puente de Roca)"</string>
+    <string name="path_ending_none">"Sin reunión"</string>
+    <string name="path_ending_unknown">"Reunión desconocida"</string>
+    <string name="path_ending_multiple">"Reuniones"</string>
+    <string name="path_ending_pitch_vertical">"Vertical"</string>
+    <string name="path_ending_pitch_shelf">"Placa"</string>
+    <string name="path_ending_pitch_inclined">"Inclinado"</string>
+    <string name="path_ending_pitch_rappeleable">"Rapelable"</string>
+    <string name="path_ending_pitch_clean">", sin equipamiento"</string>
+
+    <string name="safe_strings">"%1$s Express"</string>
+    <string name="safe_parabolt">"%1$s Parabolts"</string>
+    <string name="safe_spit">"%1$s Spits"</string>
+    <string name="safe_tensor">"%1$s Tensores"</string>
+    <string name="safe_piton">"%1$s Clavo"</string>
+    <string name="safe_buril">"%1$s Burils"</string>
+    <string name="safe_lanyard">"Cordino"</string>
+    <string name="safe_cracker">"Empotrador"</string>
+    <string name="safe_friend">"Friend"</string>
+    <string name="safe_strips">"Strips"</string>
+    <string name="safe_nail">"Uñas"</string>
+
+    <!-- NC is for No Count -->
+    <string name="safe_strings_plural">"Express"</string>
+
+    <string name="path_stats_chart_title">"Grados"</string>
+
+    <string name="sector_info_dialog_sun_morning_title">"Sol por la mañana"</string>
+    <string name="sector_info_dialog_sun_morning_msg">"Al sector le da el sol por la mañana. Paredes frías por la mañana, cálidas por la tarde, tu escoges."</string>
+    <string name="sector_info_dialog_sun_afternoon_title">"Sol por la tarde"</string>
+    <string name="sector_info_dialog_sun_afternoon_msg">"En este sector hace sol por la tarde.Por la mañana puede hacer bastante frío "</string>
+    <string name="sector_info_dialog_sun_all_title">"Sol durante todo el día"</string>
+    <string name="sector_info_dialog_sun_all_msg">"¡A este sector le pega el sol durante todo el día! En verano puede hacer bastante calor.Ten cuidado,por favor"</string>
+    <string name="sector_info_dialog_sun_no_title">"Sin Sol"</string>
+    <string name="sector_info_dialog_sun_no_msg">"A este sector no le pega nunca el sol. Lleva alguna chaqueta!"</string>
+    <string name="sector_info_dialog_kids_title">"Apto para niños"</string>
+    <string name="sector_info_dialog_kids_msg">"Este sector tiene cerca buenos sitios donde sentarse.Puedes traer a niños pequeños,pero ves con cuidado,por favor  "</string>
+
+    <string name="sector_sun_morning">"Sol mañana"</string>
+    <string name="sector_sun_afternoon">"Sol tarde"</string>
+    <string name="sector_sun_day">"Sol todo el día"</string>
+    <string name="sector_sun_no">"Sin Sol"</string>
+
+    <string name="error_chart_no_data">"Sin datos"</string>
+
+    <string name="toast_error_internal">"Ha ocurrido un error interno"</string>
+    <string name="toast_error_storage_not_found">No se ha podido encontrar el archivo</string>
+    <string name="toast_error_storage_cancelled">La solicitud ha sido cancelada</string>
+    <string name="toast_error_storage_corrupt">El archivo descargado está corrupto, contacta con un administrador</string>
+    <string name="toast_error_storage_authentication">No se ha podido acceder a un archivo privado</string>
+
+    <string name="notification_download_progress_title">Descargando…</string>
+    <string name="notification_download_progress_message">Descargando %s</string>
+    <string name="notification_download_progress_info_fetching">Descargando datos…</string>
+    <string name="notification_download_progress_info_downloading_image">Descargando imagen…</string>
+    <string name="notification_download_complete_title">Descarga completa!</string>
+    <string name="notification_download_complete_message">Descargado %s. Toca para abrir.</string>
+    <string name="notification_download_progress_info_downloading_map">Descargando mapa…</string>
+    <string name="notification_download_failed_title">La descarga ha fallado!</string>
+    <string name="notification_download_failed_message">No se ha podido descargar %s.</string>
+    <string name="notification_download_failed_message_long">Ha ocurrido un error al descargar %1$s. Código de error: %2$s</string>
+    <string name="notification_mark_completed_waiting_title">Programado el marcado como completado</string>
+    <string name="notification_mark_completed_waiting_message">Esperando hasta tener una conexión a Internet activa para enviar el comentario y marcar la vía como completada.</string>
+    <string name="notification_mark_completed_error_title">No se ha podido marcar como completada</string>
+    <string name="notification_mark_completed_error_message">La vía \"%1$s\" ha sido marcada como completada, pero ha ocurrido un error en el proceso. Código de error: %2$s</string>
+
+    <string name="attr_gpx">Este GPX ha sido ofrecido por Escalar Alcoià i Comtat. Descarga la app desde https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
+</resources>

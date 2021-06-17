@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_close">Tancar</string>
+
+    <string name="path_ending_plate">"Placa"</string>
+    <string name="path_ending_plate_ring">"Placa amb Argolla"</string>
+    <string name="path_ending_plate_lanyard">"Placa i Cordí"</string>
+    <string name="path_ending_chain_ring">"Cadena amb Argolla"</string>
+    <string name="path_ending_chain_carabiner">"Cadena i Mosquetó"</string>
+    <string name="path_ending_piton">"Clau"</string>
+    <string name="path_ending_walking">"Baixada a peu"</string>
+    <string name="path_ending_rappel">"Baixada amb Rappel"</string>
+    <string name="path_ending_lanyard">"Cordí (Pont de Roca)"</string>
+    <string name="path_ending_none">"Sense reunió"</string>
+    <string name="path_ending_unknown">"Reunió Desconeguda"</string>
+    <string name="path_ending_multiple">"Reunions"</string>
+    <string name="path_ending_pitch_vertical">"Vertical"</string>
+    <string name="path_ending_pitch_shelf">"Placa"</string>
+    <string name="path_ending_pitch_inclined">"Inclinat"</string>
+    <string name="path_ending_pitch_rappeleable">"Rapelable"</string>
+    <string name="path_ending_pitch_clean">", sense equipament"</string>
+
+    <string name="safe_strings">"%1$s Express"</string>
+    <string name="safe_parabolt">"%1$s Parabolts"</string>
+    <string name="safe_spit">"%1$s Spits"</string>
+    <string name="safe_tensor">"%1$s Tensors"</string>
+    <string name="safe_piton">"%1$s Pitons"</string>
+    <string name="safe_buril">"%1$s Burils"</string>
+    <string name="safe_lanyard">"Cordí"</string>
+    <string name="safe_cracker">"Empotrador"</string>
+    <string name="safe_friend">"Friend"</string>
+    <string name="safe_strips">"Strips"</string>
+    <string name="safe_nail">"Ungla"</string>
+
+    <!-- NC is for No Count -->
+    <string name="safe_strings_plural">"Express"</string>
+
+    <string name="path_stats_chart_title">"Graus"</string>
+
+    <string name="sector_info_dialog_sun_morning_title">"Sol de Matí"</string>
+    <string name="sector_info_dialog_sun_morning_msg">"Aquest sector té sol de matí. Parets fredes als matins, càlides per la vesprada. Ara ja, tu tries."</string>
+    <string name="sector_info_dialog_sun_afternoon_title">"Sol de Vesprada"</string>
+    <string name="sector_info_dialog_sun_afternoon_msg">"Aquest sector té sol de vesprada. És possible que faça frescoreta pels matins…"</string>
+    <string name="sector_info_dialog_sun_all_title">"Sol tot el dia"</string>
+    <string name="sector_info_dialog_sun_all_msg">"Aquest sector té sol durant tot el dia. En estiu pot fer molta calor! Per favor, ves amb compte"</string>
+    <string name="sector_info_dialog_sun_no_title">"Sense Sol"</string>
+    <string name="sector_info_dialog_sun_no_msg">"A aquest sector no li pega el sol en tot el dia. Dugues una rebequeta!"</string>
+    <string name="sector_info_dialog_kids_title">"Apte per a Xiquets"</string>
+    <string name="sector_info_dialog_kids_msg">"Aquest sector té bons llocs on seure al peu de via. Està bé dur xiquets, però per favor, aneu amb compte, i recordeu sempre el casc. &amp;#128521;"</string>
+
+    <string name="sector_sun_morning">"Sol Matí"</string>
+    <string name="sector_sun_afternoon">"Sol Vesprada"</string>
+    <string name="sector_sun_day">"Sol tot el Dia"</string>
+    <string name="sector_sun_no">"Sense sol"</string>
+
+    <string name="error_chart_no_data">"Sense dades"</string>
+
+    <string name="toast_error_internal">"Ha hagut un error intern"</string>
+    <string name="toast_error_storage_not_found">No s\'ha trobat el fitxer</string>
+    <string name="toast_error_storage_cancelled">La sol·licitud s\'ha cancel·lat</string>
+    <string name="toast_error_storage_corrupt">El fitxer baixat està corromput, contacta a un adminstrador</string>
+    <string name="toast_error_storage_authentication">No s\'ha pogut accedir a un fitxer privat</string>
+
+    <string name="notification_download_progress_title">Baixant…</string>
+    <string name="notification_download_progress_message">Baixant %s</string>
+    <string name="notification_download_progress_info_fetching">Baixant dades…</string>
+    <string name="notification_download_progress_info_downloading_image">Baixant imatge…</string>
+    <string name="notification_download_complete_title">Baixada completa!</string>
+    <string name="notification_download_complete_message">Baixat %s. Toca per a obrir.</string>
+    <string name="notification_download_progress_info_downloading_map">Baixant mapa…</string>
+    <string name="notification_download_failed_title">La baixada ha fallat!</string>
+    <string name="notification_download_failed_message">No s\'ha pogut baixar %s.</string>
+    <string name="notification_download_failed_message_long">Ha hagut un error al baixar %1$s. Codi d\'error: %2$s</string>
+    <string name="notification_mark_completed_waiting_title">Programat marcatge com a completat</string>
+    <string name="notification_mark_completed_waiting_message">Esperant fins a tenir connexió a Internet per a enviar el comentari i marcar la via com a completada.</string>
+    <string name="notification_mark_completed_error_title">No s\'ha pogut marcar com a completada</string>
+    <string name="notification_mark_completed_error_message">La via \"%1$s\" ha sigut marcada com a completada, però ha ocorregut un erorr. Codi d\'error: %2$s</string>
+
+    <string name="attr_gpx">Este GPX ha sigut oferit per Escalar Alcoià i Comtat. Baixa l\'app des de https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
+</resources>

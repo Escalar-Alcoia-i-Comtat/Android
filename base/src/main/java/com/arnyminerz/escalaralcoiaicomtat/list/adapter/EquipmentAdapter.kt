@@ -7,11 +7,11 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.SafeCountData
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.SafesData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.SafeCountData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.SafesData
+import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.PathEquipmentViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import timber.log.Timber
 
 enum class EquipmentAdapterType {

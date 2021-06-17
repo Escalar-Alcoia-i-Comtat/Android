@@ -11,9 +11,16 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreference
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.generic.toast
-import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
-import com.arnyminerz.escalaralcoiaicomtat.shared.PREVIEW_SCALE_PREFERENCE_MULTIPLIER
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.LOCATION_PERMISSION_REQUEST_CODE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_DISABLE_NEARBY
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREVIEW_SCALE_PREFERENCE_MULTIPLIER
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_CENTER_MARKER_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_LANGUAGE_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MARKER_SIZE_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_NEARBY_DISTANCE_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_PREVIEW_SCALE_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import timber.log.Timber
 
 private const val PREVIEW_SCALE_REDUCER = 10f

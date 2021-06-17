@@ -5,8 +5,8 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.widget.TextView
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.list.viewListOf
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.view.viewListOf
 import io.noties.markwon.Markwon
 
 class DescriptionDialog private constructor(private val context: Context, private val path: Path) {
@@ -32,14 +32,14 @@ class DescriptionDialog private constructor(private val context: Context, privat
 
         val markwon = Markwon.create(context)
         if (path.builtBy != null)
-            markwon.setMarkdown(builderTextView, path.builtBy)
+            markwon.setMarkdown(builderTextView, path.builtBy!!)
         else
             viewListOf(builderTextView, builderTitleTextView).visibility(false)
         if (path.rebuiltBy != null)
             markwon.setMarkdown(rebuilderTextView, path.rebuiltBy!!)
         else viewListOf(rebuilderTextView, rebuilderTitleTextView).visibility(false)
         if (path.description != null)
-            markwon.setMarkdown(descriptionTextView, path.description)
+            markwon.setMarkdown(descriptionTextView, path.description!!)
         else viewListOf(descriptionTextView, descriptionTitleTextView).visibility(false)
 
         dialog.setView(view)

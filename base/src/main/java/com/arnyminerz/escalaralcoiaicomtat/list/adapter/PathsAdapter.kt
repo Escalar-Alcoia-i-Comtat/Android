@@ -22,32 +22,32 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.CommentsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.MarkCompletedActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.EndingType
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Grade
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Pitch
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedDataInt
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.FixedSafesData
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.safes.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.EndingType
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Grade
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Pitch
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.INFO_VIBRATION
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.LinePattern
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toStringLineJumping
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.ArtifoPathEndingDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DescriptionDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.PathEquipmentDialog
-import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.LinePattern
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toStringLineJumping
-import com.arnyminerz.escalaralcoiaicomtat.generic.launch
-import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.SectorViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.shared.ENABLE_AUTHENTICATION
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
-import com.arnyminerz.escalaralcoiaicomtat.shared.INFO_VIBRATION
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.badge.BadgeUtils
 import com.google.android.material.badge.ExperimentalBadgeUtils
@@ -341,11 +341,11 @@ class PathsAdapter(
         val notes = arrayListOf<String>()
         for (completion in completions) {
             if (completion.comment != null)
-                comments.add(completion.comment)
+                comments.add(completion.comment!!)
             if (completion.notes != null)
                 if (user != null)
                     if (completion.user.uid == user.uid)
-                        notes.add(completion.notes)
+                        notes.add(completion.notes!!)
                     else Timber.v("Got note which the user (${user.uid}) is not the author of.")
                 else Timber.v("User not logged in")
             /*if (completion is MarkedCompletedData) {

@@ -7,13 +7,13 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.IntroShowReason
+import com.arnyminerz.escalaralcoiaicomtat.core.data.IntroShowReason
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_SHOWN_INTRO
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityIntroBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.BetaIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.MainIntroFragment
 import com.arnyminerz.escalaralcoiaicomtat.fragment.intro.WarningIntroFragment
-import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_SHOWN_INTRO
-import com.arnyminerz.escalaralcoiaicomtat.generic.launch
 import timber.log.Timber
 
 class IntroActivity : LanguageAppCompatActivity() {

@@ -4,11 +4,11 @@ import android.os.Bundle
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteDir
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityStorageBinding
-import com.arnyminerz.escalaralcoiaicomtat.generic.deleteDir
-import com.arnyminerz.escalaralcoiaicomtat.generic.launch
-import com.arnyminerz.escalaralcoiaicomtat.shared.sharedPreferences
-import com.arnyminerz.escalaralcoiaicomtat.storage.filesDir
 import com.google.android.material.snackbar.Snackbar
 import java.io.IOException
 

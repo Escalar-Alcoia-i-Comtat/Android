@@ -7,10 +7,10 @@ import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
-import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_PREVIEW_SCALE_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_PREVIEW_SCALE_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.view.ImageLoadParameters
 import timber.log.Timber
 import java.io.InvalidClassException
 

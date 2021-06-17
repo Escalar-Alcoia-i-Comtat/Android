@@ -4,19 +4,19 @@ import android.os.Bundle
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedDataInt
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.finishActivityWithResult
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityCommentsBinding
-import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
-import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.list.completions.adapter.CommentsAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.completions.adapter.NotesAdapter
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MISSING_DATA
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_UNKNOWN_ERROR
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -116,9 +116,9 @@ class CommentsActivity : AppCompatActivity() {
         val comments = arrayListOf<MarkedDataInt>()
         val notes = arrayListOf<MarkedDataInt>()
         for (completion in completions) {
-            if (completion.comment != null && completion.comment.isNotBlank())
+            if (completion.comment != null && completion.comment?.isNotBlank() == true)
                 comments.add(completion)
-            if (completion.notes != null && completion.notes.isNotBlank())
+            if (completion.notes != null && completion.notes?.isNotBlank() == true)
                 notes.add(completion)
         }
 

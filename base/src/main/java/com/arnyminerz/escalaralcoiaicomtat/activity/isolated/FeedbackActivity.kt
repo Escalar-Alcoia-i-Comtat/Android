@@ -4,8 +4,8 @@ import android.os.Bundle
 import androidx.core.widget.addTextChangedListener
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityFeedbackBinding
-import com.arnyminerz.escalaralcoiaicomtat.generic.toast
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase

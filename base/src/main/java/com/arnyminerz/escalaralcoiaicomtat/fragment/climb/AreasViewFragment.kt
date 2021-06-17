@@ -15,33 +15,34 @@ import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.NearbyZonesError
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.getZones
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LATITUDE
-import com.arnyminerz.escalaralcoiaicomtat.data.map.DEFAULT_LONGITUDE
-import com.arnyminerz.escalaralcoiaicomtat.data.map.GeoMarker
-import com.arnyminerz.escalaralcoiaicomtat.data.map.ICON_WAYPOINT_ESCALADOR_BLANC
-import com.arnyminerz.escalaralcoiaicomtat.data.map.MapObjectWindowData
+import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.data.NearbyZonesError
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.getZones
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LATITUDE
+import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
+import com.arnyminerz.escalaralcoiaicomtat.core.data.map.GeoMarker
+import com.arnyminerz.escalaralcoiaicomtat.core.data.map.ICON_WAYPOINT_ESCALADOR_BLANC
+import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MapObjectWindowData
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CENTER_CURRENT_LOCATION
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.LOCATION_PERMISSION_REQUEST_CODE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_DISABLE_NEARBY
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_NEARBY_DISTANCE_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.distanceTo
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.isLocationPermissionGranted
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapAnyDataToLoadException
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toLatLng
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
-import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.PREF_DISABLE_NEARBY
-import com.arnyminerz.escalaralcoiaicomtat.fragment.preferences.SETTINGS_NEARBY_DISTANCE_PREF
-import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.distanceTo
-import com.arnyminerz.escalaralcoiaicomtat.generic.extension.toLatLng
-import com.arnyminerz.escalaralcoiaicomtat.generic.isLocationPermissionGranted
-import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapAnyDataToLoadException
-import com.arnyminerz.escalaralcoiaicomtat.generic.maps.MapHelper
-import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.runOnUiThread
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_CENTER_CURRENT_LOCATION
-import com.arnyminerz.escalaralcoiaicomtat.shared.LOCATION_PERMISSION_REQUEST_CODE
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
@@ -196,7 +197,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                 }
 
                 Timber.d("Finished adding markers.")
-                runOnUiThread {
+                uiContext {
                     mapHelper.display()
                     mapHelper.center(includeCurrentLocation = true)
 
@@ -283,7 +284,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
     private fun nearbyZonesClick(): Boolean =
         try {
-            val intent = mapHelper.mapsActivityIntent(requireContext())
+            val intent = mapHelper.mapsActivityIntent(requireContext(), MapsActivity::class.java)
                 .putExtra(EXTRA_CENTER_CURRENT_LOCATION, true)
             Timber.v("Starting MapsActivity...")
             startActivity(intent)

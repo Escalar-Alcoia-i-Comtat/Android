@@ -5,10 +5,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.EndingType
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Pitch
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.EndingType
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Pitch
+import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.ArtifoEndingPitchViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import timber.log.Timber
 
 class ArtifoEndingPitchAdapter(

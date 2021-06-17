@@ -6,13 +6,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.CommentsActivity
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Grade
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedCompletedData
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedDataInt
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.storage.MarkedProjectData
-import com.arnyminerz.escalaralcoiaicomtat.generic.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Grade
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedCompletedData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedProjectData
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.list.completions.holder.CommentsViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.view.hide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -23,7 +23,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 import java.text.SimpleDateFormat
-import java.util.Locale
+import java.util.*
 
 /**
  * The RecyclerView adapter for showing the comments that people have published into a Path.

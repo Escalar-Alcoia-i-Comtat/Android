@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import android.view.Window
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.EndingType
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Pitch
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.EndingType
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Pitch
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogArtifoEndingBinding
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.ArtifoEndingPitchAdapter
 import timber.log.Timber

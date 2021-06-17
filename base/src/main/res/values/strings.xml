@@ -3,39 +3,10 @@
     <string name="app_name">Escalar Alcoia i Comtat</string>
     <string name="package_name" translatable="false">com.arnyminerz.escalaralcoiaicomtat</string>
 
-    <string name="sector_sun_morning">Morning Sun</string>
-    <string name="sector_sun_afternoon">Afternoon Sun</string>
-    <string name="sector_sun_day">All-day Sun</string>
-    <string name="sector_sun_no">No Sun</string>
     <string name="sector_walking_time">%1$smin</string>
     <string name="sector_height">%1$sm</string>
     <string name="sector_kids_apt">Kids Apt</string>
-    <string name="sector_info_dialog_sun_morning_title">Morning Sun</string>
-    <string name="sector_info_dialog_sun_morning_msg">This sector gets shiny on the mornings. Cold walls on the morning, warm on the evening, you choose.</string>
-    <string name="sector_info_dialog_sun_afternoon_title">Afternoon Sun</string>
-    <string name="sector_info_dialog_sun_afternoon_msg">This sector gets shiny on the afternoons. In the morning this may get quite cold…</string>
-    <string name="sector_info_dialog_sun_all_title">All-day Sun</string>
-    <string name="sector_info_dialog_sun_all_msg">This sector is shiny all the day! This may get hot on summer. Please, take care.</string>
-    <string name="sector_info_dialog_sun_no_title">No Sun</string>
-    <string name="sector_info_dialog_sun_no_msg">This sector doesn\'t receive run in the whole day! Bring a jacket.</string>
-    <string name="sector_info_dialog_kids_title">Kids Apt</string>
-    <string name="sector_info_dialog_kids_msg">This sector has good places to sit nearby. Bringing young children may not be that bad, but please, have caution.</string>
-    <string name="safe_strings">%1$s Strings</string>
-    <string name="safe_parabolt">%1$s Parabolts</string>
-    <string name="safe_spit">%1$s Spits</string>
-    <string name="safe_tensor">%1$s Tensors</string>
-    <string name="safe_piton">%1$s Pitons</string>
-    <string name="safe_buril">%1$s Burils</string>
-    <string name="safe_lanyard">Lanyard</string>
-    <string name="safe_cracker">Cracker</string>
-    <string name="safe_friend">Friend</string>
-    <string name="safe_strips">Strips</string>
-    <string name="safe_nail">Nails</string>
 
-    <!-- NC is for No Count -->
-    <string name="safe_strings_plural">Strings</string>
-
-    <string name="action_close">Close</string>
     <string name="action_download">Download</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_delete">Delete</string>
@@ -93,19 +64,6 @@
     <string name="dialog_logout_message">Are you sure that you want to get logged out?</string>
     <string name="dialog_background_restricted_title">Background restricted</string>
     <string name="dialog_background_restricted_message">You, or your system have blocked the application for being executed in the background, so you may not be able to receive alert notifications. Please, go to your system\'s settings and disable battery optimization for Escalar Alcoià i Comtat, or you can disable the alerts system completely.</string>
-
-    <string name="path_ending_plate">Plate</string>
-    <string name="path_ending_plate_ring">Plate Ring</string>
-    <string name="path_ending_plate_lanyard">Plate Lanyard</string>
-    <string name="path_ending_chain_ring">Chain Ring</string>
-    <string name="path_ending_chain_carabiner">Chain Carabiner</string>
-    <string name="path_ending_piton">Piton</string>
-    <string name="path_ending_walking">Walking Descent</string>
-    <string name="path_ending_rappel">Rappel Descent</string>
-    <string name="path_ending_lanyard">Lanyard (Rock Bridge)</string>
-    <string name="path_ending_none">No ending</string>
-    <string name="path_ending_unknown">Unknown Ending</string>
-    <string name="path_ending_multiple">Endings</string>
 
     <string name="mark_completed_title">Mark Path</string>
     <string name="mark_completed_name">Path Name</string>
@@ -200,24 +158,10 @@
     <string name="notification_channel_new_update_name">New update available</string>
     <string name="notification_channel_new_update_desc">This will tell you when a new update is available, and will help you downloading it.</string>
 
-    <string name="notification_download_progress_title">Downloading…</string>
-    <string name="notification_download_progress_message">Downloading %s</string>
-    <string name="notification_download_complete_title">Download complete!</string>
-    <string name="notification_download_complete_message">Downloaded %s. Tap to open.</string>
-    <string name="notification_download_failed_title">Download failed!</string>
-    <string name="notification_download_failed_message">Could not download %s.</string>
-    <string name="notification_download_failed_message_long">There was an error while downloading %1$s. Error code: %2$s</string>
-    <string name="notification_download_progress_info_fetching">Downloading data…</string>
-    <string name="notification_download_progress_info_downloading_image">Downloading image…</string>
-    <string name="notification_download_progress_info_downloading_map">Downloading map…</string>
     <string name="notification_gpx_stored_title">GPX Stored correctly</string>
     <string name="notification_gpx_stored_message">Press to open</string>
     <string name="notification_kmz_stored_title">KMZ Stored correctly</string>
     <string name="notification_kmz_stored_message">Press to open</string>
-    <string name="notification_mark_completed_waiting_title">Mark as completed scheduled</string>
-    <string name="notification_mark_completed_waiting_message">Waiting to have internet connection to send the comment and mark the path as complete.</string>
-    <string name="notification_mark_completed_error_title">Could not mark as completed</string>
-    <string name="notification_mark_completed_error_message">The path \"%1$s\" was scheduled to be marked as completed, but an error occurred. Error code: %2$s</string>
 
     <string name="no_internet_title">You have no Internet access</string>
     <string name="no_internet_message">You can access the downloaded content, or try again.</string>
@@ -228,16 +172,10 @@
     <string name="downloads_delete_dialog_msg">This will delete %s from your device FOREVER. You will have to download it again.</string>
     <string name="downloads_no_download">There\'s nothing downloaded</string>
 
-    <string name="error_chart_no_data">No Data</string>
-
     <string name="toast_error_internal">An internal error occurred</string>
     <string name="toast_error_no_internet">No Internet Access detected</string>
     <string name="toast_error_language">Cannot change language</string>
     <string name="toast_error_no_kmz">Could not find KMZ file</string>
-    <string name="toast_error_storage_not_found">Could not find file</string>
-    <string name="toast_error_storage_cancelled">The request was cancelled</string>
-    <string name="toast_error_storage_corrupt">The downloaded file is corrupt, contact an administrator</string>
-    <string name="toast_error_storage_authentication">Could not access private file</string>
     <string name="toast_error_confirmation_send">Could not send confirmation mail</string>
     <string name="toast_error_confirmation">Could not verify email!</string>
     <string name="toast_error_profile_image_update">Could not update profile image</string>
@@ -268,12 +206,6 @@
     <string name="path_chip_safe">Safes amount and type</string>
     <string name="path_chip_ending">Ending type for choosing the descent maneuver to use or top-rope.</string>
     <string name="path_chip_required">The shown component is required</string>
-    <string name="path_stats_chart_title">Grades</string>
-    <string name="path_ending_pitch_vertical">Vertical</string>
-    <string name="path_ending_pitch_shelf">Shelf</string>
-    <string name="path_ending_pitch_inclined">Inclined</string>
-    <string name="path_ending_pitch_rappeleable">Rappelable</string>
-    <string name="path_ending_pitch_clean">no equipment</string>
     <string name="path_fixed_equipment">Path fixed equipment</string>
     <string name="path_required_equipment">Required equipment</string>
     <string name="path_pitch_id">R%s: </string>
@@ -379,6 +311,4 @@
     <string name="update_progress_internet_waiting">Waiting for Internet connection…</string>
     <string name="update_progress_downloading_new_cache">Downloading new data…</string>
     <string name="update_progress_error">Error!</string>
-
-    <string name="attr_gpx">This GPX has been providen by Escalar Alcoià i Comtat. Download the app from https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
 </resources>

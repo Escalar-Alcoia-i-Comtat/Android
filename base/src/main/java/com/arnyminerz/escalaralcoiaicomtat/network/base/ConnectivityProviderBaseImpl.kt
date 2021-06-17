@@ -2,7 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.network.base
 
 import android.os.Handler
 import android.os.Looper
-import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 
 abstract class ConnectivityProviderBaseImpl : ConnectivityProvider {
     private val handler = Handler(Looper.getMainLooper())

@@ -8,36 +8,36 @@ import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.dataclass.get
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.GRADES_LIST
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.CompletionType
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.request.MarkCompletedData
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.path.completion.request.MarkProjectData
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.GRADES_LIST
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.CompletionType
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.request.MarkCompletedData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.request.MarkProjectData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.finishActivityWithResult
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.generateUUID
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.MarkCompletedWorker
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.MarkCompletedWorkerData
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMarkCompletedBinding
-import com.arnyminerz.escalaralcoiaicomtat.generic.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.generic.finishActivityWithResult
-import com.arnyminerz.escalaralcoiaicomtat.generic.generateUUID
-import com.arnyminerz.escalaralcoiaicomtat.generic.getExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.generic.toast
-import com.arnyminerz.escalaralcoiaicomtat.generic.uiContext
-import com.arnyminerz.escalaralcoiaicomtat.shared.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_AREA
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_PATH_DOCUMENT
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_SECTOR_INDEX
-import com.arnyminerz.escalaralcoiaicomtat.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MARKED_AS_COMPLETE
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MARKED_AS_PROJECT
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MISSING_DATA
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_NOT_LOGGED_IN
-import com.arnyminerz.escalaralcoiaicomtat.view.visibility
-import com.arnyminerz.escalaralcoiaicomtat.worker.MarkCompletedWorker
-import com.arnyminerz.escalaralcoiaicomtat.worker.MarkCompletedWorkerData
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -301,11 +301,7 @@ class MarkCompletedActivity : AppCompatActivity() {
         // Initialize the grades list
         Timber.v("Initializing grades list...")
         binding.gradeTextView.setAdapter(
-            ArrayAdapter(
-                this,
-                R.layout.list_item,
-                GRADES_LIST
-            )
+            ArrayAdapter(this, R.layout.list_item, GRADES_LIST)
         )
         binding.gradeTextView.setText(path?.grade()?.toString())
 
