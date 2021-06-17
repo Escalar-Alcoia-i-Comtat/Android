@@ -62,7 +62,7 @@ dependencies {
     def jetpack_work_version = '2.7.0-alpha04'
     api "androidx.work:work-runtime-ktx:$jetpack_work_version"
     api "androidx.work:work-gcm:$jetpack_work_version"
-    androidTestImplementation "androidx.work:work-testing:$jetpack_work_version"
+    androidTestApi "androidx.work:work-testing:$jetpack_work_version"
     api "androidx.startup:startup-runtime:1.0.0"
 
     // Google Play Core
