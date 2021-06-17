@@ -12,6 +12,7 @@ plugins {
 apply from: './version.gradle'
 
 android {
+    // Android Build Settings
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
     ndkVersion "23.0.7123448"
@@ -21,9 +22,14 @@ android {
         targetSdkVersion 30
         versionCode findProperty("android.versionCode") as Integer
         versionName VERSION_NAME
+        
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        
+        // Sets the supported languages
         resConfigs "en", "US", "ca", "es"
     }
+    
+    // Configures the APK and AAB signing config
     signingConfigs {
         release {
             def props = new Properties()
@@ -35,22 +41,32 @@ android {
             keyPassword props.getProperty("SIGNING_KEY_PASSWORD")
         }
     }
+    
+    // Configures the different build variants
     buildTypes {
         release {
+            // Apply the proguard rules
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Change the file name
             setProperty("archivesBaseName", "EscalarAlcoiaIComtat-${android.defaultConfig.versionCode}-${android.defaultConfig.versionName}")
+            // Set the signing keys
             signingConfig signingConfigs.release
 
             kotlinOptions {
+                // Allow experimental
                 freeCompilerArgs = ['-Xuse-experimental=kotlin.Experimental']
             }
 
+            // Set the debug symbol level
             ndk.debugSymbolLevel = 'FULL'
         }
         debug {
+            // Add the date as a suffix to the version name
             versionNameSuffix "-debug-build" + getDate()
+            // Rename the output file
             setProperty("archivesBaseName", "EscalarAlcoiaIComtat")
 
+            // Disable mapping file upload for Crashlytics
             firebaseCrashlytics {
                 mappingFileUploadEnabled false
             }
@@ -122,12 +138,18 @@ static def getDate() {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.10"
+
+    // AndroidX dependencies
     implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'androidx.core:core-ktx:1.5.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'com.google.android.material:material:1.3.0'
-
     implementation 'androidx.preference:preference-ktx:1.1.1'
+
+    // GUI libraries
+    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
 
     // Core Module
     implementation project(":core")
@@ -172,11 +194,9 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.1.1'
 
+    // Timber logging
     implementation 'com.jakewharton.timber:timber:4.7.1'
 
-    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
-
-    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
-
+    // Markdown rendering
     implementation 'io.noties.markwon:core:4.6.2'
 }
