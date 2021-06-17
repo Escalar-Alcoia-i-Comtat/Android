@@ -9,7 +9,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.IntroShowReason
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreasFromCache
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
@@ -197,20 +197,18 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         loading = true
         binding.progressTextView.setText(R.string.status_downloading)
         try {
-            loadAreasFromCache(firestore, { progress, max ->
+            loadAreas(firestore, { progress, max ->
                 Timber.i("Download progress: $progress / $max")
-                runOnUiThread {
-                    if (max >= 0) {
-                        binding.progressBar.max = max
-                        binding.progressBar.setProgressCompat(progress, true)
-                        binding.progressTextView.text =
-                            getString(R.string.status_loading_progress, progress, max)
-                    } else {
-                        visibility(binding.progressBar, false)
-                        binding.progressBar.isIndeterminate = true
-                        visibility(binding.progressBar, true)
-                        binding.progressTextView.setText(R.string.status_storing)
-                    }
+                if (max >= 0) {
+                    binding.progressBar.max = max
+                    binding.progressBar.setProgressCompat(progress, true)
+                    binding.progressTextView.text =
+                        getString(R.string.status_loading_progress, progress, max)
+                } else {
+                    visibility(binding.progressBar, false)
+                    binding.progressBar.isIndeterminate = true
+                    visibility(binding.progressBar, true)
+                    binding.progressTextView.setText(R.string.status_storing)
                 }
             }) {
                 if (AREAS.size > 0) {

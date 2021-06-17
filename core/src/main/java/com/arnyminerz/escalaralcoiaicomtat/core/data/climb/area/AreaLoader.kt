@@ -1,6 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
+import android.content.Context
+import androidx.annotation.MainThread
+import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.google.firebase.firestore.FirebaseFirestore
 import timber.log.Timber
 
@@ -11,7 +15,8 @@ import timber.log.Timber
  * @see AREAS
  * @return A collection of areas
  */
-fun loadAreasFromCache(
+@MainThread
+fun Context.loadAreas(
     firestore: FirebaseFirestore,
     progressCallback: (current: Int, total: Int) -> Unit,
     callback: () -> Unit
@@ -23,6 +28,7 @@ fun loadAreasFromCache(
         .get()
         .addOnFailureListener { e ->
             Timber.w(e, "Could not get areas.")
+            toast(R.string.toast_error_load_areas)
         }
         .addOnSuccessListener { result ->
             val areas = arrayListOf<Area>()
@@ -40,8 +46,10 @@ fun loadAreasFromCache(
             Timber.v("Areas processed, ordering them...")
             areas.sortBy { area -> area.displayName }
             Timber.v("Storing loaded areas...")
-            AREAS.clear()
-            AREAS.addAll(areas)
+            synchronized(AREAS) {
+                AREAS.clear()
+                AREAS.addAll(areas)
+            }
             callback()
         }
 }
