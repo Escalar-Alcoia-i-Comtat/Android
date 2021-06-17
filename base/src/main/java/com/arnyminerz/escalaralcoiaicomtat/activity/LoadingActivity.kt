@@ -135,8 +135,6 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                 RESULT_CANCELED -> Timber.w("App update cancelled. We might need to force the update.")
                 RESULT_IN_APP_UPDATE_FAILED -> Timber.w("In app update failed.")
             }
-        else
-            super.onActivityResult(requestCode, resultCode, data)
     }
 
     /**
