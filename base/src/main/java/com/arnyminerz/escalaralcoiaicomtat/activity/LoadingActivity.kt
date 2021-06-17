@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
@@ -90,38 +91,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
         updatesCheck()
 
-        doAsync {
-            Timber.v("Getting remote configuration...")
-            val remoteConfig = Firebase.remoteConfig
-            val configSettings = remoteConfigSettings {
-                minimumFetchIntervalInSeconds = REMOTE_CONFIG_MIN_FETCH_INTERVAL
-            }
-            remoteConfig.setConfigSettingsAsync(configSettings).await()
-            remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS).await()
-            try {
-                remoteConfig.fetchAndActivate().await()
-            } catch (e: FirebaseRemoteConfigClientException) {
-                Timber.e(e, "Could not get remote config.")
-            }
-            APP_UPDATE_MAX_TIME_DAYS = remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
-            SHOW_NON_DOWNLOADED = remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
-            ENABLE_AUTHENTICATION = remoteConfig.getBoolean(ENABLE_AUTHENTICATION_KEY)
-            PROFILE_IMAGE_SIZE = remoteConfig.getLong(PROFILE_IMAGE_SIZE_KEY)
-
-            Timber.v("APP_UPDATE_MAX_TIME_DAYS: $APP_UPDATE_MAX_TIME_DAYS")
-            Timber.v("SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
-            Timber.v("ENABLE_AUTHENTICATION: $ENABLE_AUTHENTICATION")
-
-            if (!ENABLE_AUTHENTICATION) {
-                Timber.v("Removing auth state listener...")
-                Firebase.auth.removeAuthStateListener((application as App).authStateListener)
-            }
-
-            uiContext {
-                Timber.v("Finished preparing App...")
-                load()
-            }
-        }
+        doAsync { preLoad() }
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
@@ -135,6 +105,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                 RESULT_CANCELED -> Timber.w("App update cancelled. We might need to force the update.")
                 RESULT_IN_APP_UPDATE_FAILED -> Timber.w("In app update failed.")
             }
+        else
+            super.onActivityResult(requestCode, resultCode, data)
     }
 
     /**
@@ -194,12 +166,64 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         }
     }
 
+    /**
+     * This updates the UI accordingly when there's no Internet connection.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     @UiThread
     private fun noInternetAccess() {
         Timber.w("There's no Internet connection to download new data")
         binding.progressTextView.setText(R.string.status_no_internet)
         binding.progressBar.hide()
         loading = false
+    }
+
+    /**
+     * Loads the Firebase's Remote Config settings.
+     * @author Arnau Mora
+     * @since 20210617
+     */
+    @WorkerThread
+    private suspend fun loadRemoteConfig() {
+        Timber.v("Getting remote configuration...")
+        val remoteConfig = Firebase.remoteConfig
+        val configSettings = remoteConfigSettings {
+            minimumFetchIntervalInSeconds = REMOTE_CONFIG_MIN_FETCH_INTERVAL
+        }
+        remoteConfig.setConfigSettingsAsync(configSettings).await()
+        remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS).await()
+        try {
+            remoteConfig.fetchAndActivate().await()
+        } catch (e: FirebaseRemoteConfigClientException) {
+            Timber.e(e, "Could not get remote config.")
+        }
+        APP_UPDATE_MAX_TIME_DAYS = remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
+        SHOW_NON_DOWNLOADED = remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
+        ENABLE_AUTHENTICATION = remoteConfig.getBoolean(ENABLE_AUTHENTICATION_KEY)
+        PROFILE_IMAGE_SIZE = remoteConfig.getLong(PROFILE_IMAGE_SIZE_KEY)
+
+        Timber.v("APP_UPDATE_MAX_TIME_DAYS: $APP_UPDATE_MAX_TIME_DAYS")
+        Timber.v("SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
+        Timber.v("ENABLE_AUTHENTICATION: $ENABLE_AUTHENTICATION")
+    }
+
+    /**
+     * This should be ran before [load]. It loads the data from RemoteConfig, and adds some listeners.
+     */
+    @WorkerThread
+    private suspend fun preLoad() {
+        loadRemoteConfig()
+
+        if (!ENABLE_AUTHENTICATION) {
+            Timber.v("Removing auth state listener...")
+            Firebase.auth.removeAuthStateListener((application as App).authStateListener)
+        }
+
+        uiContext {
+            Timber.v("Finished preparing App...")
+            load()
+        }
     }
 
     @UiThread
