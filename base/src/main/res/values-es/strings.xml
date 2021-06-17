@@ -6,7 +6,6 @@
     <string name="sector_kids_apt">"Apto niños"</string>
     <string name="action_close">"Cerrar"</string>
     <string name="action_download">"Descargar"</string>
-    <string name="action_cancel">"Cancelar"</string>
     <string name="action_delete">"Eliminar "</string>
     <string name="action_ok">"Ok"</string>
     <string name="action_grant">"Permitir"</string>
@@ -79,8 +78,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="path_fixed_equipment">"Equipamiento fijo en la vía"</string>
     <string name="path_required_equipment">"Equipamiento necesario"</string>
     <string name="path_pitch_id">"R%s:"</string>
-    <string name="message_nearby_zones">"Zonas cercanas"</string>
-    <string name="message_nearby_zones_no_perm">"No has concedido permiso a la localización del dispositivo, así que esta función no está disponible. Pulsa para conceder permiso o pulsa y mantén para deshabilitarlo."</string>
     <string name="message_already_downloading">"El contenido ya está siendo guardado"</string>
     <string name="fab_desc_back">"Vovler"</string>
     <string name="fab_desc_position">"Ubicación Actual"</string>
@@ -123,7 +120,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="image_desc_go_back">Volver</string>
     <string name="pref_gene_map_move_marker_sum">Si el marcador debería centrarse en la pantalla al hacer click sobre él.</string>
     <string name="pref_gene_map_move_marker_title">Centrar marcador al hacer click.</string>
-    <string name="image_desc_nearby_zones">Zonas Cercanas</string>
     <string name="image_desc_path_completed">Vía Completada</string>
     <string name="image_desc_path_info">Información de Vía</string>
     <string name="image_desc_view_more">Ver más</string>
@@ -187,9 +183,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="image_desc_nav_extra">Opciones extra</string>
     <string name="pref_down_quality_sum">Selecciona la calidad de compresión de las imágenes descargadas. Cuanto más grande, más calidad, pero también archivos más grandes.</string>
     <string name="pref_down_quality_title">Calidad de descargas</string>
-    <string name="action_enable_location">Habilitar Ubicación</string>
-    <string name="dialog_gps_disabled_title">GPS deshabilitado</string>
-    <string name="dialog_gps_disabled_message">Tienes el proveedor de ubicación desconectado.</string>
     <string name="toast_error_language">No se ha podido cambiar el idioma</string>
     <string name="feedback_error_empty_message">Debes escribir el mensaje a mandar</string>
     <string name="pref_gene_error_reporting_title">Habilitar reportes de error</string>

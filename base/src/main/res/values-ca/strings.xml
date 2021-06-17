@@ -78,8 +78,6 @@
     <string name="path_fixed_equipment">"Equipament fixe de la via"</string>
     <string name="path_required_equipment">"Equipament necessari"</string>
     <string name="path_pitch_id">"R%s:"</string>
-    <string name="message_nearby_zones">"Zones properes"</string>
-    <string name="message_nearby_zones_no_perm">"No has donat accés a la ubicació del dispositiu a l'aplicació, així que aquesta funcionalitat no està disponible. Prem una vegada per a donar permís, o prem i manté per a deshabilitar."</string>
     <string name="message_already_downloading">"El contingut ja s'està baixant"</string>
     <string name="fab_desc_back">"Tornar"</string>
     <string name="fab_desc_position">"Posició Actual"</string>
@@ -122,7 +120,6 @@
     <string name="image_desc_go_back">Tornar</string>
     <string name="pref_gene_map_move_marker_sum">Si el marcador es deuria centrar en la pantalla al fer clic.</string>
     <string name="pref_gene_map_move_marker_title">Centrar marcador al fer clic</string>
-    <string name="image_desc_nearby_zones">Zones Properes</string>
     <string name="image_desc_path_completed">Via Completada</string>
     <string name="image_desc_path_info">Informació de Via</string>
     <string name="image_desc_view_more">Veure més</string>
@@ -186,9 +183,6 @@
     <string name="image_desc_nav_extra">Opcions extra</string>
     <string name="pref_down_quality_sum">Selecciona la qualitat de compressió de les imatges baixades. Quant més gran, més qualitat, però també ocuparan més.</string>
     <string name="pref_down_quality_title">Qualitat de baixades</string>
-    <string name="action_enable_location">Habilitar Ubicació</string>
-    <string name="dialog_gps_disabled_title">GPS deshabilitat</string>
-    <string name="dialog_gps_disabled_message">Tens el proveïdor d\'ubiació desconnectat.</string>
     <string name="toast_error_language">No s\'ha pogut canviar l\'idioma</string>
     <string name="feedback_error_empty_message">Has d\'escriure el missatge a enviar</string>
     <string name="pref_gene_error_reporting_title">Habilitar reports d\'error</string>
