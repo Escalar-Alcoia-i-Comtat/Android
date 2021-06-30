@@ -31,7 +31,6 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
@@ -157,23 +156,27 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
             }
             Timber.v("updatingUiStep reached $step. Updating UI...")
 
-            val lastDownloadStatus = downloadStatuses[data.objectId]
-            if (!downloadStatuses.containsKey(data.objectId) || updateDownloadStatus) {
+            // Get the last download status
+            val lastDownloadStatus =
+                synchronized(downloadStatuses) { downloadStatuses[data.objectId] }
+            val status = if (
+            // Check if there is no download status
+                lastDownloadStatus == null ||
+                // Or it has been requested to update the download status
+                updateDownloadStatus
+            ) {
+                // Fetch the new downloa status
                 val newStatus = data.downloadStatus(activity, activity.firestore)
-                runBlocking {
-                    var success = false
-                    while (!success) {
-                        try {
-                            downloadStatuses[data.objectId] = newStatus
-                            success = true
-                        } catch (_: ConcurrentModificationException) {
-                            delay(10)
-                        }
-                    }
+                // Store it in cache
+                synchronized(downloadStatuses) {
+                    downloadStatuses[data.objectId] = newStatus
                 }
                 Timber.v("$data download status: $newStatus")
-            }
-            val status = downloadStatuses[data.objectId]!!
+                // Return the new status
+                newStatus
+            } else
+                lastDownloadStatus
+
             val shouldAddObserver =
                 lastDownloadStatus != status && status == DownloadStatus.DOWNLOADING
 
