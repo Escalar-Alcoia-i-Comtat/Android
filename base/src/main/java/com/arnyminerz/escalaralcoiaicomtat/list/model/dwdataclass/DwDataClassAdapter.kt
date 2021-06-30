@@ -32,7 +32,6 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
@@ -161,16 +160,8 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
             val lastDownloadStatus = downloadStatuses[data.objectId]
             if (!downloadStatuses.containsKey(data.objectId) || updateDownloadStatus) {
                 val newStatus = data.downloadStatus(activity, activity.firestore)
-                runBlocking {
-                    var success = false
-                    while (!success) {
-                        try {
-                            downloadStatuses[data.objectId] = newStatus
-                            success = true
-                        } catch (_: ConcurrentModificationException) {
-                            delay(10)
-                        }
-                    }
+                synchronized(downloadStatuses) {
+                    downloadStatuses[data.objectId] = newStatus
                 }
                 Timber.v("$data download status: $newStatus")
             }
