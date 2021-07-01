@@ -184,51 +184,33 @@ class MapHelper {
     }
 
     fun onStart() {
-        if (mapView == null)
-            Timber.e("Could not call onStart() since mapView is null")
-        else
-            mapView!!.onStart()
+        mapView?.onStart() ?: Timber.e("Could not call onStart() since mapView is null")
         Timber.d("onStart()")
     }
 
     fun onResume() {
-        if (mapView == null)
-            Timber.e("Could not call onResume() since mapView is null")
-        else
-            mapView!!.onResume()
+        mapView?.onResume() ?: Timber.e("Could not call onResume() since mapView is null")
         Timber.d("onResume()")
     }
 
     fun onPause() {
-        if (mapView == null)
-            Timber.e("Could not call onPause() since mapView is null")
-        else
-            mapView!!.onPause()
+        mapView?.onPause() ?: Timber.e("Could not call onPause() since mapView is null")
         Timber.d("onPause()")
     }
 
     fun onStop() {
-        if (mapView == null)
-            Timber.e("Could not call onStop() since mapView is null")
-        else
-            mapView!!.onStop()
+        mapView?.onStop() ?: Timber.e("Could not call onStop() since mapView is null")
         Timber.d("onStop()")
     }
 
     fun onLowMemory() {
-        if (mapView == null)
-            Timber.e("Could not call onLowMemory() since mapView is null")
-        else
-            mapView!!.onLowMemory()
+        mapView?.onLowMemory() ?: Timber.e("Could not call onLowMemory() since mapView is null")
         Timber.d("onLowMemory()")
     }
 
     fun onDestroy() {
         locationComponent?.destroy()
-        if (mapView == null)
-            Timber.e("Could not call onDestroy() since mapView is null")
-        else
-            mapView!!.onDestroy()
+        mapView?.onDestroy() ?: Timber.e("Could not call onDestroy() since mapView is null")
         Timber.d("onDestroy()")
     }
 
