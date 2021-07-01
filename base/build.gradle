@@ -22,13 +22,13 @@ android {
         targetSdkVersion 30
         versionCode findProperty("android.versionCode") as Integer
         versionName VERSION_NAME
-        
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        
+
         // Sets the supported languages
         resConfigs "en", "US", "ca", "es"
     }
-    
+
     // Configures the APK and AAB signing config
     signingConfigs {
         release {
@@ -41,7 +41,7 @@ android {
             keyPassword props.getProperty("SIGNING_KEY_PASSWORD")
         }
     }
-    
+
     // Configures the different build variants
     buildTypes {
         release {
@@ -70,6 +70,8 @@ android {
             firebaseCrashlytics {
                 mappingFileUploadEnabled false
             }
+
+            minifyEnabled false
         }
     }
     kotlinOptions {
