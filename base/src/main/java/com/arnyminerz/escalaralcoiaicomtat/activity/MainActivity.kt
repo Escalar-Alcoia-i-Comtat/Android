@@ -337,12 +337,12 @@ class MainActivity : LanguageAppCompatActivity() {
             LOCATION_PERMISSION_REQUEST_CODE -> {
                 if (this.isLocationPermissionGranted())
                     try {
-                        areasViewFragment.mapHelperInstance?.locationComponent?.enable(this)
+                        areasViewFragment.mapHelper?.locationComponent?.enable(this)
                     } catch (_: IllegalStateException) {
                         Timber.w("The GPS is disabled.")
                         toast(R.string.toast_error_gps_disabled)
                     }
-                areasViewFragment.updateNearbyZones()
+                areasViewFragment.nearbyZones?.updateNearbyZones()
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
