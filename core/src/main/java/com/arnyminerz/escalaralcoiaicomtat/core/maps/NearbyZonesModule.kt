@@ -70,7 +70,7 @@ class NearbyZonesModule(
      * @author Arnau Mora
      * @since 20210617
      */
-    private var mapHelper: MapHelper = MapHelper()
+    var mapHelper: MapHelper = MapHelper()
 
     /**
      * A [FirebaseFirestore] instance for loading data from the server.
