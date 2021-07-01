@@ -11,6 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.NearbyZonesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
@@ -32,7 +33,10 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
     private lateinit var firestore: FirebaseFirestore
 
-    private lateinit var nearbyZones: NearbyZonesModule
+    var nearbyZones: NearbyZonesModule? = null
+
+    val mapHelper: MapHelper?
+        get() = nearbyZones?.mapHelper
 
     private var areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null
 
@@ -62,9 +66,9 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         Timber.v("Initializing MapHelper")
-        nearbyZones.onCreate(savedInstanceState)
+        nearbyZones?.onCreate(savedInstanceState)
 
-        nearbyZones.initializeMap()
+        nearbyZones?.initializeMap()
 
         Timber.v("Refreshing areas...")
         Timber.d("Initializing area adapter for AreasViewFragment...")
@@ -81,35 +85,35 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
     override fun onStart() {
         super.onStart()
-        nearbyZones.onStart()
+        nearbyZones?.onStart()
     }
 
     override fun onResume() {
         super.onResume()
 
-        nearbyZones.initializeMap()
+        nearbyZones?.initializeMap()
         justAttached = false
-        nearbyZones.onResume()
+        nearbyZones?.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        nearbyZones.onPause()
+        nearbyZones?.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        nearbyZones.onStop()
+        nearbyZones?.onStop()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        nearbyZones.onLowMemory()
+        nearbyZones?.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        nearbyZones.onDestroy()
+        nearbyZones?.onDestroy()
     }
 
     override fun onDestroyView() {
