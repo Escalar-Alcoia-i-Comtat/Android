@@ -70,7 +70,7 @@ class NearbyZonesModule(
      * @author Arnau Mora
      * @since 20210617
      */
-    var mapHelper: MapHelper = MapHelper()
+    var mapHelper: MapHelper? = null
 
     /**
      * A [FirebaseFirestore] instance for loading data from the server.
@@ -106,25 +106,27 @@ class NearbyZonesModule(
     fun nearbyZonesReady(): List<NearbyZonesError> {
         val errors = arrayListOf<NearbyZonesError>()
 
-        if (!mapHelper.isLoaded)
-            errors.add(NearbyZonesError.NEARBY_ZONES_NOT_LOADED)
+        if (mapHelper == null)
+            errors.add(NearbyZonesError.MAP_NOT_READY)
+        if (mapHelper?.isLoaded != true)
+            errors.add(NearbyZonesError.NOT_LOADED)
         else {
             if (context == null)
-                errors.add(NearbyZonesError.NEARBY_ZONES_CONTEXT)
+                errors.add(NearbyZonesError.CONTEXT)
             else if (!nearbyEnabled)
-                errors.add(NearbyZonesError.NEARBY_ZONES_NOT_ENABLED)
+                errors.add(NearbyZonesError.NOT_ENABLED)
             else if (context.isLocationPermissionGranted()) {
                 try {
-                    mapHelper.locationComponent?.enable(context!!)
+                    mapHelper?.locationComponent?.enable(context!!)
                 } catch (_: IllegalStateException) {
-                    errors.add(NearbyZonesError.NEARBY_ZONES_GPS_DISABLED)
+                    errors.add(NearbyZonesError.GPS_DISABLED)
                 }
-            } else errors.add(NearbyZonesError.NEARBY_ZONES_PERMISSION)
+            } else errors.add(NearbyZonesError.PERMISSION)
 
             if (!fragment.isResumed)
-                errors.add(NearbyZonesError.NEARBY_ZONES_RESUMED)
+                errors.add(NearbyZonesError.RESUMED)
             if (AREAS.isEmpty())
-                errors.add(NearbyZonesError.NEARBY_ZONES_EMPTY)
+                errors.add(NearbyZonesError.EMPTY)
         }
 
         if (errors.isNotEmpty())
@@ -141,8 +143,9 @@ class NearbyZonesModule(
      */
     private fun nearbyZonesClick(): Boolean =
         try {
-            val intent = mapHelper.mapsActivityIntent(activity!!, mapsActivity)
-                .putExtra(EXTRA_CENTER_CURRENT_LOCATION, true)
+            val intent = mapHelper
+                ?.mapsActivityIntent(activity!!, mapsActivity)
+                ?.putExtra(EXTRA_CENTER_CURRENT_LOCATION, true)
             Timber.v("Starting MapsActivity...")
             activity!!.startActivity(intent)
             true
@@ -167,8 +170,8 @@ class NearbyZonesModule(
             Timber.i("Nearby Zones errors: $nearbyZonesErrors")
 
             // The location permission is not granted. Show permissions message.
-            // Having NEARBY_ZONES_PERMISSION also implies that Nearby Zones is enabled.
-            if (nearbyZonesErrors.contains(NearbyZonesError.NEARBY_ZONES_PERMISSION)) {
+            // Having PERMISSION also implies that Nearby Zones is enabled.
+            if (nearbyZonesErrors.contains(NearbyZonesError.PERMISSION)) {
                 Timber.v("The Location permission is not granted")
                 visibility(binding.mapView, false)
                 visibility(binding.nearbyZonesPermissionMessage, true)
@@ -191,7 +194,7 @@ class NearbyZonesModule(
                     true
                 }
                 binding.nearbyZonesIcon.setImageResource(R.drawable.ic_round_explore_off_24)
-            } else if (nearbyZonesErrors.contains(NearbyZonesError.NEARBY_ZONES_GPS_DISABLED))
+            } else if (nearbyZonesErrors.contains(NearbyZonesError.GPS_DISABLED))
                 MaterialAlertDialogBuilder(
                     context!!,
                     R.style.ThemeOverlay_App_MaterialAlertDialog
@@ -222,7 +225,7 @@ class NearbyZonesModule(
 
             val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get()
 
-            mapHelper.clearSymbols()
+            mapHelper?.clearSymbols()
 
             doAsync {
                 val zones = arrayListOf<Zone>()
@@ -243,14 +246,14 @@ class NearbyZonesModule(
                                 withImage(icon)
                         }
                         Timber.d("Adding marker to map")
-                        mapHelper.add(marker)
+                        mapHelper?.add(marker)
                     }
                 }
 
                 Timber.d("Finished adding markers.")
                 uiContext {
-                    mapHelper.display()
-                    mapHelper.center(includeCurrentLocation = true)
+                    mapHelper?.display()
+                    mapHelper?.center(includeCurrentLocation = true)
 
                     binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
                 }
@@ -264,18 +267,18 @@ class NearbyZonesModule(
      * @since 20210617
      */
     fun initializeMap() {
-        if (mapHelper.isLoaded)
+        if (mapHelper?.isLoaded == true)
             return
 
         Timber.d("Loading map...")
         mapHelper = mapHelper
-            .withMapView(binding.mapView)
-            .withControllable(false)
-            .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE))
-            .loadMap { _, map ->
+            ?.withMapView(binding.mapView)
+            ?.withControllable(false)
+            ?.withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE))
+            ?.loadMap { _, map ->
                 Timber.d("Map is ready.")
 
-                mapHelper.locationComponent?.addLocationUpdateCallback { location ->
+                mapHelper?.locationComponent?.addLocationUpdateCallback { location ->
                     Timber.v("Got new location: [${location.latitude}, ${location.longitude}]")
 
                     updateNearbyZones(location)
@@ -298,30 +301,33 @@ class NearbyZonesModule(
     }
 
     fun onCreate(savedInstanceBundle: Bundle?) {
-        mapHelper.onCreate(savedInstanceBundle)
+        if (mapHelper == null)
+            mapHelper = MapHelper()
+
+        mapHelper?.onCreate(savedInstanceBundle)
     }
 
     fun onStart() {
-        mapHelper.onStart()
+        mapHelper?.onStart()
     }
 
     fun onResume() {
-        mapHelper.onResume()
+        mapHelper?.onResume()
     }
 
     fun onPause() {
-        mapHelper.onPause()
+        mapHelper?.onPause()
     }
 
     fun onStop() {
-        mapHelper.onStop()
+        mapHelper?.onStop()
     }
 
     fun onDestroy() {
-        mapHelper.onDestroy()
+        mapHelper?.onDestroy()
     }
 
     fun onLowMemory() {
-        mapHelper.onLowMemory()
+        mapHelper?.onLowMemory()
     }
 }
