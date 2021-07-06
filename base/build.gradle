@@ -6,7 +6,6 @@ plugins {
     id('com.google.firebase.firebase-perf')
     id('org.jetbrains.dokka')
     id('com.google.secrets_gradle_plugin') version '0.6'
-    id('com.huawei.agconnect')
 }
 
 apply from: './version.gradle'

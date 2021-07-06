@@ -89,7 +89,6 @@ dependencies {
     api 'com.google.android.gms:play-services-auth:19.0.0'
 
     // Maps SDK
-    api 'com.github.ArnyminerZ:MapKit:1.0.2-dev6'
     api 'com.google.android.gms:play-services-maps:17.0.1'
 
     // Timber
