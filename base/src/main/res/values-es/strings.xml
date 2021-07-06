@@ -4,13 +4,11 @@
     <string name="sector_walking_time">"%1$smin"</string>
     <string name="sector_height">"%1$sm"</string>
     <string name="sector_kids_apt">"Apto niños"</string>
-    <string name="action_close">"Cerrar"</string>
     <string name="action_download">"Descargar"</string>
     <string name="action_delete">"Eliminar "</string>
     <string name="action_ok">"Ok"</string>
     <string name="action_grant">"Permitir"</string>
     <string name="action_back">"Volver "</string>
-    <string name="action_open_maps">"Abrir Google Maps"</string>
     <string name="action_clear_cache">"Limpiar Cache"</string>
     <string name="action_clear_storage">"Limpiar almacenamiento"</string>
     <string name="action_clear_downloads">"Limpiar descargas"</string>
@@ -61,6 +59,7 @@
     <string name="downloads_delete_dialog_title">"¿Estás seguro?"</string>
     <string name="downloads_delete_dialog_msg">"Esto borrará %s de tu dispositivo PARA SIEMPRE. Tendrás que volver a descargarlo."</string>
     <string name="toast_error_no_internet">"Acceso a Internet no detectado "</string>
+    <string name="toast_error_internal">Ha ocurrido un error interno</string>
     <string name="toast_location_not_shown">"No se mostrará la posición actual"</string>
     <string name="toast_stored_gpx">"GPX guardado"</string>
     <string name="toast_stored_kmz">"KMZ guardado!"</string>
@@ -82,7 +81,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="fab_desc_back">"Vovler"</string>
     <string name="fab_desc_position">"Ubicación Actual"</string>
     <string name="fab_desc_download">"Descargar"</string>
-    <string name="fab_desc_map">"Abrir Google Maps"</string>
     <string name="fab_desc_next">"Siguiente"</string>
     <string name="image_desc_downloaded">"Descargado"</string>
     <string name="image_desc_no_internet">"Sin Internet"</string>
@@ -95,7 +93,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="button_desc_download">"Descargar"</string>
     <string name="button_desc_toggle">"Cambiar"</string>
     <string name="button_desc_delete">"Eliminar"</string>
-    <string name="placeholder">"Marcador"</string>
     <string name="intro_main_title">"Bienvenido a %s"</string>
     <string name="intro_main_message">"Te vamos a guiar por un proceso de configuración breve. No te preocupes, es rápido y sencillo."</string>
     <string name="date_format">"dd-MM-yyyy kk:mm:ss"</string>
@@ -158,8 +155,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="feedback_message">Mensaje</string>
     <string name="feedback_dont_contact">No contacteis conmigo</string>
     <string name="toast_message_sent">Mensaje enviado!</string>
-    <string name="fab_desc_enter">Entrar</string>
-    <string name="image_desc_marker_image">Imagen del marcador</string>
     <string name="pref_info_cat_source">Fuente</string>
     <string name="pref_info_git_title">Github</string>
     <string name="pref_info_git_sum">Ver el repositorio de Github</string>
@@ -268,4 +263,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="comments_delete_dialog_message">Seguro que quieres eliminar el comentario?</string>
     <string name="toast_error_delete_post">No se ha podido eliminar el post</string>
     <string name="toast_error_gps_disabled">El GPS está deshabilitado</string>
+    <string name="placeholder">Marcador</string>
 </resources>

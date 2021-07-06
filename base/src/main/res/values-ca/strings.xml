@@ -4,14 +4,11 @@
     <string name="sector_walking_time">"%1$smin"</string>
     <string name="sector_height">"%1$sm"</string>
     <string name="sector_kids_apt">"Apte xiquets"</string>
-    <string name="action_close">"Tancar"</string>
     <string name="action_download">"Descarregar"</string>
-    <string name="action_cancel">"Cancel·lar"</string>
     <string name="action_delete">"Eliminar"</string>
     <string name="action_ok">"OK"</string>
     <string name="action_grant">"Concedeix"</string>
     <string name="action_back">"Tornar"</string>
-    <string name="action_open_maps">"Obrir Google Maps"</string>
     <string name="action_clear_cache">"Buidar Catxé"</string>
     <string name="action_clear_storage">"Buidar Emmagatzemament"</string>
     <string name="action_clear_downloads">"Buidar Descàrregues"</string>
@@ -62,6 +59,7 @@
     <string name="downloads_delete_dialog_title">"N'estàs segur?"</string>
     <string name="downloads_delete_dialog_msg">"Açò eliminarà %s del teu dispositiu PERMANENTMENT. Ho hauràs de tornar a descarregar si ho desitges."</string>
     <string name="toast_error_no_internet">"No s'ha detectat accés a Internet"</string>
+    <string name="toast_error_internal">Ha hagut un error intern</string>
     <string name="toast_location_not_shown">"La ubicació actual no es mostrarà"</string>
     <string name="toast_stored_gpx">"GPX Desat!"</string>
     <string name="toast_stored_kmz">"KMZ Desat!"</string>
@@ -82,7 +80,6 @@
     <string name="fab_desc_back">"Tornar"</string>
     <string name="fab_desc_position">"Posició Actual"</string>
     <string name="fab_desc_download">"Descarregar"</string>
-    <string name="fab_desc_map">"Obrir Google Maps"</string>
     <string name="fab_desc_next">"Següent"</string>
     <string name="image_desc_downloaded">"Descarregat"</string>
     <string name="image_desc_no_internet">"Sense Internet"</string>
@@ -95,7 +92,6 @@
     <string name="button_desc_download">"Descarregar"</string>
     <string name="button_desc_toggle">"Canviar"</string>
     <string name="button_desc_delete">"Eliminar"</string>
-    <string name="placeholder">"Marcador"</string>
     <string name="intro_main_title">"Benvingut a %s"</string>
     <string name="intro_main_message">"Anem a guiar-te per un procés curt de configuració. No et preocupes, és ràpid i ben senzill"</string>
     <string name="date_format">"dd-MM-yyy kk:mm:ss"</string>
@@ -158,8 +154,6 @@
     <string name="feedback_message">Missatge</string>
     <string name="feedback_dont_contact">No em contacteu</string>
     <string name="toast_message_sent">Missatge enviat!</string>
-    <string name="fab_desc_enter">Accedir</string>
-    <string name="image_desc_marker_image">Imatge del marcador</string>
     <string name="pref_info_cat_source">Font</string>
     <string name="pref_info_git_title">Github</string>
     <string name="pref_info_git_sum">Veure el repositori de Github</string>
@@ -268,4 +262,5 @@
     <string name="comments_delete_dialog_message">Segur que vols eliminar el comentari?</string>
     <string name="toast_error_delete_post">No s\'ha pogut eliminar la publicació</string>
     <string name="toast_error_gps_disabled">El GPS està deshabilitat</string>
+    <string name="placeholder">Marcador</string>
 </resources>

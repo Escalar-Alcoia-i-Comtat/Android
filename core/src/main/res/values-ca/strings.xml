@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="action_close">Tancar</string>
+    <string name="action_open_maps">"Obrir Google Maps"</string>
     <string name="action_enable_location">Habilitar Ubicació</string>
 
     <string name="path_ending_plate">"Placa"</string>
@@ -81,9 +82,15 @@
     <string name="dialog_gps_disabled_title">GPS deshabilitat</string>
     <string name="dialog_gps_disabled_message">Tens el proveïdor d\'ubiació desconnectat.</string>
 
+    <string name="fab_desc_map">"Obrir Google Maps"</string>
+    <string name="fab_desc_enter">Accedir</string>
+
     <string name="image_desc_nearby_zones">Zones Properes</string>
+    <string name="image_desc_marker_image">Imatge del marcador</string>
+
     <string name="message_nearby_zones">"Zones properes"</string>
     <string name="message_nearby_zones_no_perm">"No has donat accés a la ubicació del dispositiu a l'aplicació, així que aquesta funcionalitat no està disponible. Prem una vegada per a donar permís, o prem i manté per a deshabilitar."</string>
 
+    <string name="placeholder">"Marcador"</string>
     <string name="attr_gpx">Este GPX ha sigut oferit per Escalar Alcoià i Comtat. Baixa l\'app des de https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
 </resources>
