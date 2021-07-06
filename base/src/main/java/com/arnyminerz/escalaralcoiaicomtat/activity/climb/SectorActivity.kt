@@ -134,7 +134,8 @@ class SectorActivity : LanguageAppCompatActivity() {
             val defaultPosition = savedInstanceState?.getInt(EXTRA_POSITION.key)
                 ?: intent.getExtra(EXTRA_SECTOR_INDEX, 0)
             currentPage = defaultPosition
-            fragments[defaultPosition].load()
+            if (fragments.size >= defaultPosition)
+                fragments[defaultPosition].load()
 
             uiContext {
                 Timber.v("Initializing view pager...")
