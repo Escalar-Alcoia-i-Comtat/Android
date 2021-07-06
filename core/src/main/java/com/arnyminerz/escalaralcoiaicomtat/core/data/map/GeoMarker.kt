@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Base64
+import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -81,6 +82,7 @@ class GeoMarker(
  * @since 20210602
  * @throws InvalidObjectException When the marker doesn't have any data (tag).
  */
+@UiThread
 fun Marker.getWindow(): MapObjectWindowData = load(this)
 
 fun Collection<GeoMarker>.addToMap(mapHelper: MapHelper): List<Marker> {
