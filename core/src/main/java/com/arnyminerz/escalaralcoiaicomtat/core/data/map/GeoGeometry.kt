@@ -2,12 +2,12 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.map
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
-import idroid.android.mapskit.factory.Maps
-import idroid.android.mapskit.model.CommonPolygon
-import idroid.android.mapskit.model.CommonPolygonOptions
-import idroid.android.mapskit.model.CommonPolyline
-import idroid.android.mapskit.model.CommonPolylineOptions
+import com.google.android.gms.maps.model.Polygon
+import com.google.android.gms.maps.model.PolygonOptions
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 import timber.log.Timber
 
 data class GeoGeometry(
@@ -28,17 +28,18 @@ data class GeoGeometry(
         parcel.readInt() == 1
     )
 
-    fun addToMap(map: Maps): Pair<CommonPolyline?, CommonPolygon?> {
+    fun addToMap(map: GoogleMap): Pair<Polyline?, Polygon?> {
         Timber.v("Creating new polygon with ${points.size} points...")
         return if (closedShape) { // Polygon
-            val options = CommonPolygonOptions(points)
+            val options = PolygonOptions()
+                .addAll(points)
                 .apply(style)
 
             val fill = map.addPolygon(options)
             Pair(null, fill)
         } else { // Polyline
-            val options = CommonPolylineOptions()
-                .add(points)
+            val options = PolylineOptions()
+                .addAll(points)
                 .apply(style)
             val line = map.addPolyline(options)
             Pair(line, null)
@@ -70,9 +71,9 @@ data class GeoGeometry(
 }
 
 fun Collection<GeoGeometry>.addToMap(
-    map: Maps,
-): List<Pair<CommonPolyline?, CommonPolygon?>> {
-    val list = arrayListOf<Pair<CommonPolyline?, CommonPolygon?>>()
+    map: GoogleMap,
+): List<Pair<Polyline?, Polygon?>> {
+    val list = arrayListOf<Pair<Polyline?, Polygon?>>()
     for (geometry in this)
         list.add(geometry.addToMap(map))
     return list.toList()

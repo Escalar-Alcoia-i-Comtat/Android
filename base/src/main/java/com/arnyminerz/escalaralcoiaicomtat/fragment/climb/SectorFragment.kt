@@ -224,15 +224,15 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 sector.downloadStatus(sectorActivity, sectorActivity.firestore).isDownloaded()
             else false
 
-            val size = getDisplaySize(requireActivity())
-            notMaximizedImageHeight = size.second / 2
+            if (activity != null && activity?.isDestroyed == true) {
+                val size = activity?.let { getDisplaySize(it).second } ?: 0
+                notMaximizedImageHeight = size / 2
 
-            uiContext {
-                binding?.sectorImageViewLayout?.layoutParams?.height = notMaximizedImageHeight
-                binding?.sectorImageViewLayout?.requestLayout()
-            }
+                uiContext {
+                    binding?.sectorImageViewLayout?.layoutParams?.height = notMaximizedImageHeight
+                    binding?.sectorImageViewLayout?.requestLayout()
+                }
 
-            if (activity != null) {
                 Timber.v("Loading paths...")
                 val paths = arrayListOf<Path>()
                 sector.getChildren(sectorActivity?.firestore)

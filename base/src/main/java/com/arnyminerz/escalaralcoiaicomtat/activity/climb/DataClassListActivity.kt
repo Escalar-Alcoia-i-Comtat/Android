@@ -82,7 +82,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         val view = binding.root
         setContentView(view)
 
-        mapHelper = mapHelper.withMapView(binding.map)
+        mapHelper = mapHelper.withMapFragment(this, R.id.map)
         mapHelper.onCreate(savedInstanceState)
 
         binding.statusImageView.setOnClickListener { it.performLongClick() }
@@ -134,7 +134,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                 .show()
                 .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
                 .withControllable(false)
-                .loadMap { _, map ->
+                .loadMap { map ->
                     try {
                         doAsync {
                             Timber.v("Getting KMZ file...")

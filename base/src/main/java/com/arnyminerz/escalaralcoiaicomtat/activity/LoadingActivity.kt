@@ -4,12 +4,13 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.IntroShowReason
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreasFromCache
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
@@ -69,11 +70,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         binding = ActivityLoadingBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val enableErrorReporting = SETTINGS_ERROR_REPORTING_PREF.get()
-        Firebase.crashlytics.setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
-        Timber.v("Set Crashlytics collection enabled to $enableErrorReporting")
-        Firebase.analytics.setAnalyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
-        Timber.v("Set Analytics collection enabled to $enableErrorReporting")
+        dataCollectionSetUp()
 
         Timber.v("Getting Firestore instance...")
         firestore = Firebase.firestore
@@ -92,14 +89,57 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
         deepLinkPath = getExtra(EXTRA_LINK_PATH)
 
+        updatesCheck()
+
+        doAsync { preLoad() }
+    }
+
+    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
+        load()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == APP_UPDATE_REQUEST_CODE)
+            when (resultCode) {
+                RESULT_OK -> Timber.v("App update complete")
+                RESULT_CANCELED -> Timber.w("App update cancelled. We might need to force the update.")
+                RESULT_IN_APP_UPDATE_FAILED -> Timber.w("In app update failed.")
+            }
+        else
+            super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    /**
+     * Initializes the user-set data collection policy.
+     * If debugging, data collection will always be disabled.
+     * @author Arnau Mora
+     * @since 20210617
+     * @see SETTINGS_ERROR_REPORTING_PREF
+     */
+    @UiThread
+    private fun dataCollectionSetUp() {
+        val enableErrorReporting = SETTINGS_ERROR_REPORTING_PREF.get()
+        Firebase.crashlytics.setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
+        Timber.v("Set Crashlytics collection enabled to $enableErrorReporting")
+        Firebase.analytics.setAnalyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
+        Timber.v("Set Analytics collection enabled to $enableErrorReporting")
+    }
+
+    /**
+     * Checks if there is any update available for the app at the Play Store.
+     * @author Arnau Mora
+     * @since 20210617
+     */
+    @UiThread
+    private fun updatesCheck() {
         Timber.v("Searching for updates...")
         val appUpdateManager = AppUpdateManagerFactory.create(this)
         appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
             val updateAvailability = appUpdateInfo.updateAvailability()
             if (updateAvailability == UPDATE_AVAILABLE) {
                 Timber.v("There's an update available")
-                val updateSteless = appUpdateInfo.clientVersionStalenessDays()
-                if (updateSteless != null && updateSteless >= APP_UPDATE_MAX_TIME_DAYS) {
+                val updateStaleness = appUpdateInfo.clientVersionStalenessDays()
+                if (updateStaleness != null && updateStaleness >= APP_UPDATE_MAX_TIME_DAYS) {
                     if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
                         // Request immediate update
                         Timber.v("Requesting immediate update.")
@@ -124,62 +164,66 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                 } else Timber.w("Flexible update is not allowed")
             } else Timber.d("There's no update available. ($updateAvailability)")
         }
-
-        doAsync {
-            Timber.v("Getting remote configuration...")
-            val remoteConfig = Firebase.remoteConfig
-            val configSettings = remoteConfigSettings {
-                minimumFetchIntervalInSeconds = REMOTE_CONFIG_MIN_FETCH_INTERVAL
-            }
-            remoteConfig.setConfigSettingsAsync(configSettings).await()
-            remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS).await()
-            try {
-                remoteConfig.fetchAndActivate().await()
-            } catch (e: FirebaseRemoteConfigClientException) {
-                Timber.e(e, "Could not get remote config.")
-            }
-            APP_UPDATE_MAX_TIME_DAYS = remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
-            SHOW_NON_DOWNLOADED = remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
-            ENABLE_AUTHENTICATION = remoteConfig.getBoolean(ENABLE_AUTHENTICATION_KEY)
-            PROFILE_IMAGE_SIZE = remoteConfig.getLong(PROFILE_IMAGE_SIZE_KEY)
-
-            Timber.v("APP_UPDATE_MAX_TIME_DAYS: $APP_UPDATE_MAX_TIME_DAYS")
-            Timber.v("SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
-            Timber.v("ENABLE_AUTHENTICATION: $ENABLE_AUTHENTICATION")
-
-            if (!ENABLE_AUTHENTICATION) {
-                Timber.v("Removing auth state listener...")
-                Firebase.auth.removeAuthStateListener((application as App).authStateListener)
-            }
-
-            uiContext {
-                Timber.v("Finished preparing App...")
-                load()
-            }
-        }
     }
 
-    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        load()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == APP_UPDATE_REQUEST_CODE)
-            when (resultCode) {
-                RESULT_OK -> Timber.v("App update complete")
-                RESULT_CANCELED -> Timber.w("App update cancelled. We might need to force the update.")
-                RESULT_IN_APP_UPDATE_FAILED -> Timber.w("In app update failed.")
-            }
-        else
-            super.onActivityResult(requestCode, resultCode, data)
-    }
-
+    /**
+     * This updates the UI accordingly when there's no Internet connection.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     @UiThread
     private fun noInternetAccess() {
         Timber.w("There's no Internet connection to download new data")
         binding.progressTextView.setText(R.string.status_no_internet)
         binding.progressBar.hide()
         loading = false
+    }
+
+    /**
+     * Loads the Firebase's Remote Config settings.
+     * @author Arnau Mora
+     * @since 20210617
+     */
+    @WorkerThread
+    private suspend fun loadRemoteConfig() {
+        Timber.v("Getting remote configuration...")
+        val remoteConfig = Firebase.remoteConfig
+        val configSettings = remoteConfigSettings {
+            minimumFetchIntervalInSeconds = REMOTE_CONFIG_MIN_FETCH_INTERVAL
+        }
+        remoteConfig.setConfigSettingsAsync(configSettings).await()
+        remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS).await()
+        try {
+            remoteConfig.fetchAndActivate().await()
+        } catch (e: FirebaseRemoteConfigClientException) {
+            Timber.e(e, "Could not get remote config.")
+        }
+        APP_UPDATE_MAX_TIME_DAYS = remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
+        SHOW_NON_DOWNLOADED = remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
+        ENABLE_AUTHENTICATION = remoteConfig.getBoolean(ENABLE_AUTHENTICATION_KEY)
+        PROFILE_IMAGE_SIZE = remoteConfig.getLong(PROFILE_IMAGE_SIZE_KEY)
+
+        Timber.v("APP_UPDATE_MAX_TIME_DAYS: $APP_UPDATE_MAX_TIME_DAYS")
+        Timber.v("SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
+        Timber.v("ENABLE_AUTHENTICATION: $ENABLE_AUTHENTICATION")
+    }
+
+    /**
+     * This should be ran before [load]. It loads the data from RemoteConfig, and adds some listeners.
+     */
+    @WorkerThread
+    private suspend fun preLoad() {
+        loadRemoteConfig()
+
+        if (!ENABLE_AUTHENTICATION) {
+            Timber.v("Removing auth state listener...")
+            Firebase.auth.removeAuthStateListener((application as App).authStateListener)
+        }
+
+        uiContext {
+            Timber.v("Finished preparing App...")
+            load()
+        }
     }
 
     @UiThread
@@ -197,20 +241,18 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         loading = true
         binding.progressTextView.setText(R.string.status_downloading)
         try {
-            loadAreasFromCache(firestore, { progress, max ->
+            loadAreas(firestore, { progress, max ->
                 Timber.i("Download progress: $progress / $max")
-                runOnUiThread {
-                    if (max >= 0) {
-                        binding.progressBar.max = max
-                        binding.progressBar.setProgressCompat(progress, true)
-                        binding.progressTextView.text =
-                            getString(R.string.status_loading_progress, progress, max)
-                    } else {
-                        visibility(binding.progressBar, false)
-                        binding.progressBar.isIndeterminate = true
-                        visibility(binding.progressBar, true)
-                        binding.progressTextView.setText(R.string.status_storing)
-                    }
+                if (max >= 0) {
+                    binding.progressBar.max = max
+                    binding.progressBar.setProgressCompat(progress, true)
+                    binding.progressTextView.text =
+                        getString(R.string.status_loading_progress, progress, max)
+                } else {
+                    visibility(binding.progressBar, false)
+                    binding.progressBar.isIndeterminate = true
+                    visibility(binding.progressBar, true)
+                    binding.progressTextView.setText(R.string.status_storing)
                 }
             }) {
                 if (AREAS.size > 0) {

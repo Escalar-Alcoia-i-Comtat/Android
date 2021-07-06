@@ -6,7 +6,6 @@ plugins {
     id('com.google.firebase.firebase-perf')
     id('org.jetbrains.dokka')
     id('com.google.secrets_gradle_plugin') version '0.6'
-    id('com.huawei.agconnect')
 }
 
 apply from: './version.gradle'
@@ -22,13 +21,13 @@ android {
         targetSdkVersion 30
         versionCode findProperty("android.versionCode") as Integer
         versionName VERSION_NAME
-        
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        
+
         // Sets the supported languages
         resConfigs "en", "US", "ca", "es"
     }
-    
+
     // Configures the APK and AAB signing config
     signingConfigs {
         release {
@@ -41,7 +40,7 @@ android {
             keyPassword props.getProperty("SIGNING_KEY_PASSWORD")
         }
     }
-    
+
     // Configures the different build variants
     buildTypes {
         release {
@@ -70,6 +69,8 @@ android {
             firebaseCrashlytics {
                 mappingFileUploadEnabled false
             }
+
+            minifyEnabled false
         }
     }
     kotlinOptions {

@@ -4,14 +4,11 @@
     <string name="sector_walking_time">"%1$smin"</string>
     <string name="sector_height">"%1$sm"</string>
     <string name="sector_kids_apt">"Apte xiquets"</string>
-    <string name="action_close">"Tancar"</string>
     <string name="action_download">"Descarregar"</string>
-    <string name="action_cancel">"Cancel·lar"</string>
     <string name="action_delete">"Eliminar"</string>
     <string name="action_ok">"OK"</string>
     <string name="action_grant">"Concedeix"</string>
     <string name="action_back">"Tornar"</string>
-    <string name="action_open_maps">"Obrir Google Maps"</string>
     <string name="action_clear_cache">"Buidar Catxé"</string>
     <string name="action_clear_storage">"Buidar Emmagatzemament"</string>
     <string name="action_clear_downloads">"Buidar Descàrregues"</string>
@@ -62,6 +59,7 @@
     <string name="downloads_delete_dialog_title">"N'estàs segur?"</string>
     <string name="downloads_delete_dialog_msg">"Açò eliminarà %s del teu dispositiu PERMANENTMENT. Ho hauràs de tornar a descarregar si ho desitges."</string>
     <string name="toast_error_no_internet">"No s'ha detectat accés a Internet"</string>
+    <string name="toast_error_internal">Ha hagut un error intern</string>
     <string name="toast_location_not_shown">"La ubicació actual no es mostrarà"</string>
     <string name="toast_stored_gpx">"GPX Desat!"</string>
     <string name="toast_stored_kmz">"KMZ Desat!"</string>
@@ -78,13 +76,10 @@
     <string name="path_fixed_equipment">"Equipament fixe de la via"</string>
     <string name="path_required_equipment">"Equipament necessari"</string>
     <string name="path_pitch_id">"R%s:"</string>
-    <string name="message_nearby_zones">"Zones properes"</string>
-    <string name="message_nearby_zones_no_perm">"No has donat accés a la ubicació del dispositiu a l'aplicació, així que aquesta funcionalitat no està disponible. Prem una vegada per a donar permís, o prem i manté per a deshabilitar."</string>
     <string name="message_already_downloading">"El contingut ja s'està baixant"</string>
     <string name="fab_desc_back">"Tornar"</string>
     <string name="fab_desc_position">"Posició Actual"</string>
     <string name="fab_desc_download">"Descarregar"</string>
-    <string name="fab_desc_map">"Obrir Google Maps"</string>
     <string name="fab_desc_next">"Següent"</string>
     <string name="image_desc_downloaded">"Descarregat"</string>
     <string name="image_desc_no_internet">"Sense Internet"</string>
@@ -97,7 +92,6 @@
     <string name="button_desc_download">"Descarregar"</string>
     <string name="button_desc_toggle">"Canviar"</string>
     <string name="button_desc_delete">"Eliminar"</string>
-    <string name="placeholder">"Marcador"</string>
     <string name="intro_main_title">"Benvingut a %s"</string>
     <string name="intro_main_message">"Anem a guiar-te per un procés curt de configuració. No et preocupes, és ràpid i ben senzill"</string>
     <string name="date_format">"dd-MM-yyy kk:mm:ss"</string>
@@ -122,7 +116,6 @@
     <string name="image_desc_go_back">Tornar</string>
     <string name="pref_gene_map_move_marker_sum">Si el marcador es deuria centrar en la pantalla al fer clic.</string>
     <string name="pref_gene_map_move_marker_title">Centrar marcador al fer clic</string>
-    <string name="image_desc_nearby_zones">Zones Properes</string>
     <string name="image_desc_path_completed">Via Completada</string>
     <string name="image_desc_path_info">Informació de Via</string>
     <string name="image_desc_view_more">Veure més</string>
@@ -161,8 +154,6 @@
     <string name="feedback_message">Missatge</string>
     <string name="feedback_dont_contact">No em contacteu</string>
     <string name="toast_message_sent">Missatge enviat!</string>
-    <string name="fab_desc_enter">Accedir</string>
-    <string name="image_desc_marker_image">Imatge del marcador</string>
     <string name="pref_info_cat_source">Font</string>
     <string name="pref_info_git_title">Github</string>
     <string name="pref_info_git_sum">Veure el repositori de Github</string>
@@ -186,9 +177,6 @@
     <string name="image_desc_nav_extra">Opcions extra</string>
     <string name="pref_down_quality_sum">Selecciona la qualitat de compressió de les imatges baixades. Quant més gran, més qualitat, però també ocuparan més.</string>
     <string name="pref_down_quality_title">Qualitat de baixades</string>
-    <string name="action_enable_location">Habilitar Ubicació</string>
-    <string name="dialog_gps_disabled_title">GPS deshabilitat</string>
-    <string name="dialog_gps_disabled_message">Tens el proveïdor d\'ubiació desconnectat.</string>
     <string name="toast_error_language">No s\'ha pogut canviar l\'idioma</string>
     <string name="feedback_error_empty_message">Has d\'escriure el missatge a enviar</string>
     <string name="pref_gene_error_reporting_title">Habilitar reports d\'error</string>
@@ -274,4 +262,5 @@
     <string name="comments_delete_dialog_message">Segur que vols eliminar el comentari?</string>
     <string name="toast_error_delete_post">No s\'ha pogut eliminar la publicació</string>
     <string name="toast_error_gps_disabled">El GPS està deshabilitat</string>
+    <string name="placeholder">Marcador</string>
 </resources>

@@ -40,7 +40,6 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
-import idroid.android.mapskit.factory.Maps
 import timber.log.Timber
 import java.io.FileNotFoundException
 
@@ -48,6 +47,8 @@ class MapFragment : NetworkChangeListenerFragment() {
     private lateinit var mapHelper: MapHelper
     private var mapLoaded = false
     private var mapLoading = false
+
+    private var markerWindow: MapHelper.MarkerWindow? = null
 
     private var binding: FragmentMapBinding? = null
 
@@ -62,9 +63,6 @@ class MapFragment : NetworkChangeListenerFragment() {
         binding = FragmentMapBinding.inflate(inflater, container, false)
         return binding!!.root
     }
-
-    private var map: Maps? = null
-    private var markerWindow: MapHelper.MarkerWindow? = null
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -81,9 +79,7 @@ class MapFragment : NetworkChangeListenerFragment() {
         mapHelper.onCreate(savedInstanceState ?: Bundle.EMPTY)
         mapHelper
             .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
-            .loadMap { _, map ->
-                this.map = map
-
+            .loadMap { map ->
                 if (context != null)
                     try {
                         val permissionGranted = try {
@@ -121,7 +117,7 @@ class MapFragment : NetworkChangeListenerFragment() {
                 mapHelper.addMarkerClickListener {
                     Timber.v("Tapped on symbol.")
                     if (SETTINGS_CENTER_MARKER_PREF.get())
-                        map.animateCamera(position, DEFAULT_ZOOM)
+                        mapHelper.move(position, DEFAULT_ZOOM)
 
                     markerWindow?.hide()
                     activity?.let {

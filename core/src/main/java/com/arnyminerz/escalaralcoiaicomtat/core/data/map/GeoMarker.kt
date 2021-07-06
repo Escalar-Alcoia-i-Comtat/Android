@@ -4,10 +4,12 @@ import android.graphics.Bitmap
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Base64
+import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
-import idroid.android.mapskit.model.CommonMarker
-import idroid.android.mapskit.model.CommonMarkerOptions
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import timber.log.Timber
 import java.io.InvalidObjectException
 
@@ -36,12 +38,11 @@ class GeoMarker(
         return this
     }
 
-    fun addToMap(mapHelper: MapHelper): CommonMarker {
-        val symbolOptions = CommonMarkerOptions(
-            position,
-            windowData?.title ?: "",
-            icon.icon
-        )
+    fun addToMap(mapHelper: MapHelper): Marker? {
+        val symbolOptions = MarkerOptions()
+            .position(position)
+            .title(windowData?.title ?: "")
+            .icon(BitmapDescriptorFactory.fromBitmap(icon.icon))
 
         return mapHelper.createMarker(symbolOptions, windowData)
     }
@@ -81,13 +82,14 @@ class GeoMarker(
  * @since 20210602
  * @throws InvalidObjectException When the marker doesn't have any data (tag).
  */
-fun CommonMarker.getWindow(): MapObjectWindowData = load(this)
+@UiThread
+fun Marker.getWindow(): MapObjectWindowData = load(this)
 
-fun Collection<GeoMarker>.addToMap(mapHelper: MapHelper): List<CommonMarker> {
-    val symbols = arrayListOf<CommonMarker>()
-    for (marker in this) {
-        val symbol = marker.addToMap(mapHelper)
-        symbols.add(symbol)
-    }
+fun Collection<GeoMarker>.addToMap(mapHelper: MapHelper): List<Marker> {
+    val symbols = arrayListOf<Marker>()
+    for (marker in this)
+        marker.addToMap(mapHelper)?.let {
+            symbols.add(it)
+        }
     return symbols.toList()
 }

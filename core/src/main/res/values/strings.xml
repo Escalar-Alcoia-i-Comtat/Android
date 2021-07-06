@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_open_maps">Open Google Maps</string>
     <string name="action_close">Close</string>
+    <string name="action_enable_location">Enable Location</string>
 
     <string name="path_ending_plate">Plate</string>
     <string name="path_ending_plate_ring">Plate Ring</string>
@@ -60,6 +63,7 @@
     <string name="toast_error_storage_cancelled">The request was cancelled</string>
     <string name="toast_error_storage_corrupt">The downloaded file is corrupt, contact an administrator</string>
     <string name="toast_error_storage_authentication">Could not access private file</string>
+    <string name="toast_error_load_areas">Could not load areas</string>
 
     <string name="notification_download_progress_title">Downloading…</string>
     <string name="notification_download_progress_message">Downloading %s</string>
@@ -76,5 +80,18 @@
     <string name="notification_mark_completed_error_title">Could not mark as completed</string>
     <string name="notification_mark_completed_error_message">The path \"%1$s\" was scheduled to be marked as completed, but an error occurred. Error code: %2$s</string>
 
+    <string name="dialog_gps_disabled_title">GPS disabled</string>
+    <string name="dialog_gps_disabled_message">You have the device\'s location provider turned off.</string>
+
+    <string name="fab_desc_map">Open Google Maps</string>
+    <string name="fab_desc_enter">Enter</string>
+
+    <string name="image_desc_nearby_zones">Nearby Zones</string>
+    <string name="image_desc_marker_image">Marker image</string>
+
+    <string name="message_nearby_zones">Nearby zones</string>
+    <string name="message_nearby_zones_no_perm">You have not granted access to the location of the device, so this functionality is not usable. Press once to ask for permission, or press and hold to disable.</string>
+
+    <string name="placeholder">Placeholder</string>
     <string name="attr_gpx">This GPX has been providen by Escalar Alcoià i Comtat. Download the app from https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
 </resources>

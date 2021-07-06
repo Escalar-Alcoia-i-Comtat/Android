@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="action_close">Cerrar</string>
+    <string name="action_open_maps">"Abrir Google Maps"</string>
+    <string name="action_enable_location">Habilitar Ubicación</string>
+    <string name="action_cancel">"Cancelar"</string>
 
     <string name="path_ending_plate">"Placa"</string>
     <string name="path_ending_plate_ring">"Placa con argolla"</string>
@@ -60,6 +63,7 @@
     <string name="toast_error_storage_cancelled">La solicitud ha sido cancelada</string>
     <string name="toast_error_storage_corrupt">El archivo descargado está corrupto, contacta con un administrador</string>
     <string name="toast_error_storage_authentication">No se ha podido acceder a un archivo privado</string>
+    <string name="toast_error_load_areas">No se han podido cargar las áreas</string>
 
     <string name="notification_download_progress_title">Descargando…</string>
     <string name="notification_download_progress_message">Descargando %s</string>
@@ -76,5 +80,18 @@
     <string name="notification_mark_completed_error_title">No se ha podido marcar como completada</string>
     <string name="notification_mark_completed_error_message">La vía \"%1$s\" ha sido marcada como completada, pero ha ocurrido un error en el proceso. Código de error: %2$s</string>
 
+    <string name="dialog_gps_disabled_title">GPS deshabilitado</string>
+    <string name="dialog_gps_disabled_message">Tienes el proveedor de ubicación desconectado.</string>
+
+    <string name="fab_desc_map">"Abrir Google Maps"</string>
+    <string name="fab_desc_enter">Entrar</string>
+
+    <string name="image_desc_nearby_zones">Zonas Cercanas</string>
+    <string name="image_desc_marker_image">Imagen del marcador</string>
+
+    <string name="message_nearby_zones">"Zonas cercanas"</string>
+    <string name="message_nearby_zones_no_perm">"No has concedido permiso a la localización del dispositivo, así que esta función no está disponible. Pulsa para conceder permiso o pulsa y mantén para deshabilitarlo."</string>
+
+    <string name="placeholder">"Marcador"</string>
     <string name="attr_gpx">Este GPX ha sido ofrecido por Escalar Alcoià i Comtat. Descarga la app desde https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
 </resources>

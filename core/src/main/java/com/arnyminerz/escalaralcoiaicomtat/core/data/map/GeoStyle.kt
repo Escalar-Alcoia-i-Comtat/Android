@@ -3,40 +3,25 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.map
 import android.graphics.Color
 import android.os.Parcel
 import android.os.Parcelable
-import idroid.android.mapskit.model.CommonCap
-import idroid.android.mapskit.model.CommonJointType
-import idroid.android.mapskit.model.CommonPolygonOptions
-import idroid.android.mapskit.model.CommonPolylineOptions
+import com.google.android.gms.maps.model.Cap
+import com.google.android.gms.maps.model.PolygonOptions
+import com.google.android.gms.maps.model.PolylineOptions
 
 data class GeoStyle(
     val fillColor: String?,
     val strokeColor: String?,
     val lineWidth: Float?,
-    val jointType: CommonJointType?,
-    val startEndCap: Pair<CommonCap?, CommonCap?> = Pair(null, null)
+    @com.arnyminerz.escalaralcoiaicomtat.core.annotations.JointType val jointType: Int?,
+    val startEndCap: Pair<Cap?, Cap?> = Pair(null, null)
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString(),
         parcel.readString(),
         parcel.readFloat(),
-        when (parcel.readInt()) {
-            0 -> CommonJointType.ROUND
-            1 -> CommonJointType.BEVEL
-            else -> CommonJointType.DEFAULT
-        },
+        parcel.readInt(),
         Pair(
-            when (parcel.readInt()) {
-                0 -> CommonCap.BUTT
-                1 -> CommonCap.ROUND
-                2 -> CommonCap.SQUARE
-                else -> null
-            },
-            when (parcel.readInt()) {
-                0 -> CommonCap.BUTT
-                1 -> CommonCap.ROUND
-                2 -> CommonCap.SQUARE
-                else -> null
-            },
+            parcel.readParcelable(Cap::class.java.classLoader),
+            parcel.readParcelable(Cap::class.java.classLoader),
         )
     )
 
@@ -61,30 +46,9 @@ data class GeoStyle(
         dest.writeString(fillColor)
         dest.writeString(strokeColor)
         lineWidth?.let { dest.writeFloat(it) }
-        dest.writeInt(
-            when (jointType) {
-                CommonJointType.BEVEL -> 0
-                CommonJointType.ROUND -> 1
-                CommonJointType.DEFAULT -> 2
-                else -> 2
-            }
-        )
-        dest.writeInt(
-            when (startEndCap.first) {
-                CommonCap.BUTT -> 0
-                CommonCap.ROUND -> 1
-                CommonCap.SQUARE -> 2
-                else -> -1
-            }
-        )
-        dest.writeInt(
-            when (startEndCap.second) {
-                CommonCap.BUTT -> 0
-                CommonCap.ROUND -> 1
-                CommonCap.SQUARE -> 2
-                else -> -1
-            }
-        )
+        jointType?.let { dest.writeInt(it) }
+        dest.writeParcelable(startEndCap.first, 0)
+        dest.writeParcelable(startEndCap.second, 0)
     }
 
     companion object CREATOR : Parcelable.Creator<GeoStyle> {
@@ -98,20 +62,21 @@ data class GeoStyle(
     }
 }
 
-fun CommonPolygonOptions.apply(geoStyle: GeoStyle): CommonPolygonOptions {
+fun PolygonOptions.apply(geoStyle: GeoStyle): PolygonOptions {
     val strokeColor = geoStyle.strokeColor()
     val strokeWidth = geoStyle.lineWidth
     val jointType = geoStyle.jointType
     return apply {
         if (strokeColor != null)
-            this.strokeColor = strokeColor
-        this.strokeJointType = jointType
+            this.strokeColor(strokeColor)
+        if (jointType != null)
+            this.strokeJointType(jointType)
         if (strokeWidth != null)
-            this.strokeWidth = strokeWidth
+            this.strokeWidth(strokeWidth)
     }
 }
 
-fun CommonPolylineOptions.apply(geoStyle: GeoStyle): CommonPolylineOptions {
+fun PolylineOptions.apply(geoStyle: GeoStyle): PolylineOptions {
     var modOptions = this
 
     val strokeColor = geoStyle.strokeColor()

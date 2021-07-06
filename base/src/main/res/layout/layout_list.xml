@@ -93,9 +93,10 @@
                 android:id="@+id/noInternetCard"
                 layout="@layout/no_internet_card" />
 
-            <idroid.android.mapskit.ui.HuaweiGoogleMapView
+            <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/map"
                 android:layout_width="match_parent"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_height="200dp" />
 
             <androidx.recyclerview.widget.RecyclerView

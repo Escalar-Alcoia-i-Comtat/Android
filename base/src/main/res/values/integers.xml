@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="anim_duration_medium">500</integer>
-
     <integer name="marker_padding">50</integer>
 </resources>

@@ -63,6 +63,7 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     }
 
     override fun onTerminate() {
+        Timber.i("Terminating app...")
         Timber.v("Removing network listener...")
         provider.removeListener(this)
         super.onTerminate()

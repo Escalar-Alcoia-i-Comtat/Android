@@ -9,11 +9,17 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.DisplayMetrics
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import java.util.UUID
 
 fun generateUUID(): String = UUID.randomUUID().toString()
 
+/**
+ * Gets the display's size in px.
+ * @author Arnau Mora
+ * @since 20210706
+ * @param activity The currently running [Activity] to fetch the data from.
+ * @return A [Pair] being the first element the width, and the second the height.
+ */
 @Suppress("DEPRECATION")
 fun getDisplaySize(activity: Activity): Pair<Int, Int> =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -50,16 +56,3 @@ fun drawableToBitmap(drawable: Drawable): Bitmap {
 
     return bitmap
 }
-
-/**
- * Runs the action in the UI thread.
- * @author Arnau Mora
- * @since 20210311
- * @param action The runnable to execute
- * @see Activity.runOnUiThread
- * @see Fragment.getActivity
- * @throws IllegalStateException If not currently associated with an activity or if associated only with a context
- */
-@Throws(IllegalStateException::class)
-fun Fragment.runOnUiThread(action: Activity.() -> Unit) =
-    requireActivity().runOnUiThread { action(requireActivity()) }

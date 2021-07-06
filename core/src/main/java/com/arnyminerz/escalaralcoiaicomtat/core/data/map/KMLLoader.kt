@@ -14,11 +14,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.storeFile
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toElementList
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.web.download
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.firebase.storage.StorageReference
-import idroid.android.mapskit.factory.Maps
-import idroid.android.mapskit.model.CommonJointType
 import kotlinx.coroutines.tasks.await
 import org.w3c.dom.Element
 import org.xml.sax.InputSource
@@ -47,7 +48,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 @WorkerThread
 suspend fun loadKML(
     context: Context,
-    map: Maps,
+    map: GoogleMap,
     kmlReference: StorageReference? = null,
     kmzFile: File? = null
 ): MapFeatures {
@@ -305,7 +306,7 @@ suspend fun loadKML(
                                     "#$polyColor",
                                     "#$lineColor",
                                     lineWidth?.toFloat(),
-                                    CommonJointType.ROUND
+                                    JointType.ROUND
                                 ),
                                 polygonPoints,
                                 (if (title != null)
@@ -348,7 +349,7 @@ suspend fun loadKML(
                                 "#$polyColor",
                                 "#$lineColor",
                                 lineWidth?.toFloat(),
-                                CommonJointType.ROUND
+                                JointType.ROUND
                             ),
                             polygonPoints,
                             (if (title != null)
@@ -363,13 +364,15 @@ suspend fun loadKML(
 
     Timber.v("Centering map...")
     uiContext {
-        if (addedPoints.size > 1)
-            map.moveCamera(
-                LatLngBounds.builder().includeAll(addedPoints).build().center,
-                DEFAULT_ZOOM
+        val update = when {
+            addedPoints.size > 1 -> CameraUpdateFactory.newLatLngBounds(
+                LatLngBounds.builder().includeAll(addedPoints).build(), 10
             )
-        else if (addedPoints.size > 0)
-            map.moveCamera(addedPoints.first(), DEFAULT_ZOOM)
+            addedPoints.size > 0 -> CameraUpdateFactory.newLatLng(addedPoints.first())
+            else -> null
+        }
+        if (update != null)
+            map.moveCamera(update)
     }
 
     tempDir?.deleteRecursively()

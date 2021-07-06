@@ -112,8 +112,8 @@ class LocationComponent(private val mapHelper: MapHelper) {
             locationUpdateCallback
         )
 
-        mapHelper.map!!.setMyLocationEnabled(true)
-        mapHelper.map!!.setMyLocationButtonEnabled(false)
+        mapHelper.map!!.isMyLocationEnabled = true
+        mapHelper.map!!.uiSettings.isMyLocationButtonEnabled = false
         Timber.i("Enabled location component for MapHelper")
     }
 
