@@ -7,9 +7,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
-import android.os.Handler
 import android.os.LocaleList
-import android.os.Looper
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
@@ -26,15 +24,6 @@ fun Context.toast(text: String, duration: Int = Toast.LENGTH_SHORT) =
 @UiThread
 fun Context.toast(@StringRes text: Int, duration: Int = Toast.LENGTH_SHORT) =
     Toast.makeText(this, text, duration).show()
-
-fun Context.onUiThread(call: (context: Context) -> Unit) {
-    if (this is Activity)
-        runOnUiThread { call(this) }
-    else
-        Handler(Looper.getMainLooper()).post {
-            call(this)
-        }
-}
 
 @UiThread
 fun toast(context: Context?, @StringRes text: Int) =
