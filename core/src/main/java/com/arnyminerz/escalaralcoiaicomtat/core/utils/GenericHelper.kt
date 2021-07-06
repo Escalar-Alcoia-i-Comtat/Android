@@ -13,6 +13,13 @@ import java.util.UUID
 
 fun generateUUID(): String = UUID.randomUUID().toString()
 
+/**
+ * Gets the display's size in px.
+ * @author Arnau Mora
+ * @since 20210706
+ * @param activity The currently running [Activity] to fetch the data from.
+ * @return A [Pair] being the first element the width, and the second the height.
+ */
 @Suppress("DEPRECATION")
 fun getDisplaySize(activity: Activity): Pair<Int, Int> =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
