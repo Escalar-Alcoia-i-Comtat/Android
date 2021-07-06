@@ -9,6 +9,7 @@ import android.location.Location
 import android.os.Bundle
 import android.provider.Settings
 import androidx.annotation.UiThread
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
@@ -173,7 +174,7 @@ class NearbyZonesModule(
             // Having PERMISSION also implies that Nearby Zones is enabled.
             if (nearbyZonesErrors.contains(NearbyZonesError.PERMISSION)) {
                 Timber.v("The Location permission is not granted")
-                visibility(binding.mapView, false)
+                visibility(binding.map, false)
                 visibility(binding.nearbyZonesPermissionMessage, true)
                 visibility(binding.nearbyZonesCardView, true)
 
@@ -217,7 +218,7 @@ class NearbyZonesModule(
 
             binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
 
-            visibility(binding.mapView, true)
+            visibility(binding.map, true)
             visibility(binding.nearbyZonesPermissionMessage, false)
 
             binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
@@ -270,12 +271,14 @@ class NearbyZonesModule(
         if (mapHelper?.isLoaded == true)
             return
 
+        val appCompatActivity = fragment.activity as? AppCompatActivity ?: return
+
         Timber.d("Loading map...")
         mapHelper = mapHelper
-            ?.withMapView(binding.mapView)
+            ?.withMapFragment(appCompatActivity, R.id.map)
             ?.withControllable(false)
             ?.withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE))
-            ?.loadMap { _, map ->
+            ?.loadMap { map ->
                 Timber.d("Map is ready.")
 
                 mapHelper?.locationComponent?.addLocationUpdateCallback { location ->

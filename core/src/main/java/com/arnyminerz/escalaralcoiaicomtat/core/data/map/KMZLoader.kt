@@ -9,8 +9,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.mkdirsIfNotExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.UnzipUtil
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toElementList
+import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
-import idroid.android.mapskit.model.CommonJointType
 import org.w3c.dom.Element
 import timber.log.Timber
 import java.io.BufferedInputStream
@@ -246,7 +246,7 @@ fun loadKMZ(
                                     "#$polyColor",
                                     "#$lineColor",
                                     lineWidth?.toFloat(),
-                                    CommonJointType.ROUND
+                                    JointType.ROUND
                                 ),
                                 polygonPoints,
                                 (if (title != null)
@@ -289,7 +289,7 @@ fun loadKMZ(
                                 "#$polyColor",
                                 "#$lineColor",
                                 lineWidth?.toFloat(),
-                                CommonJointType.ROUND
+                                JointType.ROUND
                             ),
                             polygonPoints,
                             (if (title != null)

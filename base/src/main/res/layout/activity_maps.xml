@@ -6,9 +6,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".activity.MapsActivity">
 
-    <idroid.android.mapskit.ui.HuaweiGoogleMapView
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/map"
         android:layout_width="match_parent"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_height="match_parent" />
     
     <com.google.android.material.floatingactionbutton.FloatingActionButton

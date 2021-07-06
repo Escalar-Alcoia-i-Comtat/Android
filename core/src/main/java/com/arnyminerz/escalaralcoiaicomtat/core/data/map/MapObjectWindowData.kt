@@ -3,9 +3,9 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.map
 import android.os.Parcel
 import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.generateUUID
+import com.google.android.gms.maps.model.Marker
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
-import idroid.android.mapskit.model.CommonMarker
 import timber.log.Timber
 import java.io.InvalidObjectException
 
@@ -16,7 +16,7 @@ import java.io.InvalidObjectException
  * @param symbol The symbol to extract from
  * @throws InvalidObjectException When [symbol] doesn't have any data (tag).
  */
-fun load(symbol: CommonMarker): MapObjectWindowData =
+fun load(symbol: Marker): MapObjectWindowData =
     symbol.tag as? MapObjectWindowData
         ?: throw InvalidObjectException("Symbol doesn't have any data")
 

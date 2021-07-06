@@ -15,11 +15,14 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.IdRes
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.edit
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.MapType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass.Companion.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
@@ -46,16 +49,20 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polygon
+import com.google.android.gms.maps.model.Polyline
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FirebaseFirestore
-import idroid.android.mapskit.factory.Maps
-import idroid.android.mapskit.model.CommonMarker
-import idroid.android.mapskit.model.CommonMarkerOptions
-import idroid.android.mapskit.model.CommonPolygon
-import idroid.android.mapskit.model.CommonPolyline
-import idroid.android.mapskit.ui.HuaweiGoogleMapView
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
@@ -72,7 +79,7 @@ class MapHelper {
     companion object {
         suspend fun getTarget(
             activity: Activity,
-            marker: CommonMarker,
+            marker: Marker,
             firestore: FirebaseFirestore
         ): Intent? {
             Timber.d("Getting marker's title...")
@@ -99,9 +106,10 @@ class MapHelper {
         }
     }
 
-    var map: Maps? = null
+    var map: GoogleMap? = null
 
-    private var mapView: HuaweiGoogleMapView? = null
+    private var mapView: MapView? = null
+    private var mapFragment: SupportMapFragment? = null
 
     var locationComponent: LocationComponent? = null
         private set
@@ -114,14 +122,14 @@ class MapHelper {
      * @author Arnau Mora
      * @since 20210602
      */
-    private var lastZoom: Float = DEFAULT_ZOOM
+    private var initialZoom: Float = DEFAULT_ZOOM
 
     /**
      * Stores the last position the map has had.
      * @author Arnau Mora
      * @since 20210602
      */
-    private var lastPosition: LatLng = LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
+    private var initialPosition: LatLng = LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
 
     private var allGesturesEnabled: Boolean = true
 
@@ -145,7 +153,7 @@ class MapHelper {
      * @author Arnau Mora
      * @since 20210604
      */
-    private val commonMarkers = arrayListOf<CommonMarker>()
+    private val commonMarkers = arrayListOf<Marker>()
 
     /**
      * Stores all the polylines that have been added to the map, as references, for manipulating them
@@ -153,7 +161,7 @@ class MapHelper {
      * @author Arnau Mora
      * @since 20210604
      */
-    private val polylines = arrayListOf<CommonPolyline>()
+    private val polylines = arrayListOf<Polyline>()
 
     /**
      * Stores all the polygons that have been added to the map, as references, for manipulating them
@@ -161,11 +169,11 @@ class MapHelper {
      * @author Arnau Mora
      * @since 20210604
      */
-    private val polygons = arrayListOf<CommonPolygon>()
+    private val polygons = arrayListOf<Polygon>()
 
     private var loadedKmzFile: File? = null
 
-    private val markerClickListeners = arrayListOf<CommonMarker.() -> Boolean>()
+    private val markerClickListeners = arrayListOf<Marker.() -> Boolean>()
 
     private var mapSetUp = false
 
@@ -214,15 +222,20 @@ class MapHelper {
         Timber.d("onDestroy()")
     }
 
-    fun withMapView(mapView: HuaweiGoogleMapView): MapHelper {
+    fun withMapView(mapView: MapView): MapHelper {
         this.mapView = mapView
+        return this
+    }
+
+    fun withMapFragment(activity: AppCompatActivity, @IdRes id: Int): MapHelper {
+        mapFragment = activity.supportFragmentManager.findFragmentById(id) as? SupportMapFragment
         return this
     }
 
     fun withStartingPosition(startingPosition: LatLng?, zoom: Float = DEFAULT_ZOOM): MapHelper {
         if (startingPosition != null)
-            lastPosition = startingPosition
-        this.lastZoom = zoom
+            initialPosition = startingPosition
+        this.initialZoom = zoom
         return this
     }
 
@@ -234,11 +247,11 @@ class MapHelper {
     fun withControllable(controllable: Boolean): MapHelper {
         allGesturesEnabled = controllable
         if (map != null)
-            map?.setAllGesturesEnabled(allGesturesEnabled)
+            map?.uiSettings?.setAllGesturesEnabled(allGesturesEnabled)
         return this
     }
 
-    private fun mapSetup(map: Maps) {
+    private fun mapSetup(map: GoogleMap) {
         this.map = map
 
         map.setOnMarkerClickListener { marker ->
@@ -249,46 +262,50 @@ class MapHelper {
                     anyFalse = true
             !anyFalse
         }
-        map.setOnCameraMoveListener { position -> lastPosition = position }
 
-        map.setCompassEnabled(false)
-        map.setAllGesturesEnabled(allGesturesEnabled)
+        map.uiSettings.apply {
+            this.isCompassEnabled = false
+            setAllGesturesEnabled(allGesturesEnabled)
+        }
 
         locationComponent = LocationComponent(this)
         export = MapExportModule(this)
 
         mapSetUp = true
-        move(lastPosition, lastZoom, false)
+        move(initialPosition, initialZoom, false)
     }
 
     /**
      * Initializes [mapView] and sets the desired [type]. Then runs [mapSetUp] for preparing all
      * the required variables for the rest of the functions of [MapHelper].
      * @author Arnau Mora
-     * @param type The [Maps.Type] to set to the map.
+     * @param type The type to set to the map.
      * @param callback What to call when the map gets loaded
      * @throws IllegalStateException When prepared map and [isLoaded] is false.
      * @see MapHelper
-     * @see HuaweiGoogleMapView
-     * @see Maps.Type
-     * @see Maps
+     * @see MapView
+     * @see GoogleMap
      * @see isLoaded
      */
     @Throws(IllegalStateException::class)
     fun loadMap(
-        type: Maps.Type = Maps.Type.SATALLITE,
-        callback: (mapView: HuaweiGoogleMapView, map: Maps) -> Unit
+        @MapType type: Int = GoogleMap.MAP_TYPE_SATELLITE,
+        callback: MapHelper.(map: GoogleMap) -> Unit
     ): MapHelper {
         Timber.d("Loading map...")
-        mapView?.getMapAsync { map ->
+        val mapReadyCallback = OnMapReadyCallback { map ->
             Timber.d("Setting map type...")
-            map.setMapType(type)
+            map.mapType = type
 
             mapSetup(map)
             if (!isLoaded)
                 throw IllegalStateException("There was an issue while initializing MapHelper.")
-            callback(mapView!!, map)
-        } ?: Timber.e("Could not call loadMap() since mapView is null")
+            callback(this, map)
+        }
+        mapView?.getMapAsync(mapReadyCallback)
+            ?: Timber.e("Could not call loadMap() since mapView is null")
+        mapFragment?.getMapAsync(mapReadyCallback)
+            ?: Timber.e("Could not call loadMap() since mapFragment is null")
 
         return this
     }
@@ -309,7 +326,8 @@ class MapHelper {
     ): MapFeatures? =
         try {
             Timber.v("Getting map features...")
-            val features = com.arnyminerz.escalaralcoiaicomtat.core.data.map.loadKMZ(context, kmzFile)
+            val features =
+                com.arnyminerz.escalaralcoiaicomtat.core.data.map.loadKMZ(context, kmzFile)
             loadedKmzFile = kmzFile
 
             if (addToMap) {
@@ -371,15 +389,12 @@ class MapHelper {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
-        if (animate) {
-            map?.animateCamera(position, zoom)
-            lastZoom = zoom
-            lastPosition = position
-        } else {
-            map?.moveCamera(position, zoom)
-            lastZoom = zoom
-            lastPosition = position
-        }
+        val update = CameraUpdateFactory.newLatLngZoom(position, zoom)
+
+        if (animate)
+            map?.animateCamera(update)
+        else
+            map?.moveCamera(update)
 
         return this
     }
@@ -398,13 +413,12 @@ class MapHelper {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
-        lastPosition = if (animate) {
-            map?.animateCamera(position, lastZoom)
-            position
-        } else {
-            map?.moveCamera(position, lastZoom)
-            position
-        }
+        val update = CameraUpdateFactory.newLatLng(position)
+
+        if (animate)
+            map?.animateCamera(update)
+        else
+            map?.moveCamera(update)
 
         return this
     }
@@ -423,12 +437,22 @@ class MapHelper {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
-        lastZoom = if (animate) {
-            map?.animateCamera(zoom)
-            zoom
-        } else {
-            map?.moveCamera(lastPosition, zoom)
-            zoom
+        val map = this.map
+        if (map != null) {
+            val cameraPosition = map.cameraPosition
+            val update = CameraUpdateFactory.newCameraPosition(
+                CameraPosition(
+                    cameraPosition.target,
+                    zoom,
+                    cameraPosition.tilt,
+                    cameraPosition.bearing
+                )
+            )
+
+            if (animate)
+                map.animateCamera(update)
+            else
+                map.moveCamera(update)
         }
 
         return this
@@ -449,10 +473,12 @@ class MapHelper {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
+        val update = CameraUpdateFactory.newLatLngBounds(bounds, padding)
+
         if (animate)
-            map?.animateCamera(bounds, padding)
+            map?.animateCamera(update)
         else
-            map?.moveCamera(bounds.center, lastZoom)
+            map?.moveCamera(update)
 
         return this
     }
@@ -463,7 +489,7 @@ class MapHelper {
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @Throws(MapNotInitializedException::class)
-    fun addMarkerClickListener(call: CommonMarker.() -> Boolean) {
+    fun addMarkerClickListener(call: Marker.() -> Boolean) {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
 
@@ -548,7 +574,7 @@ class MapHelper {
     /**
      * Clears all the symbols from the map
      * @author Arnau Mora
-     * @see CommonMarker
+     * @see Marker
      * @throws MapNotInitializedException If the map has not been initialized
      */
     @UiThread
@@ -686,14 +712,14 @@ class MapHelper {
      */
     @Throws(MapNotInitializedException::class)
     fun createMarker(
-        options: CommonMarkerOptions,
+        options: MarkerOptions,
         window: MapObjectWindowData? = null
-    ): CommonMarker {
+    ): Marker? {
         if (!isLoaded)
             throw MapNotInitializedException("Map not initialized. Please run loadMap before this")
-        return map!!.addMarker(options).also {
+        return map!!.addMarker(options)?.also {
             if (window != null)
-                it.setMarkerTag(window)
+                it.tag = window
         }
     }
 
@@ -709,7 +735,7 @@ class MapHelper {
     fun infoCard(
         activity: Activity,
         firestore: FirebaseFirestore,
-        marker: CommonMarker,
+        marker: Marker,
         rootView: ViewGroup
     ): MarkerWindow = MarkerWindow(activity, marker, rootView, firestore)
 
@@ -748,7 +774,7 @@ class MapHelper {
     inner class MarkerWindow
     @UiThread constructor(
         private val activity: Activity,
-        private val marker: CommonMarker,
+        private val marker: Marker,
         private val rootView: ViewGroup,
         private val firestore: FirebaseFirestore
     ) {

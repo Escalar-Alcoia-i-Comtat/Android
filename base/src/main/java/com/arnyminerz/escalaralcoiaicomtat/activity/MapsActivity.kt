@@ -303,37 +303,34 @@ class MapsActivity : LanguageAppCompatActivity() {
         centerCurrentLocation: Boolean
     ) {
         mapHelper = MapHelper()
-            .withMapView(binding.map)
+            .withMapFragment(this, R.id.map)
         mapHelper.onCreate(savedInstanceState)
         mapHelper = mapHelper
-            .loadMap { _, map ->
+            .loadMap { map ->
                 Timber.v("Map loaded successfully")
                 doAsync {
-                    val kmlResult = kmzFile?.let { mapHelper.loadKMZ(this@MapsActivity, it) }
+                    val kmlResult = kmzFile?.let { loadKMZ(this@MapsActivity, it) }
 
                     if (kmlResult != null)
-                        mapHelper.add(kmlResult)
+                        add(kmlResult)
 
                     // Add the features from the intent
                     Timber.v(
                         "Got ${markers.size} markers and ${geometries.size} geometries from intent."
                     )
-                    mapHelper.addMarkers(markers)
-                    mapHelper.addGeometries(geometries)
+                    addMarkers(markers)
+                    addGeometries(geometries)
 
                     uiContext {
-                        mapHelper.display()
-                        mapHelper.center(
-                            MAP_LOAD_PADDING,
-                            includeCurrentLocation = centerCurrentLocation
-                        )
+                        display()
+                        center(MAP_LOAD_PADDING, includeCurrentLocation = centerCurrentLocation)
                     }
                 }
 
                 Timber.v("Loading current location")
                 tryToShowCurrentLocation()
 
-                map.setCompassEnabled(true)
+                map.uiSettings.isCompassEnabled = true
 
                 map.setOnCameraMoveListener {
                     if (mapHelper.locationComponent?.lastKnownLocation != null)
