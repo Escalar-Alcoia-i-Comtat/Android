@@ -11,6 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.NearbyZonesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_DISABLE_NEARBY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
@@ -57,18 +58,23 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
         firestore = Firebase.firestore
 
-        nearbyZones = NearbyZonesModule(this, MapsActivity::class.java, binding.nearbyZonesCard)
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Timber.v("Initializing MapHelper")
-        nearbyZones?.onCreate(savedInstanceState)
+        if (PREF_DISABLE_NEARBY.get())
+            Timber.i("Nearby Zones is disabled, won't load")
+        else {
+            Timber.v("Initializing Nearby Zones...")
+            nearbyZones = NearbyZonesModule(this, MapsActivity::class.java, binding.nearbyZonesCard)
 
-        nearbyZones?.initializeMap()
+            Timber.v("Initializing MapHelper")
+            nearbyZones?.onCreate(savedInstanceState)
+
+            nearbyZones?.initializeMap()
+        }
 
         Timber.v("Refreshing areas...")
         Timber.d("Initializing area adapter for AreasViewFragment...")
