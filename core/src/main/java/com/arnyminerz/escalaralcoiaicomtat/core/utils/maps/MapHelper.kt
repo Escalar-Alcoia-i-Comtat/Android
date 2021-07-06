@@ -77,13 +77,14 @@ import java.io.InvalidObjectException
 class MapHelper {
 
     companion object {
+        @WorkerThread
         suspend fun getTarget(
             activity: Activity,
             marker: Marker,
             firestore: FirebaseFirestore
         ): Intent? {
             Timber.d("Getting marker's title...")
-            val title = marker.getWindow().title
+            val title = uiContext { marker.getWindow().title }
             Timber.v("Searching in ${AREAS.size} cached areas...")
             return getIntent(activity, title, firestore)
         }
