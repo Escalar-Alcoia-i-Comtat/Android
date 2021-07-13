@@ -225,7 +225,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 sector.downloadStatus(sectorActivity, sectorActivity.firestore).isDownloaded()
             else false
 
-            if (activity != null && activity?.isDestroyed == true) {
+            if (activity != null && activity?.isDestroyed == false) {
                 val size = activity?.let { getDisplaySize(it).second } ?: 0
                 notMaximizedImageHeight = size / 2
 
@@ -303,7 +303,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
                     }
                 }
             } else
-                Timber.e("Could not start loading sectors since context is null")
+                Timber.e("Could not start loading sectors since context is null. Activity destroyed: ${activity?.isDestroyed}")
         }
 
         uiContext {
