@@ -33,7 +33,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.cache
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.MEGABYTE
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
@@ -45,6 +44,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.worker.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.DownloadWorker
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.google.firebase.dynamiclinks.ShortDynamicLink
 import com.google.firebase.dynamiclinks.ktx.androidParameters
@@ -739,6 +739,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         activity: Activity,
         storage: FirebaseStorage,
         imageView: ImageView,
+        progressBar: LinearProgressIndicator?,
         imageLoadParameters: ImageLoadParameters? = null
     ) {
         if (activity.isDestroyed) {
@@ -746,6 +747,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             return
         }
 
+        @UiThread
         fun loadImage(bmp: Bitmap?, @DrawableRes resource: Int?) {
             if (bmp != null)
                 imageView.setImageBitmap(bmp)
@@ -763,12 +765,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             Timber.d("Loading image from storage: ${downloadedImageFile.path}")
             val bmp = readBitmap(downloadedImageFile)
             imageView.setImageBitmap(bmp)
-        } else
+        } else {
+            val tempFile = File.createTempFile("images", objectId)
             storage.getReferenceFromUrl(imageReferenceUrl)
-                .getBytes(MEGABYTE * 50)
-                .addOnSuccessListener { bytes ->
+                .getFile(tempFile)
+                .addOnSuccessListener {
                     Timber.v("Loaded image for $objectId. Decoding...")
-                    val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    val bitmap = BitmapFactory.decodeFile(tempFile.path)
 
                     Timber.v("Image decoded, scaling...")
                     val scale = imageLoadParameters?.resultImageScale ?: 1f
@@ -777,10 +780,17 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     Timber.v("Setting image into imageView.")
                     loadImage(bmp, null)
                 }
+                .addOnProgressListener { snapshot ->
+                    val bytesCount = snapshot.bytesTransferred
+                    val totalBytes = snapshot.totalByteCount
+                    val progress = bytesCount / totalBytes
+                    progressBar?.progress = (progress * 100).toInt()
+                }
                 .addOnFailureListener { e ->
                     Timber.e(e, "Could not load DataClass ($objectId) image.")
                     loadImage(null, uiMetadata.errorPlaceholderDrawable)
                 }
+        }
     }
 
     override fun hashCode(): Int {

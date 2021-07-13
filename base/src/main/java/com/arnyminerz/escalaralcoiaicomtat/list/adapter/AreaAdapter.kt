@@ -46,6 +46,7 @@ class AreaAdapter(
             activity,
             activity.storage,
             holder.imageView,
+            null,
             imageLoadParameters =
             ImageLoadParameters()
                 .withResultImageScale(SETTINGS_PREVIEW_SCALE_PREF.get())

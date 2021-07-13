@@ -94,8 +94,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
                             } else Timber.w("Could not fetch adapter.")
                         }
                     }
-                    .addOnFailureListener {
-                        Timber.e(it, "Could not get path data to refresh comments")
+                    .addOnFailureListener { e ->
+                        Timber.e(e, "Could not get path data to refresh comments")
                     }
             } else Timber.w("Could not get the path's document.")
         }
@@ -130,6 +130,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             requireActivity(),
             storage,
             iv,
+            binding?.sectorProgressBar,
             ImageLoadParameters().apply {
                 withResultImageScale(1f)
                 setShowPlaceholder(false)

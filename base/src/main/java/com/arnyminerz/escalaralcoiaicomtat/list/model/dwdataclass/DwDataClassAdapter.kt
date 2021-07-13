@@ -111,9 +111,8 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
                         activity,
                         data,
                         activity.firestore,
-                        status == DownloadStatus.PARTIALLY,
-                        { requestDownload(it, holder) }
-                    ).show {
+                        status == DownloadStatus.PARTIALLY
+                    ) { requestDownload(it, holder) }.show {
                         updateUi(holder, data, true)
                     }
                 }
@@ -127,7 +126,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
             holder.imageView.layoutParams = holder.imageView.layoutParams.apply {
                 height = itemHeightDp
             }
-        data.loadImage(activity, activity.storage, holder.imageView)
+        data.loadImage(activity, activity.storage, holder.imageView, null)
         updateUi(holder, data, true)
     }
 
