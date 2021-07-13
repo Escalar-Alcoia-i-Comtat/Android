@@ -775,7 +775,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
                     Timber.v("Image decoded, scaling...")
                     val scale = imageLoadParameters?.resultImageScale ?: 1f
-                    val bmp = bitmap.scale(scale)
+                    val bmp = if (scale == 1f) bitmap.scale(scale) else bitmap
 
                     Timber.v("Setting image into imageView.")
                     loadImage(bmp, null)
