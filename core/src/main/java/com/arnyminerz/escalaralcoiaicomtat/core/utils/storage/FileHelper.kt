@@ -13,8 +13,15 @@ const val KBYTE = 1024
 fun filesDir(context: Context): File = context.filesDir
 fun dataDir(context: Context): File = File(filesDir(context), "data")
 
-fun readBitmap(file: File): Bitmap =
-    BitmapFactory.decodeStream(file.inputStream())
+/**
+ * Reads the contents of a file and converts them into a [Bitmap].
+ * @author Arnau Mora
+ * @since 20210713
+ * @param file The file to read from.
+ * @return The read [Bitmap], or null in case of an error.
+ */
+fun readBitmap(file: File): Bitmap? =
+    BitmapFactory.decodeFile(file.path)
 
 fun storeFile(file: File, stream: InputStream) {
     file.parentFile?.mkdirs()
