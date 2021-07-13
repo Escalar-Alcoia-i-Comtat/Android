@@ -94,8 +94,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
                             } else Timber.w("Could not fetch adapter.")
                         }
                     }
-                    .addOnFailureListener {
-                        Timber.e(it, "Could not get path data to refresh comments")
+                    .addOnFailureListener { e ->
+                        Timber.e(e, "Could not get path data to refresh comments")
                     }
             } else Timber.w("Could not get the path's document.")
         }
@@ -130,6 +130,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             requireActivity(),
             storage,
             iv,
+            binding?.sectorProgressBar,
             ImageLoadParameters().apply {
                 withResultImageScale(1f)
                 setShowPlaceholder(false)
@@ -224,7 +225,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 sector.downloadStatus(sectorActivity, sectorActivity.firestore).isDownloaded()
             else false
 
-            if (activity != null && activity?.isDestroyed == true) {
+            if (activity != null && activity?.isDestroyed == false) {
                 val size = activity?.let { getDisplaySize(it).second } ?: 0
                 notMaximizedImageHeight = size / 2
 
@@ -302,7 +303,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
                     }
                 }
             } else
-                Timber.e("Could not start loading sectors since context is null")
+                Timber.e("Could not start loading sectors since context is null. Activity destroyed: ${activity?.isDestroyed}")
         }
 
         uiContext {
