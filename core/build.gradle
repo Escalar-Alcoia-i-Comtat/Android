@@ -79,6 +79,7 @@ dependencies {
     api 'com.google.firebase:firebase-config-ktx'
     api 'com.google.firebase:firebase-perf-ktx'
     api 'com.google.firebase:firebase-dynamic-links-ktx'
+    api 'com.google.firebase:firebase-functions-ktx'
     api 'com.google.firebase:firebase-auth-ktx'
     api 'com.google.firebase:firebase-messaging-ktx'
     api 'com.google.firebase:firebase-messaging-directboot:22.0.0'
