@@ -64,6 +64,8 @@ class ProfileActivity : AppCompatActivity() {
 
         firestore = Firebase.firestore
 
+        binding.backFab.setOnClickListener { onBackPressed() }
+
         binding.profileNameTextView.text = user.displayName
 
         val profileImageUrl = user.photoUrl
