@@ -766,30 +766,39 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             val bmp = readBitmap(downloadedImageFile)
             imageView.setImageBitmap(bmp)
         } else {
-            val tempFile = File.createTempFile("images", objectId)
-            storage.getReferenceFromUrl(imageReferenceUrl)
-                .getFile(tempFile)
-                .addOnSuccessListener {
-                    Timber.v("Loaded image for $objectId. Decoding...")
-                    val bitmap = BitmapFactory.decodeFile(tempFile.path)
+            val tempFile = File(activity.cacheDir, "dataClass_$objectId")
 
-                    Timber.v("Image decoded, scaling...")
-                    val scale = imageLoadParameters?.resultImageScale ?: 1f
-                    val bmp = bitmap.scale(scale)
+            fun successListener() {
+                Timber.v("Loaded image for $objectId. Decoding...")
+                val bitmap = BitmapFactory.decodeFile(tempFile.path)
 
-                    Timber.v("Setting image into imageView.")
-                    loadImage(bmp, null)
-                }
-                .addOnProgressListener { snapshot ->
-                    val bytesCount = snapshot.bytesTransferred
-                    val totalBytes = snapshot.totalByteCount
-                    val progress = bytesCount / totalBytes
-                    progressBar?.progress = (progress * 100).toInt()
-                }
-                .addOnFailureListener { e ->
-                    Timber.e(e, "Could not load DataClass ($objectId) image.")
-                    loadImage(null, uiMetadata.errorPlaceholderDrawable)
-                }
+                Timber.v("Image decoded, scaling...")
+                val scale = imageLoadParameters?.resultImageScale ?: 1f
+                val bmp = if (scale == 1f) bitmap.scale(scale) else bitmap
+
+                Timber.v("Setting image into imageView.")
+                loadImage(bmp, null)
+            }
+
+            fun failureListener(e: Exception) {
+                Timber.e(e, "Could not load DataClass ($objectId) image.")
+                loadImage(null, uiMetadata.errorPlaceholderDrawable)
+            }
+
+            if (tempFile.exists()) {
+                Timber.v("The image file has already been cached ($tempFile).")
+                successListener()
+            } else
+                storage.getReferenceFromUrl(imageReferenceUrl)
+                    .getFile(tempFile)
+                    .addOnSuccessListener { successListener() }
+                    .addOnProgressListener { snapshot ->
+                        val bytesCount = snapshot.bytesTransferred
+                        val totalBytes = snapshot.totalByteCount
+                        val progress = bytesCount / totalBytes
+                        progressBar?.progress = (progress * 100).toInt()
+                    }
+                    .addOnFailureListener { e -> failureListener(e) }
         }
     }
 

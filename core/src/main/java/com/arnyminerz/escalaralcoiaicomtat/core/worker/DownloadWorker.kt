@@ -39,6 +39,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.io.File
+import java.io.IOException
 
 const val DOWNLOAD_QUALITY_MIN = 1
 const val DOWNLOAD_QUALITY_MAX = 100
@@ -135,7 +136,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      */
     private lateinit var notification: Notification
 
-    private fun downloadImageFile(imageReferenceUrl: String, imageFile: File): Result {
+    private fun downloadImageFile(
+        imageReferenceUrl: String,
+        imageFile: File,
+        objectId: String
+    ): Result {
         val dataDir = imageFile.parentFile!!
 
         var error: Result? = null
@@ -154,12 +159,20 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             .buildAndShow()
 
         try {
-            runBlocking {
-                Timber.d("Downloading image from Firebase Storage: $imageReferenceUrl...")
-                storage.getReferenceFromUrl(imageReferenceUrl).getFile(imageFile).await()
-            }
+            val tempFile = File(applicationContext.cacheDir, "dataClass_$objectId")
+            if (tempFile.exists()) {
+                Timber.d("Copying cached image file from \"$tempFile\" to \"$imageFile\"")
+                tempFile.copyTo(imageFile, overwrite = true)
+            } else
+                runBlocking {
+                    Timber.d("Downloading image from Firebase Storage: $imageReferenceUrl...")
+                    storage.getReferenceFromUrl(imageReferenceUrl).getFile(imageFile).await()
+                }
         } catch (e: StorageException) {
             Timber.w(e, "Could not get image")
+            return failure(ERROR_STORE_IMAGE)
+        } catch (e: IOException) {
+            Timber.e(e, "Could not copy image file")
             return failure(ERROR_STORE_IMAGE)
         }
 
@@ -169,7 +182,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         return Result.success()
     }
 
-    private fun fixImageReferenceUrl(image: String, firestore: FirebaseFirestore, path: String): Pair<String?, Result?> =
+    private fun fixImageReferenceUrl(
+        image: String,
+        firestore: FirebaseFirestore,
+        path: String
+    ): Pair<String?, Result?> =
         if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/"))
             try {
                 runBlocking {
@@ -242,7 +259,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val imageRef = image.first!!
 
         val imageFile = zone.imageFile(applicationContext)
-        downloadImageFile(imageRef, imageFile)
+        downloadImageFile(imageRef, imageFile, zone.objectId)
 
         try {
             Timber.d("Downloading KMZ file...")
@@ -324,7 +341,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val imageRef = image.first!!
 
         val imageFile = sector.imageFile(applicationContext)
-        downloadImageFile(imageRef, imageFile)
+        downloadImageFile(imageRef, imageFile, sector.objectId)
 
         try {
             Timber.d("Downloading KMZ file...")
