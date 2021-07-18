@@ -211,7 +211,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             Timber.v("Finished loading children!")
         }
         val dataClassId = metadata.documentPath
-        if (innerChildren.isEmpty()) {
+        val innerChildrenEmpty = synchronized(innerChildren) { innerChildren.isEmpty() }
+        if (innerChildrenEmpty) {
             loadingChildren = true
             when {
                 cache.hasChild(dataClassId) -> {
@@ -220,15 +221,18 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     for (child in children)
                         if (coroutineContext.isActive)
                             (child as? A)?.let { data ->
-                                innerChildren.add(data)
+                                synchronized(innerChildren) {
+                                    innerChildren.add(data)
+                                }
                             }
                         else break
                 }
                 firestore != null -> {
                     // Loads children from server
-                    innerChildren.addAll(
-                        loadChildren(firestore)
-                    )
+                    val children = loadChildren(firestore)
+                    synchronized(innerChildren) {
+                        innerChildren.addAll(children)
+                    }
                     cache.storeChild(dataClassId, innerChildren)
                 }
                 else -> {
