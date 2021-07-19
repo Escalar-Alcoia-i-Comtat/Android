@@ -4,6 +4,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.WorkerThread
 import androidx.collection.arrayMapOf
+import com.arnyminerz.escalaralcoiaicomtat.core.data.auth.User
 import com.arnyminerz.escalaralcoiaicomtat.core.data.auth.VisibleUserData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.CompletionType
@@ -18,11 +19,11 @@ import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.functions.FirebaseFunctionsException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
-import java.util.ArrayList
 import java.util.Date
 
 class Path(
@@ -236,25 +237,13 @@ class Path(
                 else
                     try {
                         Timber.v("$objectId > Loading user data ($userUid) from server...")
-                        val visibleUserData = firestore.collection("Users")
-                            .document(userUid)
-                            .get()
-                            .await()!!
-                        val data = visibleUserData.data
-                        if (data != null) {
-                            Timber.v("$objectId > Got visible user data: $data")
-                            val displayName = visibleUserData.getString("displayName")!!
-                            val profileImage = visibleUserData.getString("profileImage")!!
-                            Timber.v("$objectId > Got user! Caching and returning...")
-                            val loadedUser = VisibleUserData(userUid, displayName, profileImage)
-                            cachedUsers[userUid] = loadedUser
-                            loadedUser
-                        } else {
-                            Timber.i("$objectId > Visible user data is null.")
-                            null
-                        }
+                        val user = User(userUid)
+                        user.getVisibleUserData()
                     } catch (e: IllegalArgumentException) {
                         Timber.w(e)
+                        null
+                    } catch (e: FirebaseFunctionsException) {
+                        Timber.e(e, "$objectId > Could not get VisibleUserData!")
                         null
                     }
 
