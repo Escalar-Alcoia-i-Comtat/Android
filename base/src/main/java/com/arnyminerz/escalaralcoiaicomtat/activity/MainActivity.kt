@@ -409,21 +409,21 @@ class MainActivity : LanguageAppCompatActivity() {
 
         areasViewFragment.setItemClickListener { holder, position ->
             Timber.v("Clicked item %s", position)
-            val intent = Intent(this, AreaActivity()::class.java)
-                .putExtra(EXTRA_AREA, AREAS[position].objectId)
 
-            val optionsBundle =
-                ViewCompat.getTransitionName(holder.titleTextView)?.let { transitionName ->
-                    intent.putExtra(EXTRA_AREA_TRANSITION_NAME, transitionName)
+            val transition = ViewCompat.getTransitionName(holder.titleTextView)
+            val optionsBundle = transition?.let { transitionName ->
+                ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    this,
+                    findViewById(R.id.title_textView),
+                    transitionName
+                ).toBundle()
+            } ?: Bundle.EMPTY
 
-                    ActivityOptionsCompat.makeSceneTransitionAnimation(
-                        this,
-                        findViewById(R.id.title_textView),
-                        transitionName
-                    ).toBundle()
-                } ?: Bundle.EMPTY
-
-            startActivity(intent, optionsBundle)
+            launch(AreaActivity::class.java, optionsBundle) {
+                putExtra(EXTRA_AREA, AREAS[position].objectId)
+                if (transition != null)
+                    putExtra(EXTRA_AREA_TRANSITION_NAME, transition)
+            }
         }
 
         binding.authFab.setOnClickListener {
