@@ -268,4 +268,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="pref_gene_full_data_loading_sum">Si está habilitado, cuando entres a la aplicación todos los datos serán cargados en la memoria. Esto hará que se cargue la app más lentamente, pero te permitirá navegar con más agilidad.</string>
     <string name="action_restart">Reiniciar</string>
     <string name="toast_update_downloaded">Una nueva actualización ha sido descargada</string>
+    <string name="toast_error_not_found">No se ha encontrado el elemento</string>
 </resources>
