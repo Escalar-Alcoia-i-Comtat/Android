@@ -12,13 +12,13 @@ apply from: './version.gradle'
 
 android {
     // Android Build Settings
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
-    ndkVersion "23.0.7123448"
+    compileSdkVersion 31
+    buildToolsVersion "31.0.0"
+    ndkVersion "23.0.7530507"
     defaultConfig {
         applicationId "com.arnyminerz.escalaralcoiaicomtat"
         minSdkVersion 24
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode findProperty("android.versionCode") as Integer
         versionName VERSION_NAME
 
