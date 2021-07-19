@@ -264,6 +264,5 @@
     <string name="toast_error_gps_disabled">El GPS està deshabilitat</string>
     <string name="placeholder">Marcador</string>
     <string name="pref_gene_full_data_loading_title">Càrrega completa de dades</string>
-    <string name="pref_gene_full_data_loading_title">C</string>
     <string name="pref_gene_full_data_loading_sum">Si està habilitat, quan accedeixes a l\'aplicació es carreguen totes les dades a la memòria. Açò farà que es tarde més en iniciar l\'app, però et permetrà més agilitat a l\'interaccionar amb l\'app.</string>
 </resources>
