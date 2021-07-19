@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.content.Intent
+import android.content.IntentSender
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.UiThread
@@ -142,33 +143,37 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         val appUpdateManager = AppUpdateManagerFactory.create(this)
         appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
             val updateAvailability = appUpdateInfo.updateAvailability()
-            if (updateAvailability == UPDATE_AVAILABLE) {
-                Timber.v("There's an update available")
-                val updateStaleness = appUpdateInfo.clientVersionStalenessDays()
-                if (updateStaleness != null && updateStaleness >= APP_UPDATE_MAX_TIME_DAYS) {
-                    if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
-                        // Request immediate update
-                        Timber.v("Requesting immediate update.")
+            try {
+                if (updateAvailability == UPDATE_AVAILABLE) {
+                    Timber.v("There's an update available")
+                    val updateStaleness = appUpdateInfo.clientVersionStalenessDays()
+                    if (updateStaleness != null && updateStaleness >= APP_UPDATE_MAX_TIME_DAYS) {
+                        if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                            // Request immediate update
+                            Timber.v("Requesting immediate update.")
+                            appUpdateManager.startUpdateFlowForResult(
+                                appUpdateInfo,
+                                AppUpdateType.IMMEDIATE,
+                                this,
+                                APP_UPDATE_REQUEST_CODE
+                            )
+                            loading = true
+                        } else Timber.w("Immediate update is not allowed")
+                    } else if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                        // Request flexible update
+                        Timber.v("Requesting flexible update.")
                         appUpdateManager.startUpdateFlowForResult(
                             appUpdateInfo,
-                            AppUpdateType.IMMEDIATE,
+                            AppUpdateType.FLEXIBLE,
                             this,
                             APP_UPDATE_REQUEST_CODE
                         )
                         loading = true
-                    } else Timber.w("Immediate update is not allowed")
-                } else if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
-                    // Request flexible update
-                    Timber.v("Requesting flexible update.")
-                    appUpdateManager.startUpdateFlowForResult(
-                        appUpdateInfo,
-                        AppUpdateType.FLEXIBLE,
-                        this,
-                        APP_UPDATE_REQUEST_CODE
-                    )
-                    loading = true
-                } else Timber.w("Flexible update is not allowed")
-            } else Timber.d("There's no update available. ($updateAvailability)")
+                    } else Timber.w("Flexible update is not allowed")
+                } else Timber.d("There's no update available. ($updateAvailability)")
+            } catch (e: IntentSender.SendIntentException) {
+                Timber.w(e, "Could not request update.")
+            }
         }
     }
 
