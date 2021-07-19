@@ -21,7 +21,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
 /**
@@ -166,11 +165,9 @@ class CommentsActivity : AppCompatActivity() {
                 val path = Path(snapshot)
 
                 doAsync {
-                    Timber.v("Loaded path data, loading completions...")
+                    Timber.v("Loaded path data, observing completions...")
                     completions.clear()
-                    path.getCompletions(firestore).toCollection(completions)
 
-                    Timber.v("Got completions, observing changes...")
                     val listener = path.observeCompletions(firestore) { onCompletionAdded(it) }
                     completionListeners.add(listener)
 
