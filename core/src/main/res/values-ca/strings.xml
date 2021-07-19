@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="action_close">Tancar</string>
+    <string name="action_cancel">Cancel·lar</string>
     <string name="action_open_maps">"Obrir Google Maps"</string>
     <string name="action_enable_location">Habilitar Ubicació</string>
 
@@ -78,6 +79,10 @@
     <string name="notification_mark_completed_waiting_message">Esperant fins a tenir connexió a Internet per a enviar el comentari i marcar la via com a completada.</string>
     <string name="notification_mark_completed_error_title">No s\'ha pogut marcar com a completada</string>
     <string name="notification_mark_completed_error_message">La via \"%1$s\" ha sigut marcada com a completada, però ha ocorregut un erorr. Codi d\'error: %2$s</string>
+    <string name="notification_mark_completed_marking_complete_title">Marcant com a completat</string>
+    <string name="notification_mark_completed_marking_complete_message">Marcant %1$s com a completat.</string>
+    <string name="notification_mark_completed_marking_project_title">Marcant com a projecte</string>
+    <string name="notification_mark_completed_marking_project_message">Marcant %1$s com a projecte.</string>
 
     <string name="dialog_gps_disabled_title">GPS deshabilitat</string>
     <string name="dialog_gps_disabled_message">Tens el proveïdor d\'ubiació desconnectat.</string>

@@ -2,18 +2,16 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
-import androidx.collection.arrayMapOf
-import com.arnyminerz.escalaralcoiaicomtat.core.data.auth.VisibleUserData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.CompletionType
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedCompletedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedProjectData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.cache
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toTimestamp
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -22,7 +20,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
-import java.util.ArrayList
 import java.util.Date
 
 class Path(
@@ -211,87 +208,51 @@ class Path(
             .collection("Completions")
             .get()
             .await()
-        val cachedUsers = arrayMapOf<String, VisibleUserData>()
-        if (completionsData != null)
-            for (document in completionsData.documents) {
-                val timestamp = document.getTimestamp("timestamp")
-                val userUid = document.getString("user")!!
-                val attempts = document.getLong("attempts") ?: 0
-                val falls = document.getLong("falls") ?: 0
-                val comment = document.getString("comment")
-                val notes = document.getString("notes")
-                val grade = document.getString("grade") ?: ""
-                val project = document.getBoolean("project") ?: false
-                val typeRaw = document.getString("type")
-                // TODO: Load liked by
+        if (completionsData != null) {
+            val documents = completionsData.documents
+            Timber.v("$objectId > Got ${documents.size} completions.")
+            for (document in documents) {
+                Timber.v("$objectId > Creating new MarkedDataInt instance...")
+                val result = MarkedDataInt.newInstance(document)
 
-                var type: CompletionType? = null
-                for (t in CompletionType.values())
-                    if (t.id.equals(typeRaw, true))
-                        type = t
-
-                Timber.v("$objectId > Got completion data for \"$documentPath\".")
-                val user = if (cachedUsers.containsKey(userUid))
-                    cachedUsers[userUid]!!
-                else
-                    try {
-                        Timber.v("$objectId > Loading user data ($userUid) from server...")
-                        val visibleUserData = firestore.collection("Users")
-                            .document(userUid)
-                            .get()
-                            .await()!!
-                        val data = visibleUserData.data
-                        if (data != null) {
-                            Timber.v("$objectId > Got visible user data: $data")
-                            val displayName = visibleUserData.getString("displayName")!!
-                            val profileImage = visibleUserData.getString("profileImage")!!
-                            Timber.v("$objectId > Got user! Caching and returning...")
-                            val loadedUser = VisibleUserData(userUid, displayName, profileImage)
-                            cachedUsers[userUid] = loadedUser
-                            loadedUser
-                        } else {
-                            Timber.i("$objectId > Visible user data is null.")
-                            null
-                        }
-                    } catch (e: IllegalArgumentException) {
-                        Timber.w(e)
-                        null
-                    }
-
-                if (user == null) {
-                    Timber.i("$objectId > Could not find user, continuing loop.")
-                    continue
-                }
-
-                Timber.i("$objectId > Processing path completed data result...")
-                val result = when {
-                    project -> MarkedProjectData(
-                        document.reference.path,
-                        timestamp,
-                        user,
-                        comment,
-                        notes,
-                        listOf()
-                    )
-                    type != null -> MarkedCompletedData(
-                        document.reference.path,
-                        timestamp,
-                        user,
-                        attempts,
-                        falls,
-                        grade,
-                        type,
-                        comment,
-                        notes,
-                        listOf()
-                    )
-                    else -> null
-                }
                 Timber.v("$objectId > Processed result. Emitting...")
                 if (result != null)
                     emit(result)
+                else
+                    Timber.w("$objectId > Won't emit since result is null.")
             }
+        }
     }
+
+    /**
+     * Gets updates for when a completion is added to the [Path].
+     * @author Arnau Mora
+     * @since 20210719
+     * @param firestore The [FirebaseFirestore] reference for fetching updates.
+     * @param listener This will get called when a new completed path is added.
+     * @return The listener registration for cancelling the listener when needed.
+     */
+    fun observeCompletions(
+        firestore: FirebaseFirestore,
+        @UiThread listener: (data: MarkedDataInt) -> Unit
+    ) =
+        firestore.document(documentPath)
+            .collection("Completions")
+            .addSnapshotListener { value, error ->
+                if (error != null)
+                    Timber.e(error, "An error occurred while adding a new snapshot.")
+                else if (value != null) {
+                    val documentChanges = value.documentChanges
+                    doAsync {
+                        for (documentChange in documentChanges) {
+                            val document = documentChange.document
+                            val markedDataInt = MarkedDataInt.newInstance(document)
+                            if (markedDataInt != null)
+                                uiContext { listener(markedDataInt) }
+                        }
+                    }
+                }
+            }
 
     override fun describeContents(): Int = 0
     override fun writeToParcel(dest: Parcel?, flags: Int) {

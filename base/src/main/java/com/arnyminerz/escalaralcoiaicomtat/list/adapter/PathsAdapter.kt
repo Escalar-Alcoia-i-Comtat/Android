@@ -11,6 +11,7 @@ import android.widget.ImageButton
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.collection.arrayMapOf
 import androidx.core.content.ContextCompat
@@ -56,9 +57,9 @@ import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
 const val ROTATION_A = 0f
@@ -82,8 +83,8 @@ class PathsAdapter(
     private val paths: List<Path>,
     private val activity: SectorActivity,
     private val markAsCompleteRequestHandler: ActivityResultLauncher<Intent>
-) :
-    RecyclerView.Adapter<SectorViewHolder>() {
+) : RecyclerView.Adapter<SectorViewHolder>() {
+
     /**
      * Specifies the toggled status of all the paths.
      * @author Arnau Mora
@@ -126,6 +127,13 @@ class PathsAdapter(
      */
     private val user = auth.currentUser
 
+    /**
+     * The listeners for when new completions are added.
+     * @author Arnau Mora
+     * @since 20210719
+     */
+    private var listenerRegistrations = arrayListOf<ListenerRegistration>()
+
     init {
         // Initialize [toggled] and [blockStatuses] with the default values.
         val pathsSize = paths.size
@@ -164,6 +172,14 @@ class PathsAdapter(
         doAsync {
             loadPathData(path, position, holder)
         }
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+
+        Timber.v("Removing all listeners...")
+        for (listenerRegistration in listenerRegistrations)
+            listenerRegistration.remove()
     }
 
     /**
@@ -302,9 +318,9 @@ class PathsAdapter(
             }
         }
 
-        Timber.v("Checking if blocked...")
+        Timber.v("${path.objectId} > Checking if blocked...")
         val blocked = path.isBlocked(firestore)
-        Timber.d("Path ${path.objectId} block status: $blocked")
+        Timber.d("${path.objectId} > Block status: $blocked")
 
         uiContext {
             Timber.d("Binding ViewHolder for path $position: ${path.displayName}. Blocked: $blocked")
@@ -332,11 +348,34 @@ class PathsAdapter(
                 visibility(commentsImageButton, false)
             }
 
-        Timber.v("Loading path ${path.objectId} (${path.documentPath}) completions...")
         val completions = arrayListOf<MarkedDataInt>()
-        path.getCompletions(firestore).toCollection(completions)
 
-        Timber.v("Got completions for ${path.objectId}. ${completions.size} elements...")
+        Timber.v("${path.objectId} > Adding completions listener...")
+        val registration = path.observeCompletions(firestore) {
+            completions.add(it)
+            processCompletions(path, user, commentsImageButton, completions)
+        }
+        listenerRegistrations.add(registration)
+    }
+
+    /**
+     * Once completions get loaded, this processes them, and shows them to the user.
+     * @author Arnau Mora
+     * @since 20210719
+     * @param path The [Path] that contains the completions.
+     * @param user The currently logged in user, or null if not logged in.
+     * @param commentsImageButton The [ImageButton] that shows the user the amount of completions,
+     * and offers the possibility to view them.
+     * @param completions The loaded completions to get processed.
+     */
+    @UiThread
+    fun processCompletions(
+        path: Path,
+        user: FirebaseUser?,
+        commentsImageButton: ImageButton,
+        completions: ArrayList<MarkedDataInt>
+    ) {
+        Timber.v("${path.objectId} > Got completions. ${completions.size} elements...")
         val comments = arrayListOf<String>()
         val notes = arrayListOf<String>()
         for (completion in completions) {
@@ -346,41 +385,44 @@ class PathsAdapter(
                 if (user != null)
                     if (completion.user.uid == user.uid)
                         notes.add(completion.notes!!)
-                    else Timber.v("Got note which the user (${user.uid}) is not the author of.")
-                else Timber.v("User not logged in")
+                    else Timber.v("${path.objectId} > Got note which the user (${user.uid}) is not the author of.")
+                else Timber.v("${path.objectId} > User not logged in")
             /*if (completion is MarkedCompletedData) {
 
             } else if (completion is MarkedProjectData) {
 
             }*/
         }
-        Timber.v("Got ${comments.size} comments and ${notes.size} notes.")
-        uiContext {
-            if (badges.containsKey(path.objectId)) {
-                Timber.v("Dettaching old badge...")
-                BadgeUtils.detachBadgeDrawable(badges[path.objectId], commentsImageButton)
-            }
-            Timber.v("Creating comments badge...")
-            val badge = BadgeDrawable.create(activity)
 
-            val commentsCount = comments.size
-            val notesCount = notes.size
-            badge.number = commentsCount + notesCount
+        Timber.v("${path.objectId} > Got ${comments.size} comments and ${notes.size} notes.")
+        val containsKey = synchronized(badges) { badges.containsKey(path.objectId) }
+        if (containsKey) {
+            Timber.v("${path.objectId} > ettaching old badge...")
+            val badgeObject = synchronized(badges) { badges[path.objectId] }
+            BadgeUtils.detachBadgeDrawable(badgeObject, commentsImageButton)
+        }
+        Timber.v("${path.objectId} > Creating comments badge...")
+        val badge = BadgeDrawable.create(activity)
 
-            badge.isVisible = true
-            Timber.v("Storing abdge...")
+        val commentsCount = comments.size
+        val notesCount = notes.size
+        badge.number = commentsCount + notesCount
+
+        badge.isVisible = true
+        Timber.v("${path.objectId} > Storing badge...")
+        synchronized(badges) {
             badges[path.objectId] = badge
-            Timber.v("Attaching badge...")
-            BadgeUtils.attachBadgeDrawable(badge, commentsImageButton)
+        }
+        Timber.v("${path.objectId} > Attaching badge...")
+        BadgeUtils.attachBadgeDrawable(badge, commentsImageButton)
 
-            commentsImageButton.setOnClickListener {
-                if (comments.isNotEmpty() || notes.isNotEmpty())
-                    activity.launch(CommentsActivity::class.java) {
-                        putExtra(EXTRA_PATH_DOCUMENT, path.documentPath)
-                    }
-                else
-                    vibrate(activity, INFO_VIBRATION)
-            }
+        commentsImageButton.setOnClickListener {
+            if (comments.isNotEmpty() || notes.isNotEmpty())
+                activity.launch(CommentsActivity::class.java) {
+                    putExtra(EXTRA_PATH_DOCUMENT, path.documentPath)
+                }
+            else
+                vibrate(activity, INFO_VIBRATION)
         }
     }
 

@@ -6,6 +6,17 @@
     android:layout_height="match_parent"
     tools:context=".activity.profile.ProfileActivity">
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/back_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:backgroundTint="#E0F7FA"
+        android:contentDescription="@string/fab_desc_back"
+        android:src="@drawable/round_chevron_left_24"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
         android:id="@+id/background_layout"
         android:layout_width="match_parent"
@@ -49,8 +60,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="?attr/selectableItemBackground"
-                android:contentDescription="@string/image_desc_profile_image"
                 android:clickable="true"
+                android:contentDescription="@string/image_desc_profile_image"
                 android:focusable="true"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -59,6 +70,7 @@
                 tools:src="@tools:sample/avatars" />
 
             <LinearLayout
+                android:id="@+id/profileImageChange_indicator"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/overlay_color"

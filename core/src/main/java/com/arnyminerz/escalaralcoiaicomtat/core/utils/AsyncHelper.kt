@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.utils
 
 import android.app.Activity
+import androidx.annotation.MainThread
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +33,7 @@ val mainCoroutineScope
  * @param block The code to run
  * @see doOnMain Use this for updating UI elements.
  */
+@MainThread
 fun doAsync(@WorkerThread block: suspend CoroutineScope.() -> Unit) =
     asyncCoroutineScope.launch {
         block(this)

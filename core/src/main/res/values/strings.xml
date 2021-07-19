@@ -77,6 +77,10 @@
     <string name="notification_download_progress_info_downloading_map">Downloading map…</string>
     <string name="notification_mark_completed_waiting_title">Mark as completed scheduled</string>
     <string name="notification_mark_completed_waiting_message">Waiting to have internet connection to send the comment and mark the path as complete.</string>
+    <string name="notification_mark_completed_marking_complete_title">Marking as complete</string>
+    <string name="notification_mark_completed_marking_complete_message">Marking %1$s as complete.</string>
+    <string name="notification_mark_completed_marking_project_title">Marking as project</string>
+    <string name="notification_mark_completed_marking_project_message">Marking %1$s as project.</string>
     <string name="notification_mark_completed_error_title">Could not mark as completed</string>
     <string name="notification_mark_completed_error_message">The path \"%1$s\" was scheduled to be marked as completed, but an error occurred. Error code: %2$s</string>
 

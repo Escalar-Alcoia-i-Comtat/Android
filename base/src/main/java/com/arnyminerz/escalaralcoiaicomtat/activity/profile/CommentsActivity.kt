@@ -18,9 +18,9 @@ import com.arnyminerz.escalaralcoiaicomtat.list.completions.adapter.NotesAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_MISSING_DATA
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_UNKNOWN_ERROR
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
 /**
@@ -58,6 +58,13 @@ class CommentsActivity : AppCompatActivity() {
      */
     private var notesAdapter: NotesAdapter? = null
 
+    /**
+     * Stores all the listeners for when a [Path] gets marked as completed.
+     * @author Arnau Mora
+     * @since 20210719
+     */
+    private val completionListeners = arrayListOf<ListenerRegistration>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCommentsBinding.inflate(layoutInflater)
@@ -79,25 +86,17 @@ class CommentsActivity : AppCompatActivity() {
         firestore = Firebase.firestore
 
         Timber.v("Fetching Path data...")
-        firestore.document(pathDocument)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                Timber.v("Got Path data, processing...")
-                val path = Path(snapshot)
+        fetchPathData(pathDocument)
+    }
 
-                doAsync {
-                    Timber.v("Loaded path data, loading completions...")
-                    completions.clear()
-                    path.getCompletions(firestore).toCollection(completions)
-                    uiContext {
-                        loadLists()
-                    }
-                }
-            }
-            .addOnFailureListener {
-                Timber.e(it, "Could not get path data")
-                finishActivityWithResult(RESULT_CODE_UNKNOWN_ERROR, null)
-            }
+    override fun onStop() {
+        super.onStop()
+        // Cancel all the listeners.
+        Timber.v("Removing all the completion listeners...")
+        for (completionListener in completionListeners) {
+            completionListener.remove()
+            completionListeners.remove(completionListener)
+        }
     }
 
     /**
@@ -150,5 +149,46 @@ class CommentsActivity : AppCompatActivity() {
             finish()
         else if (notesCount <= 0)
             binding.notesCardView.hide()
+    }
+
+    /**
+     * Fetches all the [Path]'s data from [firestore].
+     * @author Arnau Mora
+     * @since 20210719
+     * @param pathDocument The path of the document.
+     */
+    fun fetchPathData(pathDocument: String) {
+        firestore.document(pathDocument)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                Timber.v("Got Path data, processing...")
+                val path = Path(snapshot)
+
+                doAsync {
+                    Timber.v("Loaded path data, observing completions...")
+                    completions.clear()
+
+                    val listener = path.observeCompletions(firestore) { onCompletionAdded(it) }
+                    completionListeners.add(listener)
+
+                    uiContext { loadLists() }
+                }
+            }
+            .addOnFailureListener {
+                Timber.e(it, "Could not get path data")
+                finishActivityWithResult(RESULT_CODE_UNKNOWN_ERROR, null)
+            }
+    }
+
+    /**
+     * This will get called whenever a [Path] gets marked as completed, as initialized in [fetchPathData].
+     * @author Arnau Mora
+     * @since 20210719
+     * @param markedDataInt The [MarkedDataInt] instance of the new completion.
+     */
+    @UiThread
+    fun onCompletionAdded(markedDataInt: MarkedDataInt) {
+        completions.add(markedDataInt)
+        loadLists()
     }
 }

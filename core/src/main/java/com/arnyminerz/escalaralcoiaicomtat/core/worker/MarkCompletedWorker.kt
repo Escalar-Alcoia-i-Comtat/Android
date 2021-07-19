@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.worker
 import android.content.Context
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LiveData
 import androidx.work.Constraints
 import androidx.work.NetworkType
@@ -156,14 +157,25 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
 
         pathDisplayName = pathDocument
 
-        return if (userUid == null || pathDocument == null || notificationId < 0)
+        val notiBuilder = Notification.Builder(applicationContext, notificationId)
+            .withChannelId(ALERT_CHANNEL_ID)
+            .withIcon(R.drawable.ic_notifications)
+            .setPersistent()
+
+        return if (userUid == null || pathDocument == null || notificationId < 0) {
+            NotificationManagerCompat.from(applicationContext)
+                .cancel(notificationId)
             showError(MARK_COMPLETED_ERROR_MISSING_DATA)
-        else {
+        } else {
             val firestore = Firebase.firestore
             runBlocking {
                 suspendCoroutine { cont ->
                     if (isProject) {
                         Timber.v("Marking \"$pathDocument\" as project...")
+                        notiBuilder
+                            .withTitle(R.string.notification_mark_completed_marking_project_title)
+                            .withText(R.string.notification_mark_completed_marking_project_message)
+                            .buildAndShow()
                         firestore
                             .document(pathDocument)
                             .collection("Completions")
@@ -186,6 +198,10 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
                             }
                     } else {
                         Timber.v("Marking \"$pathDocument\" as completed...")
+                        notiBuilder
+                            .withTitle(R.string.notification_mark_completed_marking_project_title)
+                            .withText(R.string.notification_mark_completed_marking_project_message)
+                            .buildAndShow()
                         firestore
                             .document(pathDocument)
                             .collection("Completions")
@@ -211,6 +227,11 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
                                 cont.resume(showError(MARK_COMPLETED_ERROR_SERVER_UPLOAD))
                             }
                     }
+                        // This will get called in both cases.
+                        .addOnCompleteListener {
+                            NotificationManagerCompat.from(applicationContext)
+                                .cancel(notificationId)
+                        }
                 }
             }
         }
@@ -256,9 +277,7 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
                 MARK_COMPLETED_COMMENT to completionData.comment,
                 MARK_COMPLETED_NOTES to completionData.notes,
 
-                MARK_COMPLETED_NOTIFICATION_ID to notificationId,
-
-                MARK_COMPLETED_IS_PROJECT to false
+                MARK_COMPLETED_NOTIFICATION_ID to notificationId
             )
             if (completionData is MarkCompletedData)
                 inputDataPairs.apply {
@@ -268,7 +287,10 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
                     put(MARK_COMPLETED_TYPE, completionData.type.id)
                     put(MARK_COMPLETED_IS_PROJECT, true)
                 }
-            else inputDataPairs[MARK_COMPLETED_IS_PROJECT] = false
+            else
+                inputDataPairs.apply {
+                    put(MARK_COMPLETED_IS_PROJECT, false)
+                }
             val workData = inputDataPairs.toWorkData()
 
             Timber.v("Building MarkCompletedWorker request...")

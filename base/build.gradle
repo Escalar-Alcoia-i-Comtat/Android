@@ -12,13 +12,13 @@ apply from: './version.gradle'
 
 android {
     // Android Build Settings
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
-    ndkVersion "23.0.7123448"
+    compileSdkVersion 31
+    buildToolsVersion "31.0.0"
+    ndkVersion "23.0.7530507"
     defaultConfig {
         applicationId "com.arnyminerz.escalaralcoiaicomtat"
         minSdkVersion 24
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode findProperty("android.versionCode") as Integer
         versionName VERSION_NAME
 
@@ -142,20 +142,20 @@ dependencies {
 
     // AndroidX dependencies
     implementation 'androidx.appcompat:appcompat:1.3.0'
-    implementation 'androidx.core:core-ktx:1.5.0'
+    implementation 'androidx.core:core-ktx:1.6.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.preference:preference-ktx:1.1.1'
 
     // GUI libraries
-    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'com.google.android.material:material:1.4.0'
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 
     // Core Module
     implementation project(":core")
 
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test:runner:1.3.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    androidTestImplementation 'androidx.test:runner:1.4.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     // Markdown rendering
     implementation 'io.noties.markwon:core:4.6.2'

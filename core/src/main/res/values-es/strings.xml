@@ -79,6 +79,10 @@
     <string name="notification_mark_completed_waiting_message">Esperando hasta tener una conexión a Internet activa para enviar el comentario y marcar la vía como completada.</string>
     <string name="notification_mark_completed_error_title">No se ha podido marcar como completada</string>
     <string name="notification_mark_completed_error_message">La vía \"%1$s\" ha sido marcada como completada, pero ha ocurrido un error en el proceso. Código de error: %2$s</string>
+    <string name="notification_mark_completed_marking_complete_title">Marcando como completada</string>
+    <string name="notification_mark_completed_marking_complete_message">Marcando %1$s como completada.</string>
+    <string name="notification_mark_completed_marking_project_title">Marcando como proyecto</string>
+    <string name="notification_mark_completed_marking_project_message">Marcando %1$s como proyecto.</string>
 
     <string name="dialog_gps_disabled_title">GPS deshabilitado</string>
     <string name="dialog_gps_disabled_message">Tienes el proveedor de ubicación desconectado.</string>
