@@ -31,6 +31,7 @@
     <string name="action_open_settings">Open Settings</string>
     <string name="action_do_not_remind">Do not remind</string>
     <string name="action_mark_completed">Mark</string>
+    <string name="action_restart">Restart</string>
 
     <string name="status_updating">Updating…</string>
     <string name="status_loading">Loading…</string>
@@ -192,6 +193,7 @@
     <string name="toast_clear_ok">Cleared correctly</string>
     <string name="toast_message_sent">Message sent!</string>
     <string name="toast_confirmation_sent">Confirmation sent!</string>
+    <string name="toast_update_downloaded">An update has just been downloaded</string>
 
     <string name="path_warning_dry">This path has some safes getting dry. This may be because some kind of chemical safe has been using for the safes. This should be active for 2 days more or less.</string>
     <string name="path_warning_build">This path is under construction or revision. This may take from days to weeks. Please, be patient. You can enable alert notifications on settings, and we will alert you when this is ready.</string>
