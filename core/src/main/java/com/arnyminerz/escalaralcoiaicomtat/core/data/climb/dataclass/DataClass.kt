@@ -246,6 +246,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
+     * Adds a child to the data class.
+     * @author Arnau Mora
+     * @since 20210719
+     */
+    fun add(child: A) {
+        innerChildren.add(child)
+    }
+
+    /**
      * Gets the KMZ file path.
      * @author Arnau Mora
      * @since 20210416
