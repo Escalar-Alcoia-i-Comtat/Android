@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_DISABLE_NEARBY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREVIEW_SCALE_PREFERENCE_MULTIPLIER
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_FULL_DATA_LOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_LANGUAGE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MARKER_SIZE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_NEARBY_DISTANCE_PREF
@@ -33,14 +34,22 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
     private var enableNearby: SwitchPreference? = null
     private var centerMarkerPreference: SwitchPreference? = null
     private var nearbyDistance: EditTextPreference? = null
+    private var loadAllDataOnLaunch: SwitchPreference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.pref_general, rootKey)
 
-        errorReportingPreference = findPreference("pref")
+        errorReportingPreference = findPreference("pref_error_reporting")
         errorReportingPreference?.setOnPreferenceChangeListener { _, value ->
             val newValue = value as Boolean
             SETTINGS_ERROR_REPORTING_PREF.put(newValue)
+            true
+        }
+
+        loadAllDataOnLaunch = findPreference("pref_full_data_loading")
+        loadAllDataOnLaunch?.setOnPreferenceChangeListener { _, value ->
+            val newValue = value as Boolean
+            SETTINGS_FULL_DATA_LOAD_PREF.put(newValue)
             true
         }
 
@@ -160,6 +169,7 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
         previewScalePreference?.value =
             (SETTINGS_PREVIEW_SCALE_PREF.get() * PREVIEW_SCALE_PREFERENCE_MULTIPLIER).toInt()
 
+        loadAllDataOnLaunch?.isChecked = SETTINGS_FULL_DATA_LOAD_PREF.get()
         errorReportingPreference?.isChecked = SETTINGS_ERROR_REPORTING_PREF.get()
     }
 }

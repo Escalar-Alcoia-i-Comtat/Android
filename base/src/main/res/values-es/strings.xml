@@ -264,4 +264,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="toast_error_delete_post">No se ha podido eliminar el post</string>
     <string name="toast_error_gps_disabled">El GPS está deshabilitado</string>
     <string name="placeholder">Marcador</string>
+    <string name="pref_gene_full_data_loading_title">Carga completa de datos</string>
+    <string name="pref_gene_full_data_loading_sum">Si está habilitado, cuando entres a la aplicación todos los datos serán cargados en la memoria. Esto hará que se cargue la app más lentamente, pero te permitirá navegar con más agilidad.</string>
 </resources>
