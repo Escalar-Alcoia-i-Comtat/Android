@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
@@ -10,6 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSa
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.cache
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toTimestamp
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -230,7 +232,10 @@ class Path(
      * @param listener This will get called when a new completed path is added.
      * @return The listener registration for cancelling the listener when needed.
      */
-    fun observeCompletions(firestore: FirebaseFirestore, listener: (data: MarkedDataInt) -> Unit) =
+    fun observeCompletions(
+        firestore: FirebaseFirestore,
+        @UiThread listener: (data: MarkedDataInt) -> Unit
+    ) =
         firestore.document(documentPath)
             .collection("Completions")
             .addSnapshotListener { value, error ->
@@ -243,7 +248,7 @@ class Path(
                             val document = documentChange.document
                             val markedDataInt = MarkedDataInt.newInstance(document)
                             if (markedDataInt != null)
-                                listener(markedDataInt)
+                                uiContext { listener(markedDataInt) }
                         }
                     }
                 }
