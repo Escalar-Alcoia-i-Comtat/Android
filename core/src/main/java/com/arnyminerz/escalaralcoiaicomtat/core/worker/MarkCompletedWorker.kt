@@ -277,9 +277,7 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
                 MARK_COMPLETED_COMMENT to completionData.comment,
                 MARK_COMPLETED_NOTES to completionData.notes,
 
-                MARK_COMPLETED_NOTIFICATION_ID to notificationId,
-
-                MARK_COMPLETED_IS_PROJECT to false
+                MARK_COMPLETED_NOTIFICATION_ID to notificationId
             )
             if (completionData is MarkCompletedData)
                 inputDataPairs.apply {
@@ -289,7 +287,10 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
                     put(MARK_COMPLETED_TYPE, completionData.type.id)
                     put(MARK_COMPLETED_IS_PROJECT, true)
                 }
-            else inputDataPairs[MARK_COMPLETED_IS_PROJECT] = false
+            else
+                inputDataPairs.apply {
+                    put(MARK_COMPLETED_IS_PROJECT, false)
+                }
             val workData = inputDataPairs.toWorkData()
 
             Timber.v("Building MarkCompletedWorker request...")
