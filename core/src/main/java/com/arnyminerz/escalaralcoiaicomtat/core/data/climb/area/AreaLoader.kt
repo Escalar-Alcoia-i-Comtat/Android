@@ -5,6 +5,7 @@ import androidx.annotation.MainThread
 import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_FULL_DATA_LOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
@@ -27,7 +28,12 @@ fun Context.loadAreas(
     @UiThread callback: () -> Unit
 ) {
     val trace = Firebase.performance.newTrace("loadAreasTrace")
+
     trace.start()
+
+    val fullDataLoad = SETTINGS_FULL_DATA_LOAD_PREF.get()
+    trace.putAttribute("full_load", fullDataLoad.toString())
+
     Timber.d("Querying areas...")
     Timber.d("Fetching areas...")
     firestore
@@ -59,26 +65,32 @@ fun Context.loadAreas(
                 AREAS.addAll(areas)
             }
 
-            doAsync {
-                Timber.v("Getting all areas' children...")
-                for ((a, area) in areas.withIndex()) {
-                    uiContext { progressCallback(a, areasCount) }
-                    trace.incrementMetric("dataClassCount", 1)
-
-                    Timber.v("Getting zones of ${area.objectId}")
-                    val zones = area.getChildren(firestore)
-                    val zonesCount = zones.count()
-                    for ((z, zone) in zones.withIndex()) {
-                        uiContext { progressCallback(z, zonesCount) }
+            if (fullDataLoad)
+                doAsync {
+                    Timber.v("Getting all areas' children...")
+                    for ((a, area) in areas.withIndex()) {
+                        uiContext { progressCallback(a, areasCount) }
                         trace.incrementMetric("dataClassCount", 1)
 
-                        Timber.v("Getting sectors of ${zone.objectId}")
-                        zone.getChildren(firestore)
+                        Timber.v("Getting zones of ${area.objectId}")
+                        val zones = area.getChildren(firestore)
+                        val zonesCount = zones.count()
+                        for ((z, zone) in zones.withIndex()) {
+                            uiContext { progressCallback(z, zonesCount) }
+                            trace.incrementMetric("dataClassCount", 1)
+
+                            Timber.v("Getting sectors of ${zone.objectId}")
+                            zone.getChildren(firestore)
+                        }
                     }
+                    Timber.v("Finished loading children. Calling callback...")
+                    trace.stop()
+                    uiContext { callback() }
                 }
-                Timber.v("Finished loading children. Calling callback...")
+            else {
+                Timber.v("Calling callback...")
                 trace.stop()
-                uiContext { callback() }
+                callback()
             }
         }
 }
