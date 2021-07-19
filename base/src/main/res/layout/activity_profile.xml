@@ -70,6 +70,7 @@
                 tools:src="@tools:sample/avatars" />
 
             <LinearLayout
+                android:id="@+id/profileImageChange_indicator"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/overlay_color"
