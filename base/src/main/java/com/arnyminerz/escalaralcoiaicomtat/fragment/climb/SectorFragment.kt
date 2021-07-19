@@ -24,6 +24,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDisplaySize
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
@@ -211,10 +212,16 @@ class SectorFragment : NetworkChangeListenerFragment() {
         else {
             Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
             val sectors = arrayListOf<Sector>()
-            AREAS[areaId]!!
-                .getChildren(sectorActivity?.firestore)[zoneId]!!
-                .getChildren(sectorActivity?.firestore)
-                .toCollection(sectors)
+            AREAS[areaId]
+                ?.getChildren(sectorActivity?.firestore)?.get(zoneId)
+                ?.getChildren(sectorActivity?.firestore)
+                ?.toCollection(sectors)
+                ?: run {
+                    Timber.e("Could not get sectors from Area $areaId in $zoneId")
+                    uiContext { toast(R.string.toast_error_not_found) }
+                    activity?.onBackPressed()
+                    return
+                }
             sector = sectors[sectorIndex]
 
             uiContext {
