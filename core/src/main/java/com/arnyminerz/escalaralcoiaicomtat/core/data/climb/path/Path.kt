@@ -206,15 +206,20 @@ class Path(
             .collection("Completions")
             .get()
             .await()
-        if (completionsData != null)
-            for (document in completionsData.documents) {
+        if (completionsData != null) {
+            val documents = completionsData.documents
+            Timber.v("$objectId > Got ${documents.size} completions.")
+            for (document in documents) {
                 Timber.v("$objectId > Creating new MarkedDataInt instance...")
                 val result = MarkedDataInt.newInstance(document)
 
                 Timber.v("$objectId > Processed result. Emitting...")
                 if (result != null)
                     emit(result)
+                else
+                    Timber.w("$objectId > Won't emit since result is null.")
             }
+        }
     }
 
     /**
