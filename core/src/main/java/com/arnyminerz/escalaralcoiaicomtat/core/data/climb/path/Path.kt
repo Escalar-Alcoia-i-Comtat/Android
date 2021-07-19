@@ -223,8 +223,9 @@ class Path(
      * @since 20210719
      * @param firestore The [FirebaseFirestore] reference for fetching updates.
      * @param listener This will get called when a new completed path is added.
+     * @return The listener registration for cancelling the listener when needed.
      */
-    fun observeCompletions(firestore: FirebaseFirestore, listener: (data: MarkedDataInt) -> Unit) {
+    fun observeCompletions(firestore: FirebaseFirestore, listener: (data: MarkedDataInt) -> Unit) =
         firestore.document(documentPath)
             .collection("Completions")
             .addSnapshotListener { value, error ->
@@ -242,7 +243,6 @@ class Path(
                     }
                 }
             }
-    }
 
     override fun describeContents(): Int = 0
     override fun writeToParcel(dest: Parcel?, flags: Int) {
