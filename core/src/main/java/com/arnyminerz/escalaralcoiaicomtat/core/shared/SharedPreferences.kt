@@ -7,6 +7,7 @@ private const val MARKER_SIZE_DEFAULT = 3
 private const val PREVIEW_SCALE_DEFAULT = .5f
 
 val SETTINGS_ERROR_REPORTING_PREF = PreferenceData("error_reporting", true)
+val SETTINGS_FULL_DATA_LOAD_PREF = PreferenceData("full_data_loading", true)
 val SETTINGS_ALERT_PREF = PreferenceData("alert_pref", true)
 val SETTINGS_LANGUAGE_PREF = PreferenceData("lang_pref", "en")
 val SETTINGS_NEARBY_DISTANCE_PREF = PreferenceData("nearby_distance", NEARBY_DISTANCE_DEFAULT)
