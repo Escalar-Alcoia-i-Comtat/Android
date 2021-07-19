@@ -43,3 +43,10 @@ val EXTRA_LINK_PATH = DataExtra<String>("Link")
  * @since 20210521
  */
 val EXTRA_STATIC = DataExtra<Boolean>("Static")
+
+/**
+ * The User's UID for selecting which user's data to load.
+ * @author Arnau Mora
+ * @since 20210719
+ */
+val EXTRA_USER_UID = DataExtra<String>("UserUid")
