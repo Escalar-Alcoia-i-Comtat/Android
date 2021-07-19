@@ -41,6 +41,7 @@ open class MarkedDataInt(
          */
         suspend fun newInstance(document: DocumentSnapshot): MarkedDataInt? {
             val documentPath = document.reference.path
+            val objectId = document.reference.id
             val timestamp = document.getTimestamp("timestamp")
             val userUid = document.getString("user")!!
             val attempts = document.getLong("attempts") ?: 0
@@ -57,25 +58,28 @@ open class MarkedDataInt(
                 if (t.id.equals(typeRaw, true))
                     type = t
 
-            Timber.v("Got completion data for \"$documentPath\".")
+            if (type == null)
+                Timber.w("$objectId > Could not find type for \"$typeRaw\"")
+
+            Timber.v("$objectId > Got completion data for \"$documentPath\".")
             val user = try {
-                Timber.v("Loading user data ($userUid) from server...")
+                Timber.v("$objectId > Loading user data ($userUid) from server...")
                 val user = User(userUid)
                 user.getVisibleUserData()
             } catch (e: IllegalArgumentException) {
                 Timber.w(e)
                 null
             } catch (e: FirebaseFunctionsException) {
-                Timber.e(e, "Could not get VisibleUserData!")
+                Timber.e(e, "$objectId > Could not get VisibleUserData!")
                 null
             }
 
             if (user == null) {
-                Timber.i("Could not find user, continuing loop.")
+                Timber.i("$objectId > Could not find user, continuing loop.")
                 return null
             }
 
-            Timber.i("Processing path completed data result...")
+            Timber.i("$objectId > Processing path completed data result...")
             return when {
                 project -> MarkedProjectData(
                     document.reference.path,
