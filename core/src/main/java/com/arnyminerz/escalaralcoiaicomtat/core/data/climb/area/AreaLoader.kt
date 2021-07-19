@@ -77,6 +77,10 @@ fun Context.loadAreas(
             Timber.v("Counting areas...")
             val areasCount = areaDocuments.size
 
+            trace.putAttribute("areasCount", areasCount.toString())
+            trace.putAttribute("zonesCount", zonesCount.toString())
+            trace.putAttribute("sectorsCount", sectorsCount.toString())
+
             var counter = 0
             val count = areasCount + zonesCount + sectorsCount
 
