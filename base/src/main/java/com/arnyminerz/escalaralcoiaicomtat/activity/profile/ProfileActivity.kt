@@ -2,18 +2,18 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.profile
 
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toDrawable
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.auth.setDefaultProfileImage
 import com.arnyminerz.escalaralcoiaicomtat.auth.setProfileImage
+import com.arnyminerz.escalaralcoiaicomtat.core.data.auth.User
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_USER_UID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.HUNDRED
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_MAX_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getBitmapFromUri
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
@@ -21,11 +21,19 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityProfileBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageException
-import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
+/**
+ * Shows a select user's personal data, such as username, profile image, and latest completions and posts.
+ *
+ * Must be launched once the user has been logged in, or using the [Intent]'s extra [EXTRA_USER_UID].
+ * @author Arnau Mora
+ * @since 20210719
+ * @see EXTRA_USER_UID
+ */
 class ProfileActivity : AppCompatActivity() {
     companion object {
         var hasProfileImageBeenChanged: Boolean = false
@@ -56,65 +64,63 @@ class ProfileActivity : AppCompatActivity() {
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val user = Firebase.auth.currentUser
-        if (user == null) {
-            Timber.w("Not logged in.")
-            return
+        val uid = intent.getExtra(EXTRA_USER_UID)
+        var loggedIn = false
+        val userUid = if (uid != null)
+            uid
+        else {
+            val authUser = Firebase.auth.currentUser
+            if (authUser == null) {
+                Timber.w("Not logged in.")
+                onBackPressed()
+                return
+            }
+            loggedIn = true
+            authUser.uid
         }
+        val user = User(userUid)
 
         firestore = Firebase.firestore
 
         binding.backFab.setOnClickListener { onBackPressed() }
 
-        binding.profileNameTextView.text = user.displayName
+        progressIndicator.visibility(true)
 
-        val profileImageUrl = user.photoUrl
-        if (profileImageUrl != null) {
-            progressIndicator.visibility(true)
-            Firebase.storage.getReferenceFromUrl(profileImageUrl.toString())
-                .getBytes(PROFILE_IMAGE_MAX_SIZE)
-                .addOnSuccessListener { bytes ->
-                    val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                    binding.profileImageImageView.background = bitmap.toDrawable(resources)
+        doAsync {
+            try {
+                val visibleUserData = user.getVisibleUserData()
+                uiContext {
+                    binding.profileNameTextView.text = visibleUserData.displayName
                 }
-                .addOnFailureListener {
-                    val e = it as StorageException
-                    when (e.errorCode) {
-                        StorageException.ERROR_OBJECT_NOT_FOUND -> {
-                            progressIndicator.visibility(false)
-                            progressIndicator.isIndeterminate = false
-                            progressIndicator.max = HUNDRED
-                            progressIndicator.visibility(true)
-                            binding.profileImageImageView.setBackgroundResource(R.drawable.ic_profile_image)
-                            doAsync {
-                                Timber.e(e, "Could not find the profile image. Setting default...")
-                                setDefaultProfileImage(
-                                    this@ProfileActivity,
-                                    firestore,
-                                    user
-                                ) { progress ->
-                                    uiContext {
-                                        progressIndicator.progress = progress.percentage()
-                                    }
-                                }
-                            }
-                        }
-                        else -> Timber.e(it, "Could not load profile image")
+
+                val profileImage = visibleUserData.profileImage()
+                uiContext {
+                    binding.profileImageImageView.background = profileImage.toDrawable(resources)
+                }
+            } catch (e: StorageException) {
+                when (e.errorCode) {
+                    StorageException.ERROR_OBJECT_NOT_FOUND -> uiContext {
+                        binding.profileImageImageView.setBackgroundResource(R.drawable.ic_profile_image)
                     }
+                    else -> Timber.e(e, "Could not load profile image")
                 }
-                .addOnCompleteListener {
-                    progressIndicator.visibility(false)
-                }
-        } else progressIndicator.visibility(false)
-
-        binding.profileImageImageView.setOnClickListener {
-            openProfileImageRequest.launch(
-                Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "image/*"
-                }
-            )
+            } catch (e: FirebaseFunctionsException) {
+                uiContext { toast(R.string.toast_error_internal) }
+            } finally {
+                uiContext { progressIndicator.visibility(false) }
+            }
         }
+
+        if (loggedIn)
+            binding.profileImageImageView.setOnClickListener {
+                openProfileImageRequest.launch(
+                    Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "image/*"
+                    }
+                )
+            }
+        else binding.profileImageChangeIndicator.visibility(false)
     }
 
     /**
