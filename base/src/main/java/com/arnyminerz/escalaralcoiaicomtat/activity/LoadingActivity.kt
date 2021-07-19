@@ -38,9 +38,12 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.ActivityResult.RESULT_IN_APP_UPDATE_FAILED
 import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.ktx.auth
@@ -141,11 +144,41 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     private fun updatesCheck() {
         Timber.v("Searching for updates...")
         val appUpdateManager = AppUpdateManagerFactory.create(this)
+
+        val listener = InstallStateUpdatedListener { state ->
+            val status = state.installStatus()
+            if (status == InstallStatus.DOWNLOADING) {
+                val bytesDownloaded = state.bytesDownloaded()
+                val totalBytesToDownload = state.totalBytesToDownload()
+                val progress = (bytesDownloaded / totalBytesToDownload).toInt() * 100
+
+                // Show update progress bar.
+                Timber.d("Downloading update $progress%: $bytesDownloaded / $totalBytesToDownload")
+                binding.progressBar.progress = progress
+            } else if (status == InstallStatus.DOWNLOADED) {
+                Timber.v("Finished downloading update, showing restart request.")
+                Snackbar.make(
+                    binding.mainLayout,
+                    R.string.toast_update_downloaded,
+                    Snackbar.LENGTH_INDEFINITE
+                )
+                    .setAction(R.string.action_restart) { appUpdateManager.completeUpdate() }
+                    .show()
+            }
+        }
+
+        appUpdateManager.registerListener(listener)
+
         appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
             val updateAvailability = appUpdateInfo.updateAvailability()
             try {
                 if (updateAvailability == UPDATE_AVAILABLE) {
                     Timber.v("There's an update available")
+
+                    binding.progressBar.visibility(false)
+                    binding.progressBar.isIndeterminate = false
+                    binding.progressBar.visibility(true)
+
                     val updateStaleness = appUpdateInfo.clientVersionStalenessDays()
                     if (updateStaleness != null && updateStaleness >= APP_UPDATE_MAX_TIME_DAYS) {
                         if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
