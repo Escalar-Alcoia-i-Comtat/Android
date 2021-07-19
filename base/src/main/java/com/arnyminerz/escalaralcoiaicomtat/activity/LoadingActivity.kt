@@ -47,6 +47,7 @@ import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.perf.ktx.performance
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigClientException
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
@@ -119,10 +120,15 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     @UiThread
     private fun dataCollectionSetUp() {
         val enableErrorReporting = SETTINGS_ERROR_REPORTING_PREF.get()
+
         Firebase.crashlytics.setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
         Timber.v("Set Crashlytics collection enabled to $enableErrorReporting")
+
         Firebase.analytics.setAnalyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
         Timber.v("Set Analytics collection enabled to $enableErrorReporting")
+
+        Firebase.performance.isPerformanceCollectionEnabled = enableErrorReporting
+        Timber.v("Set Performance collection enabled to $enableErrorReporting")
     }
 
     /**
