@@ -55,7 +55,6 @@ from the link specified, or through the repository's button.
 ### Jitpack
 | Package | Installed Version | Latest version |
 |-|-|-|
-| `com.github.ArnyminerZ:MapKit` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.0.2--dev6-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/jitpack/v/github/ArnyminerZ/MapKit?style=for-the-badge) |
 | `com.github.PhilJay:MPAndroidChart` | ![Installed version](https://img.shields.io/badge/Installed%20version-v3.1.0-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/jitpack/v/github/PhilJay/MPAndroidChart?style=for-the-badge) |
 | `com.github.chrisbanes:PhotoView` | ![Installed version](https://img.shields.io/badge/Installed%20version-2.3.0-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/jitpack/v/github/Baseflow/PhotoView?style=for-the-badge) |
 ### Google
@@ -63,14 +62,14 @@ from the link specified, or through the repository's button.
 |-|-|
 | `androidx.appcompat:appcompat` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.3.0-brightgreen?style=for-the-badge) |
 | `androidx.constraintlayout:constraintlayout` | ![Installed version](https://img.shields.io/badge/Installed%20version-2.0.4-brightgreen?style=for-the-badge) |
-| `androidx.core:core-ktx` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.5.0-brightgreen?style=for-the-badge) |
+| `androidx.core:core-ktx` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.6.0-brightgreen?style=for-the-badge) |
 | `androidx.preference:preference-ktx` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.1.1-brightgreen?style=for-the-badge) |
 | `androidx.startup:startup-runtime` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.0.0-brightgreen?style=for-the-badge) |
 | `androidx.work:work-gcm` | ![Installed version](https://img.shields.io/badge/Installed%20version-2.7.0--alpha03-brightgreen?style=for-the-badge) |
 | `androidx.work:work-runtime-ktx` | ![Installed version](https://img.shields.io/badge/Installed%20version-2.7.0--alpha03-brightgreen?style=for-the-badge) |
 | `com.google.android.gms:play-services-auth` | ![Installed version](https://img.shields.io/badge/Installed%20version-19.0.0-brightgreen?style=for-the-badge) |
 | `com.google.android.gms:play-services-maps` | ![Installed version](https://img.shields.io/badge/Installed%20version-17.0.1-brightgreen?style=for-the-badge) |
-| `com.google.android.material:material` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.3.0-brightgreen?style=for-the-badge) |
+| `com.google.android.material:material` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.4.0-brightgreen?style=for-the-badge) |
 | `com.google.android.play:core` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.10.0-brightgreen?style=for-the-badge) |
 | `com.google.android.play:core-ktx` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.8.1-brightgreen?style=for-the-badge) |
 | `com.google.firebase:firebase-bom` | ![Installed version](https://img.shields.io/badge/Installed%20version-28.1.0-brightgreen?style=for-the-badge) |
@@ -83,6 +82,7 @@ from the link specified, or through the repository's button.
 | `com.google.firebase:firebase-messaging-ktx` | BOM |
 | `com.google.firebase:firebase-perf-ktx` | BOM |
 | `com.google.firebase:firebase-storage-ktx` | BOM |
+| `com.google.firebase:firebase-functions-ktx` | BOM |
 | `com.google.firebase:firebase-messaging-directboot-ktx` | ![Installed version](https://img.shields.io/badge/Installed%20version-22.0.0-brightgreen?style=for-the-badge) |
 
 Google Dependencies's last version cannot be displayed because of the inavailability of APIs for badge generation on Google's Maven servers.
