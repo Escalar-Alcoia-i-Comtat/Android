@@ -4,11 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.ImageView
-import androidx.annotation.DrawableRes
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
@@ -44,6 +42,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.worker.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.DownloadWorker
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.google.firebase.dynamiclinks.ShortDynamicLink
@@ -760,18 +759,11 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             return
         }
 
-        @UiThread
-        fun loadImage(bmp: Bitmap?, @DrawableRes resource: Int?) {
-            if (bmp != null)
-                imageView.setImageBitmap(bmp)
-            if (resource != null)
-                imageView.setImageResource(resource)
-            imageView.scaleType = imageLoadParameters?.scaleType ?: ImageView.ScaleType.CENTER_CROP
-        }
+        imageView.scaleType = imageLoadParameters?.scaleType ?: ImageView.ScaleType.CENTER_CROP
 
         val showPlaceholder = imageLoadParameters?.showPlaceholder ?: true
         if (showPlaceholder)
-            loadImage(null, uiMetadata.placeholderDrawable)
+            imageView.setImageResource(uiMetadata.placeholderDrawable)
 
         val downloadedImageFile = imageFile(activity)
         if (downloadedImageFile.exists()) {
@@ -781,7 +773,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         } else {
             val tempFile = File(activity.cacheDir, "dataClass_$objectId")
 
-            fun successListener() {
+            val successListener = OnSuccessListener<FileDownloadTask.TaskSnapshot> {
                 Timber.v("Loaded image for $objectId. Decoding...")
                 val bitmap = BitmapFactory.decodeFile(tempFile.path)
 
@@ -790,28 +782,26 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 val bmp = if (scale == 1f) bitmap.scale(scale) else bitmap
 
                 Timber.v("Setting image into imageView.")
-                loadImage(bmp, null)
-            }
-
-            fun failureListener(e: Exception) {
-                Timber.e(e, "Could not load DataClass ($objectId) image.")
-                loadImage(null, uiMetadata.errorPlaceholderDrawable)
+                imageView.setImageBitmap(bmp)
             }
 
             if (tempFile.exists()) {
                 Timber.v("The image file has already been cached ($tempFile).")
-                successListener()
+                successListener.onSuccess(null)
             } else
                 storage.getReferenceFromUrl(imageReferenceUrl)
                     .getFile(tempFile)
-                    .addOnSuccessListener { successListener() }
+                    .addOnSuccessListener(successListener)
                     .addOnProgressListener { snapshot ->
                         val bytesCount = snapshot.bytesTransferred
                         val totalBytes = snapshot.totalByteCount
                         val progress = bytesCount / totalBytes
                         progressBar?.progress = (progress * 100).toInt()
                     }
-                    .addOnFailureListener { e -> failureListener(e) }
+                    .addOnFailureListener { e ->
+                        Timber.e(e, "Could not load DataClass ($objectId) image.")
+                        imageView.setImageResource(uiMetadata.errorPlaceholderDrawable)
+                    }
         }
     }
 

@@ -108,3 +108,18 @@ fun Activity.launch(target: Class<*>, properties: (Intent.() -> Unit)? = null) =
     startActivity(Intent(this, target).also {
         properties?.invoke(it)
     })
+
+/**
+ * Starts an activity with the specified properties for the Intent, and the specified options for
+ * the launching.
+ * @author Arnau Mora
+ * @since 20210521
+ * @param target The target activity's class.
+ * @param options Additional options for how the Activity should be started.
+ * @param properties The setter for the properties of the Intent.
+ */
+@UiThread
+fun Activity.launch(target: Class<*>, options: Bundle, properties: (Intent.() -> Unit)? = null) =
+    startActivity(Intent(this, target).also {
+        properties?.invoke(it)
+    }, options)

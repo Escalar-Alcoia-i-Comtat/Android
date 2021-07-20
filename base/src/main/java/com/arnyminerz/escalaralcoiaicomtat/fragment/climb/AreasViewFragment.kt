@@ -30,18 +30,56 @@ import timber.log.Timber
  * @since 20210617
  */
 class AreasViewFragment : NetworkChangeListenerFragment() {
+    /**
+     * If the fragment has just been attached. This will tell whether or not to animate the items
+     * in the recycler view.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     private var justAttached = false
 
+    /**
+     * The [FirebaseFirestore] instance reference for requesting data to the server.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     private lateinit var firestore: FirebaseFirestore
 
+    /**
+     * The nearby zones module for showing the user the zones that are nearby, if enabled.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     var nearbyZones: NearbyZonesModule? = null
 
+    /**
+     * The [MapHelper] instance for making map-related actions easily.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     val mapHelper: MapHelper?
         get() = nearbyZones?.mapHelper
 
+    /**
+     * What will get called when an area is clicked.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     private var areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null
 
+    /**
+     * The View Binding of the Fragment, for accessing the views.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     private var _binding: FragmentViewAreasBinding? = null
+
+    /**
+     * A non-null reference of the View Binding of the fragment.
+     * @author Arnau Mora
+     * @since 20210617
+     * @see _binding
+     */
     private val binding get() = _binding!!
 
     override fun onAttach(context: Context) {
@@ -133,6 +171,12 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         visibility(binding.areasNoInternetCardView.noInternetCardView, !state.hasInternet)
     }
 
+    /**
+     * Update the area click listener to the desired one.
+     * @author Arnau Mora
+     * @since 20210617
+     * @param areaClickListener This will get called whenever an area is selected by the user.
+     */
     fun setItemClickListener(areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?) {
         this.areaClickListener = areaClickListener
     }
