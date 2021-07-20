@@ -64,6 +64,7 @@
     <string name="toast_error_storage_corrupt">The downloaded file is corrupt, contact an administrator</string>
     <string name="toast_error_storage_authentication">Could not access private file</string>
     <string name="toast_error_load_areas">Could not load areas</string>
+    <string name="toast_error_load_image">Could not load image</string>
 
     <string name="notification_download_progress_title">Downloading…</string>
     <string name="notification_download_progress_message">Downloading %s</string>

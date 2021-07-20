@@ -64,6 +64,7 @@
     <string name="toast_error_storage_corrupt">El fitxer baixat està corromput, contacta a un adminstrador</string>
     <string name="toast_error_storage_authentication">No s\'ha pogut accedir a un fitxer privat</string>
     <string name="toast_error_load_areas">No s\'han pogut carregar les àrees</string>
+    <string name="toast_error_load_image">No s\'ha pogut carregar la image</string>
 
     <string name="notification_download_progress_title">Baixant…</string>
     <string name="notification_download_progress_message">Baixant %s</string>
