@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.ImageView
 import androidx.annotation.UiThread
@@ -12,6 +11,7 @@ import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -37,6 +37,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.scale
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.readBitmap
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.DOWNLOAD_QUALITY_MIN
@@ -775,14 +776,19 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
             val successListener = OnSuccessListener<FileDownloadTask.TaskSnapshot> {
                 Timber.v("Loaded image for $objectId. Decoding...")
-                val bitmap = BitmapFactory.decodeFile(tempFile.path)
+                val bitmap = readBitmap(tempFile)
 
                 Timber.v("Image decoded, scaling...")
                 val scale = imageLoadParameters?.resultImageScale ?: 1f
-                val bmp = if (scale == 1f) bitmap.scale(scale) else bitmap
+                val bmp = if (scale == 1f) bitmap?.scale(scale) else bitmap
 
-                Timber.v("Setting image into imageView.")
-                imageView.setImageBitmap(bmp)
+                if (bmp != null) {
+                    Timber.v("Setting image into imageView.")
+                    imageView.setImageBitmap(bmp)
+                } else {
+                    Timber.e("Could not decode image")
+                    toast(activity, R.string.toast_error_load_image)
+                }
             }
 
             if (tempFile.exists()) {
