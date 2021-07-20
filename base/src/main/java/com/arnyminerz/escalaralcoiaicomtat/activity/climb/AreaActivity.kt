@@ -29,13 +29,49 @@ import com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass.DwDataClassAda
 import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import timber.log.Timber
 
+/**
+ * A [DataClassListActivity] for exploring the interior of an [Area].
+ * The [Area] to explore must be passed through [EXTRA_AREA].
+ * @author Arnau Mora
+ * @since 20210719
+ * @see Area
+ * @see DataClassListActivity
+ */
 class AreaActivity : DataClassListActivity<Area>(true) {
-
+    /**
+     * If the fragment has just been attached. This will tell whether or not to animate the items
+     * in the recycler view.
+     * @author Arnau Mora
+     * @since 20210719
+     */
     private var justAttached = false
+
+    /**
+     * If the contents of the [Area] have been loaded.
+     * @author Arnau Mora
+     * @since 20210719
+     */
     private var loaded = false
+
+    /**
+     * If the contents of the [Area] are being loaded.
+     * @author Arnau Mora
+     * @since 20210719
+     */
     private var loading = false
 
+    /**
+     * The id of the loaded [Area].
+     * @author Arnau Mora
+     * @since 20210719
+     */
     private lateinit var areaId: String
+
+    /**
+     * The current position of the recycler view.
+     * @author Arnau Mora
+     * @since 20210719
+     */
     private var position = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,19 +85,15 @@ class AreaActivity : DataClassListActivity<Area>(true) {
             return
         }
 
-        intent.getExtra(EXTRA_AREA)?.let {
-            areaId = it
-            Timber.d("Area id: $areaId")
-        } ?: kotlin.run {
-            savedInstanceState?.getExtra(EXTRA_AREA)?.let { areaId ->
-                this.areaId = areaId
-            }
-        }
-        if (!this::areaId.isInitialized) {
+        val areaId = intent.getExtra(EXTRA_AREA) ?: savedInstanceState?.getExtra(EXTRA_AREA)
+
+        if (areaId == null) {
             Timber.e("Area extra is null")
             onBackPressed()
             return
         }
+
+        this.areaId = areaId
         if (!AREAS.has(areaId)) {
             Timber.e("Area is not loaded in AREAS")
             onBackPressed()
@@ -70,16 +102,13 @@ class AreaActivity : DataClassListActivity<Area>(true) {
         dataClass = AREAS.ensureGet(areaId)
         Timber.d("DataClass id: ${dataClass.objectId}")
 
-        position = intent.getExtra(
-            EXTRA_POSITION,
-            savedInstanceState?.getInt(EXTRA_POSITION.key, 0) ?: 0
-        )
+        position =
+            intent.getExtra(EXTRA_POSITION) ?: savedInstanceState?.getInt(EXTRA_POSITION.key, 0)
+                    ?: 0
         Timber.d("Current position: $position")
 
         binding.titleTextView.text = dataClass.displayName
-        intent.getExtra(EXTRA_AREA_TRANSITION_NAME)?.let {
-            binding.titleTextView.transitionName = it
-        }
+        binding.titleTextView.transitionName = intent.getExtra(EXTRA_AREA_TRANSITION_NAME)
 
         binding.backImageButton.setOnClickListener { onBackPressed() }
     }
