@@ -3,13 +3,18 @@ package com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class SectorViewModel(
     private val areaId: String,
@@ -19,8 +24,23 @@ class SectorViewModel(
     private val firestore = Firebase.firestore
     private val storage = Firebase.storage
 
+    private val innerSector: Sector?
+        get() = AREAS[areaId]?.get(zoneId)?.get(sectorId)
+
+    val sector: LiveData<Sector?> = liveData {
+        if (AREAS.isEmpty())
+            suspendCoroutine<List<Area>> { cont ->
+                loadAreas(firestore, storage, progressCallback = { current, total ->
+                    Timber.i("Loading areas: $current/$total")
+                }) {
+                    cont.resume(AREAS)
+                }
+            }
+        emit(innerSector)
+    }
+
     val items: LiveData<List<Path>> = liveData {
-        val paths = AREAS[areaId]?.get(zoneId)?.get(sectorId)?.getChildren(firestore, storage)
+        val paths = innerSector?.getChildren(firestore, storage)
         if (paths != null)
             emit(paths)
         else Timber.e("Could not find S/$sectorId in Z/$zoneId in A/$areaId")
