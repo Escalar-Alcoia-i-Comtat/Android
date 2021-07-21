@@ -7,15 +7,15 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 
 private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = Teal200
+    primary = Lime700,
+    primaryVariant = Lime800,
+    secondary = Lime500
 )
 
 private val LightColorPalette = lightColors(
-    primary = Purple500,
-    primaryVariant = Purple700,
-    secondary = Teal200
+    primary = Lime800,
+    primaryVariant = Lime900,
+    secondary = Lime500
 
     /* Other default colors to override
     background = Color.White,
@@ -30,13 +30,12 @@ private val LightColorPalette = lightColors(
 @Composable
 fun EscalarAlcoiaIComtatTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable() () -> Unit
+    content: @Composable () -> Unit
 ) {
-    val colors = if (darkTheme) {
+    val colors = if (darkTheme)
         DarkColorPalette
-    } else {
+    else
         LightColorPalette
-    }
 
     MaterialTheme(
         colors = colors,
