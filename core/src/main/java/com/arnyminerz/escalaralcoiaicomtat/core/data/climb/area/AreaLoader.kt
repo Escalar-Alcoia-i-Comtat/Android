@@ -24,6 +24,9 @@ import timber.log.Timber
  * Loads all the areas available in the server.
  * @author Arnau Mora
  * @since 20210313
+ * @param firestore The [FirebaseFirestore] reference for fetching data from the server.
+ * @param progressCallback This will get called when the loading progress is updated.
+ * @param callback This will get called when all the data has been loaded.
  * @see AREAS
  * @return A collection of areas
  */
