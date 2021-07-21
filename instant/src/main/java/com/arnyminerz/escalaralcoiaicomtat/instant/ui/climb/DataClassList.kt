@@ -82,7 +82,10 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.AreaItem(
     Card(
         modifier = Modifier
             .clickable {
-                toast(context, "$this > Clicked $displayName")
+                toast(context, "Clicked $displayName")
+                val path = this.metadata.documentPath
+                Timber.v("$this > Navigating to $path")
+                navController.navigate(path)
             }
     ) {
         Box {
