@@ -57,6 +57,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.lifecycle.LifecycleOwner
+import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
@@ -140,23 +141,9 @@ class MainActivity : ComponentActivity() {
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 fun MainView(activity: Activity) {
-    MainContent(activity)
-}
+    val navController = rememberNavController()
 
-@Composable
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-fun MainContent(activity: Activity) {
-    var isLoading by remember { mutableStateOf(true) }
     var expanded by remember { mutableStateOf(false) }
-    val areasViewModel = AreasViewModel()
-    val areasLiveData = areasViewModel.areas
-    val areas: List<Area> by areasLiveData.observeAsState(listOf())
-
-    areasLiveData.observe(activity as LifecycleOwner) {
-        isLoading = it.isEmpty()
-    }
 
     Scaffold(
         topBar = {
@@ -207,21 +194,36 @@ fun MainContent(activity: Activity) {
                         .animateContentSize(),
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 24.dp)
-                    ) {
-                        AnimatedVisibility(visible = isLoading, modifier = Modifier.size(52.dp)) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                    AreasList(areas, R.drawable.ic_wide_placeholder)
+                    MainContent(activity)
                 }
             }
         },
     )
+}
+
+@Composable
+@ExperimentalMaterialApi
+@ExperimentalAnimationApi
+@ExperimentalCoilApi
+fun MainContent(activity: Activity) {
+    val areasViewModel = AreasViewModel()
+    val areasLiveData = areasViewModel.areas
+    val areas: List<Area> by areasLiveData.observeAsState(listOf())
+    var isLoading by remember { mutableStateOf(true) }
+
+    areasLiveData.observe(activity as LifecycleOwner) { isLoading = it.isEmpty() }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 24.dp)
+    ) {
+        AnimatedVisibility(visible = isLoading, modifier = Modifier.size(52.dp)) {
+            CircularProgressIndicator()
+        }
+    }
+    AreasList(areas, R.drawable.ic_wide_placeholder)
 }
 
 @Composable
