@@ -8,8 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,12 +25,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
@@ -74,8 +71,8 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.AreaItem(
     image: Uri
 ) {
     val context = LocalContext.current
-    var boxSize by remember { mutableStateOf(Size.Zero) }
-    var height: Float by remember { mutableStateOf(0f) }
+
+    var imageRatio by remember { mutableStateOf(1f) }
 
     Timber.v("$this > Composing $displayName...")
     Timber.v("$this > Url: $image")
@@ -91,11 +88,11 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.AreaItem(
         Box {
             Image(
                 painter = rememberImagePainter(
-                    data = image.toString(),
+                    data = image,
                     onExecute = { _, current ->
-                        val size = current.size
-                        val scale = boxSize.height / boxSize.width
-                        height = size.height * scale
+                        val imageSize = current.size
+                        imageRatio = imageSize.width / imageSize.height
+
                         true
                     },
                     builder = {
@@ -106,16 +103,13 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.AreaItem(
                 contentDescription = "$displayName image",
                 modifier = Modifier
                     .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                    .height(150.dp)
                     .fillMaxWidth()
-                    .onGloballyPositioned { layoutCoordinates ->
-                        boxSize = layoutCoordinates.size.toSize()
-                    }
+                    .aspectRatio(imageRatio)
             )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(height.dp),
+                    .aspectRatio(imageRatio),
                 verticalAlignment = Alignment.Bottom
             ) {
                 Row(
