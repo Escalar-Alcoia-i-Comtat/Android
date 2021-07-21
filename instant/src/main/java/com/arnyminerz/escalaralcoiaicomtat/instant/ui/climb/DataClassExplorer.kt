@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.instant.ui.climb
 import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,9 +31,11 @@ import timber.log.Timber
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
+@ExperimentalFoundationApi
 fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
     activity: Activity,
     navController: NavController,
+    columnsPerRow: Int = 1,
     dataClassViewModel: Class<V>,
     viewModelArguments: List<Any> = listOf()
 ) {
@@ -62,5 +65,5 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
             CircularProgressIndicator()
         }
     }
-    DataClassList(items, R.drawable.ic_wide_placeholder, navController)
+    DataClassList(items, R.drawable.ic_wide_placeholder, columnsPerRow, navController)
 }

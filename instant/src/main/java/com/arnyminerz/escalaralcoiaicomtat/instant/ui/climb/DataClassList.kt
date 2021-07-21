@@ -2,16 +2,17 @@ package com.arnyminerz.escalaralcoiaicomtat.instant.ui.climb
 
 import android.net.Uri
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,19 +40,19 @@ import timber.log.Timber
 
 @Composable
 @ExperimentalCoilApi
+@ExperimentalFoundationApi
 fun <D : DataClass<*, *>> DataClassList(
     items: List<D>,
     @DrawableRes placeholder: Int,
+    columnsPerRow: Int = 1,
     navController: NavController
 ) {
     Timber.v("Loading DataClass list (${items.size} items)...")
     val state = rememberLazyListState()
-    LazyColumn(
+    LazyVerticalGrid(
         state = state,
-        modifier = Modifier.padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        cells = GridCells.Fixed(columnsPerRow)
     ) {
-        // App contents
         items(items) { dataClass ->
             Timber.v("$dataClass > Iterating...")
             val downloadUrl = dataClass.downloadUrl
@@ -78,6 +79,7 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.AreaItem(
     Timber.v("$this > Url: $image")
     Card(
         modifier = Modifier
+            .padding(8.dp)
             .clickable {
                 toast(context, "Clicked $displayName")
                 val path = this.metadata.documentPath

@@ -10,6 +10,7 @@ import androidx.annotation.UiThread
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -61,6 +62,7 @@ const val ANALYTICS_USER_PROP = "app_type"
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
+@ExperimentalFoundationApi
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -123,6 +125,7 @@ class MainActivity : ComponentActivity() {
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
+@ExperimentalFoundationApi
 fun MainView(activity: Activity, sharedViewModel: SharedViewModel) {
     val navController = rememberNavController()
 
@@ -197,14 +200,16 @@ fun MainView(activity: Activity, sharedViewModel: SharedViewModel) {
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
+@ExperimentalFoundationApi
 fun AreasExplorer(activity: Activity, navController: NavController) {
-    Explorer(activity, navController, AreasViewModel::class.java)
+    Explorer(activity, navController, 1, AreasViewModel::class.java)
 }
 
 @Composable
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
+@ExperimentalFoundationApi
 fun ZonesExplorer(activity: Activity, navController: NavController, areaId: String) {
-    Explorer(activity, navController, ZonesViewModel::class.java, listOf(areaId))
+    Explorer(activity, navController, 2, ZonesViewModel::class.java, listOf(areaId))
 }
