@@ -207,13 +207,17 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20210313
      * @param firestore The Firestore instance.
+     * @param storage If not null, the download url of the children will be fetched.
      * @throws NoInternetAccessException If no Internet connection is available, and the children are
      * not stored in storage.
      * @throws IllegalStateException When the children has not been loaded and [firestore] is null.
      */
     @WorkerThread
     @Throws(NoInternetAccessException::class, IllegalStateException::class)
-    suspend fun getChildren(firestore: FirebaseFirestore?): List<A> {
+    suspend fun getChildren(
+        firestore: FirebaseFirestore?,
+        storage: FirebaseStorage? = null
+    ): List<A> {
         if (loadingChildren) {
             Timber.v("Waiting for children to finish loading")
             while (loadingChildren) {
@@ -253,6 +257,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             }
             loadingChildren = false
         }
+
+        if (storage != null) {
+            Timber.v("$this > Fetching children download urls...")
+            for (child in innerChildren)
+                if (child is DataClass<*, *>)
+                    child.storageUrl(storage)
+        }
+
         return innerChildren
     }
 
