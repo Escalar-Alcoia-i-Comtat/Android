@@ -46,6 +46,7 @@ import com.arnyminerz.escalaralcoiaicomtat.instant.ui.climb.Explorer
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.theme.EscalarAlcoiaIComtatTheme
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.AreasViewModel
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.SharedViewModel
+import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.ZonesViewModel
 import com.google.android.gms.instantapps.InstantApps
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.ktx.crashlytics
@@ -205,5 +206,5 @@ fun AreasExplorer(activity: Activity, navController: NavController) {
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 fun ZonesExplorer(activity: Activity, navController: NavController, areaId: String) {
-    Explorer(activity, navController, AreasViewModel::class.java)
+    Explorer(activity, navController, ZonesViewModel::class.java, listOf(areaId))
 }
