@@ -32,9 +32,10 @@ import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.DataClassViewMod
 fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
     activity: Activity,
     navController: NavController,
-    dataClassViewModel: Class<V>
+    dataClassViewModel: Class<V>,
+    vararg viewModelArguments: Any
 ) {
-    val viewModel = dataClassViewModel.getConstructor().newInstance()
+    val viewModel = dataClassViewModel.getConstructor().newInstance(viewModelArguments)
     val liveData = viewModel.items
     val items: List<T> by liveData.observeAsState(listOf())
     var isLoading by remember { mutableStateOf(true) }
