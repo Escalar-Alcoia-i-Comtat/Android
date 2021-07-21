@@ -24,6 +24,7 @@ import coil.annotation.ExperimentalCoilApi
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.instant.R
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.DataClassViewModel
+import timber.log.Timber
 
 @Composable
 @ExperimentalMaterialApi
@@ -33,9 +34,11 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
     activity: Activity,
     navController: NavController,
     dataClassViewModel: Class<V>,
-    vararg viewModelArguments: Any
+    viewModelArguments: List<Any> = listOf()
 ) {
-    val viewModel = dataClassViewModel.getConstructor().newInstance(viewModelArguments)
+    Timber.v("viewModelArguments: $viewModelArguments")
+    val viewModel =
+        dataClassViewModel.getConstructor().newInstance(*viewModelArguments.toTypedArray())
     val liveData = viewModel.items
     val items: List<T> by liveData.observeAsState(listOf())
     var isLoading by remember { mutableStateOf(true) }
