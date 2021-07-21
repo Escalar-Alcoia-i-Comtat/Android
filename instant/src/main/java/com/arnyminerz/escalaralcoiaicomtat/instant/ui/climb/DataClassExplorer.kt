@@ -36,9 +36,16 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
     dataClassViewModel: Class<V>,
     viewModelArguments: List<Any> = listOf()
 ) {
-    Timber.v("viewModelArguments: $viewModelArguments")
-    val viewModel =
-        dataClassViewModel.getConstructor().newInstance(*viewModelArguments.toTypedArray())
+    val types = arrayListOf<Class<*>>()
+    for (argument in viewModelArguments)
+        types.add(argument::class.java)
+
+    Timber.v("Exploring ViewModel named ${dataClassViewModel.name}")
+    Timber.v("ViewModel args: $viewModelArguments ($types)")
+
+    val viewModel = dataClassViewModel
+        .getConstructor(*types.toTypedArray())
+        .newInstance(*viewModelArguments.toTypedArray())
     val liveData = viewModel.items
     val items: List<T> by liveData.observeAsState(listOf())
     var isLoading by remember { mutableStateOf(true) }
