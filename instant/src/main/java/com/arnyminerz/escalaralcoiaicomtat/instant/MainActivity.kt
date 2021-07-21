@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.annotation.UiThread
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -46,7 +45,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.climb.Explorer
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.theme.EscalarAlcoiaIComtatTheme
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.AreasViewModel
-import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.SharedViewModel
+import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.SectorsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.ZonesViewModel
 import com.google.android.gms.instantapps.InstantApps
 import com.google.firebase.analytics.ktx.analytics
@@ -70,13 +69,11 @@ class MainActivity : ComponentActivity() {
         instantInfoSetup()
         dataCollectionSetUp()
 
-        val sharedViewModel: SharedViewModel by viewModels()
-
         setContent {
             EscalarAlcoiaIComtatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    MainView(this, sharedViewModel)
+                    MainView(this)
                 }
             }
         }
@@ -126,7 +123,7 @@ class MainActivity : ComponentActivity() {
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
-fun MainView(activity: Activity, sharedViewModel: SharedViewModel) {
+fun MainView(activity: Activity) {
     val navController = rememberNavController()
 
     var expanded by remember { mutableStateOf(false) }
@@ -189,6 +186,14 @@ fun MainView(activity: Activity, sharedViewModel: SharedViewModel) {
                             else
                                 Text(text = "Could not navigate to area: $areaId")
                         }
+                        composable("Areas/{areaId}/Zones/{zoneId}") { backStackEntry ->
+                            val areaId = backStackEntry.arguments?.getString("areaId")
+                            val zoneId = backStackEntry.arguments?.getString("zoneId")
+                            if (areaId != null && zoneId != null)
+                                SectorsExplorer(activity, navController, areaId, zoneId)
+                            else
+                                Text(text = "Could not navigate to zone Z/$zoneId in A/$areaId")
+                        }
                     }
                 }
             }
@@ -212,4 +217,18 @@ fun AreasExplorer(activity: Activity, navController: NavController) {
 @ExperimentalFoundationApi
 fun ZonesExplorer(activity: Activity, navController: NavController, areaId: String) {
     Explorer(activity, navController, 2, ZonesViewModel::class.java, listOf(areaId))
+}
+
+@Composable
+@ExperimentalMaterialApi
+@ExperimentalAnimationApi
+@ExperimentalCoilApi
+@ExperimentalFoundationApi
+fun SectorsExplorer(
+    activity: Activity,
+    navController: NavController,
+    areaId: String,
+    zoneId: String
+) {
+    Explorer(activity, navController, 1, SectorsViewModel::class.java, listOf(areaId, zoneId))
 }
