@@ -56,10 +56,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
+import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.io.File
 import java.util.*
@@ -188,6 +190,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
     var imageReferenceUrl: String = imageReferenceUrl
         private set
+
+    /**
+     * The download url from Firebase Storage for the [DataClass]' image.
+     * @author Arnau Mora
+     * @since 20210721
+     */
+    var downloadUrl: Uri? = null
 
     private val pin = "${namespace}_$objectId"
 
@@ -393,7 +402,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         return innerChildren.iterator()
     }
 
-    override fun toString(): String = displayName
+    override fun toString(): String = namespace[0] + "/" + objectId
 
     /**
      * Generates a list of [DownloadedSection].
@@ -734,6 +743,29 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 }
                 .addOnFailureListener { e -> cont.resumeWithException(e) }
         } else cont.resumeWithException(IllegalStateException("The webUrl in the DataClass' metadata is null."))
+    }
+
+    /**
+     * Get the [FirebaseStorage] reference for loading the [DataClass]' image.
+     * @author Arnau Mora
+     * @since 20210721
+     * @param storage The [FirebaseStorage] reference for loading the image file.
+     * @return The [StorageReference] that corresponds to the [DataClass]' image.
+     */
+    fun storageReference(storage: FirebaseStorage): StorageReference =
+        storage.getReferenceFromUrl(imageReferenceUrl)
+
+    /**
+     * Get the [FirebaseStorage] download url for loading the [DataClass]' image.
+     * @author Arnau Mora
+     * @since 20210721
+     * @param storage The [FirebaseStorage] reference for loading the image file.
+     * @return The [DataClass]' download url.
+     */
+    suspend fun storageUrl(storage: FirebaseStorage): Uri {
+        if (downloadUrl == null)
+            downloadUrl = storageReference(storage).downloadUrl.await()
+        return downloadUrl!!
     }
 
     /**
