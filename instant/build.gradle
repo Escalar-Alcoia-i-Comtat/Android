@@ -1,6 +1,8 @@
 plugins {
     id('com.android.application')
     id('org.jetbrains.kotlin.android')
+    id('com.google.gms.google-services')
+    id('com.google.firebase.crashlytics')
     id('com.google.secrets_gradle_plugin') version '0.6'
 }
 
@@ -29,7 +31,7 @@ android {
             def props = new Properties()
             file("${rootDir}/local.properties").withInputStream { props.load(it) }
 
-            storeFile file("keystore.jks")
+            storeFile file("../base/keystore.jks")
             storePassword props.getProperty("SIGNING_KEYSTORE_PASSWORD")
             keyAlias props.getProperty("SIGNING_KEY_ALIAS")
             keyPassword props.getProperty("SIGNING_KEY_PASSWORD")
@@ -96,6 +98,10 @@ dependencies {
 
     // Firebase Dependencies
     implementation platform('com.google.firebase:firebase-bom:28.2.0')
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-perf-ktx'
+    implementation 'com.google.firebase:firebase-appindexing'
     implementation 'com.google.firebase:firebase-firestore-ktx'
 
     // Core Module
