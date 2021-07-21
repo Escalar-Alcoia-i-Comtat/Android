@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.widget.ImageView
 import androidx.annotation.UiThread
@@ -31,6 +32,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.cache
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
@@ -735,6 +737,70 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
+     * Fetches the image [Bitmap] from the DataClass.
+     * @author Arnau Mora
+     * @since 20210721
+     * @param context The context the app is running on.
+     * @param storage The [FirebaseStorage] reference for loading the image file.
+     * @param imageLoadParameters The parameters desired to load the image.
+     * @param progress The progress listener, for supervising loading.
+     * @param image This will get called once the image has been loaded.
+     * @see ValueMax
+     * @see ImageLoadParameters
+     */
+    fun image(
+        context: Context,
+        storage: FirebaseStorage,
+        imageLoadParameters: ImageLoadParameters? = null,
+        progress: (progress: ValueMax<Long>) -> Unit,
+        image: (bitmap: Bitmap?) -> Unit
+    ) {
+        val downloadedImageFile = imageFile(context)
+        if (downloadedImageFile.exists()) {
+            Timber.d("Loading image from storage: ${downloadedImageFile.path}")
+            val bmp = readBitmap(downloadedImageFile)
+            image(bmp)
+        } else {
+            val tempFile = File(context.cacheDir, "dataClass_$objectId")
+
+            val successListener = OnSuccessListener<FileDownloadTask.TaskSnapshot> {
+                Timber.v("Loaded image for $objectId. Decoding...")
+                val bitmap = readBitmap(tempFile)
+
+                Timber.v("Image decoded, scaling...")
+                val scale = imageLoadParameters?.resultImageScale ?: 1f
+                val bmp = if (scale == 1f) bitmap?.scale(scale) else bitmap
+
+                if (bmp != null) {
+                    Timber.v("Setting image into imageView.")
+                    image(bmp)
+                } else {
+                    Timber.e("Could not decode image")
+                    toast(context, R.string.toast_error_load_image)
+                    image(null)
+                }
+            }
+
+            if (tempFile.exists()) {
+                Timber.v("The image file has already been cached ($tempFile).")
+                successListener.onSuccess(null)
+            } else
+                storage.getReferenceFromUrl(imageReferenceUrl)
+                    .getFile(tempFile)
+                    .addOnSuccessListener(successListener)
+                    .addOnProgressListener { snapshot ->
+                        val bytesCount = snapshot.bytesTransferred
+                        val totalBytes = snapshot.totalByteCount
+                        progress(ValueMax(bytesCount, totalBytes))
+                    }
+                    .addOnFailureListener { e ->
+                        Timber.e(e, "Could not load DataClass ($objectId) image.")
+                        image(null)
+                    }
+        }
+    }
+
+    /**
      * Loads the image of the Data Class
      * @author Arnau Mora
      * @date 2020/09/11
@@ -766,49 +832,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         if (showPlaceholder)
             imageView.setImageResource(uiMetadata.placeholderDrawable)
 
-        val downloadedImageFile = imageFile(activity)
-        if (downloadedImageFile.exists()) {
-            Timber.d("Loading image from storage: ${downloadedImageFile.path}")
-            val bmp = readBitmap(downloadedImageFile)
-            imageView.setImageBitmap(bmp)
-        } else {
-            val tempFile = File(activity.cacheDir, "dataClass_$objectId")
-
-            val successListener = OnSuccessListener<FileDownloadTask.TaskSnapshot> {
-                Timber.v("Loaded image for $objectId. Decoding...")
-                val bitmap = readBitmap(tempFile)
-
-                Timber.v("Image decoded, scaling...")
-                val scale = imageLoadParameters?.resultImageScale ?: 1f
-                val bmp = if (scale == 1f) bitmap?.scale(scale) else bitmap
-
-                if (bmp != null) {
-                    Timber.v("Setting image into imageView.")
-                    imageView.setImageBitmap(bmp)
-                } else {
-                    Timber.e("Could not decode image")
-                    toast(activity, R.string.toast_error_load_image)
-                }
-            }
-
-            if (tempFile.exists()) {
-                Timber.v("The image file has already been cached ($tempFile).")
-                successListener.onSuccess(null)
-            } else
-                storage.getReferenceFromUrl(imageReferenceUrl)
-                    .getFile(tempFile)
-                    .addOnSuccessListener(successListener)
-                    .addOnProgressListener { snapshot ->
-                        val bytesCount = snapshot.bytesTransferred
-                        val totalBytes = snapshot.totalByteCount
-                        val progress = bytesCount / totalBytes
-                        progressBar?.progress = (progress * 100).toInt()
-                    }
-                    .addOnFailureListener { e ->
-                        Timber.e(e, "Could not load DataClass ($objectId) image.")
-                        imageView.setImageResource(uiMetadata.errorPlaceholderDrawable)
-                    }
-        }
+        image(activity, storage, imageLoadParameters, { progress ->
+            progressBar?.progress = progress.percentage()
+        }, { bmp -> imageView.setImageBitmap(bmp) })
     }
 
     override fun hashCode(): Int {
