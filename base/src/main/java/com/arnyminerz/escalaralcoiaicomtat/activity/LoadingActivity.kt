@@ -75,10 +75,14 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         binding = ActivityLoadingBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        dataCollectionSetUp()
-
         Timber.v("Getting Firestore instance...")
         firestore = Firebase.firestore
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        dataCollectionSetUp()
 
         val showIntro = IntroActivity.shouldShow()
         if (showIntro != IntroShowReason.OK) {
