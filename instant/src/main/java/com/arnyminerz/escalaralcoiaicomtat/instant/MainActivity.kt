@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.UiThread
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -36,16 +37,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.climb.Explorer
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.theme.EscalarAlcoiaIComtatTheme
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.AreasViewModel
+import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.SharedViewModel
 import com.google.android.gms.instantapps.InstantApps
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.ktx.crashlytics
@@ -67,11 +67,13 @@ class MainActivity : ComponentActivity() {
         instantInfoSetup()
         dataCollectionSetUp()
 
+        val sharedViewModel: SharedViewModel by viewModels()
+
         setContent {
             EscalarAlcoiaIComtatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    MainView(this)
+                    MainView(this, sharedViewModel)
                 }
             }
         }
@@ -120,7 +122,7 @@ class MainActivity : ComponentActivity() {
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
-fun MainView(activity: Activity) {
+fun MainView(activity: Activity, sharedViewModel: SharedViewModel) {
     val navController = rememberNavController()
 
     var expanded by remember { mutableStateOf(false) }
@@ -176,10 +178,13 @@ fun MainView(activity: Activity) {
                 ) {
                     NavHost(navController = navController, startDestination = "root") {
                         composable("root") { AreasExplorer(activity, navController) }
-                        composable(
-                            "explore_area",
-                            arguments = listOf(navArgument("areaId") { type = NavType.StringType })
-                        ) { ZonesExplorer(activity, navController) }
+                        composable("root/{areaId}") { backStackEntry ->
+                            val areaId = backStackEntry.arguments?.getString("areaId")
+                            if (areaId != null)
+                                ZonesExplorer(activity, navController, areaId)
+                            else
+                                Text(text = "Could not navigate to area: $areaId")
+                        }
                     }
                 }
             }
@@ -199,6 +204,6 @@ fun AreasExplorer(activity: Activity, navController: NavController) {
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
-fun ZonesExplorer(activity: Activity, navController: NavController) {
-    Text(text = "This is a Zone!")
+fun ZonesExplorer(activity: Activity, navController: NavController, areaId: String) {
+    Explorer(activity, navController, AreasViewModel::class.java)
 }
