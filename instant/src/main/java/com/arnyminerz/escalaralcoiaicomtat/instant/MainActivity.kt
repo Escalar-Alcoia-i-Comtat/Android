@@ -207,7 +207,7 @@ fun MainView(activity: Activity) {
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
 fun AreasExplorer(activity: Activity, navController: NavController) {
-    Explorer(activity, navController, 1, AreasViewModel::class.java)
+    Explorer(activity, navController, 1, dataClassViewModel = AreasViewModel::class.java)
 }
 
 @Composable
@@ -216,7 +216,13 @@ fun AreasExplorer(activity: Activity, navController: NavController) {
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
 fun ZonesExplorer(activity: Activity, navController: NavController, areaId: String) {
-    Explorer(activity, navController, 2, ZonesViewModel::class.java, listOf(areaId))
+    Explorer(
+        activity,
+        navController,
+        2,
+        dataClassViewModel = ZonesViewModel::class.java,
+        viewModelArguments = listOf(areaId)
+    )
 }
 
 @Composable
@@ -230,5 +236,11 @@ fun SectorsExplorer(
     areaId: String,
     zoneId: String
 ) {
-    Explorer(activity, navController, 1, SectorsViewModel::class.java, listOf(areaId, zoneId))
+    Explorer(
+        activity,
+        navController,
+        1,
+        dataClassViewModel = SectorsViewModel::class.java,
+        viewModelArguments = listOf(areaId, zoneId)
+    )
 }

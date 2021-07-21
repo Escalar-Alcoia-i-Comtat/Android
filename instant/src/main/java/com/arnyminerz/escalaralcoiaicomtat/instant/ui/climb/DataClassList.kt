@@ -42,10 +42,10 @@ import timber.log.Timber
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
 fun <D : DataClass<*, *>> DataClassList(
+    navController: NavController,
     items: List<D>,
     @DrawableRes placeholder: Int,
-    columnsPerRow: Int = 1,
-    navController: NavController
+    columnsPerRow: Int = 1
 ) {
     Timber.v("Loading DataClass list (${items.size} items)...")
     val state = rememberLazyListState()

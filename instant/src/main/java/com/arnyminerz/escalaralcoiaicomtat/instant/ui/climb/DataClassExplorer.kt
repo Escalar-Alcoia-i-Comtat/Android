@@ -65,5 +65,5 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
             CircularProgressIndicator()
         }
     }
-    DataClassList(items, R.drawable.ic_wide_placeholder, columnsPerRow, navController)
+    DataClassList(navController, items, R.drawable.ic_wide_placeholder, columnsPerRow)
 }
