@@ -10,15 +10,23 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.FloatingActionButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -27,24 +35,35 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Fullscreen
+import androidx.compose.material.icons.rounded.FullscreenExit
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.climb.Explorer
+import com.arnyminerz.escalaralcoiaicomtat.instant.ui.elements.ZoomableImage
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.theme.EscalarAlcoiaIComtatTheme
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.AreasViewModel
+import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.SectorViewModel
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.SectorsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.ZonesViewModel
 import com.google.android.gms.instantapps.InstantApps
@@ -194,6 +213,15 @@ fun MainView(activity: Activity) {
                             else
                                 Text(text = "Could not navigate to zone Z/$zoneId in A/$areaId")
                         }
+                        composable("Areas/{areaId}/Zones/{zoneId}/Sectors/{sectorId}") { backStackEntry ->
+                            val areaId = backStackEntry.arguments?.getString("areaId")
+                            val zoneId = backStackEntry.arguments?.getString("zoneId")
+                            val sectorId = backStackEntry.arguments?.getString("sectorId")
+                            if (areaId != null && zoneId != null && sectorId != null)
+                                SectorView(activity, areaId, zoneId, sectorId)
+                            else
+                                Text(text = "Could not navigate to sector S/$sectorId in Z/$zoneId in A/$areaId")
+                        }
                     }
                 }
             }
@@ -243,4 +271,75 @@ fun SectorsExplorer(
         dataClassViewModel = SectorsViewModel::class.java,
         viewModelArguments = listOf(areaId, zoneId)
     )
+}
+
+@Composable
+@ExperimentalAnimationApi
+fun SectorView(activity: Activity, areaId: String, zoneId: String, sectorId: String) {
+    val viewModel = SectorViewModel(areaId, zoneId, sectorId)
+    val liveItems = viewModel.items
+    val liveSector = viewModel.sector
+    val sector: Sector? by liveSector.observeAsState(null)
+    val paths: List<Path> by liveItems.observeAsState(listOf())
+
+    var isLoading by remember { mutableStateOf(true) }
+    var isMaximized by remember { mutableStateOf(false) }
+
+    liveItems.observe(activity as LifecycleOwner) { isLoading = it.isEmpty() }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 24.dp)
+    ) {
+        AnimatedVisibility(visible = isLoading, modifier = Modifier.size(52.dp)) {
+            CircularProgressIndicator()
+        }
+    }
+
+    Column {
+        if (sector != null)
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight(if (isMaximized) 1f else .5f)
+                    .fillMaxWidth()
+                    .animateContentSize()
+            ) {
+                ZoomableImage(
+                    painter = rememberImagePainter(
+                        data = sector!!.downloadUrl,
+                        builder = {
+                            placeholder(R.drawable.ic_tall_placeholder)
+                        }
+                    ),
+                    modifier = Modifier
+                        .clip(RectangleShape)
+                        .fillMaxHeight()
+                        .fillMaxWidth(),
+                    enableRotation = false,
+                    minZoom = 1f
+                )
+                FloatingActionButton(
+                    onClick = { isMaximized = !isMaximized },
+                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 5.dp),
+                    modifier = Modifier
+                        .size(52.dp)
+                        .padding(8.dp)
+                        .align(Alignment.BottomEnd)
+                ) {
+                    Icon(
+                        if (isMaximized) Icons.Rounded.FullscreenExit else Icons.Rounded.Fullscreen,
+                        contentDescription = if (isMaximized) "Compress" else "Expand"
+                    )
+                }
+            }
+
+        val state = rememberLazyListState()
+        LazyColumn(state = state) {
+            items(paths) { dataClass ->
+
+            }
+        }
+    }
 }
