@@ -57,6 +57,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.lifecycle.LifecycleOwner
+import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
@@ -194,7 +199,13 @@ fun MainView(activity: Activity) {
                         .animateContentSize(),
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                 ) {
-                    MainContent(activity)
+                    NavHost(navController = navController, startDestination = "root") {
+                        composable("root") { MainContent(activity, navController) }
+                        composable(
+                            "explore_area",
+                            arguments = listOf(navArgument("areaId") { type = NavType.StringType })
+                        ) { MainContent(activity, navController) }
+                    }
                 }
             }
         },
@@ -205,7 +216,7 @@ fun MainView(activity: Activity) {
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
-fun MainContent(activity: Activity) {
+fun MainContent(activity: Activity, navController: NavController) {
     val areasViewModel = AreasViewModel()
     val areasLiveData = areasViewModel.areas
     val areas: List<Area> by areasLiveData.observeAsState(listOf())
@@ -223,14 +234,15 @@ fun MainContent(activity: Activity) {
             CircularProgressIndicator()
         }
     }
-    AreasList(areas, R.drawable.ic_wide_placeholder)
+    AreasList(areas, R.drawable.ic_wide_placeholder, navController)
 }
 
 @Composable
 @ExperimentalCoilApi
 fun AreasList(
     areas: List<Area>,
-    @DrawableRes placeholder: Int
+    @DrawableRes placeholder: Int,
+    navController: NavController
 ) {
     Timber.v("Loading areas list...")
     val state = rememberLazyListState()
@@ -246,24 +258,25 @@ fun AreasList(
             if (downloadUrl == null)
                 Timber.i("A/$area > Could not load image since downloadUrl is null")
             else
-                area.AreaItem(placeholder, downloadUrl)
+                area.AreaItem(navController, placeholder, downloadUrl)
         }
     }
 }
 
 @Composable
 @ExperimentalCoilApi
-fun Area.AreaItem(@DrawableRes placeholder: Int, image: Uri) {
+fun Area.AreaItem(navController: NavController, @DrawableRes placeholder: Int, image: Uri) {
     val context = LocalContext.current
     var boxSize by remember { mutableStateOf(Size.Zero) }
     var height: Float by remember { mutableStateOf(0f) }
 
     Timber.v("$this > Composing area $displayName...")
     Timber.v("$this > Url: $image")
-    Card(modifier = Modifier
-        .clickable {
-            toast(context, "Clicked $displayName")
-        }
+    Card(
+        modifier = Modifier
+            .clickable {
+                toast(context, "Clicked $displayName")
+            }
     ) {
         Box {
             Image(
