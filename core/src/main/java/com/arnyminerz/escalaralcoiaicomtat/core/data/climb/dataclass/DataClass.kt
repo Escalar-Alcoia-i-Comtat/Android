@@ -752,7 +752,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         context: Context,
         storage: FirebaseStorage,
         imageLoadParameters: ImageLoadParameters? = null,
-        progress: (progress: ValueMax<Long>) -> Unit,
+        progress: ((progress: ValueMax<Long>) -> Unit)? = null,
         image: (bitmap: Bitmap?) -> Unit
     ) {
         val downloadedImageFile = imageFile(context)
@@ -791,7 +791,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     .addOnProgressListener { snapshot ->
                         val bytesCount = snapshot.bytesTransferred
                         val totalBytes = snapshot.totalByteCount
-                        progress(ValueMax(bytesCount, totalBytes))
+                        progress?.invoke(ValueMax(bytesCount, totalBytes))
                     }
                     .addOnFailureListener { e ->
                         Timber.e(e, "Could not load DataClass ($objectId) image.")
