@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.instant
 
-import android.content.Context
+import android.app.Activity
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -138,22 +139,22 @@ class MainActivity : ComponentActivity() {
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
-fun MainView(context: Context) {
-    MainContent(context)
+fun MainView(activity: Activity) {
+    MainContent(activity)
 }
 
 @Composable
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
-fun MainContent(context: Context) {
+fun MainContent(activity: Activity) {
     var isLoading by remember { mutableStateOf(true) }
     var expanded by remember { mutableStateOf(false) }
     val areasViewModel = AreasViewModel()
     val areasLiveData = areasViewModel.areas
     val areas: List<Area> by areasLiveData.observeAsState(listOf())
 
-    areasLiveData.observe(context as LifecycleOwner) {
+    areasLiveData.observe(activity as LifecycleOwner) {
         isLoading = it.isEmpty()
     }
 
@@ -181,7 +182,12 @@ fun MainContent(context: Context) {
                             .fillMaxWidth()
                     ) {
                         Button(
-                            onClick = { /*TODO*/ },
+                            onClick = {
+                                val postInstall = Intent(Intent.ACTION_MAIN)
+                                    .addCategory(Intent.CATEGORY_DEFAULT)
+                                    .setPackage("com.arnyminerz.escalaralcoiaicomtat")
+                                InstantApps.showInstallPrompt(activity, postInstall, 0, null)
+                            },
                             modifier = Modifier.align(Alignment.End),
                             colors = ButtonDefaults.textButtonColors(
                                 backgroundColor = MaterialTheme.colors.secondary,
