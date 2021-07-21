@@ -47,7 +47,7 @@ fun <D : DataClass<*, *>> DataClassList(
     @DrawableRes placeholder: Int,
     navController: NavController
 ) {
-    Timber.v("Loading areas list...")
+    Timber.v("Loading DataClass list (${items.size} items)...")
     val state = rememberLazyListState()
     LazyColumn(
         state = state,
