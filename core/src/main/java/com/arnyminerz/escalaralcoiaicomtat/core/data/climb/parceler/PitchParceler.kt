@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parceler
 
 class PitchParceler : Parceler<Pitch> {
     override fun create(parcel: Parcel): Pitch =
-        Pitch(parcel.readParcelable(PitchEndingData::class.java.classLoader)!!)
+        Pitch(endingData = parcel.readParcelable(PitchEndingData::class.java.classLoader)!!)
 
     override fun Pitch.write(parcel: Parcel, flags: Int) {
         parcel.writeParcelable(this.endingData, flags)
