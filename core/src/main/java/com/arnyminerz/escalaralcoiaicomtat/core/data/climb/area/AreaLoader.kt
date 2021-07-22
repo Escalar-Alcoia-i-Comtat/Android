@@ -3,15 +3,30 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 import android.content.Context
 import androidx.annotation.MainThread
 import androidx.annotation.UiThread
+import androidx.appsearch.app.AppSearchBatchResult
+import androidx.appsearch.app.AppSearchSession
+import androidx.appsearch.app.PutDocumentsRequest
+import androidx.appsearch.app.SetSchemaRequest
+import androidx.appsearch.app.SetSchemaResponse
+import androidx.appsearch.localstorage.LocalStorage
 import androidx.collection.arrayMapOf
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.data
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.data
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.data
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.INDEX_PATHS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_FULL_DATA_LOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.asyncCoroutineScope
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.google.common.util.concurrent.FutureCallback
+import com.google.common.util.concurrent.Futures
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -22,6 +37,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
+import java.util.concurrent.Executors
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Loads all the areas available in the server.
@@ -30,7 +49,7 @@ import timber.log.Timber
  * @param firestore The [FirebaseFirestore] reference for fetching data from the server.
  * @param storage The [FirebaseStorage] reference for fetching files from the server. If not-null,
  * the download url of the [Area]s will be fetched.
- * @param context The context to load the areas from. If null, no error toasts will be shown.
+ * @param context The context to load the areas from.
  * @param scope The [CoroutineScope] to run on.
  * @param progressCallback This will get called when the loading progress is updated.
  * @param callback This will get called when all the data has been loaded.
@@ -41,7 +60,7 @@ import timber.log.Timber
 fun loadAreas(
     firestore: FirebaseFirestore,
     storage: FirebaseStorage? = null,
-    context: Context? = null,
+    context: Context,
     scope: CoroutineScope = asyncCoroutineScope,
     @UiThread progressCallback: (current: Int, total: Int) -> Unit,
     @UiThread callback: () -> Unit
@@ -75,6 +94,12 @@ fun loadAreas(
             val zonesCache = arrayMapOf<String, Zone>()
             Timber.v("Initializing areas cache...")
             val areasCache = arrayMapOf<String, Area>()
+
+            Timber.v("Initializing search index list...")
+            val areasIndex = arrayListOf<AreaData>()
+            val zonesIndex = arrayListOf<ZoneData>()
+            val sectorsIndex = arrayListOf<SectorData>()
+            val pathsIndex = arrayListOf<PathData>()
 
             Timber.v("Getting sector documents...")
             val sectorDocuments = sectorsSnapshot.documents
@@ -136,6 +161,15 @@ fun loadAreas(
                 val zone = zonesCache[zoneId]
                 Timber.v("S/$sectorId > Processing sector data...")
                 val sector = Sector(sectorDocument)
+                Timber.v("S/$sectorId > Adding sector to the search index...")
+                sectorsIndex.add(sector.data())
+                if (INDEX_PATHS) {
+                    Timber.v("S/$sectorId > Loading paths...")
+                    val paths = sector.getChildren(firestore)
+                    Timber.v("S/$sectorId > Adding paths to the search index...")
+                    for (path in paths)
+                        pathsIndex.add(path.data())
+                }
                 Timber.v("S/$sectorId > Adding sector to zone Z/$zoneId...")
                 zone?.add(sector)
             }
@@ -175,6 +209,13 @@ fun loadAreas(
                 area?.add(zone)
             }
 
+            Timber.v("Adding zones to the search index...")
+            for (zone in zonesCache.values)
+                zonesIndex.add(zone.data())
+            Timber.v("Adding areas to the search index...")
+            for (area in areasCache.values)
+                areasIndex.add(area.data())
+
             Timber.v("Finished iterating documents.")
             Timber.v("Ordering areas...")
             val areas = areasCache.values.sortedBy { area -> area.displayName }
@@ -192,6 +233,123 @@ fun loadAreas(
             Timber.v("Adding all areas to AREAS...")
             AREAS.addAll(areas)
 
+            Timber.v("Search > Initializing session future...")
+            val sessionFuture = LocalStorage.createSearchSession(
+                LocalStorage.SearchContext.Builder(context, "escalaralcoiaicomtat")
+                    .build()
+            )
+            val executor = Executors.newSingleThreadExecutor()
+            Timber.v("Search > Adding document classes...")
+            val setSchemaRequest = SetSchemaRequest.Builder()
+                .addDocumentClasses(AreaData::class.java)
+                .addDocumentClasses(ZoneData::class.java)
+                .addDocumentClasses(SectorData::class.java)
+                .addDocumentClasses(PathData::class.java)
+                .build()
+            val setSchemaFuture = Futures.transformAsync(
+                sessionFuture,
+                { session ->
+                    session?.setSchema(setSchemaRequest)
+                }, executor
+            )
+            suspendCoroutine<SetSchemaResponse?> { cont ->
+                Futures.addCallback(
+                    setSchemaFuture,
+                    object : FutureCallback<SetSchemaResponse?> {
+                        override fun onSuccess(result: SetSchemaResponse?) {
+                            cont.resume(result)
+                        }
+
+                        override fun onFailure(t: Throwable) {
+                            Timber.e(t, "Search > Could not add document classes.")
+                            cont.resumeWithException(t)
+                        }
+                    },
+                    executor
+                )
+            }
+
+            Timber.v("Search > Adding documents...")
+            val putRequest = PutDocumentsRequest.Builder()
+                .addDocuments(areasIndex)
+                .addDocuments(zonesIndex)
+                .addDocuments(sectorsIndex)
+                .addDocuments(pathsIndex)
+                .build()
+            val putFuture = Futures.transformAsync(
+                sessionFuture,
+                { session -> session?.put(putRequest) },
+                executor
+            )
+            val putResponse = suspendCoroutine<AppSearchBatchResult<String, Void>?> { cont ->
+                Futures.addCallback(
+                    putFuture,
+                    object : FutureCallback<AppSearchBatchResult<String, Void>?> {
+                        override fun onSuccess(result: AppSearchBatchResult<String, Void>?) {
+                            cont.resume(result)
+                        }
+
+                        override fun onFailure(t: Throwable) {
+                            Timber.e(t, "Search > Could not add documents.")
+                            cont.resumeWithException(t)
+                        }
+                    },
+                    executor
+                )
+            }
+            val successfulResults = putResponse?.successes
+            val failedResults = putResponse?.failures
+            if (successfulResults?.isEmpty() != true)
+                Timber.i("Search > Added ${successfulResults?.size} documents...")
+            if (failedResults?.isEmpty() != true)
+                Timber.w("Search > Could not add ${failedResults?.size} documents...")
+
+            Timber.v("Search > Flushing database...")
+            val flushFuture = Futures.transformAsync(
+                sessionFuture,
+                { session -> session?.requestFlush() },
+                executor
+            )
+            suspendCoroutine<Void?> { cont ->
+                Futures.addCallback(
+                    flushFuture,
+                    object : FutureCallback<Void?> {
+                        override fun onSuccess(result: Void?) {
+                            cont.resume(result)
+                        }
+
+                        override fun onFailure(t: Throwable) {
+                            Timber.e(t, "Search > Could not flush database.")
+                            cont.resumeWithException(t)
+                        }
+                    },
+                    executor
+                )
+            }
+
+            Timber.v("Search > Closing database...")
+            val closeFuture = Futures.transform<AppSearchSession, Unit>(
+                sessionFuture,
+                { session -> session?.close() },
+                executor
+            )
+            suspendCoroutine<Unit?> { cont ->
+                Futures.addCallback(
+                    closeFuture,
+                    object : FutureCallback<Unit> {
+                        override fun onSuccess(result: Unit?) {
+                            cont.resume(result)
+                        }
+
+                        override fun onFailure(t: Throwable) {
+                            Timber.e(t, "Search > Could not flush database.")
+                            cont.resumeWithException(t)
+                        }
+                    },
+                    executor
+                )
+            }
+
             trace.stop()
 
             Timber.v("Running callback...")
@@ -200,8 +358,7 @@ fun loadAreas(
             Timber.e(e, "Could not load areas.")
             trace.putAttribute("error", "true")
             trace.stop()
-            if (context != null)
-                uiContext { toast(context, R.string.toast_error_load_areas) }
+            uiContext { toast(context, R.string.toast_error_load_areas) }
         }
     }
 
