@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.instant.ui.elements
+package com.arnyminerz.escalaralcoiaicomtat.ui.elements
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:dist="http://schemas.android.com/apk/distribution"
-    package="com.arnyminerz.escalaralcoiaicomtat.instant"
+    package="com.arnyminerz.escalaralcoiaicomtat"
+    android:versionCode="2"
     android:targetSandboxVersion="2">
 
     <dist:module dist:instant="true" />
@@ -40,5 +41,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

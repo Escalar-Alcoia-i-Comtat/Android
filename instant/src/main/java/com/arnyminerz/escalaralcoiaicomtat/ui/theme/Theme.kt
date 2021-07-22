@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.instant.ui.theme
+package com.arnyminerz.escalaralcoiaicomtat.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme

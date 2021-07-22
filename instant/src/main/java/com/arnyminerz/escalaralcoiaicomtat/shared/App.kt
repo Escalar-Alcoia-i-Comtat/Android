@@ -1,11 +1,11 @@
-package com.arnyminerz.escalaralcoiaicomtat.instant.shared
+package com.arnyminerz.escalaralcoiaicomtat.shared
 
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREFERENCES_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
-import com.arnyminerz.escalaralcoiaicomtat.instant.BuildConfig
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber

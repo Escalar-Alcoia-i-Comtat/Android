@@ -13,10 +13,14 @@ android {
     buildToolsVersion "31.0.0"
 
     defaultConfig {
-        applicationId "com.arnyminerz.escalaralcoiaicomtat.instant"
+        def instantVersionCode = findProperty("instantVersionCode") as Integer
+
+        logger.debug("Instant version code: $instantVersionCode")
+
+        applicationId "com.arnyminerz.escalaralcoiaicomtat"
         minSdk 26
         targetSdk 31
-        versionCode findProperty("instantVersionCode") as Integer
+        versionCode instantVersionCode
         versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -69,7 +73,7 @@ android.applicationVariants.all { variant ->
             Properties versionProps = new Properties()
             versionProps.load(new FileInputStream(versionPropsFile))
             def code = versionProps['android.instantVersionCode'].toInteger() + 1
-            versionProps['android.instantVersionCod'] = code.toString()
+            versionProps['android.instantVersionCode'] = code.toString()
             versionProps.store(versionPropsFile.newWriter(), null)
             logger.lifecycle("Increased instant version code to $code")
         }

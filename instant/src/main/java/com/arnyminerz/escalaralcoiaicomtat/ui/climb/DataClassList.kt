@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.instant.ui.climb
+package com.arnyminerz.escalaralcoiaicomtat.ui.climb
 
 import android.net.Uri
 import androidx.annotation.DrawableRes
@@ -35,7 +35,7 @@ import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.arnyminerz.escalaralcoiaicomtat.instant.ui.theme.ItemTextBackground
+import com.arnyminerz.escalaralcoiaicomtat.ui.theme.ItemTextBackground
 import timber.log.Timber
 
 @Composable

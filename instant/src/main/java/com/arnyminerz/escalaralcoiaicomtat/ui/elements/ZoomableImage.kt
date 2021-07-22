@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.instant.ui.elements
+package com.arnyminerz.escalaralcoiaicomtat.ui.elements
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image

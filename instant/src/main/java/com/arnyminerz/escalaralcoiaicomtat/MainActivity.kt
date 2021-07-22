@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.instant
+package com.arnyminerz.escalaralcoiaicomtat
 
 import android.app.Activity
 import android.content.Intent
@@ -66,14 +66,14 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
-import com.arnyminerz.escalaralcoiaicomtat.instant.ui.climb.Explorer
-import com.arnyminerz.escalaralcoiaicomtat.instant.ui.elements.Chip
-import com.arnyminerz.escalaralcoiaicomtat.instant.ui.elements.ZoomableImage
-import com.arnyminerz.escalaralcoiaicomtat.instant.ui.theme.EscalarAlcoiaIComtatTheme
-import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.AreasViewModel
-import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.SectorViewModel
-import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.SectorsViewModel
-import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.ZonesViewModel
+import com.arnyminerz.escalaralcoiaicomtat.ui.climb.Explorer
+import com.arnyminerz.escalaralcoiaicomtat.ui.elements.Chip
+import com.arnyminerz.escalaralcoiaicomtat.ui.elements.ZoomableImage
+import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
+import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.AreasViewModel
+import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SectorViewModel
+import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SectorsViewModel
+import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.ZonesViewModel
 import com.google.android.gms.instantapps.InstantApps
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.ktx.crashlytics
