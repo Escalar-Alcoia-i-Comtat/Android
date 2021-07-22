@@ -207,7 +207,10 @@ fun MainView(activity: Activity, path: String? = null) {
                         .animateContentSize(),
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                 ) {
-                    NavHost(navController = navController, startDestination = path ?: "Areas") {
+                    NavHost(
+                        navController = navController,
+                        startDestination = if (path != null && path.isNotEmpty()) path else "Areas"
+                    ) {
                         composable("Areas") { AreasExplorer(activity, navController) }
                         composable("Areas/{areaId}") { backStackEntry ->
                             val areaId = backStackEntry.arguments?.getString("areaId")
