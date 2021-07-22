@@ -38,6 +38,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChildFriendly
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Flare
 import androidx.compose.material.icons.rounded.Fullscreen
 import androidx.compose.material.icons.rounded.FullscreenExit
@@ -64,7 +65,10 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SunTime
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.AFTERNOON
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ALL_DAY
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.MORNING
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
 import com.arnyminerz.escalaralcoiaicomtat.ui.animation.EnterAnimation
 import com.arnyminerz.escalaralcoiaicomtat.ui.climb.Explorer
@@ -378,16 +382,18 @@ fun SectorView(activity: Activity, areaId: String, zoneId: String, sectorId: Str
                     val kidsApt = sector!!.kidsApt
                     Chip(
                         label = when (sunTime) {
-                            SunTime.NoSun -> "No Sun"
-                            SunTime.AllDay -> "All-Day Sun"
-                            SunTime.Morning -> "Morning Sun"
-                            SunTime.Afternoon -> "Afternoon Sun"
+                            NO_SUN -> "No Sun"
+                            ALL_DAY -> "All-Day Sun"
+                            MORNING -> "Morning Sun"
+                            AFTERNOON -> "Afternoon Sun"
+                            else -> "Unknown"
                         },
                         icon = when (sunTime) {
-                            SunTime.NoSun -> Icons.Rounded.WbShade
-                            SunTime.AllDay -> Icons.Rounded.WbSunny
-                            SunTime.Morning -> Icons.Rounded.Flare
-                            SunTime.Afternoon -> Icons.Rounded.Flare
+                            NO_SUN -> Icons.Rounded.WbShade
+                            ALL_DAY -> Icons.Rounded.WbSunny
+                            MORNING -> Icons.Rounded.Flare
+                            AFTERNOON -> Icons.Rounded.Flare
+                            else -> Icons.Rounded.Close
                         }
                     )
                     if (kidsApt)

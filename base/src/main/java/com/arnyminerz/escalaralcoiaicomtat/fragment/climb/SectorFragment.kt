@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.appendChip
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_AREA_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_SECTOR_INDEX
@@ -295,7 +296,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
                     // Load info bar
                     binding?.sunChip?.let {
-                        sector.sunTime.appendChip(requireContext(), it)
+                        appendChip(requireContext(), sector.sunTime, it)
                     }
                     binding?.kidsAptChip?.let {
                         sector.kidsAptChip(requireContext(), it)

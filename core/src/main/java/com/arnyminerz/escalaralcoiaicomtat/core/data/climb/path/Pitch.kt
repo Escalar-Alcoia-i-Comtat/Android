@@ -6,9 +6,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.PitchEndingData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.PitchEndingOrientation
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.PitchEndingRappel
+import org.json.JSONObject
 
 data class Pitch(
-    private val endingData: PitchEndingData
+    val endingData: PitchEndingData
 ) {
     companion object {
         /**
@@ -28,9 +29,21 @@ data class Pitch(
         }
     }
 
+    constructor(json: JSONObject) : this(
+        PitchEndingData(
+            PitchEndingOrientation.find(json.getString("orientation"))!!,
+            PitchEndingRappel.find(json.getString("rappel"))!!
+        )
+    )
+
     fun getDisplayText(context: Context): String {
         return endingData.orientation.toString(context) + " " +
                 endingData.rappel.toString(context)
+    }
+
+    fun toJSON(): JSONObject = JSONObject().apply {
+        put("orientation", endingData.orientation.key)
+        put("rappel", endingData.rappel.key)
     }
 
     /**

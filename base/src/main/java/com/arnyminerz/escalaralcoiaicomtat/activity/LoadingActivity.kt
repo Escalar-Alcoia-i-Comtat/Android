@@ -20,6 +20,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.INDEX_PATHS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.INDEX_PATHS_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE_KEY
@@ -250,10 +252,13 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         SHOW_NON_DOWNLOADED = remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
         ENABLE_AUTHENTICATION = remoteConfig.getBoolean(ENABLE_AUTHENTICATION_KEY)
         PROFILE_IMAGE_SIZE = remoteConfig.getLong(PROFILE_IMAGE_SIZE_KEY)
+        INDEX_PATHS = remoteConfig.getBoolean(INDEX_PATHS_KEY)
 
         Timber.v("APP_UPDATE_MAX_TIME_DAYS: $APP_UPDATE_MAX_TIME_DAYS")
         Timber.v("SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
         Timber.v("ENABLE_AUTHENTICATION: $ENABLE_AUTHENTICATION")
+        Timber.v("PROFILE_IMAGE_SIZE: $PROFILE_IMAGE_SIZE")
+        Timber.v("INDEX_PATHS: $INDEX_PATHS")
     }
 
     /**
