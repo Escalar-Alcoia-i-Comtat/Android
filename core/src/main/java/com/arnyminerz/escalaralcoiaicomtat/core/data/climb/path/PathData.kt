@@ -1,7 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
 import androidx.appsearch.annotation.Document
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import org.json.JSONArray
+import java.util.Date
 
 @Document
 data class PathData(
@@ -33,6 +36,60 @@ data class PathData(
 ) {
     @Document.Namespace
     var namespace: String = Path.NAMESPACE
+
+    fun path(): Path {
+        val gradesArray = JSONArray(grades)
+        val grades = Grade.GradesList()
+        for (i in 0 until gradesArray.length())
+            grades.add(Grade.fromJSON(gradesArray.getJSONObject(i)))
+
+        val heightsArray = JSONArray(heights)
+        val heights = arrayListOf<Long>()
+        for (h in 0 until heightsArray.length())
+            heights.add(heightsArray.getLong(h))
+
+        val endingsArray = JSONArray(endings)
+        val endings = arrayListOf<EndingType>()
+        for (e in 0 until endingsArray.length())
+            endings.add(EndingType.find(heightsArray.getString(e)))
+
+        val pitchesArray = JSONArray(pitches)
+        val pitches = arrayListOf<Pitch>()
+        for (p in 0 until pitchesArray.length())
+            pitches.add(Pitch(pitchesArray.getJSONObject(p)))
+
+        return Path(
+            objectId,
+            Date(timestamp),
+            sketchId,
+            displayName,
+            grades,
+            heights,
+            endings,
+            pitches,
+            FixedSafesData(
+                stringCount,
+                paraboltCount,
+                spitCount,
+                tensorCount,
+                pitonCount,
+                burilCount
+            ),
+            RequiredSafesData(
+                lanyardRequired,
+                crackerRequired,
+                friendRequired,
+                stripsRequired,
+                pitonRequired,
+                nailRequired
+            ),
+            description,
+            builtBy.ifEmpty { null },
+            rebuiltBy.ifEmpty { null },
+            downloaded,
+            documentPath
+        )
+    }
 }
 
 fun Path.data(): PathData {

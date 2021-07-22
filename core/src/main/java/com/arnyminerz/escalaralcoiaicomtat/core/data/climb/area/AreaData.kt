@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
 import androidx.appsearch.annotation.Document
+import java.util.Date
 
 @Document
 data class AreaData(
@@ -14,6 +15,16 @@ data class AreaData(
 ) {
     @Document.Namespace
     var namespace: String = Area.NAMESPACE
+
+    fun area() = Area(
+        objectId,
+        displayName,
+        Date(timestamp),
+        image,
+        kmzReferenceUrl,
+        documentPath,
+        webUrl.ifEmpty { null }
+    )
 }
 
 fun Area.data(): AreaData {
