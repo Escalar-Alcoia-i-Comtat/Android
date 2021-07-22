@@ -9,6 +9,8 @@ import android.net.Uri
 import android.widget.ImageView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.appsearch.annotation.Document
+import androidx.appsearch.app.AppSearchSchema
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -72,14 +74,16 @@ import kotlin.coroutines.suspendCoroutine
 
 // A: List type
 // B: Parent Type
+@Document
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES)
     val displayName: String,
     timestamp: Date,
     imageReferenceUrl: String,
     val kmzReferenceUrl: String?,
     val uiMetadata: UIMetadata,
     val metadata: DataClassMetadata
-) : DataClassImpl(metadata.objectId, metadata.namespace, timestamp), Iterable<A> {
+) : DataClassImpl(metadata.objectId, metadata.namespace, timestamp.time), Iterable<A> {
     companion object {
         /**
          * Searches in [AREAS] and tries to get an intent from them.
