@@ -28,7 +28,8 @@ import timber.log.Timber
  * @author Arnau Mora
  * @since 20210313
  * @param firestore The [FirebaseFirestore] reference for fetching data from the server.
- * @param storage The [FirebaseStorage] reference for fetching files from the server.
+ * @param storage The [FirebaseStorage] reference for fetching files from the server. If not-null,
+ * the download url of the [Area]s will be fetched.
  * @param context The context to load the areas from. If null, no error toasts will be shown.
  * @param scope The [CoroutineScope] to run on.
  * @param progressCallback This will get called when the loading progress is updated.
@@ -39,7 +40,7 @@ import timber.log.Timber
 @MainThread
 fun loadAreas(
     firestore: FirebaseFirestore,
-    storage: FirebaseStorage,
+    storage: FirebaseStorage? = null,
     context: Context? = null,
     scope: CoroutineScope = asyncCoroutineScope,
     @UiThread progressCallback: (current: Int, total: Int) -> Unit,
@@ -178,10 +179,12 @@ fun loadAreas(
             Timber.v("Ordering areas...")
             val areas = areasCache.values.sortedBy { area -> area.displayName }
 
-            Timber.v("Getting area download urls...")
-            for (area in areas) {
-                Timber.v("A/$area > Getting download url...")
-                area?.storageUrl(storage)
+            if (storage != null) {
+                Timber.v("Getting area download urls...")
+                for (area in areas) {
+                    Timber.v("A/$area > Getting download url...")
+                    area?.storageUrl(storage)
+                }
             }
 
             Timber.v("Clearing AREAS...")
