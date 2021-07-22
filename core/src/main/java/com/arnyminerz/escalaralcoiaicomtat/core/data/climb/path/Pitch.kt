@@ -8,7 +8,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.PitchEndin
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.PitchEndingRappel
 
 data class Pitch(
-    private val endingData: PitchEndingData
+    val endingData: PitchEndingData
 ) {
     companion object {
         /**
