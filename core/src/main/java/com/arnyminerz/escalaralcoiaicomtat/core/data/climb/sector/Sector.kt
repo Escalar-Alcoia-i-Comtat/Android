@@ -40,7 +40,7 @@ class Sector constructor(
     objectId: String,
     displayName: String,
     timestamp: Date,
-    val sunTime: SunTime,
+    @SunTime val sunTime: Int,
     val kidsApt: Boolean,
     val walkingTime: Long,
     val location: LatLng?,
@@ -75,7 +75,7 @@ class Sector constructor(
         data.id,
         data.getString("displayName")!!,
         data.getDate("created")!!,
-        SunTime.find(data.getLong("sunTime")!!.toInt()),
+        data.getLong("sunTime")!!.toInt(),
         data.getBoolean("kidsApt") ?: false,
         data.getLong("walkingTime")!!,
         data.getGeoPoint("location")?.toLatLng(),
@@ -89,7 +89,7 @@ class Sector constructor(
         parcel.writeString(objectId)
         parcel.writeString(displayName)
         parcel.writeString(timestamp.let { TIMESTAMP_FORMAT.format(timestamp) })
-        parcel.writeInt(sunTime.value)
+        parcel.writeInt(sunTime)
         parcel.writeInt(if (kidsApt) 1 else 0)
         parcel.writeLong(walkingTime)
         parcel.writeParcelable(location, 0)
@@ -104,7 +104,7 @@ class Sector constructor(
         parcel.readString()!!, // objectId
         parcel.readString()!!, // Display Name
         parcel.readString().toTimestamp()!!, // Timestamp
-        SunTime.find(parcel.readInt()), // Sun Time
+        parcel.readInt(), // Sun Time
         parcel.readInt() == 1, // Kids Apt
         parcel.readLong(), // Walking Time
         parcel.readParcelable<LatLng?>(LatLng::class.java.classLoader),
