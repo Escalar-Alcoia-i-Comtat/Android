@@ -12,6 +12,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -35,9 +36,13 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ChildFriendly
+import androidx.compose.material.icons.rounded.Flare
 import androidx.compose.material.icons.rounded.Fullscreen
 import androidx.compose.material.icons.rounded.FullscreenExit
 import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material.icons.rounded.WbShade
+import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -58,8 +63,10 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.climb.Explorer
+import com.arnyminerz.escalaralcoiaicomtat.instant.ui.elements.Chip
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.elements.ZoomableImage
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.theme.EscalarAlcoiaIComtatTheme
 import com.arnyminerz.escalaralcoiaicomtat.instant.ui.viewmodel.AreasViewModel
@@ -299,7 +306,7 @@ fun SectorView(activity: Activity, areaId: String, zoneId: String, sectorId: Str
     }
 
     Column {
-        if (sector != null)
+        if (sector != null) {
             Box(
                 modifier = Modifier
                     .fillMaxHeight(if (isMaximized) 1f else .5f)
@@ -334,6 +341,35 @@ fun SectorView(activity: Activity, areaId: String, zoneId: String, sectorId: Str
                     )
                 }
             }
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            ) {
+                Row {
+                    val sunTime = sector!!.sunTime
+                    val kidsApt = sector!!.kidsApt
+                    Chip(
+                        label = when (sunTime) {
+                            SunTime.NoSun -> "No Sun"
+                            SunTime.AllDay -> "All-Day Sun"
+                            SunTime.Morning -> "Morning Sun"
+                            SunTime.Afternoon -> "Afternoon Sun"
+                        },
+                        icon = when (sunTime) {
+                            SunTime.NoSun -> Icons.Rounded.WbShade
+                            SunTime.AllDay -> Icons.Rounded.WbSunny
+                            SunTime.Morning -> Icons.Rounded.Flare
+                            SunTime.Afternoon -> Icons.Rounded.Flare
+                        }
+                    )
+                    if (kidsApt)
+                        Chip(label = "Kids Apt", icon = Icons.Rounded.ChildFriendly)
+                }
+            }
+        }
 
         val state = rememberLazyListState()
         LazyColumn(state = state) {
