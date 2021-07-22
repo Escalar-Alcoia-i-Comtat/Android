@@ -3,6 +3,10 @@ package com.arnyminerz.escalaralcoiaicomtat.ui.climb
 import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +28,7 @@ import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.ui.animation.EnterAnimation
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.DataClassViewModel
 import timber.log.Timber
 
@@ -61,9 +66,17 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
             .fillMaxWidth()
             .padding(top = 24.dp)
     ) {
-        AnimatedVisibility(visible = isLoading, modifier = Modifier.size(52.dp)) {
+        EnterAnimation(visible = isLoading, modifier = Modifier.size(52.dp)) {
             CircularProgressIndicator()
         }
     }
-    DataClassList(navController, items, R.drawable.ic_wide_placeholder, columnsPerRow)
+    AnimatedVisibility(
+        visible = !isLoading,
+        enter = slideInHorizontally(
+            initialOffsetX = { -40 }
+        ) + fadeIn(initialAlpha = 0.7f),
+        exit = slideOutHorizontally() + fadeOut(),
+    ) {
+        DataClassList(navController, items, R.drawable.ic_wide_placeholder, columnsPerRow)
+    }
 }
