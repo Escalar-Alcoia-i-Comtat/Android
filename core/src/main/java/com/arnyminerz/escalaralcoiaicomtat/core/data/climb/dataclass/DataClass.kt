@@ -14,6 +14,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.CouldNotCreateDynamicLinkException
@@ -64,7 +65,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.io.File
-import java.util.*
+import java.util.Date
 import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
