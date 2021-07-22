@@ -2,11 +2,13 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass
 
 import android.os.Parcelable
 import androidx.appsearch.annotation.Document
+import kotlinx.parcelize.Parcelize
 import java.util.Date
 
 @Document
-abstract class DataClassImpl(
-    @Document.Id val objectId: String,
+@Parcelize
+open class DataClassImpl(
+    @Document.Id open val objectId: String,
     @Document.Namespace val namespace: String,
     @Document.CreationTimestampMillis val timestampMillis: Long
 ) : Parcelable {
@@ -19,6 +21,6 @@ abstract class DataClassImpl(
         }
     }
 
-    val timestamp: Date
+    open val timestamp: Date
         get() = Date(timestampMillis)
 }

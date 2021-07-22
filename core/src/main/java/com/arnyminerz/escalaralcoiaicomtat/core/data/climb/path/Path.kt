@@ -1,10 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
 import android.os.Parcel
-import android.os.Parcelable
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.PitchParceler
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
@@ -19,12 +19,16 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.TypeParceler
 import timber.log.Timber
 import java.util.Date
 
+@Parcelize
+@TypeParceler<Pitch, PitchParceler>
 class Path(
-    objectId: String,
-    timestamp: Date,
+    override val objectId: String,
+    override val timestamp: Date,
     val sketchId: Long,
     val displayName: String,
     val grades: Grade.GradesList,
@@ -35,13 +39,10 @@ class Path(
     val requiredSafesData: RequiredSafesData,
     val description: String?,
     val builtBy: String?,
-    rebuiltBy: String?,
+    var rebuiltBy: String?,
     val downloaded: Boolean = false,
     val documentPath: String,
-) : DataClassImpl(objectId, NAMESPACE, timestamp), Comparable<Path> {
-    var rebuiltBy: String? = rebuiltBy
-        private set
-
+) : DataClassImpl(objectId, NAMESPACE, timestamp.time), Comparable<Path> {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString().toTimestamp()!!,
@@ -254,31 +255,7 @@ class Path(
                 }
             }
 
-    override fun describeContents(): Int = 0
-    override fun writeToParcel(dest: Parcel?, flags: Int) {
-        dest?.apply {
-            writeString(objectId)
-            writeSerializable(timestamp)
-            writeLong(sketchId)
-            writeString(displayName)
-            writeList(grades)
-            writeList(heights)
-            writeList(endings)
-            writeList(pitches)
-            writeParcelable(fixedSafesData, 0)
-            writeParcelable(requiredSafesData, 0)
-            writeString(description)
-            writeString(builtBy)
-            writeString(rebuiltBy)
-            writeInt(if (downloaded) 1 else 0)
-            writeString(documentPath)
-        }
-    }
-
-    companion object CREATOR : Parcelable.Creator<Path> {
-        override fun createFromParcel(parcel: Parcel): Path = Path(parcel)
-        override fun newArray(size: Int): Array<Path?> = arrayOfNulls(size)
-
+    companion object {
         const val NAMESPACE = "Path"
     }
 }
