@@ -781,6 +781,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
+     * Checks if the [DataClass] has a stored [downloadUrl].
+     * @author Arnau Mora
+     * @since 20210722
+     */
+    fun hasStorageUrl() = downloadUrl != null
+
+    /**
      * Fetches the image [Bitmap] from the DataClass.
      * @author Arnau Mora
      * @since 20210721
