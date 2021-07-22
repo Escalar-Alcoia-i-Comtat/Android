@@ -19,7 +19,7 @@ android {
         minSdk 26
         targetSdk 31
         versionCode instantVersionCode
-        versionName VERSION_NAME
+        versionName VERSION_NAME + "-beta1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
