@@ -66,6 +66,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
+import com.arnyminerz.escalaralcoiaicomtat.ui.animation.EnterAnimation
 import com.arnyminerz.escalaralcoiaicomtat.ui.climb.Explorer
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.Chip
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.ZoomableImage
@@ -211,11 +212,17 @@ fun MainView(activity: Activity, path: String? = null) {
                         navController = navController,
                         startDestination = if (path != null && path.isNotEmpty()) path else "Areas"
                     ) {
-                        composable("Areas") { AreasExplorer(activity, navController) }
+                        composable("Areas") {
+                            EnterAnimation {
+                                AreasExplorer(activity, navController)
+                            }
+                        }
                         composable("Areas/{areaId}") { backStackEntry ->
                             val areaId = backStackEntry.arguments?.getString("areaId")
                             if (areaId != null)
-                                ZonesExplorer(activity, navController, areaId)
+                                EnterAnimation {
+                                    ZonesExplorer(activity, navController, areaId)
+                                }
                             else
                                 Text(text = "Could not navigate to area: $areaId")
                         }
@@ -223,7 +230,9 @@ fun MainView(activity: Activity, path: String? = null) {
                             val areaId = backStackEntry.arguments?.getString("areaId")
                             val zoneId = backStackEntry.arguments?.getString("zoneId")
                             if (areaId != null && zoneId != null)
-                                SectorsExplorer(activity, navController, areaId, zoneId)
+                                EnterAnimation {
+                                    SectorsExplorer(activity, navController, areaId, zoneId)
+                                }
                             else
                                 Text(text = "Could not navigate to zone Z/$zoneId in A/$areaId")
                         }
@@ -232,7 +241,9 @@ fun MainView(activity: Activity, path: String? = null) {
                             val zoneId = backStackEntry.arguments?.getString("zoneId")
                             val sectorId = backStackEntry.arguments?.getString("sectorId")
                             if (areaId != null && zoneId != null && sectorId != null)
-                                SectorView(activity, areaId, zoneId, sectorId)
+                                EnterAnimation {
+                                    SectorView(activity, areaId, zoneId, sectorId)
+                                }
                             else
                                 Text(text = "Could not navigate to sector S/$sectorId in Z/$zoneId in A/$areaId")
                         }
