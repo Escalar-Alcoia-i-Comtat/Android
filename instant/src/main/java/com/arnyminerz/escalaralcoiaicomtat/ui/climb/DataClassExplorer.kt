@@ -28,6 +28,7 @@ import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.hasStorageUrls
 import com.arnyminerz.escalaralcoiaicomtat.ui.animation.EnterAnimation
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.DataClassViewModel
 import timber.log.Timber
@@ -56,9 +57,12 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
         .newInstance(*viewModelArguments.toTypedArray())
     val liveData = viewModel.items
     val items: List<T> by liveData.observeAsState(listOf())
-    var isLoading by remember { mutableStateOf(true) }
+    var finishedLoading by remember { mutableStateOf(false) }
 
-    liveData.observe(activity as LifecycleOwner) { isLoading = it.isEmpty() }
+    liveData.observe(activity as LifecycleOwner) {
+        val storageUrlsLoaded = it.hasStorageUrls()
+        finishedLoading = it.isNotEmpty() && storageUrlsLoaded
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -66,17 +70,22 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
             .fillMaxWidth()
             .padding(top = 24.dp)
     ) {
-        EnterAnimation(visible = isLoading, modifier = Modifier.size(52.dp)) {
+        EnterAnimation(visible = !finishedLoading, modifier = Modifier.size(52.dp)) {
             CircularProgressIndicator()
         }
     }
     AnimatedVisibility(
-        visible = !isLoading,
+        visible = finishedLoading,
         enter = slideInHorizontally(
             initialOffsetX = { -40 }
         ) + fadeIn(initialAlpha = 0.7f),
         exit = slideOutHorizontally() + fadeOut(),
     ) {
-        DataClassList(navController, items, R.drawable.ic_wide_placeholder, columnsPerRow)
+        DataClassList(
+            navController,
+            items,
+            if (columnsPerRow % 2 == 0) R.drawable.ic_tall_placeholder else R.drawable.ic_wide_placeholder,
+            columnsPerRow
+        )
     }
 }
