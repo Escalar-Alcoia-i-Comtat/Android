@@ -49,7 +49,8 @@ import kotlin.coroutines.suspendCoroutine
  * @param firestore The [FirebaseFirestore] reference for fetching data from the server.
  * @param storage The [FirebaseStorage] reference for fetching files from the server. If not-null,
  * the download url of the [Area]s will be fetched.
- * @param context The context to load the areas from.
+ * @param context The context to load the areas from. If null, no toasts will be shown, and search
+ * will be disabled.
  * @param scope The [CoroutineScope] to run on.
  * @param progressCallback This will get called when the loading progress is updated.
  * @param callback This will get called when all the data has been loaded.
@@ -60,7 +61,7 @@ import kotlin.coroutines.suspendCoroutine
 fun loadAreas(
     firestore: FirebaseFirestore,
     storage: FirebaseStorage? = null,
-    context: Context,
+    context: Context? = null,
     scope: CoroutineScope = asyncCoroutineScope,
     @UiThread progressCallback: (current: Int, total: Int) -> Unit,
     @UiThread callback: () -> Unit
@@ -233,121 +234,123 @@ fun loadAreas(
             Timber.v("Adding all areas to AREAS...")
             AREAS.addAll(areas)
 
-            Timber.v("Search > Initializing session future...")
-            val sessionFuture = LocalStorage.createSearchSession(
-                LocalStorage.SearchContext.Builder(context, "escalaralcoiaicomtat")
+            if (context != null) {
+                Timber.v("Search > Initializing session future...")
+                val sessionFuture = LocalStorage.createSearchSession(
+                    LocalStorage.SearchContext.Builder(context, "escalaralcoiaicomtat")
+                        .build()
+                )
+                val executor = Executors.newSingleThreadExecutor()
+                Timber.v("Search > Adding document classes...")
+                val setSchemaRequest = SetSchemaRequest.Builder()
+                    .addDocumentClasses(AreaData::class.java)
+                    .addDocumentClasses(ZoneData::class.java)
+                    .addDocumentClasses(SectorData::class.java)
+                    .addDocumentClasses(PathData::class.java)
                     .build()
-            )
-            val executor = Executors.newSingleThreadExecutor()
-            Timber.v("Search > Adding document classes...")
-            val setSchemaRequest = SetSchemaRequest.Builder()
-                .addDocumentClasses(AreaData::class.java)
-                .addDocumentClasses(ZoneData::class.java)
-                .addDocumentClasses(SectorData::class.java)
-                .addDocumentClasses(PathData::class.java)
-                .build()
-            val setSchemaFuture = Futures.transformAsync(
-                sessionFuture,
-                { session ->
-                    session?.setSchema(setSchemaRequest)
-                }, executor
-            )
-            suspendCoroutine<SetSchemaResponse?> { cont ->
-                Futures.addCallback(
-                    setSchemaFuture,
-                    object : FutureCallback<SetSchemaResponse?> {
-                        override fun onSuccess(result: SetSchemaResponse?) {
-                            cont.resume(result)
-                        }
+                val setSchemaFuture = Futures.transformAsync(
+                    sessionFuture,
+                    { session ->
+                        session?.setSchema(setSchemaRequest)
+                    }, executor
+                )
+                suspendCoroutine<SetSchemaResponse?> { cont ->
+                    Futures.addCallback(
+                        setSchemaFuture,
+                        object : FutureCallback<SetSchemaResponse?> {
+                            override fun onSuccess(result: SetSchemaResponse?) {
+                                cont.resume(result)
+                            }
 
-                        override fun onFailure(t: Throwable) {
-                            Timber.e(t, "Search > Could not add document classes.")
-                            cont.resumeWithException(t)
-                        }
-                    },
+                            override fun onFailure(t: Throwable) {
+                                Timber.e(t, "Search > Could not add document classes.")
+                                cont.resumeWithException(t)
+                            }
+                        },
+                        executor
+                    )
+                }
+
+                Timber.v("Search > Adding documents...")
+                val putRequest = PutDocumentsRequest.Builder()
+                    .addDocuments(areasIndex)
+                    .addDocuments(zonesIndex)
+                    .addDocuments(sectorsIndex)
+                    .addDocuments(pathsIndex)
+                    .build()
+                val putFuture = Futures.transformAsync(
+                    sessionFuture,
+                    { session -> session?.put(putRequest) },
                     executor
                 )
-            }
+                val putResponse = suspendCoroutine<AppSearchBatchResult<String, Void>?> { cont ->
+                    Futures.addCallback(
+                        putFuture,
+                        object : FutureCallback<AppSearchBatchResult<String, Void>?> {
+                            override fun onSuccess(result: AppSearchBatchResult<String, Void>?) {
+                                cont.resume(result)
+                            }
 
-            Timber.v("Search > Adding documents...")
-            val putRequest = PutDocumentsRequest.Builder()
-                .addDocuments(areasIndex)
-                .addDocuments(zonesIndex)
-                .addDocuments(sectorsIndex)
-                .addDocuments(pathsIndex)
-                .build()
-            val putFuture = Futures.transformAsync(
-                sessionFuture,
-                { session -> session?.put(putRequest) },
-                executor
-            )
-            val putResponse = suspendCoroutine<AppSearchBatchResult<String, Void>?> { cont ->
-                Futures.addCallback(
-                    putFuture,
-                    object : FutureCallback<AppSearchBatchResult<String, Void>?> {
-                        override fun onSuccess(result: AppSearchBatchResult<String, Void>?) {
-                            cont.resume(result)
-                        }
+                            override fun onFailure(t: Throwable) {
+                                Timber.e(t, "Search > Could not add documents.")
+                                cont.resumeWithException(t)
+                            }
+                        },
+                        executor
+                    )
+                }
+                val successfulResults = putResponse?.successes
+                val failedResults = putResponse?.failures
+                if (successfulResults?.isEmpty() != true)
+                    Timber.i("Search > Added ${successfulResults?.size} documents...")
+                if (failedResults?.isEmpty() != true)
+                    Timber.w("Search > Could not add ${failedResults?.size} documents...")
 
-                        override fun onFailure(t: Throwable) {
-                            Timber.e(t, "Search > Could not add documents.")
-                            cont.resumeWithException(t)
-                        }
-                    },
+                Timber.v("Search > Flushing database...")
+                val flushFuture = Futures.transformAsync(
+                    sessionFuture,
+                    { session -> session?.requestFlush() },
                     executor
                 )
-            }
-            val successfulResults = putResponse?.successes
-            val failedResults = putResponse?.failures
-            if (successfulResults?.isEmpty() != true)
-                Timber.i("Search > Added ${successfulResults?.size} documents...")
-            if (failedResults?.isEmpty() != true)
-                Timber.w("Search > Could not add ${failedResults?.size} documents...")
+                suspendCoroutine<Void?> { cont ->
+                    Futures.addCallback(
+                        flushFuture,
+                        object : FutureCallback<Void?> {
+                            override fun onSuccess(result: Void?) {
+                                cont.resume(result)
+                            }
 
-            Timber.v("Search > Flushing database...")
-            val flushFuture = Futures.transformAsync(
-                sessionFuture,
-                { session -> session?.requestFlush() },
-                executor
-            )
-            suspendCoroutine<Void?> { cont ->
-                Futures.addCallback(
-                    flushFuture,
-                    object : FutureCallback<Void?> {
-                        override fun onSuccess(result: Void?) {
-                            cont.resume(result)
-                        }
+                            override fun onFailure(t: Throwable) {
+                                Timber.e(t, "Search > Could not flush database.")
+                                cont.resumeWithException(t)
+                            }
+                        },
+                        executor
+                    )
+                }
 
-                        override fun onFailure(t: Throwable) {
-                            Timber.e(t, "Search > Could not flush database.")
-                            cont.resumeWithException(t)
-                        }
-                    },
+                Timber.v("Search > Closing database...")
+                val closeFuture = Futures.transform<AppSearchSession, Unit>(
+                    sessionFuture,
+                    { session -> session?.close() },
                     executor
                 )
-            }
+                suspendCoroutine<Unit?> { cont ->
+                    Futures.addCallback(
+                        closeFuture,
+                        object : FutureCallback<Unit> {
+                            override fun onSuccess(result: Unit?) {
+                                cont.resume(result)
+                            }
 
-            Timber.v("Search > Closing database...")
-            val closeFuture = Futures.transform<AppSearchSession, Unit>(
-                sessionFuture,
-                { session -> session?.close() },
-                executor
-            )
-            suspendCoroutine<Unit?> { cont ->
-                Futures.addCallback(
-                    closeFuture,
-                    object : FutureCallback<Unit> {
-                        override fun onSuccess(result: Unit?) {
-                            cont.resume(result)
-                        }
-
-                        override fun onFailure(t: Throwable) {
-                            Timber.e(t, "Search > Could not flush database.")
-                            cont.resumeWithException(t)
-                        }
-                    },
-                    executor
-                )
+                            override fun onFailure(t: Throwable) {
+                                Timber.e(t, "Search > Could not flush database.")
+                                cont.resumeWithException(t)
+                            }
+                        },
+                        executor
+                    )
+                }
             }
 
             trace.stop()
