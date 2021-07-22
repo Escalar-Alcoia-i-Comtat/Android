@@ -122,10 +122,10 @@ const val MIME_TYPE_KMZ = "application/vnd.google-earth.kmz"
 const val MIME_TYPE_GPX = "application/gpx+xml"
 
 // Sun Time constants
-const val ALL_DAY_INDEX = 0
-const val MORNING_INDEX = 1
-const val AFTERNOON_INDEX = 2
-const val NO_SUN_INDEX = 3
+const val ALL_DAY = 0
+const val MORNING = 1
+const val AFTERNOON = 2
+const val NO_SUN = 3
 
 /**
  * Amount of meters the circumference of the planet measures.
