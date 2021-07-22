@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.instant
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -92,6 +93,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val action: String? = intent?.action
+        val data: Uri? = intent?.data
+
         instantInfoSetup()
         dataCollectionSetUp()
 
@@ -99,7 +103,7 @@ class MainActivity : ComponentActivity() {
             EscalarAlcoiaIComtatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    MainView(this)
+                    MainView(this, data?.path)
                 }
             }
         }
@@ -149,7 +153,7 @@ class MainActivity : ComponentActivity() {
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
-fun MainView(activity: Activity) {
+fun MainView(activity: Activity, path: String? = null) {
     val navController = rememberNavController()
 
     var expanded by remember { mutableStateOf(false) }
@@ -203,7 +207,7 @@ fun MainView(activity: Activity) {
                         .animateContentSize(),
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                 ) {
-                    NavHost(navController = navController, startDestination = "Areas") {
+                    NavHost(navController = navController, startDestination = path ?: "Areas") {
                         composable("Areas") { AreasExplorer(activity, navController) }
                         composable("Areas/{areaId}") { backStackEntry ->
                             val areaId = backStackEntry.arguments?.getString("areaId")
