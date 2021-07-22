@@ -210,7 +210,7 @@ fun MainView(activity: Activity, path: String? = null) {
                 ) {
                     NavHost(
                         navController = navController,
-                        startDestination = if (path != null && path.isNotEmpty()) path else "Areas"
+                        startDestination = "Areas"
                     ) {
                         composable("Areas") {
                             EnterAnimation {
@@ -247,6 +247,13 @@ fun MainView(activity: Activity, path: String? = null) {
                             else
                                 Text(text = "Could not navigate to sector S/$sectorId in Z/$zoneId in A/$areaId")
                         }
+
+                        if (path != null && path.isNotEmpty())
+                            try {
+                                navController.navigate(path)
+                            } catch (e: IllegalArgumentException) {
+                                Timber.e(e, "Could not navigate to $path")
+                            }
                     }
                 }
             }
