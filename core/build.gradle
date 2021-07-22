@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'org.jetbrains.dokka'
+    id 'org.jetbrains.kotlin.kapt'
 }
 
 android {
@@ -69,6 +70,13 @@ dependencies {
     // Google Play Core
     api 'com.google.android.play:core:1.10.0'
     api 'com.google.android.play:core-ktx:1.8.1'
+
+    // App Search
+    def appsearch_version = "1.0.0-alpha03"
+    api "androidx.appsearch:appsearch:$appsearch_version"
+    // Use kapt instead of annotationProcessor if writing Kotlin classes
+    kapt "androidx.appsearch:appsearch-compiler:$appsearch_version"
+    api "androidx.appsearch:appsearch-local-storage:$appsearch_version"
 
     // Google Firebase
     api platform('com.google.firebase:firebase-bom:28.2.1')
