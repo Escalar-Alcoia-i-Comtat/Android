@@ -1,18 +1,21 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
+    ext {
+        compose_version = '1.0.0-rc02'
+    }
     repositories {
         google()
         mavenCentral()
         maven { url 'https://maven.fabric.io/public' }
         maven { url 'https://jitpack.io' }
-        maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
-        maven { url 'https://dl.bintray.com/kotlin/dokka' }
+        maven { url 'https://repo1.maven.org/maven2/' }
+        maven { url 'https://plugins.gradle.org/m2/' }
         maven { url 'https://developer.huawei.com/repo/' }
     }
     dependencies {
         // Build tools
-        classpath 'com.android.tools.build:gradle:7.1.0-alpha03'
+        classpath 'com.android.tools.build:gradle:7.1.0-alpha04'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.10'
 
         // Google Services
@@ -24,7 +27,7 @@ buildscript {
         classpath 'com.huawei.agconnect:agcp:1.2.0.300'
 
         // Dokka documentation generator
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.4.32"
+        classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.4.32'
     }
 }
 
@@ -32,9 +35,9 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url "https://jitpack.io" }
-        maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
-        maven { url "https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven" }
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://repo1.maven.org/maven2/' }
+        maven { url 'https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven' }
         maven { url 'https://developer.huawei.com/repo/' }
     }
 }

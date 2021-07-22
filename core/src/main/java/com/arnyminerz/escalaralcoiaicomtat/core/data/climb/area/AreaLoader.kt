@@ -9,7 +9,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_FULL_DATA_LOAD_PREF
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.asyncCoroutineScope
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.firestore.DocumentSnapshot
@@ -17,6 +17,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
@@ -24,12 +27,22 @@ import timber.log.Timber
  * Loads all the areas available in the server.
  * @author Arnau Mora
  * @since 20210313
+ * @param firestore The [FirebaseFirestore] reference for fetching data from the server.
+ * @param storage The [FirebaseStorage] reference for fetching files from the server. If not-null,
+ * the download url of the [Area]s will be fetched.
+ * @param context The context to load the areas from. If null, no error toasts will be shown.
+ * @param scope The [CoroutineScope] to run on.
+ * @param progressCallback This will get called when the loading progress is updated.
+ * @param callback This will get called when all the data has been loaded.
  * @see AREAS
  * @return A collection of areas
  */
 @MainThread
-fun Context.loadAreas(
+fun loadAreas(
     firestore: FirebaseFirestore,
+    storage: FirebaseStorage? = null,
+    context: Context? = null,
+    scope: CoroutineScope = asyncCoroutineScope,
     @UiThread progressCallback: (current: Int, total: Int) -> Unit,
     @UiThread callback: () -> Unit
 ) {
@@ -41,7 +54,7 @@ fun Context.loadAreas(
     trace.putAttribute("full_load", fullDataLoad.toString())
 
     Timber.d("Fetching areas...")
-    doAsync {
+    scope.launch {
         try {
             Timber.v("Getting sectors...")
             val sectorsSnapshot = firestore
@@ -103,7 +116,7 @@ fun Context.loadAreas(
                 Timber.v("S/$sectorId > Getting sector's parent zone.")
                 val sectorParentZone = sectorReference.parent.parent ?: run {
                     Timber.e("S/$sectorId > Could not find parent zone.")
-                    return@doAsync
+                    return@launch
                 }
                 Timber.v("S/$sectorId > Getting sector's parent zone's id.")
                 val zoneId = sectorParentZone.id
@@ -113,7 +126,7 @@ fun Context.loadAreas(
                     val zoneDocument = expandedZoneDocuments[zoneId]
                     if (zoneDocument == null) {
                         Timber.e("S/$sectorId > Could not find zone (Z/$zoneId) in documents.")
-                        return@doAsync
+                        return@launch
                     } else {
                         Timber.v("S/$sectorId > Caching zone Z/$zoneId...")
                         zonesCache[zoneId] = Zone(zoneDocument)
@@ -133,14 +146,14 @@ fun Context.loadAreas(
                 Timber.v("Z/$zoneId > Getting Zone...")
                 val zone = zonesCache[zoneId] ?: run {
                     Timber.e("Z/$zoneId > Could not find zone in cache, maybe it doesn't have any sector?")
-                    return@doAsync
+                    return@launch
                 }
                 Timber.v("Z/$zoneId > Getting Zone reference...")
                 val zoneReference = zoneDocument.reference
                 Timber.v("Z/$zoneId > Getting Zone's parent Area reference...")
                 val zoneParentAreaReference = zoneReference.parent.parent ?: run {
                     Timber.e("Z/$zoneId > Could not find parent area.")
-                    return@doAsync
+                    return@launch
                 }
                 Timber.v("Z/$zoneId > Getting Zone's parent Area id...")
                 val zoneParentAreaId = zoneParentAreaReference.id
@@ -150,7 +163,7 @@ fun Context.loadAreas(
                     val areaDocument = expandedAreaDocuments[zoneParentAreaId]
                     if (areaDocument == null) {
                         Timber.e("Z/$zoneId > Could not find area (A/$zoneParentAreaId) in documents.")
-                        return@doAsync
+                        return@launch
                     } else {
                         Timber.v("Z/$zoneId > Caching area A/$zoneParentAreaId...")
                         areasCache[zoneParentAreaId] = Area(areaDocument)
@@ -166,6 +179,14 @@ fun Context.loadAreas(
             Timber.v("Ordering areas...")
             val areas = areasCache.values.sortedBy { area -> area.displayName }
 
+            if (storage != null) {
+                Timber.v("Getting area download urls...")
+                for (area in areas) {
+                    Timber.v("A/$area > Getting download url...")
+                    area?.storageUrl(storage)
+                }
+            }
+
             Timber.v("Clearing AREAS...")
             AREAS.clear()
             Timber.v("Adding all areas to AREAS...")
@@ -179,7 +200,8 @@ fun Context.loadAreas(
             Timber.e(e, "Could not load areas.")
             trace.putAttribute("error", "true")
             trace.stop()
-            uiContext { toast(R.string.toast_error_load_areas) }
+            if (context != null)
+                uiContext { toast(context, R.string.toast_error_load_areas) }
         }
     }
 

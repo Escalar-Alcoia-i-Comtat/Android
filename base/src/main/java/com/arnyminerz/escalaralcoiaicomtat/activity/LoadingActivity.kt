@@ -289,7 +289,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         loading = true
         binding.progressTextView.setText(R.string.status_downloading)
         try {
-            loadAreas(firestore, { progress, max ->
+            loadAreas(firestore, null, this, progressCallback = { progress, max ->
                 Timber.i("Download progress: $progress / $max")
                 if (max >= 0) {
                     binding.progressBar.max = max

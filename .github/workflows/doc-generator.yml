@@ -38,6 +38,7 @@ jobs:
           echo "}" >> base/version.gradle
 
           echo "${{ secrets.GOOGLE_SERVICES }}" >> base/google-services.json
+          echo "${{ secrets.GOOGLE_SERVICES }}" >> instant/google-services.json
       - name: Run dokka 📝
         id: test
         run: bash ./gradlew :base:dokkaHtml

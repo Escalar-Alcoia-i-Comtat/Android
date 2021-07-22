@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.widget.ImageView
 import androidx.annotation.UiThread
@@ -31,6 +32,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.cache
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
@@ -54,10 +56,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
+import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.io.File
 import java.util.*
@@ -187,6 +191,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     var imageReferenceUrl: String = imageReferenceUrl
         private set
 
+    /**
+     * The download url from Firebase Storage for the [DataClass]' image.
+     * @author Arnau Mora
+     * @since 20210721
+     */
+    var downloadUrl: Uri? = null
+
     private val pin = "${namespace}_$objectId"
 
     val transitionName = objectId + displayName.replace(" ", "_")
@@ -196,13 +207,17 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20210313
      * @param firestore The Firestore instance.
+     * @param storage If not null, the download url of the children will be fetched.
      * @throws NoInternetAccessException If no Internet connection is available, and the children are
      * not stored in storage.
      * @throws IllegalStateException When the children has not been loaded and [firestore] is null.
      */
     @WorkerThread
     @Throws(NoInternetAccessException::class, IllegalStateException::class)
-    suspend fun getChildren(firestore: FirebaseFirestore?): List<A> {
+    suspend fun getChildren(
+        firestore: FirebaseFirestore?,
+        storage: FirebaseStorage? = null
+    ): List<A> {
         if (loadingChildren) {
             Timber.v("Waiting for children to finish loading")
             while (loadingChildren) {
@@ -242,6 +257,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             }
             loadingChildren = false
         }
+
+        if (storage != null) {
+            Timber.v("$this > Fetching children download urls...")
+            for (child in innerChildren)
+                if (child is DataClass<*, *>)
+                    child.storageUrl(storage)
+        }
+
         return innerChildren
     }
 
@@ -391,7 +414,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         return innerChildren.iterator()
     }
 
-    override fun toString(): String = displayName
+    override fun toString(): String = namespace[0] + "/" + objectId
 
     /**
      * Generates a list of [DownloadedSection].
@@ -735,6 +758,100 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
+     * Get the [FirebaseStorage] reference for loading the [DataClass]' image.
+     * @author Arnau Mora
+     * @since 20210721
+     * @param storage The [FirebaseStorage] reference for loading the image file.
+     * @return The [StorageReference] that corresponds to the [DataClass]' image.
+     */
+    fun storageReference(storage: FirebaseStorage): StorageReference =
+        storage.getReferenceFromUrl(imageReferenceUrl)
+
+    /**
+     * Get the [FirebaseStorage] download url for loading the [DataClass]' image.
+     * @author Arnau Mora
+     * @since 20210721
+     * @param storage The [FirebaseStorage] reference for loading the image file.
+     * @return The [DataClass]' download url.
+     */
+    suspend fun storageUrl(storage: FirebaseStorage): Uri {
+        if (downloadUrl == null)
+            downloadUrl = storageReference(storage).downloadUrl.await()
+        return downloadUrl!!
+    }
+
+    /**
+     * Checks if the [DataClass] has a stored [downloadUrl].
+     * @author Arnau Mora
+     * @since 20210722
+     */
+    fun hasStorageUrl() = downloadUrl != null
+
+    /**
+     * Fetches the image [Bitmap] from the DataClass.
+     * @author Arnau Mora
+     * @since 20210721
+     * @param context The context the app is running on.
+     * @param storage The [FirebaseStorage] reference for loading the image file.
+     * @param imageLoadParameters The parameters desired to load the image.
+     * @param progress The progress listener, for supervising loading.
+     * @param image This will get called once the image has been loaded.
+     * @see ValueMax
+     * @see ImageLoadParameters
+     */
+    fun image(
+        context: Context,
+        storage: FirebaseStorage,
+        imageLoadParameters: ImageLoadParameters? = null,
+        progress: ((progress: ValueMax<Long>) -> Unit)? = null,
+        image: (bitmap: Bitmap?) -> Unit
+    ) {
+        val downloadedImageFile = imageFile(context)
+        if (downloadedImageFile.exists()) {
+            Timber.d("Loading image from storage: ${downloadedImageFile.path}")
+            val bmp = readBitmap(downloadedImageFile)
+            image(bmp)
+        } else {
+            val tempFile = File(context.cacheDir, "dataClass_$objectId")
+
+            val successListener = OnSuccessListener<FileDownloadTask.TaskSnapshot> {
+                Timber.v("Loaded image for $objectId. Decoding...")
+                val bitmap = readBitmap(tempFile)
+
+                Timber.v("Image decoded, scaling...")
+                val scale = imageLoadParameters?.resultImageScale ?: 1f
+                val bmp = if (scale == 1f) bitmap?.scale(scale) else bitmap
+
+                if (bmp != null) {
+                    Timber.v("Setting image into imageView.")
+                    image(bmp)
+                } else {
+                    Timber.e("Could not decode image")
+                    toast(context, R.string.toast_error_load_image)
+                    image(null)
+                }
+            }
+
+            if (tempFile.exists()) {
+                Timber.v("The image file has already been cached ($tempFile).")
+                successListener.onSuccess(null)
+            } else
+                storage.getReferenceFromUrl(imageReferenceUrl)
+                    .getFile(tempFile)
+                    .addOnSuccessListener(successListener)
+                    .addOnProgressListener { snapshot ->
+                        val bytesCount = snapshot.bytesTransferred
+                        val totalBytes = snapshot.totalByteCount
+                        progress?.invoke(ValueMax(bytesCount, totalBytes))
+                    }
+                    .addOnFailureListener { e ->
+                        Timber.e(e, "Could not load DataClass ($objectId) image.")
+                        image(null)
+                    }
+        }
+    }
+
+    /**
      * Loads the image of the Data Class
      * @author Arnau Mora
      * @date 2020/09/11
@@ -766,49 +883,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         if (showPlaceholder)
             imageView.setImageResource(uiMetadata.placeholderDrawable)
 
-        val downloadedImageFile = imageFile(activity)
-        if (downloadedImageFile.exists()) {
-            Timber.d("Loading image from storage: ${downloadedImageFile.path}")
-            val bmp = readBitmap(downloadedImageFile)
-            imageView.setImageBitmap(bmp)
-        } else {
-            val tempFile = File(activity.cacheDir, "dataClass_$objectId")
-
-            val successListener = OnSuccessListener<FileDownloadTask.TaskSnapshot> {
-                Timber.v("Loaded image for $objectId. Decoding...")
-                val bitmap = readBitmap(tempFile)
-
-                Timber.v("Image decoded, scaling...")
-                val scale = imageLoadParameters?.resultImageScale ?: 1f
-                val bmp = if (scale == 1f) bitmap?.scale(scale) else bitmap
-
-                if (bmp != null) {
-                    Timber.v("Setting image into imageView.")
-                    imageView.setImageBitmap(bmp)
-                } else {
-                    Timber.e("Could not decode image")
-                    toast(activity, R.string.toast_error_load_image)
-                }
-            }
-
-            if (tempFile.exists()) {
-                Timber.v("The image file has already been cached ($tempFile).")
-                successListener.onSuccess(null)
-            } else
-                storage.getReferenceFromUrl(imageReferenceUrl)
-                    .getFile(tempFile)
-                    .addOnSuccessListener(successListener)
-                    .addOnProgressListener { snapshot ->
-                        val bytesCount = snapshot.bytesTransferred
-                        val totalBytes = snapshot.totalByteCount
-                        val progress = bytesCount / totalBytes
-                        progressBar?.progress = (progress * 100).toInt()
-                    }
-                    .addOnFailureListener { e ->
-                        Timber.e(e, "Could not load DataClass ($objectId) image.")
-                        imageView.setImageResource(uiMetadata.errorPlaceholderDrawable)
-                    }
-        }
+        image(activity, storage, imageLoadParameters, { progress ->
+            progressBar?.progress = progress.percentage()
+        }, { bmp -> imageView.setImageBitmap(bmp) })
     }
 
     override fun hashCode(): Int {
@@ -834,4 +911,19 @@ operator fun <A : DataClassImpl, B : DataClassImpl, D : DataClass<A, B>> Iterabl
         if (o.objectId == objectId)
             return o
     return null
+}
+
+/**
+ * Checks if the all the items in the iterable have a loaded [DataClass.downloadUrl].
+ * @author Arnau Mora
+ * @since 20210722
+ * @return true if all the items have an stored download url, false otherwise.
+ * @see DataClass.downloadUrl
+ * @see DataClass.hasStorageUrl
+ */
+fun <D : DataClass<*, *>> Iterable<D>.hasStorageUrls(): Boolean {
+    for (i in this)
+        if (!i.hasStorageUrl())
+            return false
+    return true
 }
