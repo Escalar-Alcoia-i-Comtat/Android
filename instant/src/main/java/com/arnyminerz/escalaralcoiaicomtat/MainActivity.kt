@@ -70,8 +70,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.ALL_DAY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MORNING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
-import com.arnyminerz.escalaralcoiaicomtat.ui.animation.EnterAnimation
-import com.arnyminerz.escalaralcoiaicomtat.ui.climb.Explorer
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.animation.EnterAnimation
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.Explorer
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.Chip
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.ZoomableImage
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme

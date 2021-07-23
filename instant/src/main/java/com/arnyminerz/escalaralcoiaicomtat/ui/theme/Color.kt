@@ -14,5 +14,3 @@ val Purple300 = Color(0xffbb66b7)
 val Yellow100 = Color(0xffFFF9C4)
 
 val Amber50 = Color(0xffFFF8E1)
-
-val ItemTextBackground = Color(0x4B000000)
