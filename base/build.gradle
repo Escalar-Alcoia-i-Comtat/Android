@@ -26,6 +26,10 @@ android {
 
         // Sets the supported languages
         resConfigs "en", "US", "ca", "es"
+
+        vectorDrawables {
+            useSupportLibrary true
+        }
     }
 
     // Configures the APK and AAB signing config
@@ -89,6 +93,11 @@ android {
 
     buildFeatures {
         viewBinding true
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion compose_version
     }
 }
 
