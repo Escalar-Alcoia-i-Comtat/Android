@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.ui.climb
+package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 
 import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
@@ -26,11 +26,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
-import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.hasStorageUrls
-import com.arnyminerz.escalaralcoiaicomtat.ui.animation.EnterAnimation
-import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.DataClassViewModel
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.animation.EnterAnimation
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.DataClassViewModel
+import com.arnyminerz.escalaralcoiaicomtat.ui.climb.DataClassList
 import timber.log.Timber
 
 @Composable

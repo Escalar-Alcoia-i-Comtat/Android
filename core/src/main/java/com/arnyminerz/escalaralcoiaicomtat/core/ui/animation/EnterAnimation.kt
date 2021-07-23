@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.ui.animation
+package com.arnyminerz.escalaralcoiaicomtat.core.ui.animation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope

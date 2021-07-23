@@ -34,8 +34,8 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.ItemTextBackground
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.arnyminerz.escalaralcoiaicomtat.ui.theme.ItemTextBackground
 import timber.log.Timber
 
 @Composable
