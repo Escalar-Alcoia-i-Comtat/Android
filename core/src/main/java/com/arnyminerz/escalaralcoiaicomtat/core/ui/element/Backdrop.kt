@@ -33,11 +33,12 @@ import androidx.compose.ui.unit.dp
 @ExperimentalAnimationApi
 fun Backdrop(
     expanded: Boolean,
+    modifier: Modifier = Modifier,
     items: @Composable ColumnScope.() -> Unit,
     content: @Composable () -> Unit
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .background(MaterialTheme.colors.primary)
             .fillMaxSize(),
     ) {
