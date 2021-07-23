@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,6 +43,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Backdrop
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.resources.font.PoppinsFamiliy
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
 
@@ -87,7 +89,10 @@ class NewMainActivity : AppCompatActivity() {
                     title = {
                         Text(
                             stringResource(R.string.app_name),
+                            modifier = Modifier.fillMaxWidth(),
                             color = MaterialTheme.colors.onPrimary,
+                            fontFamily = PoppinsFamiliy,
+                            textAlign = TextAlign.Center
                         )
                     },
                     backgroundColor = MaterialTheme.colors.primary,
