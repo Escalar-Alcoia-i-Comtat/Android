@@ -42,7 +42,6 @@ import timber.log.Timber
 fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
     activity: Activity,
     navController: NavController,
-    columnsPerRow: Int = 1,
     dataClassViewModel: Class<V>,
     viewModelArguments: List<Any> = listOf()
 ) {
@@ -85,8 +84,8 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
         DataClassList(
             navController,
             items,
-            if (columnsPerRow % 2 == 0) R.drawable.ic_tall_placeholder else R.drawable.ic_wide_placeholder,
-            columnsPerRow
+            if (viewModel.columnsPerRow % 2 == 0) R.drawable.ic_tall_placeholder else R.drawable.ic_wide_placeholder,
+            viewModel.columnsPerRow
         )
     }
 }

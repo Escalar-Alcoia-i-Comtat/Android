@@ -12,6 +12,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class ZonesViewModel(private val areaId: String) : DataClassViewModel<Zone>() {
+    override val columnsPerRow: Int = 2
+
     override val items: LiveData<List<Zone>> = liveData {
         if (AREAS.isEmpty())
             suspendCoroutine<List<Area>> { cont ->

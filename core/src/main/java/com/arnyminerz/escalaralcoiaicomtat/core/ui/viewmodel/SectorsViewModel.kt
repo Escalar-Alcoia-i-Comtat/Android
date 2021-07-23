@@ -13,6 +13,8 @@ import kotlin.coroutines.suspendCoroutine
 
 class SectorsViewModel(private val areaId: String, private val zoneId: String) :
     DataClassViewModel<Sector>() {
+    override val columnsPerRow: Int = 1
+
     override val items: LiveData<List<Sector>> = liveData {
         if (AREAS.isEmpty())
             suspendCoroutine<List<Area>> { cont ->

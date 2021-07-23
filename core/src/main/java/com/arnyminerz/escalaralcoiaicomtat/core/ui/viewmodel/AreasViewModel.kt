@@ -10,6 +10,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class AreasViewModel : DataClassViewModel<Area>() {
+    override val columnsPerRow: Int = 1
+
     override val items: LiveData<List<Area>> = liveData {
         val areas = suspendCoroutine<List<Area>> { cont ->
             loadAreas(firestore, storage, progressCallback = { current, total ->

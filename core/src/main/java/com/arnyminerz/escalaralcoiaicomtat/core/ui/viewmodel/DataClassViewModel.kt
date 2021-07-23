@@ -11,5 +11,7 @@ abstract class DataClassViewModel<T : DataClass<*, *>> : ViewModel() {
     protected val firestore = Firebase.firestore
     protected val storage = Firebase.storage
 
+    abstract val columnsPerRow: Int
+
     abstract val items: LiveData<List<T>>
 }
