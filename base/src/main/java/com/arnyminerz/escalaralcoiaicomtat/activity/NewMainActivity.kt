@@ -12,6 +12,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.with
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -53,13 +54,20 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.firebase.dataCollectionSetUp
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.animation.EnterAnimation
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Backdrop
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.AreasExplorer
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.SectorsExplorer
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.ZonesExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
 
+@ExperimentalFoundationApi
+@ExperimentalCoilApi
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 class NewMainActivity : AppCompatActivity() {
@@ -214,7 +222,28 @@ class NewMainActivity : AppCompatActivity() {
                     startDestination = "Areas"
                 ) {
                     composable("Areas") {
-                        Text("Showing areas")
+                        EnterAnimation {
+                            AreasExplorer(this@NewMainActivity, navController)
+                        }
+                    }
+                    composable("Areas/{areaId}") { backStackEntry ->
+                        val areaId = backStackEntry.arguments?.getString("areaId")
+                        if (areaId != null)
+                            EnterAnimation {
+                                ZonesExplorer(this@NewMainActivity, navController, areaId)
+                            }
+                        else
+                            Text(text = "Could not navigate to area: $areaId")
+                    }
+                    composable("Areas/{areaId}/Zones/{zoneId}") { backStackEntry ->
+                        val areaId = backStackEntry.arguments?.getString("areaId")
+                        val zoneId = backStackEntry.arguments?.getString("zoneId")
+                        if (areaId != null && zoneId != null)
+                            EnterAnimation {
+                                SectorsExplorer(this@NewMainActivity, navController, areaId, zoneId)
+                            }
+                        else
+                            Text(text = "Could not navigate to zone Z/$zoneId in A/$areaId")
                     }
 
                     composable("Map") {
