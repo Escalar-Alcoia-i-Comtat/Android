@@ -56,7 +56,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -70,11 +69,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.ALL_DAY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MORNING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.animation.EnterAnimation
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.Explorer
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.AreasViewModel
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.AreasExplorer
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.SectorsExplorer
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.ZonesExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorViewModel
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorsViewModel
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.ZonesViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.Chip
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.ZoomableImage
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
@@ -237,50 +235,6 @@ fun MainView(activity: Activity, path: String? = null) {
                 }
             }
         },
-    )
-}
-
-@Composable
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@ExperimentalFoundationApi
-fun AreasExplorer(activity: Activity, navController: NavController) {
-    Explorer(activity, navController, 1, dataClassViewModel = AreasViewModel::class.java)
-}
-
-@Composable
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@ExperimentalFoundationApi
-fun ZonesExplorer(activity: Activity, navController: NavController, areaId: String) {
-    Explorer(
-        activity,
-        navController,
-        2,
-        dataClassViewModel = ZonesViewModel::class.java,
-        viewModelArguments = listOf(areaId)
-    )
-}
-
-@Composable
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@ExperimentalFoundationApi
-fun SectorsExplorer(
-    activity: Activity,
-    navController: NavController,
-    areaId: String,
-    zoneId: String
-) {
-    Explorer(
-        activity,
-        navController,
-        1,
-        dataClassViewModel = SectorsViewModel::class.java,
-        viewModelArguments = listOf(areaId, zoneId)
     )
 }
 
