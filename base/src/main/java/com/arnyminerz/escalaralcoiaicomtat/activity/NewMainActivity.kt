@@ -140,24 +140,24 @@ class NewMainActivity : AppCompatActivity() {
             bottomBar = {
                 var selectedItem by remember { mutableStateOf(0) }
                 val items = listOf(
-                    R.string.item_explore to Icons.Rounded.Explore,
-                    R.string.item_map to Icons.Rounded.Map,
-                    R.string.item_downloads to Icons.Rounded.Download,
-                    R.string.item_settings to Icons.Rounded.Settings,
+                    "Areas" to (R.string.item_explore to Icons.Rounded.Explore),
+                    "Map" to (R.string.item_map to Icons.Rounded.Map),
+                    "Downloads" to (R.string.item_downloads to Icons.Rounded.Download),
+                    "Settings" to (R.string.item_settings to Icons.Rounded.Settings),
                 )
 
                 BottomNavigation {
-                    items.forEachIndexed { index, item ->
+                    items.forEachIndexed { index, (path, item) ->
+                        val textRes = item.first
+                        val icon = item.second
                         BottomNavigationItem(
-                            icon = {
-                                Icon(
-                                    item.second,
-                                    contentDescription = stringResource(item.first)
-                                )
-                            },
-                            label = { Text(stringResource(item.first)) },
+                            icon = { Icon(icon, contentDescription = stringResource(textRes)) },
+                            label = { Text(stringResource(textRes)) },
                             selected = selectedItem == index,
-                            onClick = { selectedItem = index }
+                            onClick = {
+                                selectedItem = index
+                                navController.navigate(path)
+                            }
                         )
                     }
                 }
@@ -212,6 +212,16 @@ class NewMainActivity : AppCompatActivity() {
                 ) {
                     composable("Areas") {
                         Text("Showing areas")
+                    }
+
+                    composable("Map") {
+                        Text("This is the map page")
+                    }
+                    composable("Downloads") {
+                        Text("This is the downloads page")
+                    }
+                    composable("Settings") {
+                        Text("This is the settings page")
                     }
                 }
             }
