@@ -4,7 +4,14 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.with
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -24,6 +31,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,7 +50,6 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Backdrop
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.resources.font.PoppinsFamiliy
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
 
@@ -91,29 +97,47 @@ class NewMainActivity : AppCompatActivity() {
                             stringResource(R.string.app_name),
                             modifier = Modifier.fillMaxWidth(),
                             color = MaterialTheme.colors.onPrimary,
-                            fontFamily = PoppinsFamiliy,
-                            textAlign = TextAlign.Center
+                            style = MaterialTheme.typography.h1
                         )
                     },
                     backgroundColor = MaterialTheme.colors.primary,
                     elevation = 0.dp,
                     actions = {
                         IconButton(onClick = { expanded = !expanded }) {
-                            Icon(
-                                Icons.Rounded.AccountCircle,
-                                contentDescription = "Profile"
-                            )
+                            AnimatedContent(
+                                targetState = expanded,
+                                transitionSpec = {
+                                    if (targetState) {
+                                        slideInHorizontally({ width -> width }) + fadeIn() with
+                                                slideOutHorizontally({ width -> -width }) + fadeOut()
+                                    } else {
+                                        slideInHorizontally({ width -> -width }) + fadeIn() with
+                                                slideOutHorizontally({ width -> width }) + fadeOut()
+                                    }.using(SizeTransform(clip = false))
+                                }
+                            ) { isExpanded ->
+                                if (isExpanded)
+                                    Icon(
+                                        Icons.Rounded.Close,
+                                        contentDescription = "Close Menu"
+                                    )
+                                else
+                                    Icon(
+                                        Icons.Rounded.AccountCircle,
+                                        contentDescription = "Open Menu"
+                                    )
+                            }
                         }
                     }
                 )
             },
         ) {
             Backdrop(expanded = expanded, items = {
-                Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp)) {
+                Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp)) {
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Column(
                             modifier = Modifier
-                                .fillMaxWidth(.3f)
+                                .fillMaxWidth(.2f)
                                 .scale(1f)
                         ) {
                             Image(
