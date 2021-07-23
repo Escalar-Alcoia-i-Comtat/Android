@@ -174,7 +174,7 @@ class NewMainActivity : AppCompatActivity() {
                 }
             }
         ) {
-            Backdrop(expanded = expanded, items = {
+            Backdrop(expanded = expanded, modifier = Modifier.padding(bottom = 56.dp), items = {
                 Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp)) {
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Column(
