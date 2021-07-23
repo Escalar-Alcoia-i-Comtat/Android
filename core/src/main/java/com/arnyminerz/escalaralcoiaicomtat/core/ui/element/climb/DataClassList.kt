@@ -64,6 +64,8 @@ fun <D : DataClass<*, *>> DataClassList(
     }
 }
 
+private const val CARD_CORNER_RADIUS = 16
+
 @Composable
 @ExperimentalCoilApi
 fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.AreaItem(
@@ -80,6 +82,7 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.AreaItem(
     Card(
         modifier = Modifier
             .padding(8.dp)
+            .clip(RoundedCornerShape(CARD_CORNER_RADIUS.dp))
             .clickable {
                 toast(context, "Clicked $displayName")
                 val path = this.metadata.documentPath
@@ -104,7 +107,7 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.AreaItem(
                 contentScale = ContentScale.Crop,
                 contentDescription = "$displayName image",
                 modifier = Modifier
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    .clip(RoundedCornerShape(CARD_CORNER_RADIUS.dp))
                     .fillMaxWidth()
                     .aspectRatio(imageRatio)
             )
@@ -118,7 +121,7 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.AreaItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(ItemTextBackground)
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(CARD_CORNER_RADIUS.dp))
                 ) {
                     Text(
                         text = displayName,
