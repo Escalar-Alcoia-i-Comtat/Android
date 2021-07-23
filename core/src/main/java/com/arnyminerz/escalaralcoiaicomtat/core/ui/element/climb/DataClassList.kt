@@ -35,6 +35,7 @@ import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.ItemTextBackground
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.ItemTextColor
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import timber.log.Timber
 
@@ -127,7 +128,8 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.AreaItem(
                         text = displayName,
                         modifier = Modifier
                             .padding(8.dp)
-                            .fillMaxWidth()
+                            .fillMaxWidth(),
+                        color = ItemTextColor,
                     )
                 }
             }
