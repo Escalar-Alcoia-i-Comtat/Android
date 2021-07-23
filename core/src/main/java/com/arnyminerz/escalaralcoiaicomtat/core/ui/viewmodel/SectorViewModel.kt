@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel
+package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel

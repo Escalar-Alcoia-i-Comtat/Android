@@ -71,13 +71,13 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.MORNING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.animation.EnterAnimation
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.Explorer
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.AreasViewModel
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorViewModel
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorsViewModel
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.ZonesViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.Chip
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.ZoomableImage
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
-import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.AreasViewModel
-import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SectorViewModel
-import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SectorsViewModel
-import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.ZonesViewModel
 import com.google.android.gms.instantapps.InstantApps
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
