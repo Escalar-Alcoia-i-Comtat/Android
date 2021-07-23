@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
-import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +25,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.ListItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -48,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
@@ -57,14 +56,21 @@ import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.firebase.dataCollectionSetUp
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.animation.EnterAnimation
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Backdrop
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.AreasExplorer
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.PassiveAreasExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.SectorsExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.ZonesExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
+import timber.log.Timber
 
 @ExperimentalFoundationApi
 @ExperimentalCoilApi
@@ -76,28 +82,35 @@ class NewMainActivity : AppCompatActivity() {
 
         dataCollectionSetUp()
 
+        val firestore = Firebase.firestore
+        val storage = Firebase.storage
+
         setContent {
+            var loadingProgress by remember { mutableStateOf(0f) }
+            var areas by remember { mutableStateOf(listOf<Area>()) }
+
+            loadAreas(firestore, storage, progressCallback = { current, total ->
+                loadingProgress = current.toFloat() / total.toFloat()
+                Timber.i("Loading areas: $current/$total ($loadingProgress)")
+            }) {
+                areas = AREAS
+            }
+
             EscalarAlcoiaIComtatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    MainContent()
+                    if (areas.isEmpty())
+                        LoadingScreen(loadingProgress)
+                    else
+                        MainContent()
                 }
             }
         }
     }
 
-    @Preview(
-        showSystemUi = true, name = "Main Preview",
-        uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL
-    )
     @Composable
-    fun MainContentPreview() {
-        EscalarAlcoiaIComtatTheme {
-            // A surface container using the 'background' color from the theme
-            Surface(color = MaterialTheme.colors.background) {
-                MainContent()
-            }
-        }
+    fun LoadingScreen(progress: Float) {
+        LinearProgressIndicator(progress, modifier = Modifier.fillMaxWidth())
     }
 
     @Composable
@@ -223,7 +236,7 @@ class NewMainActivity : AppCompatActivity() {
                 ) {
                     composable("Areas") {
                         EnterAnimation {
-                            AreasExplorer(this@NewMainActivity, navController)
+                            PassiveAreasExplorer(this@NewMainActivity, navController)
                         }
                     }
                     composable("Areas/{areaId}") { backStackEntry ->
