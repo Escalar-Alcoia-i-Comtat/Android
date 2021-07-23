@@ -18,7 +18,7 @@ val Typography = Typography(
     h1 = TextStyle(
         fontFamily = PoppinsFamiliy,
         fontWeight = FontWeight.Normal,
-        fontSize = 20.sp,
+        fontSize = 22.sp,
         textAlign = TextAlign.Center
     )
     /* Other default text styles to override
