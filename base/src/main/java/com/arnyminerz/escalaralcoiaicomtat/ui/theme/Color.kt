@@ -8,6 +8,8 @@ val Lime900 = Color(0xFF827717)
 val Lime500 = Color(0xFFCEDC39)
 
 val Green400 = Color(0xff66bb6a)
+val Green500 = Color(0xff4CAF50)
+val Green600 = Color(0xff43A047)
 
 val Purple300 = Color(0xffbb66b7)
 
