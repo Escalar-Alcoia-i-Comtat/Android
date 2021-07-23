@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -32,6 +34,10 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Explore
+import androidx.compose.material.icons.rounded.Map
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -131,6 +137,31 @@ class NewMainActivity : AppCompatActivity() {
                     }
                 )
             },
+            bottomBar = {
+                var selectedItem by remember { mutableStateOf(0) }
+                val items = listOf(
+                    R.string.item_explore to Icons.Rounded.Explore,
+                    R.string.item_map to Icons.Rounded.Map,
+                    R.string.item_downloads to Icons.Rounded.Download,
+                    R.string.item_settings to Icons.Rounded.Settings,
+                )
+
+                BottomNavigation {
+                    items.forEachIndexed { index, item ->
+                        BottomNavigationItem(
+                            icon = {
+                                Icon(
+                                    item.second,
+                                    contentDescription = stringResource(item.first)
+                                )
+                            },
+                            label = { Text(stringResource(item.first)) },
+                            selected = selectedItem == index,
+                            onClick = { selectedItem = index }
+                        )
+                    }
+                }
+            }
         ) {
             Backdrop(expanded = expanded, items = {
                 Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp)) {
