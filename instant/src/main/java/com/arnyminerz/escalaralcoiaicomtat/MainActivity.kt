@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.UiThread
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
@@ -65,11 +64,11 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.firebase.dataCollectionSetUp
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AFTERNOON
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ALL_DAY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MORNING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.animation.EnterAnimation
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.Explorer
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.Chip
@@ -81,9 +80,7 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SectorsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.ZonesViewModel
 import com.google.android.gms.instantapps.InstantApps
 import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.perf.ktx.performance
 import timber.log.Timber
 
 const val STATUS_INSTALLED = "installed"
@@ -98,7 +95,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val action: String? = intent?.action
         val data: Uri? = intent?.data
 
         instantInfoSetup()
@@ -112,27 +108,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    /**
-     * Initializes the user-set data collection policy.
-     * If debugging, data collection will always be disabled.
-     * @author Arnau Mora
-     * @since 20210617
-     * @see SETTINGS_ERROR_REPORTING_PREF
-     */
-    @UiThread
-    private fun dataCollectionSetUp() {
-        val enableErrorReporting = SETTINGS_ERROR_REPORTING_PREF.get()
-
-        Firebase.crashlytics.setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
-        Timber.v("Set Crashlytics collection enabled to $enableErrorReporting")
-
-        Firebase.analytics.setAnalyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
-        Timber.v("Set Analytics collection enabled to $enableErrorReporting")
-
-        Firebase.performance.isPerformanceCollectionEnabled = enableErrorReporting
-        Timber.v("Set Performance collection enabled to $enableErrorReporting")
     }
 
     /**
