@@ -10,7 +10,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafes
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.cache
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.DocumentSnapshot
@@ -22,13 +21,12 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
 import timber.log.Timber
-import java.util.Date
 
 @Parcelize
 @TypeParceler<Pitch, PitchParceler>
 class Path(
     override val objectId: String,
-    override val timestamp: Date,
+    override val timestampMillis: Long,
     val sketchId: Long,
     val displayName: String,
     val grades: Grade.GradesList,
@@ -42,10 +40,10 @@ class Path(
     var rebuiltBy: String?,
     val downloaded: Boolean = false,
     val documentPath: String,
-) : DataClassImpl(objectId, NAMESPACE, timestamp.time), Comparable<Path> {
+) : DataClassImpl(objectId, NAMESPACE, timestampMillis), Comparable<Path> {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
-        parcel.readString().toTimestamp()!!,
+        parcel.readLong(),
         parcel.readLong(),
         parcel.readString()!!,
         Grade.GradesList(),
@@ -69,7 +67,7 @@ class Path(
      */
     constructor(data: DocumentSnapshot) : this(
         data.id,
-        data.getDate("created")!!,
+        data.getDate("created")!!.time,
         data.getString("sketchId")?.toLongOrNull() ?: 0L,
         data.getString("displayName")!!,
         Grade.GradesList(),
