@@ -63,6 +63,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.animation.EnterAnimation
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Backdrop
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.PassiveAreasExplorer
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.SectorExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.SectorsExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.ZonesExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
@@ -89,7 +90,7 @@ class NewMainActivity : AppCompatActivity() {
             var loadingProgress by remember { mutableStateOf(0f) }
             var areas by remember { mutableStateOf(listOf<Area>()) }
 
-            loadAreas(firestore, storage, progressCallback = { current, total ->
+            loadAreas(this, firestore, storage, progressCallback = { current, total ->
                 loadingProgress = current.toFloat() / total.toFloat()
                 Timber.i("Loading areas: $current/$total ($loadingProgress)")
             }) {
@@ -257,6 +258,23 @@ class NewMainActivity : AppCompatActivity() {
                             }
                         else
                             Text(text = "Could not navigate to zone Z/$zoneId in A/$areaId")
+                    }
+                    composable("Areas/{areaId}/Zones/{zoneId}/Sectors/{sectorId}") { backStackEntry ->
+                        val areaId = backStackEntry.arguments?.getString("areaId")
+                        val zoneId = backStackEntry.arguments?.getString("zoneId")
+                        val sectorId = backStackEntry.arguments?.getString("sectorId")
+                        if (areaId != null && zoneId != null && sectorId != null)
+                            EnterAnimation {
+                                SectorExplorer(
+                                    this@NewMainActivity,
+                                    navController,
+                                    areaId,
+                                    zoneId,
+                                    sectorId
+                                )
+                            }
+                        else
+                            Text(text = "Could not navigate to sector S/$sectorId in zone Z/$zoneId in A/$areaId")
                     }
 
                     composable("Map") {
