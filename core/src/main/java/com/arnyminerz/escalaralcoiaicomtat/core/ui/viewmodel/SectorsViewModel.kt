@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 
+import android.app.Application
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
@@ -13,8 +14,11 @@ import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class SectorsViewModel(private val areaId: String, private val zoneId: String) :
-    DataClassViewModel<Sector>() {
+class SectorsViewModel(
+    application: Application,
+    private val areaId: String,
+    private val zoneId: String
+) : DataClassViewModel<Sector>(application) {
     override val columnsPerRow: Int = 1
 
     override val fixedHeight: Dp = 200.dp
@@ -22,7 +26,7 @@ class SectorsViewModel(private val areaId: String, private val zoneId: String) :
     override val items: LiveData<List<Sector>> = liveData {
         if (AREAS.isEmpty())
             suspendCoroutine<List<Area>> { cont ->
-                loadAreas(firestore, storage, progressCallback = { current, total ->
+                loadAreas(context, firestore, storage, progressCallback = { current, total ->
                     Timber.i("Loading areas: $current/$total")
                 }) {
                     cont.resume(AREAS)

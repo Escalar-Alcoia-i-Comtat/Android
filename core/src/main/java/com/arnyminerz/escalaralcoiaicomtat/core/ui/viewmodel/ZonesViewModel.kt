@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 
+import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
@@ -11,13 +12,14 @@ import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class ZonesViewModel(private val areaId: String) : DataClassViewModel<Zone>() {
+class ZonesViewModel(application: Application, private val areaId: String) :
+    DataClassViewModel<Zone>(application) {
     override val columnsPerRow: Int = 2
 
     override val items: LiveData<List<Zone>> = liveData {
         if (AREAS.isEmpty())
             suspendCoroutine<List<Area>> { cont ->
-                loadAreas(firestore, storage, progressCallback = { current, total ->
+                loadAreas(context, firestore, storage, progressCallback = { current, total ->
                     Timber.i("Loading areas: $current/$total")
                 }) {
                     cont.resume(AREAS)
