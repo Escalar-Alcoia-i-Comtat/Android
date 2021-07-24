@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
 import android.content.Context
+import android.graphics.Bitmap
 import androidx.annotation.MainThread
 import androidx.annotation.UiThread
 import androidx.appsearch.app.AppSearchBatchResult
@@ -223,14 +224,14 @@ fun loadAreas(
             val areas = areasCache.values.sortedBy { area -> area.displayName }
 
             if (storage != null) {
-                Timber.v("Getting area download urls...")
+                Timber.v("Caching images...")
                 for (area in areas) {
-                    val cacheImageFile = area.cacheImageFile(context)
-                    if (cacheImageFile.exists())
-                        Timber.v("A/$area > Won't load storage url since image is in cache ($cacheImageFile)")
-                    else {
-                        Timber.v("A/$area > Getting download url...")
-                        area?.storageUrl(storage)
+                    Timber.v("$area > Caching image...")
+                    suspendCoroutine<Bitmap?> { cont ->
+                        area.image(context, storage, null, null) {
+                            Timber.v("$area > Image downloaded...")
+                            cont.resume(it)
+                        }
                     }
                 }
             }
