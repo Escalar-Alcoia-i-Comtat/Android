@@ -1,7 +1,8 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
@@ -17,10 +18,11 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class SectorViewModel(
+    application: Application,
     private val areaId: String,
     private val zoneId: String,
     private val sectorId: String
-) : ViewModel() {
+) : AndroidViewModel(application) {
     private val firestore = Firebase.firestore
     private val storage = Firebase.storage
 
@@ -30,7 +32,7 @@ class SectorViewModel(
     val sector: LiveData<Sector?> = liveData {
         if (AREAS.isEmpty())
             suspendCoroutine<List<Area>> { cont ->
-                loadAreas(firestore, storage, progressCallback = { current, total ->
+                loadAreas(context, firestore, storage, progressCallback = { current, total ->
                     Timber.i("Loading areas: $current/$total")
                 }) {
                     cont.resume(AREAS)
