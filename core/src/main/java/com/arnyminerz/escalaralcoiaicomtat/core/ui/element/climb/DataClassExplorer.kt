@@ -28,7 +28,6 @@ import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.hasStorageUrls
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.animation.EnterAnimation
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.DataClassViewModel
 import timber.log.Timber
@@ -59,8 +58,7 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
     var finishedLoading by remember { mutableStateOf(false) }
 
     liveData.observe(activity as LifecycleOwner) {
-        val storageUrlsLoaded = it.hasStorageUrls()
-        finishedLoading = it.isNotEmpty() && storageUrlsLoaded
+        finishedLoading = it.isNotEmpty()
     }
 
     Column(
