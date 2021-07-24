@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.network.base
+package com.arnyminerz.escalaralcoiaicomtat.core.network.base
 
 import android.os.Handler
 import android.os.Looper

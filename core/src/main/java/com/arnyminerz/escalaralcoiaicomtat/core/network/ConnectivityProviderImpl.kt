@@ -1,10 +1,10 @@
-package com.arnyminerz.escalaralcoiaicomtat.network
+package com.arnyminerz.escalaralcoiaicomtat.core.network
 
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProviderBaseImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProviderBaseImpl
 
 class ConnectivityProviderImpl(private val cm: ConnectivityManager) :
     ConnectivityProviderBaseImpl() {

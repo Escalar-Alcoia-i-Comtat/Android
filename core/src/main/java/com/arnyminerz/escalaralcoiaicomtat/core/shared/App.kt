@@ -1,13 +1,11 @@
-package com.arnyminerz.escalaralcoiaicomtat.shared
+package com.arnyminerz.escalaralcoiaicomtat.core.shared
 
 import android.accounts.AccountManager
 import android.app.Application
 import android.content.Context
 import android.util.Log
-import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREFERENCES_NAME
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.core.BuildConfig
+import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.ktx.crashlytics

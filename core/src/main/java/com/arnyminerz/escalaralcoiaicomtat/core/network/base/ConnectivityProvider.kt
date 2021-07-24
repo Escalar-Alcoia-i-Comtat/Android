@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.network.base
+package com.arnyminerz.escalaralcoiaicomtat.core.network.base
 
 import android.content.Context
 import android.content.Context.CONNECTIVITY_SERVICE
@@ -9,7 +9,7 @@ import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
 import android.net.NetworkCapabilities.TRANSPORT_ETHERNET
 import android.net.NetworkCapabilities.TRANSPORT_WIFI
 import androidx.annotation.WorkerThread
-import com.arnyminerz.escalaralcoiaicomtat.network.ConnectivityProviderImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.network.ConnectivityProviderImpl
 
 private const val SLOW_CONNECTION_SPEED = 400 // kbps
 
