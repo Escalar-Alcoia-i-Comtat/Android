@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.ui.climb
+package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 
 import android.net.Uri
 import androidx.annotation.DrawableRes
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
@@ -27,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
@@ -37,6 +39,16 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.ItemTextBackground
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.ItemTextColor
 import timber.log.Timber
 
+/**
+ * A list of items that show the image of a [DataClass].
+ * @author Arnau Mora
+ * @since 20210724
+ * @param navController The controller for managing the current navigation state in the app`.
+ * @param items The items to show.
+ * @param placeholder The image resource to show while loading the [DataClass]' image.
+ * @param columnsPerRow How much columns to show in the list.
+ * @param fixedHeight If not null, all the items will have this height.
+ */
 @Composable
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
@@ -44,7 +56,8 @@ fun <D : DataClass<*, *>> DataClassList(
     navController: NavController,
     items: List<D>,
     @DrawableRes placeholder: Int,
-    columnsPerRow: Int = 1
+    columnsPerRow: Int = 1,
+    fixedHeight: Dp? = null,
 ) {
     Timber.v("Loading DataClass list (${items.size} items)...")
     val state = rememberLazyListState()
@@ -58,7 +71,7 @@ fun <D : DataClass<*, *>> DataClassList(
             if (downloadUrl == null)
                 Timber.i("$dataClass > Could not load image since downloadUrl is null")
             else
-                dataClass.DataClassItem(navController, placeholder, downloadUrl)
+                dataClass.DataClassItem(navController, placeholder, downloadUrl, fixedHeight)
         }
     }
 }
@@ -70,9 +83,17 @@ private const val CARD_CORNER_RADIUS = 16
 fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.DataClassItem(
     navController: NavController,
     @DrawableRes placeholder: Int,
-    image: Uri
+    image: Uri,
+    fixedHeight: Dp? = null
 ) {
     var imageRatio by remember { mutableStateOf(1f) }
+
+    val imageModifiers = if (fixedHeight != null) {
+        Modifier.requiredHeight(fixedHeight)
+    } else {
+        Modifier.aspectRatio(imageRatio)
+    }
+        .fillMaxWidth()
 
     Timber.v("$this > Composing $displayName...")
     Timber.v("$this > Url: $image")
@@ -102,15 +123,11 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.DataClassItem(
                 ),
                 contentScale = ContentScale.Crop,
                 contentDescription = "$displayName image",
-                modifier = Modifier
-                    .clip(RoundedCornerShape(CARD_CORNER_RADIUS.dp))
-                    .fillMaxWidth()
-                    .aspectRatio(imageRatio)
+                modifier = imageModifiers
+                    .clip(RoundedCornerShape(CARD_CORNER_RADIUS.dp)),
             )
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(imageRatio),
+                modifier = imageModifiers,
                 verticalAlignment = Alignment.Bottom
             ) {
                 Row(

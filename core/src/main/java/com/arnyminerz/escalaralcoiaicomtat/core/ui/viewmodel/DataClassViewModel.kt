@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
@@ -12,6 +13,8 @@ abstract class DataClassViewModel<T : DataClass<*, *>> : ViewModel() {
     protected val storage = Firebase.storage
 
     abstract val columnsPerRow: Int
+
+    open val fixedHeight: Dp? = null
 
     abstract val items: LiveData<List<T>>
 }

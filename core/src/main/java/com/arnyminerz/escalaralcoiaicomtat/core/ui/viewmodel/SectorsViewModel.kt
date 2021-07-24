@@ -1,5 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
@@ -14,6 +16,8 @@ import kotlin.coroutines.suspendCoroutine
 class SectorsViewModel(private val areaId: String, private val zoneId: String) :
     DataClassViewModel<Sector>() {
     override val columnsPerRow: Int = 1
+
+    override val fixedHeight: Dp = 200.dp
 
     override val items: LiveData<List<Sector>> = liveData {
         if (AREAS.isEmpty())
