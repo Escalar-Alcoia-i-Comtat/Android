@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
 import androidx.appsearch.annotation.Document
-import java.util.Date
 
 @Document
 data class AreaData(
@@ -19,7 +18,7 @@ data class AreaData(
     fun area() = Area(
         objectId,
         displayName,
-        Date(timestamp),
+        timestamp,
         image,
         kmzReferenceUrl,
         documentPath,
@@ -33,7 +32,7 @@ fun Area.data(): AreaData {
         displayName,
         timestampMillis,
         imageReferenceUrl,
-        kmzReferenceUrl ?: "",
+        kmzReferenceUrl,
         metadata.documentPath,
         metadata.webURL ?: ""
     )

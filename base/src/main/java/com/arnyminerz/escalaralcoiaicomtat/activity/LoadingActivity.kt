@@ -22,8 +22,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.INDEX_PATHS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.INDEX_PATHS_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE_KEY
@@ -57,6 +55,8 @@ import com.google.firebase.perf.ktx.performance
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigClientException
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
@@ -71,6 +71,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     private var deepLinkPath: String? = null
 
     private lateinit var firestore: FirebaseFirestore
+    private lateinit var storage: FirebaseStorage
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +80,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
         Timber.v("Getting Firestore instance...")
         firestore = Firebase.firestore
+        Timber.v("Getting Firebase Storage instance...")
+        storage = Firebase.storage
     }
 
     override fun onStart() {
@@ -252,13 +255,11 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         SHOW_NON_DOWNLOADED = remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
         ENABLE_AUTHENTICATION = remoteConfig.getBoolean(ENABLE_AUTHENTICATION_KEY)
         PROFILE_IMAGE_SIZE = remoteConfig.getLong(PROFILE_IMAGE_SIZE_KEY)
-        INDEX_PATHS = remoteConfig.getBoolean(INDEX_PATHS_KEY)
 
         Timber.v("APP_UPDATE_MAX_TIME_DAYS: $APP_UPDATE_MAX_TIME_DAYS")
         Timber.v("SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
         Timber.v("ENABLE_AUTHENTICATION: $ENABLE_AUTHENTICATION")
         Timber.v("PROFILE_IMAGE_SIZE: $PROFILE_IMAGE_SIZE")
-        Timber.v("INDEX_PATHS: $INDEX_PATHS")
     }
 
     /**
@@ -294,7 +295,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         loading = true
         binding.progressTextView.setText(R.string.status_downloading)
         try {
-            loadAreas(this, firestore, null, false, progressCallback = { progress, max ->
+            loadAreas(this, firestore, progressCallback = { progress, max ->
                 Timber.i("Download progress: $progress / $max")
                 if (max >= 0) {
                     binding.progressBar.max = max
@@ -317,7 +318,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
                         doAsync {
                             val intent =
-                                DataClass.getIntent(this@LoadingActivity, deepLinkPath!!, firestore)
+                                DataClass.getIntent(this@LoadingActivity, deepLinkPath!!, storage)
                             uiContext {
                                 if (intent != null)
                                     startActivity(intent)

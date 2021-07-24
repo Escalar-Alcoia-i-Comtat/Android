@@ -19,6 +19,6 @@ fun ZonesExplorer(activity: Activity, navController: NavController, areaId: Stri
         activity,
         navController,
         dataClassViewModel = ZonesViewModel::class.java,
-        viewModelArguments = listOf(activity.application, areaId)
+        viewModelArguments = listOf(Activity::class.java to activity, String::class.java to areaId)
     )
 }

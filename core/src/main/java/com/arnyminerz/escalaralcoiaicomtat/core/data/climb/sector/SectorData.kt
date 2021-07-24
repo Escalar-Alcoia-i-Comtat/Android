@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector
 
 import androidx.appsearch.annotation.Document
 import com.google.android.gms.maps.model.LatLng
-import java.util.Date
 
 @Document
 data class SectorData(
@@ -26,7 +25,7 @@ data class SectorData(
     fun sector() = Sector(
         objectId,
         displayName,
-        Date(timestamp),
+        timestamp,
         sunTime,
         kidsApt,
         walkingTime,

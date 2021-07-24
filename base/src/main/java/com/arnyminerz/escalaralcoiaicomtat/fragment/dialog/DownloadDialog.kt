@@ -11,14 +11,14 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 class DownloadDialog<T : DataClass<*, *>>(
     private val activity: Activity,
     private val data: T,
-    private val firestore: FirebaseFirestore,
+    private val storage: FirebaseStorage,
     private val partialDownload: Boolean,
     private val downloader: (dataClass: T) -> Unit,
 ) {
@@ -76,7 +76,7 @@ class DownloadDialog<T : DataClass<*, *>>(
                                     doAsync {
                                         val children = arrayListOf<DataClassImpl>()
                                         data
-                                            .getChildren(firestore)
+                                            .getChildren(activity, storage)
                                             .toCollection(children)
                                         for (child in children)
                                             if (child is DataClass<*, *>)

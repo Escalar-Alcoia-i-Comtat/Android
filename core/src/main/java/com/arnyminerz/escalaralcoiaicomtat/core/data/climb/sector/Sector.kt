@@ -3,20 +3,15 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.Parcel
-import android.os.Parcelable
 import android.widget.TextView
 import androidx.annotation.UiThread
-import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toLatLng
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toUri
 import com.arnyminerz.escalaralcoiaicomtat.core.view.BarChartHelper
 import com.arnyminerz.escalaralcoiaicomtat.core.view.getAttribute
@@ -28,30 +23,32 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 import timber.log.Timber
-import java.util.Date
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
-class Sector constructor(
-    objectId: String,
-    displayName: String,
-    timestamp: Date,
+/**
+ * Creates a new [Sector] instance.
+ * @author Arnau Mora
+ * @since 20210724
+ */
+@Parcelize
+class Sector internal constructor(
+    override val objectId: String,
+    override val displayName: String,
+    override val timestampMillis: Long,
     @SunTime val sunTime: Int,
     val kidsApt: Boolean,
     val walkingTime: Long,
     val location: LatLng?,
     val weight: String,
-    imageUrl: String,
-    documentPath: String,
-    webUrl: String?
+    override val imageReferenceUrl: String,
+    val documentPath: String,
+    val webUrl: String?
 ) : DataClass<Path, Zone>(
     displayName,
-    timestamp,
-    imageUrl,
+    timestampMillis,
+    imageReferenceUrl,
     null,
     UIMetadata(
         R.drawable.ic_wide_placeholder,
@@ -74,7 +71,7 @@ class Sector constructor(
     constructor(data: DocumentSnapshot) : this(
         data.id,
         data.getString("displayName")!!,
-        data.getDate("created")!!,
+        data.getDate("created")!!.time,
         data.getLong("sunTime")!!.toInt(),
         data.getBoolean("kidsApt") ?: false,
         data.getLong("walkingTime")!!,
@@ -85,80 +82,8 @@ class Sector constructor(
         data.getString("webURL")
     )
 
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(objectId)
-        parcel.writeString(displayName)
-        parcel.writeString(timestamp.let { TIMESTAMP_FORMAT.format(timestamp) })
-        parcel.writeInt(sunTime)
-        parcel.writeInt(if (kidsApt) 1 else 0)
-        parcel.writeLong(walkingTime)
-        parcel.writeParcelable(location, 0)
-        parcel.writeString(weight)
-        parcel.writeString(imageReferenceUrl)
-        parcel.writeString(metadata.documentPath)
-        parcel.writeList(innerChildren)
-        parcel.writeString(metadata.webURL)
-    }
-
-    constructor(parcel: Parcel) : this(
-        parcel.readString()!!, // objectId
-        parcel.readString()!!, // Display Name
-        parcel.readString().toTimestamp()!!, // Timestamp
-        parcel.readInt(), // Sun Time
-        parcel.readInt() == 1, // Kids Apt
-        parcel.readLong(), // Walking Time
-        parcel.readParcelable<LatLng?>(LatLng::class.java.classLoader),
-        parcel.readString()!!,
-        parcel.readString()!!, // Image Url
-        parcel.readString()!!, // Pointer
-        parcel.readString(), // Web URL
-    ) {
-        parcel.readList(innerChildren, Path::class.java.classLoader)
-    }
-
-    /**
-     * Loads the Sector's children Paths
-     * @author Arnau Mora
-     * @since 20210411
-     * @return The loaded Paths list
-     * @see Path
-     */
-    @WorkerThread
-    override suspend fun loadChildren(firestore: FirebaseFirestore): List<Path> {
-        val paths = arrayListOf<Path>()
-        Timber.v("Loading Sector's children.")
-
-        Timber.d("Fetching...")
-        val ref = firestore
-            .document(metadata.documentPath)
-            .collection("Paths")
-            .orderBy("sketchId")
-        val childTask = ref.get()
-        try {
-            Timber.v("Awaiting results...")
-            val snapshot = suspendCoroutine<QuerySnapshot> { cont ->
-                childTask
-                    .addOnSuccessListener { cont.resume(it) }
-                    .addOnFailureListener { cont.resumeWithException(it) }
-            }
-            Timber.v("Got children result")
-            val pathsDocs = snapshot.documents
-            Timber.d("Got ${pathsDocs.size} elements. Processing result")
-            for (l in pathsDocs.indices) {
-                val pathData = pathsDocs[l]
-                Timber.d("Processing sector #$l")
-                val path = Path(pathData)
-                paths.add(path)
-            }
-            Timber.d("Finished loading zones")
-        } catch (e: Exception) {
-            Timber.w(e, "Could not get.")
-            e.let { throw it }
-        }
-        return paths
-    }
-
-    override fun describeContents(): Int = 0
+    @IgnoredOnParcel
+    override val imageQuality: Int = 100
 
     /**
      * Sets the content for the chip as a kids apt chip.
@@ -254,10 +179,7 @@ class Sector constructor(
         }
     }
 
-    companion object CREATOR : Parcelable.Creator<Sector> {
-        override fun createFromParcel(parcel: Parcel): Sector = Sector(parcel)
-        override fun newArray(size: Int): Array<Sector?> = arrayOfNulls(size)
-
+    companion object {
         const val NAMESPACE = "Sector"
     }
 }

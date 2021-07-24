@@ -1,14 +1,17 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 
+import android.app.Activity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 
-class PassiveAreasViewModel(application: App) :
-    DataClassViewModel<Area>(application) {
+class PassiveAreasViewModel<A : Activity>(activity: A) : DataClassViewModel<Area, A>(activity) {
     override val columnsPerRow: Int = 1
 
-    override val items: LiveData<List<Area>> = liveData { emit(AREAS) }
+    override val items: LiveData<List<Area>> = liveData {
+        for (area in AREAS)
+            area.image(context, storage)
+        emit(AREAS)
+    }
 }

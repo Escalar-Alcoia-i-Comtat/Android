@@ -71,7 +71,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
         Timber.d("Setting view for ${data.namespace} \"%s\"", data.displayName)
 
         holder.titleTextView.text = data.displayName
-        ViewCompat.setTransitionName(holder.titleTextView, data.transitionName)
+        ViewCompat.setTransitionName(holder.titleTextView, data.pin)
 
         holder.imageView.setOnClickListener {
             Timber.v("Showing \"%s\"", data.displayName)
@@ -110,7 +110,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
                     else -> DownloadDialog(
                         activity,
                         data,
-                        activity.firestore,
+                        activity.storage,
                         status == DownloadStatus.PARTIALLY
                     ) { requestDownload(it, holder) }.show {
                         updateUi(holder, data, true)
@@ -165,7 +165,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
                 updateDownloadStatus
             ) {
                 // Fetch the new downloa status
-                val newStatus = data.downloadStatus(activity, activity.firestore)
+                val newStatus = data.downloadStatus(activity, activity.storage)
                 // Store it in cache
                 synchronized(downloadStatuses) {
                     downloadStatuses[data.objectId] = newStatus

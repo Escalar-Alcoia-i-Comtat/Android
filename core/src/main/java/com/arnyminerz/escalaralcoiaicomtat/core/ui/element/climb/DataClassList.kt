@@ -73,13 +73,8 @@ fun <D : DataClass<*, *>> DataClassList(
             if (cacheImageFile.exists()) {
                 Timber.i("$dataClass > Loading image from cache ($cacheImageFile).")
                 dataClass.DataClassItem(navController, placeholder, cacheImageFile, fixedHeight)
-            } else {
-                val downloadUrl = dataClass.downloadUrl
-                if (downloadUrl == null)
-                    Timber.i("$dataClass > Could not load image since downloadUrl is null")
-                else
-                    dataClass.DataClassItem(navController, placeholder, downloadUrl, fixedHeight)
-            }
+            } else
+                Text(text = "$dataClass doesn't have an image")
         }
     }
 }

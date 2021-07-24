@@ -71,7 +71,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
                 Timber.w("Could not find area \"$areaId\" in AREAS.")
                 return@doAsync
             }
-            val zones = area.getChildren(firestore)
+            val zones = area.getChildren(this@ZoneActivity, storage)
             dataClass = zones[zoneId] ?: kotlin.run {
                 Timber.w("Could not find zone \"$zoneId\" in \"$areaId\".")
                 return@doAsync
@@ -126,7 +126,7 @@ class ZoneActivity : DataClassListActivity<Zone>() {
         if (!loaded && dataClassInitialized)
             try {
                 val sectors = arrayListOf<Sector>()
-                dataClass.getChildren(firestore).toCollection(sectors)
+                dataClass.getChildren(this, storage).toCollection(sectors)
 
                 Timber.v("Got ${sectors.size} sectors.")
 

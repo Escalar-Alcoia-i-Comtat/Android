@@ -70,7 +70,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
 @ExperimentalFoundationApi
@@ -84,13 +83,12 @@ class NewMainActivity : AppCompatActivity() {
         dataCollectionSetUp()
 
         val firestore = Firebase.firestore
-        val storage = Firebase.storage
 
         setContent {
             var loadingProgress by remember { mutableStateOf(0f) }
             var areas by remember { mutableStateOf(listOf<Area>()) }
 
-            loadAreas(this, firestore, storage, progressCallback = { current, total ->
+            loadAreas(this, firestore, progressCallback = { current, total ->
                 loadingProgress = current.toFloat() / total.toFloat()
                 Timber.i("Loading areas: $current/$total ($loadingProgress)")
             }) {

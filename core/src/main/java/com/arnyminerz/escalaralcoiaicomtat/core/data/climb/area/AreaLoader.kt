@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
-import android.content.Context
-import android.graphics.Bitmap
+import android.app.Activity
 import androidx.annotation.MainThread
 import androidx.annotation.UiThread
 import androidx.appsearch.app.AppSearchBatchResult
@@ -12,6 +11,7 @@ import androidx.appsearch.app.SetSchemaResponse
 import androidx.appsearch.localstorage.LocalStorage
 import androidx.collection.arrayMapOf
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.data
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -21,7 +21,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.data
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.INDEX_PATHS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_FULL_DATA_LOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.asyncCoroutineScope
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
@@ -33,7 +32,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
-import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -47,11 +45,8 @@ import kotlin.coroutines.suspendCoroutine
  * Loads all the areas available in the server.
  * @author Arnau Mora
  * @since 20210313
+ * @param activity The [Activity]
  * @param firestore The [FirebaseFirestore] reference for fetching data from the server.
- * @param storage The [FirebaseStorage] reference for fetching files from the server. If not-null,
- * the download url of the [Area]s will be fetched.
- * @param context The context to load the areas from. If null, no toasts will be shown, and search
- * will be disabled.
  * @param scope The [CoroutineScope] to run on.
  * @param progressCallback This will get called when the loading progress is updated.
  * @param callback This will get called when all the data has been loaded.
@@ -60,9 +55,8 @@ import kotlin.coroutines.suspendCoroutine
  */
 @MainThread
 fun loadAreas(
-    context: Context,
+    activity: Activity,
     firestore: FirebaseFirestore,
-    storage: FirebaseStorage? = null,
     enableSearch: Boolean = false,
     scope: CoroutineScope = asyncCoroutineScope,
     @UiThread progressCallback: (current: Int, total: Int) -> Unit,
@@ -78,6 +72,11 @@ fun loadAreas(
     Timber.d("Fetching areas...")
     scope.launch {
         try {
+            Timber.v("Getting paths...")
+            val pathsSnapshot = firestore
+                .collectionGroup("Paths")
+                .get()
+                .await()
             Timber.v("Getting sectors...")
             val sectorsSnapshot = firestore
                 .collectionGroup("Sectors")
@@ -93,6 +92,7 @@ fun loadAreas(
                 .collectionGroup("Areas")
                 .get()
                 .await()
+
             Timber.v("Initializing zones cache...")
             val zonesCache = arrayMapOf<String, Zone>()
             Timber.v("Initializing areas cache...")
@@ -104,6 +104,8 @@ fun loadAreas(
             val sectorsIndex = arrayListOf<SectorData>()
             val pathsIndex = arrayListOf<PathData>()
 
+            Timber.v("Getting path documents...")
+            val pathDocuments = pathsSnapshot.documents
             Timber.v("Getting sector documents...")
             val sectorDocuments = sectorsSnapshot.documents
             Timber.v("Getting zone documents...")
@@ -111,6 +113,8 @@ fun loadAreas(
             Timber.v("Getting area documents...")
             val areaDocuments = areasSnapshot.documents
 
+            Timber.v("Counting paths...")
+            val pathsCount = pathDocuments.size
             Timber.v("Counting sectors...")
             val sectorsCount = sectorDocuments.size
             Timber.v("Counting zones...")
@@ -121,9 +125,21 @@ fun loadAreas(
             trace.putAttribute("areasCount", areasCount.toString())
             trace.putAttribute("zonesCount", zonesCount.toString())
             trace.putAttribute("sectorsCount", sectorsCount.toString())
+            trace.putAttribute("pathsCount", pathsCount.toString())
 
             var counter = 0
-            val count = areasCount + zonesCount + sectorsCount
+            val count = areasCount + zonesCount + sectorsCount + pathsCount
+
+            Timber.v("Creation relation with sector and path documents...")
+            // The key is the sector id, the value the snapshot of the path
+            val sectorIdPathDocument = arrayMapOf<String, ArrayList<DocumentSnapshot>>()
+            for (pathDocument in pathDocuments) {
+                val sectorId = pathDocument.reference.parent.parent!!.id
+                if (sectorIdPathDocument.containsKey(sectorId))
+                    sectorIdPathDocument[sectorId] = arrayListOf(pathDocument)
+                else
+                    sectorIdPathDocument[sectorId]?.add(pathDocument)
+            }
 
             Timber.v("Expanding zone documents...")
             val expandedZoneDocuments = arrayMapOf<String, DocumentSnapshot>()
@@ -157,7 +173,8 @@ fun loadAreas(
                         return@launch
                     } else {
                         Timber.v("S/$sectorId > Caching zone Z/$zoneId...")
-                        zonesCache[zoneId] = Zone(zoneDocument)
+                        val zone = Zone(zoneDocument)
+                        zonesCache[zoneId] = zone
                     }
                 }
                 Timber.v("S/$sectorId > Getting zone Z/$zoneId from cache...")
@@ -166,13 +183,21 @@ fun loadAreas(
                 val sector = Sector(sectorDocument)
                 Timber.v("S/$sectorId > Adding sector to the search index...")
                 sectorsIndex.add(sector.data())
-                if (INDEX_PATHS) {
-                    Timber.v("S/$sectorId > Loading paths...")
-                    val paths = sector.getChildren(firestore)
-                    Timber.v("S/$sectorId > Adding paths to the search index...")
-                    for (path in paths)
+
+                Timber.v("S/$sectorId > Loading paths...")
+                val paths = sectorIdPathDocument[sectorId]
+                if (paths != null) {
+                    for (pathDocument in paths) {
+                        Timber.v("P/${pathDocument.id} > Processing...")
+                        val path = Path(activity, pathDocument)
+                        Timber.v("$path > Adding to the search index...")
                         pathsIndex.add(path.data())
-                }
+                        Timber.v("$path > Adding to the sector ($sector)...")
+                        sector.add(path)
+                    }
+                } else
+                    Timber.w("S/$sectorId > There isn't any path for the sector.")
+
                 Timber.v("S/$sectorId > Adding sector to zone Z/$zoneId...")
                 zone?.add(sector)
             }
@@ -223,19 +248,6 @@ fun loadAreas(
             Timber.v("Ordering areas...")
             val areas = areasCache.values.sortedBy { area -> area.displayName }
 
-            if (storage != null) {
-                Timber.v("Caching images...")
-                for (area in areas) {
-                    Timber.v("$area > Caching image...")
-                    suspendCoroutine<Bitmap?> { cont ->
-                        area.image(context, storage, null, null) {
-                            Timber.v("$area > Image downloaded...")
-                            cont.resume(it)
-                        }
-                    }
-                }
-            }
-
             Timber.v("Clearing AREAS...")
             AREAS.clear()
             Timber.v("Adding all areas to AREAS...")
@@ -244,7 +256,7 @@ fun loadAreas(
             if (enableSearch) {
                 Timber.v("Search > Initializing session future...")
                 val sessionFuture = LocalStorage.createSearchSession(
-                    LocalStorage.SearchContext.Builder(context, "escalaralcoiaicomtat")
+                    LocalStorage.SearchContext.Builder(activity, "escalaralcoiaicomtat")
                         .build()
                 )
                 val executor = Executors.newSingleThreadExecutor()
@@ -368,7 +380,7 @@ fun loadAreas(
             Timber.e(e, "Could not load areas.")
             trace.putAttribute("error", "true")
             trace.stop()
-            uiContext { toast(context, R.string.toast_error_load_areas) }
+            uiContext { toast(activity, R.string.toast_error_load_areas) }
         }
     }
 

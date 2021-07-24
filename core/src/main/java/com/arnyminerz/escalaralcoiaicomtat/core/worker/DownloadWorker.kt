@@ -122,6 +122,8 @@ constructor(
 
 class DownloadWorker private constructor(appContext: Context, workerParams: WorkerParameters) :
     Worker(appContext, workerParams) {
+    // TODO: Check if worker is working properly
+
     private lateinit var namespace: String
     private lateinit var displayName: String
     private var downloadPath: String? = null
@@ -279,7 +281,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val sectors = runBlocking {
             Timber.d("Downloading child sectors...")
             val sectors = arrayListOf<Sector>()
-            zone.getChildren(firestore)
+            zone.getChildren(applicationContext, storage)
                 .toCollection(sectors)
             sectors
         }
@@ -420,7 +422,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 val intent = runBlocking {
                     Timber.v("Getting intent...")
                     Intent()
-                    DataClass.getIntent(applicationContext, displayName, firestore)
+                    DataClass.getIntent(applicationContext, displayName, storage)
                         ?.let { intent ->
                             PendingIntent.getActivity(
                                 applicationContext,

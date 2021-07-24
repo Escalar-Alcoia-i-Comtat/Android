@@ -33,6 +33,8 @@ import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
 @ExperimentalBadgeUtils
@@ -51,6 +53,7 @@ class SectorActivity : LanguageAppCompatActivity() {
 
     private lateinit var binding: ActivitySectorBinding
     lateinit var firestore: FirebaseFirestore
+    lateinit var storage: FirebaseStorage
 
     /**
      * Tells if the content has been loaded correctly
@@ -104,6 +107,7 @@ class SectorActivity : LanguageAppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         firestore = Firebase.firestore
+        storage = Firebase.storage
         binding = ActivitySectorBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)

@@ -129,7 +129,7 @@ class MapFragment : NetworkChangeListenerFragment() {
 
                         Timber.v("Creating marker window...")
                         binding?.root?.let { viewRoot ->
-                            markerWindow = mapHelper.infoCard(it, firestore, this, viewRoot)
+                            markerWindow = mapHelper.infoCard(it, firebaseStorage, this, viewRoot)
                                 .also { markerWindow ->
                                     markerWindow.show()
                                     markerWindow.listenHide {

@@ -36,7 +36,7 @@ class AreaAdapter(
         val area = AREAS[position]
         Timber.v("Showing area #$position in RecyclerView")
 
-        ViewCompat.setTransitionName(holder.titleTextView, area.transitionName)
+        ViewCompat.setTransitionName(holder.titleTextView, area.pin)
 
         holder.titleTextView.text = area.displayName
         holder.imageView.setOnClickListener {

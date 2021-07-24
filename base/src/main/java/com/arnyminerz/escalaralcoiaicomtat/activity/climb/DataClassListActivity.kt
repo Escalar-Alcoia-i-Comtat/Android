@@ -215,7 +215,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
 
             Timber.v("Updating icon, getting download status...")
             val downloadStatus = if (dataClassInitialized)
-                dataClass.downloadStatus(activity, firestore)
+                dataClass.downloadStatus(activity, storage)
             else null
             Timber.v("Got download status: $downloadStatus")
 

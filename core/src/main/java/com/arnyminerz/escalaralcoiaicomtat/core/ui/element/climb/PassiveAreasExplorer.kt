@@ -19,6 +19,6 @@ fun PassiveAreasExplorer(activity: Activity, navController: NavController) {
         activity,
         navController,
         dataClassViewModel = PassiveAreasViewModel::class.java,
-        listOf(activity.application)
+        listOf(Activity::class.java to activity)
     )
 }

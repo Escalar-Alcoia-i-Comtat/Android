@@ -42,9 +42,9 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
 /**
@@ -136,7 +136,7 @@ class MarkCompletedActivity : AppCompatActivity() {
      * @author Arnau Mora
      * @since 20210429
      */
-    private lateinit var firestore: FirebaseFirestore
+    private lateinit var storage: FirebaseStorage
 
     /**
      * A reference to the Firebase auth instance to load the user's data.
@@ -187,7 +187,7 @@ class MarkCompletedActivity : AppCompatActivity() {
         }
 
         // Fetch the Firestore instance
-        firestore = Firebase.firestore
+        storage = Firebase.storage
         auth = Firebase.auth
 
         // Get the logged in user
@@ -252,7 +252,7 @@ class MarkCompletedActivity : AppCompatActivity() {
 
         Timber.v("Loading zone $zoneId...")
         val zones = arrayListOf<Zone>()
-        area!!.getChildren(firestore).toCollection(zones)
+        area!!.getChildren(this, storage).toCollection(zones)
         try {
             zone = area!![zoneId!!]
         } catch (_: IndexOutOfBoundsException) {
@@ -265,7 +265,7 @@ class MarkCompletedActivity : AppCompatActivity() {
 
         Timber.v("Loading sector #$sectorIndex...")
         val sectors = arrayListOf<Sector>()
-        zone!!.getChildren(firestore).toCollection(sectors)
+        zone!!.getChildren(this, storage).toCollection(sectors)
         try {
             sector = zone!![sectorIndex!!]
         } catch (_: IndexOutOfBoundsException) {
@@ -278,7 +278,7 @@ class MarkCompletedActivity : AppCompatActivity() {
 
         Timber.v("Loading path $pathId...")
         val paths = arrayListOf<Path>()
-        sector!!.getChildren(firestore).toCollection(paths)
+        sector!!.getChildren(this, storage).toCollection(paths)
         try {
             path = sector!![pathId!!]
         } catch (_: IndexOutOfBoundsException) {

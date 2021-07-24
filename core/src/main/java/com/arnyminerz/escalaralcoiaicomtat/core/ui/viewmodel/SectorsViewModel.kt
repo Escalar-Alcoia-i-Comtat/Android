@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 
+import android.app.Activity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
@@ -9,16 +10,15 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class SectorsViewModel(
-    application: App,
+class SectorsViewModel<A : Activity>(
+    activity: A,
     private val areaId: String,
     private val zoneId: String
-) : DataClassViewModel<Sector>(application) {
+) : DataClassViewModel<Sector, A>(activity) {
     override val columnsPerRow: Int = 1
 
     override val fixedHeight: Dp = 200.dp
@@ -26,15 +26,17 @@ class SectorsViewModel(
     override val items: LiveData<List<Sector>> = liveData {
         if (AREAS.isEmpty())
             suspendCoroutine<List<Area>> { cont ->
-                loadAreas(context, firestore, storage, progressCallback = { current, total ->
+                loadAreas(context as Activity, firestore, progressCallback = { current, total ->
                     Timber.i("Loading areas: $current/$total")
                 }) {
                     cont.resume(AREAS)
                 }
             }
-        val sectors = AREAS[areaId]?.get(zoneId)?.getChildren(firestore, storage)
-        if (sectors != null)
+        val sectors = AREAS[areaId]?.get(zoneId)?.getChildren(context, storage)
+        if (sectors != null) {
+            for (sector in sectors)
+                sector.image(context, storage)
             emit(sectors)
-        else Timber.e("Could not find Z/$zoneId in A/$areaId")
+        } else Timber.e("Could not find Z/$zoneId in A/$areaId")
     }
 }

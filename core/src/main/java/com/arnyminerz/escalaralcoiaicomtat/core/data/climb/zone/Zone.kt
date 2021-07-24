@@ -1,40 +1,36 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone
 
-import android.os.Parcel
-import android.os.Parcelable
-import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.TIMESTAMP_FORMAT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toLatLng
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toTimestamp
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
-import timber.log.Timber
-import java.util.Date
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
-class Zone(
-    objectId: String,
-    displayName: String,
-    timestamp: Date,
-    val image: String,
-    kmzReferenceUrl: String,
+/**
+ * Creates a new [Zone] instance.
+ * @author Arnau Mora
+ * @since 20210724
+ */
+@Parcelize
+class Zone internal constructor(
+    override val objectId: String,
+    override val displayName: String,
+    override val timestampMillis: Long,
+    override val imageReferenceUrl: String,
+    override val kmzReferenceUrl: String,
     val position: LatLng,
-    documentPath: String,
-    webUrl: String?
+    val documentPath: String,
+    val webUrl: String?
 ) : DataClass<Sector, Area>(
     displayName,
-    timestamp,
-    image,
+    timestampMillis,
+    imageReferenceUrl,
     kmzReferenceUrl,
     UIMetadata(
         R.drawable.ic_tall_placeholder,
@@ -47,20 +43,6 @@ class Zone(
         webUrl
     )
 ) {
-    @WorkerThread
-    private constructor(parcel: Parcel) : this(
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString().toTimestamp()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        LatLng(parcel.readDouble(), parcel.readDouble()),
-        parcel.readString()!!,
-        parcel.readString()
-    ) {
-        parcel.readList(innerChildren, Sector::class.java.classLoader)
-    }
-
     /**
      * Creates a new [Zone] from the data of a [DocumentSnapshot].
      * Note: This doesn't add children
@@ -71,7 +53,7 @@ class Zone(
     constructor(data: DocumentSnapshot) : this(
         data.id,
         data.getString("displayName")!!,
-        data.getDate("created")!!,
+        data.getDate("created")!!.time,
         data.getString("image")!!,
         data.getString("kmz")!!,
         data.getGeoPoint("location")!!.toLatLng(),
@@ -79,67 +61,10 @@ class Zone(
         data.getString("webURL")
     )
 
-    /**
-     * Loads the [Zone]s's children [Sector]s
-     * @author Arnau Mora
-     * @since 20210411
-     * @return The loaded [Sector] list
-     * @see Sector
-     */
-    @WorkerThread
-    override suspend fun loadChildren(firestore: FirebaseFirestore): List<Sector> {
-        val sectors = arrayListOf<Sector>()
-        Timber.v("Loading Zone's children.")
+    @IgnoredOnParcel
+    override val imageQuality: Int = 65
 
-        Timber.d("Fetching...")
-        val ref = firestore
-            .document(metadata.documentPath)
-            .collection("Sectors")
-            .orderBy("weight")
-        val childTask = ref.get()
-        try {
-            Timber.v("Awaiting results...")
-            val snapshot = suspendCoroutine<QuerySnapshot> { cont ->
-                childTask
-                    .addOnSuccessListener { cont.resume(it) }
-                    .addOnFailureListener { cont.resumeWithException(it) }
-            }
-            Timber.v("Got children result")
-            val sectorsDocs = snapshot.documents
-            Timber.d("Got ${sectorsDocs.size} elements. Processing result")
-            for (l in sectorsDocs.indices) {
-                val sectorData = sectorsDocs[l]
-                Timber.d("Processing sector #$l")
-                val sector = Sector(sectorData)
-                sectors.add(sector)
-            }
-            Timber.d("Finished loading sectors")
-        } catch (e: Exception) {
-            Timber.w(e, "Could not get.")
-            e.let { throw it }
-        }
-        return sectors
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(objectId)
-        parcel.writeString(displayName)
-        parcel.writeString(TIMESTAMP_FORMAT.format(timestamp))
-        parcel.writeString(image)
-        parcel.writeString(kmzReferenceUrl)
-        parcel.writeDouble(position.latitude)
-        parcel.writeDouble(position.longitude)
-        parcel.writeString(metadata.documentPath)
-        parcel.writeList(innerChildren)
-        parcel.writeString(metadata.webURL)
-    }
-
-    override fun describeContents(): Int = 0
-
-    companion object CREATOR : Parcelable.Creator<Zone> {
-        override fun createFromParcel(parcel: Parcel): Zone = Zone(parcel)
-        override fun newArray(size: Int): Array<Zone?> = arrayOfNulls(size)
-
+    companion object {
         const val NAMESPACE = "Zone"
     }
 }

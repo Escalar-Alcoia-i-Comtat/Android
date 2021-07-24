@@ -78,7 +78,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
                     .get()
                     .addOnSuccessListener { pathData ->
                         Timber.v("Processing path data...")
-                        val path = Path(pathData)
+                        val path = Path(requireActivity(), pathData)
                         doAsync {
                             Timber.v("Getting adapter...")
                             val adapter = binding?.pathsRecyclerView?.adapter as PathsAdapter?
@@ -214,8 +214,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
             Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
             val sectors = arrayListOf<Sector>()
             AREAS[areaId]
-                ?.getChildren(sectorActivity?.firestore)?.get(zoneId)
-                ?.getChildren(sectorActivity?.firestore)
+                ?.getChildren(sectorActivity!!, sectorActivity.storage)?.get(zoneId)
+                ?.getChildren(sectorActivity, sectorActivity.storage)
                 ?.toCollection(sectors)
                 ?: run {
                     Timber.e("Could not get sectors from Area $areaId in $zoneId")
@@ -230,7 +230,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             }
 
             isDownloaded = if (sectorActivity != null)
-                sector.downloadStatus(sectorActivity, sectorActivity.firestore).isDownloaded()
+                sector.downloadStatus(sectorActivity, sectorActivity.storage).isDownloaded()
             else false
 
             if (activity != null && activity?.isDestroyed == false) {
@@ -244,7 +244,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
                 Timber.v("Loading paths...")
                 val paths = arrayListOf<Path>()
-                sector.getChildren(sectorActivity?.firestore)
+                sector.getChildren(sectorActivity!!, sectorActivity.storage)
                     .toCollection(paths)
                 paths.sortBy { it.sketchId }
                 Timber.v("Finished loading children sectors")

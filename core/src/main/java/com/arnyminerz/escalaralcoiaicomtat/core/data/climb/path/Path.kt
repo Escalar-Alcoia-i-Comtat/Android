@@ -1,14 +1,13 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
-import android.os.Parcel
+import android.app.Activity
 import androidx.annotation.UiThread
-import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.BlockingTypeParceler
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.PitchParceler
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.cache
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.auth.FirebaseAuthException
@@ -18,13 +17,20 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
 import timber.log.Timber
 
+/**
+ * Creates a new [Path] instance.
+ * @author Arnau Mora
+ * @since 20210724
+ */
 @Parcelize
 @TypeParceler<Pitch, PitchParceler>
-class Path(
+@TypeParceler<BlockingType, BlockingTypeParceler>
+class Path internal constructor(
     override val objectId: String,
     override val timestampMillis: Long,
     val sketchId: Long,
@@ -41,31 +47,23 @@ class Path(
     val downloaded: Boolean = false,
     val documentPath: String,
 ) : DataClassImpl(objectId, NAMESPACE, timestampMillis), Comparable<Path> {
-    constructor(parcel: Parcel) : this(
-        parcel.readString()!!,
-        parcel.readLong(),
-        parcel.readLong(),
-        parcel.readString()!!,
-        Grade.GradesList(),
-        arrayListOf(),
-        arrayListOf(),
-        arrayListOf(),
-        parcel.readParcelable<FixedSafesData>(FixedSafesData::class.java.classLoader)!!,
-        parcel.readParcelable<RequiredSafesData>(RequiredSafesData::class.java.classLoader)!!,
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readInt() == 1,
-        parcel.readString()!!,
-    )
+    /**
+     * Stores is the path is blocked.
+     * @author Arnau Mora
+     * @since 20210724
+     */
+    @IgnoredOnParcel
+    var blockingType: BlockingType = BlockingType.UNKNOWN
+        private set
 
     /**
      * Creates a new [Path] from the data of a [DocumentSnapshot].
      * @author Arnau Mora
      * @since 20210411
+     * @param activity The [Activity] that will be keeping track of the blocking status.
      * @param data The object to get data from
      */
-    constructor(data: DocumentSnapshot) : this(
+    constructor(activity: Activity, data: DocumentSnapshot) : this(
         data.id,
         data.getDate("created")!!.time,
         data.getString("sketchId")?.toLongOrNull() ?: 0L,
@@ -132,6 +130,18 @@ class Path(
         val rebuilders = pathData?.get("rebuiltBy") as List<*>?
         val d = rebuilders?.joinToString(separator = ", ")
         rebuiltBy = d
+
+        data.reference.addSnapshotListener(activity) { snapshot, error ->
+            Timber.v("$this > Got snapshot update!")
+            if (error != null)
+                Timber.e(error, "$this > Detected an error in a snapshot.")
+            else if (snapshot != null && snapshot.exists()) {
+                Timber.v("$this > Processing blocked status...")
+                val blocked = snapshot.getString("blocked")
+                val blockingType = BlockingType.find(blocked)
+                this.blockingType = blockingType
+            }
+        }
     }
 
     override fun toString(): String = displayName
@@ -142,41 +152,6 @@ class Path(
             sketchId < other.sketchId -> -1
             else -> 0
         }
-
-    /**
-     * Checks if the path is blocked or not
-     * @author Arnau Mora
-     * @since 20210316
-     * @param firestore The Firestore instance to fetch new data
-     * @return A matching BlockingType class
-     */
-    @WorkerThread
-    suspend fun isBlocked(firestore: FirebaseFirestore): BlockingType {
-        var blockStatus = cache.getBlockStatus(objectId)
-        return if (blockStatus != null) {
-            Timber.v("There's already an stored block status for $objectId: $blockStatus")
-            blockStatus
-        } else {
-            Timber.d("Fetching...")
-            val ref = firestore.document(documentPath)
-
-            Timber.v("Checking if \"$documentPath\" is blocked...")
-            val task = ref.get()
-            val result = task.await()
-            blockStatus = if (!task.isSuccessful) {
-                val e = task.exception!!
-                Timber.w(e, "Could not check if path is blocked")
-                BlockingType.UNKNOWN
-            } else {
-                val blocked = result!!.getString("blocked")
-                val blockingType = BlockingType.find(blocked)
-                Timber.v("Blocking status for \"$displayName\": $blockingType")
-                blockingType
-            }
-            cache.storeBlockStatus(objectId, blockStatus)
-            blockStatus
-        }
-    }
 
     /**
      * Checks if the Path has a description or built by information

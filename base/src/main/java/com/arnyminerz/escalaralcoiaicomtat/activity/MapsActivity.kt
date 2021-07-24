@@ -46,9 +46,9 @@ import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAskerFragment
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 import java.io.File
 
@@ -58,7 +58,7 @@ class MapsActivity : LanguageAppCompatActivity() {
     private var geometries = arrayListOf<GeoGeometry>()
 
     private lateinit var mapHelper: MapHelper
-    private lateinit var firestore: FirebaseFirestore
+    private lateinit var storage: FirebaseStorage
 
     private var markerWindow: MapHelper.MarkerWindow? = null
 
@@ -143,7 +143,7 @@ class MapsActivity : LanguageAppCompatActivity() {
 
         // Hi from march of 2021
 
-        firestore = Firebase.firestore
+        storage = Firebase.storage
 
         var kmzFile: File? = null
         var centerCurrentLocation = false
@@ -356,7 +356,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                     if (title.isNotEmpty()) {
                         markerWindow = mapHelper.infoCard(
                             this@MapsActivity,
-                            firestore,
+                            storage,
                             this,
                             binding.root
                         ).also {

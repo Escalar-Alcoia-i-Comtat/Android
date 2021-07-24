@@ -3,7 +3,6 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone
 import androidx.appsearch.annotation.Document
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.google.android.gms.maps.model.LatLng
-import java.util.Date
 
 @Document
 data class ZoneData(
@@ -23,7 +22,7 @@ data class ZoneData(
     fun zone() = Zone(
         objectId,
         displayName,
-        Date(timestamp),
+        timestamp,
         image,
         kmzReferenceUrl,
         LatLng(latitude, longitude),
@@ -38,7 +37,7 @@ fun Zone.data(): ZoneData {
         displayName,
         timestampMillis,
         imageReferenceUrl,
-        kmzReferenceUrl ?: "",
+        kmzReferenceUrl,
         position.latitude,
         position.longitude,
         metadata.documentPath,

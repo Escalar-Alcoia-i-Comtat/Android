@@ -319,7 +319,7 @@ class PathsAdapter(
         }
 
         Timber.v("${path.objectId} > Checking if blocked...")
-        val blocked = path.isBlocked(firestore)
+        val blocked = path.blockingType
         Timber.d("${path.objectId} > Block status: $blocked")
 
         uiContext {

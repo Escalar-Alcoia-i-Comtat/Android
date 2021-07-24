@@ -20,7 +20,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 
 @Composable
-fun ZoomableImage(painter: Painter, minScale: Float = 0.7f, maxScale: Float = 4f) {
+fun ZoomableImage(
+    painter: Painter,
+    modifier: Modifier = Modifier,
+    minScale: Float = 0.7f,
+    maxScale: Float = 4f
+) {
     var scale by remember { mutableStateOf(1f) }
     var rotation by remember { mutableStateOf(0f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
@@ -35,7 +40,7 @@ fun ZoomableImage(painter: Painter, minScale: Float = 0.7f, maxScale: Float = 4f
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
+        modifier = modifier
             .background(Color.Black)
 
     ) {

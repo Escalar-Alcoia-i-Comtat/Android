@@ -162,7 +162,7 @@ class CommentsActivity : AppCompatActivity() {
             .get()
             .addOnSuccessListener { snapshot ->
                 Timber.v("Got Path data, processing...")
-                val path = Path(snapshot)
+                val path = Path(this, snapshot)
 
                 doAsync {
                     Timber.v("Loaded path data, observing completions...")

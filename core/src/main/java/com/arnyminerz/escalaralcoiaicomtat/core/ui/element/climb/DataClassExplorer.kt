@@ -37,22 +37,25 @@ import timber.log.Timber
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
-fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
+fun <T : DataClass<*, *>, V : DataClassViewModel<T, *>> Explorer(
     activity: Activity,
     navController: NavController,
     dataClassViewModel: Class<V>,
-    viewModelArguments: List<Any> = listOf()
+    viewModelArguments: List<Pair<Class<*>, Any?>> = listOf()
 ) {
     val types = arrayListOf<Class<*>>()
-    for (argument in viewModelArguments)
-        types.add(argument::class.java)
+    val arguments = arrayListOf<Any?>()
+    for (argument in viewModelArguments) {
+        types.add(argument.first)
+        arguments.add(argument.second)
+    }
 
     Timber.v("Exploring ViewModel named ${dataClassViewModel.name}")
     Timber.v("ViewModel args: $viewModelArguments ($types)")
 
     val viewModel = dataClassViewModel
         .getConstructor(*types.toTypedArray())
-        .newInstance(*viewModelArguments.toTypedArray())
+        .newInstance(*arguments.toTypedArray())
     val liveData = viewModel.items
     val items: List<T> by liveData.observeAsState(listOf())
     var finishedLoading by remember { mutableStateOf(false) }

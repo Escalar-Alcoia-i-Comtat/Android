@@ -53,7 +53,7 @@ class DownloadsFragment : Fragment() {
         reloadSizeTextView()
 
         val mainActivity = requireActivity() as MainActivity
-        val firestore = mainActivity.firestore
+        val storage = mainActivity.storage
 
         visibility(binding.downloadsRecyclerView, false)
         visibility(binding.noDownloadsTextView, false)
@@ -65,7 +65,7 @@ class DownloadsFragment : Fragment() {
             val sections = arrayListOf<DownloadedSection>()
             DownloadedSection.list(
                 mainActivity,
-                firestore,
+                storage,
                 SHOW_NON_DOWNLOADED
             ) { progress, max ->
                 uiContext {
