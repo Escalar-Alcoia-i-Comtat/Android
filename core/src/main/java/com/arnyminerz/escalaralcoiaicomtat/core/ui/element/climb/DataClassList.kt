@@ -1,6 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 
-import android.net.Uri
+import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -43,6 +43,7 @@ import timber.log.Timber
  * A list of items that show the image of a [DataClass].
  * @author Arnau Mora
  * @since 20210724
+ * @param context The context where this list will be shown
  * @param navController The controller for managing the current navigation state in the app`.
  * @param items The items to show.
  * @param placeholder The image resource to show while loading the [DataClass]' image.
@@ -53,6 +54,7 @@ import timber.log.Timber
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
 fun <D : DataClass<*, *>> DataClassList(
+    context: Context,
     navController: NavController,
     items: List<D>,
     @DrawableRes placeholder: Int,
@@ -67,11 +69,17 @@ fun <D : DataClass<*, *>> DataClassList(
     ) {
         items(items) { dataClass ->
             Timber.v("$dataClass > Iterating...")
-            val downloadUrl = dataClass.downloadUrl
-            if (downloadUrl == null)
-                Timber.i("$dataClass > Could not load image since downloadUrl is null")
-            else
-                dataClass.DataClassItem(navController, placeholder, downloadUrl, fixedHeight)
+            val cacheImageFile = dataClass.cacheImageFile(context)
+            if (cacheImageFile.exists()) {
+                Timber.i("$dataClass > Loading image from cache ($cacheImageFile).")
+                dataClass.DataClassItem(navController, placeholder, cacheImageFile, fixedHeight)
+            } else {
+                val downloadUrl = dataClass.downloadUrl
+                if (downloadUrl == null)
+                    Timber.i("$dataClass > Could not load image since downloadUrl is null")
+                else
+                    dataClass.DataClassItem(navController, placeholder, downloadUrl, fixedHeight)
+            }
         }
     }
 }
@@ -83,7 +91,7 @@ private const val CARD_CORNER_RADIUS = 16
 fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.DataClassItem(
     navController: NavController,
     @DrawableRes placeholder: Int,
-    image: Uri,
+    image: Any,
     fixedHeight: Dp? = null
 ) {
     var imageRatio by remember { mutableStateOf(1f) }
