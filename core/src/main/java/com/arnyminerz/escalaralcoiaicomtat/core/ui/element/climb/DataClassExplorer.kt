@@ -31,7 +31,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.hasStorageUrls
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.animation.EnterAnimation
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.DataClassViewModel
-import com.arnyminerz.escalaralcoiaicomtat.ui.climb.DataClassList
 import timber.log.Timber
 
 @Composable
@@ -85,7 +84,8 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
             navController,
             items,
             if (viewModel.columnsPerRow % 2 == 0) R.drawable.ic_tall_placeholder else R.drawable.ic_wide_placeholder,
-            viewModel.columnsPerRow
+            viewModel.columnsPerRow,
+            viewModel.fixedHeight
         )
     }
 }
