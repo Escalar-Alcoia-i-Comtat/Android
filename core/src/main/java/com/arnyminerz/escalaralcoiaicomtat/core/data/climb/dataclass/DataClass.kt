@@ -703,6 +703,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     fun imageFile(context: Context): File = File(dataDir(context), "$namespace-$objectId.webp")
 
     /**
+     * Returns the File that represents the image of the DataClass in cache.
+     * @author Arnau Mora
+     * @date 20210724
+     * @param context The context to run from
+     * @return The path of the image file that can be downloaded
+     */
+    fun cacheImageFile(context: Context): File = File(context.cacheDir, "$namespace-$objectId.webp")
+
+    /**
      * Creates a dynamic link access for the DataClass
      * @author Arnau Mora
      * @since 20210521
