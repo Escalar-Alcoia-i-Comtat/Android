@@ -4,7 +4,6 @@ import androidx.appsearch.annotation.Document
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import org.json.JSONArray
-import java.util.Date
 
 @Document
 data class PathData(
@@ -60,7 +59,7 @@ data class PathData(
 
         return Path(
             objectId,
-            Date(timestamp),
+            timestamp,
             sketchId,
             displayName,
             grades,
