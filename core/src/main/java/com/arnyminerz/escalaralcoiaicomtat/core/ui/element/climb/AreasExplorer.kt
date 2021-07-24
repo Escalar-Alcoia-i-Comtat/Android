@@ -15,5 +15,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.AreasViewModel
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
 fun AreasExplorer(activity: Activity, navController: NavController) {
-    Explorer(activity, navController, dataClassViewModel = AreasViewModel::class.java)
+    Explorer(
+        activity,
+        navController,
+        dataClassViewModel = AreasViewModel::class.java,
+        listOf(activity.application)
+    )
 }

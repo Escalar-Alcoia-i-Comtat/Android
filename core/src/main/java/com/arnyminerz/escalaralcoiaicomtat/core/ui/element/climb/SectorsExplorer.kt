@@ -24,6 +24,6 @@ fun SectorsExplorer(
         activity,
         navController,
         dataClassViewModel = SectorsViewModel::class.java,
-        viewModelArguments = listOf(areaId, zoneId)
+        viewModelArguments = listOf(activity.application, areaId, zoneId)
     )
 }

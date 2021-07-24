@@ -15,5 +15,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.PassiveAreasViewMod
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
 fun PassiveAreasExplorer(activity: Activity, navController: NavController) {
-    Explorer(activity, navController, dataClassViewModel = PassiveAreasViewModel::class.java)
+    Explorer(
+        activity,
+        navController,
+        dataClassViewModel = PassiveAreasViewModel::class.java,
+        listOf(activity.application)
+    )
 }
