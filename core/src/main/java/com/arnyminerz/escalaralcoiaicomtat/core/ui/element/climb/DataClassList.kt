@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
@@ -36,7 +35,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.ItemTextBackground
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.ItemTextColor
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import timber.log.Timber
 
 @Composable
@@ -74,8 +72,6 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.AreaItem(
     @DrawableRes placeholder: Int,
     image: Uri
 ) {
-    val context = LocalContext.current
-
     var imageRatio by remember { mutableStateOf(1f) }
 
     Timber.v("$this > Composing $displayName...")
@@ -85,7 +81,6 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.AreaItem(
             .padding(8.dp)
             .clip(RoundedCornerShape(CARD_CORNER_RADIUS.dp))
             .clickable {
-                toast(context, "Clicked $displayName")
                 val path = this.metadata.documentPath
                 Timber.v("$this > Navigating to $path")
                 navController.navigate(path)
