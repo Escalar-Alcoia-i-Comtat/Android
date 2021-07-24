@@ -81,6 +81,7 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T>> Explorer(
         exit = slideOutHorizontally() + fadeOut(),
     ) {
         DataClassList(
+            activity,
             navController,
             items,
             if (viewModel.columnsPerRow % 2 == 0) R.drawable.ic_tall_placeholder else R.drawable.ic_wide_placeholder,
