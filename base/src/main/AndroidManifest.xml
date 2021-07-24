@@ -19,7 +19,7 @@
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
 
     <application
-        android:name=".shared.App"
+        android:name=".core.shared.App"
         android:allowBackup="true"
         android:allowClearUserData="true"
         android:directBootAware="true"
