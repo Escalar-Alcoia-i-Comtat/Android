@@ -241,7 +241,7 @@ fun MainView(activity: Activity, path: String? = null) {
 @Composable
 @ExperimentalAnimationApi
 fun SectorView(activity: Activity, areaId: String, zoneId: String, sectorId: String) {
-    val viewModel = SectorViewModel(areaId, zoneId, sectorId)
+    val viewModel = SectorViewModel(activity.application, areaId, zoneId, sectorId)
     val liveItems = viewModel.items
     val liveSector = viewModel.sector
     val sector: Sector? by liveSector.observeAsState(null)
