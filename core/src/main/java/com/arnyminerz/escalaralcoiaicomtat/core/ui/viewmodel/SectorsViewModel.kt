@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 
-import android.app.Application
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
@@ -10,12 +9,13 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class SectorsViewModel(
-    application: Application,
+    application: App,
     private val areaId: String,
     private val zoneId: String
 ) : DataClassViewModel<Sector>(application) {

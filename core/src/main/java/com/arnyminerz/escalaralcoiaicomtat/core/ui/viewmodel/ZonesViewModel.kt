@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 
-import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
@@ -8,11 +7,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class ZonesViewModel(application: Application, private val areaId: String) :
+class ZonesViewModel(application: App, private val areaId: String) :
     DataClassViewModel<Zone>(application) {
     override val columnsPerRow: Int = 2
 
