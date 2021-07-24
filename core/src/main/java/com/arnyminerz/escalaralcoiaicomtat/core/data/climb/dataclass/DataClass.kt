@@ -709,7 +709,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to run from
      * @return The path of the image file that can be downloaded
      */
-    fun cacheImageFile(context: Context): File = File(context.cacheDir, "$namespace-$objectId.webp")
+    fun cacheImageFile(context: Context): File = File(context.cacheDir, "$namespace-$objectId")
 
     /**
      * Creates a dynamic link access for the DataClass
@@ -822,11 +822,11 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             val bmp = readBitmap(downloadedImageFile)
             image(bmp)
         } else {
-            val tempFile = File(context.cacheDir, "dataClass_$objectId")
+            val cacheImage = cacheImageFile(context)
 
             val successListener = OnSuccessListener<FileDownloadTask.TaskSnapshot> {
                 Timber.v("Loaded image for $objectId. Decoding...")
-                val bitmap = readBitmap(tempFile)
+                val bitmap = readBitmap(cacheImage)
 
                 Timber.v("Image decoded, scaling...")
                 val scale = imageLoadParameters?.resultImageScale ?: 1f
@@ -842,12 +842,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 }
             }
 
-            if (tempFile.exists()) {
-                Timber.v("The image file has already been cached ($tempFile).")
+            if (cacheImage.exists()) {
+                Timber.v("The image file has already been cached ($cacheImage).")
                 successListener.onSuccess(null)
             } else
                 storage.getReferenceFromUrl(imageReferenceUrl)
-                    .getFile(tempFile)
+                    .getFile(cacheImage)
                     .addOnSuccessListener(successListener)
                     .addOnProgressListener { snapshot ->
                         val bytesCount = snapshot.bytesTransferred
@@ -856,6 +856,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     }
                     .addOnFailureListener { e ->
                         Timber.e(e, "Could not load DataClass ($objectId) image.")
+
                         image(null)
                     }
         }
