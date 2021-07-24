@@ -59,9 +59,10 @@ import kotlin.coroutines.suspendCoroutine
  */
 @MainThread
 fun loadAreas(
+    context: Context,
     firestore: FirebaseFirestore,
     storage: FirebaseStorage? = null,
-    context: Context? = null,
+    enableSearch: Boolean = false,
     scope: CoroutineScope = asyncCoroutineScope,
     @UiThread progressCallback: (current: Int, total: Int) -> Unit,
     @UiThread callback: () -> Unit
@@ -224,8 +225,13 @@ fun loadAreas(
             if (storage != null) {
                 Timber.v("Getting area download urls...")
                 for (area in areas) {
-                    Timber.v("A/$area > Getting download url...")
-                    area?.storageUrl(storage)
+                    val cacheImageFile = area.cacheImageFile(context)
+                    if (cacheImageFile.exists())
+                        Timber.v("A/$area > Won't load storage url since image is in cache ($cacheImageFile)")
+                    else {
+                        Timber.v("A/$area > Getting download url...")
+                        area?.storageUrl(storage)
+                    }
                 }
             }
 
@@ -234,7 +240,7 @@ fun loadAreas(
             Timber.v("Adding all areas to AREAS...")
             AREAS.addAll(areas)
 
-            if (context != null) {
+            if (enableSearch) {
                 Timber.v("Search > Initializing session future...")
                 val sessionFuture = LocalStorage.createSearchSession(
                     LocalStorage.SearchContext.Builder(context, "escalaralcoiaicomtat")
