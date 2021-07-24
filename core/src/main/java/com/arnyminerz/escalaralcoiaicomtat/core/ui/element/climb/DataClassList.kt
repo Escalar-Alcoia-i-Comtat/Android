@@ -58,7 +58,7 @@ fun <D : DataClass<*, *>> DataClassList(
             if (downloadUrl == null)
                 Timber.i("$dataClass > Could not load image since downloadUrl is null")
             else
-                dataClass.AreaItem(navController, placeholder, downloadUrl)
+                dataClass.DataClassItem(navController, placeholder, downloadUrl)
         }
     }
 }
@@ -67,7 +67,7 @@ private const val CARD_CORNER_RADIUS = 16
 
 @Composable
 @ExperimentalCoilApi
-fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.AreaItem(
+fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.DataClassItem(
     navController: NavController,
     @DrawableRes placeholder: Int,
     image: Uri
