@@ -844,24 +844,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
-     * Fetches the image [Bitmap] from the DataClass.
-     * @author Arnau Mora
-     * @since 20210721
-     * @param context The context the app is running on.
-     * @param storage The [FirebaseStorage] reference for loading the image file.
-     */
-    suspend fun image(
-        context: Context,
-        storage: FirebaseStorage
-    ) {
-        suspendCoroutine<Bitmap?> { cont ->
-            image(context, storage) {
-                cont.resume(it)
-            }
-        }
-    }
-
-    /**
      * Loads the image of the Data Class
      * @author Arnau Mora
      * @date 2020/09/11
