@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
@@ -27,16 +27,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.ItemTextBackground
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.ItemTextColor
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
 /**
@@ -61,20 +67,50 @@ fun <D : DataClass<*, *>> DataClassList(
     columnsPerRow: Int = 1,
     fixedHeight: Dp? = null,
 ) {
-    Timber.v("Loading DataClass list (${items.size} items)...")
+    val itemsCount = items.size
+    Timber.v("Loading DataClass list ($itemsCount items)...")
     val state = rememberLazyListState()
     LazyVerticalGrid(
         state = state,
         cells = GridCells.Fixed(columnsPerRow)
     ) {
-        items(items) { dataClass ->
+        items(itemsCount) { index ->
+            val dataClass = items[index]
+            Timber.v("$dataClass > Loading placeholder...")
+            val drawable = ContextCompat.getDrawable(context, placeholder)
+            val placeholderBitmap = drawable!!.toBitmap()
+            val placeholderImageBitmap = placeholderBitmap.asImageBitmap()
+            var image by remember { mutableStateOf(placeholderImageBitmap) }
+
             Timber.v("$dataClass > Iterating...")
             val cacheImageFile = dataClass.cacheImageFile(context)
             if (cacheImageFile.exists()) {
                 Timber.i("$dataClass > Loading image from cache ($cacheImageFile).")
-                dataClass.DataClassItem(navController, placeholder, cacheImageFile, fixedHeight)
-            } else
-                Text(text = "$dataClass doesn't have an image")
+                val bitmap = BitmapFactory.decodeFile(cacheImageFile.path)
+                image = bitmap.asImageBitmap()
+            } else {
+                Timber.i("$dataClass > Loading image from Firebase...")
+                val storage = Firebase.storage
+                storage
+                    .getReferenceFromUrl(dataClass.imageReferenceUrl)
+                    .stream
+                    .addOnSuccessListener { snapshot ->
+                        Timber.v("$dataClass > Finished loading image.")
+                        doAsync {
+                            val bitmap = BitmapFactory.decodeStream(snapshot.stream)
+                            image = bitmap.asImageBitmap()
+                        }
+                    }
+                    .addOnFailureListener { error ->
+                        Timber.e(error, "$dataClass > Could not load image.")
+                    }
+                    .addOnProgressListener { snapshot ->
+                        val progress = snapshot.bytesTransferred
+                        val total = snapshot.totalByteCount
+                        Timber.v("$dataClass > Loading image... $progress/$total")
+                    }
+            }
+            dataClass.DataClassItem(navController, image, fixedHeight)
         }
     }
 }
@@ -85,11 +121,10 @@ private const val CARD_CORNER_RADIUS = 16
 @ExperimentalCoilApi
 fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.DataClassItem(
     navController: NavController,
-    @DrawableRes placeholder: Int,
-    image: Any,
+    image: ImageBitmap,
     fixedHeight: Dp? = null
 ) {
-    var imageRatio by remember { mutableStateOf(1f) }
+    val imageRatio = image.width.toFloat() / image.height
 
     val imageModifiers = if (fixedHeight != null) {
         Modifier.requiredHeight(fixedHeight)
@@ -99,7 +134,6 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.DataClassItem(
         .fillMaxWidth()
 
     Timber.v("$this > Composing $displayName...")
-    Timber.v("$this > Url: $image")
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -112,18 +146,7 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.DataClassItem(
     ) {
         Box {
             Image(
-                painter = rememberImagePainter(
-                    data = image,
-                    onExecute = { _, current ->
-                        val imageSize = current.size
-                        imageRatio = imageSize.width / imageSize.height
-
-                        true
-                    },
-                    builder = {
-                        placeholder(placeholder)
-                    }
-                ),
+                image,
                 contentScale = ContentScale.Crop,
                 contentDescription = "$displayName image",
                 modifier = imageModifiers
