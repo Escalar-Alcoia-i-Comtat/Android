@@ -9,9 +9,5 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 class PassiveAreasViewModel<A : Activity>(activity: A) : DataClassViewModel<Area, A>(activity) {
     override val columnsPerRow: Int = 1
 
-    override val items: LiveData<List<Area>> = liveData {
-        for (area in AREAS)
-            area.image(context, storage)
-        emit(AREAS)
-    }
+    override val items: LiveData<List<Area>> = liveData { emit(AREAS) }
 }
