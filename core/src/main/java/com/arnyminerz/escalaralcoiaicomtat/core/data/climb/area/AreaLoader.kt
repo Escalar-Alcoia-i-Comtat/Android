@@ -106,12 +106,16 @@ fun loadAreas(
 
             Timber.v("Getting path documents...")
             val pathDocuments = pathsSnapshot.documents
+                .sortedBy { snapshot -> snapshot.getString("sketchId")?.toInt() }
             Timber.v("Getting sector documents...")
             val sectorDocuments = sectorsSnapshot.documents
+                .sortedBy { snapshot -> snapshot.getString("displayName") }
             Timber.v("Getting zone documents...")
             val zoneDocuments = zonesSnapshot.documents
+                .sortedBy { snapshot -> snapshot.getString("displayName") }
             Timber.v("Getting area documents...")
             val areaDocuments = areasSnapshot.documents
+                .sortedBy { snapshot -> snapshot.getString("displayName") }
 
             Timber.v("Counting paths...")
             val pathsCount = pathDocuments.size
@@ -246,7 +250,7 @@ fun loadAreas(
 
             Timber.v("Finished iterating documents.")
             Timber.v("Ordering areas...")
-            val areas = areasCache.values.sortedBy { area -> area.displayName }
+            val areas = areasCache.values
 
             Timber.v("Clearing AREAS...")
             AREAS.clear()
