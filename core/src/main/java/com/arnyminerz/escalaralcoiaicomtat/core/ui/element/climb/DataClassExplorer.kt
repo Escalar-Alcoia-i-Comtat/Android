@@ -17,13 +17,9 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.arnyminerz.escalaralcoiaicomtat.core.R
@@ -58,11 +54,6 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T, *>> Explorer(
         .newInstance(*arguments.toTypedArray())
     val liveData = viewModel.items
     val items: List<T> by liveData.observeAsState(listOf())
-    var finishedLoading by remember { mutableStateOf(false) }
-
-    liveData.observe(activity as LifecycleOwner) {
-        finishedLoading = it.isNotEmpty()
-    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -70,24 +61,25 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T, *>> Explorer(
             .fillMaxWidth()
             .padding(top = 24.dp)
     ) {
-        EnterAnimation(visible = !finishedLoading, modifier = Modifier.size(52.dp)) {
+        EnterAnimation(visible = items.isEmpty(), modifier = Modifier.size(52.dp)) {
             CircularProgressIndicator()
         }
     }
     AnimatedVisibility(
-        visible = finishedLoading,
+        visible = items.isNotEmpty(),
         enter = slideInHorizontally(
             initialOffsetX = { -40 }
         ) + fadeIn(initialAlpha = 0.7f),
         exit = slideOutHorizontally() + fadeOut(),
     ) {
-        DataClassList(
-            activity,
-            navController,
-            items,
-            if (viewModel.columnsPerRow % 2 == 0) R.drawable.ic_tall_placeholder else R.drawable.ic_wide_placeholder,
-            viewModel.columnsPerRow,
-            viewModel.fixedHeight
-        )
+        if (items.isNotEmpty())
+            DataClassList(
+                activity,
+                navController,
+                items,
+                if (viewModel.columnsPerRow % 2 == 0) R.drawable.ic_tall_placeholder else R.drawable.ic_wide_placeholder,
+                viewModel.columnsPerRow,
+                viewModel.fixedHeight
+            )
     }
 }
