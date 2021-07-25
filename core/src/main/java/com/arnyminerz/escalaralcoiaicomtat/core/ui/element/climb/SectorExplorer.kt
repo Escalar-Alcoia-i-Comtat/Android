@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 
 import android.app.Activity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Text
@@ -12,6 +11,7 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.ZoomableImage
 import timber.log.Timber
 
 @Composable
@@ -27,7 +27,7 @@ fun SectorExplorer(
     if (sector == null)
         Text(text = "Could not load sector $sectorId")
     else {
-        Image(
+        ZoomableImage(
             painter = rememberImagePainter(
                 data = sector.cacheImageFile(activity),
                 onExecute = { previous, current ->
@@ -35,7 +35,6 @@ fun SectorExplorer(
                     true
                 }
             ),
-            "",
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(.5f)
