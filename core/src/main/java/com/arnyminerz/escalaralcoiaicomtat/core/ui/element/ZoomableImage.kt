@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.ui.element
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,20 +19,24 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.consumeAllChanges
+import androidx.compose.ui.input.pointer.pointerInput
 
 @Composable
 fun ZoomableImage(
     painter: Painter,
     modifier: Modifier = Modifier,
     minScale: Float = 0.7f,
-    maxScale: Float = 4f
+    maxScale: Float = 4f,
+    enableRotation: Boolean = false
 ) {
     var scale by remember { mutableStateOf(1f) }
     var rotation by remember { mutableStateOf(0f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     val state = rememberTransformableState { zoomChange, offsetChange, rotationChange ->
         scale *= zoomChange
-        rotation += rotationChange
+        if (enableRotation)
+            rotation += rotationChange
         offset += offsetChange
     }
 
@@ -42,7 +47,6 @@ fun ZoomableImage(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .background(Color.Black)
-
     ) {
         Image(
             painter = painter,
@@ -57,6 +61,12 @@ fun ZoomableImage(
                     translationY = offset.y
                 )
                 .transformable(state = state)
+                .pointerInput(Unit) {
+                    detectDragGestures { change, dragAmount ->
+                        change.consumeAllChanges()
+                        offset += dragAmount
+                    }
+                }
         )
     }
 }
