@@ -76,6 +76,7 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.navigation.sector
 import com.arnyminerz.escalaralcoiaicomtat.ui.navigation.sectors
 import com.arnyminerz.escalaralcoiaicomtat.ui.navigation.zones
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
+import com.arnyminerz.escalaralcoiaicomtat.utils.searchNavigation
 import com.google.android.gms.instantapps.InstantApps
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.ktx.crashlytics
@@ -99,7 +100,7 @@ class MainActivity : ComponentActivity() {
             EscalarAlcoiaIComtatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    MainView(this, data?.path)
+                    MainView(this, data)
                 }
             }
         }
@@ -129,7 +130,7 @@ class MainActivity : ComponentActivity() {
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
-fun MainView(activity: Activity, path: String? = null) {
+fun MainView(activity: Activity, navigateUri: Uri? = null) {
     val navController = rememberNavController()
 
     var expanded by remember { mutableStateOf(false) }
@@ -161,12 +162,21 @@ fun MainView(activity: Activity, path: String? = null) {
                     sectors(activity, navController)
                     sector(activity)
 
-                    if (path != null && path.isNotEmpty())
+                    if (navigateUri != null)
                         try {
-                            navController.navigate(path)
-                        } catch (e: IllegalArgumentException) {
-                            Timber.e(e, "Could not navigate to $path")
+                            val path = navigateUri.path
+                            if (path != null && path.isNotEmpty()) {
+                                Timber.v("Navigating to: $path")
+                                navController.navigate(path)
+                            }
+                        } catch (e: NullPointerException) {
+                            try {
+                                navController.searchNavigation(navigateUri)
+                            } catch (e: IllegalArgumentException) {
+                                Timber.e(e, "Could not navigate to $navigateUri")
+                            }
                         }
+                    else Timber.v("The navigateUri is null, won't navigate anywhere else.")
                 }
             }
         },
