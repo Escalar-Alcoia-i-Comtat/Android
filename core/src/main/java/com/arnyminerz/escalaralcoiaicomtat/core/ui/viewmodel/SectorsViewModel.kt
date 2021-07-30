@@ -5,14 +5,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import timber.log.Timber
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class SectorsViewModel<A : Activity>(
     activity: A,
@@ -25,13 +22,9 @@ class SectorsViewModel<A : Activity>(
 
     override val items: LiveData<List<Sector>> = liveData {
         if (AREAS.isEmpty())
-            suspendCoroutine<List<Area>> { cont ->
-                loadAreas(context as Activity, firestore, progressCallback = { current, total ->
-                    Timber.i("Loading areas: $current/$total")
-                }) {
-                    cont.resume(AREAS)
-                }
-            }
+            loadAreas(context, firestore, progressCallback = { current, total ->
+                Timber.i("Loading areas: $current/$total")
+            })
         val sectors = AREAS[areaId]?.get(zoneId)?.getChildren(context, storage)
         if (sectors != null) {
             for (sector in sectors)

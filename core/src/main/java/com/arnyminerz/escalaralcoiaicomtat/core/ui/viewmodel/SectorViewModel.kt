@@ -4,7 +4,6 @@ import android.app.Activity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
@@ -14,8 +13,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class SectorViewModel(
     activity: Activity,
@@ -31,13 +28,9 @@ class SectorViewModel(
 
     val sector: LiveData<Sector?> = liveData {
         if (AREAS.isEmpty())
-            suspendCoroutine<List<Area>> { cont ->
-                loadAreas(activity, firestore, progressCallback = { current, total ->
-                    Timber.i("Loading areas: $current/$total")
-                }) {
-                    cont.resume(AREAS)
-                }
-            }
+            loadAreas(activity, firestore, progressCallback = { current, total ->
+                Timber.i("Loading areas: $current/$total")
+            })
         emit(innerSector)
     }
 
