@@ -44,7 +44,7 @@ import timber.log.Timber
 suspend fun loadAreas(
     context: Context,
     firestore: FirebaseFirestore,
-    enableSearch: Boolean = false,
+    enableSearch: Boolean = true,
     @UiThread progressCallback: (current: Int, total: Int) -> Unit
 ) {
     val trace = Firebase.performance.newTrace("loadAreasTrace")
@@ -244,6 +244,7 @@ suspend fun loadAreas(
         if (enableSearch) {
             Timber.v("Search > Initializing session future...")
             val sessionFuture = LocalStorage.createSearchSession(
+                // TODO: Database name should not be hardcoded
                 LocalStorage.SearchContext.Builder(context, "escalaralcoiaicomtat")
                     .build()
             )
