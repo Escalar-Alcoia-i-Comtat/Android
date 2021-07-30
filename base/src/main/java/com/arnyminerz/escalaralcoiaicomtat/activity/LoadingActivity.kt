@@ -108,7 +108,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         doAsync { preLoad() }
     }
 
-    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
+    override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
+        super.onStateChangeAsync(state)
         load()
     }
 
@@ -274,17 +275,17 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             Firebase.auth.removeAuthStateListener((application as App).authStateListener)
         }
 
-        uiContext {
-            Timber.v("Finished preparing App...")
-            load()
-        }
+        Timber.v("Finished preparing App...")
+        load()
     }
 
-    @UiThread
-    private fun load() {
+    @WorkerThread
+    private suspend fun load() {
         val waitingForEmailConfirmation = PREF_WAITING_EMAIL_CONFIRMATION.get()
         if (waitingForEmailConfirmation) {
-            launch(EmailConfirmationActivity::class.java)
+            uiContext {
+                launch(EmailConfirmationActivity::class.java)
+            }
             return
         }
 
@@ -308,45 +309,49 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                     visibility(binding.progressBar, true)
                     binding.progressTextView.setText(R.string.status_storing)
                 }
-            }) {
-                if (AREAS.size > 0) {
-                    if (deepLinkPath != null) {
+            })
+            if (AREAS.size > 0) {
+                if (deepLinkPath != null) {
+                    uiContext {
                         binding.progressTextView.setText(R.string.status_loading_deep_link)
                         binding.progressBar.visibility(false)
                         binding.progressBar.isIndeterminate = true
                         binding.progressBar.visibility(true)
+                    }
 
-                        doAsync {
-                            val intent =
-                                DataClass.getIntent(this@LoadingActivity, deepLinkPath!!, storage)
-                            uiContext {
-                                if (intent != null)
-                                    startActivity(intent)
-                                /*else if (BuildConfig.DEBUG)
-                                    launch(SectorActivity::class.java) {
-                                        putExtra(EXTRA_AREA, "WWQME983XhriXVhtVxFu")
-                                        putExtra(EXTRA_ZONE, "LtYZWlzTPwqHsWbYIDTt")
-                                        putExtra(EXTRA_SECTOR_COUNT, 15)
-                                        putExtra(EXTRA_SECTOR_INDEX, 11)
-                                    }*/
-                                else
-                                    launch(MainActivity::class.java)
-                            }
-                        }
-                    }/* else if (BuildConfig.DEBUG)
+                    val intent =
+                        DataClass.getIntent(this@LoadingActivity, deepLinkPath!!, storage)
+                    uiContext {
+                        if (intent != null)
+                            startActivity(intent)
+                        /*else if (BuildConfig.DEBUG)
+                            launch(SectorActivity::class.java) {
+                                putExtra(EXTRA_AREA, "WWQME983XhriXVhtVxFu")
+                                putExtra(EXTRA_ZONE, "LtYZWlzTPwqHsWbYIDTt")
+                                putExtra(EXTRA_SECTOR_COUNT, 15)
+                                putExtra(EXTRA_SECTOR_INDEX, 11)
+                            }*/
+                        else
+                            launch(MainActivity::class.java)
+                    }
+                }/* else if (BuildConfig.DEBUG)
                         launch(SectorActivity::class.java) {
                             putExtra(EXTRA_AREA, "WWQME983XhriXVhtVxFu")
                             putExtra(EXTRA_ZONE, "LtYZWlzTPwqHsWbYIDTt")
                             putExtra(EXTRA_SECTOR_COUNT, 9)
                             putExtra(EXTRA_SECTOR_INDEX, 6)
                         }*/
-                    else
-                        launch(MainActivity::class.java)
-                } else if (!appNetworkState.hasInternet)
+                else uiContext {
+                    launch(MainActivity::class.java)
+                }
+            } else if (!appNetworkState.hasInternet)
+                uiContext {
                     noInternetAccess()
-            }
+                }
         } catch (_: NoInternetAccessException) {
-            noInternetAccess()
+            uiContext {
+                noInternetAccess()
+            }
         }
     }
 }
