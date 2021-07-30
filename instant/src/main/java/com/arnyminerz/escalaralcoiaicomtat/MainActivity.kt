@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.FloatingActionButtonDefaults
@@ -73,17 +72,18 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.AreasExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.SectorsExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.ZonesExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorViewModel
+import com.arnyminerz.escalaralcoiaicomtat.shared.APP_TYPE_PROP
+import com.arnyminerz.escalaralcoiaicomtat.shared.STATUS_INSTALLED
+import com.arnyminerz.escalaralcoiaicomtat.shared.STATUS_INSTANT
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.Chip
+import com.arnyminerz.escalaralcoiaicomtat.ui.elements.LoadingIndicator
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.ZoomableImage
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
 import com.google.android.gms.instantapps.InstantApps
 import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
-
-const val STATUS_INSTALLED = "installed"
-const val STATUS_INSTANT = "instant"
-const val ANALYTICS_USER_PROP = "app_type"
 
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
