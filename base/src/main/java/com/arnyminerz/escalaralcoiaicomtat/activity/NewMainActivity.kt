@@ -57,9 +57,7 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.firebase.dataCollectionSetUp
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.animation.EnterAnimation
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Backdrop
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.PassiveAreasExplorer
@@ -70,7 +68,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import timber.log.Timber
 
 @ExperimentalFoundationApi
 @ExperimentalCoilApi
@@ -88,12 +85,13 @@ class NewMainActivity : AppCompatActivity() {
             var loadingProgress by remember { mutableStateOf(0f) }
             var areas by remember { mutableStateOf(listOf<Area>()) }
 
-            loadAreas(this, firestore, progressCallback = { current, total ->
-                loadingProgress = current.toFloat() / total.toFloat()
-                Timber.i("Loading areas: $current/$total ($loadingProgress)")
+            // TODO: Create a view holder with an observer state for the loadAreas coroutine
+            /**loadAreas(this, firestore, progressCallback = { current, total ->
+            loadingProgress = current.toFloat() / total.toFloat()
+            Timber.i("Loading areas: $current/$total ($loadingProgress)")
             }) {
-                areas = AREAS
-            }
+            areas = AREAS
+            }*/
 
             EscalarAlcoiaIComtatTheme {
                 // A surface container using the 'background' color from the theme
