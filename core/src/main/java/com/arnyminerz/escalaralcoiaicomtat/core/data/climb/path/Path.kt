@@ -60,10 +60,9 @@ class Path internal constructor(
      * Creates a new [Path] from the data of a [DocumentSnapshot].
      * @author Arnau Mora
      * @since 20210411
-     * @param activity The [Activity] that will be keeping track of the blocking status.
      * @param data The object to get data from
      */
-    constructor(activity: Activity, data: DocumentSnapshot) : this(
+    constructor(data: DocumentSnapshot) : this(
         data.id,
         data.getDate("created")!!.time,
         data.getString("sketchId")?.toLongOrNull() ?: 0L,
@@ -130,18 +129,6 @@ class Path internal constructor(
         val rebuilders = pathData?.get("rebuiltBy") as List<*>?
         val d = rebuilders?.joinToString(separator = ", ")
         rebuiltBy = d
-
-        data.reference.addSnapshotListener(activity) { snapshot, error ->
-            Timber.v("$this > Got snapshot update!")
-            if (error != null)
-                Timber.e(error, "$this > Detected an error in a snapshot.")
-            else if (snapshot != null && snapshot.exists()) {
-                Timber.v("$this > Processing blocked status...")
-                val blocked = snapshot.getString("blocked")
-                val blockingType = BlockingType.find(blocked)
-                this.blockingType = blockingType
-            }
-        }
     }
 
     override fun toString(): String = displayName
@@ -203,16 +190,19 @@ class Path internal constructor(
      * @author Arnau Mora
      * @since 20210719
      * @param firestore The [FirebaseFirestore] reference for fetching updates.
+     * @param activity The [Activity] to attach the listener to. When the activity is destroyed,
+     * the observer will also be removed.
      * @param listener This will get called when a new completed path is added.
      * @return The listener registration for cancelling the listener when needed.
      */
     fun observeCompletions(
         firestore: FirebaseFirestore,
+        activity: Activity,
         @UiThread listener: (data: MarkedDataInt) -> Unit
     ) =
         firestore.document(documentPath)
             .collection("Completions")
-            .addSnapshotListener { value, error ->
+            .addSnapshotListener(activity) { value, error ->
                 if (error != null)
                     Timber.e(error, "An error occurred while adding a new snapshot.")
                 else if (value != null) {
@@ -225,6 +215,35 @@ class Path internal constructor(
                                 uiContext { listener(markedDataInt) }
                         }
                     }
+                }
+            }
+
+    /**
+     * Observes the block status of the path, and notifies the app whenever it changes.
+     * @author Arnau Mora
+     * @since 20210730
+     * @param firestore The [FirebaseFirestore] reference to fetch the updates from the server.
+     * @param activity The [Activity] to attach the listener to. When the activity is destroyed,
+     * the observer will also be removed.
+     * @param listener This will get called when a new completed path is added.
+     * @return The listener registration for cancelling the listener when needed.
+     */
+    fun observeBlockStatus(
+        firestore: FirebaseFirestore,
+        activity: Activity,
+        @UiThread listener: (blocking: BlockingType) -> Unit
+    ) =
+        firestore.document(documentPath)
+            .addSnapshotListener(activity) { snapshot, error ->
+                Timber.v("$this > Got snapshot update!")
+                if (error != null)
+                    Timber.e(error, "$this > Detected an error in a snapshot.")
+                else if (snapshot != null && snapshot.exists()) {
+                    Timber.v("$this > Processing blocked status...")
+                    val blocked = snapshot.getString("blocked")
+                    val blockingType = BlockingType.find(blocked)
+                    this.blockingType = blockingType
+                    listener(blockingType)
                 }
             }
 
