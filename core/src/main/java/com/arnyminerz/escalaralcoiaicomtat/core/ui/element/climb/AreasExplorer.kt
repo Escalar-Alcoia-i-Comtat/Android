@@ -18,7 +18,6 @@ fun AreasExplorer(activity: Activity, navController: NavController) {
     Explorer(
         activity,
         navController,
-        dataClassViewModel = AreasViewModel::class.java,
-        listOf(Activity::class.java to activity)
+        AreasViewModel(activity)
     )
 }

@@ -59,8 +59,7 @@ import timber.log.Timber
 @Composable
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
-fun <D : DataClass<*, *>> DataClassList(
-    context: Context,
+fun <D : DataClass<*, *>> Context.DataClassList(
     navController: NavController,
     items: List<D>,
     @DrawableRes placeholder: Int,
@@ -77,13 +76,13 @@ fun <D : DataClass<*, *>> DataClassList(
         items(itemsCount) { index ->
             val dataClass = items[index]
             Timber.v("$dataClass > Loading placeholder...")
-            val drawable = ContextCompat.getDrawable(context, placeholder)
+            val drawable = ContextCompat.getDrawable(this@DataClassList, placeholder)
             val placeholderBitmap = drawable!!.toBitmap()
             val placeholderImageBitmap = placeholderBitmap.asImageBitmap()
             var image by remember { mutableStateOf(placeholderImageBitmap) }
 
             Timber.v("$dataClass > Iterating...")
-            val cacheImageFile = dataClass.cacheImageFile(context)
+            val cacheImageFile = dataClass.cacheImageFile(this@DataClassList)
             if (cacheImageFile.exists()) {
                 Timber.i("$dataClass > Loading image from cache ($cacheImageFile).")
                 val bitmap = BitmapFactory.decodeFile(cacheImageFile.path)

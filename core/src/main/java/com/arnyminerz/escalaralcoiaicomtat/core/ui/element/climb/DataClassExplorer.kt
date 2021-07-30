@@ -1,6 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 
-import android.app.Activity
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
@@ -26,7 +26,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.animation.EnterAnimation
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.DataClassViewModel
-import timber.log.Timber
 
 @Composable
 @ExperimentalMaterialApi
@@ -34,24 +33,10 @@ import timber.log.Timber
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
 fun <T : DataClass<*, *>, V : DataClassViewModel<T, *>> Explorer(
-    activity: Activity,
+    context: Context,
     navController: NavController,
-    dataClassViewModel: Class<V>,
-    viewModelArguments: List<Pair<Class<*>, Any?>> = listOf()
+    viewModel: V,
 ) {
-    val types = arrayListOf<Class<*>>()
-    val arguments = arrayListOf<Any?>()
-    for (argument in viewModelArguments) {
-        types.add(argument.first)
-        arguments.add(argument.second)
-    }
-
-    Timber.v("Exploring ViewModel named ${dataClassViewModel.name}")
-    Timber.v("ViewModel args: $viewModelArguments ($types)")
-
-    val viewModel = dataClassViewModel
-        .getConstructor(*types.toTypedArray())
-        .newInstance(*arguments.toTypedArray())
     val liveData = viewModel.items
     val items: List<T> by liveData.observeAsState(listOf())
 
@@ -73,11 +58,12 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T, *>> Explorer(
         exit = slideOutHorizontally() + fadeOut(),
     ) {
         if (items.isNotEmpty())
-            DataClassList(
-                activity,
+            context.DataClassList(
                 navController,
                 items,
-                if (viewModel.columnsPerRow % 2 == 0) R.drawable.ic_tall_placeholder else R.drawable.ic_wide_placeholder,
+                if (viewModel.columnsPerRow % 2 == 0)
+                    R.drawable.ic_tall_placeholder
+                else R.drawable.ic_wide_placeholder,
                 viewModel.columnsPerRow,
                 viewModel.fixedHeight
             )
