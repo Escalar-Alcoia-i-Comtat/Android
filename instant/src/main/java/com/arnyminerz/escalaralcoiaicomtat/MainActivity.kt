@@ -115,14 +115,15 @@ class MainActivity : ComponentActivity() {
      */
     private fun instantInfoSetup() {
         val analytics = Firebase.analytics
+        val crashlytics = Firebase.crashlytics
 
-        analytics.setUserProperty(
-            ANALYTICS_USER_PROP,
-            if (InstantApps.getPackageManagerCompat(this).isInstantApp)
-                STATUS_INSTANT
-            else
-                STATUS_INSTALLED
-        )
+        val isInstant = if (InstantApps.getPackageManagerCompat(this).isInstantApp)
+            STATUS_INSTANT
+        else
+            STATUS_INSTALLED
+
+        crashlytics.setCustomKey(APP_TYPE_PROP, isInstant)
+        analytics.setUserProperty(APP_TYPE_PROP, isInstant)
     }
 }
 
@@ -241,7 +242,7 @@ fun MainView(activity: Activity, path: String? = null) {
 @Composable
 @ExperimentalAnimationApi
 fun SectorView(activity: Activity, areaId: String, zoneId: String, sectorId: String) {
-    val viewModel = SectorViewModel(activity.application, areaId, zoneId, sectorId)
+    val viewModel = SectorViewModel(activity, areaId, zoneId, sectorId)
     val liveItems = viewModel.items
     val liveSector = viewModel.sector
     val sector: Sector? by liveSector.observeAsState(null)
@@ -252,16 +253,7 @@ fun SectorView(activity: Activity, areaId: String, zoneId: String, sectorId: Str
 
     liveItems.observe(activity as LifecycleOwner) { isLoading = it.isEmpty() }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 24.dp)
-    ) {
-        AnimatedVisibility(visible = isLoading, modifier = Modifier.size(52.dp)) {
-            CircularProgressIndicator()
-        }
-    }
+    LoadingIndicator(isLoading)
 
     Column {
         if (sector != null) {
