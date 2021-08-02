@@ -7,11 +7,13 @@ import androidx.appsearch.exceptions.AppSearchException
 import androidx.appsearch.localstorage.LocalStorage
 import androidx.navigation.NavController
 import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import timber.log.Timber
 
 /**
@@ -19,12 +21,9 @@ import timber.log.Timber
  * @author Arnau Mora
  * @since 20210730
  * @param uri The path to navigate to.
- * @throws IllegalArgumentException If the [uri] specified is not valid.
  */
-@Throws(IllegalArgumentException::class)
 fun NavController.searchNavigation(uri: Uri) {
-    val strPath =
-        uri.path ?: throw IllegalArgumentException("The path specified does not have a child.")
+    val strPath = uri.path ?: return
     val path = strPath.substring(1) // This removes the initial "/"
     if (path.isEmpty() || path == "imatge-inici.html" || path == "inici.html")
         return // Just load the Areas section that is selected by default
@@ -38,7 +37,12 @@ fun NavController.searchNavigation(uri: Uri) {
         val session = sessionFuture.await()
         try {
             Timber.i("Searching for \"$uri\"")
-            val searchResults = session.search(uri.toString(), SearchSpec.Builder().build())
+            val searchResults = session.search(
+                uri.toString(),
+                SearchSpec.Builder()
+                    .addFilterPackageNames(BuildConfig.APPLICATION_ID)
+                    .build()
+            )
             val searchPage = searchResults.nextPage.await()
             if (searchPage.isEmpty())
                 Timber.w("Could not navigate to $uri. Could not find any results.")
@@ -58,8 +62,10 @@ fun NavController.searchNavigation(uri: Uri) {
                 else
                     try {
                         Timber.v("Navigating for $documentPath")
-                        navigate(documentPath)
+                        uiContext { navigate(documentPath) }
                     } catch (e: NullPointerException) {
+                        Timber.e(e, "Could not navigate to $documentPath.")
+                    } catch (e: IllegalArgumentException) {
                         Timber.e(e, "Could not navigate to $documentPath.")
                     }
             }
