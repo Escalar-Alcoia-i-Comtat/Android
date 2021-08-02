@@ -96,7 +96,14 @@ fun <D : DataClass<*, *>> Context.DataClassList(
                     .addOnSuccessListener { snapshot ->
                         Timber.v("$dataClass > Finished loading image.")
                         doAsync {
-                            val bitmap = BitmapFactory.decodeStream(snapshot.stream)
+                            Timber.v("$dataClass > Opening output stream...")
+                            val outputStream = cacheImageFile.outputStream()
+                            val stream = snapshot.stream
+                            Timber.v("$dataClass > Storing image to cache ($cacheImageFile)...")
+                            outputStream.use { stream.copyTo(it) }
+                            Timber.v("$dataClass > Decoding image stream...")
+                            val bitmap = BitmapFactory.decodeFile(cacheImageFile.path)
+                            Timber.v("$dataClass > Updating image...")
                             image = bitmap.asImageBitmap()
                         }
                     }
