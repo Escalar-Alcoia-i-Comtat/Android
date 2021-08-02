@@ -75,19 +75,22 @@ fun <D : DataClass<*, *>> Context.DataClassList(
     ) {
         items(itemsCount) { index ->
             val dataClass = items[index]
-            Timber.v("$dataClass > Loading placeholder...")
-            val drawable = ContextCompat.getDrawable(this@DataClassList, placeholder)
-            val placeholderBitmap = drawable!!.toBitmap()
-            val placeholderImageBitmap = placeholderBitmap.asImageBitmap()
-            var image by remember { mutableStateOf(placeholderImageBitmap) }
-
-            Timber.v("$dataClass > Iterating...")
             val cacheImageFile = dataClass.cacheImageFile(this@DataClassList)
-            if (cacheImageFile.exists()) {
+
+            Timber.v("$dataClass > Loading placeholder...")
+            val defaultImage: ImageBitmap = if (cacheImageFile.exists()) {
                 Timber.i("$dataClass > Loading image from cache ($cacheImageFile).")
                 val bitmap = BitmapFactory.decodeFile(cacheImageFile.path)
-                image = bitmap.asImageBitmap()
+                bitmap.asImageBitmap()
             } else {
+                val drawable = ContextCompat.getDrawable(this@DataClassList, placeholder)
+                val placeholderBitmap = drawable!!.toBitmap()
+                placeholderBitmap.asImageBitmap()
+            }
+            var image by remember { mutableStateOf(defaultImage) }
+
+            Timber.v("$dataClass > Iterating...")
+            if (!cacheImageFile.exists()) {
                 Timber.i("$dataClass > Loading image from Firebase...")
                 val storage = Firebase.storage
                 storage
