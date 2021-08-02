@@ -15,7 +15,7 @@ class AreasViewModel<A : Activity>(activity: A) : DataClassViewModel<Area, A>(ac
     override val items: LiveData<List<Area>> = liveData {
         if (AREAS.isEmpty()) {
             val application = (context as? Activity)?.application ?: context as Application
-            loadAreas(application, firestore, progressCallback = { current, total ->
+            firestore.loadAreas(application, progressCallback = { current, total ->
                 Timber.i("Loading areas: $current/$total")
             })
         }
