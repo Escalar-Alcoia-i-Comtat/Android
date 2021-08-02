@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
 import androidx.appsearch.annotation.Document
+import androidx.appsearch.app.AppSearchSchema
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import org.json.JSONArray
@@ -10,7 +11,7 @@ data class PathData(
     @Document.Id var objectId: String,
     @Document.CreationTimestampMillis var timestamp: Long,
     @Document.LongProperty var sketchId: Long,
-    @Document.StringProperty var displayName: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var displayName: String,
     @Document.StringProperty var grades: String,
     @Document.StringProperty var heights: String,
     @Document.StringProperty var endings: String,
@@ -28,10 +29,10 @@ data class PathData(
     @Document.BooleanProperty val pitonRequired: Boolean,
     @Document.BooleanProperty val nailRequired: Boolean,
     @Document.StringProperty var description: String,
-    @Document.StringProperty var builtBy: String,
-    @Document.StringProperty var rebuiltBy: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var builtBy: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var rebuiltBy: String,
     @Document.BooleanProperty var downloaded: Boolean,
-    @Document.StringProperty var documentPath: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var documentPath: String,
 ) {
     @Document.Namespace
     var namespace: String = Path.NAMESPACE

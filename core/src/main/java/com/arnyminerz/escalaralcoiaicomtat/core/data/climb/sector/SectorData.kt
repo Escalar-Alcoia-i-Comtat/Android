@@ -1,12 +1,13 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector
 
 import androidx.appsearch.annotation.Document
+import androidx.appsearch.app.AppSearchSchema
 import com.google.android.gms.maps.model.LatLng
 
 @Document
 data class SectorData(
     @Document.Id var objectId: String,
-    @Document.StringProperty var displayName: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var displayName: String,
     @Document.CreationTimestampMillis var timestamp: Long,
     @Document.LongProperty var sunTime: Int,
     @Document.BooleanProperty var kidsApt: Boolean,
@@ -16,8 +17,8 @@ data class SectorData(
     @Document.StringProperty var weight: String,
     @Document.StringProperty var image: String,
     @Document.StringProperty var kmzReferenceUrl: String,
-    @Document.StringProperty var documentPath: String,
-    @Document.StringProperty var webUrl: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var documentPath: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var webUrl: String,
 ) {
     @Document.Namespace
     var namespace: String = Sector.NAMESPACE
