@@ -1,6 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
-import android.content.Context
+import android.app.Application
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.PutDocumentsRequest
@@ -34,7 +34,7 @@ import timber.log.Timber
  * Loads all the areas available in the server.
  * @author Arnau Mora
  * @since 20210313
- * @param context The [Context] where to load the areas from.
+ * @param application The [Application] that owns the app execution.
  * @param firestore The [FirebaseFirestore] reference for fetching data from the server.
  * @param progressCallback This will get called when the loading progress is updated.
  * @see AREAS
@@ -42,7 +42,7 @@ import timber.log.Timber
  */
 @WorkerThread
 suspend fun loadAreas(
-    context: Context,
+    application: Application,
     firestore: FirebaseFirestore,
     enableSearch: Boolean = true,
     @UiThread progressCallback: (current: Int, total: Int) -> Unit
@@ -245,7 +245,7 @@ suspend fun loadAreas(
             Timber.v("Search > Initializing session future...")
             val sessionFuture = LocalStorage.createSearchSession(
                 // TODO: Database name should not be hardcoded
-                LocalStorage.SearchContext.Builder(context, "escalaralcoiaicomtat")
+                LocalStorage.SearchContext.Builder(application, "escalaralcoiaicomtat")
                     .build()
             )
             Timber.v("Search > Awaiting for session...")
@@ -286,6 +286,6 @@ suspend fun loadAreas(
         Timber.e(e, "Could not load areas.")
         trace.putAttribute("error", "true")
         trace.stop()
-        uiContext { toast(context, R.string.toast_error_load_areas) }
+        uiContext { toast(application, R.string.toast_error_load_areas) }
     }
 }
