@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 
 import android.app.Activity
+import android.app.Application
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
@@ -21,10 +22,12 @@ class SectorsViewModel<A : Activity>(
     override val fixedHeight: Dp = 200.dp
 
     override val items: LiveData<List<Sector>> = liveData {
-        if (AREAS.isEmpty())
-            loadAreas(context, firestore, progressCallback = { current, total ->
+        if (AREAS.isEmpty()) {
+            val application = (context as? Activity)?.application ?: context as Application
+            loadAreas(application, firestore, progressCallback = { current, total ->
                 Timber.i("Loading areas: $current/$total")
             })
+        }
         val sectors = AREAS[areaId]?.get(zoneId)?.getChildren(context, storage)
         if (sectors != null) {
             for (sector in sectors)

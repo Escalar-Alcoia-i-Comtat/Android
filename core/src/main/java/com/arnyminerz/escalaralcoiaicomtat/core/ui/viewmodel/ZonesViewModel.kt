@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 
 import android.app.Activity
+import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
@@ -14,10 +15,12 @@ class ZonesViewModel<A : Activity>(activity: A, private val areaId: String) :
     override val columnsPerRow: Int = 2
 
     override val items: LiveData<List<Zone>> = liveData {
-        if (AREAS.isEmpty())
-            loadAreas(context as Activity, firestore, progressCallback = { current, total ->
+        if (AREAS.isEmpty()) {
+            val application = (context as? Activity)?.application ?: context as Application
+            loadAreas(application, firestore, progressCallback = { current, total ->
                 Timber.i("Loading areas: $current/$total")
             })
+        }
         val zones = AREAS[areaId]?.getChildren(context, storage)
         if (zones != null) {
             for (zone in zones)
