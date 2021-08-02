@@ -78,7 +78,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
                     .get()
                     .addOnSuccessListener { pathData ->
                         Timber.v("Processing path data...")
-                        val path = Path(requireActivity(), pathData)
+                        val path = Path(pathData)
                         doAsync {
                             Timber.v("Getting adapter...")
                             val adapter = binding?.pathsRecyclerView?.adapter as PathsAdapter?
