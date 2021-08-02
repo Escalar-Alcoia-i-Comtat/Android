@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass.Companion.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
@@ -23,9 +24,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.DownloadSectionViewHolder
-import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
@@ -33,8 +33,8 @@ class DownloadSectionsAdapter(
     private val downloadedSections: ArrayList<DownloadedSection>,
     private val mainActivity: MainActivity
 ) : RecyclerView.Adapter<DownloadSectionViewHolder>() {
-    private val firestore: FirebaseFirestore
-        get() = mainActivity.firestore
+    private val storage: FirebaseStorage
+        get() = mainActivity.storage
 
     override fun getItemCount(): Int = downloadedSections.size
 
@@ -72,7 +72,7 @@ class DownloadSectionsAdapter(
                     DownloadDialog(
                         mainActivity,
                         section,
-                        firestore,
+                        storage,
                         downloadStatus == DownloadStatus.PARTIALLY,
                         { downloadSection(it, holder) }
                     ).show()
@@ -95,7 +95,7 @@ class DownloadSectionsAdapter(
     ) {
         doAsync {
             Timber.v("Downloading section \"$section\"")
-            val downloadStatus = section.downloadStatus(mainActivity, firestore)
+            val downloadStatus = section.downloadStatus(mainActivity, storage)
 
             uiContext {
                 if (!appNetworkState.hasInternet) {
@@ -172,10 +172,10 @@ class DownloadSectionsAdapter(
             Timber.v("Deleting section \"$section\"")
             section.delete(mainActivity)
             Timber.v("Section deleted, getting new download status...")
-            val newDownloadStatus = section.downloadStatus(mainActivity, firestore)
+            val newDownloadStatus = section.downloadStatus(mainActivity, storage)
             Timber.v("Section download status loaded, getting downloaded section list...")
             val newChildSectionList = arrayListOf<DownloadedSection>()
-            section.downloadedSectionList(mainActivity, firestore, true)
+            section.downloadedSectionList(mainActivity, storage, true)
                 .toCollection(newChildSectionList)
             Timber.v("Got downloaded section list. Updating UI...")
 
@@ -196,7 +196,7 @@ class DownloadSectionsAdapter(
      */
     private fun view(section: DataClass<*, *>) {
         doAsync {
-            val intent = getIntent(mainActivity, section.displayName, firestore)
+            val intent = getIntent(mainActivity, section.displayName, storage)
             uiContext {
                 if (intent == null) {
                     Timber.w("Could not launch activity.")
@@ -229,11 +229,11 @@ class DownloadSectionsAdapter(
 
         doAsync {
             Timber.v("Checking section's downloaded children.")
-            val sectionDownloadStatus = section.downloadStatus(mainActivity, firestore)
+            val sectionDownloadStatus = section.downloadStatus(mainActivity, storage)
             // Get all the children for the section
             Timber.v("Loading section list for \"${section.displayName}\"...")
             val childSectionList = arrayListOf<DownloadedSection>()
-            section.downloadedSectionList(mainActivity, firestore, true)
+            section.downloadedSectionList(mainActivity, storage, true)
                 .toCollection(childSectionList)
 
             uiContext {

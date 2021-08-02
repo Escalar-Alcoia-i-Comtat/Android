@@ -1,8 +1,8 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.model
 
 import androidx.fragment.app.Fragment
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkProvider
+import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkProvider
 
 abstract class NetworkChangeListenerFragment : Fragment(),
     ConnectivityProvider.ConnectivityStateListener {

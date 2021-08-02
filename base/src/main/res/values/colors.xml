@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#afb42b</color>
-    <color name="colorPrimaryDark">@color/colorPrimary</color>
+    <color name="colorPrimary">#66BB6A</color> <!-- Green 400 -->
+    <color name="colorPrimaryDark">#4CAF50</color> <!-- Green 500 -->
     <color name="colorAccent">#9da226</color>
 
     <color name="bg_color">#f5f5f5</color>
@@ -30,5 +30,5 @@
 
     <color name="overlay_color">#44000000</color>
 
-    <color name="intro_green">#8BC34A</color>
+    <color name="intro_green">#4CAF50</color> <!-- Green 500 -->
 </resources>

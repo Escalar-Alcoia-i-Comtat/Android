@@ -14,14 +14,14 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NoInternetAccessException
+import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.INDEX_PATHS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.INDEX_PATHS_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE_KEY
@@ -30,6 +30,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_MIN_FETCH_I
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED_KEY
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
@@ -37,9 +38,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.createNotificationChannels
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.shared.App
-import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.InstallStateUpdatedListener
@@ -57,6 +55,8 @@ import com.google.firebase.perf.ktx.performance
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigClientException
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
@@ -71,6 +71,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     private var deepLinkPath: String? = null
 
     private lateinit var firestore: FirebaseFirestore
+    private lateinit var storage: FirebaseStorage
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +80,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
         Timber.v("Getting Firestore instance...")
         firestore = Firebase.firestore
+        Timber.v("Getting Firebase Storage instance...")
+        storage = Firebase.storage
     }
 
     override fun onStart() {
@@ -105,7 +108,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         doAsync { preLoad() }
     }
 
-    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
+    override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
+        super.onStateChangeAsync(state)
         load()
     }
 
@@ -252,13 +256,11 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         SHOW_NON_DOWNLOADED = remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
         ENABLE_AUTHENTICATION = remoteConfig.getBoolean(ENABLE_AUTHENTICATION_KEY)
         PROFILE_IMAGE_SIZE = remoteConfig.getLong(PROFILE_IMAGE_SIZE_KEY)
-        INDEX_PATHS = remoteConfig.getBoolean(INDEX_PATHS_KEY)
 
         Timber.v("APP_UPDATE_MAX_TIME_DAYS: $APP_UPDATE_MAX_TIME_DAYS")
         Timber.v("SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
         Timber.v("ENABLE_AUTHENTICATION: $ENABLE_AUTHENTICATION")
         Timber.v("PROFILE_IMAGE_SIZE: $PROFILE_IMAGE_SIZE")
-        Timber.v("INDEX_PATHS: $INDEX_PATHS")
     }
 
     /**
@@ -273,17 +275,17 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             Firebase.auth.removeAuthStateListener((application as App).authStateListener)
         }
 
-        uiContext {
-            Timber.v("Finished preparing App...")
-            load()
-        }
+        Timber.v("Finished preparing App...")
+        load()
     }
 
-    @UiThread
-    private fun load() {
+    @WorkerThread
+    private suspend fun load() {
         val waitingForEmailConfirmation = PREF_WAITING_EMAIL_CONFIRMATION.get()
         if (waitingForEmailConfirmation) {
-            launch(EmailConfirmationActivity::class.java)
+            uiContext {
+                launch(EmailConfirmationActivity::class.java)
+            }
             return
         }
 
@@ -294,7 +296,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         loading = true
         binding.progressTextView.setText(R.string.status_downloading)
         try {
-            loadAreas(firestore, null, this, progressCallback = { progress, max ->
+            loadAreas(application, firestore, progressCallback = { progress, max ->
                 Timber.i("Download progress: $progress / $max")
                 if (max >= 0) {
                     binding.progressBar.max = max
@@ -307,45 +309,49 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                     visibility(binding.progressBar, true)
                     binding.progressTextView.setText(R.string.status_storing)
                 }
-            }) {
-                if (AREAS.size > 0) {
-                    if (deepLinkPath != null) {
+            })
+            if (AREAS.size > 0) {
+                if (deepLinkPath != null) {
+                    uiContext {
                         binding.progressTextView.setText(R.string.status_loading_deep_link)
                         binding.progressBar.visibility(false)
                         binding.progressBar.isIndeterminate = true
                         binding.progressBar.visibility(true)
+                    }
 
-                        doAsync {
-                            val intent =
-                                DataClass.getIntent(this@LoadingActivity, deepLinkPath!!, firestore)
-                            uiContext {
-                                if (intent != null)
-                                    startActivity(intent)
-                                /*else if (BuildConfig.DEBUG)
-                                    launch(SectorActivity::class.java) {
-                                        putExtra(EXTRA_AREA, "WWQME983XhriXVhtVxFu")
-                                        putExtra(EXTRA_ZONE, "LtYZWlzTPwqHsWbYIDTt")
-                                        putExtra(EXTRA_SECTOR_COUNT, 15)
-                                        putExtra(EXTRA_SECTOR_INDEX, 11)
-                                    }*/
-                                else
-                                    launch(MainActivity::class.java)
-                            }
-                        }
-                    }/* else if (BuildConfig.DEBUG)
+                    val intent =
+                        DataClass.getIntent(this@LoadingActivity, deepLinkPath!!, storage)
+                    uiContext {
+                        if (intent != null)
+                            startActivity(intent)
+                        /*else if (BuildConfig.DEBUG)
+                            launch(SectorActivity::class.java) {
+                                putExtra(EXTRA_AREA, "WWQME983XhriXVhtVxFu")
+                                putExtra(EXTRA_ZONE, "LtYZWlzTPwqHsWbYIDTt")
+                                putExtra(EXTRA_SECTOR_COUNT, 15)
+                                putExtra(EXTRA_SECTOR_INDEX, 11)
+                            }*/
+                        else
+                            launch(MainActivity::class.java)
+                    }
+                }/* else if (BuildConfig.DEBUG)
                         launch(SectorActivity::class.java) {
                             putExtra(EXTRA_AREA, "WWQME983XhriXVhtVxFu")
                             putExtra(EXTRA_ZONE, "LtYZWlzTPwqHsWbYIDTt")
                             putExtra(EXTRA_SECTOR_COUNT, 9)
                             putExtra(EXTRA_SECTOR_INDEX, 6)
                         }*/
-                    else
-                        launch(MainActivity::class.java)
-                } else if (!appNetworkState.hasInternet)
+                else uiContext {
+                    launch(MainActivity::class.java)
+                }
+            } else if (!appNetworkState.hasInternet)
+                uiContext {
                     noInternetAccess()
-            }
+                }
         } catch (_: NoInternetAccessException) {
-            noInternetAccess()
+            uiContext {
+                noInternetAccess()
+            }
         }
     }
 }

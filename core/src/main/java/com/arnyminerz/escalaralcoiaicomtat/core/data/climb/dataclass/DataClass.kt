@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.ImageView
 import androidx.annotation.UiThread
@@ -18,7 +19,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.CouldNotCreateDynamicLinkException
-import com.arnyminerz.escalaralcoiaicomtat.core.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_AREA_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_SECTOR_META
@@ -32,8 +32,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.cache
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
@@ -53,20 +53,18 @@ import com.google.firebase.dynamiclinks.ShortDynamicLink
 import com.google.firebase.dynamiclinks.ktx.androidParameters
 import com.google.firebase.dynamiclinks.ktx.shortLinkAsync
 import com.google.firebase.dynamiclinks.ktx.socialMetaTagParameters
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.StorageReference
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
 import java.util.Date
-import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -74,13 +72,13 @@ import kotlin.coroutines.suspendCoroutine
 // A: List type
 // B: Parent Type
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
-    val displayName: String,
-    timestamp: Date,
-    imageReferenceUrl: String,
-    val kmzReferenceUrl: String?,
-    val uiMetadata: UIMetadata,
-    val metadata: DataClassMetadata
-) : DataClassImpl(metadata.objectId, metadata.namespace, timestamp.time), Iterable<A> {
+    open val displayName: String,
+    override val timestampMillis: Long,
+    open val imageReferenceUrl: String,
+    open val kmzReferenceUrl: String?,
+    open val uiMetadata: UIMetadata,
+    open val metadata: DataClassMetadata
+) : DataClassImpl(metadata.objectId, metadata.namespace, timestampMillis), Iterable<A> {
     companion object {
         /**
          * Searches in [AREAS] and tries to get an intent from them.
@@ -88,13 +86,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
          * @since 20210416
          * @param context The context to initialize the [Intent]
          * @param queryName What to search. May be [DataClass.displayName] or [DataClassMetadata.webURL].
-         * @param firestore The [FirebaseFirestore] instance.
+         * @param storage The [FirebaseStorage] reference to download the files required from the server.
          * @return An [Intent] if the [DataClass] was found, or null.
          */
         suspend fun getIntent(
             context: Context,
             queryName: String,
-            firestore: FirebaseFirestore
+            storage: FirebaseStorage
         ): Intent? {
             var result: Intent? = null
 
@@ -130,12 +128,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 else {
                     Timber.d("  Iterating area's children...")
                     val zones = arrayListOf<Zone>()
-                    area.getChildren(firestore).toCollection(zones)
+                    area.getChildren(context, storage).toCollection(zones)
                     for (zone in zones) {
                         Timber.d("    Finding in ${zone.displayName}.")
                         // Children must be loaded so `count` is fetched correctly.
                         val sectors = arrayListOf<Sector>()
-                        zone.getChildren(firestore)
+                        zone.getChildren(context, storage)
                             .toCollection(sectors)
 
                         if (zone.displayName.equals(queryName, true) ||
@@ -181,16 +179,25 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
+     * Sets the quality which the images should be loaded in.
+     * @author Arnau Mora
+     * @since 20210724
+     */
+    protected abstract val imageQuality: Int
+
+    /**
      * Stores if the children are currently being loaded.
      * @author Arnau Mora
      * @since 20210514
      */
     private var loadingChildren = false
 
-    protected val innerChildren = arrayListOf<A>()
-
-    var imageReferenceUrl: String = imageReferenceUrl
-        private set
+    /**
+     * Stores the currently loaded children of the [DataClass].
+     * @author Arnau Mora
+     * @since 20210724
+     */
+    protected val children = arrayListOf<A>()
 
     /**
      * The download url from Firebase Storage for the [DataClass]' image.
@@ -199,74 +206,43 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     var downloadUrl: Uri? = null
 
-    private val pin = "${namespace}_$objectId"
-
-    val transitionName = objectId + displayName.replace(" ", "_")
+    /**
+     * Provides a generic name for the [DataClass].
+     * @author Arnau Mora
+     * @since 20210724
+     */
+    val pin: String
+        get() = "${namespace}_$objectId"
 
     /**
-     * Returns the data classes' children. May fetch them from storage, or return the cached items
+     * Returns the children of the [DataClass]. Also downloads their images if not downloaded.
      * @author Arnau Mora
      * @since 20210313
-     * @param firestore The Firestore instance.
-     * @param storage If not null, the download url of the children will be fetched.
-     * @throws NoInternetAccessException If no Internet connection is available, and the children are
-     * not stored in storage.
-     * @throws IllegalStateException When the children has not been loaded and [firestore] is null.
+     * @param context The context where the content is being loaded from.
+     * @param storage The [FirebaseStorage] instance for loading the images from.
      */
     @WorkerThread
-    @Throws(NoInternetAccessException::class, IllegalStateException::class)
-    suspend fun getChildren(
-        firestore: FirebaseFirestore?,
-        storage: FirebaseStorage? = null
+    fun getChildren(
+        context: Context,
+        storage: FirebaseStorage
     ): List<A> {
         if (loadingChildren) {
             Timber.v("Waiting for children to finish loading")
             while (loadingChildren) {
-                delay(DATACLASS_WAIT_CHILDREN_DELAY)
+                Thread.sleep(DATACLASS_WAIT_CHILDREN_DELAY)
             }
             Timber.v("Finished loading children!")
         }
-        val dataClassId = metadata.documentPath
-        val innerChildrenEmpty = synchronized(innerChildren) { innerChildren.isEmpty() }
-        if (innerChildrenEmpty) {
-            loadingChildren = true
-            when {
-                cache.hasChild(dataClassId) -> {
-                    // Loads children from cache
-                    val children = cache.getChildren(dataClassId)!!
-                    for (child in children)
-                        if (coroutineContext.isActive)
-                            (child as? A)?.let { data ->
-                                synchronized(innerChildren) {
-                                    innerChildren.add(data)
-                                }
-                            }
-                        else break
-                }
-                firestore != null -> {
-                    // Loads children from server
-                    val children = loadChildren(firestore)
-                    synchronized(innerChildren) {
-                        innerChildren.addAll(children)
-                    }
-                    cache.storeChild(dataClassId, innerChildren)
-                }
-                else -> {
-                    loadingChildren = false
-                    throw IllegalStateException("There are no loaded children, and firestore is null.")
-                }
-            }
-            loadingChildren = false
-        }
 
-        if (storage != null) {
-            Timber.v("$this > Fetching children download urls...")
-            for (child in innerChildren)
-                if (child is DataClass<*, *>)
-                    child.storageUrl(storage)
-        }
+        loadingChildren = true
 
-        return innerChildren
+        for (child in children)
+            if (child is DataClass<*, *> && !child.cacheImageFile(context).exists())
+                child.image(context, storage, null)
+
+        loadingChildren = false
+
+        return children
     }
 
     /**
@@ -275,8 +251,95 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210719
      */
     fun add(child: A) {
-        innerChildren.add(child)
+        children.add(child)
     }
+
+    /**
+     * Gets the children element at [index].
+     * May throw [IndexOutOfBoundsException] if children have not been loaded.
+     * @author Arnau Mora
+     * @since 20210413
+     * @throws IndexOutOfBoundsException When the specified [index] does not exist in [children]
+     */
+    @Throws(IndexOutOfBoundsException::class)
+    @WorkerThread
+    operator fun get(index: Int): A = children[index]
+
+    /**
+     * Finds an [DataClass] inside a list with an specific id. If it's not found, null is returned.
+     * @author Arnau Mora
+     * @since 20210413
+     * @param objectId The id to search
+     */
+    operator fun get(objectId: String): A? {
+        for (o in this)
+            if (o.objectId == objectId)
+                return o
+        return null
+    }
+
+    fun has(objectId: String): Boolean {
+        for (o in this)
+            if (o.objectId == objectId)
+                return true
+        return false
+    }
+
+    /**
+     * Checks if the data class has children.
+     * Note: won't load children, will just use the already loaded ones.
+     * @author Arnau Mora
+     * @since 20210411
+     */
+    fun isEmpty(): Boolean = children.isEmpty()
+
+    /**
+     * Checks if the data class doesn't have any children
+     * @author Arnau Mora
+     * @since 20210411
+     */
+    fun isNotEmpty() = children.isNotEmpty()
+
+    /**
+     * Returns the amount of children the [DataClass] has.
+     * @author Arnau Mora
+     * @since 20210724
+     */
+    val size: Int
+        get() = children.size
+
+    /**
+     * Gets the children [Iterator].
+     * @author Arnau Mora
+     * @since 20210413
+     * @throws IllegalStateException When there are no loaded children.
+     */
+    @WorkerThread
+    @Throws(IllegalStateException::class)
+    override fun iterator(): Iterator<A> {
+        if (children.isEmpty())
+            throw IllegalStateException("Children is empty")
+        return children.iterator()
+    }
+
+    /**
+     * Checks if the [DataClass] is the same as another one.
+     * @author Arnau Mora
+     * @since 20210724
+     */
+    override fun equals(other: Any?): Boolean {
+        if (other !is DataClass<*, *>)
+            return super.equals(other)
+        return pin == other.pin
+    }
+
+    /**
+     * Converts the [DataClass] to a [String] for showing in debug or to the user. The string contains
+     * the first letter of the [namespace], followed by a slash (/) and the [objectId].
+     * @author Arnau Mora
+     * @since 20210724
+     */
+    override fun toString(): String = namespace[0] + "/" + objectId
 
     /**
      * Gets the KMZ file path.
@@ -306,7 +369,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     ): FileDownloadTask.TaskSnapshot? =
         if (kmzReferenceUrl != null)
             suspendCoroutine { cont ->
-                storage.getReferenceFromUrl(kmzReferenceUrl)
+                storage.getReferenceFromUrl(kmzReferenceUrl!!)
                     .getFile(targetFile)
                     .addOnSuccessListener { cont.resume(it) }
                     .addOnFailureListener { cont.resumeWithException(it) }
@@ -362,84 +425,28 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
-     * Gets the children element at [index].
-     * May throw [IndexOutOfBoundsException] if children have not been loaded.
-     * @author Arnau Mora
-     * @since 20210413
-     * @throws IndexOutOfBoundsException When the specified [index] does not exist in [innerChildren]
-     */
-    @Throws(IndexOutOfBoundsException::class)
-    @WorkerThread
-    operator fun get(index: Int): A = innerChildren[index]
-
-    @WorkerThread
-    protected abstract suspend fun loadChildren(firestore: FirebaseFirestore): Collection<A>
-
-    /**
-     * Gets an object based on objectId
-     * @author Arnau Mora
-     * @since 20210312
-     * @param objectId The id to find
-     * @return The found dataclass
-     * @see getChildren
-     * @throws IllegalStateException If the children's list is empty
-     * @throws IndexOutOfBoundsException If the objectId was not found
-     */
-    @Throws(IllegalStateException::class, IndexOutOfBoundsException::class)
-    operator fun get(objectId: String): A {
-        if (innerChildren.isEmpty())
-            throw IllegalStateException("Children is empty")
-        for (child in innerChildren)
-            if (child.objectId == objectId)
-                return child
-        throw IndexOutOfBoundsException("Could not find $objectId in children.")
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is DataClass<*, *>)
-            return super.equals(other)
-        return other.namespace == namespace && other.objectId == objectId
-    }
-
-    /**
-     * Gets the children [Iterator].
-     * @author Arnau Mora
-     * @since 20210413
-     * @throws IllegalStateException When there are no loaded children.
-     */
-    @WorkerThread
-    @Throws(IllegalStateException::class)
-    override fun iterator(): Iterator<A> {
-        if (innerChildren.isEmpty())
-            throw IllegalStateException("Children is empty")
-        return innerChildren.iterator()
-    }
-
-    override fun toString(): String = namespace[0] + "/" + objectId
-
-    /**
      * Generates a list of [DownloadedSection].
      * @author Arnau Mora
      * @since 20210412
      * @param activity The [Activity] where the function is being ran on.
-     * @param firestore The [FirebaseFirestore] instance to load the data from.
+     * @param storage The [FirebaseStorage] instance to load the files from the server.
      * @param showNonDownloaded If the non-downloaded sections should be added.
      * @param progressListener A listener for the progress of the load.
      */
     @WorkerThread
     suspend fun downloadedSectionList(
         activity: Activity,
-        firestore: FirebaseFirestore,
+        storage: FirebaseStorage,
         showNonDownloaded: Boolean,
         progressListener: (suspend (current: Int, max: Int) -> Unit)? = null
     ): Flow<DownloadedSection> = flow {
         Timber.v("Getting downloaded sections...")
         val downloadedSectionsList = arrayListOf<DownloadedSection>()
         val children = arrayListOf<DataClassImpl>()
-        getChildren(firestore).toCollection(children)
+        getChildren(activity, storage).toCollection(children)
         for ((c, child) in children.withIndex())
             (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
-                val downloadStatus = dataClass.downloadStatus(activity, firestore)
+                val downloadStatus = dataClass.downloadStatus(activity, storage)
                 progressListener?.invoke(c, children.size)
                 if (showNonDownloaded ||
                     downloadStatus.isDownloaded() || downloadStatus.partialDownload()
@@ -481,24 +488,24 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Gets the DownloadStatus of the DataClass
      * @author Arnau Mora
      * @since 20210313
-     * @param activity The activity to run from
-     * @param firestore The [FirebaseFirestore] instance to load children from
-     * @param progressListener A progress updater
+     * @param context The [Context] where the request is running from.
+     * @param storage The [FirebaseStorage] instance to load children from the server.
+     * @param progressListener A progress updater.
      * @return a matching DownloadStatus representing the Data Class' download status
      */
     @WorkerThread
     suspend fun downloadStatus(
-        activity: Activity,
-        firestore: FirebaseFirestore,
+        context: Context,
+        storage: FirebaseStorage,
         progressListener: ((current: Int, max: Int) -> Unit)? = null
     ): DownloadStatus {
         Timber.d("$pin Checking if downloaded")
 
-        val downloadWorkInfo = downloadWorkInfo(activity)
+        val downloadWorkInfo = downloadWorkInfo(context)
         val result = if (downloadWorkInfo != null)
             DownloadStatus.DOWNLOADING
         else {
-            val imageFile = imageFile(activity)
+            val imageFile = imageFile(context)
             Timber.v("Checking if image file exists...")
             val imageFileExists = imageFile.exists()
             if (!imageFileExists)
@@ -513,7 +520,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
             Timber.v("$pin Getting children elements download status...")
             val children = arrayListOf<DataClassImpl>()
-            getChildren(firestore).toCollection(children)
+            getChildren(context, storage).toCollection(children)
 
             Timber.v("$pin Finding for a downloaded children in ${children.size}...")
             var allChildrenDownloaded = true
@@ -521,7 +528,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             for ((c, child) in children.withIndex()) {
                 if (child is DataClass<*, *>) {
                     progressListener?.invoke(c, children.size)
-                    val childDownloadStatus = child.downloadStatus(activity, firestore)
+                    val childDownloadStatus = child.downloadStatus(context, storage)
                     if (childDownloadStatus != DownloadStatus.DOWNLOADED) {
                         Timber.d(
                             "$pin has a non-downloaded children (${child.pin}): $childDownloadStatus"
@@ -547,21 +554,20 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Checks if the data class has any children that has been downloaded
      * @author Arnau Mora
      * @date 2020/09/14
-     * @param activity The activity to run from
-     * @param firestore A [FirebaseFirestore] instance to load new data from.
-     *
+     * @param context The [Context] where the request is running from.
+     * @param storage The [FirebaseStorage] instance to load children from the server.
      * @return If the data class has any downloaded children
      */
     @WorkerThread
     suspend fun hasAnyDownloadedChildren(
-        activity: Activity,
-        firestore: FirebaseFirestore
+        context: Context,
+        storage: FirebaseStorage
     ): Boolean {
         val children = arrayListOf<DataClassImpl>()
-        getChildren(firestore).toCollection(children)
+        getChildren(context, storage).toCollection(children)
         for (child in children)
             if (child is DataClass<*, *> &&
-                child.downloadStatus(activity, firestore) == DownloadStatus.DOWNLOADED
+                child.downloadStatus(context, storage) == DownloadStatus.DOWNLOADED
             )
                 return true
         return false
@@ -570,32 +576,31 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     /**
      * Deletes the downloaded content if downloaded
      * @author Arnau Mora
-     * @date 2020/09/11
-     * @param activity The activity to run from
+     * @date 20210724
+     * @param context The [Context] where the request is running from.
      * @return If the content was deleted successfully. Note: returns true if not downloaded
      */
-    suspend fun delete(activity: Activity): Boolean {
+    @WorkerThread
+    fun delete(context: Context): Boolean {
         Timber.v("Deleting $objectId")
-        val imgFile = imageFile(activity)
-        val lst = arrayListOf<Boolean>()
+        val lst = arrayListOf<Boolean>() // Stores all the delection success statuses
 
-        val kmzFile = kmzFile(activity, true)
+        val kmzFile = kmzFile(context, true)
         if (kmzFile.exists()) {
-            Timber.v("Deleting \"$kmzFile\"")
-            kmzFile.deleteIfExists()
+            Timber.v("$this > Deleting \"$kmzFile\"")
+            lst.add(kmzFile.deleteIfExists())
         }
 
-        Timber.v("Deleting \"$imgFile\"...")
-        lst.add(imgFile.deleteIfExists())
-        val children = arrayListOf<DataClassImpl>()
-        try {
-            getChildren(null).toCollection(children)
-        } catch (_: IllegalStateException) {
+        val imgFile = imageFile(context)
+        if (imgFile.exists()) {
+            Timber.v("$this > Deleting \"$imgFile\"")
+            lst.add(imgFile.deleteIfExists())
         }
+
         for (child in children)
-            (child as? DataClass<*, *>)?.let {
-                lst.add(it.delete(activity))
-            }
+            if (child is DataClass<*, *>)
+                lst.add(child.delete(context))
+
         return lst.allTrue()
     }
 
@@ -610,57 +615,20 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @throws NotDownloadedException If tried to get size when not downloaded
      */
     @Throws(NotDownloadedException::class)
-    suspend fun size(activity: Activity): Long {
+    fun size(activity: Activity): Long {
         val imgFile = imageFile(activity)
 
         if (!imgFile.exists()) throw NotDownloadedException(this)
 
         var size = imgFile.length()
 
-        val children = arrayListOf<DataClassImpl>()
-        try {
-            getChildren(null).toCollection(children)
-        } catch (_: IllegalStateException) {
-        }
         for (child in children)
             if (child is DataClass<*, *>)
                 size += child.size(activity)
 
-        Timber.v("\"$displayName\" storage usage: $size")
+        Timber.v("$this > Storage usage: $size")
 
         return size
-    }
-
-    /**
-     * Returns the amount of children the data class has
-     * @author Arnau Mora
-     * @date 20210413
-     * @return The amount of children the data class has
-     * @throws IllegalStateException When the children has not been loaded and [firestore] is null.
-     * @see getChildren
-     */
-    @Throws(IllegalStateException::class)
-    @WorkerThread
-    suspend fun count(firestore: FirebaseFirestore?): Int {
-        val children = arrayListOf<DataClassImpl>()
-        getChildren(firestore).toCollection(children)
-        return children.size
-    }
-
-    /**
-     * Returns the amount of children the data class has, as well as all the children
-     * @author Arnau Mora
-     * @date 2020/09/11
-     * @return The amount of children the data class has, as well as all the children
-     */
-    fun fullCount(): Int { // Counts all the children also
-        var counter = 1 // Starts at 1 for counting self
-
-        for (me in this)
-            if (me is DataClass<*, *>)
-                counter += me.fullCount()
-
-        return counter
     }
 
     /**
@@ -677,30 +645,22 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
-     * Checks if the data class has children.
-     * Note: won't load children, will just use the already loaded ones.
-     * @author Arnau Mora
-     * @since 20210411
-     */
-    @WorkerThread
-    fun isEmpty(): Boolean = innerChildren.isEmpty()
-
-    /**
-     * Checks if the data class doesn't have any children
-     * @author Arnau Mora
-     * @since 20210411
-     */
-    @WorkerThread
-    fun isNotEmpty() = !isEmpty()
-
-    /**
      * Returns the File that represents the image of the DataClass
      * @author Arnau Mora
      * @date 2020/09/10
      * @param context The context to run from
      * @return The path of the image file that can be downloaded
      */
-    fun imageFile(context: Context): File = File(dataDir(context), "$namespace-$objectId.webp")
+    fun imageFile(context: Context): File = File(dataDir(context), "$namespace-$objectId")
+
+    /**
+     * Returns the File that represents the image of the DataClass in cache.
+     * @author Arnau Mora
+     * @date 20210724
+     * @param context The context to run from
+     * @return The path of the image file that can be downloaded
+     */
+    fun cacheImageFile(context: Context): File = File(context.cacheDir, "$namespace-$objectId")
 
     /**
      * Creates a dynamic link access for the DataClass
@@ -805,40 +765,69 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         storage: FirebaseStorage,
         imageLoadParameters: ImageLoadParameters? = null,
         progress: ((progress: ValueMax<Long>) -> Unit)? = null,
-        image: (bitmap: Bitmap?) -> Unit
+        image: ((bitmap: Bitmap?) -> Unit)? = null
     ) {
         val downloadedImageFile = imageFile(context)
-        if (downloadedImageFile.exists()) {
+        if (downloadedImageFile.exists() && image != null) {
             Timber.d("Loading image from storage: ${downloadedImageFile.path}")
             val bmp = readBitmap(downloadedImageFile)
             image(bmp)
         } else {
-            val tempFile = File(context.cacheDir, "dataClass_$objectId")
+            val cacheImage = cacheImageFile(context)
+            var tempCacheImage: File? = null
 
-            val successListener = OnSuccessListener<FileDownloadTask.TaskSnapshot> {
-                Timber.v("Loaded image for $objectId. Decoding...")
-                val bitmap = readBitmap(tempFile)
+            val successListener = OnSuccessListener<FileDownloadTask.TaskSnapshot> { snapshot ->
+                if (image == null)
+                    return@OnSuccessListener
 
-                Timber.v("Image decoded, scaling...")
+                if (tempCacheImage != null && !cacheImage.exists()) {
+                    Timber.v("$this > Compressing $tempCacheImage to $cacheImage...")
+                    val bmp: Bitmap? = BitmapFactory.decodeFile(tempCacheImage!!.path)
+                    val baos = ByteArrayOutputStream()
+                    val compressedBitmap = bmp?.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
+                    if (compressedBitmap != true)
+                        Timber.e("$this > Could not compress image!")
+                    else {
+                        Timber.v("$this > Finished compressing image.")
+                        try {
+                            Timber.v("$this > Storing image to file...")
+                            baos.writeTo(cacheImage.outputStream())
+                            Timber.v("$this > Finished writing image.")
+                            Timber.v("$this > Deleting temp cache image file...")
+                            if (tempCacheImage?.deleteIfExists() == true)
+                                Timber.v("$this > File deleted successfully!")
+                            else
+                                Timber.e("$this > Could not delete!")
+                        } catch (e: IOException) {
+                            Timber.e(e, "$this > Could not write compressed image.")
+                        }
+                    }
+                }
+
+                Timber.v("$this > Loaded image for $objectId. Decoding...")
+                val bitmap = readBitmap(cacheImage)
+
+                Timber.v("$this > Image decoded, scaling...")
                 val scale = imageLoadParameters?.resultImageScale ?: 1f
                 val bmp = if (scale == 1f) bitmap?.scale(scale) else bitmap
 
                 if (bmp != null) {
-                    Timber.v("Setting image into imageView.")
+                    Timber.v("$this > Setting image into imageView.")
                     image(bmp)
                 } else {
-                    Timber.e("Could not decode image")
+                    Timber.e("$this > Could not decode image")
                     toast(context, R.string.toast_error_load_image)
                     image(null)
                 }
             }
 
-            if (tempFile.exists()) {
-                Timber.v("The image file has already been cached ($tempFile).")
+            if (cacheImage.exists()) {
+                Timber.v("$this > The image file has already been cached ($cacheImage).")
                 successListener.onSuccess(null)
-            } else
+            } else {
+                tempCacheImage = File(context.cacheDir, cacheImage.nameWithoutExtension + "-temp")
                 storage.getReferenceFromUrl(imageReferenceUrl)
-                    .getFile(tempFile)
+                    .getFile(tempCacheImage)
                     .addOnSuccessListener(successListener)
                     .addOnProgressListener { snapshot ->
                         val bytesCount = snapshot.bytesTransferred
@@ -846,9 +835,11 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                         progress?.invoke(ValueMax(bytesCount, totalBytes))
                     }
                     .addOnFailureListener { e ->
-                        Timber.e(e, "Could not load DataClass ($objectId) image.")
-                        image(null)
+                        Timber.e(e, "$this > Could not load DataClass ($objectId) image.")
+
+                        image?.invoke(null)
                     }
+            }
         }
     }
 
@@ -902,19 +893,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 }
 
 /**
- * Finds an [DataClass] inside a list with an specific id. If it's not found, null is returned.
- * @author Arnau Mora
- * @since 20210413
- * @param objectId The id to search
- */
-operator fun <A : DataClassImpl, B : DataClassImpl, D : DataClass<A, B>> Iterable<D>.get(objectId: String): D? {
-    for (o in this)
-        if (o.objectId == objectId)
-            return o
-    return null
-}
-
-/**
  * Checks if the all the items in the iterable have a loaded [DataClass.downloadUrl].
  * @author Arnau Mora
  * @since 20210722
@@ -927,4 +905,49 @@ fun <D : DataClass<*, *>> Iterable<D>.hasStorageUrls(): Boolean {
         if (!i.hasStorageUrl())
             return false
     return true
+}
+
+/**
+ * Gets the children from all the [DataClass]es in the [Iterator].
+ * @author Arnau Mora
+ * @since 20210724
+ * @param context The [Context] where the content is being loaded from.
+ * @param storage The [FirebaseStorage] reference to load files from.
+ */
+fun <A : DataClassImpl, B : DataClassImpl, D : DataClass<A, B>> Iterable<D>.getChildren(
+    context: Context,
+    storage: FirebaseStorage
+): List<A> {
+    val items = arrayListOf<A>()
+    for (i in this)
+        items.addAll(i.getChildren(context, storage))
+    return items
+}
+
+/**
+ * Gets an element from the [Iterable].
+ * @author Arnau Mora
+ * @since 20210724
+ * @param objectId The id of the object to search for.
+ * @return The object you are searching for, or null if not found.
+ */
+operator fun <D : DataClass<*, *>> Iterable<D>.get(objectId: String): D? {
+    for (item in this)
+        if (item.objectId == objectId)
+            return item
+    return null
+}
+
+/**
+ * Checks if an [Iterable] contains a [DataClass] with the set [objectId].
+ * @author Arnau Mora
+ * @since 20210724
+ * @param objectId The id of the object to search for.
+ * @return The object you are searching for, or null if not found.
+ */
+fun <D : DataClass<*, *>> Iterable<D>.has(objectId: String): Boolean {
+    for (item in this)
+        if (item.objectId == objectId)
+            return true
+    return false
 }

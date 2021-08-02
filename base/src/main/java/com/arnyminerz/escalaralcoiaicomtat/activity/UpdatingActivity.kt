@@ -9,6 +9,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ERROR_VIBRATE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.QUIET_UPDATE
@@ -23,11 +24,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityUpdatingBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 import java.io.IOException
 
@@ -45,7 +45,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
 
     private lateinit var binding: ActivityUpdatingBinding
 
-    private lateinit var firestore: FirebaseFirestore
+    private lateinit var storage: FirebaseStorage
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +59,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             return
         }
 
-        firestore = Firebase.firestore
+        storage = Firebase.storage
 
         updateArea = intent.getExtra(UPDATE_AREA)
         updateZone = intent.getExtra(UPDATE_ZONE)
@@ -127,13 +127,13 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
 
             doAsync {
                 for (area in AREAS) {
-                    if (area.downloadStatus(this@UpdatingActivity, firestore).isDownloaded())
+                    if (area.downloadStatus(this@UpdatingActivity, storage).isDownloaded())
                         iterateUpdate(area)
                     else for (zone in area)
-                        if (zone.downloadStatus(this@UpdatingActivity, firestore).isDownloaded())
+                        if (zone.downloadStatus(this@UpdatingActivity, storage).isDownloaded())
                             iterateUpdate(zone)
                         else for (sector in zone)
-                            if (sector.downloadStatus(this@UpdatingActivity, firestore)
+                            if (sector.downloadStatus(this@UpdatingActivity, storage)
                                     .isDownloaded()
                             )
                                 iterateUpdate(sector)

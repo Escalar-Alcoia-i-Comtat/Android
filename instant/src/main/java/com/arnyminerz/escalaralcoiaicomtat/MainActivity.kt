@@ -1,13 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat
 
 import android.app.Activity
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.UiThread
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -22,10 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.FloatingActionButtonDefaults
@@ -57,38 +51,37 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.firebase.dataCollectionSetUp
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AFTERNOON
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ALL_DAY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MORNING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
-import com.arnyminerz.escalaralcoiaicomtat.ui.animation.EnterAnimation
-import com.arnyminerz.escalaralcoiaicomtat.ui.climb.Explorer
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorViewModel
+import com.arnyminerz.escalaralcoiaicomtat.shared.APP_TYPE_PROP
+import com.arnyminerz.escalaralcoiaicomtat.shared.STATUS_INSTALLED
+import com.arnyminerz.escalaralcoiaicomtat.shared.STATUS_INSTANT
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.Chip
+import com.arnyminerz.escalaralcoiaicomtat.ui.elements.ExpandableHeader
+import com.arnyminerz.escalaralcoiaicomtat.ui.elements.InstallButton
+import com.arnyminerz.escalaralcoiaicomtat.ui.elements.LoadingIndicator
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.ZoomableImage
+import com.arnyminerz.escalaralcoiaicomtat.ui.navigation.areas
+import com.arnyminerz.escalaralcoiaicomtat.ui.navigation.sector
+import com.arnyminerz.escalaralcoiaicomtat.ui.navigation.sectors
+import com.arnyminerz.escalaralcoiaicomtat.ui.navigation.zones
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
-import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.AreasViewModel
-import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SectorViewModel
-import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SectorsViewModel
-import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.ZonesViewModel
+import com.arnyminerz.escalaralcoiaicomtat.utils.searchNavigation
 import com.google.android.gms.instantapps.InstantApps
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.perf.ktx.performance
 import timber.log.Timber
-
-const val STATUS_INSTALLED = "installed"
-const val STATUS_INSTANT = "instant"
-const val ANALYTICS_USER_PROP = "app_type"
 
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
@@ -98,7 +91,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val action: String? = intent?.action
         val data: Uri? = intent?.data
 
         instantInfoSetup()
@@ -108,31 +100,10 @@ class MainActivity : ComponentActivity() {
             EscalarAlcoiaIComtatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    MainView(this, data?.path)
+                    MainView(this, data)
                 }
             }
         }
-    }
-
-    /**
-     * Initializes the user-set data collection policy.
-     * If debugging, data collection will always be disabled.
-     * @author Arnau Mora
-     * @since 20210617
-     * @see SETTINGS_ERROR_REPORTING_PREF
-     */
-    @UiThread
-    private fun dataCollectionSetUp() {
-        val enableErrorReporting = SETTINGS_ERROR_REPORTING_PREF.get()
-
-        Firebase.crashlytics.setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
-        Timber.v("Set Crashlytics collection enabled to $enableErrorReporting")
-
-        Firebase.analytics.setAnalyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
-        Timber.v("Set Analytics collection enabled to $enableErrorReporting")
-
-        Firebase.performance.isPerformanceCollectionEnabled = enableErrorReporting
-        Timber.v("Set Performance collection enabled to $enableErrorReporting")
     }
 
     /**
@@ -142,14 +113,15 @@ class MainActivity : ComponentActivity() {
      */
     private fun instantInfoSetup() {
         val analytics = Firebase.analytics
+        val crashlytics = Firebase.crashlytics
 
-        analytics.setUserProperty(
-            ANALYTICS_USER_PROP,
-            if (InstantApps.getPackageManagerCompat(this).isInstantApp)
-                STATUS_INSTANT
-            else
-                STATUS_INSTALLED
-        )
+        val isInstant = if (InstantApps.getPackageManagerCompat(this).isInstantApp)
+            STATUS_INSTANT
+        else
+            STATUS_INSTALLED
+
+        crashlytics.setCustomKey(APP_TYPE_PROP, isInstant)
+        analytics.setUserProperty(APP_TYPE_PROP, isInstant)
     }
 }
 
@@ -158,7 +130,7 @@ class MainActivity : ComponentActivity() {
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
-fun MainView(activity: Activity, path: String? = null) {
+fun MainView(activity: Activity, navigateUri: Uri? = null) {
     val navController = rememberNavController()
 
     var expanded by remember { mutableStateOf(false) }
@@ -178,87 +150,33 @@ fun MainView(activity: Activity, path: String? = null) {
         },
         backgroundColor = MaterialTheme.colors.primary,
         content = {
-            Column {
-                // Top Menu
-                AnimatedVisibility(visible = expanded) {
-                    Column(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Button(
-                            onClick = {
-                                val postInstall = Intent(Intent.ACTION_MAIN)
-                                    .addCategory(Intent.CATEGORY_DEFAULT)
-                                    .setPackage("com.arnyminerz.escalaralcoiaicomtat")
-                                InstantApps.showInstallPrompt(activity, postInstall, 0, null)
-                            },
-                            modifier = Modifier.align(Alignment.End),
-                            colors = ButtonDefaults.textButtonColors(
-                                backgroundColor = MaterialTheme.colors.secondary,
-                                contentColor = MaterialTheme.colors.onSecondary
-                            ),
-                        ) {
-                            Text("Install App")
-                        }
-                    }
-                }
-
-                // Content card
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                        .animateContentSize(),
-                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+            ExpandableHeader(expanded, headerContent = {
+                InstallButton(activity)
+            }) {
+                NavHost(
+                    navController = navController,
+                    startDestination = "Areas"
                 ) {
-                    NavHost(
-                        navController = navController,
-                        startDestination = "Areas"
-                    ) {
-                        composable("Areas") {
-                            EnterAnimation {
-                                AreasExplorer(activity, navController)
-                            }
-                        }
-                        composable("Areas/{areaId}") { backStackEntry ->
-                            val areaId = backStackEntry.arguments?.getString("areaId")
-                            if (areaId != null)
-                                EnterAnimation {
-                                    ZonesExplorer(activity, navController, areaId)
-                                }
-                            else
-                                Text(text = "Could not navigate to area: $areaId")
-                        }
-                        composable("Areas/{areaId}/Zones/{zoneId}") { backStackEntry ->
-                            val areaId = backStackEntry.arguments?.getString("areaId")
-                            val zoneId = backStackEntry.arguments?.getString("zoneId")
-                            if (areaId != null && zoneId != null)
-                                EnterAnimation {
-                                    SectorsExplorer(activity, navController, areaId, zoneId)
-                                }
-                            else
-                                Text(text = "Could not navigate to zone Z/$zoneId in A/$areaId")
-                        }
-                        composable("Areas/{areaId}/Zones/{zoneId}/Sectors/{sectorId}") { backStackEntry ->
-                            val areaId = backStackEntry.arguments?.getString("areaId")
-                            val zoneId = backStackEntry.arguments?.getString("zoneId")
-                            val sectorId = backStackEntry.arguments?.getString("sectorId")
-                            if (areaId != null && zoneId != null && sectorId != null)
-                                EnterAnimation {
-                                    SectorView(activity, areaId, zoneId, sectorId)
-                                }
-                            else
-                                Text(text = "Could not navigate to sector S/$sectorId in Z/$zoneId in A/$areaId")
-                        }
+                    areas(activity, navController)
+                    zones(activity, navController)
+                    sectors(activity, navController)
+                    sector(activity)
 
-                        if (path != null && path.isNotEmpty())
-                            try {
+                    if (navigateUri != null)
+                        try {
+                            val path = navigateUri.path
+                            if (path != null && path.isNotEmpty()) {
+                                Timber.v("Navigating to: $path")
                                 navController.navigate(path)
-                            } catch (e: IllegalArgumentException) {
-                                Timber.e(e, "Could not navigate to $path")
                             }
-                    }
+                        } catch (e: NullPointerException) {
+                            try {
+                                navController.searchNavigation(navigateUri)
+                            } catch (e: IllegalArgumentException) {
+                                Timber.e(e, "Could not navigate to $navigateUri")
+                            }
+                        }
+                    else Timber.v("The navigateUri is null, won't navigate anywhere else.")
                 }
             }
         },
@@ -266,53 +184,9 @@ fun MainView(activity: Activity, path: String? = null) {
 }
 
 @Composable
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@ExperimentalFoundationApi
-fun AreasExplorer(activity: Activity, navController: NavController) {
-    Explorer(activity, navController, 1, dataClassViewModel = AreasViewModel::class.java)
-}
-
-@Composable
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@ExperimentalFoundationApi
-fun ZonesExplorer(activity: Activity, navController: NavController, areaId: String) {
-    Explorer(
-        activity,
-        navController,
-        2,
-        dataClassViewModel = ZonesViewModel::class.java,
-        viewModelArguments = listOf(areaId)
-    )
-}
-
-@Composable
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@ExperimentalFoundationApi
-fun SectorsExplorer(
-    activity: Activity,
-    navController: NavController,
-    areaId: String,
-    zoneId: String
-) {
-    Explorer(
-        activity,
-        navController,
-        1,
-        dataClassViewModel = SectorsViewModel::class.java,
-        viewModelArguments = listOf(areaId, zoneId)
-    )
-}
-
-@Composable
 @ExperimentalAnimationApi
 fun SectorView(activity: Activity, areaId: String, zoneId: String, sectorId: String) {
-    val viewModel = SectorViewModel(areaId, zoneId, sectorId)
+    val viewModel = SectorViewModel(activity, areaId, zoneId, sectorId)
     val liveItems = viewModel.items
     val liveSector = viewModel.sector
     val sector: Sector? by liveSector.observeAsState(null)
@@ -323,16 +197,7 @@ fun SectorView(activity: Activity, areaId: String, zoneId: String, sectorId: Str
 
     liveItems.observe(activity as LifecycleOwner) { isLoading = it.isEmpty() }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 24.dp)
-    ) {
-        AnimatedVisibility(visible = isLoading, modifier = Modifier.size(52.dp)) {
-            CircularProgressIndicator()
-        }
-    }
+    LoadingIndicator(isLoading)
 
     Column {
         if (sector != null) {

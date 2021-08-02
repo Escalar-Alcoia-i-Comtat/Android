@@ -19,6 +19,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
@@ -28,11 +29,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.SectorFragment
-import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
 @ExperimentalBadgeUtils
@@ -51,6 +53,7 @@ class SectorActivity : LanguageAppCompatActivity() {
 
     private lateinit var binding: ActivitySectorBinding
     lateinit var firestore: FirebaseFirestore
+    lateinit var storage: FirebaseStorage
 
     /**
      * Tells if the content has been loaded correctly
@@ -104,6 +107,7 @@ class SectorActivity : LanguageAppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         firestore = Firebase.firestore
+        storage = Firebase.storage
         binding = ActivitySectorBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)

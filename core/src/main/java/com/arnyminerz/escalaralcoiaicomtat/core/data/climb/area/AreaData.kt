@@ -1,17 +1,17 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
 import androidx.appsearch.annotation.Document
-import java.util.Date
+import androidx.appsearch.app.AppSearchSchema
 
 @Document
 data class AreaData(
     @Document.Id var objectId: String,
-    @Document.StringProperty var displayName: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var displayName: String,
     @Document.CreationTimestampMillis var timestamp: Long,
     @Document.StringProperty var image: String,
     @Document.StringProperty var kmzReferenceUrl: String,
-    @Document.StringProperty var documentPath: String,
-    @Document.StringProperty var webUrl: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var documentPath: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var webUrl: String,
 ) {
     @Document.Namespace
     var namespace: String = Area.NAMESPACE
@@ -19,7 +19,7 @@ data class AreaData(
     fun area() = Area(
         objectId,
         displayName,
-        Date(timestamp),
+        timestamp,
         image,
         kmzReferenceUrl,
         documentPath,
@@ -33,7 +33,7 @@ fun Area.data(): AreaData {
         displayName,
         timestampMillis,
         imageReferenceUrl,
-        kmzReferenceUrl ?: "",
+        kmzReferenceUrl,
         metadata.documentPath,
         metadata.webURL ?: ""
     )

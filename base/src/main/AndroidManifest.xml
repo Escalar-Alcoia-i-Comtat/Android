@@ -19,7 +19,7 @@
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
 
     <application
-        android:name=".shared.App"
+        android:name=".core.shared.App"
         android:allowBackup="true"
         android:allowClearUserData="true"
         android:directBootAware="true"
@@ -79,6 +79,7 @@
             android:exported="true" />
         <activity
             android:name=".activity.LoadingActivity"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -116,6 +117,17 @@
         <activity
             android:name=".activity.MapsActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.NewMainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <meta-data
             android:name="firebase_performance_logcat_enabled"

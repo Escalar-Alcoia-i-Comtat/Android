@@ -16,9 +16,6 @@ const val ENABLE_AUTHENTICATION_DEFAULT = false
 const val PROFILE_IMAGE_SIZE_KEY = "PROFILE_IMAGE_SIZE"
 const val PROFILE_IMAGE_SIZE_DEFAULT = 512L
 
-const val INDEX_PATHS_KEY = "INDEX_PATHS"
-const val INDEX_PATHS_DEFAULT = false
-
 /**
  * The maximum amount of days that will be allowed to the user not having updated the app
  * before forcing an update.
@@ -43,12 +40,6 @@ var ENABLE_AUTHENTICATION = ENABLE_AUTHENTICATION_DEFAULT
 var PROFILE_IMAGE_SIZE = PROFILE_IMAGE_SIZE_DEFAULT
 
 /**
- * Sets if the paths should be indexed for search.
- * @since 20210722
- */
-var INDEX_PATHS = INDEX_PATHS_DEFAULT
-
-/**
  * Sets the default values for Remote Config
  */
 val REMOTE_CONFIG_DEFAULTS = mapOf(
@@ -56,7 +47,6 @@ val REMOTE_CONFIG_DEFAULTS = mapOf(
     SHOW_NON_DOWNLOADED_KEY to SHOW_NON_DOWNLOADED_DEFAULT,
     ENABLE_AUTHENTICATION_KEY to ENABLE_AUTHENTICATION_DEFAULT,
     PROFILE_IMAGE_SIZE_KEY to PROFILE_IMAGE_SIZE_DEFAULT,
-    INDEX_PATHS_KEY to INDEX_PATHS_DEFAULT,
 )
 const val REMOTE_CONFIG_MIN_FETCH_INTERVAL = 3600L
 

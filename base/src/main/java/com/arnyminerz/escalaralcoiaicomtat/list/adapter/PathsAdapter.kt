@@ -319,7 +319,7 @@ class PathsAdapter(
         }
 
         Timber.v("${path.objectId} > Checking if blocked...")
-        val blocked = path.isBlocked(firestore)
+        val blocked = path.blockingType
         Timber.d("${path.objectId} > Block status: $blocked")
 
         uiContext {
@@ -351,7 +351,7 @@ class PathsAdapter(
         val completions = arrayListOf<MarkedDataInt>()
 
         Timber.v("${path.objectId} > Adding completions listener...")
-        val registration = path.observeCompletions(firestore) {
+        val registration = path.observeCompletions(firestore, activity) {
             completions.add(it)
             processCompletions(path, user, commentsImageButton, completions)
         }

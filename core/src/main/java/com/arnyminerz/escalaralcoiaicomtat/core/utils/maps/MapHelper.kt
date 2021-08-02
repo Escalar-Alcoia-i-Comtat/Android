@@ -62,7 +62,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
@@ -81,12 +81,12 @@ class MapHelper {
         suspend fun getTarget(
             activity: Activity,
             marker: Marker,
-            firestore: FirebaseFirestore
+            storage: FirebaseStorage
         ): Intent? {
             Timber.d("Getting marker's title...")
             val title = uiContext { marker.getWindow().title }
             Timber.v("Searching in ${AREAS.size} cached areas...")
-            return getIntent(activity, title, firestore)
+            return getIntent(activity, title, storage)
         }
 
         fun getImageUrl(description: String?): String? {
@@ -735,10 +735,10 @@ class MapHelper {
      */
     fun infoCard(
         activity: Activity,
-        firestore: FirebaseFirestore,
+        storage: FirebaseStorage,
         marker: Marker,
         rootView: ViewGroup
-    ): MarkerWindow = MarkerWindow(activity, marker, rootView, firestore)
+    ): MarkerWindow = MarkerWindow(activity, marker, rootView, storage)
 
     /**
      * Changes the map view visibility
@@ -777,7 +777,7 @@ class MapHelper {
         private val activity: Activity,
         private val marker: Marker,
         private val rootView: ViewGroup,
-        private val firestore: FirebaseFirestore
+        private val storage: FirebaseStorage
     ) {
         private var destroyed = false
         private var shown = false
@@ -849,7 +849,7 @@ class MapHelper {
 
             doAsync {
                 // Info Window Data Class
-                val activityIntent = getTarget(activity, marker, firestore)
+                val activityIntent = getTarget(activity, marker, storage)
 
                 uiContext {
                     visibility(enterButton, activityIntent != null)

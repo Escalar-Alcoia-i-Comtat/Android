@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATACLASS_WAIT_CHILDREN_DELAY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_KMZ_FILE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
@@ -25,7 +26,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
-import com.arnyminerz.escalaralcoiaicomtat.shared.appNetworkState
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageException
@@ -71,7 +71,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
         Timber.d("Setting view for ${data.namespace} \"%s\"", data.displayName)
 
         holder.titleTextView.text = data.displayName
-        ViewCompat.setTransitionName(holder.titleTextView, data.transitionName)
+        ViewCompat.setTransitionName(holder.titleTextView, data.pin)
 
         holder.imageView.setOnClickListener {
             Timber.v("Showing \"%s\"", data.displayName)
@@ -110,7 +110,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
                     else -> DownloadDialog(
                         activity,
                         data,
-                        activity.firestore,
+                        activity.storage,
                         status == DownloadStatus.PARTIALLY
                     ) { requestDownload(it, holder) }.show {
                         updateUi(holder, data, true)
@@ -165,7 +165,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
                 updateDownloadStatus
             ) {
                 // Fetch the new downloa status
-                val newStatus = data.downloadStatus(activity, activity.firestore)
+                val newStatus = data.downloadStatus(activity, activity.storage)
                 // Store it in cache
                 synchronized(downloadStatuses) {
                     downloadStatuses[data.objectId] = newStatus

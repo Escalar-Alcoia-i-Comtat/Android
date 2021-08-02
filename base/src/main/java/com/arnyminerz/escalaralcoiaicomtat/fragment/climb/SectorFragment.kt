@@ -17,6 +17,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.appendChip
+import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_AREA_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_SECTOR_INDEX
@@ -33,7 +34,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.PathsAdapter
-import com.arnyminerz.escalaralcoiaicomtat.network.base.ConnectivityProvider
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -214,8 +214,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
             Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
             val sectors = arrayListOf<Sector>()
             AREAS[areaId]
-                ?.getChildren(sectorActivity?.firestore)?.get(zoneId)
-                ?.getChildren(sectorActivity?.firestore)
+                ?.getChildren(sectorActivity!!, sectorActivity.storage)?.get(zoneId)
+                ?.getChildren(sectorActivity, sectorActivity.storage)
                 ?.toCollection(sectors)
                 ?: run {
                     Timber.e("Could not get sectors from Area $areaId in $zoneId")
@@ -230,7 +230,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             }
 
             isDownloaded = if (sectorActivity != null)
-                sector.downloadStatus(sectorActivity, sectorActivity.firestore).isDownloaded()
+                sector.downloadStatus(sectorActivity, sectorActivity.storage).isDownloaded()
             else false
 
             if (activity != null && activity?.isDestroyed == false) {
@@ -244,7 +244,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
                 Timber.v("Loading paths...")
                 val paths = arrayListOf<Path>()
-                sector.getChildren(sectorActivity?.firestore)
+                sector.getChildren(sectorActivity!!, sectorActivity.storage)
                     .toCollection(paths)
                 paths.sortBy { it.sketchId }
                 Timber.v("Finished loading children sectors")

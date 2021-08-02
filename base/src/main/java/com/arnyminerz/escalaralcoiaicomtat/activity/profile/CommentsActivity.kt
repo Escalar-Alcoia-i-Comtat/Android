@@ -157,7 +157,7 @@ class CommentsActivity : AppCompatActivity() {
      * @since 20210719
      * @param pathDocument The path of the document.
      */
-    fun fetchPathData(pathDocument: String) {
+    private fun fetchPathData(pathDocument: String) {
         firestore.document(pathDocument)
             .get()
             .addOnSuccessListener { snapshot ->
@@ -168,7 +168,10 @@ class CommentsActivity : AppCompatActivity() {
                     Timber.v("Loaded path data, observing completions...")
                     completions.clear()
 
-                    val listener = path.observeCompletions(firestore) { onCompletionAdded(it) }
+                    val listener = path.observeCompletions(
+                        firestore,
+                        this@CommentsActivity
+                    ) { onCompletionAdded(it) }
                     completionListeners.add(listener)
 
                     uiContext { loadLists() }

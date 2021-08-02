@@ -1,16 +1,14 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
-import android.os.Parcel
+import android.app.Activity
 import androidx.annotation.UiThread
-import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.BlockingTypeParceler
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.PitchParceler
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.cache
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toTimestamp
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.DocumentSnapshot
@@ -19,16 +17,22 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
 import timber.log.Timber
-import java.util.Date
 
+/**
+ * Creates a new [Path] instance.
+ * @author Arnau Mora
+ * @since 20210724
+ */
 @Parcelize
 @TypeParceler<Pitch, PitchParceler>
-class Path(
+@TypeParceler<BlockingType, BlockingTypeParceler>
+class Path internal constructor(
     override val objectId: String,
-    override val timestamp: Date,
+    override val timestampMillis: Long,
     val sketchId: Long,
     val displayName: String,
     val grades: Grade.GradesList,
@@ -42,24 +46,15 @@ class Path(
     var rebuiltBy: String?,
     val downloaded: Boolean = false,
     val documentPath: String,
-) : DataClassImpl(objectId, NAMESPACE, timestamp.time), Comparable<Path> {
-    constructor(parcel: Parcel) : this(
-        parcel.readString()!!,
-        parcel.readString().toTimestamp()!!,
-        parcel.readLong(),
-        parcel.readString()!!,
-        Grade.GradesList(),
-        arrayListOf(),
-        arrayListOf(),
-        arrayListOf(),
-        parcel.readParcelable<FixedSafesData>(FixedSafesData::class.java.classLoader)!!,
-        parcel.readParcelable<RequiredSafesData>(RequiredSafesData::class.java.classLoader)!!,
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readInt() == 1,
-        parcel.readString()!!,
-    )
+) : DataClassImpl(objectId, NAMESPACE, timestampMillis), Comparable<Path> {
+    /**
+     * Stores is the path is blocked.
+     * @author Arnau Mora
+     * @since 20210724
+     */
+    @IgnoredOnParcel
+    var blockingType: BlockingType = BlockingType.UNKNOWN
+        private set
 
     /**
      * Creates a new [Path] from the data of a [DocumentSnapshot].
@@ -69,7 +64,7 @@ class Path(
      */
     constructor(data: DocumentSnapshot) : this(
         data.id,
-        data.getDate("created")!!,
+        data.getDate("created")!!.time,
         data.getString("sketchId")?.toLongOrNull() ?: 0L,
         data.getString("displayName")!!,
         Grade.GradesList(),
@@ -146,41 +141,6 @@ class Path(
         }
 
     /**
-     * Checks if the path is blocked or not
-     * @author Arnau Mora
-     * @since 20210316
-     * @param firestore The Firestore instance to fetch new data
-     * @return A matching BlockingType class
-     */
-    @WorkerThread
-    suspend fun isBlocked(firestore: FirebaseFirestore): BlockingType {
-        var blockStatus = cache.getBlockStatus(objectId)
-        return if (blockStatus != null) {
-            Timber.v("There's already an stored block status for $objectId: $blockStatus")
-            blockStatus
-        } else {
-            Timber.d("Fetching...")
-            val ref = firestore.document(documentPath)
-
-            Timber.v("Checking if \"$documentPath\" is blocked...")
-            val task = ref.get()
-            val result = task.await()
-            blockStatus = if (!task.isSuccessful) {
-                val e = task.exception!!
-                Timber.w(e, "Could not check if path is blocked")
-                BlockingType.UNKNOWN
-            } else {
-                val blocked = result!!.getString("blocked")
-                val blockingType = BlockingType.find(blocked)
-                Timber.v("Blocking status for \"$displayName\": $blockingType")
-                blockingType
-            }
-            cache.storeBlockStatus(objectId, blockStatus)
-            blockStatus
-        }
-    }
-
-    /**
      * Checks if the Path has a description or built by information
      * @author Arnau Mora
      * @since 20210316
@@ -230,16 +190,19 @@ class Path(
      * @author Arnau Mora
      * @since 20210719
      * @param firestore The [FirebaseFirestore] reference for fetching updates.
+     * @param activity The [Activity] to attach the listener to. When the activity is destroyed,
+     * the observer will also be removed.
      * @param listener This will get called when a new completed path is added.
      * @return The listener registration for cancelling the listener when needed.
      */
     fun observeCompletions(
         firestore: FirebaseFirestore,
+        activity: Activity,
         @UiThread listener: (data: MarkedDataInt) -> Unit
     ) =
         firestore.document(documentPath)
             .collection("Completions")
-            .addSnapshotListener { value, error ->
+            .addSnapshotListener(activity) { value, error ->
                 if (error != null)
                     Timber.e(error, "An error occurred while adding a new snapshot.")
                 else if (value != null) {
@@ -252,6 +215,35 @@ class Path(
                                 uiContext { listener(markedDataInt) }
                         }
                     }
+                }
+            }
+
+    /**
+     * Observes the block status of the path, and notifies the app whenever it changes.
+     * @author Arnau Mora
+     * @since 20210730
+     * @param firestore The [FirebaseFirestore] reference to fetch the updates from the server.
+     * @param activity The [Activity] to attach the listener to. When the activity is destroyed,
+     * the observer will also be removed.
+     * @param listener This will get called when a new completed path is added.
+     * @return The listener registration for cancelling the listener when needed.
+     */
+    fun observeBlockStatus(
+        firestore: FirebaseFirestore,
+        activity: Activity,
+        @UiThread listener: (blocking: BlockingType) -> Unit
+    ) =
+        firestore.document(documentPath)
+            .addSnapshotListener(activity) { snapshot, error ->
+                Timber.v("$this > Got snapshot update!")
+                if (error != null)
+                    Timber.e(error, "$this > Detected an error in a snapshot.")
+                else if (snapshot != null && snapshot.exists()) {
+                    Timber.v("$this > Processing blocked status...")
+                    val blocked = snapshot.getString("blocked")
+                    val blockingType = BlockingType.find(blocked)
+                    this.blockingType = blockingType
+                    listener(blockingType)
                 }
             }
 

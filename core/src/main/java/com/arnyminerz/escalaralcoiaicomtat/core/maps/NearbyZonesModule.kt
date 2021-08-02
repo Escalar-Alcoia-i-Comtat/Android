@@ -15,8 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.NearbyZonesError
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.getZones
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.getChildren
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.GeoMarker
@@ -42,6 +41,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
 /**
@@ -165,6 +165,8 @@ class NearbyZonesModule(
     fun updateNearbyZones(location: Location? = null) {
         val nearbyZonesErrors = nearbyZonesReady()
 
+        val storage = Firebase.storage
+
         visibility(binding.nearbyZonesCardView, nearbyZonesErrors.isEmpty())
 
         if (nearbyZonesErrors.isNotEmpty()) {
@@ -229,8 +231,7 @@ class NearbyZonesModule(
             mapHelper?.clearSymbols()
 
             doAsync {
-                val zones = arrayListOf<Zone>()
-                AREAS.getZones(firestore).toCollection(zones)
+                val zones = AREAS.getChildren(context!!, storage)
                 Timber.v("Iterating through ${zones.size} zones.")
                 Timber.v("Current Location: [${location.latitude},${location.longitude}]")
                 for (zone in zones) {
