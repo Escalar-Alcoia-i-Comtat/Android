@@ -35,15 +35,13 @@ import timber.log.Timber
  * @author Arnau Mora
  * @since 20210313
  * @param application The [Application] that owns the app execution.
- * @param firestore The [FirebaseFirestore] reference for fetching data from the server.
  * @param progressCallback This will get called when the loading progress is updated.
  * @see AREAS
  * @return A collection of areas
  */
 @WorkerThread
-suspend fun loadAreas(
+suspend fun FirebaseFirestore.loadAreas(
     application: Application,
-    firestore: FirebaseFirestore,
     enableSearch: Boolean = true,
     @UiThread progressCallback: (current: Int, total: Int) -> Unit
 ) {
@@ -57,23 +55,19 @@ suspend fun loadAreas(
     Timber.d("Fetching areas...")
     try {
         Timber.v("Getting paths...")
-        val pathsSnapshot = firestore
-            .collectionGroup("Paths")
+        val pathsSnapshot = collectionGroup("Paths")
             .get()
             .await()
         Timber.v("Getting sectors...")
-        val sectorsSnapshot = firestore
-            .collectionGroup("Sectors")
+        val sectorsSnapshot = collectionGroup("Sectors")
             .get()
             .await()
         Timber.v("Getting zones...")
-        val zonesSnapshot = firestore
-            .collectionGroup("Zones")
+        val zonesSnapshot = collectionGroup("Zones")
             .get()
             .await()
         Timber.v("Getting areas...")
-        val areasSnapshot = firestore
-            .collectionGroup("Areas")
+        val areasSnapshot = collectionGroup("Areas")
             .get()
             .await()
 
