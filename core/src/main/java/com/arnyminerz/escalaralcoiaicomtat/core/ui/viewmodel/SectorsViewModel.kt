@@ -10,7 +10,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.currentUrl
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.asyncCoroutineScope
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import timber.log.Timber
 
 class SectorsViewModel<A : Activity>(
@@ -29,7 +31,9 @@ class SectorsViewModel<A : Activity>(
                 Timber.i("Loading areas: $current/$total")
             })
         }
-        val sectors = AREAS[areaId]?.get(zoneId)?.getChildren(context, storage)
+        val zone = AREAS[areaId]?.get(zoneId)
+        uiContext { currentUrl.value = zone?.webUrl }
+        val sectors = zone?.getChildren(context, storage)
         if (sectors != null) {
             for (sector in sectors)
                 sector.image(context, storage)
