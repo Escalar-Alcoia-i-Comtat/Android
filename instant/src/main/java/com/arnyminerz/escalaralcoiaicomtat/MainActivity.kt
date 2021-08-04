@@ -1,8 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat
 
 import android.app.Activity
+import android.app.assist.AssistContent
 import android.net.Uri
 import android.os.Bundle
+import android.webkit.URLUtil
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -62,6 +64,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.AFTERNOON
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ALL_DAY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MORNING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.currentUrl
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorViewModel
 import com.arnyminerz.escalaralcoiaicomtat.shared.APP_TYPE_PROP
 import com.arnyminerz.escalaralcoiaicomtat.shared.STATUS_INSTALLED
@@ -109,6 +112,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onProvideAssistContent(outContent: AssistContent?) {
+        super.onProvideAssistContent(outContent)
+
+        val url = currentUrl.value
+        if (url != null && URLUtil.isValidUrl(url))
+            outContent?.webUri = Uri.parse(url)
+        else Timber.w("Cannot provide assist url since invalid url or null ($url).")
     }
 
     /**
