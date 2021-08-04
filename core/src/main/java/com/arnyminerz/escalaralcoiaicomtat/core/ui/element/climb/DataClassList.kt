@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -27,7 +28,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
@@ -77,36 +77,29 @@ fun <D : DataClass<*, *>> Context.DataClassList(
             val cacheImageFile = dataClass.cacheImageFile(this@DataClassList)
 
             Timber.v("$dataClass > Loading placeholder...")
-            val defaultImage: ImageBitmap = if (cacheImageFile.exists()) {
+            if (cacheImageFile.exists()) {
                 Timber.i("$dataClass > Loading image from cache ($cacheImageFile).")
                 val bitmap = BitmapFactory.decodeFile(cacheImageFile.path)
-                bitmap.asImageBitmap()
+
+                dataClass.DataClassItem(navController, bitmap, fixedHeight)
             } else {
                 val drawable = ContextCompat.getDrawable(this@DataClassList, placeholder)
                 val placeholderBitmap = drawable!!.toBitmap()
-                placeholderBitmap.asImageBitmap()
-            }
-            var image by remember { mutableStateOf(defaultImage) }
 
-            Timber.v("$dataClass > Iterating...")
-            if (!cacheImageFile.exists()) {
+                var image by remember { mutableStateOf(placeholderBitmap) }
+
                 Timber.i("$dataClass > Loading image from Firebase...")
-                val storage = Firebase.storage
-                storage
+                Firebase.storage
                     .getReferenceFromUrl(dataClass.imageReferenceUrl)
-                    .stream
-                    .addOnSuccessListener { snapshot ->
+                    .getFile(cacheImageFile)
+                    .addOnSuccessListener {
                         Timber.v("$dataClass > Finished loading image.")
                         doAsync {
-                            Timber.v("$dataClass > Opening output stream...")
-                            val outputStream = cacheImageFile.outputStream()
-                            val stream = snapshot.stream
-                            Timber.v("$dataClass > Storing image to cache ($cacheImageFile)...")
-                            outputStream.use { stream.copyTo(it) }
                             Timber.v("$dataClass > Decoding image stream...")
-                            val bitmap = BitmapFactory.decodeFile(cacheImageFile.path)
-                            Timber.v("$dataClass > Updating image...")
-                            image = bitmap.asImageBitmap()
+                            val bitmap: Bitmap? = BitmapFactory.decodeFile(cacheImageFile.path)
+                            if (bitmap != null)
+                                image = bitmap
+                            else Timber.e("Could not decode bitmap. Bitmap is null.")
                         }
                     }
                     .addOnFailureListener { error ->
@@ -117,8 +110,9 @@ fun <D : DataClass<*, *>> Context.DataClassList(
                         val total = snapshot.totalByteCount
                         Timber.v("$dataClass > Loading image... $progress/$total")
                     }
+
+                dataClass.DataClassItem(navController, image, fixedHeight)
             }
-            dataClass.DataClassItem(navController, image, fixedHeight)
         }
     }
 }
@@ -129,7 +123,7 @@ private const val CARD_CORNER_RADIUS = 16
 @ExperimentalCoilApi
 fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.DataClassItem(
     navController: NavController,
-    image: ImageBitmap,
+    image: Bitmap,
     fixedHeight: Dp? = null
 ) {
     val imageRatio = image.width.toFloat() / image.height
@@ -154,7 +148,7 @@ fun <A : DataClassImpl, B : DataClassImpl> DataClass<A, B>.DataClassItem(
     ) {
         Box {
             Image(
-                image,
+                image.asImageBitmap(),
                 contentScale = ContentScale.Crop,
                 contentDescription = "$displayName image",
                 modifier = imageModifiers
