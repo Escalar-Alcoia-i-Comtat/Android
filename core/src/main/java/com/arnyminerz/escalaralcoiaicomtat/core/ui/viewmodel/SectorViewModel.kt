@@ -10,6 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.asyncCoroutineScope
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
@@ -27,7 +28,7 @@ class SectorViewModel(
     private val innerSector: Sector?
         get() = AREAS[areaId]?.get(zoneId)?.get(sectorId)
 
-    val sector: LiveData<Sector?> = liveData {
+    val sector: LiveData<Sector?> = liveData(asyncCoroutineScope.coroutineContext) {
         if (AREAS.isEmpty()) {
             val application = (context as? Activity)?.application ?: context as Application
             firestore.loadAreas(application, progressCallback = { current, total ->
