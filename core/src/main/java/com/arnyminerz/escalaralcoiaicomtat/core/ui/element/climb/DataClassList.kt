@@ -49,7 +49,6 @@ import timber.log.Timber
  * A list of items that show the image of a [DataClass].
  * @author Arnau Mora
  * @since 20210724
- * @param context The context where this list will be shown
  * @param navController The controller for managing the current navigation state in the app`.
  * @param items The items to show.
  * @param placeholder The image resource to show while loading the [DataClass]' image.
