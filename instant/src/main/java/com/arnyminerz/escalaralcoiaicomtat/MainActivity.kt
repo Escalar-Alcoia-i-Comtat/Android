@@ -79,6 +79,7 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
 import com.arnyminerz.escalaralcoiaicomtat.utils.searchNavigation
 import com.google.android.gms.instantapps.InstantApps
 import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
@@ -95,6 +96,10 @@ class MainActivity : ComponentActivity() {
 
         instantInfoSetup()
         dataCollectionSetUp()
+
+        val auth = Firebase.auth
+        if (auth.currentUser == null)
+            auth.signInAnonymously()
 
         setContent {
             EscalarAlcoiaIComtatTheme {
