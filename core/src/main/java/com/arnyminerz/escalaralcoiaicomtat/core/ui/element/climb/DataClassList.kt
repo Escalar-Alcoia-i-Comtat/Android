@@ -79,9 +79,15 @@ fun <D : DataClass<*, *>> Context.DataClassList(
             Timber.v("$dataClass > Loading placeholder...")
             if (cacheImageFile.exists()) {
                 Timber.i("$dataClass > Loading image from cache ($cacheImageFile).")
-                val bitmap = BitmapFactory.decodeFile(cacheImageFile.path)
+                val bitmap: Bitmap? = BitmapFactory.decodeFile(cacheImageFile.path)
 
-                dataClass.DataClassItem(navController, bitmap, fixedHeight)
+                if (bitmap != null)
+                    dataClass.DataClassItem(navController, bitmap, fixedHeight)
+                else {
+                    val drawable = ContextCompat.getDrawable(this@DataClassList, placeholder)
+                    val placeholderBitmap = drawable!!.toBitmap()
+                    dataClass.DataClassItem(navController, placeholderBitmap, fixedHeight)
+                }
             } else {
                 val drawable = ContextCompat.getDrawable(this@DataClassList, placeholder)
                 val placeholderBitmap = drawable!!.toBitmap()
