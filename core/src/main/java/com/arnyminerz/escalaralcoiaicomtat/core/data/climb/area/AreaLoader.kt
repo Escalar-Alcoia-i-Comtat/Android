@@ -115,6 +115,7 @@ suspend fun FirebaseFirestore.loadAreas(
         // The key is the sector id, the value the snapshot of the path
         val sectorIdPathDocument = arrayMapOf<String, ArrayList<DocumentSnapshot>>()
         for (pathDocument in pathDocuments) {
+            uiContext { progressCallback?.invoke(++counter, count) }
             val sectorId = pathDocument.reference.parent.parent!!.id
             if (sectorIdPathDocument.containsKey(sectorId))
                 sectorIdPathDocument[sectorId] = arrayListOf(pathDocument)
