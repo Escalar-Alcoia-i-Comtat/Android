@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.content.Intent
 import android.content.IntentSender
-import android.os.Build
 import android.os.Bundle
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -13,7 +12,6 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerA
 import com.arnyminerz.escalaralcoiaicomtat.core.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
@@ -28,7 +26,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
-import com.arnyminerz.escalaralcoiaicomtat.createNotificationChannels
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -85,9 +82,6 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             return
         } else
             Timber.v("  Won't show intro.")
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            createNotificationChannels()
 
         deepLinkPath = getExtra(EXTRA_LINK_PATH)
 
@@ -251,63 +245,58 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         }
         loading = true
         binding.progressTextView.setText(R.string.status_downloading)
-        try {
-            firestore.loadAreas(application) { progress, max ->
-                Timber.i("Download progress: $progress / $max")
-                if (max >= 0) {
-                    binding.progressBar.max = max
-                    binding.progressBar.setProgressCompat(progress, true)
-                    binding.progressTextView.text =
-                        getString(R.string.status_loading_progress, progress, max)
-                } else {
-                    visibility(binding.progressBar, false)
-                    binding.progressBar.isIndeterminate = true
-                    visibility(binding.progressBar, true)
-                    binding.progressTextView.setText(R.string.status_storing)
-                }
-            }
-            if (AREAS.size > 0) {
-                if (deepLinkPath != null) {
-                    uiContext {
-                        binding.progressTextView.setText(R.string.status_loading_deep_link)
-                        binding.progressBar.visibility(false)
-                        binding.progressBar.isIndeterminate = true
-                        binding.progressBar.visibility(true)
-                    }
 
-                    val intent =
-                        DataClass.getIntent(this@LoadingActivity, deepLinkPath!!, storage)
-                    uiContext {
-                        if (intent != null)
-                            startActivity(intent)
-                        /*else if (BuildConfig.DEBUG)
-                            launch(SectorActivity::class.java) {
-                                putExtra(EXTRA_AREA, "WWQME983XhriXVhtVxFu")
-                                putExtra(EXTRA_ZONE, "LtYZWlzTPwqHsWbYIDTt")
-                                putExtra(EXTRA_SECTOR_COUNT, 15)
-                                putExtra(EXTRA_SECTOR_INDEX, 11)
-                            }*/
-                        else
-                            launch(MainActivity::class.java)
-                    }
-                }/* else if (BuildConfig.DEBUG)
+        firestore.loadAreas(application) { progress, max ->
+            Timber.i("Download progress: $progress / $max")
+            if (max >= 0 && progress < max) {
+                binding.progressBar.max = max
+                binding.progressBar.setProgressCompat(progress, true)
+                binding.progressTextView.text =
+                    getString(R.string.status_loading_progress, progress, max)
+            } else {
+                visibility(binding.progressBar, false)
+                binding.progressBar.isIndeterminate = true
+                visibility(binding.progressBar, true)
+                binding.progressTextView.setText(R.string.status_storing)
+            }
+        }
+        if (AREAS.size > 0) {
+            if (deepLinkPath != null) {
+                uiContext {
+                    binding.progressTextView.setText(R.string.status_loading_deep_link)
+                    binding.progressBar.visibility(false)
+                    binding.progressBar.isIndeterminate = true
+                    binding.progressBar.visibility(true)
+                }
+
+                val intent =
+                    DataClass.getIntent(this@LoadingActivity, deepLinkPath!!, storage)
+                uiContext {
+                    if (intent != null)
+                        startActivity(intent)
+                    /*else if (BuildConfig.DEBUG)
+                        launch(SectorActivity::class.java) {
+                            putExtra(EXTRA_AREA, "WWQME983XhriXVhtVxFu")
+                            putExtra(EXTRA_ZONE, "LtYZWlzTPwqHsWbYIDTt")
+                            putExtra(EXTRA_SECTOR_COUNT, 15)
+                            putExtra(EXTRA_SECTOR_INDEX, 11)
+                        }*/
+                    else
+                        launch(MainActivity::class.java)
+                }
+            }/* else if (BuildConfig.DEBUG)
                         launch(SectorActivity::class.java) {
                             putExtra(EXTRA_AREA, "WWQME983XhriXVhtVxFu")
                             putExtra(EXTRA_ZONE, "LtYZWlzTPwqHsWbYIDTt")
                             putExtra(EXTRA_SECTOR_COUNT, 9)
                             putExtra(EXTRA_SECTOR_INDEX, 6)
                         }*/
-                else uiContext {
-                    launch(MainActivity::class.java)
-                }
-            } else if (!appNetworkState.hasInternet)
-                uiContext {
-                    noInternetAccess()
-                }
-        } catch (_: NoInternetAccessException) {
+            else uiContext {
+                launch(MainActivity::class.java)
+            }
+        } else if (!appNetworkState.hasInternet)
             uiContext {
                 noInternetAccess()
             }
-        }
     }
 }

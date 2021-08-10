@@ -35,7 +35,7 @@ class Path internal constructor(
     override val timestampMillis: Long,
     val sketchId: Long,
     val displayName: String,
-    val grades: Grade.GradesList,
+    val grades: ArrayList<Grade>,
     val heights: ArrayList<Long>,
     val endings: ArrayList<EndingType>,
     val pitches: ArrayList<Pitch>,
@@ -67,7 +67,7 @@ class Path internal constructor(
         data.getDate("created")!!.time,
         data.getString("sketchId")?.toLongOrNull() ?: 0L,
         data.getString("displayName")!!,
-        Grade.GradesList(),
+        arrayListOf<Grade>(),
         arrayListOf(),
         arrayListOf(),
         arrayListOf(),
@@ -149,8 +149,14 @@ class Path internal constructor(
     fun hasInfo(): Boolean =
         (description != null && description.isNotBlank()) || (builtBy != null && builtBy.isNotBlank())
 
-    fun grade(): Grade =
-        if (grades.size > 0) grades.first() else throw NoSuchElementException("Grades list is empty")
+    /**
+     * Gets the first [Grade] from the [grades] list.
+     * @author Arnau Mora
+     * @since 20210811
+     * @throws NoSuchElementException When [grades] is empty.
+     */
+    @Throws(NoSuchElementException::class)
+    fun grade(): Grade = grades.first()
 
     /**
      * Fetches all the completions that have been requested by the users.

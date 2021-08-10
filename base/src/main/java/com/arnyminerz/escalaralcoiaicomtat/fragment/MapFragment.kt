@@ -13,7 +13,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_ZOOM
-import com.arnyminerz.escalaralcoiaicomtat.core.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
@@ -280,10 +279,6 @@ class MapFragment : NetworkChangeListenerFragment() {
             Timber.e(e, "Could not load KML")
             Firebase.crashlytics.recordException(e)
             uiContext { toast(context, R.string.toast_error_internal) }
-        } catch (e: NoInternetAccessException) {
-            Timber.e(e, "Could not load KML")
-            Firebase.crashlytics.recordException(e)
-            uiContext { toast(context, R.string.toast_error_no_internet) }
         } catch (e: MapNotInitializedException) {
             Timber.e(e, "Could not load KML")
             Firebase.crashlytics.recordException(e)

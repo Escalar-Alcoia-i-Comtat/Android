@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.map
 
 import android.content.Context
 import androidx.annotation.WorkerThread
-import com.arnyminerz.escalaralcoiaicomtat.core.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.MEGABYTE
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getElementByTagName
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getElementByTagNameWithAttribute
@@ -37,14 +36,10 @@ import javax.xml.parsers.DocumentBuilderFactory
 /**
  * Loads the KML address or KMZ file. Should be called asyncronously.
  * @throws FileNotFoundException When the KMZ file could not be found
- * @throws NoInternetAccessException When no Internet access was detected
  * @throws IllegalStateException When both kmlAddress and kmzFile are null
  * @return The LoadResult with the loaded data
  */
-@Throws(
-    FileNotFoundException::class,
-    NoInternetAccessException::class
-)
+@Throws(FileNotFoundException::class)
 @WorkerThread
 suspend fun loadKML(
     context: Context,
