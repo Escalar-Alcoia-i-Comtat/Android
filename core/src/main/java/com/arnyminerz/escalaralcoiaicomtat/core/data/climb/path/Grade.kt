@@ -7,6 +7,7 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import androidx.annotation.ColorRes
+import androidx.annotation.IntRange
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.join
 import com.arnyminerz.escalaralcoiaicomtat.core.view.getColor
@@ -67,8 +68,10 @@ class Grade(val displayName: String) : Parcelable {
      * @param count The amount of items to show, set to -1 for all
      * @return The colored text
      */
-    fun getSpannable(context: Context, count: Int = Int.MAX_VALUE): SpannableString =
-        listOf(this).take(count).getSpannable(context, count)
+    fun getSpannable(
+        context: Context,
+        @IntRange(from = 0, to = Int.MAX_VALUE.toLong()) count: Int = Int.MAX_VALUE
+    ): SpannableString = listOf(this).take(count).getSpannable(context, count)
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(displayName)
@@ -182,7 +185,10 @@ fun Iterable<Grade>?.toString(): String {
     return builder.toString()
 }
 
-fun Iterable<Grade>.getSpannable(context: Context, count: Int = Int.MAX_VALUE): SpannableString {
+fun Iterable<Grade>.getSpannable(
+    context: Context,
+    @IntRange(from = 0, to = Int.MAX_VALUE.toLong()) count: Int = Int.MAX_VALUE
+): SpannableString {
     val spannable = SpannableString(toString().split("\n").take(count).join("\n"))
     var charCounter = 0
     for (line in toString().split("\n").take(count))
