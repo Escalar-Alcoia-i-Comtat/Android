@@ -15,8 +15,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 
-fun Collection<Grade>.toGradesList(): Grade.GradesList = Grade.GradesList(this)
-
 private const val PATH_GRADE_SPAN_PADDING = 3
 
 /**
@@ -70,94 +68,7 @@ class Grade(val displayName: String) : Parcelable {
      * @return The colored text
      */
     fun getSpannable(context: Context, count: Int = Int.MAX_VALUE): SpannableString =
-        gradesListOf(this).sublist(count).getSpannable(context, count)
-
-    class GradesList() : ArrayList<Grade>() {
-        constructor(items: Collection<Grade>) : this() {
-            addAll(items)
-        }
-
-        fun sublist(count: Int): GradesList {
-            return try {
-                take(count)
-            } catch (_: IllegalArgumentException) {
-                this
-            }.toGradesList()
-        }
-
-        fun addAllHere(grades: MutableList<Grade>): GradesList {
-            this.addAll(grades)
-            return this
-        }
-
-        fun gradeNames(): ArrayList<String> {
-            val list = arrayListOf<String>()
-            for (grade in this)
-                list.add(grade.displayName)
-            return list
-        }
-
-        fun toJSONStringArray(): String {
-            var result = "["
-
-            for (u in this)
-                result += "\"${u.toJSON()}\","
-            result = result.substring(0, result.length - 1)
-
-            result += "]"
-            return result
-        }
-
-        override fun toString(): String {
-            val builder = StringBuilder()
-
-            for (item in this)
-                builder.append(item.toString() + "\n")
-
-            return builder.toString()
-        }
-
-        fun getSpannable(context: Context, count: Int = Int.MAX_VALUE): SpannableString {
-            val spannable = SpannableString(toString().split("\n").take(count).join("\n"))
-            var charCounter = 0
-            for (line in toString().split("\n").take(count))
-                if (line.isNotEmpty())
-                    for (grade in line.split("/")) {
-                        if (grade.isEmpty()) continue
-
-                        Timber.v("Generating spannable for \"$grade\". Current char: $charCounter")
-                        if (grade.indexOf(" ") >= 0) {
-                            val prefix = grade.substring(0, 1)
-                            val gradePiece = grade.substring(PATH_GRADE_SPAN_PADDING)
-                            Timber.v("  It is pitch! GradePiece: $gradePiece")
-                            spannable.setSpan(
-                                ForegroundColorSpan(getColor(context, gradeColor(prefix))),
-                                charCounter,
-                                charCounter + PATH_GRADE_SPAN_PADDING,
-                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                            )
-                            spannable.setSpan(
-                                ForegroundColorSpan(getColor(context, gradeColor(gradePiece))),
-                                // Adding 3 for starting after L#
-                                charCounter + PATH_GRADE_SPAN_PADDING,
-                                // Should be the 3 added before and then -1 for the indexing of length
-                                charCounter + PATH_GRADE_SPAN_PADDING + gradePiece.length,
-                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                            )
-                        } else {
-                            spannable.setSpan(
-                                ForegroundColorSpan(getColor(context, gradeColor(grade))),
-                                charCounter,
-                                charCounter + grade.length,
-                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                            )
-                        }
-                        charCounter += grade.length + 1 // Line jump
-                    }
-
-            return spannable
-        }
-    }
+        listOf(this).take(count).getSpannable(context, count)
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(displayName)
@@ -172,20 +83,8 @@ class Grade(val displayName: String) : Parcelable {
 
         override fun newArray(size: Int): Array<Grade?> = arrayOfNulls(size)
 
-        /**
-         * Creates a [GradesList] with [grades] as contents.
-         * @author Arnau Mora
-         * @since 20210406
-         * @param grades The grades to add to the [GradesList]
-         * @return A new [GradesList] populated with [grades].
-         */
-        fun gradesListOf(vararg grades: Grade): GradesList =
-            GradesList().apply {
-                addAll(grades)
-            }
-
-        fun fromDB(obj: String): GradesList {
-            val list = GradesList()
+        fun fromDB(obj: String): List<Grade> {
+            val list = arrayListOf<Grade>()
             if (obj.contains("\n"))
                 for (ln in obj
                     .replace("\r", "")
@@ -208,8 +107,8 @@ class Grade(val displayName: String) : Parcelable {
         }
 
         @Throws(JSONException::class)
-        fun fromJSONArrayList(list: JSONArray): GradesList {
-            val lst = gradesListOf()
+        fun fromJSONArrayList(list: JSONArray): List<Grade> {
+            val lst = arrayListOf<Grade>()
             for (o in 0 until list.length())
                 with(list[o]) {
                     if (this is String) {
@@ -221,8 +120,8 @@ class Grade(val displayName: String) : Parcelable {
             return lst
         }
 
-        fun listFromStrings(strings: Collection<String>): GradesList {
-            val grades = gradesListOf()
+        fun listFromStrings(strings: Collection<String>): List<Grade> {
+            val grades = arrayListOf<Grade>()
             for (string in strings)
                 with(Grade(string)) {
                     grades.add(this)
@@ -253,4 +152,73 @@ class Grade(val displayName: String) : Parcelable {
             Pair('L', gradeLColor)
         )
     }
+}
+
+fun Iterable<Grade>.gradeNames(): ArrayList<String> {
+    val list = arrayListOf<String>()
+    for (grade in this)
+        list.add(grade.displayName)
+    return list
+}
+
+fun Iterable<Grade>.toJSONStringArray(): String {
+    var result = "["
+
+    for (u in this)
+        result += "\"${u.toJSON()}\","
+    result = result.substring(0, result.length - 1)
+
+    result += "]"
+    return result
+}
+
+fun Iterable<Grade>?.toString(): String {
+    val builder = StringBuilder()
+
+    if (this != null)
+        for (item in this)
+            builder.append(item.toString() + "\n")
+
+    return builder.toString()
+}
+
+fun Iterable<Grade>.getSpannable(context: Context, count: Int = Int.MAX_VALUE): SpannableString {
+    val spannable = SpannableString(toString().split("\n").take(count).join("\n"))
+    var charCounter = 0
+    for (line in toString().split("\n").take(count))
+        if (line.isNotEmpty())
+            for (grade in line.split("/")) {
+                if (grade.isEmpty()) continue
+
+                Timber.v("Generating spannable for \"$grade\". Current char: $charCounter")
+                if (grade.indexOf(" ") >= 0) {
+                    val prefix = grade.substring(0, 1)
+                    val gradePiece = grade.substring(PATH_GRADE_SPAN_PADDING)
+                    Timber.v("  It is pitch! GradePiece: $gradePiece")
+                    spannable.setSpan(
+                        ForegroundColorSpan(getColor(context, Grade.gradeColor(prefix))),
+                        charCounter,
+                        charCounter + PATH_GRADE_SPAN_PADDING,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    spannable.setSpan(
+                        ForegroundColorSpan(getColor(context, Grade.gradeColor(gradePiece))),
+                        // Adding 3 for starting after L#
+                        charCounter + PATH_GRADE_SPAN_PADDING,
+                        // Should be the 3 added before and then -1 for the indexing of length
+                        charCounter + PATH_GRADE_SPAN_PADDING + gradePiece.length,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                } else {
+                    spannable.setSpan(
+                        ForegroundColorSpan(getColor(context, Grade.gradeColor(grade))),
+                        charCounter,
+                        charCounter + grade.length,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                }
+                charCounter += grade.length + 1 // Line jump
+            }
+
+    return spannable
 }
