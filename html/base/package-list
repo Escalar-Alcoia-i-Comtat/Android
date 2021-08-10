@@ -440,6 +440,23 @@ $dokka.location:com.arnyminerz.escalaralcoiaicomtat.ui.theme//Purple300/#/Pointi
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.ui.theme//Shapes/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.ui.theme/-shapes.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.ui.theme//Typography/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.ui.theme/-typography.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.ui.theme//Yellow100/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.ui.theme/-yellow100.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup////PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/index.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/EscalarAlcoiaIComtatInitializer///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-escalar-alcoia-i-comtat-initializer/index.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/EscalarAlcoiaIComtatInitializer/EscalarAlcoiaIComtatInitializer/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-escalar-alcoia-i-comtat-initializer/-escalar-alcoia-i-comtat-initializer.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/EscalarAlcoiaIComtatInitializer/create/#android.content.Context/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-escalar-alcoia-i-comtat-initializer/create.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/EscalarAlcoiaIComtatInitializer/dependencies/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-escalar-alcoia-i-comtat-initializer/dependencies.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/NotificationChannelsInitializer///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-notification-channels-initializer/index.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/NotificationChannelsInitializer/NotificationChannelsInitializer/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-notification-channels-initializer/-notification-channels-initializer.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/NotificationChannelsInitializer/create/#android.content.Context/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-notification-channels-initializer/create.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/NotificationChannelsInitializer/dependencies/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-notification-channels-initializer/dependencies.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/RemoteConfigInitializer///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-remote-config-initializer/index.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/RemoteConfigInitializer/RemoteConfigInitializer/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-remote-config-initializer/-remote-config-initializer.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/RemoteConfigInitializer/create/#android.content.Context/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-remote-config-initializer/create.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/RemoteConfigInitializer/dependencies/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-remote-config-initializer/dependencies.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/TimberInitializer///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-timber-initializer/index.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/TimberInitializer/TimberInitializer/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-timber-initializer/-timber-initializer.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/TimberInitializer/create/#android.content.Context/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-timber-initializer/create.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.worker.startup/TimberInitializer/dependencies/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.worker.startup/-timber-initializer/dependencies.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat////PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat/index.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat//createNotificationChannels/android.content.Context#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat/create-notification-channels.html
 com.arnyminerz.escalaralcoiaicomtat
@@ -466,4 +483,5 @@ com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass
 com.arnyminerz.escalaralcoiaicomtat.service
 com.arnyminerz.escalaralcoiaicomtat.shared
 com.arnyminerz.escalaralcoiaicomtat.ui.theme
+com.arnyminerz.escalaralcoiaicomtat.worker.startup
 
