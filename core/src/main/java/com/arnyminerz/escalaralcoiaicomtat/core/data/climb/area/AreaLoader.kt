@@ -92,8 +92,7 @@ suspend fun FirebaseFirestore.loadAreas(
         val zoneDocuments = zonesSnapshot.documents
             .sortedBy { snapshot -> snapshot.getString("displayName") }
         Timber.v("Getting area documents...")
-        val areaDocuments = areasSnapshot.documents
-            .sortedBy { snapshot -> snapshot.getString("displayName") }
+        val areaDocuments = areasSnapshot.documents // Areas get sorted when added to AREAS
 
         Timber.v("Counting paths...")
         val pathsCount = pathDocuments.size
@@ -234,6 +233,8 @@ suspend fun FirebaseFirestore.loadAreas(
         AREAS.clear()
         Timber.v("Adding all areas to AREAS...")
         AREAS.addAll(areas)
+        Timber.v("Shorting AREAS...")
+        AREAS.sortBy { area -> area.displayName }
 
         if (enableSearch) {
             Timber.v("Search > Initializing session future...")
