@@ -65,14 +65,14 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.ALL_DAY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MORNING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.currentUrl
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.ExpandableHeader
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.LoadingIndicator
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorViewModel
 import com.arnyminerz.escalaralcoiaicomtat.shared.APP_TYPE_PROP
 import com.arnyminerz.escalaralcoiaicomtat.shared.STATUS_INSTALLED
 import com.arnyminerz.escalaralcoiaicomtat.shared.STATUS_INSTANT
-import com.arnyminerz.escalaralcoiaicomtat.ui.elements.Chip
-import com.arnyminerz.escalaralcoiaicomtat.ui.elements.ExpandableHeader
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.InstallButton
-import com.arnyminerz.escalaralcoiaicomtat.ui.elements.LoadingIndicator
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.ZoomableImage
 import com.arnyminerz.escalaralcoiaicomtat.ui.navigation.areas
 import com.arnyminerz.escalaralcoiaicomtat.ui.navigation.sector
