@@ -359,7 +359,9 @@ class MainActivity : LanguageAppCompatActivity() {
         binding.authFab.visibility(ENABLE_AUTHENTICATION)
 
         if (ENABLE_AUTHENTICATION) {
-            val user = Firebase.auth.currentUser
+            val auth = Firebase.auth
+            val currentUser = auth.currentUser
+            val user = if (currentUser?.isAnonymous == true) null else currentUser
 
             binding.profileCardView.visibility(user != null)
             binding.profileImageView.visibility(user != null)
