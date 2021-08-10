@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.content.Intent
 import android.content.IntentSender
-import android.os.Build
 import android.os.Bundle
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -27,7 +26,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
-import com.arnyminerz.escalaralcoiaicomtat.createNotificationChannels
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -84,9 +82,6 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             return
         } else
             Timber.v("  Won't show intro.")
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            createNotificationChannels()
 
         deepLinkPath = getExtra(EXTRA_LINK_PATH)
 
