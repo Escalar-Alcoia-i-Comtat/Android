@@ -24,7 +24,6 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.CommentsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.MarkCompletedActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.EndingType
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Grade
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Pitch
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
@@ -197,16 +196,11 @@ class PathsAdapter(
         val toggled = this@PathsAdapter.toggled[position]
         val hasInfo = path.hasInfo()
         val pathSpannable = path.grade().getSpannable(activity)
+        val gradesCount = path.grades.size
         val toggledPathSpannable =
-            if (path.grades.size > 1)
-                arrayListOf<Grade>().apply {
-                    addAll(
-                        path.grades.subList(
-                            1,
-                            path.grades.size
-                        ) // Remove first line
-                    )
-                }.getSpannable(activity)
+            if (gradesCount > 1)
+                path.grades.subList(1, gradesCount) // Remove first line
+                    .getSpannable(activity)
             else
                 pathSpannable
 
