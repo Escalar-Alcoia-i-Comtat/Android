@@ -5,7 +5,7 @@ plugins {
     id('com.google.firebase.crashlytics')
     id('com.google.firebase.firebase-perf')
     id('org.jetbrains.dokka')
-    id('com.google.secrets_gradle_plugin') version '0.6'
+    id('com.google.secrets_gradle_plugin') version '0.6.1'
 }
 
 apply from: './version.gradle'
