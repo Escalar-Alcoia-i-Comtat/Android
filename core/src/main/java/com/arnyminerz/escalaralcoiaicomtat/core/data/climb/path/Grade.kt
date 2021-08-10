@@ -175,7 +175,7 @@ fun Iterable<Grade>.toJSONStringArray(): String {
     return result
 }
 
-fun Iterable<Grade>?.toString(): String {
+fun Iterable<Grade>?.string(): String {
     val builder = StringBuilder()
 
     if (this != null)
@@ -189,9 +189,10 @@ fun Iterable<Grade>.getSpannable(
     context: Context,
     @IntRange(from = 0, to = Int.MAX_VALUE.toLong()) count: Int = Int.MAX_VALUE
 ): SpannableString {
-    val spannable = SpannableString(toString().split("\n").take(count).join("\n"))
+    val str = string()
+    val spannable = SpannableString(str.split("\n").take(count).join("\n"))
     var charCounter = 0
-    for (line in toString().split("\n").take(count))
+    for (line in str.split("\n").take(count))
         if (line.isNotEmpty())
             for (grade in line.split("/")) {
                 if (grade.isEmpty()) continue
