@@ -372,6 +372,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 storage.getReferenceFromUrl(kmzReferenceUrl!!)
                     .getFile(targetFile)
                     .addOnSuccessListener { cont.resume(it) }
+                    .addOnProgressListener { Timber.v("Loading progress: ${it.bytesTransferred}/${it.totalByteCount}") }
                     .addOnFailureListener { cont.resumeWithException(it) }
             }
         else null
@@ -494,7 +495,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @return a matching DownloadStatus representing the Data Class' download status
      */
     @WorkerThread
-    suspend fun downloadStatus(
+    fun downloadStatus(
         context: Context,
         storage: FirebaseStorage,
         progressListener: ((current: Int, max: Int) -> Unit)? = null
@@ -776,7 +777,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             val cacheImage = cacheImageFile(context)
             var tempCacheImage: File? = null
 
-            val successListener = OnSuccessListener<FileDownloadTask.TaskSnapshot> { snapshot ->
+            val successListener = OnSuccessListener<FileDownloadTask.TaskSnapshot> {
                 if (image == null)
                     return@OnSuccessListener
 

@@ -16,20 +16,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NoInternetAccessException
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE_KEY
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_DEFAULTS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
@@ -52,12 +44,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigClientException
-import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
 class LoadingActivity : NetworkChangeListenerActivity() {
@@ -234,42 +222,10 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     }
 
     /**
-     * Loads the Firebase's Remote Config settings.
-     * @author Arnau Mora
-     * @since 20210617
-     */
-    @WorkerThread
-    private suspend fun loadRemoteConfig() {
-        Timber.v("Getting remote configuration...")
-        val remoteConfig = Firebase.remoteConfig
-        val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = REMOTE_CONFIG_MIN_FETCH_INTERVAL
-        }
-        remoteConfig.setConfigSettingsAsync(configSettings).await()
-        remoteConfig.setDefaultsAsync(REMOTE_CONFIG_DEFAULTS).await()
-        try {
-            remoteConfig.fetchAndActivate().await()
-        } catch (e: FirebaseRemoteConfigClientException) {
-            Timber.e(e, "Could not get remote config.")
-        }
-        APP_UPDATE_MAX_TIME_DAYS = remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
-        SHOW_NON_DOWNLOADED = remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
-        ENABLE_AUTHENTICATION = remoteConfig.getBoolean(ENABLE_AUTHENTICATION_KEY)
-        PROFILE_IMAGE_SIZE = remoteConfig.getLong(PROFILE_IMAGE_SIZE_KEY)
-
-        Timber.v("APP_UPDATE_MAX_TIME_DAYS: $APP_UPDATE_MAX_TIME_DAYS")
-        Timber.v("SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
-        Timber.v("ENABLE_AUTHENTICATION: $ENABLE_AUTHENTICATION")
-        Timber.v("PROFILE_IMAGE_SIZE: $PROFILE_IMAGE_SIZE")
-    }
-
-    /**
      * This should be ran before [load]. It loads the data from RemoteConfig, and adds some listeners.
      */
     @WorkerThread
     private suspend fun preLoad() {
-        loadRemoteConfig()
-
         if (!ENABLE_AUTHENTICATION) {
             Timber.v("Removing auth state listener...")
             Firebase.auth.removeAuthStateListener((application as App).authStateListener)

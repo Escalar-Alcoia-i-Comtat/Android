@@ -3,19 +3,14 @@ package com.arnyminerz.escalaralcoiaicomtat.core.shared
 import android.accounts.AccountManager
 import android.app.Application
 import android.content.Context
-import android.util.Log
-import com.arnyminerz.escalaralcoiaicomtat.core.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
-
-private const val CRASHLYTICS_KEY_PRIORITY = "priority"
-private const val CRASHLYTICS_KEY_TAG = "tag"
 
 class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     private val provider: ConnectivityProvider
@@ -42,9 +37,6 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     override fun onCreate() {
         super.onCreate()
 
-        Timber.plant(if (BuildConfig.DEBUG) Timber.DebugTree() else CrashReportingTree())
-        Timber.v("Planted Timber.")
-
         sharedPreferences =
             applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
 
@@ -69,33 +61,16 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         Timber.v("Network state updated: $state")
-        Timber.v("Updating Firestore's network status according to new state.")
-        if (state.hasInternet)
-            firestore.enableNetwork()
-        else
-            firestore.disableNetwork()
 
         appNetworkState = state
     }
 
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
         Timber.v("Network state updated asyncronously: $state")
-    }
-
-    private inner class CrashReportingTree : Timber.Tree() {
-        override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-            val crashlytics = Firebase.crashlytics
-
-            crashlytics.setCustomKey(CRASHLYTICS_KEY_PRIORITY, priority)
-            if (tag != null)
-                crashlytics.setCustomKey(CRASHLYTICS_KEY_TAG, tag)
-
-            if (priority == Log.DEBUG || priority == Log.VERBOSE || priority == Log.INFO || priority == Log.WARN)
-                crashlytics.log(message)
-            else if (t != null)
-                crashlytics.recordException(t)
-            else
-                crashlytics.log(message)
-        }
+        Timber.v("Updating Firestore's network status according to new state.")
+        if (state.hasInternet)
+            firestore.enableNetwork().await()
+        else
+            firestore.disableNetwork().await()
     }
 }
