@@ -9,6 +9,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
 class App : Application(), ConnectivityProvider.ConnectivityStateListener {
@@ -60,16 +61,16 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         Timber.v("Network state updated: $state")
-        Timber.v("Updating Firestore's network status according to new state.")
-        if (state.hasInternet)
-            firestore.enableNetwork()
-        else
-            firestore.disableNetwork()
 
         appNetworkState = state
     }
 
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
         Timber.v("Network state updated asyncronously: $state")
+        Timber.v("Updating Firestore's network status according to new state.")
+        if (state.hasInternet)
+            firestore.enableNetwork().await()
+        else
+            firestore.disableNetwork().await()
     }
 }
