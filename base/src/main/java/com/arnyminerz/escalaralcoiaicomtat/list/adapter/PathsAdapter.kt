@@ -28,6 +28,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Grade
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Pitch
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.getSpannable
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
@@ -198,12 +199,14 @@ class PathsAdapter(
         val pathSpannable = path.grade().getSpannable(activity)
         val toggledPathSpannable =
             if (path.grades.size > 1)
-                Grade.GradesList(
-                    path.grades.subList(
-                        1,
-                        path.grades.size
-                    ) // Remove first line
-                ).getSpannable(activity)
+                arrayListOf<Grade>().apply {
+                    addAll(
+                        path.grades.subList(
+                            1,
+                            path.grades.size
+                        ) // Remove first line
+                    )
+                }.getSpannable(activity)
             else
                 pathSpannable
 

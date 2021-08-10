@@ -39,7 +39,7 @@ data class PathData(
 
     fun path(): Path {
         val gradesArray = JSONArray(grades)
-        val grades = Grade.GradesList()
+        val grades = arrayListOf<Grade>()
         for (i in 0 until gradesArray.length())
             grades.add(Grade.fromJSON(gradesArray.getJSONObject(i)))
 
