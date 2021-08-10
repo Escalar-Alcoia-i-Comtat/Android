@@ -34,6 +34,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Explore
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
@@ -125,6 +127,15 @@ class NewMainActivity : AppCompatActivity() {
                     },
                     backgroundColor = MaterialTheme.colors.primary,
                     elevation = 0.dp,
+                    navigationIcon = {
+                        val state by navController.currentBackStackEntryAsState()
+                        AnimatedContent(targetState = state?.arguments != null) { visible ->
+                            if (visible)
+                                IconButton(onClick = { navController.popBackStack() }) {
+                                    Icon(Icons.Rounded.ArrowBack, contentDescription = "Back icon")
+                                }
+                        }
+                    },
                     actions = {
                         IconButton(onClick = { expanded = !expanded }) {
                             AnimatedContent(
