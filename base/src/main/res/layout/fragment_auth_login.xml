@@ -51,6 +51,7 @@
                 android:id="@+id/email_editText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:autofillHints="emailAddress"
                 android:imeOptions="actionNext"
                 android:inputType="text" />
 
@@ -71,6 +72,7 @@
                 android:id="@+id/password_editText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:autofillHints="password"
                 android:imeOptions="actionGo"
                 android:inputType="textPassword" />
 
