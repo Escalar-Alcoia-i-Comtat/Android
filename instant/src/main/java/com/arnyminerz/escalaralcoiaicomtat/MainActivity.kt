@@ -1,8 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat
 
 import android.app.Activity
+import android.app.assist.AssistContent
 import android.net.Uri
 import android.os.Bundle
+import android.webkit.URLUtil
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -62,14 +64,15 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.AFTERNOON
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ALL_DAY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MORNING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.currentUrl
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.ExpandableHeader
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.LoadingIndicator
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorViewModel
 import com.arnyminerz.escalaralcoiaicomtat.shared.APP_TYPE_PROP
 import com.arnyminerz.escalaralcoiaicomtat.shared.STATUS_INSTALLED
 import com.arnyminerz.escalaralcoiaicomtat.shared.STATUS_INSTANT
-import com.arnyminerz.escalaralcoiaicomtat.ui.elements.Chip
-import com.arnyminerz.escalaralcoiaicomtat.ui.elements.ExpandableHeader
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.InstallButton
-import com.arnyminerz.escalaralcoiaicomtat.ui.elements.LoadingIndicator
 import com.arnyminerz.escalaralcoiaicomtat.ui.elements.ZoomableImage
 import com.arnyminerz.escalaralcoiaicomtat.ui.navigation.areas
 import com.arnyminerz.escalaralcoiaicomtat.ui.navigation.sector
@@ -79,6 +82,7 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
 import com.arnyminerz.escalaralcoiaicomtat.utils.searchNavigation
 import com.google.android.gms.instantapps.InstantApps
 import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
@@ -96,6 +100,10 @@ class MainActivity : ComponentActivity() {
         instantInfoSetup()
         dataCollectionSetUp()
 
+        val auth = Firebase.auth
+        if (auth.currentUser == null)
+            auth.signInAnonymously()
+
         setContent {
             EscalarAlcoiaIComtatTheme {
                 // A surface container using the 'background' color from the theme
@@ -104,6 +112,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onProvideAssistContent(outContent: AssistContent?) {
+        super.onProvideAssistContent(outContent)
+
+        val url = currentUrl.value
+        if (url != null && URLUtil.isValidUrl(url))
+            outContent?.webUri = Uri.parse(url)
+        else Timber.w("Cannot provide assist url since invalid url or null ($url).")
     }
 
     /**

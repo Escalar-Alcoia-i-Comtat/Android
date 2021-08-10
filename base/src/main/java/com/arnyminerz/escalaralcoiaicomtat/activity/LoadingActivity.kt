@@ -296,7 +296,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         loading = true
         binding.progressTextView.setText(R.string.status_downloading)
         try {
-            loadAreas(application, firestore, progressCallback = { progress, max ->
+            firestore.loadAreas(application) { progress, max ->
                 Timber.i("Download progress: $progress / $max")
                 if (max >= 0) {
                     binding.progressBar.max = max
@@ -309,7 +309,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                     visibility(binding.progressBar, true)
                     binding.progressTextView.setText(R.string.status_storing)
                 }
-            })
+            }
             if (AREAS.size > 0) {
                 if (deepLinkPath != null) {
                     uiContext {

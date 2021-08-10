@@ -10,6 +10,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.currentUrl
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.asyncCoroutineScope
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
@@ -27,10 +30,10 @@ class SectorViewModel(
     private val innerSector: Sector?
         get() = AREAS[areaId]?.get(zoneId)?.get(sectorId)
 
-    val sector: LiveData<Sector?> = liveData {
+    val sector: LiveData<Sector?> = liveData(asyncCoroutineScope.coroutineContext) {
         if (AREAS.isEmpty()) {
             val application = (context as? Activity)?.application ?: context as Application
-            loadAreas(application, firestore, progressCallback = { current, total ->
+            firestore.loadAreas(application, progressCallback = { current, total ->
                 Timber.i("Loading areas: $current/$total")
             })
         }
@@ -38,6 +41,7 @@ class SectorViewModel(
     }
 
     val items: LiveData<List<Path>> = liveData {
+        uiContext { currentUrl.value = innerSector?.webUrl }
         val paths = innerSector?.getChildren(context, storage)
         if (paths != null)
             emit(paths)

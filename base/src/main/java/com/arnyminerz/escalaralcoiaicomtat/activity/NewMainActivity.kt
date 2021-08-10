@@ -34,6 +34,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Explore
@@ -41,6 +42,7 @@ import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
@@ -64,9 +67,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.PassiveAreasExp
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.SectorExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.SectorsExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.ZonesExplorer
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.AreasViewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
-import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 @ExperimentalFoundationApi
@@ -79,25 +83,19 @@ class NewMainActivity : AppCompatActivity() {
 
         dataCollectionSetUp()
 
-        val firestore = Firebase.firestore
+        val auth = Firebase.auth
+        if (auth.currentUser == null)
+            auth.signInAnonymously()
 
         setContent {
-            var loadingProgress by remember { mutableStateOf(0f) }
-            var areas by remember { mutableStateOf(listOf<Area>()) }
-
-            // TODO: Create a view holder with an observer state for the loadAreas coroutine
-            /**loadAreas(this, firestore, progressCallback = { current, total ->
-            loadingProgress = current.toFloat() / total.toFloat()
-            Timber.i("Loading areas: $current/$total ($loadingProgress)")
-            }) {
-            areas = AREAS
-            }*/
+            val areasViewModel = AreasViewModel(this)
+            val areas: List<Area> by areasViewModel.items.observeAsState(listOf())
 
             EscalarAlcoiaIComtatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
                     if (areas.isEmpty())
-                        LoadingScreen(loadingProgress)
+                        LoadingScreen(areasViewModel.progress.value?.float() ?: 0f)
                     else
                         MainContent()
                 }
@@ -129,6 +127,15 @@ class NewMainActivity : AppCompatActivity() {
                     },
                     backgroundColor = MaterialTheme.colors.primary,
                     elevation = 0.dp,
+                    navigationIcon = {
+                        val state by navController.currentBackStackEntryAsState()
+                        AnimatedContent(targetState = state?.arguments != null) { visible ->
+                            if (visible)
+                                IconButton(onClick = { navController.popBackStack() }) {
+                                    Icon(Icons.Rounded.ArrowBack, contentDescription = "Back icon")
+                                }
+                        }
+                    },
                     actions = {
                         IconButton(onClick = { expanded = !expanded }) {
                             AnimatedContent(

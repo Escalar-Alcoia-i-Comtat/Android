@@ -35,17 +35,15 @@ import timber.log.Timber
  * @author Arnau Mora
  * @since 20210313
  * @param application The [Application] that owns the app execution.
- * @param firestore The [FirebaseFirestore] reference for fetching data from the server.
  * @param progressCallback This will get called when the loading progress is updated.
  * @see AREAS
  * @return A collection of areas
  */
 @WorkerThread
-suspend fun loadAreas(
+suspend fun FirebaseFirestore.loadAreas(
     application: Application,
-    firestore: FirebaseFirestore,
     enableSearch: Boolean = true,
-    @UiThread progressCallback: (current: Int, total: Int) -> Unit
+    @UiThread progressCallback: ((current: Int, total: Int) -> Unit)? = null
 ) {
     val trace = Firebase.performance.newTrace("loadAreasTrace")
 
@@ -57,23 +55,19 @@ suspend fun loadAreas(
     Timber.d("Fetching areas...")
     try {
         Timber.v("Getting paths...")
-        val pathsSnapshot = firestore
-            .collectionGroup("Paths")
+        val pathsSnapshot = collectionGroup("Paths")
             .get()
             .await()
         Timber.v("Getting sectors...")
-        val sectorsSnapshot = firestore
-            .collectionGroup("Sectors")
+        val sectorsSnapshot = collectionGroup("Sectors")
             .get()
             .await()
         Timber.v("Getting zones...")
-        val zonesSnapshot = firestore
-            .collectionGroup("Zones")
+        val zonesSnapshot = collectionGroup("Zones")
             .get()
             .await()
         Timber.v("Getting areas...")
-        val areasSnapshot = firestore
-            .collectionGroup("Areas")
+        val areasSnapshot = collectionGroup("Areas")
             .get()
             .await()
 
@@ -98,8 +92,7 @@ suspend fun loadAreas(
         val zoneDocuments = zonesSnapshot.documents
             .sortedBy { snapshot -> snapshot.getString("displayName") }
         Timber.v("Getting area documents...")
-        val areaDocuments = areasSnapshot.documents
-            .sortedBy { snapshot -> snapshot.getString("displayName") }
+        val areaDocuments = areasSnapshot.documents // Areas get sorted when added to AREAS
 
         Timber.v("Counting paths...")
         val pathsCount = pathDocuments.size
@@ -140,7 +133,7 @@ suspend fun loadAreas(
 
         Timber.v("Iterating $sectorsCount sector documents...")
         for (sectorDocument in sectorDocuments) {
-            uiContext { progressCallback(++counter, count) }
+            uiContext { progressCallback?.invoke(++counter, count) }
 
             val sectorId = sectorDocument.id
             Timber.v("S/$sectorId > Getting sector's reference...")
@@ -153,7 +146,7 @@ suspend fun loadAreas(
             Timber.v("S/$sectorId > Getting sector's parent zone's id.")
             val zoneId = sectorParentZone.id
             if (!zonesCache.containsKey(zoneId)) {
-                uiContext { progressCallback(++counter, count) }
+                uiContext { progressCallback?.invoke(++counter, count) }
                 Timber.v("S/$sectorId > There's no cached version for Z/$zoneId.")
                 val zoneDocument = expandedZoneDocuments[zoneId]
                 if (zoneDocument == null) {
@@ -208,7 +201,7 @@ suspend fun loadAreas(
             Timber.v("Z/$zoneId > Getting Zone's parent Area id...")
             val zoneParentAreaId = zoneParentAreaReference.id
             if (!areasCache.containsKey(zoneParentAreaId)) {
-                uiContext { progressCallback(++counter, count) }
+                uiContext { progressCallback?.invoke(++counter, count) }
                 Timber.v("Z/$zoneId > Could not find A/$zoneParentAreaId in cache...")
                 val areaDocument = expandedAreaDocuments[zoneParentAreaId]
                 if (areaDocument == null) {
@@ -240,6 +233,8 @@ suspend fun loadAreas(
         AREAS.clear()
         Timber.v("Adding all areas to AREAS...")
         AREAS.addAll(areas)
+        Timber.v("Shorting AREAS...")
+        AREAS.sortBy { area -> area.displayName }
 
         if (enableSearch) {
             Timber.v("Search > Initializing session future...")
