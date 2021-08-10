@@ -43,7 +43,7 @@ import timber.log.Timber
 suspend fun FirebaseFirestore.loadAreas(
     application: Application,
     enableSearch: Boolean = true,
-    @UiThread progressCallback: (current: Int, total: Int) -> Unit
+    @UiThread progressCallback: ((current: Int, total: Int) -> Unit)? = null
 ) {
     val trace = Firebase.performance.newTrace("loadAreasTrace")
 
@@ -134,7 +134,7 @@ suspend fun FirebaseFirestore.loadAreas(
 
         Timber.v("Iterating $sectorsCount sector documents...")
         for (sectorDocument in sectorDocuments) {
-            uiContext { progressCallback(++counter, count) }
+            uiContext { progressCallback?.invoke(++counter, count) }
 
             val sectorId = sectorDocument.id
             Timber.v("S/$sectorId > Getting sector's reference...")
@@ -147,7 +147,7 @@ suspend fun FirebaseFirestore.loadAreas(
             Timber.v("S/$sectorId > Getting sector's parent zone's id.")
             val zoneId = sectorParentZone.id
             if (!zonesCache.containsKey(zoneId)) {
-                uiContext { progressCallback(++counter, count) }
+                uiContext { progressCallback?.invoke(++counter, count) }
                 Timber.v("S/$sectorId > There's no cached version for Z/$zoneId.")
                 val zoneDocument = expandedZoneDocuments[zoneId]
                 if (zoneDocument == null) {
@@ -202,7 +202,7 @@ suspend fun FirebaseFirestore.loadAreas(
             Timber.v("Z/$zoneId > Getting Zone's parent Area id...")
             val zoneParentAreaId = zoneParentAreaReference.id
             if (!areasCache.containsKey(zoneParentAreaId)) {
-                uiContext { progressCallback(++counter, count) }
+                uiContext { progressCallback?.invoke(++counter, count) }
                 Timber.v("Z/$zoneId > Could not find A/$zoneParentAreaId in cache...")
                 val areaDocument = expandedAreaDocuments[zoneParentAreaId]
                 if (areaDocument == null) {
