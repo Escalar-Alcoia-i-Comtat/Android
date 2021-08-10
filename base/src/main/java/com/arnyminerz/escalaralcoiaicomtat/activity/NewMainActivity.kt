@@ -41,6 +41,7 @@ import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -64,9 +65,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.PassiveAreasExp
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.SectorExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.SectorsExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.ZonesExplorer
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.AreasViewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
-import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 @ExperimentalFoundationApi
@@ -79,25 +81,19 @@ class NewMainActivity : AppCompatActivity() {
 
         dataCollectionSetUp()
 
-        val firestore = Firebase.firestore
+        val auth = Firebase.auth
+        if (auth.currentUser == null)
+            auth.signInAnonymously()
 
         setContent {
-            var loadingProgress by remember { mutableStateOf(0f) }
-            var areas by remember { mutableStateOf(listOf<Area>()) }
-
-            // TODO: Create a view holder with an observer state for the loadAreas coroutine
-            /**loadAreas(this, firestore, progressCallback = { current, total ->
-            loadingProgress = current.toFloat() / total.toFloat()
-            Timber.i("Loading areas: $current/$total ($loadingProgress)")
-            }) {
-            areas = AREAS
-            }*/
+            val areasViewModel = AreasViewModel(this)
+            val areas: List<Area> by areasViewModel.items.observeAsState(listOf())
 
             EscalarAlcoiaIComtatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
                     if (areas.isEmpty())
-                        LoadingScreen(loadingProgress)
+                        LoadingScreen(areasViewModel.progress.value?.float() ?: 0f)
                     else
                         MainContent()
                 }
