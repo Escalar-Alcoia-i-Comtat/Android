@@ -113,14 +113,17 @@ suspend fun FirebaseFirestore.loadAreas(
 
         Timber.v("Creation relation with sector and path documents...")
         // The key is the sector id, the value the snapshot of the path
-        val sectorIdPathDocument = arrayMapOf<String, ArrayList<DocumentSnapshot>>()
+        val sectorIdPathDocument = arrayMapOf<String, ArrayList<Path>>()
         for (pathDocument in pathDocuments) {
             uiContext { progressCallback?.invoke(++counter, count) }
+            val pathId = pathDocument.id
+            Timber.v("P/$pathId > Processing path...")
+            val path = Path(pathDocument)
             val sectorId = pathDocument.reference.parent.parent!!.id
-            if (sectorIdPathDocument.containsKey(sectorId))
-                sectorIdPathDocument[sectorId] = arrayListOf(pathDocument)
-            else
-                sectorIdPathDocument[sectorId]?.add(pathDocument)
+            Timber.v("P/$pathId > Adding to sector S/$sectorId...")
+            sectorIdPathDocument[sectorId]?.add(path) ?: run {
+                sectorIdPathDocument[sectorId] = arrayListOf(path)
+            }
         }
 
         Timber.v("Expanding zone documents...")
@@ -169,9 +172,7 @@ suspend fun FirebaseFirestore.loadAreas(
             Timber.v("S/$sectorId > Loading paths...")
             val paths = sectorIdPathDocument[sectorId]
             if (paths != null) {
-                for (pathDocument in paths) {
-                    Timber.v("P/${pathDocument.id} > Processing...")
-                    val path = Path(pathDocument)
+                for (path in paths) {
                     Timber.v("$path > Adding to the search index...")
                     pathsIndex.add(path.data())
                     Timber.v("$path > Adding to the sector ($sector)...")
