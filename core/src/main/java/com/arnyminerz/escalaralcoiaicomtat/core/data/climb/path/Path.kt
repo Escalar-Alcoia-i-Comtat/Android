@@ -149,8 +149,14 @@ class Path internal constructor(
     fun hasInfo(): Boolean =
         (description != null && description.isNotBlank()) || (builtBy != null && builtBy.isNotBlank())
 
-    fun grade(): Grade =
-        if (grades.size > 0) grades.first() else throw NoSuchElementException("Grades list is empty")
+    /**
+     * Gets the first [Grade] from the [grades] list.
+     * @author Arnau Mora
+     * @since 20210811
+     * @throws NoSuchElementException When [grades] is empty.
+     */
+    @Throws(NoSuchElementException::class)
+    fun grade(): Grade = grades.first()
 
     /**
      * Fetches all the completions that have been requested by the users.
