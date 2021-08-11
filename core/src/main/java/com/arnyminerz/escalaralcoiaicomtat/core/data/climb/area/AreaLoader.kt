@@ -19,6 +19,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.data
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_FULL_DATA_LOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
@@ -241,8 +242,7 @@ suspend fun FirebaseFirestore.loadAreas(
         if (enableSearch) {
             Timber.v("Search > Initializing session future...")
             val sessionFuture = LocalStorage.createSearchSession(
-                // TODO: Database name should not be hardcoded
-                LocalStorage.SearchContext.Builder(application, "escalaralcoiaicomtat")
+                LocalStorage.SearchContext.Builder(application, SEARCH_DATABASE_NAME)
                     .build()
             )
             Timber.v("Search > Awaiting for session...")
