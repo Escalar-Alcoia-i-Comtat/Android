@@ -1,7 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
-import android.content.Intent
-import android.content.IntentSender
 import android.os.Bundle
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -9,11 +7,9 @@ import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
@@ -27,13 +23,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.install.InstallStateUpdatedListener
-import com.google.android.play.core.install.model.ActivityResult.RESULT_IN_APP_UPDATE_FAILED
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.InstallStatus
-import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.ktx.crashlytics
@@ -46,10 +35,6 @@ import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
 class LoadingActivity : NetworkChangeListenerActivity() {
-    companion object {
-        private const val APP_UPDATE_REQUEST_CODE = 8 // This number was chosen by Eva
-    }
-
     private lateinit var binding: ActivityLoadingBinding
     private var loading = false
 
@@ -74,6 +59,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
         dataCollectionSetUp()
 
+        val time = System.currentTimeMillis()
+        // Check takes around 5ms
         val showIntro = IntroActivity.shouldShow()
         if (showIntro) {
             Timber.w("  Showing intro!")
@@ -82,10 +69,9 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             return
         } else
             Timber.v("  Won't show intro.")
+        Timber.v("Intro check time: ${System.currentTimeMillis() - time}")
 
         deepLinkPath = getExtra(EXTRA_LINK_PATH)
-
-        updatesCheck()
 
         doAsync { preLoad() }
     }
@@ -93,17 +79,6 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
         super.onStateChangeAsync(state)
         load()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == APP_UPDATE_REQUEST_CODE)
-            when (resultCode) {
-                RESULT_OK -> Timber.v("App update complete")
-                RESULT_CANCELED -> Timber.w("App update cancelled. We might need to force the update.")
-                RESULT_IN_APP_UPDATE_FAILED -> Timber.w("In app update failed.")
-            }
-        else
-            super.onActivityResult(requestCode, resultCode, data)
     }
 
     /**
@@ -125,81 +100,6 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
         Firebase.performance.isPerformanceCollectionEnabled = enableErrorReporting
         Timber.v("Set Performance collection enabled to $enableErrorReporting")
-    }
-
-    /**
-     * Checks if there is any update available for the app at the Play Store.
-     * @author Arnau Mora
-     * @since 20210617
-     */
-    @UiThread
-    private fun updatesCheck() {
-        Timber.v("Searching for updates...")
-        val appUpdateManager = AppUpdateManagerFactory.create(this)
-
-        val listener = InstallStateUpdatedListener { state ->
-            val status = state.installStatus()
-            if (status == InstallStatus.DOWNLOADING) {
-                val bytesDownloaded = state.bytesDownloaded()
-                val totalBytesToDownload = state.totalBytesToDownload()
-                val progress = (bytesDownloaded / totalBytesToDownload).toInt() * 100
-
-                // Show update progress bar.
-                Timber.d("Downloading update $progress%: $bytesDownloaded / $totalBytesToDownload")
-                binding.progressBar.progress = progress
-            } else if (status == InstallStatus.DOWNLOADED) {
-                Timber.v("Finished downloading update, showing restart request.")
-                Snackbar.make(
-                    binding.mainLayout,
-                    R.string.toast_update_downloaded,
-                    Snackbar.LENGTH_INDEFINITE
-                )
-                    .setAction(R.string.action_restart) { appUpdateManager.completeUpdate() }
-                    .show()
-            }
-        }
-
-        appUpdateManager.registerListener(listener)
-
-        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
-            val updateAvailability = appUpdateInfo.updateAvailability()
-            try {
-                if (updateAvailability == UPDATE_AVAILABLE) {
-                    Timber.v("There's an update available")
-
-                    binding.progressBar.visibility(false)
-                    binding.progressBar.isIndeterminate = false
-                    binding.progressBar.visibility(true)
-
-                    val updateStaleness = appUpdateInfo.clientVersionStalenessDays()
-                    if (updateStaleness != null && updateStaleness >= APP_UPDATE_MAX_TIME_DAYS) {
-                        if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
-                            // Request immediate update
-                            Timber.v("Requesting immediate update.")
-                            appUpdateManager.startUpdateFlowForResult(
-                                appUpdateInfo,
-                                AppUpdateType.IMMEDIATE,
-                                this,
-                                APP_UPDATE_REQUEST_CODE
-                            )
-                            loading = true
-                        } else Timber.w("Immediate update is not allowed")
-                    } else if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
-                        // Request flexible update
-                        Timber.v("Requesting flexible update.")
-                        appUpdateManager.startUpdateFlowForResult(
-                            appUpdateInfo,
-                            AppUpdateType.FLEXIBLE,
-                            this,
-                            APP_UPDATE_REQUEST_CODE
-                        )
-                        loading = true
-                    } else Timber.w("Flexible update is not allowed")
-                } else Timber.d("There's no update available. ($updateAvailability)")
-            } catch (e: IntentSender.SendIntentException) {
-                Timber.w(e, "Could not request update.")
-            }
-        }
     }
 
     /**
