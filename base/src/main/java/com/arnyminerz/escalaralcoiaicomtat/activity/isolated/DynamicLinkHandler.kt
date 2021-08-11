@@ -25,9 +25,7 @@ class DynamicLinkHandler : Activity() {
             .getDynamicLink(intent)
             .addOnSuccessListener(this) { pendingDynamicLinkData ->
                 // Get deep link from result (may be null if no link is found)
-                var deepLink: Uri? = null
-                if (pendingDynamicLinkData != null)
-                    deepLink = pendingDynamicLinkData.link
+                val deepLink: Uri? = pendingDynamicLinkData.link
 
                 if (deepLink == null) {
                     finish()
