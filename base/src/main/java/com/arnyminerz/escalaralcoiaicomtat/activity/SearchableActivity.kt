@@ -31,8 +31,11 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,7 +48,9 @@ import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone.Companion.SAMPLE_ZONE
@@ -140,19 +145,33 @@ class SearchableActivity : ComponentActivity() {
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = when (val type = dataClassImpl::class.java.simpleName) {
-                        "Area" -> stringResource(R.string.data_type_area)
-                        "Zone" -> stringResource(R.string.data_type_zone)
-                        "Sector" -> stringResource(R.string.data_type_sector)
-                        "Path" -> stringResource(R.string.data_type_path)
-                        else -> type
+                    text = buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                color = SearchItemTypeColor,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        ) {
+                            append(
+                                when (val type = dataClassImpl::class.java.simpleName) {
+                                    "Area" -> stringResource(R.string.data_type_area)
+                                    "Zone" -> stringResource(R.string.data_type_zone)
+                                    "Sector" -> stringResource(R.string.data_type_sector)
+                                    "Path" -> stringResource(R.string.data_type_path)
+                                    else -> type
+                                }
+                            )
+                        }
+                        val parent = (dataClassImpl as? DataClass<*, *>)?.parent
+                            ?: run { (dataClassImpl as? Path)?.parent }
+                        if (parent != null)
+                            append(" - " + parent.displayName)
+                        else Timber.e("Could not find parent for $dataClassImpl")
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 4.dp),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = SearchItemTypeColor
+                        .padding(start = 4.dp)
                 )
                 IconButton(
                     modifier = Modifier.align(Alignment.End),
