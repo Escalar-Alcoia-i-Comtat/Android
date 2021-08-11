@@ -25,14 +25,14 @@ import androidx.compose.ui.unit.dp
 @ExperimentalAnimationApi
 @Composable
 fun LoadingIndicator(isLoading: Boolean, size: Dp = 52.dp) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 24.dp)
-    ) {
-        AnimatedVisibility(visible = isLoading, modifier = Modifier.size(size)) {
-            CircularProgressIndicator()
+    AnimatedVisibility(visible = isLoading) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp)
+        ) {
+            CircularProgressIndicator(modifier = Modifier.size(size))
         }
     }
 }
