@@ -6,7 +6,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.resources.font.PoppinsFamiliy
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.PoppinsFamily
 
 // Set of Material typography styles to start with
 val Typography = Typography(
@@ -16,7 +16,7 @@ val Typography = Typography(
         fontSize = 16.sp
     ),
     h1 = TextStyle(
-        fontFamily = PoppinsFamiliy,
+        fontFamily = PoppinsFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 22.sp,
         textAlign = TextAlign.Center
