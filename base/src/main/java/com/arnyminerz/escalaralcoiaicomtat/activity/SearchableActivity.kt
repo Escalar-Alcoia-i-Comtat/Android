@@ -40,6 +40,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -123,6 +125,7 @@ class SearchableActivity : ComponentActivity() {
                             Timber.v("New search query: $query")
                             searchViewModel.search(query)
                         }
+                        Timber.v("Search results: ${list.value}")
                         SearchResultsView(list.value)
                     }
                 }
@@ -158,12 +161,15 @@ class SearchableActivity : ComponentActivity() {
         search: ((query: String) -> Unit)? = null
     ) {
         var value by remember { mutableStateOf(query) }
+        val focusRequester = remember { FocusRequester() }
         val keyboardController = LocalSoftwareKeyboardController.current
 
         OutlinedTextField(
             value = value,
             onValueChange = { value = it },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
             maxLines = 1,
             keyboardActions = KeyboardActions(
                 onSearch = {
@@ -174,7 +180,7 @@ class SearchableActivity : ComponentActivity() {
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
             leadingIcon = { Icon(Icons.Rounded.Search, "Search icon") },
             trailingIcon = {
-                IconButton(onClick = { value = "" }) {
+                IconButton(onClick = { value = ""; focusRequester.requestFocus() }) {
                     Icon(Icons.Rounded.Close, "Clear text")
                 }
             },
