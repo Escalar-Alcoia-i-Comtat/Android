@@ -94,7 +94,11 @@
             android:name=".activity.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan">
+            <meta-data
+                android:name="android.app.default_searchable"
+                android:value=".activity.SearchableActivity" />
+        </activity>
         <activity
             android:name=".activity.climb.AreaActivity"
             android:screenOrientation="portrait" />
