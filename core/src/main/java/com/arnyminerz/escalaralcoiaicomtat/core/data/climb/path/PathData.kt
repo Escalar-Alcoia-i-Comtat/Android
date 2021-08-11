@@ -15,7 +15,7 @@ data class PathData(
     @Document.StringProperty var grades: String,
     @Document.StringProperty var heights: String,
     @Document.StringProperty var endings: String,
-    @Document.StringProperty var pitches: String,
+    @Document.StringProperty var pitches: String?,
     @Document.LongProperty val stringCount: Long,
     @Document.LongProperty val paraboltCount: Long,
     @Document.LongProperty val spitCount: Long,
