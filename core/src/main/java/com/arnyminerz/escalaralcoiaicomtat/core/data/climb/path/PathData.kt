@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
 import androidx.appsearch.annotation.Document
 import androidx.appsearch.app.AppSearchSchema
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import org.json.JSONArray
@@ -49,9 +50,9 @@ data class PathData(
             heights.add(heightsArray.getLong(h))
 
         val endingsArray = JSONArray(endings)
-        val endings = arrayListOf<EndingType>()
+        val endings = arrayListOf<@EndingType String>()
         for (e in 0 until endingsArray.length())
-            endings.add(EndingType.find(endingsArray.getString(e)))
+            endings.add(endingsArray.getString(e))
 
         val pitchesArray = JSONArray(pitches)
         val pitches = arrayListOf<Pitch>()
@@ -99,7 +100,7 @@ fun Path.data(): PathData {
 
     val endings = JSONArray()
     for (ending in this.endings)
-        endings.put(ending.idName)
+        endings.put(ending)
 
     val pitches = JSONArray()
     for (pitch in this.pitches)

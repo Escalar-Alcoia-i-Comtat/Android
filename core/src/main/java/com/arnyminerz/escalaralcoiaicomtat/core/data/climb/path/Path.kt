@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
 import android.app.Activity
 import androidx.annotation.UiThread
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.BlockingTypeParceler
@@ -40,7 +41,7 @@ class Path internal constructor(
     override val displayName: String,
     val grades: ArrayList<Grade>,
     val heights: ArrayList<Long>,
-    val endings: ArrayList<EndingType>,
+    val endings: ArrayList<@EndingType String>,
     val pitches: ArrayList<Pitch>,
     val fixedSafesData: FixedSafesData,
     val requiredSafesData: RequiredSafesData,
@@ -96,14 +97,11 @@ class Path internal constructor(
         "",
         documentPath = data.reference.path
     ) {
-        val pathData = data.data
+        val pathData: Map<String, Any>? = data.data
 
         Timber.d("Loading heights for Path $objectId")
         val heights = pathData?.get("height") as List<*>?
-        if (heights != null)
-            for (h in heights.indices)
-                this.heights.add((heights[h].toString()).toLong())
-        else Timber.w("Heights is null")
+        heights?.forEach { this.heights.add(it.toString().toLong()) } ?: Timber.w("Heights is null")
 
         Timber.d("Loading grade for Path $objectId")
         val gradeValue = data.getString("grade")!!
@@ -112,13 +110,7 @@ class Path internal constructor(
 
         Timber.d("Loading endings for Path $objectId")
         val endingsList = pathData?.get("ending") as List<*>?
-        if (endingsList != null)
-            for (e in endingsList.indices) {
-                val ending = endingsList[e].toString()
-                val endingType = EndingType.find(ending)
-                endings.add(endingType)
-            }
-        else Timber.w("Endings list is null")
+        endingsList?.forEachIndexed { i, _ -> endings.add(endingsList[i].toString()) }
 
         Timber.d("Loading artifo endings for Path $objectId")
         val endingArtifo = data.getString("ending_artifo")

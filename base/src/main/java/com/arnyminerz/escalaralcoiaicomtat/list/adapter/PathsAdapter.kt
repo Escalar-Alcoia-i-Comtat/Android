@@ -23,11 +23,14 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.CommentsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.MarkCompletedActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.EndingType
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Pitch
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.getSpannable
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.image
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.index
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.isUnknown
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
@@ -430,7 +433,7 @@ class PathsAdapter(
     internal data class ChipData(
         val chipType: ChipType,
         @DrawableRes val icon: Int? = null,
-        val endings: List<EndingType>,
+        val endings: List<@EndingType String>,
         val pitches: List<Pitch>,
         val fixedSafesData: FixedSafesData,
         val requiredSafesData: RequiredSafesData
@@ -448,12 +451,6 @@ class PathsAdapter(
             count: Long?
         ): Chip {
             val chip = Chip(activity)
-            val icon = icon
-            val chipType = chipType
-            val endings = endings
-            val pitches = pitches
-            val fixedSafesData = fixedSafesData
-            val requiredSafesData = requiredSafesData
 
             chip.text = string?.let {
                 if (count == null) it
@@ -517,7 +514,7 @@ class PathsAdapter(
      * @since 20210406
      */
     private fun createChips(
-        endings: List<EndingType>,
+        endings: List<@EndingType String>,
         pitches: List<Pitch>,
         fixedSafesData: FixedSafesData,
         requiredSafesData: RequiredSafesData
@@ -552,14 +549,14 @@ class PathsAdapter(
                     )
             )
 
-        if (endings.size == 1 && !endings[0].isUnknown()) {
+        if (endings.size == 1 && !endings[0].isUnknown) {
             val ending = endings.first()
             val endingVal = ending.index
 
             add(
                 ChipData(
                     ChipType.ENDING,
-                    ending.getImage(),
+                    ending.image,
                     endings,
                     pitches,
                     fixedSafesData,
