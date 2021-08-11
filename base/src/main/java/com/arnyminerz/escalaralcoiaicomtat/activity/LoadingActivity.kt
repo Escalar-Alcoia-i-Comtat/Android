@@ -17,7 +17,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
@@ -52,14 +51,14 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         firestore = Firebase.firestore
         Timber.v("Getting Firebase Storage instance...")
         storage = Firebase.storage
+
+        dataCollectionSetUp()
+        authSetup()
     }
 
     override fun onStart() {
         super.onStart()
 
-        dataCollectionSetUp()
-
-        val time = System.currentTimeMillis()
         // Check takes around 5ms
         val showIntro = IntroActivity.shouldShow()
         if (showIntro) {
@@ -69,11 +68,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             return
         } else
             Timber.v("  Won't show intro.")
-        Timber.v("Intro check time: ${System.currentTimeMillis() - time}")
 
         deepLinkPath = getExtra(EXTRA_LINK_PATH)
-
-        doAsync { preLoad() }
     }
 
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
@@ -116,17 +112,15 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     }
 
     /**
-     * This should be ran before [load]. It loads the data from RemoteConfig, and adds some listeners.
+     * Removes auth state listeners if the authentication is not enabled.
+     * @author Arnau Mora
+     * @since 20210811
      */
-    @WorkerThread
-    private suspend fun preLoad() {
+    private fun authSetup() {
         if (!ENABLE_AUTHENTICATION) {
             Timber.v("Removing auth state listener...")
             Firebase.auth.removeAuthStateListener((application as App).authStateListener)
         }
-
-        Timber.v("Finished preparing App...")
-        load()
     }
 
     @WorkerThread
@@ -144,7 +138,9 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             return
         }
         loading = true
-        binding.progressTextView.setText(R.string.status_downloading)
+        uiContext {
+            binding.progressTextView.setText(R.string.status_downloading)
+        }
 
         firestore.loadAreas(application) { progress, max ->
             Timber.i("Download progress: $progress / $max")
@@ -162,7 +158,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                 binding.progressTextView.setText(R.string.status_storing)
             }
         }
-        if (AREAS.size > 0) {
+        if (AREAS.isNotEmpty()) {
             if (deepLinkPath != null) {
                 uiContext {
                     binding.progressTextView.setText(R.string.status_loading_deep_link)
@@ -176,24 +172,10 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                 uiContext {
                     if (intent != null)
                         startActivity(intent)
-                    /*else if (BuildConfig.DEBUG)
-                        launch(SectorActivity::class.java) {
-                            putExtra(EXTRA_AREA, "WWQME983XhriXVhtVxFu")
-                            putExtra(EXTRA_ZONE, "LtYZWlzTPwqHsWbYIDTt")
-                            putExtra(EXTRA_SECTOR_COUNT, 15)
-                            putExtra(EXTRA_SECTOR_INDEX, 11)
-                        }*/
                     else
                         launch(MainActivity::class.java)
                 }
-            }/* else if (BuildConfig.DEBUG)
-                        launch(SectorActivity::class.java) {
-                            putExtra(EXTRA_AREA, "WWQME983XhriXVhtVxFu")
-                            putExtra(EXTRA_ZONE, "LtYZWlzTPwqHsWbYIDTt")
-                            putExtra(EXTRA_SECTOR_COUNT, 9)
-                            putExtra(EXTRA_SECTOR_INDEX, 6)
-                        }*/
-            else uiContext {
+            } else uiContext {
                 launch(MainActivity::class.java)
             }
         } else if (!appNetworkState.hasInternet)
