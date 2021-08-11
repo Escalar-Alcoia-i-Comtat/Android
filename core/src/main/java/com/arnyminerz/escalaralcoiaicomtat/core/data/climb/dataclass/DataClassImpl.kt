@@ -21,4 +21,6 @@ open class DataClassImpl(
 
     val timestamp: Date
         get() = Date(timestampMillis)
+
+    override fun toString(): String = "$namespace/$objectId"
 }
