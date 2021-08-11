@@ -19,6 +19,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import timber.log.Timber
 
 /**
  * Launches the DataClass' [Activity].
@@ -38,26 +39,27 @@ fun DataClassImpl.launch(activity: Activity) {
     }
     activity.launch(activityClass) {
         val pathPieces = documentPath.split("/")
+        Timber.v("Launching activity with path $documentPath")
         when (namespace) {
             Area.NAMESPACE -> {
-                putExtra(EXTRA_AREA, pathPieces[2]) // area ID
+                putExtra(EXTRA_AREA, pathPieces[0]) // area ID
             }
             Zone.NAMESPACE -> {
-                putExtra(EXTRA_AREA, pathPieces[2]) // area ID
-                putExtra(EXTRA_ZONE, pathPieces[4]) // zone ID
+                putExtra(EXTRA_AREA, pathPieces[0]) // area ID
+                putExtra(EXTRA_ZONE, pathPieces[2]) // zone ID
             }
             Sector.NAMESPACE -> {
-                putExtra(EXTRA_AREA, pathPieces[2]) // area ID
-                putExtra(EXTRA_ZONE, pathPieces[4]) // zone ID
+                putExtra(EXTRA_AREA, pathPieces[0]) // area ID
+                putExtra(EXTRA_ZONE, pathPieces[2]) // zone ID
             }
             Path.NAMESPACE -> {
-                putExtra(EXTRA_AREA, pathPieces[2]) // area ID
-                putExtra(EXTRA_ZONE, pathPieces[4]) // zone ID
-                val sectors = AREAS[pathPieces[2]]?.get(pathPieces[4])
+                putExtra(EXTRA_AREA, pathPieces[0]) // area ID
+                putExtra(EXTRA_ZONE, pathPieces[2]) // zone ID
+                val sectors = AREAS[pathPieces[0]]?.get(pathPieces[2])
                     ?.getChildren(activity, Firebase.storage)
                 val sectorIndex = sectors?.let {
-                    val i = it.indexOfFirst { sector -> sector.objectId == pathPieces[6] }
-                    if (i < 0) 0
+                    val i = it.indexOfFirst { sector -> sector.objectId == pathPieces[4] }
+                    if (i < 0) 0 // If sector was not found, select the first one
                     else i
                 } ?: 0
                 putExtra(EXTRA_SECTOR_INDEX, sectorIndex)
