@@ -28,6 +28,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -172,6 +173,11 @@ class SearchableActivity : ComponentActivity() {
             ),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
             leadingIcon = { Icon(Icons.Rounded.Search, "Search icon") },
+            trailingIcon = {
+                IconButton(onClick = { value = "" }) {
+                    Icon(Icons.Rounded.Close, "Clear text")
+                }
+            },
             placeholder = { Text(stringResource(R.string.search_hint)) }
         )
     }
@@ -345,7 +351,9 @@ class SearchableActivity : ComponentActivity() {
          */
         fun search(query: String) {
             viewModelScope.launch(Dispatchers.IO) {
+                Timber.v("Searching for \"$query\"...")
                 val result = performSearch(query)
+                Timber.v("Search got ${result.size} results.")
                 uiContext { _itemList.value = result }
             }
         }
