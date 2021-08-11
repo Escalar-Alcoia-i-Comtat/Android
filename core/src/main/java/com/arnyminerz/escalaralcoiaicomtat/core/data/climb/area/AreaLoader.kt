@@ -46,7 +46,8 @@ suspend fun FirebaseFirestore.loadAreas(
     enableSearch: Boolean = true,
     @UiThread progressCallback: ((current: Int, total: Int) -> Unit)? = null
 ) {
-    val trace = Firebase.performance.newTrace("loadAreasTrace")
+    val performance = Firebase.performance
+    val trace = performance.newTrace("loadAreasTrace")
 
     trace.start()
 
@@ -55,22 +56,37 @@ suspend fun FirebaseFirestore.loadAreas(
 
     Timber.d("Fetching areas...")
     try {
+        val pathsFetchTrace = performance.newTrace("fetchPathsTrace")
+        pathsFetchTrace.start()
         Timber.v("Getting paths...")
         val pathsSnapshot = collectionGroup("Paths")
             .get()
             .await()
+        pathsFetchTrace.stop()
+
+        val sectorsFetchTrace = performance.newTrace("sectorsFetchTrace")
+        sectorsFetchTrace.start()
         Timber.v("Getting sectors...")
         val sectorsSnapshot = collectionGroup("Sectors")
             .get()
             .await()
+        sectorsFetchTrace.stop()
+
+        val zonesFetchTrace = performance.newTrace("zonesFetchTrace")
+        zonesFetchTrace.start()
         Timber.v("Getting zones...")
         val zonesSnapshot = collectionGroup("Zones")
             .get()
             .await()
+        zonesFetchTrace.stop()
+
+        val areasFetchTrace = performance.newTrace("areasFetchTrace")
+        areasFetchTrace.start()
         Timber.v("Getting areas...")
         val areasSnapshot = collectionGroup("Areas")
             .get()
             .await()
+        areasFetchTrace.stop()
 
         Timber.v("Initializing zones cache...")
         val zonesCache = arrayMapOf<String, Zone>()
@@ -116,6 +132,8 @@ suspend fun FirebaseFirestore.loadAreas(
         // The key is the sector id, the value the snapshot of the path
         val sectorIdPathDocument = arrayMapOf<String, ArrayList<Path>>()
         for (pathDocument in pathDocuments) {
+            val pathProcessingTrace = performance.newTrace("pathProcessingTrace")
+            pathProcessingTrace.start()
             uiContext { progressCallback?.invoke(++counter, count) }
             val pathId = pathDocument.id
             Timber.v("P/$pathId > Processing path...")
@@ -125,6 +143,7 @@ suspend fun FirebaseFirestore.loadAreas(
             sectorIdPathDocument[sectorId]?.add(path) ?: run {
                 sectorIdPathDocument[sectorId] = arrayListOf(path)
             }
+            pathProcessingTrace.stop()
         }
 
         Timber.v("Expanding zone documents...")
