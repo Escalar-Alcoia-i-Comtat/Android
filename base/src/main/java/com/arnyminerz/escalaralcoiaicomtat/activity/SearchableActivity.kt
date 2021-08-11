@@ -33,6 +33,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.LoadingIndicator
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.context
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -152,7 +153,8 @@ class SearchableActivity : ComponentActivity() {
          */
         fun search(query: String) {
             viewModelScope.launch(Dispatchers.IO) {
-                _itemList.value = performSearch(query)
+                val result = performSearch(query)
+                uiContext { _itemList.value = result }
             }
         }
     }
