@@ -254,9 +254,11 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                 binding.progressTextView.text =
                     getString(R.string.status_loading_progress, progress, max)
             } else {
-                visibility(binding.progressBar, false)
-                binding.progressBar.isIndeterminate = true
-                visibility(binding.progressBar, true)
+                if (!binding.progressBar.isIndeterminate) {
+                    visibility(binding.progressBar, false)
+                    binding.progressBar.isIndeterminate = true
+                    visibility(binding.progressBar, true)
+                }
                 binding.progressTextView.setText(R.string.status_storing)
             }
         }
