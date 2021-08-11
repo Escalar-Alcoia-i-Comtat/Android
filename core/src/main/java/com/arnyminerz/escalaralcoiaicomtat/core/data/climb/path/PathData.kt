@@ -5,7 +5,6 @@ import androidx.appsearch.app.AppSearchSchema
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
-import org.json.JSONArray
 
 @Document
 data class PathData(
@@ -39,11 +38,6 @@ data class PathData(
     var namespace: String = Path.NAMESPACE
 
     fun path(): Path {
-        val gradesArray = grades.split(",")
-        val grades = arrayListOf<Grade>()
-        for (g in gradesArray)
-            grades.add(Grade(g))
-
         val heightsArray = heights.split(",")
         val heights = arrayListOf<Long>()
         for (h in heightsArray)
@@ -53,11 +47,6 @@ data class PathData(
         val endings = arrayListOf<@EndingType String>()
         for (e in endingsArray)
             endings.add(e)
-
-        val pitchesArray = JSONArray(pitches)
-        val pitches = arrayListOf<Pitch>()
-        for (p in 0 until pitchesArray.length())
-            pitches.add(Pitch(pitchesArray.getJSONObject(p)))
 
         return Path(
             objectId,
@@ -104,19 +93,15 @@ fun Path.data(): PathData {
         endings += "$ending,"
     endings = endings.substringBeforeLast(',')
 
-    val pitches = JSONArray()
-    for (pitch in this.pitches)
-        pitches.put(pitch.toJSON())
-
     return PathData(
         objectId,
         timestampMillis,
         sketchId,
         displayName,
-        grades.toJSONStringArray(),
+        rawGrades,
         heights,
         endings,
-        pitches.toString(),
+        rawPitches,
         fixedSafesData.stringCount,
         fixedSafesData.paraboltCount,
         fixedSafesData.spitCount,
