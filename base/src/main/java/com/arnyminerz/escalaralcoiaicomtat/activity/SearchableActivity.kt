@@ -55,7 +55,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.SearchItemTypeColor
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.LoadingIndicator
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.context
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
 import kotlinx.coroutines.Dispatchers
@@ -157,9 +156,7 @@ class SearchableActivity : ComponentActivity() {
                 )
                 IconButton(
                     modifier = Modifier.align(Alignment.End),
-                    onClick = {
-                        toast("Clicked $dataClassImpl")
-                    }) {
+                    onClick = { dataClassImpl.launch(this@SearchableActivity) }) {
                     Icon(Icons.Rounded.ChevronRight, contentDescription = "Enter element")
                 }
             }
