@@ -42,7 +42,7 @@ class Path internal constructor(
     val rawGrades: String,
     val heights: ArrayList<Long>,
     val endings: ArrayList<@EndingType String>,
-    val rawPitches: String,
+    val rawPitches: String?,
     val fixedSafesData: FixedSafesData,
     val requiredSafesData: RequiredSafesData,
     val description: String?,
@@ -75,7 +75,7 @@ class Path internal constructor(
         data.getString("grade")!!,
         arrayListOf(),
         arrayListOf(),
-        data.getString("ending_artifo")!!,
+        data.getString("ending_artifo"),
         FixedSafesData(
             data.getLong("stringCount") ?: 0,
             data.getLong("paraboltCount") ?: 0,
@@ -131,12 +131,15 @@ class Path internal constructor(
      */
     val pitches: List<Pitch>
         get() {
-            val result = arrayListOf<Pitch>()
-            val artifos = rawPitches.replace("\r", "").split("\n")
-            for (artifo in artifos)
-                Pitch.fromEndingDataString(artifo)
-                    ?.let { artifoEnding -> result.add(artifoEnding) }
-            return result
+            return if (rawPitches == null)
+                emptyList()
+            else
+                arrayListOf<Pitch>().apply {
+                    val artifos = rawPitches.replace("\r", "").split("\n")
+                    for (artifo in artifos)
+                        Pitch.fromEndingDataString(artifo)
+                            ?.let { artifoEnding -> add(artifoEnding) }
+                }
         }
 
     /**
