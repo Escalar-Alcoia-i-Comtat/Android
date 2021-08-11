@@ -19,13 +19,14 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.data
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_FULL_DATA_LOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
 import kotlinx.coroutines.tasks.await
@@ -68,6 +69,7 @@ suspend fun FirebaseFirestore.loadAreas(
         sectorsFetchTrace.start()
         Timber.v("Getting sectors...")
         val sectorsSnapshot = collectionGroup("Sectors")
+            .orderBy("displayName", Query.Direction.ASCENDING)
             .get()
             .await()
         sectorsFetchTrace.stop()
@@ -76,6 +78,7 @@ suspend fun FirebaseFirestore.loadAreas(
         zonesFetchTrace.start()
         Timber.v("Getting zones...")
         val zonesSnapshot = collectionGroup("Zones")
+            .orderBy("displayName", Query.Direction.ASCENDING)
             .get()
             .await()
         zonesFetchTrace.stop()
@@ -84,6 +87,7 @@ suspend fun FirebaseFirestore.loadAreas(
         areasFetchTrace.start()
         Timber.v("Getting areas...")
         val areasSnapshot = collectionGroup("Areas")
+            .orderBy("displayName", Query.Direction.ASCENDING)
             .get()
             .await()
         areasFetchTrace.stop()
@@ -104,13 +108,12 @@ suspend fun FirebaseFirestore.loadAreas(
             .sortedBy { snapshot -> snapshot.getString("sketchId")?.toInt() }
         Timber.v("Getting sector documents...")
         val sectorDocuments = sectorsSnapshot.documents
-            .sortedBy { snapshot -> snapshot.getString("displayName") }
         Timber.v("Getting zone documents...")
         val zoneDocuments = zonesSnapshot.documents
-            .sortedBy { snapshot -> snapshot.getString("displayName") }
         Timber.v("Getting area documents...")
-        val areaDocuments = areasSnapshot.documents // Areas get sorted when added to AREAS
+        val areaDocuments = areasSnapshot.documents
 
+        // Count time is approx 0ms, so shouldn't bother about this taking a lot of time.
         Timber.v("Counting paths...")
         val pathsCount = pathDocuments.size
         Timber.v("Counting sectors...")
@@ -125,16 +128,15 @@ suspend fun FirebaseFirestore.loadAreas(
         trace.putAttribute("sectorsCount", sectorsCount.toString())
         trace.putAttribute("pathsCount", pathsCount.toString())
 
-        var counter = 0
-        val count = areasCount + zonesCount + sectorsCount + pathsCount
+        var progressCounter = 0
+        val progressMax = areasCount + zonesCount + sectorsCount
 
         Timber.v("Creation relation with sector and path documents...")
         // The key is the sector id, the value the snapshot of the path
         val sectorIdPathDocument = arrayMapOf<String, ArrayList<Path>>()
+        val pathsProcessingTrace = performance.newTrace("pathsProcessingTrace")
+        pathsProcessingTrace.start()
         for (pathDocument in pathDocuments) {
-            val pathProcessingTrace = performance.newTrace("pathProcessingTrace")
-            pathProcessingTrace.start()
-            uiContext { progressCallback?.invoke(++counter, count) }
             val pathId = pathDocument.id
             Timber.v("P/$pathId > Processing path...")
             val path = Path(pathDocument)
@@ -143,21 +145,12 @@ suspend fun FirebaseFirestore.loadAreas(
             sectorIdPathDocument[sectorId]?.add(path) ?: run {
                 sectorIdPathDocument[sectorId] = arrayListOf(path)
             }
-            pathProcessingTrace.stop()
         }
-
-        Timber.v("Expanding zone documents...")
-        val expandedZoneDocuments = arrayMapOf<String, DocumentSnapshot>()
-        for (zoneDocument in zoneDocuments)
-            expandedZoneDocuments[zoneDocument.id] = zoneDocument
-        Timber.v("Expanding area documents...")
-        val expandedAreaDocuments = arrayMapOf<String, DocumentSnapshot>()
-        for (areaDocument in areaDocuments)
-            expandedAreaDocuments[areaDocument.id] = areaDocument
+        pathsProcessingTrace.stop()
 
         Timber.v("Iterating $sectorsCount sector documents...")
         for (sectorDocument in sectorDocuments) {
-            uiContext { progressCallback?.invoke(++counter, count) }
+            uiContext { progressCallback?.invoke(++progressCounter, progressMax) }
 
             val sectorId = sectorDocument.id
             Timber.v("S/$sectorId > Getting sector's reference...")
@@ -170,9 +163,9 @@ suspend fun FirebaseFirestore.loadAreas(
             Timber.v("S/$sectorId > Getting sector's parent zone's id.")
             val zoneId = sectorParentZone.id
             if (!zonesCache.containsKey(zoneId)) {
-                uiContext { progressCallback?.invoke(++counter, count) }
+                uiContext { progressCallback?.invoke(++progressCounter, progressMax) }
                 Timber.v("S/$sectorId > There's no cached version for Z/$zoneId.")
-                val zoneDocument = expandedZoneDocuments[zoneId]
+                val zoneDocument = zoneDocuments.find { it.id == zoneId }
                 if (zoneDocument == null) {
                     Timber.e("S/$sectorId > Could not find zone (Z/$zoneId) in documents.")
                     return
@@ -223,9 +216,9 @@ suspend fun FirebaseFirestore.loadAreas(
             Timber.v("Z/$zoneId > Getting Zone's parent Area id...")
             val zoneParentAreaId = zoneParentAreaReference.id
             if (!areasCache.containsKey(zoneParentAreaId)) {
-                uiContext { progressCallback?.invoke(++counter, count) }
+                uiContext { progressCallback?.invoke(++progressCounter, progressMax) }
                 Timber.v("Z/$zoneId > Could not find A/$zoneParentAreaId in cache...")
-                val areaDocument = expandedAreaDocuments[zoneParentAreaId]
+                val areaDocument = areaDocuments.find { it.id == zoneParentAreaId }
                 if (areaDocument == null) {
                     Timber.e("Z/$zoneId > Could not find area (A/$zoneParentAreaId) in documents.")
                     return
@@ -255,17 +248,14 @@ suspend fun FirebaseFirestore.loadAreas(
         AREAS.clear()
         Timber.v("Adding all areas to AREAS...")
         AREAS.addAll(areas)
-        Timber.v("Shorting AREAS...")
-        AREAS.sortBy { area -> area.displayName }
 
-        if (enableSearch) {
+        if (enableSearch && !PREF_INDEXED_SEARCH.get()) {
             Timber.v("Search > Initializing session future...")
-            val sessionFuture = LocalStorage.createSearchSession(
+            val session = LocalStorage.createSearchSession(
                 LocalStorage.SearchContext.Builder(application, SEARCH_DATABASE_NAME)
                     .build()
-            )
-            Timber.v("Search > Awaiting for session...")
-            val session = sessionFuture.await()
+            ).await()
+            val time = System.currentTimeMillis()
             Timber.v("Search > Adding document classes...")
             val setSchemaRequest = SetSchemaRequest.Builder()
                 .addDocumentClasses(AreaData::class.java)
@@ -274,6 +264,7 @@ suspend fun FirebaseFirestore.loadAreas(
                 .addDocumentClasses(PathData::class.java)
                 .build()
             session.setSchema(setSchemaRequest).await()
+            Timber.i("Set schema time: ${System.currentTimeMillis() - time}")
 
             Timber.v("Search > Adding documents...")
             val putRequest = PutDocumentsRequest.Builder()
@@ -290,11 +281,15 @@ suspend fun FirebaseFirestore.loadAreas(
             if (failedResults?.isEmpty() != true)
                 Timber.w("Search > Could not add ${failedResults?.size} documents...")
 
+            // This persists the data to the disk
             Timber.v("Search > Flushing database...")
             session.requestFlush().await()
 
             Timber.v("Search > Closing database...")
             session.close()
+
+            Timber.v("Search > Storing to preferences...")
+            PREF_INDEXED_SEARCH.put(true)
         }
 
         trace.stop()
