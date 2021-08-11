@@ -7,32 +7,55 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.WorkerThread
+import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
 import androidx.appsearch.exceptions.AppSearchException
 import androidx.appsearch.localstorage.LocalStorage
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
+import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone.Companion.SAMPLE_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.SearchItemTypeColor
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.LoadingIndicator
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.context
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
 import kotlinx.coroutines.Dispatchers
@@ -66,17 +89,87 @@ class SearchableActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * A view that contains all the results from a search.
+     * @author Arnau Mora
+     * @since 0210811
+     * @param results The results to show to the user.
+     * @see SearchResult(dataClassImpl = ) This is the element that will render each result.
+     */
     @Composable
     @OptIn(ExperimentalAnimationApi::class)
     private fun SearchResultsView(results: List<DataClassImpl>?) {
-        LoadingIndicator(isLoading = results != null || results?.isEmpty() == true)
+        Timber.v("Showing ${results?.size ?: "no"} results to the user...")
 
-        if (results != null)
+        Timber.v("Displaying LoadingIndicator ${results?.isNotEmpty() != true}")
+        LoadingIndicator(isLoading = results?.isNotEmpty() != true)
+
+        if (results != null) {
+            Timber.v("Displaying LazyColumn...")
             LazyColumn {
-                items(results) { result ->
-                    Text(text = result.namespace + "/" + result.objectId)
+                items(results) { result -> SearchResult(result) }
+            }
+        }
+    }
+
+    /**
+     * For displaying a search result to the user.
+     * @author Arnau Mora
+     * @since 20210811
+     * @param dataClassImpl The [DataClassImpl] that contains the searched data.
+     */
+    @Composable
+    fun SearchResult(dataClassImpl: DataClassImpl) {
+        Timber.v("Displaying a SearchResult...")
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            elevation = 10.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = dataClassImpl.displayName,
+                    modifier = Modifier.fillMaxWidth(),
+                    fontSize = 26.sp,
+                    fontFamily = CabinFamily,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = when (val type = dataClassImpl::class.java.simpleName) {
+                        "Area" -> stringResource(R.string.data_type_area)
+                        "Zone" -> stringResource(R.string.data_type_zone)
+                        "Sector" -> stringResource(R.string.data_type_sector)
+                        "Path" -> stringResource(R.string.data_type_path)
+                        else -> type
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 4.dp),
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = SearchItemTypeColor
+                )
+                IconButton(
+                    modifier = Modifier.align(Alignment.End),
+                    onClick = {
+                        toast("Clicked $dataClassImpl")
+                    }) {
+                    Icon(Icons.Rounded.ChevronRight, contentDescription = "Enter element")
                 }
             }
+        }
+    }
+
+    @Preview(name = "Zone search result preview", device = Devices.DEFAULT, showBackground = true)
+    @Composable
+    fun SearchResultPreview() {
+        SearchResult(SAMPLE_ZONE)
     }
 
     class SearchViewModel(application: Application) : AndroidViewModel(application) {
