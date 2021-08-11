@@ -25,7 +25,7 @@ class Zone internal constructor(
     override val imageReferenceUrl: String,
     override val kmzReferenceUrl: String,
     val position: LatLng,
-    val documentPath: String,
+    override val documentPath: String,
     val webUrl: String?
 ) : DataClass<Sector, Area>(
     displayName,
@@ -66,5 +66,16 @@ class Zone internal constructor(
 
     companion object {
         const val NAMESPACE = "Zone"
+
+        val SAMPLE_ZONE = Zone(
+            objectId = "LtYZWlzTPwqHsWbYIDTt",
+            displayName = "Barranquet de Ferri",
+            timestampMillis = 1618160538000L,
+            imageReferenceUrl = "gs://escalaralcoiaicomtat.appspot.com/images/BarranquetDeFerriAPP.jpg",
+            kmzReferenceUrl = "gs://escalaralcoiaicomtat.appspot.com/kmz/Barranquet de Ferri.kmz",
+            position = LatLng(38.705581, -0.498946),
+            documentPath = "/Areas/WWQME983XhriXVhtVxFu/Zones/LtYZWlzTPwqHsWbYIDTt",
+            webUrl = "https://escalaralcoiaicomtat.centrexcursionistalcoi.org/barranquet-de-ferri.html"
+        )
     }
 }

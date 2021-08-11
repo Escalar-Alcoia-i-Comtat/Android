@@ -8,7 +8,9 @@ import java.util.Date
 open class DataClassImpl(
     open val objectId: String,
     val namespace: String,
-    open val timestampMillis: Long
+    open val timestampMillis: Long,
+    open val displayName: String,
+    open val documentPath: String
 ) : Parcelable {
     companion object {
         fun find(list: List<DataClassImpl>, objectId: String): Int {
@@ -21,4 +23,6 @@ open class DataClassImpl(
 
     val timestamp: Date
         get() = Date(timestampMillis)
+
+    override fun toString(): String = "$namespace/$objectId"
 }

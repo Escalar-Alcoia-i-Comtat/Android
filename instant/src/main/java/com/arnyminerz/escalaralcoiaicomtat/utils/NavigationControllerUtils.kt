@@ -12,6 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import timber.log.Timber
@@ -30,8 +31,7 @@ fun NavController.searchNavigation(uri: Uri) {
     else doAsync {
         Timber.v("Initializing search session...")
         val sessionFuture = LocalStorage.createSearchSession(
-            // TODO: Database name should not be hardcoded
-            LocalStorage.SearchContext.Builder(context, "escalaralcoiaicomtat")
+            LocalStorage.SearchContext.Builder(context, SEARCH_DATABASE_NAME)
                 .build()
         )
         val session = sessionFuture.await()

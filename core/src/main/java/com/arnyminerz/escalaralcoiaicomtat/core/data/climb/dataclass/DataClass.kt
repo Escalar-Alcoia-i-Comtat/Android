@@ -72,13 +72,20 @@ import kotlin.coroutines.suspendCoroutine
 // A: List type
 // B: Parent Type
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
-    open val displayName: String,
+    override val displayName: String,
     override val timestampMillis: Long,
     open val imageReferenceUrl: String,
     open val kmzReferenceUrl: String?,
     open val uiMetadata: UIMetadata,
     open val metadata: DataClassMetadata
-) : DataClassImpl(metadata.objectId, metadata.namespace, timestampMillis), Iterable<A> {
+) : DataClassImpl(
+    metadata.objectId,
+    metadata.namespace,
+    timestampMillis,
+    displayName,
+    metadata.documentPath
+),
+    Iterable<A> {
     companion object {
         /**
          * Searches in [AREAS] and tries to get an intent from them.
@@ -213,6 +220,23 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     val pin: String
         get() = "${namespace}_$objectId"
+
+    /**
+     * Returns the parent element of the [DataClass] provided by [AREAS].
+     * @author Arnau Mora
+     * @since 20210811
+     * @see AREAS
+     */
+    val parent: DataClass<*, *>?
+        get() {
+            val docPath = documentPath.split("/")
+            return when (namespace) {
+                Area.NAMESPACE -> null
+                Zone.NAMESPACE -> AREAS[docPath[1]]
+                Sector.NAMESPACE -> AREAS[docPath[1]]?.get(docPath[3])
+                else -> null
+            }
+        }
 
     /**
      * Returns the children of the [DataClass]. Also downloads their images if not downloaded.

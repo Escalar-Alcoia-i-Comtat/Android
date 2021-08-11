@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.climb
 
+import android.app.SearchManager
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -113,6 +114,12 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
             nearbyZones?.initializeMap()
         }
+
+        Timber.v("Initializing search engine...")
+        val searchManager =
+            requireContext().getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        binding.searchView.setSearchableInfo(searchManager.getSearchableInfo(requireActivity().componentName))
+        binding.searchView.setIconifiedByDefault(false)
 
         Timber.v("Refreshing areas...")
         Timber.d("Initializing area adapter for AreasViewFragment...")

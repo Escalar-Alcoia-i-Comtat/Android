@@ -52,7 +52,7 @@ class Grade(val displayName: String) : Parcelable {
 
     override fun toString(): String = displayName
 
-    fun toJSON(): String = "{ \"displayName\":\"$displayName\" }"
+    fun toJSON(): JSONObject = JSONObject("{ \"displayName\":\"$displayName\" }")
 
     fun color(): Int {
         for (combination in startingColorCombinations)
@@ -165,14 +165,12 @@ fun Iterable<Grade>.gradeNames(): ArrayList<String> {
 }
 
 fun Iterable<Grade>.toJSONStringArray(): String {
-    var result = "["
+    val array = JSONArray()
 
     for (u in this)
-        result += "\"${u.toJSON()}\","
-    result = result.substring(0, result.length - 1)
+        array.put(u.toJSON())
 
-    result += "]"
-    return result
+    return array.toString()
 }
 
 fun Iterable<Grade>?.string(): String {

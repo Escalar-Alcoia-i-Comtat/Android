@@ -14,6 +14,11 @@
             android:id="@+id/areasNoInternetCardView"
             layout="@layout/no_internet_card" />
 
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <include
             android:id="@+id/nearby_zones_card"
             layout="@layout/nearby_zones_card" />

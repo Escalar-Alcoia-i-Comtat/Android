@@ -43,7 +43,7 @@ class Sector internal constructor(
     val location: LatLng?,
     val weight: String,
     override val imageReferenceUrl: String,
-    val documentPath: String,
+    override val documentPath: String,
     val webUrl: String?
 ) : DataClass<Path, Zone>(
     displayName,

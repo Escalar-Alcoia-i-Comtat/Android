@@ -45,6 +45,11 @@
     <string name="status_no_internet">No Internet Connection</string>
     <string name="status_loading_deep_link">Processing link…</string>
 
+    <string name="data_type_area">Area</string>
+    <string name="data_type_zone">Zone</string>
+    <string name="data_type_sector">Sector</string>
+    <string name="data_type_path">Path</string>
+
     <string name="dialog_permission_title">Permission Required!</string>
     <string name="dialog_permission_message">The functionality you are trying to use requires the %s permission. Please grant it, or refuse to use that.</string>
     <string name="dialog_permission_my_location_message">For showing your current position, the app must have access to the location of your device. Please, grant it, or refuse to use this functionality.</string>
@@ -285,6 +290,8 @@
     <string name="button_desc_download">Download</string>
     <string name="button_desc_toggle">Toggle</string>
     <string name="button_desc_delete">Delete</string>
+
+    <string name="search_hint">Search…</string>
 
     <string name="placeholder">Placeholder</string>
     <string name="r_placeholder" translatable="false">R#:</string>

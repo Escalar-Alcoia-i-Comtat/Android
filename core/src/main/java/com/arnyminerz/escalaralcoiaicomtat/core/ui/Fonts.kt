@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.core.ui.resources.font
+package com.arnyminerz.escalaralcoiaicomtat.core.ui
 
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -6,7 +6,9 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 
-val PoppinsFamiliy = FontFamily(
+val CabinFamily = FontFamily(Font(R.font.cabin))
+
+val PoppinsFamily = FontFamily(
     Font(R.font.poppins_extra_light_italic, FontWeight.ExtraLight, FontStyle.Italic),
     Font(R.font.poppins_extra_light, FontWeight.ExtraLight, FontStyle.Normal),
 
