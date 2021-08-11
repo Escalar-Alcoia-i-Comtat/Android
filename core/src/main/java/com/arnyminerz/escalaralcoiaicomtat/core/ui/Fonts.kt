@@ -8,7 +8,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 
 val CabinFamily = FontFamily(Font(R.font.cabin))
 
-val PoppinsFamiliy = FontFamily(
+val PoppinsFamily = FontFamily(
     Font(R.font.poppins_extra_light_italic, FontWeight.ExtraLight, FontStyle.Italic),
     Font(R.font.poppins_extra_light, FontWeight.ExtraLight, FontStyle.Normal),
 
