@@ -222,6 +222,23 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         get() = "${namespace}_$objectId"
 
     /**
+     * Returns the parent element of the [DataClass] provided by [AREAS].
+     * @author Arnau Mora
+     * @since 20210811
+     * @see AREAS
+     */
+    val parent: DataClass<*, *>?
+        get() {
+            val docPath = documentPath.split("/")
+            return when (namespace) {
+                Area.NAMESPACE -> null
+                Zone.NAMESPACE -> AREAS[docPath[1]]
+                Sector.NAMESPACE -> AREAS[docPath[1]]?.get(docPath[3])
+                else -> null
+            }
+        }
+
+    /**
      * Returns the children of the [DataClass]. Also downloads their images if not downloaded.
      * @author Arnau Mora
      * @since 20210313

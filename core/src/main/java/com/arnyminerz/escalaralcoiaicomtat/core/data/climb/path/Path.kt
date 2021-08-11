@@ -3,11 +3,14 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 import android.app.Activity
 import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.BlockingTypeParceler
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.PitchParceler
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.auth.FirebaseAuthException
@@ -131,6 +134,19 @@ class Path internal constructor(
         val d = rebuilders?.joinToString(separator = ", ")
         rebuiltBy = d
     }
+
+    /**
+     * Returns the parent [Sector] of the [Path] provided by [AREAS].
+     * @author Arnau Mora
+     * @since 20210811
+     * @return The parent [Sector], or null if not found.
+     * @see AREAS
+     */
+    val parent: Sector?
+        get() {
+            val docPath = documentPath.split("/")
+            return AREAS[docPath[1]]?.get(docPath[3])?.get(docPath[5])
+        }
 
     override fun toString(): String = displayName
 
