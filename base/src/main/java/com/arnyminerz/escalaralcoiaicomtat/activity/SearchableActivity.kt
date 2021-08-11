@@ -31,7 +31,6 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -110,8 +109,7 @@ class SearchableActivity : ComponentActivity() {
                     var query by remember { mutableStateOf(searchQuery ?: "") }
 
                     val searchViewModel = SearchViewModel(application)
-                    val list: State<List<DataClassImpl>?> =
-                        searchViewModel.itemList.observeAsState()
+                    val list: List<DataClassImpl> by searchViewModel.itemList.observeAsState(listOf())
                     if (searchQuery != null && searchQuery.isNotBlank() && lastSearch != searchQuery) {
                         lastSearch = searchQuery
                         searchViewModel.search(searchQuery)
@@ -125,8 +123,11 @@ class SearchableActivity : ComponentActivity() {
                             Timber.v("New search query: $query")
                             searchViewModel.search(query)
                         }
-                        Timber.v("Search results: ${list.value}")
-                        SearchResultsView(list.value)
+                        Timber.v("Search results: $list")
+                        if (list.isEmpty())
+                            Text("No results") // TODO: Use resource
+                        else
+                            SearchResultsView(list)
                     }
                 }
             }
