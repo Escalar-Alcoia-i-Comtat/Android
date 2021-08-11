@@ -72,13 +72,14 @@ import kotlin.coroutines.suspendCoroutine
 // A: List type
 // B: Parent Type
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
-    open val displayName: String,
+    override val displayName: String,
     override val timestampMillis: Long,
     open val imageReferenceUrl: String,
     open val kmzReferenceUrl: String?,
     open val uiMetadata: UIMetadata,
     open val metadata: DataClassMetadata
-) : DataClassImpl(metadata.objectId, metadata.namespace, timestampMillis), Iterable<A> {
+) : DataClassImpl(metadata.objectId, metadata.namespace, timestampMillis, displayName),
+    Iterable<A> {
     companion object {
         /**
          * Searches in [AREAS] and tries to get an intent from them.
