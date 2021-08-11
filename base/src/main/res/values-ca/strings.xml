@@ -268,4 +268,9 @@
     <string name="action_restart">Reiniciar</string>
     <string name="toast_update_downloaded">Una nova actualització ha sigut baixada</string>
     <string name="toast_error_not_found">No s\'ha trobat l\'element</string>
+    <string name="search_hint">Cercar…</string>
+    <string name="data_type_area">Àrea</string>
+    <string name="data_type_zone">Zona</string>
+    <string name="data_type_sector">Sector</string>
+    <string name="data_type_path">Via</string>
 </resources>
