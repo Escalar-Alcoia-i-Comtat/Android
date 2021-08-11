@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
 import android.app.Activity
 import androidx.annotation.UiThread
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.BlockingTypeParceler
@@ -38,10 +39,10 @@ class Path internal constructor(
     override val timestampMillis: Long,
     val sketchId: Long,
     override val displayName: String,
-    val grades: ArrayList<Grade>,
+    val rawGrades: String,
     val heights: ArrayList<Long>,
-    val endings: ArrayList<EndingType>,
-    val pitches: ArrayList<Pitch>,
+    val endings: ArrayList<@EndingType String>,
+    val rawPitches: String?,
     val fixedSafesData: FixedSafesData,
     val requiredSafesData: RequiredSafesData,
     val description: String?,
@@ -71,10 +72,10 @@ class Path internal constructor(
         data.getDate("created")!!.time,
         data.getString("sketchId")?.toLongOrNull() ?: 0L,
         data.getString("displayName")!!,
-        arrayListOf<Grade>(),
+        data.getString("grade")!!,
         arrayListOf(),
         arrayListOf(),
-        arrayListOf(),
+        data.getString("ending_artifo"),
         FixedSafesData(
             data.getLong("stringCount") ?: 0,
             data.getLong("paraboltCount") ?: 0,
@@ -96,44 +97,50 @@ class Path internal constructor(
         "",
         documentPath = data.reference.path
     ) {
-        val pathData = data.data
+        val pathData: Map<String, Any>? = data.data
 
         Timber.d("Loading heights for Path $objectId")
         val heights = pathData?.get("height") as List<*>?
-        if (heights != null)
-            for (h in heights.indices)
-                this.heights.add((heights[h].toString()).toLong())
-        else Timber.w("Heights is null")
-
-        Timber.d("Loading grade for Path $objectId")
-        val gradeValue = data.getString("grade")!!
-        val gradeValues = gradeValue.split(" ")
-        grades.addAll(Grade.listFromStrings(gradeValues))
+        heights?.forEach { this.heights.add(it.toString().toLong()) } ?: Timber.w("Heights is null")
 
         Timber.d("Loading endings for Path $objectId")
         val endingsList = pathData?.get("ending") as List<*>?
-        if (endingsList != null)
-            for (e in endingsList.indices) {
-                val ending = endingsList[e].toString()
-                val endingType = EndingType.find(ending)
-                endings.add(endingType)
-            }
-        else Timber.w("Endings list is null")
-
-        Timber.d("Loading artifo endings for Path $objectId")
-        val endingArtifo = data.getString("ending_artifo")
-        endingArtifo?.let {
-            val artifos = it.replace("\r", "").split("\n")
-            for (artifo in artifos)
-                Pitch.fromEndingDataString(artifo)
-                    ?.let { artifoEnding -> pitches.add(artifoEnding) }
-        }
+        endingsList?.forEachIndexed { i, _ -> endings.add(endingsList[i].toString()) }
 
         Timber.d("Loading rebuilders...")
         val rebuilders = pathData?.get("rebuiltBy") as List<*>?
         val d = rebuilders?.joinToString(separator = ", ")
         rebuiltBy = d
     }
+
+    /**
+     * Returns the [Path]'s [Grade]s as a [List].
+     * @author Arnau Mora
+     * @since 20210811
+     */
+    val grades: List<Grade>
+        get() {
+            val gradeValues = rawGrades.split(" ")
+            return Grade.listFromStrings(gradeValues)
+        }
+
+    /**
+     * Returns the [Path]'s [Pitch]es as a [List].
+     * @author Arnau Mora
+     * @since 20210811
+     */
+    val pitches: List<Pitch>
+        get() {
+            return if (rawPitches == null)
+                emptyList()
+            else
+                arrayListOf<Pitch>().apply {
+                    val artifos = rawPitches.replace("\r", "").split("\n")
+                    for (artifo in artifos)
+                        Pitch.fromEndingDataString(artifo)
+                            ?.let { artifoEnding -> add(artifoEnding) }
+                }
+        }
 
     /**
      * Returns the parent [Sector] of the [Path] provided by [AREAS].

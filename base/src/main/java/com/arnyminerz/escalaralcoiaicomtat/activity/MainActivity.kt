@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
+import android.content.IntentSender
 import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
 import android.os.Build
@@ -21,6 +22,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.ProfileActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
@@ -52,6 +54,13 @@ import com.arnyminerz.escalaralcoiaicomtat.list.adapter.MainPagerAdapter
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_LOGGED_IN
 import com.arnyminerz.escalaralcoiaicomtat.shared.RESULT_CODE_WAITING_EMAIL_CONFIRMATION
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.InstallStateUpdatedListener
+import com.google.android.play.core.install.model.ActivityResult
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.InstallStatus
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -60,6 +69,8 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
+
+private const val APP_UPDATE_REQUEST_CODE = 8 // This number was chosen by Eva
 
 /**
  * The Main Activity, shows a view pager with the areas view, a map, the downloads view, and the
@@ -194,6 +205,74 @@ class MainActivity : LanguageAppCompatActivity() {
 
         binding.mainViewPager.isUserInputEnabled =
             position == TAB_ITEM_HOME || position == TAB_ITEM_DOWNLOADS
+    }
+
+    /**
+     * Checks if there is any update available for the app at the Play Store.
+     * @author Arnau Mora
+     * @since 20210617
+     */
+    @UiThread
+    private fun updatesCheck() {
+        Timber.v("Searching for updates...")
+        val appUpdateManager = AppUpdateManagerFactory.create(this)
+
+        val listener = InstallStateUpdatedListener { state ->
+            val status = state.installStatus()
+            if (status == InstallStatus.DOWNLOADING) {
+                val bytesDownloaded = state.bytesDownloaded()
+                val totalBytesToDownload = state.totalBytesToDownload()
+                val progress = (bytesDownloaded / totalBytesToDownload).toInt() * 100
+
+                // Show update progress bar.
+                Timber.d("Downloading update $progress%: $bytesDownloaded / $totalBytesToDownload")
+            } else if (status == InstallStatus.DOWNLOADED) {
+                Timber.v("Finished downloading update, showing restart request.")
+                Snackbar.make(
+                    binding.mainLayout,
+                    R.string.toast_update_downloaded,
+                    Snackbar.LENGTH_INDEFINITE
+                )
+                    .setAction(R.string.action_restart) { appUpdateManager.completeUpdate() }
+                    .show()
+            }
+        }
+
+        appUpdateManager.registerListener(listener)
+
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+            val updateAvailability = appUpdateInfo.updateAvailability()
+            try {
+                if (updateAvailability == UpdateAvailability.UPDATE_AVAILABLE) {
+                    Timber.v("There's an update available")
+
+                    val updateStaleness = appUpdateInfo.clientVersionStalenessDays()
+                    if (updateStaleness != null && updateStaleness >= APP_UPDATE_MAX_TIME_DAYS) {
+                        if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                            // Request immediate update
+                            Timber.v("Requesting immediate update.")
+                            appUpdateManager.startUpdateFlowForResult(
+                                appUpdateInfo,
+                                AppUpdateType.IMMEDIATE,
+                                this,
+                                APP_UPDATE_REQUEST_CODE
+                            )
+                        } else Timber.w("Immediate update is not allowed")
+                    } else if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                        // Request flexible update
+                        Timber.v("Requesting flexible update.")
+                        appUpdateManager.startUpdateFlowForResult(
+                            appUpdateInfo,
+                            AppUpdateType.FLEXIBLE,
+                            this,
+                            APP_UPDATE_REQUEST_CODE
+                        )
+                    } else Timber.w("Flexible update is not allowed")
+                } else Timber.d("There's no update available. ($updateAvailability)")
+            } catch (e: IntentSender.SendIntentException) {
+                Timber.w(e, "Could not request update.")
+            }
+        }
     }
 
     /**
@@ -346,6 +425,17 @@ class MainActivity : LanguageAppCompatActivity() {
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == APP_UPDATE_REQUEST_CODE)
+            when (resultCode) {
+                RESULT_OK -> Timber.v("App update complete")
+                RESULT_CANCELED -> Timber.w("App update cancelled. We might need to force the update.")
+                ActivityResult.RESULT_IN_APP_UPDATE_FAILED -> Timber.w("In app update failed.")
+            }
+        else
+            super.onActivityResult(requestCode, resultCode, data)
     }
 
     /**

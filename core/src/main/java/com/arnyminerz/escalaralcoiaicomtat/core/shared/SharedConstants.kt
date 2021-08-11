@@ -48,7 +48,7 @@ val REMOTE_CONFIG_DEFAULTS = mapOf(
     ENABLE_AUTHENTICATION_KEY to ENABLE_AUTHENTICATION_DEFAULT,
     PROFILE_IMAGE_SIZE_KEY to PROFILE_IMAGE_SIZE_DEFAULT,
 )
-const val REMOTE_CONFIG_MIN_FETCH_INTERVAL = 3600L
+const val REMOTE_CONFIG_MIN_FETCH_INTERVAL = 43200L // 12 hours
 
 /**
  * The database name for the app search engine.
@@ -124,6 +124,19 @@ const val ALL_DAY = 0
 const val MORNING = 1
 const val AFTERNOON = 2
 const val NO_SUN = 3
+
+// Ending Type constants
+const val ENDING_TYPE_UNKNOWN = "NULL"
+const val ENDING_TYPE_PLATE = "plate"
+const val ENDING_TYPE_PLATE_RING = "plate_ring"
+const val ENDING_TYPE_PLATE_LANYARD = "plate_lanyard"
+const val ENDING_TYPE_CHAIN_RING = "chain_ring"
+const val ENDING_TYPE_CHAIN_CARABINER = "chain_carabiner"
+const val ENDING_TYPE_PITON = "piton"
+const val ENDING_TYPE_WALKING = "walking"
+const val ENDING_TYPE_RAPPEL = "rappel"
+const val ENDING_TYPE_LANYARD = "lanyard"
+const val ENDING_TYPE_NONE = "none"
 
 /**
  * Amount of meters the circumference of the planet measures.

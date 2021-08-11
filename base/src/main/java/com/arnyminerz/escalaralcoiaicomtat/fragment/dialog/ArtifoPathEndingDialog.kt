@@ -7,15 +7,17 @@ import android.view.ViewGroup
 import android.view.Window
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.EndingType
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Pitch
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.displayName
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.image
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogArtifoEndingBinding
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.ArtifoEndingPitchAdapter
 import timber.log.Timber
 
 class ArtifoPathEndingDialog(
     context: Context,
-    private val endings: List<EndingType>,
+    private val endings: List<@EndingType String>,
     private val pitches: List<Pitch>
 ) : Dialog(context, R.style.ThemeOverlay_App_AlertDialog) {
 
@@ -35,7 +37,7 @@ class ArtifoPathEndingDialog(
 
         binding.artifoTitleTextView.text = context.getString(endings.first().displayName)
 
-        binding.artifoEndingTypeImageView.setImageResource(endings.first().getImage())
+        binding.artifoEndingTypeImageView.setImageResource(endings.first().image)
 
         val listEndings = endings.subList(1, endings.size)
         Timber.v("  List will show ${listEndings.size} endings.")

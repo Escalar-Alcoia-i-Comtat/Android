@@ -98,7 +98,7 @@ class LoginFragment private constructor() : Fragment() {
                                 toast(R.string.toast_error_login_one_tap)
                             }
                     }
-                    username != null && password != null -> {
+                    password != null -> {
                         Timber.v("Got username and password from One-Tap. Logging in...")
                         auth.signInWithEmailAndPassword(username, password)
                             .addOnSuccessListener(requireActivity(), loginSuccessListener)

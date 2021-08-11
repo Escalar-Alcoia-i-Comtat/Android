@@ -2,9 +2,9 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
 import androidx.appsearch.annotation.Document
 import androidx.appsearch.app.AppSearchSchema
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
-import org.json.JSONArray
 
 @Document
 data class PathData(
@@ -15,7 +15,7 @@ data class PathData(
     @Document.StringProperty var grades: String,
     @Document.StringProperty var heights: String,
     @Document.StringProperty var endings: String,
-    @Document.StringProperty var pitches: String,
+    @Document.StringProperty var pitches: String?,
     @Document.LongProperty val stringCount: Long,
     @Document.LongProperty val paraboltCount: Long,
     @Document.LongProperty val spitCount: Long,
@@ -38,25 +38,15 @@ data class PathData(
     var namespace: String = Path.NAMESPACE
 
     fun path(): Path {
-        val gradesArray = JSONArray(grades)
-        val grades = arrayListOf<Grade>()
-        for (i in 0 until gradesArray.length())
-            grades.add(Grade.fromJSON(gradesArray.getJSONObject(i)))
-
-        val heightsArray = JSONArray(heights)
+        val heightsArray = heights.split(",")
         val heights = arrayListOf<Long>()
-        for (h in 0 until heightsArray.length())
-            heights.add(heightsArray.getLong(h))
+        for (h in heightsArray)
+            heights.add(h.toLong())
 
-        val endingsArray = JSONArray(endings)
-        val endings = arrayListOf<EndingType>()
-        for (e in 0 until endingsArray.length())
-            endings.add(EndingType.find(endingsArray.getString(e)))
-
-        val pitchesArray = JSONArray(pitches)
-        val pitches = arrayListOf<Pitch>()
-        for (p in 0 until pitchesArray.length())
-            pitches.add(Pitch(pitchesArray.getJSONObject(p)))
+        val endingsArray = endings.split(",")
+        val endings = arrayListOf<@EndingType String>()
+        for (e in endingsArray)
+            endings.add(e)
 
         return Path(
             objectId,
@@ -93,27 +83,25 @@ data class PathData(
 }
 
 fun Path.data(): PathData {
-    val heights = JSONArray()
+    var heights = ""
     for (height in this.heights)
-        heights.put(height)
+        heights += "$height,"
+    heights = heights.substringBeforeLast(',')
 
-    val endings = JSONArray()
+    var endings = ""
     for (ending in this.endings)
-        endings.put(ending.idName)
-
-    val pitches = JSONArray()
-    for (pitch in this.pitches)
-        pitches.put(pitch.toJSON())
+        endings += "$ending,"
+    endings = endings.substringBeforeLast(',')
 
     return PathData(
         objectId,
         timestampMillis,
         sketchId,
         displayName,
-        grades.toJSONStringArray(),
-        heights.toString(),
-        endings.toString(),
-        pitches.toString(),
+        rawGrades,
+        heights,
+        endings,
+        rawPitches,
         fixedSafesData.stringCount,
         fixedSafesData.paraboltCount,
         fixedSafesData.spitCount,
