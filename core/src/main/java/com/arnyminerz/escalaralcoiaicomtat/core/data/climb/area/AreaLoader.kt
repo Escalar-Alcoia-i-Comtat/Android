@@ -55,11 +55,14 @@ suspend fun FirebaseFirestore.loadAreas(
     val fullDataLoad = SETTINGS_FULL_DATA_LOAD_PREF.get()
     trace.putAttribute("full_load", fullDataLoad.toString())
 
+    val shouldIndexSearch = enableSearch && !PREF_INDEXED_SEARCH.get()
+    trace.putAttribute("search_index", shouldIndexSearch.toString())
+
     Timber.d("Fetching areas...")
     try {
         val pathsFetchTrace = performance.newTrace("fetchPathsTrace")
         pathsFetchTrace.start()
-        Timber.v("Getting paths...")
+        Timber.v("Getting paths...") // Around 3.8 seconds
         val pathsSnapshot = collectionGroup("Paths")
             .get()
             .await()
@@ -67,7 +70,7 @@ suspend fun FirebaseFirestore.loadAreas(
 
         val sectorsFetchTrace = performance.newTrace("sectorsFetchTrace")
         sectorsFetchTrace.start()
-        Timber.v("Getting sectors...")
+        Timber.v("Getting sectors...") // Around .5 seconds
         val sectorsSnapshot = collectionGroup("Sectors")
             .orderBy("displayName", Query.Direction.ASCENDING)
             .get()
@@ -76,7 +79,7 @@ suspend fun FirebaseFirestore.loadAreas(
 
         val zonesFetchTrace = performance.newTrace("zonesFetchTrace")
         zonesFetchTrace.start()
-        Timber.v("Getting zones...")
+        Timber.v("Getting zones...") // Around .3 seconds
         val zonesSnapshot = collectionGroup("Zones")
             .orderBy("displayName", Query.Direction.ASCENDING)
             .get()
@@ -85,7 +88,7 @@ suspend fun FirebaseFirestore.loadAreas(
 
         val areasFetchTrace = performance.newTrace("areasFetchTrace")
         areasFetchTrace.start()
-        Timber.v("Getting areas...")
+        Timber.v("Getting areas...") // Around .3 seconds
         val areasSnapshot = collectionGroup("Areas")
             .orderBy("displayName", Query.Direction.ASCENDING)
             .get()
@@ -123,30 +126,25 @@ suspend fun FirebaseFirestore.loadAreas(
         Timber.v("Counting areas...")
         val areasCount = areaDocuments.size
 
-        trace.putAttribute("areasCount", areasCount.toString())
-        trace.putAttribute("zonesCount", zonesCount.toString())
-        trace.putAttribute("sectorsCount", sectorsCount.toString())
-        trace.putAttribute("pathsCount", pathsCount.toString())
-
         var progressCounter = 0
         val progressMax = areasCount + zonesCount + sectorsCount
 
         Timber.v("Creation relation with sector and path documents...")
         // The key is the sector id, the value the snapshot of the path
+        // This is what takes the most of the time, more than 7 seconds.
         val sectorIdPathDocument = arrayMapOf<String, ArrayList<Path>>()
-        val pathsProcessingTrace = performance.newTrace("pathsProcessingTrace")
-        pathsProcessingTrace.start()
         for (pathDocument in pathDocuments) {
             val pathId = pathDocument.id
             Timber.v("P/$pathId > Processing path...")
+            val pathInitTime = System.currentTimeMillis()
             val path = Path(pathDocument)
+            Timber.i("Path init time: ${System.currentTimeMillis() - pathInitTime}")
             val sectorId = pathDocument.reference.parent.parent!!.id
             Timber.v("P/$pathId > Adding to sector S/$sectorId...")
             sectorIdPathDocument[sectorId]?.add(path) ?: run {
                 sectorIdPathDocument[sectorId] = arrayListOf(path)
             }
         }
-        pathsProcessingTrace.stop()
 
         Timber.v("Iterating $sectorsCount sector documents...")
         for (sectorDocument in sectorDocuments) {
@@ -179,15 +177,19 @@ suspend fun FirebaseFirestore.loadAreas(
             val zone = zonesCache[zoneId]
             Timber.v("S/$sectorId > Processing sector data...")
             val sector = Sector(sectorDocument)
-            Timber.v("S/$sectorId > Adding sector to the search index...")
-            sectorsIndex.add(sector.data())
+            if (shouldIndexSearch) {
+                Timber.v("S/$sectorId > Adding sector to the search index...")
+                sectorsIndex.add(sector.data())
+            }
 
             Timber.v("S/$sectorId > Loading paths...")
             val paths = sectorIdPathDocument[sectorId]
             if (paths != null) {
                 for (path in paths) {
-                    Timber.v("$path > Adding to the search index...")
-                    pathsIndex.add(path.data())
+                    if (shouldIndexSearch) {
+                        Timber.v("$path > Adding to the search index...")
+                        pathsIndex.add(path.data())
+                    }
                     Timber.v("$path > Adding to the sector ($sector)...")
                     sector.add(path)
                 }
@@ -233,23 +235,23 @@ suspend fun FirebaseFirestore.loadAreas(
             area?.add(zone)
         }
 
-        Timber.v("Adding zones to the search index...")
-        for (zone in zonesCache.values)
-            zonesIndex.add(zone.data())
-        Timber.v("Adding areas to the search index...")
-        for (area in areasCache.values)
-            areasIndex.add(area.data())
+        if (shouldIndexSearch) {
+            Timber.v("Adding zones to the search index...")
+            for (zone in zonesCache.values)
+                zonesIndex.add(zone.data())
+            Timber.v("Adding areas to the search index...")
+            for (area in areasCache.values)
+                areasIndex.add(area.data())
+        }
 
         Timber.v("Finished iterating documents.")
-        Timber.v("Ordering areas...")
-        val areas = areasCache.values
 
         Timber.v("Clearing AREAS...")
         AREAS.clear()
         Timber.v("Adding all areas to AREAS...")
-        AREAS.addAll(areas)
+        AREAS.addAll(areasCache.values)
 
-        if (enableSearch && !PREF_INDEXED_SEARCH.get()) {
+        if (shouldIndexSearch) {
             Timber.v("Search > Initializing session future...")
             val session = LocalStorage.createSearchSession(
                 LocalStorage.SearchContext.Builder(application, SEARCH_DATABASE_NAME)
