@@ -51,7 +51,7 @@ data class PathData(
         val endingsArray = JSONArray(endings)
         val endings = arrayListOf<EndingType>()
         for (e in 0 until endingsArray.length())
-            endings.add(EndingType.find(heightsArray.getString(e)))
+            endings.add(EndingType.find(endingsArray.getString(e)))
 
         val pitchesArray = JSONArray(pitches)
         val pitches = arrayListOf<Pitch>()
