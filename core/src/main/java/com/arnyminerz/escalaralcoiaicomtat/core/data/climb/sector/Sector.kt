@@ -6,6 +6,7 @@ import android.content.Intent
 import android.widget.TextView
 import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.UIMetadata

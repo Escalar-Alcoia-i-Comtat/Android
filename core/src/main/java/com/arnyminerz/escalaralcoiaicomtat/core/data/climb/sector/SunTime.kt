@@ -1,20 +1,16 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector
 
 import android.content.Context
-import androidx.annotation.IntDef
 import androidx.annotation.UiThread
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AFTERNOON
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ALL_DAY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MORNING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-
-@IntDef(ALL_DAY, MORNING, AFTERNOON, NO_SUN)
-@Retention(AnnotationRetention.SOURCE)
-annotation class SunTime
 
 @UiThread
 fun appendChip(context: Context, @SunTime sunTime: Int, sunChip: Chip) {
