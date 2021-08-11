@@ -7,7 +7,6 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.data.IntroShowReason
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_SHOWN_INTRO
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityIntroBinding
@@ -18,12 +17,12 @@ import timber.log.Timber
 
 class IntroActivity : LanguageAppCompatActivity() {
     companion object {
-        fun shouldShow(): IntroShowReason {
-            var result: IntroShowReason? = null
-            if (!PREF_SHOWN_INTRO.get())
-                result = IntroShowReason.PREF_FALSE
-            return result ?: IntroShowReason.OK
-        }
+        /**
+         * Tells whether or not the Intro page should be shown.
+         * @author Arnau Mora
+         * @since 20210811
+         */
+        fun shouldShow(): Boolean = !PREF_SHOWN_INTRO.get()
     }
 
     private var adapterViewPager: IntroPagerAdapter? = null
