@@ -125,6 +125,19 @@ const val MORNING = 1
 const val AFTERNOON = 2
 const val NO_SUN = 3
 
+// Ending Type constants
+const val ENDING_TYPE_UNKNOWN = "NULL"
+const val ENDING_TYPE_PLATE = "plate"
+const val ENDING_TYPE_PLATE_RING = "plate_ring"
+const val ENDING_TYPE_PLATE_LANYARD = "plate_lanyard"
+const val ENDING_TYPE_CHAIN_RING = "chain_ring"
+const val ENDING_TYPE_CHAIN_CARABINER = "chain_carabiner"
+const val ENDING_TYPE_PITON = "piton"
+const val ENDING_TYPE_WALKING = "walking"
+const val ENDING_TYPE_RAPPEL = "rappel"
+const val ENDING_TYPE_LANYARD = "lanyard"
+const val ENDING_TYPE_NONE = "none"
+
 /**
  * Amount of meters the circumference of the planet measures.
  * @author Arnau Mora
