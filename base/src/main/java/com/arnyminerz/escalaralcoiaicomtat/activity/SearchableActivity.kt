@@ -17,27 +17,40 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.AndroidViewModel
@@ -66,7 +79,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+/**
+ * An Activity that provides the user the possibility to perform searches. It's configured to be the
+ * default search activity, for the search widgets.
+ * @author Arnau Mora
+ * @since 20210811
+ */
 class SearchableActivity : ComponentActivity() {
+    /**
+     * Stores the last performed search so multiple searches are not made at once.
+     * @author Arnau Mora
+     * @since 20210811
+     */
+    var lastSearch = ""
+
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,19 +104,76 @@ class SearchableActivity : ComponentActivity() {
                     val searchQuery = if (intent.action == Intent.ACTION_SEARCH)
                         intent.getStringExtra(SearchManager.QUERY)
                     else null
+                    var query by remember { mutableStateOf(searchQuery ?: "") }
 
                     val searchViewModel = SearchViewModel(application)
                     val list: State<List<DataClassImpl>?> =
                         searchViewModel.itemList.observeAsState()
-                    if (searchQuery != null)
+                    if (searchQuery != null && searchQuery.isNotBlank() && lastSearch != searchQuery) {
+                        lastSearch = searchQuery
                         searchViewModel.search(searchQuery)
-                    else
+                    } else
                         Timber.w("Search query is null, won't search for anything.")
 
-                    SearchResultsView(list.value)
+                    Column {
+                        Timber.v("Search query: $query")
+                        SearchBar(query) {
+                            query = it
+                            Timber.v("New search query: $query")
+                            searchViewModel.search(query)
+                        }
+                        SearchResultsView(list.value)
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * The sample parameter provider for the [SearchBar] preview.
+     * Provides some sample strings to fill the search bar's content.
+     * @author Arnau Mora
+     * @since 20210811
+     */
+    class SampleSearchProvider(
+        override val values: Sequence<String> = sequenceOf("Default", "Query", "Sample")
+    ) : PreviewParameterProvider<String> {
+        override val count: Int = values.count()
+    }
+
+    /**
+     * A search bar for providing the user the option to perform a new search within the
+     * [SearchableActivity].
+     * @author Arnau Mora
+     * @since 20210811
+     * @param query The text that will be inside the text field.
+     * @param search This will get called whenever the user performs a new search.
+     */
+    @OptIn(ExperimentalComposeUiApi::class)
+    @Preview(name = "Search bar preview", showBackground = true)
+    @Composable
+    fun SearchBar(
+        @PreviewParameter(SampleSearchProvider::class) query: String,
+        search: ((query: String) -> Unit)? = null
+    ) {
+        var value by remember { mutableStateOf(query) }
+        val keyboardController = LocalSoftwareKeyboardController.current
+
+        OutlinedTextField(
+            value = value,
+            onValueChange = { value = it },
+            modifier = Modifier.fillMaxWidth(),
+            maxLines = 1,
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    keyboardController?.hide() ?: Timber.w("Keyboard controller is null")
+                    search?.invoke(value)
+                }
+            ),
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+            leadingIcon = { Icon(Icons.Rounded.Search, "Search icon") },
+            placeholder = { Text(stringResource(R.string.search_hint)) }
+        )
     }
 
     /**
