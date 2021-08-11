@@ -110,9 +110,9 @@ class SearchableActivity : ComponentActivity() {
 
                     val searchViewModel = SearchViewModel(application)
                     val list: List<DataClassImpl> by searchViewModel.itemList.observeAsState(listOf())
-                    if (searchQuery != null && searchQuery.isNotBlank() && lastSearch != searchQuery) {
-                        lastSearch = searchQuery
-                        searchViewModel.search(searchQuery)
+                    if (query.isNotBlank() && lastSearch != query) {
+                        lastSearch = query
+                        searchViewModel.search(query)
                     } else
                         Timber.w("Search query is null, won't search for anything.")
 
@@ -121,7 +121,7 @@ class SearchableActivity : ComponentActivity() {
                         SearchBar(query) {
                             query = it
                             Timber.v("New search query: $query")
-                            searchViewModel.search(query)
+//                            searchViewModel.search(query)
                         }
                         Timber.v("Search results: $list")
                         if (list.isEmpty())
