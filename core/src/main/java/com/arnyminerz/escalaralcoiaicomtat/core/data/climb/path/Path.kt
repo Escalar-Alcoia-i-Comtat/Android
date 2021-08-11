@@ -45,8 +45,9 @@ class Path internal constructor(
     val builtBy: String?,
     var rebuiltBy: String?,
     val downloaded: Boolean = false,
-    val documentPath: String,
-) : DataClassImpl(objectId, NAMESPACE, timestampMillis, displayName), Comparable<Path> {
+    override val documentPath: String,
+) : DataClassImpl(objectId, NAMESPACE, timestampMillis, displayName, documentPath),
+    Comparable<Path> {
     /**
      * Stores is the path is blocked.
      * @author Arnau Mora

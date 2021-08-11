@@ -28,7 +28,7 @@ class Area internal constructor(
     override val timestampMillis: Long,
     override val imageReferenceUrl: String,
     override val kmzReferenceUrl: String,
-    val documentPath: String,
+    override val documentPath: String,
     val webUrl: String?,
 ) : DataClass<Zone, DataClassImpl>(
     displayName,

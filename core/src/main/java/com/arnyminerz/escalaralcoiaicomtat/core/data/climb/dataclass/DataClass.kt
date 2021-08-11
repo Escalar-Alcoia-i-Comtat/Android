@@ -78,7 +78,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     open val kmzReferenceUrl: String?,
     open val uiMetadata: UIMetadata,
     open val metadata: DataClassMetadata
-) : DataClassImpl(metadata.objectId, metadata.namespace, timestampMillis, displayName),
+) : DataClassImpl(
+    metadata.objectId,
+    metadata.namespace,
+    timestampMillis,
+    displayName,
+    metadata.documentPath
+),
     Iterable<A> {
     companion object {
         /**

@@ -25,7 +25,7 @@ class Zone internal constructor(
     override val imageReferenceUrl: String,
     override val kmzReferenceUrl: String,
     val position: LatLng,
-    val documentPath: String,
+    override val documentPath: String,
     val webUrl: String?
 ) : DataClass<Sector, Area>(
     displayName,
