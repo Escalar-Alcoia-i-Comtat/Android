@@ -57,8 +57,11 @@ import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
@@ -383,23 +386,32 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210416
      * @param storage The [FirebaseStorage] instance.
      * @param targetFile The [File] to store the KMZ at.
+     * @param progressListener This will get called for updating the progress.
      * @throws StorageException When there has been an exception with the [storage] download.
      * @see kmzReferenceUrl
      */
     @Throws(StorageException::class)
+    @WorkerThread
     private suspend fun storeKmz(
         storage: FirebaseStorage,
-        targetFile: File
-    ): FileDownloadTask.TaskSnapshot? =
-        if (kmzReferenceUrl != null)
-            suspendCoroutine { cont ->
-                storage.getReferenceFromUrl(kmzReferenceUrl!!)
-                    .getFile(targetFile)
-                    .addOnSuccessListener { cont.resume(it) }
-                    .addOnProgressListener { Timber.v("Loading progress: ${it.bytesTransferred}/${it.totalByteCount}") }
-                    .addOnFailureListener { cont.resumeWithException(it) }
-            }
-        else null
+        targetFile: File,
+        progressListener: (@UiThread (progress: ValueMax<Long>) -> Unit)? = null
+    ): FileDownloadTask.TaskSnapshot? = if (kmzReferenceUrl != null)
+        suspendCoroutine { cont ->
+            storage.getReferenceFromUrl(kmzReferenceUrl!!)
+                .getFile(targetFile)
+                .addOnSuccessListener { cont.resume(it) }
+                .addOnProgressListener {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        it.apply {
+                            Timber.v("Loading progress: ${bytesTransferred}/${totalByteCount}")
+                            progressListener?.invoke(ValueMax(bytesTransferred, totalByteCount))
+                        }
+                    }
+                }
+                .addOnFailureListener { cont.resumeWithException(it) }
+        }
+    else null
 
     /**
      * Gets the KMZ file path.
@@ -411,15 +423,24 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param storage The [FirebaseStorage] instance.
      * @param permanent If true, the KMZ will get stored in the data directory, if false, it will
      * be cached.
+     * @param progressListener This will get called for updating the progress.
      * @throws IllegalStateException When [kmzReferenceUrl] is null, so a [File] can't be retrieved.
      */
     @Throws(IllegalStateException::class)
-    suspend fun kmzFile(context: Context, storage: FirebaseStorage, permanent: Boolean): File {
+    @WorkerThread
+    suspend fun kmzFile(
+        context: Context,
+        storage: FirebaseStorage,
+        permanent: Boolean,
+        progressListener: (@UiThread (progress: ValueMax<Long>) -> Unit)? = null
+    ): File {
         val kmzFile = kmzFile(context, permanent)
 
         if (!kmzFile.exists()) {
             Timber.v("Storing KMZ file...")
-            val kmzTaskSnapshot = storeKmz(storage, kmzFile)
+            val kmzTaskSnapshot = storeKmz(storage, kmzFile) { progress ->
+                progressListener?.invoke(progress)
+            }
             if (kmzTaskSnapshot == null)
                 Timber.e("Could not store KMZ File ($kmzReferenceUrl).")
             else
