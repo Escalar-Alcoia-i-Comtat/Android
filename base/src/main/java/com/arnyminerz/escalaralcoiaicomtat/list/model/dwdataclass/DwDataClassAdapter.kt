@@ -34,7 +34,7 @@ import kotlinx.coroutines.delay
 import timber.log.Timber
 
 class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
-    private val activity: DataClassListActivity<P>,
+    private val activity: DataClassListActivity<*, *, P>,
     val items: List<T>,
     private val itemsPerRow: Int = 1,
     private val itemHeightPx: Int? = null,
