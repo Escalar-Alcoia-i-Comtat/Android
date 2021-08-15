@@ -55,12 +55,12 @@ class ZoneActivity : DataClassListActivity<Sector, Area, Zone>(1, R.dimen.zone_i
         areaId = areaIdExtra
         zoneId = zoneIdExtra
         doAsync {
-            val area = AREAS[areaId] ?: kotlin.run {
+            val area = AREAS[areaId] ?: run {
                 Timber.w("Could not find area \"$areaId\" in AREAS.")
                 return@doAsync
             }
             val zones = area.getChildren(this@ZoneActivity, storage)
-            dataClass = zones[zoneId] ?: kotlin.run {
+            dataClass = zones[zoneId] ?: run {
                 Timber.w("Could not find zone \"$zoneId\" in \"$areaId\".")
                 return@doAsync
             }
