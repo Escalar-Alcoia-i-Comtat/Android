@@ -2,30 +2,23 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.animation.AnimationUtils
-import androidx.core.app.ActivityOptionsCompat
-import androidx.core.view.ViewCompat
-import androidx.recyclerview.widget.GridLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.has
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_POSITION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.put
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
-import com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass.DwDataClassAdapter
 import timber.log.Timber
 
 /**
@@ -36,22 +29,7 @@ import timber.log.Timber
  * @see Area
  * @see DataClassListActivity
  */
-class AreaActivity : DataClassListActivity<Area>(true) {
-    /**
-     * If the fragment has just been attached. This will tell whether or not to animate the items
-     * in the recycler view.
-     * @author Arnau Mora
-     * @since 20210719
-     */
-    private var justAttached = false
-
-    /**
-     * If the contents of the [Area] have been loaded.
-     * @author Arnau Mora
-     * @since 20210719
-     */
-    private var loaded = false
-
+class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen.area_item_height) {
     /**
      * If the contents of the [Area] are being loaded.
      * @author Arnau Mora
@@ -65,13 +43,6 @@ class AreaActivity : DataClassListActivity<Area>(true) {
      * @since 20210719
      */
     private lateinit var areaId: String
-
-    /**
-     * The current position of the recycler view.
-     * @author Arnau Mora
-     * @since 20210719
-     */
-    private var position = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,8 +79,6 @@ class AreaActivity : DataClassListActivity<Area>(true) {
 
         binding.titleTextView.text = dataClass.displayName
         binding.titleTextView.transitionName = intent.getExtra(EXTRA_AREA_TRANSITION_NAME)
-
-        binding.backImageButton.setOnClickListener { onBackPressed() }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -131,68 +100,8 @@ class AreaActivity : DataClassListActivity<Area>(true) {
         justAttached = false
     }
 
-    override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
-        super.onStateChangeAsync(state)
-
-        if (!loaded && !isDestroyed && !loading) {
-            loading = true
-
-            Timber.v("Getting children zones...")
-            val zones = arrayListOf<Zone>()
-            dataClass.getChildren(this, storage).toCollection(zones)
-            Timber.v("Got zones.")
-
-            uiContext {
-                Timber.v("Preparing recycler view...")
-                binding.recyclerView.apply {
-                    layoutManager = GridLayoutManager(this@AreaActivity, 2)
-                    if (justAttached)
-                        binding.recyclerView.layoutAnimation =
-                            AnimationUtils.loadLayoutAnimation(
-                                this@AreaActivity,
-                                R.anim.item_enter_left_animator
-                            )
-                    adapter =
-                        DwDataClassAdapter(
-                            this@AreaActivity,
-                            zones,
-                            1,
-                            resources.getDimension(R.dimen.area_item_height).toInt()
-                        ) { _, holder, position ->
-                            binding.loadingIndicator.show()
-
-                            Timber.v("Clicked item $position")
-                            val intent =
-                                Intent(this@AreaActivity, ZoneActivity()::class.java)
-                                    .putExtra(EXTRA_AREA, areaId)
-                                    .putExtra(
-                                        EXTRA_ZONE,
-                                        zones[position].objectId
-                                    )
-
-                            val optionsBundle =
-                                ViewCompat.getTransitionName(holder.titleTextView)
-                                    ?.let { transitionName ->
-                                        intent.putExtra(
-                                            EXTRA_ZONE_TRANSITION_NAME,
-                                            transitionName
-                                        )
-
-                                        ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                            this@AreaActivity,
-                                            holder.titleTextView,
-                                            transitionName
-                                        ).toBundle()
-                                    } ?: Bundle.EMPTY
-
-                            startActivity(intent, optionsBundle)
-                        }
-                    scrollToPosition(position)
-                }
-            }
-
-            loaded = true
-            loading = false
-        }
-    }
+    override fun intentExtra(index: Int, transitionName: String?): Intent =
+        Intent(this@AreaActivity, ZoneActivity()::class.java)
+            .putExtra(EXTRA_AREA, areaId)
+            .putExtra(EXTRA_ZONE, items[position].objectId)
 }
