@@ -16,7 +16,7 @@ val EXTRA_POSITION = DataExtra<Int>("position")
 
 val EXTRA_ZONE_TRANSITION_NAME = DataExtra<String>("zone_transition")
 val EXTRA_AREA_TRANSITION_NAME = DataExtra<String>("area_transition")
-val EXTRA_SECTOR_TRANSITION_NAME = DataExtra<String>("sector_transition")
+val EXTRA_SECTOR_TRANSITION_NAME = DataExtra<String?>("sector_transition")
 
 val UPDATE_AREA = DataExtra<Area>("update_area")
 val UPDATE_ZONE = DataExtra<Zone>("update_zone")
