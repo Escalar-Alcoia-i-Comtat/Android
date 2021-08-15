@@ -190,6 +190,9 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         val hasInternet = state.hasInternet
         visibility(binding.noInternetCard.noInternetCardView, !hasInternet)
+        visibility(binding.mapProgressBar, false)
+        binding.mapProgressBar.isIndeterminate = true
+        visibility(binding.mapProgressBar, true)
 
         updateIcon()
 
@@ -204,8 +207,19 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                     try {
                         doAsync {
                             Timber.v("Getting KMZ file...")
-                            val kmzFile =
-                                dataClass.kmzFile(this@DataClassListActivity, storage, false)
+                            val kmzFile = dataClass.kmzFile(
+                                this@DataClassListActivity,
+                                storage,
+                                false
+                            ) {
+                                binding.mapProgressBar.progress = it.percentage()
+                                binding.mapProgressBar.max = 100
+                            }
+                            uiContext {
+                                visibility(binding.mapProgressBar, false)
+                                binding.mapProgressBar.isIndeterminate = true
+                                visibility(binding.mapProgressBar, true)
+                            }
                             Timber.v("Getting map features...")
                             val features = mapHelper.loadKMZ(this@DataClassListActivity, kmzFile)
 
@@ -215,6 +229,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                             }
 
                             uiContext {
+                                visibility(binding.mapProgressBar, false)
                                 mapHelper.display()
                                 mapHelper.center(animate = false)
                                 binding.map.show()
