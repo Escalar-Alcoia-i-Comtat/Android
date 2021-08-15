@@ -133,7 +133,8 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
      * @author Arnau Mora
      * @since 20210815
      */
-    internal val items = arrayListOf<C>()
+    internal var items = listOf<C>()
+        private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -268,7 +269,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
             }
 
             try {
-                dataClass.getChildren(this, storage).toCollection(items)
+                items = dataClass.getChildren(this, storage)
 
                 Timber.v("Got ${items.size} items of ${dataClass.namespace}.")
 
