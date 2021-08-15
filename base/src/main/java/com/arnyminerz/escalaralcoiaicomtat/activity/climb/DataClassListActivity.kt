@@ -1,15 +1,25 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.view.animation.AnimationUtils
+import androidx.annotation.DimenRes
 import androidx.annotation.UiThread
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.view.ViewCompat
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_ZOOM
+import com.arnyminerz.escalaralcoiaicomtat.core.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
@@ -22,6 +32,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
+import com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass.DwDataClassAdapter
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
@@ -33,8 +44,18 @@ import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 import java.io.FileNotFoundException
 
-abstract class DataClassListActivity<T : DataClass<*, *>>(
-    private val overrideLoadedMapData: Boolean = false,
+/**
+ * @author Arnau Mora
+ * @since 20210815
+ * @param T The [DataClass] type that is being displayed.
+ * @param C The children type of [T].
+ * @param B Should match [T].
+ * @param itemsPerRow The amount of items that should be on each row of the list.
+ * @param itemHeight The height of the items of the list.
+ */
+abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T : DataClass<C, B>>(
+    private val itemsPerRow: Int,
+    @DimenRes private val itemHeight: Int
 ) : NetworkChangeListenerActivity() {
     /**
      * The ViewBinding object for the Activity's view.
@@ -48,7 +69,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
      * @author Arnau Mora
      * @since 20210604
      */
-    protected lateinit var dataClass: T
+    internal lateinit var dataClass: T
 
     /**
      * The [MapHelper] instance for doing map-stuff.
@@ -71,6 +92,49 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
      */
     lateinit var storage: FirebaseStorage
 
+    /**
+     * Stores if the Activity's content has just been attached.
+     * @author Arnau Mora
+     * @since 20210815
+     */
+    internal var justAttached = false
+
+    /**
+     * Stores if the content has been loaded completely.
+     * @author Arnau Mora
+     * @since 20210815
+     */
+    internal var loaded = false
+
+    /**
+     * Stores the current position of the list for recovering it just in case it's necessary.
+     * @author Arnau Mora
+     * @since 20210815
+     */
+    internal var position = 0
+
+    /**
+     * Stores the name for showing transitions in the title.
+     * @author Arnau Mora
+     * @since 20210815
+     */
+    internal var transitionName: String? = null
+
+    /**
+     * Tells if the [dataClass] has been initialized.
+     * @author Arnau Mora
+     * @since 20210815
+     */
+    internal val dataClassInitialized: Boolean
+        get() = this::dataClass.isInitialized
+
+    /**
+     * Stores the items that are being shown to the user.
+     * @author Arnau Mora
+     * @since 20210815
+     */
+    internal val items = arrayListOf<C>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -85,6 +149,7 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
         mapHelper = mapHelper.withMapFragment(this, R.id.map)
         mapHelper.onCreate(savedInstanceState)
 
+        binding.backImageButton.setOnClickListener { onBackPressed() }
         binding.statusImageView.setOnClickListener { it.performLongClick() }
         updateIcon()
     }
@@ -192,6 +257,73 @@ abstract class DataClassListActivity<T : DataClass<*, *>>(
                 mapHelper.hide()
         }
     }
+
+    override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
+        super.onStateChangeAsync(state)
+
+        if (!loaded && dataClassInitialized) {
+            uiContext {
+                binding.titleTextView.text = dataClass.displayName
+                binding.titleTextView.transitionName = transitionName
+            }
+
+            try {
+                dataClass.getChildren(this, storage).toCollection(items)
+
+                Timber.v("Got ${items.size} items of ${dataClass.namespace}.")
+
+                uiContext {
+                    binding.recyclerView.layoutManager = if (itemsPerRow > 1)
+                        GridLayoutManager(this, itemsPerRow)
+                    else
+                        LinearLayoutManager(this)
+                    if (justAttached)
+                        binding.recyclerView.layoutAnimation =
+                            AnimationUtils.loadLayoutAnimation(
+                                this,
+                                R.anim.item_enter_left_animator
+                            )
+                    binding.recyclerView.adapter = DwDataClassAdapter(
+                        this,
+                        items,
+                        itemsPerRow,
+                        resources.getDimension(itemHeight).toInt()
+                    ) { _, viewHolder, index ->
+                        binding.loadingIndicator.show()
+
+                        Timber.v("Clicked item $index")
+                        val trn = ViewCompat.getTransitionName(viewHolder.titleTextView)
+                        Timber.v("Transition name: $trn")
+                        val intent = intentExtra(index, trn)
+                        val options = if (trn != null)
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                this, viewHolder.titleTextView, trn
+                            )
+                        else null
+
+                        startActivity(intent, options?.toBundle())
+                    }
+                    binding.recyclerView.scrollToPosition(position)
+                }
+
+                loaded = true
+            } catch (_: AlreadyLoadingException) {
+                // Ignore an already loading exception. The content will be loaded from somewhere else
+                Timber.v(
+                    "An AlreadyLoadingException has been thrown while loading the zones in ZoneActivity."
+                ) // Let's just warn the debugger this is controlled
+            }
+        } else if (dataClassInitialized)
+            Timber.i("Already loaded!")
+    }
+
+    /**
+     * This will get called when the user wants to navigate.
+     * @author Arnau Mora
+     * @since 20210815
+     * @return The [Intent] that should be launched with the data required for the target [Activity].
+     */
+    abstract fun intentExtra(index: Int, transitionName: String?): Intent
 
     /**
      * Updates the status icon at the actionbar.
