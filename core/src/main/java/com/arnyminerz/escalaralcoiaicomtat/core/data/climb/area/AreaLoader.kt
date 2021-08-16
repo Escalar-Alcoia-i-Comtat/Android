@@ -34,6 +34,8 @@ import timber.log.Timber
 
 /**
  * Loads all the areas available in the server.
+ * Custom progress callbacks:
+ * - 0/0 paths are being processed.
  * @author Arnau Mora
  * @since 20210313
  * @param application The [Application] that owns the app execution.
@@ -124,6 +126,8 @@ suspend fun FirebaseFirestore.loadAreas(
         // The key is the sector id, the value the snapshot of the path
         // This is what takes the most of the time, more than 7 seconds.
         val sectorIdPathDocument = arrayMapOf<String, ArrayList<Path>>()
+        // Notify 0 progress, 0 max, for telling the UI that paths are being processed
+        uiContext { progressCallback?.invoke(0, 0) }
         for (pathDocument in pathDocuments) {
             val pathId = pathDocument.id
             Timber.v("P/$pathId > Processing path...")
