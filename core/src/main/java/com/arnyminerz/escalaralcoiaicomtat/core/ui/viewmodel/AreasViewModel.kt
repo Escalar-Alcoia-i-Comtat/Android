@@ -8,6 +8,7 @@ import androidx.lifecycle.liveData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.asyncCoroutineScope
 import timber.log.Timber
@@ -21,7 +22,7 @@ class AreasViewModel<A : Activity>(activity: A) : DataClassViewModel<Area, A>(ac
         if (AREAS.isEmpty()) {
             Timber.v("Areas is empty, loading...")
             val application = (context as? Activity)?.application ?: context as Application
-            firestore.loadAreas(application, progressCallback = { current, total ->
+            firestore.loadAreas(application as App, progressCallback = { current, total ->
                 Timber.i("Loading areas: $current/$total")
                 progress.value = ValueMax(current, total)
             })

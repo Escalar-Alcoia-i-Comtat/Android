@@ -142,7 +142,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             binding.progressTextView.setText(R.string.status_downloading)
         }
 
-        firestore.loadAreas(application) { progress, max ->
+        firestore.loadAreas(application as App) { progress, max ->
             Timber.i("Download progress: $progress / $max")
             if (progress == 0 && max == 0)
                 binding.progressTextView.setText(R.string.status_processing_paths)

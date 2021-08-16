@@ -8,6 +8,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.currentUrl
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.asyncCoroutineScope
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
@@ -20,7 +21,7 @@ class ZonesViewModel<A : Activity>(activity: A, private val areaId: String) :
     override val items: LiveData<List<Zone>> = liveData(asyncCoroutineScope.coroutineContext) {
         if (AREAS.isEmpty()) {
             val application = (context as? Activity)?.application ?: context as Application
-            firestore.loadAreas(application, progressCallback = { current, total ->
+            firestore.loadAreas(application as App, progressCallback = { current, total ->
                 Timber.i("Loading areas: $current/$total")
             })
         }
