@@ -80,13 +80,12 @@ class MapHelper {
         @WorkerThread
         suspend fun getTarget(
             activity: Activity,
-            marker: Marker,
-            storage: FirebaseStorage
+            marker: Marker
         ): Intent? {
             Timber.d("Getting marker's title...")
             val title = uiContext { marker.getWindow().title }
             Timber.v("Searching in ${AREAS.size} cached areas...")
-            return getIntent(activity, title, storage)
+            return getIntent(activity, title)
         }
 
         fun getImageUrl(description: String?): String? {
@@ -849,7 +848,7 @@ class MapHelper {
 
             doAsync {
                 // Info Window Data Class
-                val activityIntent = getTarget(activity, marker, storage)
+                val activityIntent = getTarget(activity, marker)
 
                 uiContext {
                     visibility(enterButton, activityIntent != null)

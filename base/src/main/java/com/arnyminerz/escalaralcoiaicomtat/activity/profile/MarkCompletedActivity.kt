@@ -251,8 +251,7 @@ class MarkCompletedActivity : AppCompatActivity() {
         }
 
         Timber.v("Loading zone $zoneId...")
-        val zones = arrayListOf<Zone>()
-        area!!.getChildren(this, storage).toCollection(zones)
+        area!!.getChildren()
         try {
             zone = area!![zoneId!!]
         } catch (_: IndexOutOfBoundsException) {
@@ -264,8 +263,7 @@ class MarkCompletedActivity : AppCompatActivity() {
         }
 
         Timber.v("Loading sector #$sectorIndex...")
-        val sectors = arrayListOf<Sector>()
-        zone!!.getChildren(this, storage).toCollection(sectors)
+        zone!!.getChildren()
         try {
             sector = zone!![sectorIndex!!]
         } catch (_: IndexOutOfBoundsException) {
@@ -277,8 +275,7 @@ class MarkCompletedActivity : AppCompatActivity() {
         }
 
         Timber.v("Loading path $pathId...")
-        val paths = arrayListOf<Path>()
-        sector!!.getChildren(this, storage).toCollection(paths)
+        sector!!.getChildren()
         try {
             path = sector!![pathId!!]
         } catch (_: IndexOutOfBoundsException) {

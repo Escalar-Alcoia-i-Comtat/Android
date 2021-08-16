@@ -196,7 +196,7 @@ class DownloadSectionsAdapter(
      */
     private fun view(section: DataClass<*, *>) {
         doAsync {
-            val intent = getIntent(mainActivity, section.displayName, storage)
+            val intent = getIntent(mainActivity, section.displayName)
             uiContext {
                 if (intent == null) {
                     Timber.w("Could not launch activity.")

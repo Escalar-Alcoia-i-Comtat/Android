@@ -4,7 +4,6 @@ import android.app.Activity
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
@@ -74,10 +73,7 @@ class DownloadDialog<T : DataClass<*, *>>(
                             when (data) {
                                 is Area, is Zone, is Sector ->
                                     doAsync {
-                                        val children = arrayListOf<DataClassImpl>()
-                                        data
-                                            .getChildren(activity, storage)
-                                            .toCollection(children)
+                                        val children = data.getChildren()
                                         for (child in children)
                                             if (child is DataClass<*, *>)
                                                 child.delete(activity)

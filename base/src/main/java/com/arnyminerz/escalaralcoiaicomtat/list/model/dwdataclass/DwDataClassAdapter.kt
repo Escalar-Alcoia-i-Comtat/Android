@@ -23,6 +23,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
@@ -126,7 +127,13 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
             holder.imageView.layoutParams = holder.imageView.layoutParams.apply {
                 height = itemHeightDp
             }
-        data.loadImage(activity, activity.storage, holder.imageView, null)
+        data.loadImage(
+            activity,
+            activity.storage,
+            holder.imageView,
+            null,
+            imageLoadParameters = ImageLoadParameters().withResultImageScale(.25f)
+        )
         updateUi(holder, data, true)
     }
 

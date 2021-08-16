@@ -42,7 +42,7 @@ class SectorViewModel(
 
     val items: LiveData<List<Path>> = liveData {
         uiContext { currentUrl.value = innerSector?.webUrl }
-        val paths = innerSector?.getChildren(context, storage)
+        val paths = innerSector?.getChildren()
         if (paths != null)
             emit(paths)
         else Timber.e("Could not find S/$sectorId in Z/$zoneId in A/$areaId")

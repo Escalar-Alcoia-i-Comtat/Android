@@ -284,7 +284,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
             }
 
             try {
-                items = dataClass.getChildren(this, storage)
+                items = dataClass.getChildren()
 
                 Timber.v("Got ${items.size} items of ${dataClass.namespace}.")
 
