@@ -32,7 +32,6 @@ class ZoneActivity : DataClassListActivity<Sector, Area, Zone>(1, R.dimen.zone_i
 
     private lateinit var areaId: String
     private lateinit var zoneId: String
-    private lateinit var sectors: List<Sector>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,7 +103,7 @@ class ZoneActivity : DataClassListActivity<Sector, Area, Zone>(1, R.dimen.zone_i
         Intent(this, SectorActivity::class.java)
             .putExtra(EXTRA_AREA, areaId)
             .putExtra(EXTRA_ZONE, zoneId)
-            .putExtra(EXTRA_SECTOR_COUNT, sectors.size)
+            .putExtra(EXTRA_SECTOR_COUNT, items.size)
             .putExtra(EXTRA_SECTOR_INDEX, index)
             .putExtra(EXTRA_SECTOR_TRANSITION_NAME, transitionName)
 }
