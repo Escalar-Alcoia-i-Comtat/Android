@@ -252,11 +252,13 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                     } catch (_: FileNotFoundException) {
                         Timber.w("KMZ file not found")
                         binding.map.hide()
+                        binding.mapProgressBarCard.hide()
                     } catch (e: IllegalStateException) {
                         Firebase.crashlytics.recordException(e)
                         Timber.w("The DataClass ($dataClass) does not contain a KMZ address")
                         toast(R.string.toast_error_no_kmz)
                         binding.map.hide()
+                        binding.mapProgressBarCard.hide()
                     } catch (e: StorageException) {
                         Firebase.crashlytics.recordException(e)
                         val handler = handleStorageException(e)
