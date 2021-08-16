@@ -274,4 +274,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="data_type_zone">Zona</string>
     <string name="data_type_sector">Sector</string>
     <string name="data_type_path">Vía</string>
+    <string name="status_processing_paths">Procesando vías…</string>
 </resources>

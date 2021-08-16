@@ -42,6 +42,7 @@
     <string name="status_downloading">Downloading…</string>
     <string name="status_storing">Storing…</string>
     <string name="status_loading_progress">Loading %d/%d</string>
+    <string name="status_processing_paths">Processing paths…</string>
     <string name="status_no_internet">No Internet Connection</string>
     <string name="status_loading_deep_link">Processing link…</string>
 

@@ -273,4 +273,5 @@
     <string name="data_type_zone">Zona</string>
     <string name="data_type_sector">Sector</string>
     <string name="data_type_path">Via</string>
+    <string name="status_processing_paths">Processant vies…</string>
 </resources>
