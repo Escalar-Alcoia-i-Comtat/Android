@@ -5,7 +5,6 @@ import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.PutDocumentsRequest
 import androidx.appsearch.app.SetSchemaRequest
-import androidx.appsearch.localstorage.LocalStorage
 import androidx.collection.arrayMapOf
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.R
@@ -19,8 +18,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.data
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_FULL_DATA_LOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
@@ -45,8 +44,7 @@ import timber.log.Timber
  */
 @WorkerThread
 suspend fun FirebaseFirestore.loadAreas(
-    application: Application,
-    enableSearch: Boolean = true,
+    application: App,
     @UiThread progressCallback: ((current: Int, total: Int) -> Unit)? = null
 ) {
     val performance = Firebase.performance
@@ -56,9 +54,6 @@ suspend fun FirebaseFirestore.loadAreas(
 
     val fullDataLoad = SETTINGS_FULL_DATA_LOAD_PREF.get()
     trace.putAttribute("full_load", fullDataLoad.toString())
-
-    val shouldIndexSearch = enableSearch && !PREF_INDEXED_SEARCH.get()
-    trace.putAttribute("search_index", shouldIndexSearch.toString())
 
     Timber.d("Fetching areas...")
     try {
@@ -172,19 +167,15 @@ suspend fun FirebaseFirestore.loadAreas(
             val zone = zonesCache[zoneId]
             Timber.v("S/$sectorId > Processing sector data...")
             val sector = Sector(sectorDocument)
-            if (shouldIndexSearch) {
-                Timber.v("S/$sectorId > Adding sector to the search index...")
-                sectorsIndex.add(sector.data())
-            }
+            Timber.v("S/$sectorId > Adding sector to the search index...")
+            sectorsIndex.add(sector.data())
 
             Timber.v("S/$sectorId > Loading paths...")
             val paths = sectorIdPathDocument[sectorId]
             if (paths != null) {
                 for (path in paths) {
-                    if (shouldIndexSearch) {
-                        Timber.v("$path > Adding to the search index...")
-                        pathsIndex.add(path.data())
-                    }
+                    Timber.v("$path > Adding to the search index...")
+                    pathsIndex.add(path.data())
                     Timber.v("$path > Adding to the sector ($sector)...")
                     sector.add(path)
                 }
@@ -230,14 +221,12 @@ suspend fun FirebaseFirestore.loadAreas(
             area?.add(zone)
         }
 
-        if (shouldIndexSearch) {
-            Timber.v("Adding zones to the search index...")
-            for (zone in zonesCache.values)
-                zonesIndex.add(zone.data())
-            Timber.v("Adding areas to the search index...")
-            for (area in areasCache.values)
-                areasIndex.add(area.data())
-        }
+        Timber.v("Adding zones to the search index...")
+        for (zone in zonesCache.values)
+            zonesIndex.add(zone.data())
+        Timber.v("Adding areas to the search index...")
+        for (area in areasCache.values)
+            areasIndex.add(area.data())
 
         Timber.v("Finished iterating documents.")
 
@@ -246,48 +235,43 @@ suspend fun FirebaseFirestore.loadAreas(
         Timber.v("Adding all areas to AREAS...")
         AREAS.addAll(areasCache.values)
 
-        if (shouldIndexSearch) {
-            Timber.v("Search > Initializing session future...")
-            val session = LocalStorage.createSearchSession(
-                LocalStorage.SearchContext.Builder(application, SEARCH_DATABASE_NAME)
-                    .build()
-            ).await()
-            val time = System.currentTimeMillis()
-            Timber.v("Search > Adding document classes...")
-            val setSchemaRequest = SetSchemaRequest.Builder()
-                .addDocumentClasses(AreaData::class.java)
-                .addDocumentClasses(ZoneData::class.java)
-                .addDocumentClasses(SectorData::class.java)
-                .addDocumentClasses(PathData::class.java)
-                .build()
-            session.setSchema(setSchemaRequest).await()
-            Timber.i("Set schema time: ${System.currentTimeMillis() - time}")
+        Timber.v("Search > Initializing session future...")
+        val session = application.searchSession
+        val time = System.currentTimeMillis()
+        Timber.v("Search > Adding document classes...")
+        val setSchemaRequest = SetSchemaRequest.Builder()
+            .addDocumentClasses(AreaData::class.java)
+            .addDocumentClasses(ZoneData::class.java)
+            .addDocumentClasses(SectorData::class.java)
+            .addDocumentClasses(PathData::class.java)
+            .build()
+        session.setSchema(setSchemaRequest).await()
+        Timber.i("Set schema time: ${System.currentTimeMillis() - time}")
 
-            Timber.v("Search > Adding documents...")
-            val putRequest = PutDocumentsRequest.Builder()
-                .addDocuments(areasIndex)
-                .addDocuments(zonesIndex)
-                .addDocuments(sectorsIndex)
-                .addDocuments(pathsIndex)
-                .build()
-            val putResponse = session.put(putRequest).await()
-            val successfulResults = putResponse?.successes
-            val failedResults = putResponse?.failures
-            if (successfulResults?.isEmpty() != true)
-                Timber.i("Search > Added ${successfulResults?.size} documents...")
-            if (failedResults?.isEmpty() != true)
-                Timber.w("Search > Could not add ${failedResults?.size} documents...")
+        Timber.v("Search > Adding documents...")
+        val putRequest = PutDocumentsRequest.Builder()
+            .addDocuments(areasIndex)
+            .addDocuments(zonesIndex)
+            .addDocuments(sectorsIndex)
+            .addDocuments(pathsIndex)
+            .build()
+        val putResponse = session.put(putRequest).await()
+        val successfulResults = putResponse?.successes
+        val failedResults = putResponse?.failures
+        if (successfulResults?.isEmpty() != true)
+            Timber.i("Search > Added ${successfulResults?.size} documents...")
+        if (failedResults?.isEmpty() != true)
+            Timber.w("Search > Could not add ${failedResults?.size} documents...")
 
-            // This persists the data to the disk
-            Timber.v("Search > Flushing database...")
-            session.requestFlush().await()
+        // This persists the data to the disk
+        Timber.v("Search > Flushing database...")
+        session.requestFlush().await()
 
-            Timber.v("Search > Closing database...")
-            session.close()
+        Timber.v("Search > Closing database...")
+        session.close()
 
-            Timber.v("Search > Storing to preferences...")
-            PREF_INDEXED_SEARCH.put(true)
-        }
+        Timber.v("Search > Storing to preferences...")
+        PREF_INDEXED_SEARCH.put(true)
 
         trace.stop()
     } catch (e: FirebaseFirestoreException) {
