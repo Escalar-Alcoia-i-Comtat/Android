@@ -665,9 +665,11 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @date 20210724
      * @param context The context to run from
+     * @param suffix If not null, will be added to the end of the file name.
      * @return The path of the image file that can be downloaded
      */
-    fun cacheImageFile(context: Context): File = File(context.cacheDir, "$namespace-$objectId")
+    fun cacheImageFile(context: Context, suffix: String? = null): File =
+        File(context.cacheDir, "$namespace-$objectId${suffix ?: ""}")
 
     /**
      * Creates a dynamic link access for the DataClass
@@ -778,8 +780,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             Timber.d("Loading image from storage: ${downloadedImageFile.path}")
             readBitmap(downloadedImageFile)
         } else {
-            val cacheImage = cacheImageFile(context)
             val scale = imageLoadParameters?.resultImageScale ?: 1f
+            val cacheImage = cacheImageFile(context, "scale$scale")
 
             if (!cacheImage.exists())
                 try {
