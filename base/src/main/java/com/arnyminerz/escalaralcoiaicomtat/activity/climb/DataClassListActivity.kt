@@ -190,6 +190,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         val hasInternet = state.hasInternet
         visibility(binding.noInternetCard.noInternetCardView, !hasInternet)
+        binding.mapProgressBarCard.show()
         visibility(binding.mapProgressBar, false)
         binding.mapProgressBar.isIndeterminate = true
         visibility(binding.mapProgressBar, true)
@@ -229,10 +230,10 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                             }
 
                             uiContext {
-                                visibility(binding.mapProgressBar, false)
                                 mapHelper.display()
                                 mapHelper.center(animate = false)
                                 binding.map.show()
+                                binding.mapProgressBarCard.hide()
 
                                 map.setOnMapClickListener {
                                     try {
@@ -269,6 +270,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                 }
         } else if (!hasInternet) {
             binding.loadingIndicator.hide()
+            binding.mapProgressBarCard.hide()
             if (this::mapHelper.isInitialized)
                 mapHelper.hide()
         }
