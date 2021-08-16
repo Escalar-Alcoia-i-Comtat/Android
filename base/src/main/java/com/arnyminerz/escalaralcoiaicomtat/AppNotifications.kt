@@ -13,7 +13,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_C
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.PEOPLE_NOTIFICATION_CHANNEL_GROUP
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_COMPLETED_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.UPDATE_AVAILABLE_CHANNEL_ID
-import com.google.firebase.perf.metrics.AddTrace
 
 @TargetApi(Build.VERSION_CODES.O)
 private fun Context.createAlertsChannel(): NotificationChannel {
@@ -82,7 +81,6 @@ private fun Context.createNewUpdateChannel(): NotificationChannel {
 }
 
 @TargetApi(Build.VERSION_CODES.O)
-@AddTrace(name = "createNotificationChannels")
 fun Context.createNotificationChannels() {
     val notificationManager =
         getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
