@@ -3,15 +3,19 @@ package com.arnyminerz.escalaralcoiaicomtat.core.shared
 import android.accounts.AccountManager
 import android.app.Application
 import android.content.Context
+import androidx.appsearch.app.AppSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
+import javax.inject.Inject
 
+@HiltAndroidApp
 class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     private val provider: ConnectivityProvider
         get() = appNetworkProvider
@@ -33,6 +37,14 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
             }
         }
     }
+
+    /**
+     * The session for doing search-related operations.
+     * @author Arnau Mora
+     * @since 20210817
+     */
+    @Inject
+    lateinit var searchSession: AppSearchSession
 
     override fun onCreate() {
         super.onCreate()
