@@ -60,31 +60,22 @@ suspend fun FirebaseFirestore.loadAreas(
 
     Timber.d("Fetching areas...")
     try {
-        val pathsFetchTrace = performance.newTrace("fetchPathsTrace")
-        pathsFetchTrace.start()
         Timber.v("Getting paths...") // Around 3.8 seconds
         val pathsSnapshot = collectionGroup("Paths")
             .get()
             .await()
-        pathsFetchTrace.stop()
 
-        val sectorsFetchTrace = performance.newTrace("sectorsFetchTrace")
-        sectorsFetchTrace.start()
         Timber.v("Getting sectors...") // Around .5 seconds
         val sectorsSnapshot = collectionGroup("Sectors")
             .orderBy("displayName", Query.Direction.ASCENDING)
             .get()
             .await()
-        sectorsFetchTrace.stop()
 
-        val zonesFetchTrace = performance.newTrace("zonesFetchTrace")
-        zonesFetchTrace.start()
         Timber.v("Getting zones...") // Around .3 seconds
         val zonesSnapshot = collectionGroup("Zones")
             .orderBy("displayName", Query.Direction.ASCENDING)
             .get()
             .await()
-        zonesFetchTrace.stop()
 
         val areasFetchTrace = performance.newTrace("areasFetchTrace")
         areasFetchTrace.start()
@@ -117,8 +108,8 @@ suspend fun FirebaseFirestore.loadAreas(
         val areaDocuments = areasSnapshot.documents
 
         // Count time is approx 0ms, so shouldn't bother about this taking a lot of time.
-        Timber.v("Counting paths...")
-        val pathsCount = pathDocuments.size
+        // Timber.v("Counting paths...")
+        // val pathsCount = pathDocuments.size
         Timber.v("Counting sectors...")
         val sectorsCount = sectorDocuments.size
         Timber.v("Counting zones...")
