@@ -167,8 +167,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                     binding.progressBar.visibility(true)
                 }
 
-                val intent =
-                    DataClass.getIntent(this@LoadingActivity, deepLinkPath!!, storage)
+                val intent = DataClass.getIntent(this@LoadingActivity, deepLinkPath!!)
                 uiContext {
                     if (intent != null)
                         startActivity(intent)

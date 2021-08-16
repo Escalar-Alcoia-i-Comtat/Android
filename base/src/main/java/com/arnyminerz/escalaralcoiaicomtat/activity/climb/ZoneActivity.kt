@@ -59,7 +59,7 @@ class ZoneActivity : DataClassListActivity<Sector, Area, Zone>(1, R.dimen.zone_i
                 Timber.w("Could not find area \"$areaId\" in AREAS.")
                 return@doAsync
             }
-            val zones = area.getChildren(this@ZoneActivity, storage)
+            val zones = area.getChildren()
             dataClass = zones[zoneId] ?: run {
                 Timber.w("Could not find zone \"$zoneId\" in \"$areaId\".")
                 return@doAsync

@@ -41,7 +41,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
 /**
@@ -165,8 +164,6 @@ class NearbyZonesModule(
     fun updateNearbyZones(location: Location? = null) {
         val nearbyZonesErrors = nearbyZonesReady()
 
-        val storage = Firebase.storage
-
         visibility(binding.nearbyZonesCardView, nearbyZonesErrors.isEmpty())
 
         if (nearbyZonesErrors.isNotEmpty()) {
@@ -231,7 +228,7 @@ class NearbyZonesModule(
             mapHelper?.clearSymbols()
 
             doAsync {
-                val zones = AREAS.getChildren(context!!, storage)
+                val zones = AREAS.getChildren()
                 Timber.v("Iterating through ${zones.size} zones.")
                 Timber.v("Current Location: [${location.latitude},${location.longitude}]")
                 for (zone in zones) {

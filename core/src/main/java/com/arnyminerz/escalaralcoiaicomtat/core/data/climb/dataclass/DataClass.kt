@@ -13,7 +13,6 @@ import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -25,7 +24,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_SECTOR_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_ZONE_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APPLICATION_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATACLASS_WAIT_CHILDREN_DELAY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DYNAMIC_LINKS_DOMAIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_COUNT
@@ -36,17 +34,16 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.scale
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.readBitmap
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.DownloadWorker
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.google.firebase.dynamiclinks.ShortDynamicLink
@@ -96,13 +93,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
          * @since 20210416
          * @param context The context to initialize the [Intent]
          * @param queryName What to search. May be [DataClass.displayName] or [DataClassMetadata.webURL].
-         * @param storage The [FirebaseStorage] reference to download the files required from the server.
          * @return An [Intent] if the [DataClass] was found, or null.
          */
-        suspend fun getIntent(
+        @WorkerThread
+        fun getIntent(
             context: Context,
-            queryName: String,
-            storage: FirebaseStorage
+            queryName: String
         ): Intent? {
             var result: Intent? = null
 
@@ -137,14 +133,11 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     }
                 else {
                     Timber.d("  Iterating area's children...")
-                    val zones = arrayListOf<Zone>()
-                    area.getChildren(context, storage).toCollection(zones)
+                    val zones = area.getChildren()
                     for (zone in zones) {
                         Timber.d("    Finding in ${zone.displayName}.")
                         // Children must be loaded so `count` is fetched correctly.
-                        val sectors = arrayListOf<Sector>()
-                        zone.getChildren(context, storage)
-                            .toCollection(sectors)
+                        val sectors = zone.getChildren()
 
                         if (zone.displayName.equals(queryName, true) ||
                             zone.metadata.webURL.equals(queryName, true)
@@ -196,13 +189,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     protected abstract val imageQuality: Int
 
     /**
-     * Stores if the children are currently being loaded.
-     * @author Arnau Mora
-     * @since 20210514
-     */
-    private var loadingChildren = false
-
-    /**
      * Stores the currently loaded children of the [DataClass].
      * @author Arnau Mora
      * @since 20210724
@@ -242,35 +228,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         }
 
     /**
-     * Returns the children of the [DataClass]. Also downloads their images if not downloaded.
+     * Returns the children of the [DataClass].
      * @author Arnau Mora
      * @since 20210313
-     * @param context The context where the content is being loaded from.
-     * @param storage The [FirebaseStorage] instance for loading the images from.
      */
     @WorkerThread
-    fun getChildren(
-        context: Context,
-        storage: FirebaseStorage
-    ): List<A> {
-        if (loadingChildren) {
-            Timber.v("Waiting for children to finish loading")
-            while (loadingChildren) {
-                Thread.sleep(DATACLASS_WAIT_CHILDREN_DELAY)
-            }
-            Timber.v("Finished loading children!")
-        }
-
-        loadingChildren = true
-
-        for (child in children)
-            if (child is DataClass<*, *> && !child.cacheImageFile(context).exists())
-                child.image(context, storage, null)
-
-        loadingChildren = false
-
-        return children
-    }
+    fun getChildren(): List<A> = children
 
     /**
      * Adds a child to the data class.
@@ -488,8 +451,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     ): Flow<DownloadedSection> = flow {
         Timber.v("Getting downloaded sections...")
         val downloadedSectionsList = arrayListOf<DownloadedSection>()
-        val children = arrayListOf<DataClassImpl>()
-        getChildren(activity, storage).toCollection(children)
+        val children = getChildren()
         for ((c, child) in children.withIndex())
             (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
                 val downloadStatus = dataClass.downloadStatus(activity, storage)
@@ -565,8 +527,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             // - If there's at least one downloaded children: PARTIALLY
 
             Timber.v("$pin Getting children elements download status...")
-            val children = arrayListOf<DataClassImpl>()
-            getChildren(context, storage).toCollection(children)
+            val children = getChildren()
 
             Timber.v("$pin Finding for a downloaded children in ${children.size}...")
             var allChildrenDownloaded = true
@@ -605,12 +566,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @return If the data class has any downloaded children
      */
     @WorkerThread
-    suspend fun hasAnyDownloadedChildren(
+    fun hasAnyDownloadedChildren(
         context: Context,
         storage: FirebaseStorage
     ): Boolean {
         val children = arrayListOf<DataClassImpl>()
-        getChildren(context, storage).toCollection(children)
+        getChildren().toCollection(children)
         for (child in children)
             if (child is DataClass<*, *> &&
                 child.downloadStatus(context, storage) == DownloadStatus.DOWNLOADED
@@ -802,90 +763,69 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param storage The [FirebaseStorage] reference for loading the image file.
      * @param imageLoadParameters The parameters desired to load the image.
      * @param progress The progress listener, for supervising loading.
-     * @param image This will get called once the image has been loaded.
      * @see ValueMax
      * @see ImageLoadParameters
      */
-    fun image(
+    @WorkerThread
+    suspend fun image(
         context: Context,
         storage: FirebaseStorage,
         imageLoadParameters: ImageLoadParameters? = null,
-        progress: ((progress: ValueMax<Long>) -> Unit)? = null,
-        image: ((bitmap: Bitmap?) -> Unit)? = null
-    ) {
+        progress: (@UiThread (progress: ValueMax<Long>) -> Unit)? = null
+    ): Bitmap? {
         val downloadedImageFile = imageFile(context)
-        if (downloadedImageFile.exists() && image != null) {
+        return if (downloadedImageFile.exists()) {
             Timber.d("Loading image from storage: ${downloadedImageFile.path}")
-            val bmp = readBitmap(downloadedImageFile)
-            image(bmp)
+            readBitmap(downloadedImageFile)
         } else {
             val cacheImage = cacheImageFile(context)
-            var tempCacheImage: File? = null
+            val scale = imageLoadParameters?.resultImageScale ?: 1f
 
-            val successListener = OnSuccessListener<FileDownloadTask.TaskSnapshot> {
-                if (image == null)
-                    return@OnSuccessListener
-
-                if (tempCacheImage != null && !cacheImage.exists()) {
-                    Timber.v("$this > Compressing $tempCacheImage to $cacheImage...")
-                    val bmp: Bitmap? = BitmapFactory.decodeFile(tempCacheImage!!.path)
-                    val baos = ByteArrayOutputStream()
-                    val compressedBitmap = bmp?.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
-                    if (compressedBitmap != true)
-                        Timber.e("$this > Could not compress image!")
-                    else {
-                        Timber.v("$this > Finished compressing image.")
-                        try {
-                            Timber.v("$this > Storing image to file...")
+            if (!cacheImage.exists())
+                try {
+                    Timber.v("$this > Getting stream...")
+                    val snapshot = storage.getReferenceFromUrl(imageReferenceUrl)
+                        .stream
+                        .addOnProgressListener { snapshot ->
+                            if (progress != null) {
+                                val bytesCount = snapshot.bytesTransferred
+                                val totalBytes = snapshot.totalByteCount
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    progress(ValueMax(bytesCount, totalBytes))
+                                }
+                            }
+                        }
+                        .await()
+                    Timber.v("$this > Stream loaded. Decoding...")
+                    val stream = snapshot.stream
+                    val bitmap: Bitmap? = BitmapFactory.decodeStream(
+                        stream,
+                        null,
+                        BitmapFactory.Options().apply {
+                            inSampleSize = (1 / scale).toInt()
+                        }
+                    )
+                    if (bitmap != null) {
+                        Timber.v("$this > Compressing image...")
+                        val baos = ByteArrayOutputStream()
+                        val compressedBitmap: Boolean =
+                            bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
+                        if (!compressedBitmap) {
+                            Timber.e("$this > Could not compress image!")
+                            throw IOException("Could not compress image for $this.")
+                        } else {
+                            Timber.v("$this > Storing image...")
                             baos.writeTo(cacheImage.outputStream())
-                            Timber.v("$this > Finished writing image.")
-                            Timber.v("$this > Deleting temp cache image file...")
-                            if (tempCacheImage?.deleteIfExists() == true)
-                                Timber.v("$this > File deleted successfully!")
-                            else
-                                Timber.e("$this > Could not delete!")
-                        } catch (e: IOException) {
-                            Timber.e(e, "$this > Could not write compressed image.")
+                            Timber.v("$this > Image stored.")
                         }
                     }
+                } catch (e: Exception) {
+                    Timber.e(e, "$this > Could not load DataClass ($objectId) image.")
+                    throw e
                 }
 
-                Timber.v("$this > Loaded image for $objectId. Decoding...")
-                val bitmap = readBitmap(cacheImage)
-
-                Timber.v("$this > Image decoded, scaling...")
-                val scale = imageLoadParameters?.resultImageScale ?: 1f
-                val bmp = if (scale == 1f) bitmap?.scale(scale) else bitmap
-
-                if (bmp != null) {
-                    Timber.v("$this > Setting image into imageView.")
-                    image(bmp)
-                } else {
-                    Timber.e("$this > Could not decode image")
-                    toast(context, R.string.toast_error_load_image)
-                    image(null)
-                }
-            }
-
-            if (cacheImage.exists()) {
-                Timber.v("$this > The image file has already been cached ($cacheImage).")
-                successListener.onSuccess(null)
-            } else {
-                tempCacheImage = File(context.cacheDir, cacheImage.nameWithoutExtension + "-temp")
-                storage.getReferenceFromUrl(imageReferenceUrl)
-                    .getFile(tempCacheImage)
-                    .addOnSuccessListener(successListener)
-                    .addOnProgressListener { snapshot ->
-                        val bytesCount = snapshot.bytesTransferred
-                        val totalBytes = snapshot.totalByteCount
-                        progress?.invoke(ValueMax(bytesCount, totalBytes))
-                    }
-                    .addOnFailureListener { e ->
-                        Timber.e(e, "$this > Could not load DataClass ($objectId) image.")
-
-                        image?.invoke(null)
-                    }
-            }
+            Timber.v("$this > Reading cache image ($cacheImage)...")
+            readBitmap(cacheImage)
         }
     }
 
@@ -921,9 +861,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         if (showPlaceholder)
             imageView.setImageResource(uiMetadata.placeholderDrawable)
 
-        image(activity, storage, imageLoadParameters, { progress ->
-            progressBar?.progress = progress.percentage()
-        }, { bmp -> imageView.setImageBitmap(bmp) })
+        doAsync {
+            val bmp = image(activity, storage, imageLoadParameters) { progress ->
+                progressBar?.progress = progress.percentage()
+            }
+            uiContext { imageView.setImageBitmap(bmp) }
+        }
     }
 
     override fun hashCode(): Int {
@@ -957,16 +900,11 @@ fun <D : DataClass<*, *>> Iterable<D>.hasStorageUrls(): Boolean {
  * Gets the children from all the [DataClass]es in the [Iterator].
  * @author Arnau Mora
  * @since 20210724
- * @param context The [Context] where the content is being loaded from.
- * @param storage The [FirebaseStorage] reference to load files from.
  */
-fun <A : DataClassImpl, B : DataClassImpl, D : DataClass<A, B>> Iterable<D>.getChildren(
-    context: Context,
-    storage: FirebaseStorage
-): List<A> {
+fun <A : DataClassImpl, B : DataClassImpl, D : DataClass<A, B>> Iterable<D>.getChildren(): List<A> {
     val items = arrayListOf<A>()
     for (i in this)
-        items.addAll(i.getChildren(context, storage))
+        items.addAll(i.getChildren())
     return items
 }
 

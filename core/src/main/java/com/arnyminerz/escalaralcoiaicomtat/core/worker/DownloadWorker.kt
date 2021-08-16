@@ -238,7 +238,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         }
         Timber.v("Got Zone document!")
 
-        val result = task.result!!
+        val result = task.result
         val zone = Zone(result)
 
         Timber.v("Updating notification...")
@@ -278,13 +278,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 Timber.e(e, handler.second)
         }
 
-        val sectors = runBlocking {
-            Timber.d("Downloading child sectors...")
-            val sectors = arrayListOf<Sector>()
-            zone.getChildren(applicationContext, storage)
-                .toCollection(sectors)
-            sectors
-        }
+        Timber.d("Downloading child sectors...")
+        val sectors = zone.getChildren()
         val total = sectors.size
         for ((s, sector) in sectors.withIndex())
             downloadSector(firestore, sector.metadata.documentPath, ValueMax(s, total))
@@ -320,7 +315,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         if (exception != null)
             return failure(ERROR_DATA_FETCH)
 
-        val result = task.result!!
+        val result = task.result
         val sector = Sector(result)
 
         Timber.v("Updating notification...")
@@ -422,7 +417,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 val intent = runBlocking {
                     Timber.v("Getting intent...")
                     Intent()
-                    DataClass.getIntent(applicationContext, displayName, storage)
+                    DataClass.getIntent(applicationContext, displayName)
                         ?.let { intent ->
                             PendingIntent.getActivity(
                                 applicationContext,

@@ -33,7 +33,7 @@ class SectorsViewModel<A : Activity>(
         }
         val zone = AREAS[areaId]?.get(zoneId)
         uiContext { currentUrl.value = zone?.webUrl }
-        val sectors = zone?.getChildren(context, storage)
+        val sectors = zone?.getChildren()
         if (sectors != null) {
             for (sector in sectors)
                 sector.image(context, storage)
