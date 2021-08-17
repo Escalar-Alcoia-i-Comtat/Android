@@ -11,7 +11,7 @@ import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ROTATION_A
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ROTATION_B
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.TOGGLE_ANIMATION_DURATION
@@ -41,16 +41,16 @@ data class DownloadedSection(val section: DataClass<*, *>) {
          */
         @WorkerThread
         suspend fun list(
-            activity: Activity,
+            app: App,
             storage: FirebaseStorage,
             showNonDownloaded: Boolean,
             progressListener: suspend (current: Int, max: Int) -> Unit
         ) = flow {
             Timber.v("Loading downloads...")
-            for (area in AREAS)
+            for (area in app.getAreas())
                 emitAll(
                     area.downloadedSectionList(
-                        activity,
+                        app,
                         storage,
                         showNonDownloaded,
                         progressListener

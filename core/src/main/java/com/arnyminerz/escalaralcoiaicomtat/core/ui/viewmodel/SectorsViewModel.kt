@@ -9,7 +9,6 @@ import androidx.lifecycle.liveData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.currentUrl
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.asyncCoroutineScope
@@ -26,13 +25,15 @@ class SectorsViewModel<A : Activity>(
     override val fixedHeight: Dp = 200.dp
 
     override val items: LiveData<List<Sector>> = liveData(asyncCoroutineScope.coroutineContext) {
-        if (AREAS.isEmpty()) {
+        val app = getApplication<App>()
+        val areas = app.getAreas()
+        if (areas.isEmpty()) {
             val application = (context as? Activity)?.application ?: context as Application
             firestore.loadAreas(application as App, progressCallback = { current, total ->
                 Timber.i("Loading areas: $current/$total")
             })
         }
-        val zone = AREAS[areaId]?.get(zoneId)
+        val zone = areas[areaId]?.get(zoneId)
         uiContext { currentUrl.value = zone?.webUrl }
         val sectors = zone?.getChildren()
         if (sectors != null) {

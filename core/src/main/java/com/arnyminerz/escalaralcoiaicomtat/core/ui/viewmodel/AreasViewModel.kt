@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.asyncCoroutineScope
@@ -19,7 +18,9 @@ class AreasViewModel<A : Activity>(activity: A) : DataClassViewModel<Area, A>(ac
     val progress: MutableLiveData<ValueMax<Int>> by lazy { MutableLiveData(ValueMax(0, 0)) }
 
     override val items: LiveData<List<Area>> = liveData(asyncCoroutineScope.coroutineContext) {
-        if (AREAS.isEmpty()) {
+        val app = getApplication<App>()
+        val areas = app.getAreas()
+        if (areas.isEmpty()) {
             Timber.v("Areas is empty, loading...")
             val application = (context as? Activity)?.application ?: context as Application
             firestore.loadAreas(application as App, progressCallback = { current, total ->
@@ -27,6 +28,6 @@ class AreasViewModel<A : Activity>(activity: A) : DataClassViewModel<Area, A>(ac
                 progress.value = ValueMax(current, total)
             })
         }
-        emit(AREAS)
+        emit(areas)
     }
 }

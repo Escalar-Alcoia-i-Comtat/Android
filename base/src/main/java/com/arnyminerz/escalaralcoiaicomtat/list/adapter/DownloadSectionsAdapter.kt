@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass.Companion.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
@@ -175,7 +176,7 @@ class DownloadSectionsAdapter(
             val newDownloadStatus = section.downloadStatus(mainActivity, storage)
             Timber.v("Section download status loaded, getting downloaded section list...")
             val newChildSectionList = arrayListOf<DownloadedSection>()
-            section.downloadedSectionList(mainActivity, storage, true)
+            section.downloadedSectionList(mainActivity.application as App, storage, true)
                 .toCollection(newChildSectionList)
             Timber.v("Got downloaded section list. Updating UI...")
 
@@ -196,7 +197,9 @@ class DownloadSectionsAdapter(
      */
     private fun view(section: DataClass<*, *>) {
         doAsync {
-            val intent = getIntent(mainActivity, section.displayName)
+            val app = mainActivity.application as App
+            val areas = app.getAreas()
+            val intent = areas.getIntent(mainActivity, section.displayName)
             uiContext {
                 if (intent == null) {
                     Timber.w("Could not launch activity.")
@@ -233,7 +236,7 @@ class DownloadSectionsAdapter(
             // Get all the children for the section
             Timber.v("Loading section list for \"${section.displayName}\"...")
             val childSectionList = arrayListOf<DownloadedSection>()
-            section.downloadedSectionList(mainActivity, storage, true)
+            section.downloadedSectionList(mainActivity.application as App, storage, true)
                 .toCollection(childSectionList)
 
             uiContext {

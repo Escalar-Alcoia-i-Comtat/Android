@@ -7,7 +7,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_POSITION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_COUNT
@@ -54,7 +54,9 @@ class ZoneActivity : DataClassListActivity<Sector, Area, Zone>(1, R.dimen.zone_i
         areaId = areaIdExtra
         zoneId = zoneIdExtra
         doAsync {
-            val area = AREAS[areaId] ?: run {
+            val app = application as App
+            val areas = app.getAreas()
+            val area = areas[areaId] ?: run {
                 Timber.w("Could not find area \"$areaId\" in AREAS.")
                 return@doAsync
             }

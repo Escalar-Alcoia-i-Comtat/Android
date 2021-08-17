@@ -9,6 +9,7 @@ import android.location.Location
 import android.os.Bundle
 import android.provider.Settings
 import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -22,7 +23,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.ICON_WAYPOINT_ESCALADOR_BLANC
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MapObjectWindowData
 import com.arnyminerz.escalaralcoiaicomtat.core.databinding.NearbyZonesCardBinding
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CENTER_CURRENT_LOCATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.LOCATION_PERMISSION_REQUEST_CODE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_DISABLE_NEARBY
@@ -41,6 +42,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 /**
@@ -96,14 +98,23 @@ class NearbyZonesModule(
         get() = fragment.activity
 
     /**
+     * The [App] module received from the [fragment]'s [Activity].
+     * @author Arnau Mora
+     * @since 20210817
+     */
+    private val app: App
+        get() = fragment.requireActivity().application as App
+
+    /**
      * Checks if nearby zones is available to be shown.
      * @author Arnau Mora
      * @since 20210617
      * @return A [List] with some [NearbyZonesError]. If empty, there is no error, and nearby zones
      * can be launched.
      */
+    @WorkerThread
     @SuppressLint("MissingPermission")
-    fun nearbyZonesReady(): List<NearbyZonesError> {
+    suspend fun nearbyZonesReady(): List<NearbyZonesError> {
         val errors = arrayListOf<NearbyZonesError>()
 
         if (mapHelper == null)
@@ -125,7 +136,8 @@ class NearbyZonesModule(
 
             if (!fragment.isResumed)
                 errors.add(NearbyZonesError.RESUMED)
-            if (AREAS.isEmpty())
+            val areas = app.getAreas()
+            if (areas.isEmpty())
                 errors.add(NearbyZonesError.EMPTY)
         }
 
@@ -162,7 +174,7 @@ class NearbyZonesModule(
      */
     @UiThread
     fun updateNearbyZones(location: Location? = null) {
-        val nearbyZonesErrors = nearbyZonesReady()
+        val nearbyZonesErrors = runBlocking { nearbyZonesReady() }
 
         visibility(binding.nearbyZonesCardView, nearbyZonesErrors.isEmpty())
 
@@ -228,7 +240,7 @@ class NearbyZonesModule(
             mapHelper?.clearSymbols()
 
             doAsync {
-                val zones = AREAS.getChildren()
+                val zones = app.getAreas().getChildren()
                 Timber.v("Iterating through ${zones.size} zones.")
                 Timber.v("Current Location: [${location.latitude},${location.longitude}]")
                 for (zone in zones) {

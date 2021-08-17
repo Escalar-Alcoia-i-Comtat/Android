@@ -10,7 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ERROR_VIBRATE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.QUIET_UPDATE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.UPDATE_AREA
@@ -126,7 +126,9 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             binding.progressBar.isIndeterminate = true
 
             doAsync {
-                for (area in AREAS) {
+                val app = application as App
+                val areas = app.getAreas()
+                for (area in areas) {
                     if (area.downloadStatus(this@UpdatingActivity, storage).isDownloaded())
                         iterateUpdate(area)
                     else for (zone in area)

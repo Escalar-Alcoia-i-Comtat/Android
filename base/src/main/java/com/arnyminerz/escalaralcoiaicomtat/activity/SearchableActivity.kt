@@ -70,6 +70,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone.Companion.SAMPLE_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.SearchItemTypeColor
@@ -80,6 +81,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 /**
@@ -260,8 +262,11 @@ class SearchableActivity : ComponentActivity() {
                                 }
                             )
                         }
-                        val parent = (dataClassImpl as? DataClass<*, *>)?.parent
-                            ?: run { (dataClassImpl as? Path)?.parent }
+                        val app = application as App
+                        val parent = runBlocking {
+                            (dataClassImpl as? DataClass<*, *>)?.getParent(app)
+                                ?: run { (dataClassImpl as? Path)?.getParent(app) }
+                        }
                         if (parent != null)
                             append(" - " + parent.displayName)
                         else Timber.e("Could not find parent for $dataClassImpl")

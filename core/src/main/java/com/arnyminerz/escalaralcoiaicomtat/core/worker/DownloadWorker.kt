@@ -2,7 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.worker
 
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
+import androidx.appsearch.localstorage.LocalStorage
 import androidx.lifecycle.LiveData
 import androidx.work.Constraints
 import androidx.work.NetworkType
@@ -11,18 +11,22 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import androidx.work.await
 import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass.Companion.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_OVERWRITE_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_DEFAULT
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MOBILE_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ROAMING_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.getAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
@@ -415,9 +419,13 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
             if (downloadResult == Result.success()) {
                 val intent = runBlocking {
+                    val searchSession = LocalStorage.createSearchSession(
+                        LocalStorage.SearchContext.Builder(applicationContext, SEARCH_DATABASE_NAME)
+                            .build()
+                    ).await()
+                    val areas = searchSession.getAreas()
                     Timber.v("Getting intent...")
-                    Intent()
-                    DataClass.getIntent(applicationContext, displayName)
+                    areas.getIntent(applicationContext, displayName)
                         ?.let { intent ->
                             PendingIntent.getActivity(
                                 applicationContext,

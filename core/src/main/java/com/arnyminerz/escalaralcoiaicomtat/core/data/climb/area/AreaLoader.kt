@@ -17,7 +17,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.data
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.data
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_FULL_DATA_LOAD_PREF
@@ -39,14 +38,17 @@ import timber.log.Timber
  * @since 20210313
  * @param application The [Application] that owns the app execution.
  * @param progressCallback This will get called when the loading progress is updated.
- * @see AREAS
  * @return A collection of areas
  */
 @WorkerThread
 suspend fun FirebaseFirestore.loadAreas(
     application: App,
     @UiThread progressCallback: ((current: Int, total: Int) -> Unit)? = null
-) {
+): List<Area> {
+    val indexedSearch = PREF_INDEXED_SEARCH.get()
+    if (indexedSearch)
+        return application.getAreas()
+
     val performance = Firebase.performance
     val trace = performance.newTrace("loadAreasTrace")
 
@@ -146,7 +148,7 @@ suspend fun FirebaseFirestore.loadAreas(
             Timber.v("S/$sectorId > Getting sector's parent zone.")
             val sectorParentZone = sectorReference.parent.parent ?: run {
                 Timber.e("S/$sectorId > Could not find parent zone.")
-                return
+                return emptyList()
             }
             Timber.v("S/$sectorId > Getting sector's parent zone's id.")
             val zoneId = sectorParentZone.id
@@ -156,7 +158,7 @@ suspend fun FirebaseFirestore.loadAreas(
                 val zoneDocument = zoneDocuments.find { it.id == zoneId }
                 if (zoneDocument == null) {
                     Timber.e("S/$sectorId > Could not find zone (Z/$zoneId) in documents.")
-                    return
+                    return emptyList()
                 } else {
                     Timber.v("S/$sectorId > Caching zone Z/$zoneId...")
                     val zone = Zone(zoneDocument)
@@ -192,14 +194,14 @@ suspend fun FirebaseFirestore.loadAreas(
             Timber.v("Z/$zoneId > Getting Zone...")
             val zone = zonesCache[zoneId] ?: run {
                 Timber.e("Z/$zoneId > Could not find zone in cache, maybe it doesn't have any sector?")
-                return
+                return emptyList()
             }
             Timber.v("Z/$zoneId > Getting Zone reference...")
             val zoneReference = zoneDocument.reference
             Timber.v("Z/$zoneId > Getting Zone's parent Area reference...")
             val zoneParentAreaReference = zoneReference.parent.parent ?: run {
                 Timber.e("Z/$zoneId > Could not find parent area.")
-                return
+                return emptyList()
             }
             Timber.v("Z/$zoneId > Getting Zone's parent Area id...")
             val zoneParentAreaId = zoneParentAreaReference.id
@@ -209,7 +211,7 @@ suspend fun FirebaseFirestore.loadAreas(
                 val areaDocument = areaDocuments.find { it.id == zoneParentAreaId }
                 if (areaDocument == null) {
                     Timber.e("Z/$zoneId > Could not find area (A/$zoneParentAreaId) in documents.")
-                    return
+                    return emptyList()
                 } else {
                     Timber.v("Z/$zoneId > Caching area A/$zoneParentAreaId...")
                     areasCache[zoneParentAreaId] = Area(areaDocument)
@@ -229,11 +231,6 @@ suspend fun FirebaseFirestore.loadAreas(
             areasIndex.add(area.data())
 
         Timber.v("Finished iterating documents.")
-
-        Timber.v("Clearing AREAS...")
-        AREAS.clear()
-        Timber.v("Adding all areas to AREAS...")
-        AREAS.addAll(areasCache.values)
 
         Timber.v("Search > Initializing session future...")
         val session = application.searchSession
@@ -267,17 +264,17 @@ suspend fun FirebaseFirestore.loadAreas(
         Timber.v("Search > Flushing database...")
         session.requestFlush().await()
 
-        Timber.v("Search > Closing database...")
-        session.close()
-
         Timber.v("Search > Storing to preferences...")
         PREF_INDEXED_SEARCH.put(true)
 
         trace.stop()
+
+        return arrayListOf<Area>().apply { addAll(areasCache.values) }
     } catch (e: FirebaseFirestoreException) {
         Timber.e(e, "Could not load areas.")
         trace.putAttribute("error", "true")
         trace.stop()
         uiContext { toast(application, R.string.toast_error_load_areas) }
+        return emptyList()
     }
 }

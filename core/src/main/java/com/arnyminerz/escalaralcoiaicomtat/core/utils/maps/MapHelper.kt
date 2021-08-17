@@ -35,7 +35,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MapFeatures
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MapObjectWindowData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.addToMap
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.getWindow
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_KMZ_FILE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MAP_MARKERS_BUNDLE_EXTRA
@@ -82,10 +82,12 @@ class MapHelper {
             activity: Activity,
             marker: Marker
         ): Intent? {
+            val app = activity.application as App
+            val areas = app.getAreas()
             Timber.d("Getting marker's title...")
             val title = uiContext { marker.getWindow().title }
-            Timber.v("Searching in ${AREAS.size} cached areas...")
-            return getIntent(activity, title)
+            Timber.v("Searching in ${areas.size} cached areas...")
+            return areas.getIntent(app, title)
         }
 
         fun getImageUrl(description: String?): String? {

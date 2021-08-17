@@ -288,6 +288,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
             }
 
             try {
+                Timber.v("Loading items...")
                 items = dataClass.getChildren()
 
                 Timber.v("Got ${items.size} items of ${dataClass.namespace}.")
@@ -335,6 +336,8 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
             }
         } else if (dataClassInitialized)
             Timber.i("Already loaded!")
+        else
+            Timber.w("DataClass not initialized!")
     }
 
     /**

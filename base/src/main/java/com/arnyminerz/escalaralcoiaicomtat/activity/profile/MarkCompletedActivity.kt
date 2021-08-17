@@ -17,7 +17,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.reque
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.request.MarkProjectData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
@@ -240,8 +240,10 @@ class MarkCompletedActivity : AppCompatActivity() {
      */
     @Throws(NullPointerException::class)
     private suspend fun loadPath() {
+        val app = application as App
+        val areas = app.getAreas()
         Timber.v("Loading area $areaId...")
-        area = AREAS[areaId!!]
+        area = areas[areaId!!]
         if (area == null) {
             // Could not find valid Area
             Timber.e("Could not find Area $areaId")

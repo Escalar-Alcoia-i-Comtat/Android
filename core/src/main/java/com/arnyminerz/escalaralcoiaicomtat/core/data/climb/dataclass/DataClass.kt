@@ -23,7 +23,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_AREA_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_SECTOR_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_ZONE_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APPLICATION_ID
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DYNAMIC_LINKS_DOMAIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_COUNT
@@ -96,7 +96,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
          * @return An [Intent] if the [DataClass] was found, or null.
          */
         @WorkerThread
-        fun getIntent(
+        fun List<Area>.getIntent(
             context: Context,
             queryName: String
         ): Intent? {
@@ -121,8 +121,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             val zoneActivityClass = Class.forName(zoneActivityPackage)
             val sectorActivityClass = Class.forName(sectorActivityPackage)
 
-            Timber.d("Trying to generate intent from \"$queryName\". Searching in ${AREAS.size} areas.")
-            for (area in AREAS) {
+            Timber.d("Trying to generate intent from \"$queryName\". Searching in $size areas.")
+            for (area in this) {
                 Timber.d("  Finding in ${area.displayName}.")
                 if (area.displayName.equals(queryName, true) ||
                     area.metadata.webURL.equals(queryName, true)
@@ -211,21 +211,21 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         get() = "${namespace}_$objectId"
 
     /**
-     * Returns the parent element of the [DataClass] provided by [AREAS].
+     * Returns the parent element of the [DataClass].
      * @author Arnau Mora
-     * @since 20210811
-     * @see AREAS
+     * @since 20210817
+     * @param application The [App] class for fetching areas.
      */
-    val parent: DataClass<*, *>?
-        get() {
-            val docPath = documentPath.split("/")
-            return when (namespace) {
-                Area.NAMESPACE -> null
-                Zone.NAMESPACE -> AREAS[docPath[1]]
-                Sector.NAMESPACE -> AREAS[docPath[1]]?.get(docPath[3])
-                else -> null
-            }
+    suspend fun getParent(application: App): DataClass<*, *>? {
+        val areas = application.getAreas()
+        val docPath = documentPath.split("/")
+        return when (namespace) {
+            Area.NAMESPACE -> null
+            Zone.NAMESPACE -> areas[docPath[1]]
+            Sector.NAMESPACE -> areas[docPath[1]]?.get(docPath[3])
+            else -> null
         }
+    }
 
     /**
      * Returns the children of the [DataClass].
@@ -437,14 +437,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Generates a list of [DownloadedSection].
      * @author Arnau Mora
      * @since 20210412
-     * @param activity The [Activity] where the function is being ran on.
+     * @param app The [App] instance.
      * @param storage The [FirebaseStorage] instance to load the files from the server.
      * @param showNonDownloaded If the non-downloaded sections should be added.
      * @param progressListener A listener for the progress of the load.
      */
     @WorkerThread
     suspend fun downloadedSectionList(
-        activity: Activity,
+        app: App,
         storage: FirebaseStorage,
         showNonDownloaded: Boolean,
         progressListener: (suspend (current: Int, max: Int) -> Unit)? = null
@@ -454,7 +454,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val children = getChildren()
         for ((c, child) in children.withIndex())
             (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
-                val downloadStatus = dataClass.downloadStatus(activity, storage)
+                val downloadStatus = dataClass.downloadStatus(app, storage)
                 progressListener?.invoke(c, children.size)
                 if (showNonDownloaded ||
                     downloadStatus.isDownloaded() || downloadStatus.partialDownload()

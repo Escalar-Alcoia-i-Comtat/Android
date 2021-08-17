@@ -9,16 +9,18 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassIm
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.has
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_POSITION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.put
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import timber.log.Timber
 
 /**
@@ -64,21 +66,25 @@ class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen
         }
 
         this.areaId = areaId
-        if (!AREAS.has(areaId)) {
-            Timber.e("Area is not loaded in AREAS")
-            onBackPressed()
-            return
+        val app = application as App
+        doAsync {
+            val areas = app.getAreas()
+            if (!areas.has(areaId))
+                uiContext {
+                    Timber.e("Area is not loaded in AREAS")
+                    onBackPressed()
+                }
+            else {
+                dataClass = areas[areaId]!!
+                Timber.d("DataClass id: ${dataClass.objectId}")
+
+                position = intent.getExtra(EXTRA_POSITION)
+                    ?: savedInstanceState?.getInt(EXTRA_POSITION.key, 0) ?: 0
+                Timber.d("Current position: $position")
+
+                onStateChangeAsync(appNetworkState)
+            }
         }
-        dataClass = AREAS[areaId]!!
-        Timber.d("DataClass id: ${dataClass.objectId}")
-
-        position =
-            intent.getExtra(EXTRA_POSITION) ?: savedInstanceState?.getInt(EXTRA_POSITION.key, 0)
-                    ?: 0
-        Timber.d("Current position: $position")
-
-        binding.titleTextView.text = dataClass.displayName
-        binding.titleTextView.transitionName = intent.getExtra(EXTRA_AREA_TRANSITION_NAME)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

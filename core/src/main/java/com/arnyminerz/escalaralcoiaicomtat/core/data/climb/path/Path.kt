@@ -11,7 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.stora
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.auth.FirebaseAuthException
@@ -143,17 +143,17 @@ class Path internal constructor(
         }
 
     /**
-     * Returns the parent [Sector] of the [Path] provided by [AREAS].
+     * Returns the parent [Sector] of the [Path].
      * @author Arnau Mora
-     * @since 20210811
+     * @since 20210817
+     * @param application The [App] class for fetching areas.
      * @return The parent [Sector], or null if not found.
-     * @see AREAS
      */
-    val parent: Sector?
-        get() {
-            val docPath = documentPath.split("/")
-            return AREAS[docPath[1]]?.get(docPath[3])?.get(docPath[5])
-        }
+    suspend fun getParent(application: App): Sector? {
+        val areas = application.getAreas()
+        val docPath = documentPath.split("/")
+        return areas[docPath[1]]?.get(docPath[3])?.get(docPath[5])
+    }
 
     override fun toString(): String = displayName
 

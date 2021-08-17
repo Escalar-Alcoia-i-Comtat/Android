@@ -18,10 +18,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.appendChip
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_AREA_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_ZONE_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDisplaySize
@@ -211,9 +211,11 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 loadImage()
             }
         else {
+            val app = requireActivity().application as App
+            val areas = app.getAreas()
             Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
             val sectors = arrayListOf<Sector>()
-            AREAS[areaId]
+            areas[areaId]
                 ?.getChildren()?.get(zoneId)
                 ?.getChildren()
                 ?.toCollection(sectors)
