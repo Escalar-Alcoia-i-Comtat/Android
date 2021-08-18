@@ -236,6 +236,8 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                 Timber.v("Got ${items.size} items of ${dataClass.namespace}.")
 
                 uiContext {
+                    if (mapLoaded)
+                        binding.mapProgressBarCard.hide()
                     binding.recyclerView.layoutManager = if (itemsPerRow > 1)
                         GridLayoutManager(this, itemsPerRow)
                     else
@@ -390,9 +392,8 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                                         Timber.w("Clicked on map and any data has been loaded")
                                     }
                                 }
-
-                                mapLoaded = true
                             }
+                            mapLoaded = true
                         }
                     } catch (_: FileNotFoundException) {
                         Timber.w("KMZ file not found")
@@ -423,6 +424,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
             binding.mapLayout.hide()
             if (this::mapHelper.isInitialized)
                 mapHelper.hide()
-        }
+        } else
+            binding.mapProgressBarCard.hide()
     }
 }
