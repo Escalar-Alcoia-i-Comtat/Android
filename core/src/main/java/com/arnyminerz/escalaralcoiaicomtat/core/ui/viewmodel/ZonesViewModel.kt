@@ -28,7 +28,7 @@ class ZonesViewModel<A : Activity>(activity: A, private val areaId: String) :
         }
         val area = areas[areaId]
         uiContext { currentUrl.value = area?.webUrl }
-        val zones = area?.getChildren(app)
+        val zones = area?.getChildren(app.searchSession)
         if (zones != null) {
             for (zone in zones)
                 zone.image(context, storage)

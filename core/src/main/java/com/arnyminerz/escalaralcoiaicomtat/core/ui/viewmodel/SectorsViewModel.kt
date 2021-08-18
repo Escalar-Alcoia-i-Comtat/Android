@@ -33,9 +33,9 @@ class SectorsViewModel<A : Activity>(
                 Timber.i("Loading areas: $current/$total")
             })
         }
-        val zone = areas[areaId]?.get(app, zoneId)
+        val zone = areas[areaId]?.get(app.searchSession, zoneId)
         uiContext { currentUrl.value = zone?.webUrl }
-        val sectors = zone?.getChildren(app)
+        val sectors = zone?.getChildren(app.searchSession)
         if (sectors != null) {
             for (sector in sectors)
                 sector.image(context, storage)

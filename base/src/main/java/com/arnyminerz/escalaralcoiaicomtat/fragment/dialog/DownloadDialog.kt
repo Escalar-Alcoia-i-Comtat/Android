@@ -51,7 +51,14 @@ class DownloadDialog<T : DataClass<*, *>>(
                 } ?: "N/A"
             ) + '\n' + activity.getString(
                 R.string.dialog_uses_storage_msg,
-                runBlocking { humanReadableByteCountBin(data.size(activity.app)) }
+                runBlocking {
+                    humanReadableByteCountBin(
+                        data.size(
+                            activity.app,
+                            activity.app.searchSession
+                        )
+                    )
+                }
             )
 
             builder = builder
@@ -74,12 +81,15 @@ class DownloadDialog<T : DataClass<*, *>>(
                             when (data) {
                                 is Area, is Zone, is Sector ->
                                     doAsync {
-                                        val children = data.getChildren(activity.app)
+                                        val children = data.getChildren(activity.app.searchSession)
                                         for (child in children)
                                             if (child is DataClass<*, *>)
-                                                child.delete(activity.app)
+                                                child.delete(
+                                                    activity.app,
+                                                    activity.app.searchSession
+                                                )
 
-                                        data.delete(activity.app)
+                                        data.delete(activity.app, activity.app.searchSession)
                                         uiContext {
                                             deleteCallback?.invoke()
                                         }

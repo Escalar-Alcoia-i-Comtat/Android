@@ -16,8 +16,6 @@ data class AreaData(
     @Document.Namespace
     var namespace: String = Area.NAMESPACE
 
-    // TODO: Children should be stored in data
-
     fun area() = Area(
         objectId,
         displayName,

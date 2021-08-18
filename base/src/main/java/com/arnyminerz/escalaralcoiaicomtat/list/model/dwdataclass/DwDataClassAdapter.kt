@@ -173,7 +173,8 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
                 updateDownloadStatus
             ) {
                 // Fetch the new downloa status
-                val newStatus = data.downloadStatus(activity.app, activity.storage)
+                val newStatus =
+                    data.downloadStatus(activity.app, activity.app.searchSession, activity.storage)
                 // Store it in cache
                 synchronized(downloadStatuses) {
                     downloadStatuses[data.objectId] = newStatus

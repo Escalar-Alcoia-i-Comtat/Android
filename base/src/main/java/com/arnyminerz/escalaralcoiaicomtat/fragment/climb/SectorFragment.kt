@@ -216,8 +216,9 @@ class SectorFragment : NetworkChangeListenerFragment() {
             Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
             val sectors = arrayListOf<Sector>()
             areas[areaId]
-                ?.getChildren(app)?.get(zoneId)
-                ?.getChildren(app)
+                ?.getChildren(app.searchSession)
+                ?.get(zoneId)
+                ?.getChildren(app.searchSession)
                 ?.toCollection(sectors)
                 ?: run {
                     Timber.e("Could not get sectors from Area $areaId in $zoneId")
@@ -232,7 +233,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             }
 
             isDownloaded = if (sectorActivity != null)
-                sector.downloadStatus(app, sectorActivity.storage).isDownloaded()
+                sector.downloadStatus(app, app.searchSession, sectorActivity.storage).isDownloaded()
             else false
 
             if (activity != null && activity?.isDestroyed == false) {
@@ -245,7 +246,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 }
 
                 Timber.v("Loading paths...")
-                val paths = sector.getChildren(app).sortedBy { it.sketchId }
+                val paths = sector.getChildren(app.searchSession).sortedBy { it.sketchId }
                 Timber.v("Finished loading children sectors")
 
                 uiContext {

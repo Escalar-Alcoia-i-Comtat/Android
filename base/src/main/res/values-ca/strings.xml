@@ -275,4 +275,5 @@
     <string name="data_type_path">Via</string>
     <string name="status_processing_paths">Processant vies…</string>
     <string name="action_clear_data">Buidar les dades</string>
+    <string name="search_no_results">Cap resultat</string>
 </resources>

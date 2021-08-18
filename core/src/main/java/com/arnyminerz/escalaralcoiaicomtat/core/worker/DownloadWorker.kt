@@ -1,6 +1,8 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.worker
 
+import android.app.PendingIntent
 import android.content.Context
+import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.localstorage.LocalStorage
 import androidx.lifecycle.LiveData
 import androidx.work.Constraints
@@ -14,6 +16,7 @@ import androidx.work.await
 import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass.Companion.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
@@ -139,6 +142,13 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @since 20210323
      */
     private lateinit var notification: Notification
+
+    /**
+     * The session for performing data loads.
+     * @author Arnau Mora
+     * @since 20210818
+     */
+    private lateinit var appSearchSession: AppSearchSession
 
     private fun downloadImageFile(
         imageReferenceUrl: String,
@@ -280,12 +290,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 Timber.e(e, handler.second)
         }
 
-        // TODO: Fix downloads
-        /*Timber.d("Downloading child sectors...")
-        val sectors = zone.getChildren()
+        Timber.d("Downloading child sectors...")
+        val sectors = zone.getChildren(appSearchSession)
         val total = sectors.size
         for ((s, sector) in sectors.withIndex())
-            downloadSector(firestore, sector.metadata.documentPath, ValueMax(s, total))*/
+            downloadSector(firestore, sector.metadata.documentPath, ValueMax(s, total))
 
         return Result.success()
     }
@@ -378,6 +387,14 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             Timber.v("Initializing Firebase Storage instance...")
             storage = Firebase.storage
 
+            Timber.v("Initializing search session...")
+            appSearchSession = runBlocking {
+                LocalStorage.createSearchSession(
+                    LocalStorage.SearchContext.Builder(applicationContext, SEARCH_DATABASE_NAME)
+                        .build()
+                ).await()
+            }
+
             Timber.v("Downloading $namespace at $downloadPath...")
             this.namespace = namespace
             this.displayName = displayName
@@ -424,8 +441,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                     ).await()
                     val areas = searchSession.getAreas()
                     Timber.v("Getting intent...")
-                    // TODO: Fix intent get
-                    /*areas.getIntent(applicationContext, displayName)
+                    areas.getIntent(applicationContext, searchSession, displayName)
                         ?.let { intent ->
                             PendingIntent.getActivity(
                                 applicationContext,
@@ -433,7 +449,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                                 intent,
                                 PendingIntent.FLAG_IMMUTABLE
                             )
-                        }*/
+                        }
                     null
                 }
                 Timber.v("Showing download finished notification")
@@ -466,6 +482,9 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                     )
                     .buildAndShow()
             }
+
+            Timber.v("Closing search session...")
+            appSearchSession.close()
 
             downloadResult
         }

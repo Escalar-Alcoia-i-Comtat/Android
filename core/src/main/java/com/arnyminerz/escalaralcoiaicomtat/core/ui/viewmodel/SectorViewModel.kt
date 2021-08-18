@@ -30,7 +30,9 @@ class SectorViewModel(
 
     suspend fun getInnerSector(): Sector? {
         val areas = app.getAreas()
-        return areas[areaId]?.get(app, zoneId)?.get(app, sectorId)
+        return areas[areaId]
+            ?.get(app.searchSession, zoneId)
+            ?.get(app.searchSession, sectorId)
     }
 
     val sector: LiveData<Sector?> = liveData(asyncCoroutineScope.coroutineContext) {
@@ -48,7 +50,7 @@ class SectorViewModel(
     val items: LiveData<List<Path>> = liveData {
         val innerSector = getInnerSector()
         uiContext { currentUrl.value = innerSector?.webUrl }
-        val paths = innerSector?.getChildren(app)
+        val paths = innerSector?.getChildren(app.searchSession)
         if (paths != null)
             emit(paths)
         else Timber.e("Could not find S/$sectorId in Z/$zoneId in A/$areaId")

@@ -87,7 +87,7 @@ class MapHelper {
             Timber.d("Getting marker's title...")
             val title = uiContext { marker.getWindow().title }
             Timber.v("Searching in ${areas.size} cached areas...")
-            return areas.getIntent(app, title)
+            return areas.getIntent(app, app.searchSession, title)
         }
 
         fun getImageUrl(description: String?): String? {

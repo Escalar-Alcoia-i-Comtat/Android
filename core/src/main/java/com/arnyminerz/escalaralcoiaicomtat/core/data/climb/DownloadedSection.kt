@@ -51,6 +51,7 @@ data class DownloadedSection(val section: DataClass<*, *>) {
                 emitAll(
                     area.downloadedSectionList(
                         app,
+                        app.searchSession,
                         storage,
                         showNonDownloaded,
                         progressListener
