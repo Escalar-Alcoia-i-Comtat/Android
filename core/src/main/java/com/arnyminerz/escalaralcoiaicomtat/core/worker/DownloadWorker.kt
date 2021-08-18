@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.worker
 
+import android.app.PendingIntent
 import android.content.Context
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.localstorage.LocalStorage
@@ -15,6 +16,7 @@ import androidx.work.await
 import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass.Companion.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
@@ -439,8 +441,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                     ).await()
                     val areas = searchSession.getAreas()
                     Timber.v("Getting intent...")
-                    // TODO: Fix intent get
-                    /*areas.getIntent(applicationContext, displayName)
+                    areas.getIntent(applicationContext, searchSession, displayName)
                         ?.let { intent ->
                             PendingIntent.getActivity(
                                 applicationContext,
@@ -448,7 +449,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                                 intent,
                                 PendingIntent.FLAG_IMMUTABLE
                             )
-                        }*/
+                        }
                     null
                 }
                 Timber.v("Showing download finished notification")
@@ -481,6 +482,9 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                     )
                     .buildAndShow()
             }
+
+            Timber.v("Closing search session...")
+            appSearchSession.close()
 
             downloadResult
         }
