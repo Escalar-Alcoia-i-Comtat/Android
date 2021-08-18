@@ -6,6 +6,7 @@ import com.google.android.gms.maps.model.LatLng
 
 @Document
 data class SectorData(
+    @Document.Score var index: Int,
     @Document.Id var objectId: String,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var displayName: String,
     @Document.CreationTimestampMillis var timestamp: Long,
@@ -40,8 +41,9 @@ data class SectorData(
     )
 }
 
-fun Sector.data(): SectorData {
+fun Sector.data(index: Int): SectorData {
     return SectorData(
+        index,
         objectId,
         displayName,
         timestampMillis,

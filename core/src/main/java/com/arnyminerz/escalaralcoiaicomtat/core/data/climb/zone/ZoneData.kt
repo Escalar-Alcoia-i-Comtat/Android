@@ -6,6 +6,7 @@ import com.google.android.gms.maps.model.LatLng
 
 @Document
 data class ZoneData(
+    @Document.Score var index: Int,
     @Document.Id var objectId: String,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var displayName: String,
     @Document.CreationTimestampMillis var timestamp: Long,
@@ -33,8 +34,9 @@ data class ZoneData(
     )
 }
 
-fun Zone.data(): ZoneData {
+fun Zone.data(index: Int): ZoneData {
     return ZoneData(
+        index,
         objectId,
         displayName,
         timestampMillis,

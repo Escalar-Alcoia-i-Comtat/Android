@@ -7,6 +7,7 @@ import android.content.Context
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchSpec
+import androidx.appsearch.app.SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE
 import androidx.appsearch.exceptions.AppSearchException
 import androidx.collection.arrayMapOf
 import androidx.lifecycle.AndroidViewModel
@@ -141,6 +142,8 @@ suspend fun AppSearchSession.getAreas(): List<Area> {
     if (areas.isEmpty()) {
         val areasSearchSpec = SearchSpec.Builder()
             .addFilterNamespaces(Area.NAMESPACE)
+            .setOrder(SearchSpec.ORDER_ASCENDING)
+            .setRankingStrategy(RANKING_STRATEGY_DOCUMENT_SCORE)
             .build()
         val searchResult = search("", areasSearchSpec)
         val searchPage = searchResult.nextPage.await()

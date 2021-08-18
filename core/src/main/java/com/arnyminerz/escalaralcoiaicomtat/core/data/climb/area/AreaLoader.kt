@@ -101,6 +101,7 @@ suspend fun FirebaseFirestore.loadAreas(
             .sortedBy { snapshot -> snapshot.getString("sketchId")?.toInt() }
         Timber.v("Getting sector documents...")
         val sectorDocuments = sectorsSnapshot.documents
+            .sortedBy { snapshot -> snapshot.getString("displayName") }
         Timber.v("Getting zone documents...")
         val zoneDocuments = zonesSnapshot.documents
         Timber.v("Getting area documents...")
@@ -139,7 +140,7 @@ suspend fun FirebaseFirestore.loadAreas(
         }
 
         Timber.v("Iterating $sectorsCount sector documents...")
-        for (sectorDocument in sectorDocuments) {
+        for ((i, sectorDocument) in sectorDocuments.withIndex()) {
             uiContext { progressCallback?.invoke(++progressCounter, progressMax) }
 
             val sectorId = sectorDocument.id
@@ -170,7 +171,7 @@ suspend fun FirebaseFirestore.loadAreas(
             Timber.v("S/$sectorId > Processing sector data...")
             val sector = Sector(sectorDocument)
             Timber.v("S/$sectorId > Adding sector to the search index...")
-            sectorsIndex.add(sector.data())
+            sectorsIndex.add(sector.data(i))
 
             Timber.v("S/$sectorId > Loading paths...")
             val paths = sectorIdPathDocument[sectorId]
@@ -217,11 +218,11 @@ suspend fun FirebaseFirestore.loadAreas(
         }
 
         Timber.v("Adding zones to the search index...")
-        for (zone in zonesCache.values)
-            zonesIndex.add(zone.data())
+        for ((i, zone) in zonesCache.values.sortedBy { it.displayName }.withIndex())
+            zonesIndex.add(zone.data(i))
         Timber.v("Adding areas to the search index...")
-        for (area in areasCache.values)
-            areasIndex.add(area.data())
+        for ((i, area) in areasCache.values.sortedBy { it.displayName }.withIndex())
+            areasIndex.add(area.data(i))
 
         Timber.v("Finished iterating documents.")
 
