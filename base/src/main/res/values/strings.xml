@@ -294,6 +294,7 @@
     <string name="button_desc_delete">Delete</string>
 
     <string name="search_hint">Search…</string>
+    <string name="search_no_results">No results</string>
 
     <string name="placeholder">Placeholder</string>
     <string name="r_placeholder" translatable="false">R#:</string>

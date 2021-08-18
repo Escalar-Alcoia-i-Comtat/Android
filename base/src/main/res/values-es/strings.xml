@@ -276,4 +276,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="data_type_path">Vía</string>
     <string name="status_processing_paths">Procesando vías…</string>
     <string name="action_clear_data">Vaciar los datos</string>
+    <string name="search_no_results">Sin resultados</string>
 </resources>
