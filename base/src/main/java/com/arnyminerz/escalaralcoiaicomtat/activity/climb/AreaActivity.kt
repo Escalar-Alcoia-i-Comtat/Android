@@ -110,5 +110,5 @@ class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen
     override fun intentExtra(index: Int, transitionName: String?): Intent =
         Intent(this@AreaActivity, ZoneActivity()::class.java)
             .putExtra(EXTRA_AREA, areaId)
-            .putExtra(EXTRA_ZONE, items[position].objectId)
+            .putExtra(EXTRA_ZONE, items[index].objectId)
 }
