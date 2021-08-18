@@ -258,6 +258,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val searchSpec = SearchSpec.Builder()
             .addFilterNamespaces(childNamespace)
             .setResultCountPerPage(100)
+            .setOrder(SearchSpec.ORDER_ASCENDING)
+            .setRankingStrategy(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE)
             .build()
         Timber.v("$this > Performing search for \"$objectId\" with namespace \"$childNamespace\"...")
         val searchResults = searchSession.search(objectId, searchSpec)
