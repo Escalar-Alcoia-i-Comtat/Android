@@ -240,7 +240,7 @@ class NearbyZonesModule(
             mapHelper?.clearSymbols()
 
             doAsync {
-                val zones = app.getAreas().getChildren(app)
+                val zones = app.getAreas().getChildren(app.searchSession)
                 Timber.v("Iterating through ${zones.size} zones.")
                 Timber.v("Current Location: [${location.latitude},${location.longitude}]")
                 for (zone in zones) {

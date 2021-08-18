@@ -130,13 +130,13 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
                 val app = application as App
                 val areas = app.getAreas()
                 for (area in areas) {
-                    if (area.downloadStatus(app, storage).isDownloaded())
+                    if (area.downloadStatus(app, app.searchSession, storage).isDownloaded())
                         iterateUpdate(area)
-                    else for (zone in area.getChildren(app))
-                        if (zone.downloadStatus(app, storage).isDownloaded())
+                    else for (zone in area.getChildren(app.searchSession))
+                        if (zone.downloadStatus(app, app.searchSession, storage).isDownloaded())
                             iterateUpdate(zone)
-                        else for (sector in zone.getChildren(app))
-                            if (sector.downloadStatus(app, storage)
+                        else for (sector in zone.getChildren(app.searchSession))
+                            if (sector.downloadStatus(app, app.searchSession, storage)
                                     .isDownloaded()
                             )
                                 iterateUpdate(sector)
@@ -157,7 +157,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
     @WorkerThread
     private suspend fun iterateUpdate(dataClass: DataClass<*, *>) {
         Timber.v("Deleting area #$updateArea...")
-        dataClass.delete(app)
+        dataClass.delete(app, app.searchSession)
 
         Timber.v("Downloading area #$updateArea...")
         // TODO: The map won't be downloaded again

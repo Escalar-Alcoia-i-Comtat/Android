@@ -54,7 +54,9 @@ suspend fun DataClassImpl.launch(activity: Activity) {
             Timber.v("Getting sectors for zone ${pathPieces[3]}...")
             val app = activity.app
             val areas = app.getAreas()
-            val sectors = areas[pathPieces[1]]?.get(app, pathPieces[3])?.getChildren(app)
+            val sectors = areas[pathPieces[1]]
+                ?.get(app.searchSession, pathPieces[3])
+                ?.getChildren(app.searchSession)
             if (sectors == null)
                 Timber.e("Could not load sectors from area ${pathPieces[1]}, sector ${pathPieces[3]}")
             val sectorIndex = sectors?.let {

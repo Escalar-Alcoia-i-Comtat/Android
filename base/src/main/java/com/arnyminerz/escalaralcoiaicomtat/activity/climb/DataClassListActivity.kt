@@ -301,7 +301,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
 
             try {
                 Timber.v("Loading items...")
-                items = dataClass.getChildren(app)
+                items = dataClass.getChildren(app.searchSession)
 
                 Timber.v("Got ${items.size} items of ${dataClass.namespace}.")
 
@@ -382,7 +382,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
 
             Timber.v("Updating icon, getting download status...")
             val downloadStatus = if (dataClassInitialized)
-                dataClass.downloadStatus(app, storage)
+                dataClass.downloadStatus(app, app.searchSession, storage)
             else null
             Timber.v("Got download status: $downloadStatus")
 

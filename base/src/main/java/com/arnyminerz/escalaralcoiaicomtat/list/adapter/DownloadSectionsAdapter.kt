@@ -64,7 +64,7 @@ class DownloadSectionsAdapter(
         if (downloadStatus != DownloadStatus.DOWNLOADED) {
             holder.sizeChip.text = mainActivity.getString(R.string.status_not_downloaded)
         } else doAsync {
-            val size = section.size(mainActivity.app)
+            val size = section.size(mainActivity.app, mainActivity.app.searchSession)
 
             uiContext {
                 holder.sizeChip.text = humanReadableByteCountBin(size)
@@ -96,7 +96,8 @@ class DownloadSectionsAdapter(
     ) {
         doAsync {
             Timber.v("Downloading section \"$section\"")
-            val downloadStatus = section.downloadStatus(mainActivity.app, storage)
+            val downloadStatus =
+                section.downloadStatus(mainActivity.app, mainActivity.app.searchSession, storage)
 
             uiContext {
                 if (!appNetworkState.hasInternet) {
@@ -171,12 +172,18 @@ class DownloadSectionsAdapter(
     fun deleteSection(holder: DownloadSectionViewHolder, section: DataClass<*, *>) {
         doAsync {
             Timber.v("Deleting section \"$section\"")
-            section.delete(mainActivity.app)
+            section.delete(mainActivity.app, mainActivity.app.searchSession)
             Timber.v("Section deleted, getting new download status...")
-            val newDownloadStatus = section.downloadStatus(mainActivity.app, storage)
+            val newDownloadStatus =
+                section.downloadStatus(mainActivity.app, mainActivity.app.searchSession, storage)
             Timber.v("Section download status loaded, getting downloaded section list...")
             val newChildSectionList = arrayListOf<DownloadedSection>()
-            section.downloadedSectionList(mainActivity.application as App, storage, true)
+            section.downloadedSectionList(
+                mainActivity.app,
+                mainActivity.app.searchSession,
+                storage,
+                true
+            )
                 .toCollection(newChildSectionList)
             Timber.v("Got downloaded section list. Updating UI...")
 
@@ -199,7 +206,11 @@ class DownloadSectionsAdapter(
         doAsync {
             val app = mainActivity.application as App
             val areas = app.getAreas()
-            val intent = areas.getIntent(mainActivity.app, section.displayName)
+            val intent = areas.getIntent(
+                mainActivity.app,
+                mainActivity.app.searchSession,
+                section.displayName
+            )
             uiContext {
                 if (intent == null) {
                     Timber.w("Could not launch activity.")
@@ -232,11 +243,17 @@ class DownloadSectionsAdapter(
 
         doAsync {
             Timber.v("Checking section's downloaded children.")
-            val sectionDownloadStatus = section.downloadStatus(mainActivity.app, storage)
+            val sectionDownloadStatus =
+                section.downloadStatus(mainActivity.app, mainActivity.app.searchSession, storage)
             // Get all the children for the section
             Timber.v("Loading section list for \"${section.displayName}\"...")
             val childSectionList = arrayListOf<DownloadedSection>()
-            section.downloadedSectionList(mainActivity.application as App, storage, true)
+            section.downloadedSectionList(
+                mainActivity.app,
+                mainActivity.app.searchSession,
+                storage,
+                true
+            )
                 .toCollection(childSectionList)
 
             uiContext {

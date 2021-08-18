@@ -152,7 +152,9 @@ class Path internal constructor(
     suspend fun getParent(application: App): Sector? {
         val areas = application.getAreas()
         val docPath = documentPath.split("/")
-        return areas[docPath[1]]?.get(application, docPath[3])?.get(application, docPath[5])
+        return areas[docPath[1]]
+            ?.get(application.searchSession, docPath[3])
+            ?.get(application.searchSession, docPath[5])
     }
 
     override fun toString(): String = displayName
