@@ -17,6 +17,7 @@
     <string name="action_clear_downloads">Clear Downloads</string>
     <string name="action_clear_settings">Clear Settings</string>
     <string name="action_launch_app">Launch App</string>
+    <string name="action_clear_data">Clear Data</string>
     <string name="action_share_with">Share with</string>
     <string name="action_continue">Continue</string>
     <string name="action_send">Send</string>
