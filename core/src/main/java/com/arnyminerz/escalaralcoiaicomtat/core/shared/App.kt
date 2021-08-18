@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.shared
 
 import android.accounts.AccountManager
+import android.app.Activity
 import android.app.Application
 import android.content.Context
 import androidx.annotation.WorkerThread
@@ -100,6 +101,14 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     @WorkerThread
     suspend fun getAreas(): List<Area> = searchSession.getAreas()
 }
+
+/**
+ * Returns the [Activity.getApplication] casted as [App].
+ * @author Arnau Mora
+ * @since 20210818
+ */
+val Activity.app: App
+    get() = application as App
 
 val appSearchSessionAreas = arrayMapOf<Int, List<Area>>()
 
