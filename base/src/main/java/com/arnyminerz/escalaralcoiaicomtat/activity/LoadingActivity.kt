@@ -15,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
@@ -168,7 +169,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                     binding.progressBar.visibility(true)
                 }
 
-                val intent = areas.getIntent(this@LoadingActivity, deepLinkPath!!)
+                val intent = areas.getIntent(app, deepLinkPath!!)
                 uiContext {
                     if (intent != null)
                         startActivity(intent)

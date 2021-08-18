@@ -10,6 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.currentUrl
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.asyncCoroutineScope
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
@@ -28,9 +29,8 @@ class SectorViewModel(
     private val storage = Firebase.storage
 
     suspend fun getInnerSector(): Sector? {
-        val app = getApplication<App>()
         val areas = app.getAreas()
-        return areas[areaId]?.get(zoneId)?.get(sectorId)
+        return areas[areaId]?.get(app, zoneId)?.get(app, sectorId)
     }
 
     val sector: LiveData<Sector?> = liveData(asyncCoroutineScope.coroutineContext) {
@@ -48,7 +48,7 @@ class SectorViewModel(
     val items: LiveData<List<Path>> = liveData {
         val innerSector = getInnerSector()
         uiContext { currentUrl.value = innerSector?.webUrl }
-        val paths = innerSector?.getChildren()
+        val paths = innerSector?.getChildren(app)
         if (paths != null)
             emit(paths)
         else Timber.e("Could not find S/$sectorId in Z/$zoneId in A/$areaId")

@@ -21,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.AlreadyLoadingException
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
@@ -278,6 +279,17 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
         }
     }
 
+    /**
+     * Once [dataClass] has been initialized, which is indicated with [dataClassInitialized], and
+     * only if [loaded] is false, this is, for not loading the content multiple times when the
+     * network status gets updated, all the content gets loaded.
+     * Loads:
+     * - Title transition and text
+     * - [dataClass]'s children.
+     * - Recycler view
+     * @author Arnau Mora
+     * @since 20210818
+     */
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
         super.onStateChangeAsync(state)
 
@@ -289,7 +301,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
 
             try {
                 Timber.v("Loading items...")
-                items = dataClass.getChildren()
+                items = dataClass.getChildren(app)
 
                 Timber.v("Got ${items.size} items of ${dataClass.namespace}.")
 
@@ -370,7 +382,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
 
             Timber.v("Updating icon, getting download status...")
             val downloadStatus = if (dataClassInitialized)
-                dataClass.downloadStatus(activity, storage)
+                dataClass.downloadStatus(app, storage)
             else null
             Timber.v("Got download status: $downloadStatus")
 

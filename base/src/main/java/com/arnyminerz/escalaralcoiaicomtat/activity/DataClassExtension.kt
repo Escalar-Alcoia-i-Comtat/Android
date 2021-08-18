@@ -12,11 +12,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import timber.log.Timber
@@ -52,10 +52,9 @@ suspend fun DataClassImpl.launch(activity: Activity) {
             intent.putExtra(EXTRA_AREA, pathPieces[1]) // area ID
             intent.putExtra(EXTRA_ZONE, pathPieces[3]) // zone ID
             Timber.v("Getting sectors for zone ${pathPieces[3]}...")
-            val app = activity.application as App
+            val app = activity.app
             val areas = app.getAreas()
-            val sectors = areas[pathPieces[1]]?.get(pathPieces[3])
-                ?.getChildren()
+            val sectors = areas[pathPieces[1]]?.get(app, pathPieces[3])?.getChildren(app)
             if (sectors == null)
                 Timber.e("Could not load sectors from area ${pathPieces[1]}, sector ${pathPieces[3]}")
             val sectorIndex = sectors?.let {

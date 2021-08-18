@@ -25,8 +25,7 @@ fun SectorExplorer(
     sectorId: String
 ) {
     val app = activity.application as App
-    val areas = runBlocking { app.getAreas() }
-    val sector = areas[areaId]?.get(zoneId)?.get(sectorId)
+    val sector = runBlocking { app.getAreas()[areaId]?.get(app, zoneId)?.get(app, sectorId) }
     if (sector == null)
         Text(text = "Could not load sector $sectorId")
     else {

@@ -75,6 +75,7 @@ class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen
                     onBackPressed()
                 }
             else {
+                // Get the corresponding Area and store it in [dataClass]
                 dataClass = areas[areaId]!!
                 Timber.d("DataClass id: ${dataClass.objectId}")
 

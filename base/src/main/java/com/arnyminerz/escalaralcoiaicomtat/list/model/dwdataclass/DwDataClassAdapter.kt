@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATACLASS_WAIT_CHILDREN_DELAY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_KMZ_FILE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
@@ -172,7 +173,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
                 updateDownloadStatus
             ) {
                 // Fetch the new downloa status
-                val newStatus = data.downloadStatus(activity, activity.storage)
+                val newStatus = data.downloadStatus(activity.app, activity.storage)
                 // Store it in cache
                 synchronized(downloadStatuses) {
                     downloadStatuses[data.objectId] = newStatus

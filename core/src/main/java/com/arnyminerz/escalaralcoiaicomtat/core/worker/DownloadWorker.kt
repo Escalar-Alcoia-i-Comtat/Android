@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.worker
 
-import android.app.PendingIntent
 import android.content.Context
 import androidx.appsearch.localstorage.LocalStorage
 import androidx.lifecycle.LiveData
@@ -15,7 +14,6 @@ import androidx.work.await
 import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass.Companion.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
@@ -229,7 +227,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @see ERROR_DATA_FETCH
      * @see ERROR_STORE_IMAGE
      */
-    private fun downloadZone(firestore: FirebaseFirestore, path: String): Result {
+    private suspend fun downloadZone(firestore: FirebaseFirestore, path: String): Result {
         Timber.d("Downloading Zone $path...")
         Timber.v("Getting document...")
         val task = firestore.document(path).get()
@@ -282,11 +280,12 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                 Timber.e(e, handler.second)
         }
 
-        Timber.d("Downloading child sectors...")
+        // TODO: Fix downloads
+        /*Timber.d("Downloading child sectors...")
         val sectors = zone.getChildren()
         val total = sectors.size
         for ((s, sector) in sectors.withIndex())
-            downloadSector(firestore, sector.metadata.documentPath, ValueMax(s, total))
+            downloadSector(firestore, sector.metadata.documentPath, ValueMax(s, total))*/
 
         return Result.success()
     }
@@ -403,7 +402,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             val firestore = Firebase.firestore
 
             val downloadResult = when (namespace) {
-                Zone.NAMESPACE -> {
+                Zone.NAMESPACE -> runBlocking {
                     Timber.d("Downloading Zone...")
                     downloadZone(firestore, downloadPath!!)
                 }
@@ -425,7 +424,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                     ).await()
                     val areas = searchSession.getAreas()
                     Timber.v("Getting intent...")
-                    areas.getIntent(applicationContext, displayName)
+                    // TODO: Fix intent get
+                    /*areas.getIntent(applicationContext, displayName)
                         ?.let { intent ->
                             PendingIntent.getActivity(
                                 applicationContext,
@@ -433,7 +433,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                                 intent,
                                 PendingIntent.FLAG_IMMUTABLE
                             )
-                        }
+                        }*/
+                    null
                 }
                 Timber.v("Showing download finished notification")
                 val text = applicationContext.getString(

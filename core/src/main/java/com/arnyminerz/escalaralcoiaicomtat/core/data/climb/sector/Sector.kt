@@ -45,7 +45,8 @@ class Sector internal constructor(
     val weight: String,
     override val imageReferenceUrl: String,
     override val documentPath: String,
-    val webUrl: String?
+    val webUrl: String?,
+    val parentZoneId: String,
 ) : DataClass<Path, Zone>(
     displayName,
     timestampMillis,
@@ -58,8 +59,11 @@ class Sector internal constructor(
     DataClassMetadata(
         objectId,
         NAMESPACE,
+        Zone.NAMESPACE,
+        Path.NAMESPACE,
         documentPath,
-        webUrl
+        webUrl,
+        parentZoneId
     )
 ) {
     /**
@@ -80,7 +84,8 @@ class Sector internal constructor(
         data.getString("weight")!!,
         data.getString("image")!!,
         documentPath = data.reference.path,
-        data.getString("webURL")
+        data.getString("webURL"),
+        data.reference.parent.parent!!.id
     )
 
     @IgnoredOnParcel

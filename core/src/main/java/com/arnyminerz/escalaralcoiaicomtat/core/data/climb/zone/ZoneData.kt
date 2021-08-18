@@ -15,6 +15,7 @@ data class ZoneData(
     @Document.DoubleProperty var longitude: Double,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var documentPath: String,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var webUrl: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var parentObjectId: String,
 ) {
     @Document.Namespace
     var namespace: String = Zone.NAMESPACE
@@ -27,7 +28,8 @@ data class ZoneData(
         kmzReferenceUrl,
         LatLng(latitude, longitude),
         documentPath,
-        webUrl.ifEmpty { null }
+        webUrl.ifEmpty { null },
+        parentObjectId
     )
 }
 
@@ -41,6 +43,7 @@ fun Zone.data(): ZoneData {
         position.latitude,
         position.longitude,
         metadata.documentPath,
-        metadata.webURL ?: ""
+        metadata.webURL ?: "",
+        parentAreaId
     )
 }

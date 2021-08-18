@@ -253,9 +253,9 @@ class MarkCompletedActivity : AppCompatActivity() {
         }
 
         Timber.v("Loading zone $zoneId...")
-        area!!.getChildren()
+        area!!.getChildren(app)
         try {
-            zone = area!![zoneId!!]
+            zone = area!!.get(app, zoneId!!)
         } catch (_: IndexOutOfBoundsException) {
             // Could not find valid Zone
             Timber.e("Could not find Zone $zoneId")
@@ -265,9 +265,9 @@ class MarkCompletedActivity : AppCompatActivity() {
         }
 
         Timber.v("Loading sector #$sectorIndex...")
-        zone!!.getChildren()
+        zone!!.getChildren(app)
         try {
-            sector = zone!![sectorIndex!!]
+            sector = zone!!.get(app, sectorIndex!!)
         } catch (_: IndexOutOfBoundsException) {
             // Could not find valid Zone
             Timber.e("Could not find Sector #$sectorIndex")
@@ -277,9 +277,9 @@ class MarkCompletedActivity : AppCompatActivity() {
         }
 
         Timber.v("Loading path $pathId...")
-        sector!!.getChildren()
+        sector!!.getChildren(app)
         try {
-            path = sector!![pathId!!]
+            path = sector!!.get(app, pathId!!)
         } catch (_: IndexOutOfBoundsException) {
             // Could not find valid Zone
             Timber.e("Could not find Path $pathId")

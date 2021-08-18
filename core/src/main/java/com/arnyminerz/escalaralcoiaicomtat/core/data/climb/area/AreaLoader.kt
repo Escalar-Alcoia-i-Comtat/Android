@@ -178,14 +178,9 @@ suspend fun FirebaseFirestore.loadAreas(
                 for (path in paths) {
                     Timber.v("$path > Adding to the search index...")
                     pathsIndex.add(path.data())
-                    Timber.v("$path > Adding to the sector ($sector)...")
-                    sector.add(path)
                 }
             } else
                 Timber.w("S/$sectorId > There isn't any path for the sector.")
-
-            Timber.v("S/$sectorId > Adding sector to zone Z/$zoneId...")
-            zone?.add(sector)
         }
 
         Timber.v("Iterating $zonesCount zone documents...")
@@ -219,8 +214,6 @@ suspend fun FirebaseFirestore.loadAreas(
             }
             Timber.v("Z/$zoneId > Getting area A/$zoneParentAreaId from cache...")
             val area = areasCache[zoneParentAreaId]
-            Timber.v("Z/$zoneId > Adding zone to area A/$zoneParentAreaId...")
-            area?.add(zone)
         }
 
         Timber.v("Adding zones to the search index...")

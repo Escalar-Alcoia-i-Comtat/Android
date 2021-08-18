@@ -9,6 +9,7 @@ import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchSpec
 import androidx.appsearch.exceptions.AppSearchException
 import androidx.collection.arrayMapOf
+import androidx.lifecycle.AndroidViewModel
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
@@ -98,6 +99,11 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
             firestore.disableNetwork().await()
     }
 
+    /**
+     * Gets all the [Area]s available in [searchSession].
+     * @author Arnau Mora
+     * @since 20210818
+     */
     @WorkerThread
     suspend fun getAreas(): List<Area> = searchSession.getAreas()
 }
@@ -110,12 +116,26 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
 val Activity.app: App
     get() = application as App
 
+/**
+ * Returns the [AndroidViewModel.getApplication] casted as [App].
+ * @author Arnau Mora
+ * @since 20210818
+ */
+val AndroidViewModel.app: App
+    get() = getApplication<App>()
+
 val appSearchSessionAreas = arrayMapOf<Int, List<Area>>()
 
 private var AppSearchSession.areas: List<Area>
     get() = appSearchSessionAreas[hashCode()] ?: listOf()
     set(value) = appSearchSessionAreas.set(hashCode(), value)
 
+/**
+ * Gets all the stored [Area]s in the [AppSearchSession].
+ * @author Arnau Mora
+ * @since 20210818
+ * @return A list of the [Area]s that have been found.
+ */
 @WorkerThread
 suspend fun AppSearchSession.getAreas(): List<Area> {
     if (areas.isEmpty()) {
