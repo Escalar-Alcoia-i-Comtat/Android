@@ -10,6 +10,7 @@ import android.net.Uri
 import android.widget.ImageView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchSpec
 import androidx.appsearch.exceptions.AppSearchException
 import androidx.lifecycle.LiveData
@@ -101,14 +102,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
          */
         @WorkerThread
         suspend fun List<Area>.getIntent(
-            app: App,
+            context: Context,
+            searchSession: AppSearchSession,
             queryName: String
         ): Intent? {
             var result: Intent? = null
 
             Timber.v("Getting Activities...")
-            val appInfo = app.packageManager.getApplicationInfo(
-                app.packageName,
+            val appInfo = context.packageManager.getApplicationInfo(
+                context.packageName,
                 PackageManager.GET_META_DATA
             )
             val appBundle = appInfo.metaData
@@ -131,26 +133,26 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 if (area.displayName.equals(queryName, true) ||
                     area.metadata.webURL.equals(queryName, true)
                 )
-                    result = Intent(app, areaActivityClass).apply {
+                    result = Intent(context, areaActivityClass).apply {
                         Timber.d("Found Area id ${area.objectId}!")
                         putExtra(EXTRA_AREA, area.objectId)
                     }
                 else {
                     Timber.d("  Iterating area's children...")
-                    val zones = area.getChildren(app)
+                    val zones = area.getChildren(searchSession)
                     for (zone in zones) {
                         Timber.d("    Finding in ${zone.displayName}.")
                         // Children must be loaded so `count` is fetched correctly.
-                        val sectors = zone.getChildren(app)
+                        val sectors = zone.getChildren(searchSession)
 
                         if (zone.displayName.equals(queryName, true) ||
                             zone.metadata.webURL.equals(queryName, true)
                         )
-                            result = Intent(app, zoneActivityClass).apply {
+                            result = Intent(context, zoneActivityClass).apply {
                                 Timber.d("Found Zone id ${zone.objectId}!")
                                 putExtra(EXTRA_AREA, area.objectId)
                                 putExtra(EXTRA_ZONE, zone.objectId)
-                                putExtra(EXTRA_SECTOR_COUNT, zone.getSize(app))
+                                putExtra(EXTRA_SECTOR_COUNT, zone.getSize(searchSession))
                             }
                         else
                             for ((counter, sector) in sectors.withIndex()) {
@@ -158,12 +160,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                                 if (sector.displayName.equals(queryName, true) ||
                                     sector.metadata.webURL.equals(queryName, true)
                                 )
-                                    result = Intent(app, sectorActivityClass)
+                                    result = Intent(context, sectorActivityClass)
                                         .apply {
                                             Timber.d("Found Sector id ${sector.objectId} at $counter!")
                                             putExtra(EXTRA_AREA, area.objectId)
                                             putExtra(EXTRA_ZONE, zone.objectId)
-                                            putExtra(EXTRA_SECTOR_COUNT, zone.getSize(app))
+                                            putExtra(
+                                                EXTRA_SECTOR_COUNT,
+                                                zone.getSize(searchSession)
+                                            )
                                             putExtra(EXTRA_SECTOR_INDEX, counter)
                                         }
 
@@ -244,12 +249,11 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Returns the children of the [DataClass].
      * @author Arnau Mora
      * @since 20210313
+     * @param searchSession The session for performing searches.
      */
     @WorkerThread
-    suspend fun getChildren(application: App): List<A> {
+    suspend fun getChildren(searchSession: AppSearchSession): List<A> {
         val childNamespace = metadata.childNamespace
-        Timber.v("$this > Getting search session...")
-        val searchSession = application.searchSession
         Timber.v("$this > Building search spec...")
         val searchSpec = SearchSpec.Builder()
             .addFilterNamespaces(childNamespace)
@@ -292,11 +296,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * May throw [IndexOutOfBoundsException] if children have not been loaded.
      * @author Arnau Mora
      * @since 20210413
-     * @throws IndexOutOfBoundsException When the specified [index] does not exist in [children]
+     * @throws IndexOutOfBoundsException When the specified [index] does not exist
      */
     @Throws(IndexOutOfBoundsException::class)
     @WorkerThread
-    suspend fun get(app: App, index: Int): A = getChildren(app)[index]
+    suspend fun get(searchSession: AppSearchSession, index: Int): A =
+        getChildren(searchSession)[index]
 
     /**
      * Finds an [DataClass] inside a list with an specific id. If it's not found, null is returned.
@@ -305,16 +310,16 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param objectId The id to search
      */
     @WorkerThread
-    suspend fun get(app: App, objectId: String): A? {
-        for (o in getChildren(app))
+    suspend fun get(searchSession: AppSearchSession, objectId: String): A? {
+        for (o in getChildren(searchSession))
             if (o.objectId == objectId)
                 return o
         return null
     }
 
     @WorkerThread
-    suspend fun has(app: App, objectId: String): Boolean {
-        for (o in getChildren(app))
+    suspend fun has(searchSession: AppSearchSession, objectId: String): Boolean {
+        for (o in getChildren(searchSession))
             if (o.objectId == objectId)
                 return true
         return false
@@ -327,7 +332,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210411
      */
     @WorkerThread
-    suspend fun isEmpty(app: App): Boolean = getSize(app) <= 0
+    suspend fun isEmpty(searchSession: AppSearchSession): Boolean = getSize(searchSession) <= 0
 
     /**
      * Checks if the data class doesn't have any children
@@ -335,7 +340,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210411
      */
     @WorkerThread
-    suspend fun isNotEmpty(app: App): Boolean = getSize(app) > 0
+    suspend fun isNotEmpty(searchSession: AppSearchSession): Boolean = getSize(searchSession) > 0
 
     /**
      * Returns the amount of children the [DataClass] has.
@@ -343,7 +348,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210724
      */
     @WorkerThread
-    suspend fun getSize(app: App): Int = getChildren(app).size
+    suspend fun getSize(searchSession: AppSearchSession): Int = getChildren(searchSession).size
 
     /**
      * Checks if the [DataClass] is the same as another one.
@@ -470,24 +475,26 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Generates a list of [DownloadedSection].
      * @author Arnau Mora
      * @since 20210412
-     * @param app The [App] instance.
+     * @param context The currently calling [Context].
+     * @param searchSession The search session for fetching data.
      * @param storage The [FirebaseStorage] instance to load the files from the server.
      * @param showNonDownloaded If the non-downloaded sections should be added.
      * @param progressListener A listener for the progress of the load.
      */
     @WorkerThread
     suspend fun downloadedSectionList(
-        app: App,
+        context: Context,
+        searchSession: AppSearchSession,
         storage: FirebaseStorage,
         showNonDownloaded: Boolean,
         progressListener: (suspend (current: Int, max: Int) -> Unit)? = null
     ): Flow<DownloadedSection> = flow {
         Timber.v("Getting downloaded sections...")
         val downloadedSectionsList = arrayListOf<DownloadedSection>()
-        val children = getChildren(app)
+        val children = getChildren(searchSession)
         for ((c, child) in children.withIndex())
             (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
-                val downloadStatus = dataClass.downloadStatus(app, storage)
+                val downloadStatus = dataClass.downloadStatus(context, searchSession, storage)
                 progressListener?.invoke(c, children.size)
                 if (showNonDownloaded ||
                     downloadStatus.isDownloaded() || downloadStatus.partialDownload()
@@ -529,24 +536,25 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Gets the DownloadStatus of the DataClass
      * @author Arnau Mora
      * @since 20210313
-     * @param app The [App] instance.
+     * @param context The currently calling [Context].
      * @param storage The [FirebaseStorage] instance to load children from the server.
      * @param progressListener A progress updater.
      * @return a matching DownloadStatus representing the Data Class' download status
      */
     @WorkerThread
     suspend fun downloadStatus(
-        app: App,
+        context: Context,
+        searchSession: AppSearchSession,
         storage: FirebaseStorage,
         progressListener: ((current: Int, max: Int) -> Unit)? = null
     ): DownloadStatus {
         Timber.d("$pin Checking if downloaded")
 
-        val downloadWorkInfo = downloadWorkInfo(app)
+        val downloadWorkInfo = downloadWorkInfo(context)
         val result = if (downloadWorkInfo != null)
             DownloadStatus.DOWNLOADING
         else {
-            val imageFile = imageFile(app)
+            val imageFile = imageFile(context)
             Timber.v("Checking if image file exists...")
             val imageFileExists = imageFile.exists()
             if (!imageFileExists)
@@ -560,7 +568,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             // - If there's at least one downloaded children: PARTIALLY
 
             Timber.v("$pin Getting children elements download status...")
-            val children = getChildren(app)
+            val children = getChildren(searchSession)
 
             Timber.v("$pin Finding for a downloaded children in ${children.size}...")
             var allChildrenDownloaded = true
@@ -568,7 +576,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             for ((c, child) in children.withIndex()) {
                 if (child is DataClass<*, *>) {
                     progressListener?.invoke(c, children.size)
-                    val childDownloadStatus = child.downloadStatus(app, storage)
+                    val childDownloadStatus = child.downloadStatus(context, searchSession, storage)
                     if (childDownloadStatus != DownloadStatus.DOWNLOADED) {
                         Timber.d(
                             "$pin has a non-downloaded children (${child.pin}): $childDownloadStatus"
@@ -594,19 +602,21 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Checks if the data class has any children that has been downloaded
      * @author Arnau Mora
      * @date 2020/09/14
-     * @param app The [App] instance.
+     * @param context The currently calling [Context].
+     * @param searchSession The search session for fetching data.
      * @param storage The [FirebaseStorage] instance to load children from the server.
      * @return If the data class has any downloaded children
      */
     @WorkerThread
     suspend fun hasAnyDownloadedChildren(
-        app: App,
+        context: Context,
+        searchSession: AppSearchSession,
         storage: FirebaseStorage
     ): Boolean {
-        val children = getChildren(app)
+        val children = getChildren(searchSession)
         for (child in children)
             if (child is DataClass<*, *> &&
-                child.downloadStatus(app, storage) == DownloadStatus.DOWNLOADED
+                child.downloadStatus(context, searchSession, storage) == DownloadStatus.DOWNLOADED
             )
                 return true
         return false
@@ -616,30 +626,31 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * Deletes the downloaded content if downloaded
      * @author Arnau Mora
      * @date 20210724
-     * @param app The [App] instance.
+     * @param context The currently calling [Context].
+     * @param searchSession The search session for fetching data.
      * @return If the content was deleted successfully. Note: returns true if not downloaded
      */
     @WorkerThread
-    suspend fun delete(app: App): Boolean {
+    suspend fun delete(context: Context, searchSession: AppSearchSession): Boolean {
         Timber.v("Deleting $objectId")
         val lst = arrayListOf<Boolean>() // Stores all the delection success statuses
 
-        val kmzFile = kmzFile(app, true)
+        val kmzFile = kmzFile(context, true)
         if (kmzFile.exists()) {
             Timber.v("$this > Deleting \"$kmzFile\"")
             lst.add(kmzFile.deleteIfExists())
         }
 
-        val imgFile = imageFile(app)
+        val imgFile = imageFile(context)
         if (imgFile.exists()) {
             Timber.v("$this > Deleting \"$imgFile\"")
             lst.add(imgFile.deleteIfExists())
         }
 
-        val children = getChildren(app)
+        val children = getChildren(searchSession)
         for (child in children)
             if (child is DataClass<*, *>)
-                lst.add(child.delete(app))
+                lst.add(child.delete(context, searchSession))
 
         return lst.allTrue()
     }
@@ -649,23 +660,24 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @date 2020/09/11
      * @patch 2020/09/12 - Arnau Mora: Added child space computation
-     * @param app The [App] instance.
+     * @param context The currently calling context.
+     * @param searchSession The search session for fetching data.
      * @return The size in bytes that is used by the downloaded data
      *
      * @throws NotDownloadedException If tried to get size when not downloaded
      */
     @Throws(NotDownloadedException::class)
-    suspend fun size(app: App): Long {
-        val imgFile = imageFile(app)
+    suspend fun size(context: Context, searchSession: AppSearchSession): Long {
+        val imgFile = imageFile(context)
 
         if (!imgFile.exists()) throw NotDownloadedException(this)
 
         var size = imgFile.length()
 
-        val children = getChildren(app)
+        val children = getChildren(searchSession)
         for (child in children)
             if (child is DataClass<*, *>)
-                size += child.size(app)
+                size += child.size(context, searchSession)
 
         Timber.v("$this > Storage usage: $size")
 
@@ -936,12 +948,14 @@ fun <D : DataClass<*, *>> Iterable<D>.hasStorageUrls(): Boolean {
  * Gets the children from all the [DataClass]es in the [Iterator].
  * @author Arnau Mora
  * @since 20210724
- * @param app The [App] instance.
+ * @param searchSession The search session for fetching data
  */
-suspend fun <A : DataClassImpl, B : DataClassImpl, D : DataClass<A, B>> Iterable<D>.getChildren(app: App): List<A> {
+suspend fun <A : DataClassImpl, B : DataClassImpl, D : DataClass<A, B>> Iterable<D>.getChildren(
+    searchSession: AppSearchSession
+): List<A> {
     val items = arrayListOf<A>()
     for (i in this)
-        items.addAll(i.getChildren(app))
+        items.addAll(i.getChildren(searchSession))
     return items
 }
 
