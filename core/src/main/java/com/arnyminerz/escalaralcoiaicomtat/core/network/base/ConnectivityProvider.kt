@@ -8,15 +8,34 @@ import android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET
 import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
 import android.net.NetworkCapabilities.TRANSPORT_ETHERNET
 import android.net.NetworkCapabilities.TRANSPORT_WIFI
+import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.core.network.ConnectivityProviderImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.asyncCoroutineScope
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 
 private const val SLOW_CONNECTION_SPEED = 400 // kbps
 
 interface ConnectivityProvider {
     interface ConnectivityStateListener {
+        /**
+         * This will get called when the connectivity state of the device is updated.
+         * @author Arnau Mora
+         * @since 20210818
+         * @param state The new [ConnectivityProvider.NetworkState].
+         */
+        @MainThread
         fun onStateChange(state: NetworkState)
 
+        /**
+         * This will get called when the connectivity state of the device is updated.
+         * Gets called anyncronously with [doAsync].
+         * @author Arnau Mora
+         * @since 20210818
+         * @param state The new [ConnectivityProvider.NetworkState].
+         * @see doAsync
+         * @see asyncCoroutineScope
+         */
         @WorkerThread
         suspend fun onStateChangeAsync(state: NetworkState)
     }

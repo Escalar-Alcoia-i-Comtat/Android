@@ -14,7 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_ZOOM
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
@@ -228,8 +228,10 @@ class MapFragment : NetworkChangeListenerFragment() {
         }
         mapLoading = true
 
+        val app = requireActivity().application as App
+        val areas = app.getAreas()
         Timber.v("Loading map...")
-        for (area in AREAS) {
+        for (area in areas) {
             if (context == null) {
                 Timber.w("Stopped loading map areas' since context is null.")
                 break

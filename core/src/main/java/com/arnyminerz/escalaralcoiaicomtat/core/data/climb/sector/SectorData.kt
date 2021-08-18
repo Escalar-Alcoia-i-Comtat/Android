@@ -19,6 +19,7 @@ data class SectorData(
     @Document.StringProperty var kmzReferenceUrl: String,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var documentPath: String,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var webUrl: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var parentObjectId: String,
 ) {
     @Document.Namespace
     var namespace: String = Sector.NAMESPACE
@@ -34,7 +35,9 @@ data class SectorData(
         weight,
         image,
         documentPath,
-        webUrl.ifEmpty { null })
+        webUrl.ifEmpty { null },
+        parentObjectId
+    )
 }
 
 fun Sector.data(): SectorData {
@@ -51,6 +54,7 @@ fun Sector.data(): SectorData {
         imageReferenceUrl,
         kmzReferenceUrl ?: "",
         metadata.documentPath,
-        metadata.webURL ?: ""
+        metadata.webURL ?: "",
+        parentZoneId
     )
 }

@@ -22,8 +22,9 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.ProfileActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA_TRANSITION_NAME
@@ -37,6 +38,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.TAB_ITEM_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.TAB_ITEM_HOME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.TAB_ITEM_MAP
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.TAB_ITEM_SETTINGS
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.isLocationPermissionGranted
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
@@ -148,6 +150,13 @@ class MainActivity : LanguageAppCompatActivity() {
             RESULT_CODE_WAITING_EMAIL_CONFIRMATION -> launch(EmailConfirmationActivity::class.java)
         }
     }
+
+    /**
+     * A cache for storing the [Area]s list from [App.getAreas].
+     * @author Arnau Mora
+     * @since 20210817
+     */
+    private var areas: List<Area> = listOf()
 
     /**
      * Updates the bottom app bar icons according to the position of the [ActivityMainBinding.mainViewPager].
@@ -350,7 +359,11 @@ class MainActivity : LanguageAppCompatActivity() {
             }
         })
 
-        Timber.v("  --- Found ${AREAS.size} areas ---")
+        val app = application as App
+        doAsync {
+            areas = app.getAreas()
+            Timber.v("  --- Found ${areas.size} areas ---")
+        }
 
         firestore = Firebase.firestore
         storage = Firebase.storage
@@ -512,7 +525,7 @@ class MainActivity : LanguageAppCompatActivity() {
             } ?: Bundle.EMPTY
 
             launch(AreaActivity::class.java, optionsBundle) {
-                putExtra(EXTRA_AREA, AREAS[position].objectId)
+                putExtra(EXTRA_AREA, areas[position].objectId)
                 if (transition != null)
                     putExtra(EXTRA_AREA_TRANSITION_NAME, transition)
             }

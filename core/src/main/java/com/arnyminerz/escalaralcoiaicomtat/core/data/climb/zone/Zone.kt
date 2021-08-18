@@ -26,7 +26,8 @@ class Zone internal constructor(
     override val kmzReferenceUrl: String,
     val position: LatLng,
     override val documentPath: String,
-    val webUrl: String?
+    val webUrl: String?,
+    val parentAreaId: String,
 ) : DataClass<Sector, Area>(
     displayName,
     timestampMillis,
@@ -39,8 +40,11 @@ class Zone internal constructor(
     DataClassMetadata(
         objectId,
         NAMESPACE,
+        Area.NAMESPACE,
+        Sector.NAMESPACE,
         documentPath,
-        webUrl
+        webUrl,
+        parentAreaId
     )
 ) {
     /**
@@ -58,7 +62,8 @@ class Zone internal constructor(
         data.getString("kmz")!!,
         data.getGeoPoint("location")!!.toLatLng(),
         documentPath = data.reference.path,
-        data.getString("webURL")
+        data.getString("webURL"),
+        data.reference.parent.parent!!.id
     )
 
     @IgnoredOnParcel
@@ -75,7 +80,8 @@ class Zone internal constructor(
             kmzReferenceUrl = "gs://escalaralcoiaicomtat.appspot.com/kmz/Barranquet de Ferri.kmz",
             position = LatLng(38.705581, -0.498946),
             documentPath = "/Areas/WWQME983XhriXVhtVxFu/Zones/LtYZWlzTPwqHsWbYIDTt",
-            webUrl = "https://escalaralcoiaicomtat.centrexcursionistalcoi.org/barranquet-de-ferri.html"
+            webUrl = "https://escalaralcoiaicomtat.centrexcursionistalcoi.org/barranquet-de-ferri.html",
+            parentAreaId = "WWQME983XhriXVhtVxFu"
         )
     }
 }

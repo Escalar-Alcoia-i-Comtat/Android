@@ -16,6 +16,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass.Companion.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
@@ -62,7 +64,7 @@ class DownloadSectionsAdapter(
         if (downloadStatus != DownloadStatus.DOWNLOADED) {
             holder.sizeChip.text = mainActivity.getString(R.string.status_not_downloaded)
         } else doAsync {
-            val size = section.size(mainActivity)
+            val size = section.size(mainActivity.app)
 
             uiContext {
                 holder.sizeChip.text = humanReadableByteCountBin(size)
@@ -73,9 +75,8 @@ class DownloadSectionsAdapter(
                         mainActivity,
                         section,
                         storage,
-                        downloadStatus == DownloadStatus.PARTIALLY,
-                        { downloadSection(it, holder) }
-                    ).show()
+                        downloadStatus == DownloadStatus.PARTIALLY
+                    ) { downloadSection(it, holder) }.show()
                 }
             }
         }
@@ -95,7 +96,7 @@ class DownloadSectionsAdapter(
     ) {
         doAsync {
             Timber.v("Downloading section \"$section\"")
-            val downloadStatus = section.downloadStatus(mainActivity, storage)
+            val downloadStatus = section.downloadStatus(mainActivity.app, storage)
 
             uiContext {
                 if (!appNetworkState.hasInternet) {
@@ -170,12 +171,12 @@ class DownloadSectionsAdapter(
     fun deleteSection(holder: DownloadSectionViewHolder, section: DataClass<*, *>) {
         doAsync {
             Timber.v("Deleting section \"$section\"")
-            section.delete(mainActivity)
+            section.delete(mainActivity.app)
             Timber.v("Section deleted, getting new download status...")
-            val newDownloadStatus = section.downloadStatus(mainActivity, storage)
+            val newDownloadStatus = section.downloadStatus(mainActivity.app, storage)
             Timber.v("Section download status loaded, getting downloaded section list...")
             val newChildSectionList = arrayListOf<DownloadedSection>()
-            section.downloadedSectionList(mainActivity, storage, true)
+            section.downloadedSectionList(mainActivity.application as App, storage, true)
                 .toCollection(newChildSectionList)
             Timber.v("Got downloaded section list. Updating UI...")
 
@@ -196,7 +197,9 @@ class DownloadSectionsAdapter(
      */
     private fun view(section: DataClass<*, *>) {
         doAsync {
-            val intent = getIntent(mainActivity, section.displayName)
+            val app = mainActivity.application as App
+            val areas = app.getAreas()
+            val intent = areas.getIntent(mainActivity.app, section.displayName)
             uiContext {
                 if (intent == null) {
                     Timber.w("Could not launch activity.")
@@ -229,11 +232,11 @@ class DownloadSectionsAdapter(
 
         doAsync {
             Timber.v("Checking section's downloaded children.")
-            val sectionDownloadStatus = section.downloadStatus(mainActivity, storage)
+            val sectionDownloadStatus = section.downloadStatus(mainActivity.app, storage)
             // Get all the children for the section
             Timber.v("Loading section list for \"${section.displayName}\"...")
             val childSectionList = arrayListOf<DownloadedSection>()
-            section.downloadedSectionList(mainActivity, storage, true)
+            section.downloadedSectionList(mainActivity.application as App, storage, true)
                 .toCollection(childSectionList)
 
             uiContext {

@@ -42,8 +42,11 @@ class Area internal constructor(
     DataClassMetadata(
         objectId,
         NAMESPACE,
+        null,
+        Zone.NAMESPACE,
         documentPath,
-        webUrl
+        webUrl,
+        null
     )
 ) {
     /**

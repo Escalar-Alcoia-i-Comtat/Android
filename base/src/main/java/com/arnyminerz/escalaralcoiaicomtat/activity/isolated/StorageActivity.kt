@@ -1,13 +1,20 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.isolated
 
 import android.os.Bundle
+import androidx.appsearch.app.SearchSpec
+import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteDir
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.filesDir
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityStorageBinding
 import com.google.android.material.snackbar.Snackbar
 import java.io.IOException
@@ -50,15 +57,39 @@ class StorageActivity : LanguageAppCompatActivity() {
             } catch (ex: IOException) {
                 ex.printStackTrace()
             } finally {
-                Snackbar.make(binding.storageLayout, R.string.toast_clear_ok, Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(binding.storageLayout, R.string.toast_clear_ok, Snackbar.LENGTH_SHORT)
+                    .show()
                 refreshView()
             }
         }
 
         binding.clearSettingsButton.setOnClickListener {
             sharedPreferences.edit()?.clear()?.apply()
-            Snackbar.make(binding.storageLayout, R.string.toast_clear_ok, Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(binding.storageLayout, R.string.toast_clear_ok, Snackbar.LENGTH_SHORT)
+                .show()
             refreshView()
+        }
+
+        binding.clearDataButton.setOnClickListener {
+            binding.clearDataButton.isEnabled = false
+            doAsync {
+                val searchSession = app.searchSession
+                val searchSpec = SearchSpec.Builder()
+                    .addFilterPackageNames(BuildConfig.APPLICATION_ID)
+                    .setResultCountPerPage(10000)
+                    .build()
+                searchSession.remove("", searchSpec).await()
+                PREF_INDEXED_SEARCH.put(false)
+                uiContext {
+                    binding.clearDataButton.isEnabled = true
+                    Snackbar.make(
+                        binding.storageLayout,
+                        R.string.toast_clear_ok,
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                    refreshView()
+                }
+            }
         }
 
         binding.launchAppButton.setOnClickListener {

@@ -13,8 +13,11 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.NearbyZonesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_DISABLE_NEARBY
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
@@ -121,17 +124,23 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         binding.searchView.setSearchableInfo(searchManager.getSearchableInfo(requireActivity().componentName))
         binding.searchView.setIconifiedByDefault(false)
 
-        Timber.v("Refreshing areas...")
-        Timber.d("Initializing area adapter for AreasViewFragment...")
-        binding.areasRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        if (justAttached)
-            binding.areasRecyclerView.layoutAnimation =
-                AnimationUtils.loadLayoutAnimation(
-                    requireContext(),
-                    R.anim.item_fall_animator
-                )
-        binding.areasRecyclerView.adapter =
-            AreaAdapter(requireActivity() as MainActivity, areaClickListener)
+        doAsync {
+            Timber.v("Refreshing areas...")
+            val app = requireActivity().application as App
+            val areas = app.getAreas()
+            uiContext {
+                Timber.d("Initializing area adapter for AreasViewFragment...")
+                binding.areasRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+                if (justAttached)
+                    binding.areasRecyclerView.layoutAnimation =
+                        AnimationUtils.loadLayoutAnimation(
+                            requireContext(),
+                            R.anim.item_fall_animator
+                        )
+                binding.areasRecyclerView.adapter =
+                    AreaAdapter(requireActivity() as MainActivity, areas, areaClickListener)
+            }
+        }
     }
 
     override fun onStart() {

@@ -10,13 +10,14 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ERROR_VIBRATE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.QUIET_UPDATE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.UPDATE_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.UPDATE_IMAGES
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.UPDATE_SECTOR
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.UPDATE_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
@@ -126,14 +127,16 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
             binding.progressBar.isIndeterminate = true
 
             doAsync {
-                for (area in AREAS) {
-                    if (area.downloadStatus(this@UpdatingActivity, storage).isDownloaded())
+                val app = application as App
+                val areas = app.getAreas()
+                for (area in areas) {
+                    if (area.downloadStatus(app, storage).isDownloaded())
                         iterateUpdate(area)
-                    else for (zone in area)
-                        if (zone.downloadStatus(this@UpdatingActivity, storage).isDownloaded())
+                    else for (zone in area.getChildren(app))
+                        if (zone.downloadStatus(app, storage).isDownloaded())
                             iterateUpdate(zone)
-                        else for (sector in zone)
-                            if (sector.downloadStatus(this@UpdatingActivity, storage)
+                        else for (sector in zone.getChildren(app))
+                            if (sector.downloadStatus(app, storage)
                                     .isDownloaded()
                             )
                                 iterateUpdate(sector)
@@ -154,7 +157,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
     @WorkerThread
     private suspend fun iterateUpdate(dataClass: DataClass<*, *>) {
         Timber.v("Deleting area #$updateArea...")
-        dataClass.delete(this@UpdatingActivity)
+        dataClass.delete(app)
 
         Timber.v("Downloading area #$updateArea...")
         // TODO: The map won't be downloaded again

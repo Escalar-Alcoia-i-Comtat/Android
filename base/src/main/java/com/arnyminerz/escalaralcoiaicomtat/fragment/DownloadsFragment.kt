@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.sizeString
@@ -64,7 +65,7 @@ class DownloadsFragment : Fragment() {
             Timber.v("Getting downloaded sections list, SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
             val sections = arrayListOf<DownloadedSection>()
             DownloadedSection.list(
-                mainActivity,
+                mainActivity.application as App,
                 storage,
                 SHOW_NON_DOWNLOADED
             ) { progress, max ->

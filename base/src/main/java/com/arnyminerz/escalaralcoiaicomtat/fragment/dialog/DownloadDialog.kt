@@ -6,6 +6,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
@@ -50,7 +51,7 @@ class DownloadDialog<T : DataClass<*, *>>(
                 } ?: "N/A"
             ) + '\n' + activity.getString(
                 R.string.dialog_uses_storage_msg,
-                runBlocking { humanReadableByteCountBin(data.size(activity)) }
+                runBlocking { humanReadableByteCountBin(data.size(activity.app)) }
             )
 
             builder = builder
@@ -73,12 +74,12 @@ class DownloadDialog<T : DataClass<*, *>>(
                             when (data) {
                                 is Area, is Zone, is Sector ->
                                     doAsync {
-                                        val children = data.getChildren()
+                                        val children = data.getChildren(activity.app)
                                         for (child in children)
                                             if (child is DataClass<*, *>)
-                                                child.delete(activity)
+                                                child.delete(activity.app)
 
-                                        data.delete(activity)
+                                        data.delete(activity.app)
                                         uiContext {
                                             deleteCallback?.invoke()
                                         }

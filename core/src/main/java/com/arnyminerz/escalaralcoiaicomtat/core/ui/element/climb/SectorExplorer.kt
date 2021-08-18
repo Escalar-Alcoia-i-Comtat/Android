@@ -10,8 +10,9 @@ import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.ZoomableImage
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 @Composable
@@ -23,14 +24,15 @@ fun SectorExplorer(
     zoneId: String,
     sectorId: String
 ) {
-    val sector = AREAS[areaId]?.get(zoneId)?.get(sectorId)
+    val app = activity.application as App
+    val sector = runBlocking { app.getAreas()[areaId]?.get(app, zoneId)?.get(app, sectorId) }
     if (sector == null)
         Text(text = "Could not load sector $sectorId")
     else {
         ZoomableImage(
             painter = rememberImagePainter(
                 data = sector.cacheImageFile(activity),
-                onExecute = { previous, current ->
+                onExecute = { _, current ->
                     Timber.v("Loaded image (${current.request.data})!")
                     true
                 }

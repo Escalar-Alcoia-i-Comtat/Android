@@ -17,7 +17,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.reque
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.request.MarkProjectData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
@@ -240,8 +240,10 @@ class MarkCompletedActivity : AppCompatActivity() {
      */
     @Throws(NullPointerException::class)
     private suspend fun loadPath() {
+        val app = application as App
+        val areas = app.getAreas()
         Timber.v("Loading area $areaId...")
-        area = AREAS[areaId!!]
+        area = areas[areaId!!]
         if (area == null) {
             // Could not find valid Area
             Timber.e("Could not find Area $areaId")
@@ -251,9 +253,9 @@ class MarkCompletedActivity : AppCompatActivity() {
         }
 
         Timber.v("Loading zone $zoneId...")
-        area!!.getChildren()
+        area!!.getChildren(app)
         try {
-            zone = area!![zoneId!!]
+            zone = area!!.get(app, zoneId!!)
         } catch (_: IndexOutOfBoundsException) {
             // Could not find valid Zone
             Timber.e("Could not find Zone $zoneId")
@@ -263,9 +265,9 @@ class MarkCompletedActivity : AppCompatActivity() {
         }
 
         Timber.v("Loading sector #$sectorIndex...")
-        zone!!.getChildren()
+        zone!!.getChildren(app)
         try {
-            sector = zone!![sectorIndex!!]
+            sector = zone!!.get(app, sectorIndex!!)
         } catch (_: IndexOutOfBoundsException) {
             // Could not find valid Zone
             Timber.e("Could not find Sector #$sectorIndex")
@@ -275,9 +277,9 @@ class MarkCompletedActivity : AppCompatActivity() {
         }
 
         Timber.v("Loading path $pathId...")
-        sector!!.getChildren()
+        sector!!.getChildren(app)
         try {
-            path = sector!![pathId!!]
+            path = sector!!.get(app, pathId!!)
         } catch (_: IndexOutOfBoundsException) {
             // Could not find valid Zone
             Timber.e("Could not find Path $pathId")

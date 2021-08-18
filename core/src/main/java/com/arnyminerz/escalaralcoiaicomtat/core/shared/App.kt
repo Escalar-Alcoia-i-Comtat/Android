@@ -1,22 +1,37 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.shared
 
 import android.accounts.AccountManager
+import android.app.Activity
 import android.app.Application
 import android.content.Context
+import androidx.annotation.WorkerThread
+import androidx.appsearch.app.AppSearchSession
+import androidx.appsearch.app.SearchSpec
+import androidx.appsearch.exceptions.AppSearchException
+import androidx.collection.arrayMapOf
+import androidx.lifecycle.AndroidViewModel
+import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
+import javax.inject.Inject
 
+@HiltAndroidApp
 class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     private val provider: ConnectivityProvider
         get() = appNetworkProvider
 
     private lateinit var firestore: FirebaseFirestore
+
+    private var areas: List<Area> = listOf()
 
     val authStateListener: FirebaseAuth.AuthStateListener = FirebaseAuth.AuthStateListener {
         val user = it.currentUser
@@ -33,6 +48,14 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
             }
         }
     }
+
+    /**
+     * The session for doing search-related operations.
+     * @author Arnau Mora
+     * @since 20210817
+     */
+    @Inject
+    lateinit var searchSession: AppSearchSession
 
     override fun onCreate() {
         super.onCreate()
@@ -56,6 +79,8 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         Timber.i("Terminating app...")
         Timber.v("Removing network listener...")
         provider.removeListener(this)
+        Timber.v("Closing AppSearch...")
+        searchSession.close()
         super.onTerminate()
     }
 
@@ -73,4 +98,66 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         else
             firestore.disableNetwork().await()
     }
+
+    /**
+     * Gets all the [Area]s available in [searchSession].
+     * @author Arnau Mora
+     * @since 20210818
+     */
+    @WorkerThread
+    suspend fun getAreas(): List<Area> = searchSession.getAreas()
+}
+
+/**
+ * Returns the [Activity.getApplication] casted as [App].
+ * @author Arnau Mora
+ * @since 20210818
+ */
+val Activity.app: App
+    get() = application as App
+
+/**
+ * Returns the [AndroidViewModel.getApplication] casted as [App].
+ * @author Arnau Mora
+ * @since 20210818
+ */
+val AndroidViewModel.app: App
+    get() = getApplication<App>()
+
+val appSearchSessionAreas = arrayMapOf<Int, List<Area>>()
+
+private var AppSearchSession.areas: List<Area>
+    get() = appSearchSessionAreas[hashCode()] ?: listOf()
+    set(value) = appSearchSessionAreas.set(hashCode(), value)
+
+/**
+ * Gets all the stored [Area]s in the [AppSearchSession].
+ * @author Arnau Mora
+ * @since 20210818
+ * @return A list of the [Area]s that have been found.
+ */
+@WorkerThread
+suspend fun AppSearchSession.getAreas(): List<Area> {
+    if (areas.isEmpty()) {
+        val areasSearchSpec = SearchSpec.Builder()
+            .addFilterNamespaces(Area.NAMESPACE)
+            .build()
+        val searchResult = search("", areasSearchSpec)
+        val searchPage = searchResult.nextPage.await()
+        areas = arrayListOf<Area>().apply {
+            for (page in searchPage) {
+                val genericDocument = page.genericDocument
+                Timber.v("Got generic document ${genericDocument.namespace}: ${genericDocument.id}")
+                val areaData = try {
+                    genericDocument.toDocumentClass(AreaData::class.java)
+                } catch (e: AppSearchException) {
+                    Timber.e("Could not convert GenericDocument to AreaData!")
+                    continue
+                }
+                val area = areaData.area()
+                add(area)
+            }
+        }
+    }
+    return areas
 }

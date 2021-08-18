@@ -8,14 +8,14 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass.Companion.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
@@ -142,9 +142,11 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             binding.progressTextView.setText(R.string.status_downloading)
         }
 
-        firestore.loadAreas(application) { progress, max ->
+        val areas = firestore.loadAreas(application as App) { progress, max ->
             Timber.i("Download progress: $progress / $max")
-            if (max >= 0 && progress < max) {
+            if (progress == 0 && max == 0)
+                binding.progressTextView.setText(R.string.status_processing_paths)
+            else if (max >= 0 && progress < max) {
                 binding.progressBar.max = max
                 binding.progressBar.setProgressCompat(progress, true)
                 binding.progressTextView.text =
@@ -158,7 +160,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                 binding.progressTextView.setText(R.string.status_storing)
             }
         }
-        if (AREAS.isNotEmpty()) {
+        if (areas.isNotEmpty()) {
             if (deepLinkPath != null) {
                 uiContext {
                     binding.progressTextView.setText(R.string.status_loading_deep_link)
@@ -167,7 +169,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                     binding.progressBar.visibility(true)
                 }
 
-                val intent = DataClass.getIntent(this@LoadingActivity, deepLinkPath!!)
+                val intent = areas.getIntent(app, deepLinkPath!!)
                 uiContext {
                     if (intent != null)
                         startActivity(intent)

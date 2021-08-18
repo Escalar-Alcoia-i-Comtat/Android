@@ -41,7 +41,7 @@ data class PathData(
         val heightsArray = heights.split(",")
         val heights = arrayListOf<Long>()
         for (h in heightsArray)
-            heights.add(h.toLong())
+            h.toLongOrNull()?.let { heights.add(it) }
 
         val endingsArray = endings.split(",")
         val endings = arrayListOf<@EndingType String>()

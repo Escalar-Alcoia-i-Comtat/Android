@@ -9,7 +9,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.currentUrl
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.asyncCoroutineScope
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
@@ -27,22 +28,27 @@ class SectorViewModel(
     private val firestore = Firebase.firestore
     private val storage = Firebase.storage
 
-    private val innerSector: Sector?
-        get() = AREAS[areaId]?.get(zoneId)?.get(sectorId)
+    suspend fun getInnerSector(): Sector? {
+        val areas = app.getAreas()
+        return areas[areaId]?.get(app, zoneId)?.get(app, sectorId)
+    }
 
     val sector: LiveData<Sector?> = liveData(asyncCoroutineScope.coroutineContext) {
-        if (AREAS.isEmpty()) {
+        val app = getApplication<App>()
+        val areas = app.getAreas()
+        if (areas.isEmpty()) {
             val application = (context as? Activity)?.application ?: context as Application
-            firestore.loadAreas(application, progressCallback = { current, total ->
+            firestore.loadAreas(application as App, progressCallback = { current, total ->
                 Timber.i("Loading areas: $current/$total")
             })
         }
-        emit(innerSector)
+        emit(getInnerSector())
     }
 
     val items: LiveData<List<Path>> = liveData {
+        val innerSector = getInnerSector()
         uiContext { currentUrl.value = innerSector?.webUrl }
-        val paths = innerSector?.getChildren()
+        val paths = innerSector?.getChildren(app)
         if (paths != null)
             emit(paths)
         else Timber.e("Could not find S/$sectorId in Z/$zoneId in A/$areaId")

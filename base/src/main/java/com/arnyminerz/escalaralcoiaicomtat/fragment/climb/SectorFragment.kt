@@ -18,10 +18,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.appendChip
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_AREA_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_ZONE_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDisplaySize
@@ -211,11 +211,13 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 loadImage()
             }
         else {
+            val app = requireActivity().application as App
+            val areas = app.getAreas()
             Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
             val sectors = arrayListOf<Sector>()
-            AREAS[areaId]
-                ?.getChildren()?.get(zoneId)
-                ?.getChildren()
+            areas[areaId]
+                ?.getChildren(app)?.get(zoneId)
+                ?.getChildren(app)
                 ?.toCollection(sectors)
                 ?: run {
                     Timber.e("Could not get sectors from Area $areaId in $zoneId")
@@ -230,7 +232,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             }
 
             isDownloaded = if (sectorActivity != null)
-                sector.downloadStatus(sectorActivity, sectorActivity.storage).isDownloaded()
+                sector.downloadStatus(app, sectorActivity.storage).isDownloaded()
             else false
 
             if (activity != null && activity?.isDestroyed == false) {
@@ -243,10 +245,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 }
 
                 Timber.v("Loading paths...")
-                val paths = arrayListOf<Path>()
-                sector.getChildren()
-                    .toCollection(paths)
-                paths.sortBy { it.sketchId }
+                val paths = sector.getChildren(app).sortedBy { it.sketchId }
                 Timber.v("Finished loading children sectors")
 
                 uiContext {

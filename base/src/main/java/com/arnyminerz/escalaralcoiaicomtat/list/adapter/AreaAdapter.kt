@@ -7,7 +7,7 @@ import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AREAS
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_PREVIEW_SCALE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
@@ -16,13 +16,14 @@ import java.io.InvalidClassException
 
 class AreaAdapter(
     private val activity: MainActivity,
+    private val areas: List<Area>,
     private var clickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<AreaViewHolder>() {
     init {
         Timber.v("Initialized AreaAdapter with $itemCount areas.")
     }
 
-    override fun getItemCount(): Int = AREAS.size
+    override fun getItemCount(): Int = areas.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         AreaViewHolder(
@@ -30,10 +31,10 @@ class AreaAdapter(
         )
 
     override fun onBindViewHolder(holder: AreaViewHolder, position: Int) {
-        if (AREAS.size < position)
+        if (areas.size < position)
             throw InvalidClassException("Current position is not a valid area")
 
-        val area = AREAS[position]
+        val area = areas[position]
         Timber.v("Showing area #$position in RecyclerView")
 
         ViewCompat.setTransitionName(holder.titleTextView, area.pin)
