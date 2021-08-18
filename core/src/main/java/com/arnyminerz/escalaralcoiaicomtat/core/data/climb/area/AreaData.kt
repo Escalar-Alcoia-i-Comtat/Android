@@ -5,6 +5,7 @@ import androidx.appsearch.app.AppSearchSchema
 
 @Document
 data class AreaData(
+    @Document.Score var index: Int,
     @Document.Id var objectId: String,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var displayName: String,
     @Document.CreationTimestampMillis var timestamp: Long,
@@ -27,8 +28,9 @@ data class AreaData(
     )
 }
 
-fun Area.data(): AreaData {
+fun Area.data(index: Int): AreaData {
     return AreaData(
+        index,
         objectId,
         displayName,
         timestampMillis,
