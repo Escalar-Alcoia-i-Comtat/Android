@@ -335,13 +335,13 @@ class SearchableActivity : ComponentActivity() {
                 val dataClassImpl: DataClassImpl? = try {
                     when (schemaType) {
                         "AreaData" -> genericDocument.toDocumentClass(AreaData::class.java)
-                            .area()
+                            .data()
                         "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java)
-                            .zone()
+                            .data()
                         "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java)
-                            .sector()
+                            .data()
                         "PathData" -> genericDocument.toDocumentClass(PathData::class.java)
-                            .path()
+                            .data()
                         else -> null
                     }
                 } catch (e: AppSearchException) {
