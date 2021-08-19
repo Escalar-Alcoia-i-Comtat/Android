@@ -34,9 +34,9 @@ import timber.log.Timber
  */
 class DataClassPagingSource(
     private val searchSession: AppSearchSession,
-    val areaId: String?,
-    val zoneId: String?,
-    val sectorId: String?,
+    val areaId: String? = null,
+    val zoneId: String? = null,
+    val sectorId: String? = null,
 ) : PagingSource<Int, DataClassImpl>() {
     data class SearchData<D : DataRoot<*>>(
         val id: String,
@@ -56,18 +56,22 @@ class DataClassPagingSource(
         loadSize: Int,
         offset: Int
     ): List<DataClassImpl> {
+        Timber.v("Performing load...")
         // Will load the sector's contents, they are paths
         val id = data.id
         val namespace = data.namespace
         val dataClassType = data.dataClass
         val dataClassTypeName = dataClassType.simpleName
         // Set spec to search for paths
+        Timber.v("Building SearchSpec...")
         val searchSpec = SearchSpec.Builder()
             .addFilterNamespaces(namespace)
             .setResultCountPerPage(offset + loadSize)
             .build()
         // Will search for sectorId, but in paths. This should be searching for parentSectorId
+        Timber.v("Searching...")
         val searchResults = searchSession.search(id, searchSpec)
+        Timber.v("Getting search results...")
         val nextPage = searchResults.nextPage.await()
         return arrayListOf<DataClassImpl>().apply {
             if (nextPage.size < offset)
