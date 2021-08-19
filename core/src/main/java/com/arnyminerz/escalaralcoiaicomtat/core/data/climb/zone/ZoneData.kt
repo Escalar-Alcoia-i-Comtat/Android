@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone
 
 import androidx.appsearch.annotation.Document
 import androidx.appsearch.app.AppSearchSchema
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.google.android.gms.maps.model.LatLng
 
 @Document
@@ -17,11 +18,11 @@ data class ZoneData(
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var documentPath: String,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var webUrl: String,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var parentObjectId: String,
-) {
+) : DataRoot<Zone> {
     @Document.Namespace
     var namespace: String = Zone.NAMESPACE
 
-    fun zone() = Zone(
+    override fun data() = Zone(
         objectId,
         displayName,
         timestamp,
