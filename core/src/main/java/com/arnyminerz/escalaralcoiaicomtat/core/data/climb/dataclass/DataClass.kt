@@ -83,7 +83,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     open val imageReferenceUrl: String,
     open val kmzReferenceUrl: String?,
     open val uiMetadata: UIMetadata,
-    open val metadata: DataClassMetadata
+    open val metadata: DataClassMetadata,
+    val displayOptions: DataClassDisplayOptions,
 ) : DataClassImpl(
     metadata.objectId,
     metadata.namespace,
@@ -239,8 +240,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val genericDocument = searchResult.genericDocument
         return when (genericDocument.schemaType) {
             "AreaData" -> null // Areas do not have parent
-            "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).zone()
-            "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).sector()
+            "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).data()
+            "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).data()
             else -> null // Just in case
         }
     }
@@ -273,10 +274,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             Timber.v("$this > [$p] Schema type: $schemaType")
             val data = try {
                 when (schemaType) {
-                    "AreaData" -> genericDocument.toDocumentClass(AreaData::class.java).area()
-                    "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).zone()
-                    "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).sector()
-                    "PathData" -> genericDocument.toDocumentClass(PathData::class.java).path()
+                    "AreaData" -> genericDocument.toDocumentClass(AreaData::class.java).data()
+                    "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).data()
+                    "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).data()
+                    "PathData" -> genericDocument.toDocumentClass(PathData::class.java).data()
                     else -> {
                         Timber.w("$this > [$p] Got unknown schema type.")
                         continue
