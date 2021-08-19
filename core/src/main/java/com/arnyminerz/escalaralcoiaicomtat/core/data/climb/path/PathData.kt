@@ -33,6 +33,7 @@ data class PathData(
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var rebuiltBy: String,
     @Document.BooleanProperty var downloaded: Boolean,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var documentPath: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var parentSectorId: String,
 ) {
     @Document.Namespace
     var namespace: String = Path.NAMESPACE
@@ -77,7 +78,8 @@ data class PathData(
             builtBy.ifEmpty { null },
             rebuiltBy.ifEmpty { null },
             downloaded,
-            documentPath
+            documentPath,
+            parentSectorId,
         )
     }
 }
@@ -118,6 +120,7 @@ fun Path.data(): PathData {
         builtBy ?: "",
         rebuiltBy ?: "",
         downloaded,
-        documentPath
+        documentPath,
+        parentSectorId,
     )
 }
