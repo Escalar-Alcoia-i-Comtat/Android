@@ -157,7 +157,7 @@ suspend fun AppSearchSession.getAreas(): List<Area> {
                     Timber.e("Could not convert GenericDocument to AreaData!")
                     continue
                 }
-                val area = areaData.area()
+                val area = areaData.data()
                 add(area)
             }
         }
