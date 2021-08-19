@@ -8,6 +8,7 @@ import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
@@ -64,7 +65,8 @@ class Sector internal constructor(
         documentPath,
         webUrl,
         parentZoneId
-    )
+    ),
+    DataClassDisplayOptions(1, true)
 ) {
     /**
      * Creates a new [Sector] from the data of a [DocumentSnapshot].
