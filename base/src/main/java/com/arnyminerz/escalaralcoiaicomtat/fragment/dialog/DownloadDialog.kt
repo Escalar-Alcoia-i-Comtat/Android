@@ -31,8 +31,8 @@ class DownloadDialog<T : DataClass<*, *>>(
     private val activity: Activity,
     private val data: T,
     private val storage: FirebaseStorage,
-    private val partialDownload: Boolean,
-    private val downloader: (dataClass: T) -> Unit,
+    private val partialDownload: Boolean = false,
+    private val downloader: ((dataClass: T) -> Unit)? = null,
 ) {
     /**
      * Shows the dialog to the user.
@@ -54,7 +54,7 @@ class DownloadDialog<T : DataClass<*, *>>(
                     )
                 )
                 .setPositiveButton(R.string.action_download) { dialog, _ ->
-                    downloader(data)
+                    downloader?.invoke(data)
                     dialog.dismiss()
                 }
         } else {
