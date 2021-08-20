@@ -9,6 +9,7 @@ import androidx.annotation.DimenRes
 import androidx.annotation.UiThread
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -44,6 +45,8 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.FileNotFoundException
 
@@ -371,22 +374,28 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
      */
     private fun updateList() {
         if (!loaded && viewModelInitialized && dataClassInitialized) {
+            Timber.v("Updating title...")
             binding.titleTextView.text = dataClass.displayName
             binding.titleTextView.transitionName = transitionName
 
             try {
+                Timber.v("Updating RecyclerView...")
                 if (mapLoaded)
                     binding.mapProgressBarCard.hide()
+                Timber.v("Setting layout manager...")
                 binding.recyclerView.layoutManager = if (itemsPerRow > 1)
                     GridLayoutManager(this, itemsPerRow)
                 else
                     LinearLayoutManager(this)
-                if (justAttached)
+                if (justAttached) {
+                    Timber.v("Setting animation...")
                     binding.recyclerView.layoutAnimation =
                         AnimationUtils.loadLayoutAnimation(
                             this,
                             R.anim.item_enter_left_animator
                         )
+                }
+                Timber.v("Initializing adapter...")
                 val adapter = DataClassAdapter(
                     itemsPerRow,
                     false,
@@ -408,8 +417,19 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                     },
                     DataClassComparator()
                 )
+                Timber.v("Setting adapter...")
                 binding.recyclerView.adapter = adapter
+                Timber.v("Scrolling to position $position...")
                 binding.recyclerView.scrollToPosition(position)
+
+                Timber.v("Loading data...")
+                lifecycleScope.launch {
+                    Timber.v("Collecting flow from ViewModel...")
+                    viewModel.flow.collectLatest { pagingData ->
+                        Timber.v("Submitting paging data...")
+                        adapter.submitData(pagingData)
+                    }
+                }
 
                 loaded = true
             } catch (_: AlreadyLoadingException) {
