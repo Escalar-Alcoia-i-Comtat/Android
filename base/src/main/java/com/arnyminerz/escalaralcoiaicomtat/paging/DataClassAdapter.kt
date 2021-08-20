@@ -79,7 +79,7 @@ open class DataClassAdapter(
                 binding.titleTextView.show()
                 binding.actionButtons.visibility(downloadable)
 
-                if (oddColumns)
+                if (!oddColumns)
                     binding.titleTextView.textAlignment = View.TEXT_ALIGNMENT_CENTER
                 binding.titleTextView.text = dataClass.displayName
                 binding.imageView.setOnClickListener {
