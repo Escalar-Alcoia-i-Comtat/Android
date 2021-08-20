@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.NearbyZonesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
@@ -74,7 +75,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
      * @author Arnau Mora
      * @since 20210617
      */
-    private var areaClickListener: ((binding: ListItemDwDataclassBinding, position: Int) -> Unit)? =
+    var areaClickListener: ((binding: ListItemDwDataclassBinding, position: Int, item: DataClassImpl) -> Unit)? =
         null
 
     /**
@@ -200,15 +201,5 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         if (!isResumed) return
 
         visibility(binding.areasNoInternetCardView.noInternetCardView, !state.hasInternet)
-    }
-
-    /**
-     * Update the area click listener to the desired one.
-     * @author Arnau Mora
-     * @since 20210617
-     * @param areaClickListener This will get called whenever an area is selected by the user.
-     */
-    fun setItemClickListener(areaClickListener: ((binding: ListItemDwDataclassBinding, position: Int) -> Unit)?) {
-        this.areaClickListener = areaClickListener
     }
 }
