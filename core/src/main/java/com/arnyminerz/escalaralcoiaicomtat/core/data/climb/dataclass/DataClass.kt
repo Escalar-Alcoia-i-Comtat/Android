@@ -489,9 +489,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
                 val downloadStatus = dataClass.downloadStatus(context, searchSession, storage)
                 progressListener?.invoke(c, children.size)
-                if (showNonDownloaded ||
-                    downloadStatus.isDownloaded() || downloadStatus.partialDownload()
-                )
+                if (showNonDownloaded || downloadStatus.downloaded || downloadStatus.partialDownload)
                     emit(DownloadedSection(dataClass))
             }
         Timber.v("Got ${downloadedSectionsList.size} sections.")
