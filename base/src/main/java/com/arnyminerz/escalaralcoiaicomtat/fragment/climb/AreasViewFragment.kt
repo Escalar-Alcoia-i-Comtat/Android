@@ -7,9 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.NearbyZonesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
@@ -20,12 +21,16 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
+import com.arnyminerz.escalaralcoiaicomtat.databinding.ListItemDwDataclassBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
-import com.arnyminerz.escalaralcoiaicomtat.list.adapter.AreaAdapter
-import com.arnyminerz.escalaralcoiaicomtat.list.holder.AreaViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.paging.AreaAdapter
+import com.arnyminerz.escalaralcoiaicomtat.view.model.AreasViewModel
+import com.arnyminerz.escalaralcoiaicomtat.view.model.AreasViewModelFactory
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 /**
@@ -69,7 +74,8 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
      * @author Arnau Mora
      * @since 20210617
      */
-    private var areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)? = null
+    private var areaClickListener: ((binding: ListItemDwDataclassBinding, position: Int) -> Unit)? =
+        null
 
     /**
      * The View Binding of the Fragment, for accessing the views.
@@ -106,6 +112,9 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val app = requireActivity().application as App
+        val viewModel by viewModels<AreasViewModel> { AreasViewModelFactory(app) }
+
         if (PREF_DISABLE_NEARBY.get())
             Timber.i("Nearby Zones is disabled, won't load")
         else {
@@ -126,8 +135,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
 
         doAsync {
             Timber.v("Refreshing areas...")
-            val app = requireActivity().application as App
-            val areas = app.getAreas()
             uiContext {
                 Timber.d("Initializing area adapter for AreasViewFragment...")
                 binding.areasRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -137,8 +144,16 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                             requireContext(),
                             R.anim.item_fall_animator
                         )
-                binding.areasRecyclerView.adapter =
-                    AreaAdapter(requireActivity() as MainActivity, areas, areaClickListener)
+                val adapter = AreaAdapter(areaClickListener)
+                binding.areasRecyclerView.adapter = adapter
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    Timber.v("Collecting flow from ViewModel...")
+                    viewModel.flow.collectLatest { pagingData ->
+                        Timber.v("Submitting paging data...")
+                        adapter.submitData(pagingData)
+                    }
+                }
             }
         }
     }
@@ -193,7 +208,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
      * @since 20210617
      * @param areaClickListener This will get called whenever an area is selected by the user.
      */
-    fun setItemClickListener(areaClickListener: ((viewHolder: AreaViewHolder, position: Int) -> Unit)?) {
+    fun setItemClickListener(areaClickListener: ((binding: ListItemDwDataclassBinding, position: Int) -> Unit)?) {
         this.areaClickListener = areaClickListener
     }
 }
