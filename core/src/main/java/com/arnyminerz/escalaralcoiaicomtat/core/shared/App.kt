@@ -12,8 +12,10 @@ import androidx.appsearch.exceptions.AppSearchException
 import androidx.collection.arrayMapOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
@@ -168,21 +170,25 @@ suspend fun AppSearchSession.getAreas(): List<Area> {
 }
 
 /**
- * Searches for a [Sector] with id [sectorId] stored in the [AppSearchSession].
+ * Searches for a [DataClassImpl] parent with Class name [R], and [DataRoot] T.
  * @author Arnau Mora
- * @since 20210818
- * @param sectorId The ID of the sector to search for.
- * @return The [Sector], or null if not found.
+ * @since 20210820
+ * @param query What to search for.
+ * @param namespace The namespace of the query.
+ * @return The [R], or null if not found.
  */
 @WorkerThread
-suspend fun AppSearchSession.getSector(sectorId: String): Sector? {
-    val areasSearchSpec = SearchSpec.Builder()
-        .addFilterNamespaces(Sector.NAMESPACE)
+suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession.getData(
+    query: String,
+    namespace: String
+): R? {
+    val searchSpec = SearchSpec.Builder()
+        .addFilterNamespaces(namespace)
         .setOrder(SearchSpec.ORDER_ASCENDING)
         .setRankingStrategy(RANKING_STRATEGY_DOCUMENT_SCORE)
         .setResultCountPerPage(1)
         .build()
-    val searchResult = search(sectorId, areasSearchSpec)
+    val searchResult = search(query, searchSpec)
     val searchPage = searchResult.nextPage.await().ifEmpty { return null }
 
     // If reached here, searchPage is not empty.
@@ -190,11 +196,22 @@ suspend fun AppSearchSession.getSector(sectorId: String): Sector? {
 
     val genericDocument = page.genericDocument
     Timber.v("Got generic document ${genericDocument.namespace}: ${genericDocument.id}")
-    val sectorData = try {
-        genericDocument.toDocumentClass(SectorData::class.java)
+    val data: T = try {
+        genericDocument.toDocumentClass(T::class.java)
     } catch (e: AppSearchException) {
-        Timber.e("Could not convert GenericDocument to AreaData!")
+        Timber.e("Could not convert GenericDocument to ${T::class.java.simpleName}!")
         return null
     }
-    return sectorData.data()
+    return data.data()
 }
+
+/**
+ * Searches for a [Sector] with id [sectorId] stored in the [AppSearchSession].
+ * @author Arnau Mora
+ * @since 20210820
+ * @param sectorId The ID of the sector to search for.
+ * @return The [Sector], or null if not found.
+ */
+@WorkerThread
+suspend fun AppSearchSession.getSector(sectorId: String): Sector? =
+    getData<Sector, SectorData>(sectorId, Sector.NAMESPACE)
