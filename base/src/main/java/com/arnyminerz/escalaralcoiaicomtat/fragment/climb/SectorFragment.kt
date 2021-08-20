@@ -13,14 +13,11 @@ import androidx.annotation.WorkerThread
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.appendChip
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_AREA_ID
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_SECTOR_INDEX
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_ZONE_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_SECTOR_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
@@ -50,24 +47,18 @@ class SectorFragment : NetworkChangeListenerFragment() {
          * Creates a new [SectorFragment] instance with the specified arguments.
          * @author Arnau Mora
          * @since 20210820
-         * @param areaId The id of the Area that contains the Zone where the sector is.
-         * @param zoneId The id of the Zone that contains the sector.
-         * @param sectorIndex The index of the sector inside the Zone.
+         * @param sectorId The id of the Sector to display.
          */
-        fun newInstance(areaId: String, zoneId: String, sectorIndex: Int): SectorFragment {
+        fun newInstance(sectorId: String): SectorFragment {
             return SectorFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARGUMENT_AREA_ID, areaId)
-                    putString(ARGUMENT_ZONE_ID, zoneId)
-                    putInt(ARGUMENT_SECTOR_INDEX, sectorIndex)
+                    putString(ARGUMENT_SECTOR_ID, sectorId)
                 }
             }
         }
     }
 
-    private lateinit var areaId: String
-    private lateinit var zoneId: String
-    private var sectorIndex: Int = -1
+    private lateinit var sectorId: String
     private lateinit var sector: Sector
 
     private var loading = false
@@ -172,9 +163,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        areaId = requireArguments().getString(ARGUMENT_AREA_ID)!!
-        zoneId = requireArguments().getString(ARGUMENT_ZONE_ID)!!
-        sectorIndex = requireArguments().getInt(ARGUMENT_SECTOR_INDEX, 0)
+        sectorId = requireArguments().getString(ARGUMENT_SECTOR_ID)!!
 
         firestore = Firebase.firestore
         storage = Firebase.storage
@@ -201,7 +190,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
     suspend fun load() {
         var error = false
         val sectorActivity = this.sectorActivity
-        if (!this::zoneId.isInitialized) {
+        if (!this::sectorId.isInitialized) {
             Timber.w("Could not load since class is not initialized")
             error = true
         }
@@ -232,21 +221,13 @@ class SectorFragment : NetworkChangeListenerFragment() {
             }
         else {
             val app = requireActivity().application as App
-            val areas = app.getAreas()
-            Timber.d("Loading sector #$sectorIndex of $areaId/$zoneId")
-            val sectors = arrayListOf<Sector>()
-            areas[areaId]
-                ?.getChildren(app.searchSession)
-                ?.get(zoneId)
-                ?.getChildren(app.searchSession)
-                ?.toCollection(sectors)
-                ?: run {
-                    Timber.e("Could not get sectors from Area $areaId in $zoneId")
-                    uiContext { toast(R.string.toast_error_not_found) }
-                    activity?.onBackPressed()
-                    return
-                }
-            sector = sectors[sectorIndex]
+            Timber.d("Loading sector S/$sectorId")
+            sector = app.getSector(sectorId) ?: run {
+                Timber.e("Could not get sector S/$sectorId")
+                uiContext { toast(R.string.toast_error_not_found) }
+                activity?.onBackPressed()
+                return
+            }
 
             uiContext {
                 binding?.sectorTextView?.text = sector.displayName
