@@ -288,3 +288,26 @@ suspend fun AppSearchSession.getZone(zoneId: String): Zone? =
 @WorkerThread
 suspend fun AppSearchSession.getSector(sectorId: String): Sector? =
     getData<Sector, SectorData>(sectorId, Sector.NAMESPACE)
+
+/**
+ * Searches for all the [AppSearchSession] indexed [Zone]s that have as a parent an area with id [areaId].
+ * @author Arnau Mora
+ * @since 20210820
+ * @param areaId The parent [Area] id of the [Zone]s to search for.
+ * @return A [List] with the found [Zone]s.
+ */
+@WorkerThread
+suspend fun AppSearchSession.getZones(areaId: String): List<Zone> =
+    getList<Zone, ZoneData>(areaId, Zone.NAMESPACE)
+
+/**
+ * Searches for all the [AppSearchSession] indexed [Sector]s that have as a parent a zone with id
+ * [zoneId].
+ * @author Arnau Mora
+ * @since 20210820
+ * @param zoneId The parent [Zone] id of the [Sector]s to search for.
+ * @return A [List] with the found [Sector]s.
+ */
+@WorkerThread
+suspend fun AppSearchSession.getSectors(zoneId: String): List<Sector> =
+    getList<Sector, SectorData>(zoneId, Sector.NAMESPACE)
