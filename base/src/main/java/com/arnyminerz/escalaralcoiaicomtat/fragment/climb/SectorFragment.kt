@@ -45,6 +45,26 @@ import timber.log.Timber
 
 @ExperimentalBadgeUtils
 class SectorFragment : NetworkChangeListenerFragment() {
+    companion object {
+        /**
+         * Creates a new [SectorFragment] instance with the specified arguments.
+         * @author Arnau Mora
+         * @since 20210820
+         * @param areaId The id of the Area that contains the Zone where the sector is.
+         * @param zoneId The id of the Zone that contains the sector.
+         * @param sectorIndex The index of the sector inside the Zone.
+         */
+        fun newInstance(areaId: String, zoneId: String, sectorIndex: Int): SectorFragment {
+            return SectorFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARGUMENT_AREA_ID, areaId)
+                    putString(ARGUMENT_ZONE_ID, zoneId)
+                    putInt(ARGUMENT_SECTOR_INDEX, sectorIndex)
+                }
+            }
+        }
+    }
+
     private lateinit var areaId: String
     private lateinit var zoneId: String
     private var sectorIndex: Int = -1
