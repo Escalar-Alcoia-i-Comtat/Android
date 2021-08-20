@@ -512,7 +512,7 @@ class MainActivity : LanguageAppCompatActivity() {
         binding.actionDownloads.setOnClickListener { navigate(TAB_ITEM_DOWNLOADS) }
         binding.actionExtra.setOnClickListener { navigate(TAB_ITEM_EXTRA) }
 
-        areasViewFragment.setItemClickListener { holder, position ->
+        areasViewFragment.areaClickListener = { holder, position, _ ->
             Timber.v("Clicked item %s", position)
 
             val transition = ViewCompat.getTransitionName(holder.titleTextView)
