@@ -32,8 +32,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.APPLICATION_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DYNAMIC_LINKS_DOMAIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_COUNT
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
@@ -150,10 +148,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                             zone.metadata.webURL.equals(queryName, true)
                         )
                             result = Intent(context, zoneActivityClass).apply {
-                                Timber.d("Found Zone id ${zone.objectId}!")
-                                putExtra(EXTRA_AREA, area.objectId)
                                 putExtra(EXTRA_ZONE, zone.objectId)
-                                putExtra(EXTRA_SECTOR_COUNT, zone.getSize(searchSession))
                             }
                         else
                             for ((counter, sector) in sectors.withIndex()) {
@@ -166,11 +161,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                                             Timber.d("Found Sector id ${sector.objectId} at $counter!")
                                             putExtra(EXTRA_AREA, area.objectId)
                                             putExtra(EXTRA_ZONE, zone.objectId)
-                                            putExtra(
-                                                EXTRA_SECTOR_COUNT,
-                                                zone.getSize(searchSession)
-                                            )
-                                            putExtra(EXTRA_SECTOR_INDEX, counter)
                                         }
 
                                 // If a result has been found, exit loop
