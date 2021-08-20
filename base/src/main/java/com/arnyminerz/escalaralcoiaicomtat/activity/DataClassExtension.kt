@@ -13,8 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_COUNT
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
@@ -59,13 +58,7 @@ suspend fun DataClassImpl.launch(activity: Activity) {
                 ?.getChildren(app.searchSession)
             if (sectors == null)
                 Timber.e("Could not load sectors from area ${pathPieces[1]}, sector ${pathPieces[3]}")
-            val sectorIndex = sectors?.let {
-                val i = it.indexOfFirst { sector -> sector.objectId == pathPieces[5] }
-                if (i < 0) 0 // If sector was not found, select the first one
-                else i
-            } ?: 0
-            intent.putExtra(EXTRA_SECTOR_INDEX, sectorIndex)
-            intent.putExtra(EXTRA_SECTOR_COUNT, sectors?.size ?: 0)
+            intent.putExtra(EXTRA_SECTOR, pathPieces[5])
         }
     }
     uiContext { activity.startActivity(intent) }
