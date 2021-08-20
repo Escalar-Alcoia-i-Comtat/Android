@@ -63,6 +63,8 @@ import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.internal.synchronized
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
@@ -320,6 +322,7 @@ class MapHelper {
      * @param kmzFile The file to load
      * @param addToMap If true, the loaded features will be added automatically to the map
      */
+    @InternalCoroutinesApi
     @WorkerThread
     fun loadKMZ(
         context: Context,
@@ -349,6 +352,7 @@ class MapHelper {
      * @param context The context to launch from.
      * @param targetActivity The [Activity] to launch.
      */
+    @InternalCoroutinesApi
     fun mapsActivityIntent(context: Context, targetActivity: Class<*>): Intent {
         sharedPreferences.edit {
             val loadedElements =
@@ -506,6 +510,7 @@ class MapHelper {
      * @see GeoMarker
      * @throws MapNotInitializedException If the map has not been initialized
      */
+    @InternalCoroutinesApi
     @Throws(MapNotInitializedException::class)
     fun add(result: MapFeatures) {
         Timber.v("Loading features...")
@@ -524,6 +529,7 @@ class MapHelper {
      * @param markers The markers to add
      * @see GeoMarker
      */
+    @InternalCoroutinesApi
     fun addMarkers(markers: Collection<GeoMarker>) {
         for (marker in markers)
             addMarker(marker)
@@ -534,6 +540,7 @@ class MapHelper {
      * @param marker The marker to add
      * @see GeoMarker
      */
+    @InternalCoroutinesApi
     fun addMarker(marker: GeoMarker) {
         synchronized(markers) {
             markers.add(marker)
@@ -566,6 +573,7 @@ class MapHelper {
      * @see GeoGeometry
      * @see GeoMarker
      */
+    @InternalCoroutinesApi
     fun add(element: Parcelable) {
         if (element is GeoMarker)
             addMarker(element)
@@ -630,6 +638,7 @@ class MapHelper {
      * @since 20210602
      * @throws MapNotInitializedException If the map has not been initialized
      */
+    @InternalCoroutinesApi
     @UiThread
     @Throws(MapNotInitializedException::class)
     fun display() {
@@ -642,7 +651,7 @@ class MapHelper {
         clearPolygons()
         clearLines()
 
-        val geometries = geometries.addToMap(map!!)
+        val geometries = synchronized(geometries) { geometries.addToMap(map!!) }
         for (geometry in geometries) {
             geometry.first?.let { polylines.add(it) }
             geometry.second?.let { polygons.add(it) }
@@ -660,6 +669,7 @@ class MapHelper {
      * @param animate If the movement should be animated
      * @throws MapNotInitializedException If the map has not been initialized
      */
+    @InternalCoroutinesApi
     @UiThread
     @Throws(MapNotInitializedException::class)
     fun center(padding: Int = 11, animate: Boolean = true, includeCurrentLocation: Boolean = true) {
