@@ -1,5 +1,8 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass
 
+import androidx.annotation.DrawableRes
+import com.arnyminerz.escalaralcoiaicomtat.core.R
+
 /**
  * Specifies the download status of a [DataClass].
  * @author Arnau Mora
@@ -52,4 +55,18 @@ enum class DownloadStatus {
      * @since 20210413
      */
     fun partialDownload(): Boolean = this == PARTIALLY
+
+    /**
+     * Gets the icon that should be displayed for the download status.
+     * @author Arnau Mora
+     * @since 20210820
+     */
+    @DrawableRes
+    fun getIcon(): Int =
+        when (this) {
+            NOT_DOWNLOADED -> R.drawable.download
+            DOWNLOADED -> R.drawable.cloud_check
+            DOWNLOADING -> R.drawable.cloud_sync
+            PARTIALLY -> R.drawable.cloud_braces
+        }
 }
