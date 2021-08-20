@@ -124,12 +124,20 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
     internal var transitionName: String? = null
 
     /**
+     * Tells if the [viewModel] has been initialized.
+     * @author Arnau Mora
+     * @since 20210820
+     */
+    internal val viewModelInitialized: Boolean
+        get() = this::viewModel.isInitialized
+
+    /**
      * Tells if the [dataClass] has been initialized.
      * @author Arnau Mora
      * @since 20210815
      */
-    internal val viewModelInitialized: Boolean
-        get() = this::viewModel.isInitialized
+    internal val dataClassInitialized: Boolean
+        get() = this::dataClass.isInitialized
 
     /**
      * Stores whether or not the map has been loaded.
@@ -356,8 +364,13 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
             binding.mapProgressBarCard.hide()
     }
 
+    /**
+     * Updates the RecyclerView with the contents from [dataClass].
+     * @author Arnau Mora
+     * @since 20210820
+     */
     private fun updateList() {
-        if (!loaded && viewModelInitialized) {
+        if (!loaded && viewModelInitialized && dataClassInitialized) {
             binding.titleTextView.text = dataClass.displayName
             binding.titleTextView.transitionName = transitionName
 
@@ -405,7 +418,11 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                     "An AlreadyLoadingException has been thrown while loading the zones in ZoneActivity."
                 ) // Let's just warn the debugger this is controlled
             }
-        } else
+        } else if (dataClassInitialized)
             Timber.w("DataClass not initialized!")
+        else if (viewModelInitialized)
+            Timber.w("ViewModel not initialized!")
+        else
+            Timber.w("Already loaded.")
     }
 }
