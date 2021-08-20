@@ -147,6 +147,16 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     suspend fun getSector(sectorId: String): Sector? = searchSession.getSector(sectorId)
 
     /**
+     * Searches for the specified [Path] in [searchSession].
+     * Serves for a shortcut to [AppSearchSession.getPath].
+     * @author Arnau Mora
+     * @since 20210820
+     * @see AppSearchSession.getSector
+     */
+    @WorkerThread
+    suspend fun getPath(pathId: String): Path? = searchSession.getPath(pathId)
+
+    /**
      * Searches for the specified [Path]s in [searchSession].
      * Serves for a shortcut to [AppSearchSession.getPaths].
      * @author Arnau Mora
@@ -321,6 +331,17 @@ suspend fun AppSearchSession.getZone(zoneId: String): Zone? =
 @WorkerThread
 suspend fun AppSearchSession.getSector(sectorId: String): Sector? =
     getData<Sector, SectorData>(sectorId, Sector.NAMESPACE)
+
+/**
+ * Searches for a [Path] with id [pathId] stored in the [AppSearchSession].
+ * @author Arnau Mora
+ * @since 20210820
+ * @param pathId The ID of the path to search for.
+ * @return The [Path], or null if not found.
+ */
+@WorkerThread
+suspend fun AppSearchSession.getPath(pathId: String): Path? =
+    getData<Path, PathData>(pathId, Path.NAMESPACE)
 
 /**
  * Searches for all the [AppSearchSession] indexed [Zone]s that have as a parent an area with id [areaId].
