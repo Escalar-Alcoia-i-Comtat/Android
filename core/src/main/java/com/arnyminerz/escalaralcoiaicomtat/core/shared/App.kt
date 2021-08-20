@@ -228,6 +228,46 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
 }
 
 /**
+ * Searches for all the [DataClassImpl] typed [R] that are indexed with [query].
+ * @author Arnau Mora
+ * @since 20210820
+ * @param query What to search for.
+ * @param namespace The namespace of the query.
+ * @param max The maximum amount of items to fetch.
+ * @return A [List] of [R] with the found items.
+ */
+@WorkerThread
+suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession.getList(
+    query: String,
+    namespace: String,
+    max: Int = 100,
+): List<R> {
+    val searchSpec = SearchSpec.Builder()
+        .addFilterNamespaces(namespace)
+        .setOrder(SearchSpec.ORDER_ASCENDING)
+        .setRankingStrategy(RANKING_STRATEGY_DOCUMENT_SCORE)
+        .setResultCountPerPage(max)
+        .build()
+    val searchResult = search(query, searchSpec)
+    val searchPage = searchResult.nextPage.await()
+
+    return arrayListOf<R>().apply {
+        for (page in searchPage) {
+            val genericDocument = page.genericDocument
+            Timber.v("Got generic document ${genericDocument.namespace}: ${genericDocument.id}")
+            val data: T = try {
+                genericDocument.toDocumentClass(T::class.java)
+            } catch (e: AppSearchException) {
+                Timber.e("Could not convert GenericDocument to ${T::class.java.simpleName}!")
+                continue
+            }
+            val t = data.data()
+            add(t)
+        }
+    }
+}
+
+/**
  * Searches for a [Zone] with id [zoneId] stored in the [AppSearchSession].
  * @author Arnau Mora
  * @since 20210820
