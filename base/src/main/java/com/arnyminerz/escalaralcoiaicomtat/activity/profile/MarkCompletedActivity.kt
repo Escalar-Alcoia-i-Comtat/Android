@@ -8,20 +8,16 @@ import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.GRADES_LIST
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.CompletionType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.request.MarkCompletedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.request.MarkProjectData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.finishActivityWithResult
@@ -53,8 +49,8 @@ import timber.log.Timber
  * The required extras are:
  * - [EXTRA_AREA]: The Area id that contains the path.
  * - [EXTRA_ZONE]: The Zone id inside [EXTRA_AREA] that contains the path.
- * - [EXTRA_SECTOR_INDEX]: The index of the path inside [EXTRA_ZONE] that contains the path.
- * - [EXTRA_PATH]: The id of the path to load inside [EXTRA_SECTOR_INDEX].
+ * - [EXTRA_SECTOR]: The Sector id of the path inside [EXTRA_ZONE] that contains the path.
+ * - [EXTRA_PATH]: The id of the path to load inside [EXTRA_SECTOR].
  * If any extra is missing, result code [RESULT_CODE_MISSING_DATA] will be returned.
  * If the user is not logged in [RESULT_CODE_NOT_LOGGED_IN] will be returned.
  * @author Arnau Mora
@@ -75,54 +71,11 @@ class MarkCompletedActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMarkCompletedBinding
 
     /**
-     * The id of the [Area] where the [Path] to mark is in. May be loaded from Intent.
-     * @author Arnau Mora
-     * @since 20210429
-     */
-    private var areaId: String? = null
-
-    /**
-     * The id of the [Zone] where the [Path] to mark is in. May be loaded from Intent.
-     * @author Arnau Mora
-     * @since 20210429
-     */
-    private var zoneId: String? = null
-
-    /**
-     * The index of the [Sector] inside [areaId] where the [Path] to mark is in. May be loaded from
-     * Intent.
-     * @author Arnau Mora
-     * @since 20210429
-     */
-    private var sectorIndex: Int? = null
-
-    /**
      * The id of the [Path] to mark. May be loaded from Intent.
      * @author Arnau Mora
      * @since 20210429
      */
-    private var pathId: String? = null
-
-    /**
-     * The loaded data of the [Area] where [Path] is in. Gets loaded in [loadPath].
-     * @author Arnau Mora
-     * @since 20210429
-     */
-    private var area: Area? = null
-
-    /**
-     * The loaded data of the [Zone] where [Path] is in. Gets loaded in [loadPath].
-     * @author Arnau Mora
-     * @since 20210429
-     */
-    private var zone: Zone? = null
-
-    /**
-     * The loaded data of the [Sector] where [Path] is in. Gets loaded in [loadPath].
-     * @author Arnau Mora
-     * @since 20210429
-     */
-    private var sector: Sector? = null
+    private lateinit var pathId: String
 
     /**
      * The loaded data of the [Path] to mark. Gets loaded in [loadPath].
@@ -221,65 +174,26 @@ class MarkCompletedActivity : AppCompatActivity() {
      * be exitted.
      */
     private fun getFromIntent(): Boolean {
-        areaId = intent.getExtra(EXTRA_AREA)
-        zoneId = intent.getExtra(EXTRA_ZONE)
-        sectorIndex = intent.getExtra(EXTRA_SECTOR_INDEX)
-        pathId = intent.getExtra(EXTRA_PATH)
+        pathId = intent.getExtra(EXTRA_PATH) ?: return false
 
-        return areaId != null && zoneId != null && sectorIndex != null && pathId != null
+        return true
     }
 
     /**
-     * Loads the [Path] ([path]) data from the specified [areaId], [zoneId], [sectorIndex] and [pathId].
+     * Loads the [Path] ([path]) data from the specified [areaId], [zoneId], [sectorId] and [pathId].
      * It is required that all the parameters are checked to be non-null, or [NullPointerException]
      * will be thrown.
      * @author Arnau Mora
      * @since 20210429
-     * @throws NullPointerException When any of the parameters ([areaId], [zoneId], [sectorIndex] or
+     * @throws NullPointerException When any of the parameters ([areaId], [zoneId], [sectorId] or
      * [pathId]) are null.
      */
     @Throws(NullPointerException::class)
     private suspend fun loadPath() {
         val app = application as App
-        val areas = app.getAreas()
-        Timber.v("Loading area $areaId...")
-        area = areas[areaId!!]
-        if (area == null) {
-            // Could not find valid Area
-            Timber.e("Could not find Area $areaId")
-            onBackPressed()
-            toast(R.string.toast_error_internal)
-            return
-        }
-
-        Timber.v("Loading zone $zoneId...")
-        area!!.getChildren(app.searchSession)
         try {
-            zone = area!!.get(app.searchSession, zoneId!!)
-        } catch (_: IndexOutOfBoundsException) {
-            // Could not find valid Zone
-            Timber.e("Could not find Zone $zoneId")
-            onBackPressed()
-            toast(R.string.toast_error_internal)
-            return
-        }
-
-        Timber.v("Loading sector #$sectorIndex...")
-        zone!!.getChildren(app.searchSession)
-        try {
-            sector = zone!!.get(app.searchSession, sectorIndex!!)
-        } catch (_: IndexOutOfBoundsException) {
-            // Could not find valid Zone
-            Timber.e("Could not find Sector #$sectorIndex")
-            onBackPressed()
-            toast(R.string.toast_error_internal)
-            return
-        }
-
-        Timber.v("Loading path $pathId...")
-        sector!!.getChildren(app.searchSession)
-        try {
-            path = sector!!.get(app.searchSession, pathId!!)
+            Timber.v("Loading path $pathId...")
+            path = app.getPath(pathId)
         } catch (_: IndexOutOfBoundsException) {
             // Could not find valid Zone
             Timber.e("Could not find Path $pathId")
