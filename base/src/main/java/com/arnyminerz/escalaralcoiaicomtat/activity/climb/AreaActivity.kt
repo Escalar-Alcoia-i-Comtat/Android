@@ -7,8 +7,6 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.has
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
@@ -73,6 +71,7 @@ class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen
             ?: savedInstanceState?.getInt(EXTRA_POSITION.key, 0) ?: 0
         Timber.d("Current position: $position")
 
+        Timber.v("Getting view model...")
         val viewModel by viewModels<DataClassListViewModel> {
             DataClassListViewModelFactory(
                 app,
@@ -87,20 +86,20 @@ class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen
         val app = application as App
 
         doAsync {
-            val areas = app.getAreas()
-            if (!areas.has(areaId))
+            // Get the corresponding Area and store it in [dataClass]
+            dataClass = app.getArea(areaId) ?: run {
                 uiContext {
-                    Timber.e("Area is not loaded in AREAS")
+                    Timber.e("Could not find area A/$areaId!")
                     onBackPressed()
+                    finish()
                 }
-            else {
-                // Get the corresponding Area and store it in [dataClass]
-                dataClass = areas[areaId]!!
-                Timber.d("DataClass id: ${dataClass.objectId}")
+                return@doAsync
+            }
+            Timber.d("DataClass id: A/${dataClass.objectId}")
 
-                uiContext {
-                    onStateChange(appNetworkState)
-                }
+            uiContext {
+                Timber.v("Refreshing UI with the loaded data...")
+                onStateChange(appNetworkState)
             }
         }
     }
