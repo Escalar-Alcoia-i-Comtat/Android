@@ -14,6 +14,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -163,4 +165,36 @@ suspend fun AppSearchSession.getAreas(): List<Area> {
         }
     }
     return areas
+}
+
+/**
+ * Searches for a [Sector] with id [sectorId] stored in the [AppSearchSession].
+ * @author Arnau Mora
+ * @since 20210818
+ * @param sectorId The ID of the sector to search for.
+ * @return The [Sector], or null if not found.
+ */
+@WorkerThread
+suspend fun AppSearchSession.getSector(sectorId: String): Sector? {
+    val areasSearchSpec = SearchSpec.Builder()
+        .addFilterNamespaces(Sector.NAMESPACE)
+        .setOrder(SearchSpec.ORDER_ASCENDING)
+        .setRankingStrategy(RANKING_STRATEGY_DOCUMENT_SCORE)
+        .setResultCountPerPage(1)
+        .build()
+    val searchResult = search(sectorId, areasSearchSpec)
+    val searchPage = searchResult.nextPage.await().ifEmpty { return null }
+
+    // If reached here, searchPage is not empty.
+    val page = searchPage[0]
+
+    val genericDocument = page.genericDocument
+    Timber.v("Got generic document ${genericDocument.namespace}: ${genericDocument.id}")
+    val sectorData = try {
+        genericDocument.toDocumentClass(SectorData::class.java)
+    } catch (e: AppSearchException) {
+        Timber.e("Could not convert GenericDocument to AreaData!")
+        return null
+    }
+    return sectorData.data()
 }
