@@ -539,7 +539,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         context: Context,
         searchSession: AppSearchSession,
         storage: FirebaseStorage,
-        progressListener: ((current: Int, max: Int) -> Unit)? = null
+        progressListener: (@UiThread (current: Int, max: Int) -> Unit)? = null
     ): DownloadStatus {
         Timber.d("$pin Checking if downloaded")
 
@@ -568,7 +568,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             var atLeastOneChildrenDownloaded = false
             for ((c, child) in children.withIndex()) {
                 if (child is DataClass<*, *>) {
-                    progressListener?.invoke(c, children.size)
+                    uiContext { progressListener?.invoke(c, children.size) }
                     val childDownloadStatus = child.downloadStatus(context, searchSession, storage)
                     if (childDownloadStatus != DownloadStatus.DOWNLOADED) {
                         Timber.d(
