@@ -113,6 +113,26 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      */
     @WorkerThread
     suspend fun getAreas(): List<Area> = searchSession.getAreas()
+
+    /**
+     * Searches for the specified [Zone] in [searchSession].
+     * Serves for a shortcut to [AppSearchSession.getZone].
+     * @author Arnau Mora
+     * @since 20210820
+     * @see AppSearchSession.getZone
+     */
+    @WorkerThread
+    suspend fun getZone(zoneId: String): Zone? = searchSession.getZone(zoneId)
+
+    /**
+     * Searches for the specified [Sector] in [searchSession].
+     * Serves for a shortcut to [AppSearchSession.getSector].
+     * @author Arnau Mora
+     * @since 20210820
+     * @see AppSearchSession.getSector
+     */
+    @WorkerThread
+    suspend fun getSector(sectorId: String): Sector? = searchSession.getSector(sectorId)
 }
 
 /**
