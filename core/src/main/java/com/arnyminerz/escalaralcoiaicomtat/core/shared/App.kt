@@ -18,6 +18,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -204,6 +206,17 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
     }
     return data.data()
 }
+
+/**
+ * Searches for a [Zone] with id [zoneId] stored in the [AppSearchSession].
+ * @author Arnau Mora
+ * @since 20210820
+ * @param zoneId The ID of the [Zone] to search for.
+ * @return The [Zone], or null if not found.
+ */
+@WorkerThread
+suspend fun AppSearchSession.getZone(zoneId: String): Zone? =
+    getData<Zone, ZoneData>(zoneId, Zone.NAMESPACE)
 
 /**
  * Searches for a [Sector] with id [sectorId] stored in the [AppSearchSession].
