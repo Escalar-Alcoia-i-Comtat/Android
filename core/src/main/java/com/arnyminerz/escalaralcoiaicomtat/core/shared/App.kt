@@ -268,6 +268,17 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
 }
 
 /**
+ * Searches for a [Area] with id [areaId] stored in the [AppSearchSession].
+ * @author Arnau Mora
+ * @since 20210820
+ * @param areaId The ID of the [Area] to search for.
+ * @return The [Area], or null if not found.
+ */
+@WorkerThread
+suspend fun AppSearchSession.getArea(areaId: String): Area? =
+    getData<Area, AreaData>(areaId, Area.NAMESPACE)
+
+/**
  * Searches for a [Zone] with id [zoneId] stored in the [AppSearchSession].
  * @author Arnau Mora
  * @since 20210820
