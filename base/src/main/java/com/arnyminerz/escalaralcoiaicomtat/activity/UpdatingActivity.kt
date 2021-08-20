@@ -130,14 +130,13 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
                 val app = application as App
                 val areas = app.getAreas()
                 for (area in areas) {
-                    if (area.downloadStatus(app, app.searchSession, storage).isDownloaded())
+                    if (area.downloadStatus(app, app.searchSession, storage).downloaded)
                         iterateUpdate(area)
                     else for (zone in area.getChildren(app.searchSession))
-                        if (zone.downloadStatus(app, app.searchSession, storage).isDownloaded())
+                        if (zone.downloadStatus(app, app.searchSession, storage).downloaded)
                             iterateUpdate(zone)
                         else for (sector in zone.getChildren(app.searchSession))
-                            if (sector.downloadStatus(app, app.searchSession, storage)
-                                    .isDownloaded()
+                            if (sector.downloadStatus(app, app.searchSession, storage).downloaded
                             )
                                 iterateUpdate(sector)
                 }

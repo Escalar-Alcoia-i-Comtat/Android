@@ -252,7 +252,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
             Timber.v("Got download status: $downloadStatus")
 
             uiContext {
-                if (downloadStatus?.isDownloaded() == true) {
+                if (downloadStatus?.downloaded == true) {
                     i.setImageResource(R.drawable.cloud_check)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                         i.tooltipText = getString(R.string.status_downloaded)

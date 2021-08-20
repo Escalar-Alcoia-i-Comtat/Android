@@ -234,7 +234,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
             }
 
             isDownloaded = if (sectorActivity != null)
-                sector.downloadStatus(app, app.searchSession, sectorActivity.storage).isDownloaded()
+                sector.downloadStatus(app, app.searchSession, sectorActivity.storage).downloaded
             else false
 
             if (activity != null && activity?.isDestroyed == false) {
