@@ -1,16 +1,21 @@
 package com.arnyminerz.escalaralcoiaicomtat.paging
 
+import android.app.Activity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.DimenRes
+import androidx.annotation.UiThread
+import androidx.lifecycle.LifecycleOwner
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.then
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
@@ -21,6 +26,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ListItemDwDataclassBinding
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ListItemPathBinding
+import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
@@ -61,7 +67,15 @@ open class DataClassAdapter(
             Timber.v("Displaying contents for DataClass \"$dataClass\"")
             val binding = holder.dataClassBinding
             val context = binding.root.context
+            val activity = context as Activity
+            val app = activity.app
             val storage = Firebase.storage
+
+            @UiThread
+            fun updateDownloadStatus(status: DownloadStatus) {
+                binding.progressIndicator.visibility(status.downloading)
+                binding.downloadImageButton.setImageResource(status.getIcon())
+            }
 
             val oddColumns = columns % 2 == 0
             if (oddColumns)
@@ -88,7 +102,52 @@ open class DataClassAdapter(
 
                 if (downloadable) {
                     binding.downloadImageButton.setOnClickListener {
-                        dataClass.download(context)
+                        binding.progressIndicator.show()
+                        doAsync {
+                            val downloadStatus =
+                                dataClass.downloadStatus(context, app.searchSession, storage)
+                            uiContext {
+                                binding.progressIndicator.hide()
+
+                                if (!downloadStatus.downloaded && !downloadStatus.downloading)
+                                    dataClass.download(context)
+                                        .observe(activity as LifecycleOwner) {
+                                            val finished = it.state.isFinished
+
+                                            binding.progressIndicator.show()
+                                            if (!binding.progressIndicator.isIndeterminate) {
+                                                binding.progressIndicator.hide()
+                                                binding.progressIndicator.isIndeterminate = true
+                                                binding.progressIndicator.show()
+                                            }
+                                            updateDownloadStatus(
+                                                if (finished)
+                                                    DownloadStatus.DOWNLOADED
+                                                else
+                                                    DownloadStatus.DOWNLOADING
+                                            )
+                                        }
+                                else {
+                                    Timber.v("Showing download dialog")
+                                    DownloadDialog(activity, dataClass, storage)
+                                        .show {
+                                            Timber.v("Deleted DataClass at $position.")
+                                            notifyItemChanged(position)
+                                        }
+                                }
+                            }
+                        }
+                    }
+
+                    // Check download status
+                    doAsync {
+                        val downloadStatus =
+                            dataClass.downloadStatus(context, app.searchSession, storage)
+                            { binding.progressIndicator.progress = it.percentage() }
+                        uiContext {
+                            binding.progressIndicator.visibility(downloadStatus.downloading)
+                            binding.downloadImageButton.setImageResource(downloadStatus.getIcon())
+                        }
                     }
                 }
 
