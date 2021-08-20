@@ -47,14 +47,24 @@ enum class DownloadStatus {
      * @author Arnau Mora
      * @since 20210413
      */
-    fun isDownloaded(): Boolean = this == DOWNLOADED
+    val downloaded: Boolean
+        get() = this == DOWNLOADED
 
     /**
      * Checks if the [DataClass] is partially downloaded.
      * @author Arnau Mora
      * @since 20210413
      */
-    fun partialDownload(): Boolean = this == PARTIALLY
+    val partialDownload: Boolean
+        get() = this == PARTIALLY
+
+    /**
+     * Checks if the [DataClass] is being downloaded.
+     * @author Arnau Mora
+     * @since 20210820
+     */
+    val downloading: Boolean
+        get() = this == DOWNLOADING
 
     /**
      * Gets the icon that should be displayed for the download status.
