@@ -56,7 +56,7 @@ class DataClassPagingSource(
         loadSize: Int,
         offset: Int
     ): List<DataClassImpl> {
-        Timber.v("Performing load...")
+        Timber.v("Performing load for $loadSize items at $offset...")
         // Will load the sector's contents, they are paths
         val id = data.id
         val namespace = data.namespace
@@ -67,22 +67,26 @@ class DataClassPagingSource(
         val searchSpec = SearchSpec.Builder()
             .addFilterNamespaces(namespace)
             .setResultCountPerPage(offset + loadSize)
+            .setOrder(SearchSpec.ORDER_ASCENDING)
             .build()
         // Will search for sectorId, but in paths. This should be searching for parentSectorId
         Timber.v("Searching...")
         val searchResults = searchSession.search(id, searchSpec)
         Timber.v("Getting search results...")
         val nextPage = searchResults.nextPage.await()
+        Timber.v("Got ${nextPage.size} results. Processing...")
         return arrayListOf<DataClassImpl>().apply {
             if (nextPage.size < offset)
                 return@apply
 
             val page = nextPage.subList(offset, nextPage.size)
+            Timber.v("Got sublist to display with ${page.size} elements. Processing...")
             for (searchResult in page) {
                 val genericDocument = searchResult.genericDocument
                 val schemaType = genericDocument.schemaType
                 if (schemaType == dataClassTypeName) { // This should be true
                     val document = genericDocument.toDocumentClass(dataClassType).data()
+                    Timber.v("Adding \"${document.displayName}\"...")
                     add(document)
                 } else // Just in case loaded data is not the correct type
                     Timber.w("Got invalid data in search. Schema: $schemaType")
@@ -127,7 +131,7 @@ class DataClassPagingSource(
             return LoadResult.Page(
                 data = result,
                 prevKey = null, // Only paging forward
-                nextKey = loadSize + key,
+                nextKey = if (result.size >= loadSize) loadSize + key else null,
             )
         } catch (e: Exception) {
             return LoadResult.Error(e)
