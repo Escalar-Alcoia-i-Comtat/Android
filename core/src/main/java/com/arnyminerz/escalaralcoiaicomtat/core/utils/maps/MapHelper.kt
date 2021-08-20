@@ -140,16 +140,16 @@ class MapHelper {
      * @author Arnau Mora
      * @since 20210604
      */
-    @get:Synchronized
-    internal val markers = arrayListOf<GeoMarker>()
+    @Volatile
+    internal var markers = listOf<GeoMarker>()
 
     /**
      * Stores all the geometries that should be shown in the map when [display] is called.
      * @author Arnau Mora
      * @since 20210604
      */
-    @get:Synchronized
-    internal val geometries = arrayListOf<GeoGeometry>()
+    @Volatile
+    internal var geometries = listOf<GeoGeometry>()
 
     /**
      * Stores all the markers that have been added to the map, as references, for manipulating them
@@ -157,8 +157,8 @@ class MapHelper {
      * @author Arnau Mora
      * @since 20210604
      */
-    @get:Synchronized
-    private val commonMarkers = arrayListOf<Marker>()
+    @Volatile
+    private var commonMarkers = listOf<Marker>()
 
     /**
      * Stores all the polylines that have been added to the map, as references, for manipulating them
@@ -166,8 +166,8 @@ class MapHelper {
      * @author Arnau Mora
      * @since 20210604
      */
-    @get:Synchronized
-    private val polylines = arrayListOf<Polyline>()
+    @Volatile
+    private var polylines = listOf<Polyline>()
 
     /**
      * Stores all the polygons that have been added to the map, as references, for manipulating them
@@ -175,8 +175,8 @@ class MapHelper {
      * @author Arnau Mora
      * @since 20210604
      */
-    @get:Synchronized
-    private val polygons = arrayListOf<Polygon>()
+    @Volatile
+    private var polygons = listOf<Polygon>()
 
     private var loadedKmzFile: File? = null
 
@@ -514,7 +514,7 @@ class MapHelper {
         Timber.v("Loading features...")
         with(result) {
             Timber.v("  Loading ${markers.size} markers...")
-            addMarkers(markers)
+            addMarkers(*markers.toTypedArray())
             Timber.v("  Loading ${polygons.size} polygons...")
             addGeometries(polygons)
             Timber.v("  Loading ${polylines.size} polylines...")
@@ -527,7 +527,7 @@ class MapHelper {
      * @param markers The markers to add
      * @see GeoMarker
      */
-    fun addMarkers(markers: Collection<GeoMarker>) {
+    fun addMarkers(vararg markers: GeoMarker) {
         for (marker in markers)
             addMarker(marker)
     }
@@ -538,7 +538,31 @@ class MapHelper {
      * @see GeoMarker
      */
     fun addMarker(marker: GeoMarker) {
-        markers.add(marker)
+        val copy = markers.toMutableList()
+        copy.add(marker)
+        markers = copy
+    }
+
+
+    /**
+     * Adds markers to the map
+     * @param markers The markers to add
+     * @see Marker
+     */
+    fun addMarkers(vararg markers: Marker) {
+        for (marker in markers)
+            addMarker(marker)
+    }
+
+    /**
+     * Adds a marker to the map
+     * @param marker The marker to add
+     * @see Marker
+     */
+    fun addMarker(marker: Marker) {
+        val copy = commonMarkers.toMutableList()
+        copy.add(marker)
+        commonMarkers = copy
     }
 
     /**
@@ -557,7 +581,51 @@ class MapHelper {
      * @see GeoGeometry
      */
     fun addGeometry(geometry: GeoGeometry) {
-        geometries.add(geometry)
+        val copy = geometries.toMutableList()
+        copy.add(geometry)
+        geometries = copy
+    }
+
+    /**
+     * Adds polylines to the map
+     * @param polylines The polylines to add
+     * @see Polyline
+     */
+    fun addPolylines(polylines: Collection<Polyline>) {
+        for (polyline in polylines)
+            addPolyline(polyline)
+    }
+
+    /**
+     * Adds a polyline to the map
+     * @param polyline The polyline to add
+     * @see Polyline
+     */
+    fun addPolyline(polyline: Polyline) {
+        val copy = polylines.toMutableList()
+        copy.add(polyline)
+        polylines = copy
+    }
+
+    /**
+     * Adds polygons to the map
+     * @param polygons The polygons to add
+     * @see Polygon
+     */
+    fun addPolygon(polygons: Collection<Polygon>) {
+        for (polygon in polygons)
+            addPolygon(polygon)
+    }
+
+    /**
+     * Adds a polygon to the map
+     * @param polygon The polyline to add
+     * @see Polygon
+     */
+    fun addPolygon(polygon: Polygon) {
+        val copy = polygons.toMutableList()
+        copy.add(polygon)
+        polygons = copy
     }
 
     /**
@@ -588,7 +656,9 @@ class MapHelper {
         Timber.d("Clearing symbols from map...")
         for (marker in commonMarkers)
             marker.remove()
-        commonMarkers.clear()
+        val copy = commonMarkers.toMutableList()
+        copy.clear()
+        commonMarkers = copy
     }
 
     /**
@@ -605,7 +675,9 @@ class MapHelper {
         Timber.d("Clearing lines from map...")
         for (line in polylines)
             line.remove()
-        polylines.clear()
+        val copy = polylines.toMutableList()
+        copy.clear()
+        polylines = copy
     }
 
     /**
@@ -622,7 +694,9 @@ class MapHelper {
         Timber.d("Clearing polygons from map...")
         for (fill in polygons)
             fill.remove()
-        polygons.clear()
+        val copy = polygons.toMutableList()
+        copy.clear()
+        polygons = copy
     }
 
     /**
@@ -645,12 +719,12 @@ class MapHelper {
 
         val geometries = geometries.addToMap(map!!)
         for (geometry in geometries) {
-            geometry.first?.let { polylines.add(it) }
-            geometry.second?.let { polygons.add(it) }
+            geometry.first?.let { addPolyline(it) }
+            geometry.second?.let { addPolygon(it) }
         }
 
         val symbols = markers.addToMap(this)
-        this.commonMarkers.addAll(symbols)
+        addMarkers(*symbols.toTypedArray())
     }
 
     /**
