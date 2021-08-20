@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.paging
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.DimenRes
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -25,13 +26,14 @@ import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
 class AreaAdapter(
-    clickListener: ((binding: ListItemDwDataclassBinding, position: Int) -> Unit)?
-) : DataClassAdapter(1, false, clickListener, DataClassComparator())
+    clickListener: ((binding: ListItemDwDataclassBinding, position: Int, item: DataClassImpl) -> Unit)?
+) : DataClassAdapter(1, false, R.dimen.area_item_height, clickListener, DataClassComparator())
 
 open class DataClassAdapter(
     private val columns: Int,
     private val isPath: Boolean,
-    private val clickListener: ((binding: ListItemDwDataclassBinding, position: Int) -> Unit)?,
+    @DimenRes private val itemHeight: Int,
+    private val clickListener: ((binding: ListItemDwDataclassBinding, position: Int, item: DataClassImpl) -> Unit)?,
     diffCallback: DiffUtil.ItemCallback<DataClassImpl>
 ) : PagingDataAdapter<DataClassImpl, DataClassAdapter.DataClassViewHolder>(diffCallback) {
     class DataClassViewHolder(
@@ -80,7 +82,9 @@ open class DataClassAdapter(
                 if (oddColumns)
                     binding.titleTextView.textAlignment = View.TEXT_ALIGNMENT_CENTER
                 binding.titleTextView.text = dataClass.displayName
-                binding.imageView.setOnClickListener { clickListener?.invoke(binding, position) }
+                binding.imageView.setOnClickListener {
+                    clickListener?.invoke(binding, position, dataClass)
+                }
 
                 if (downloadable) {
                     binding.downloadImageButton.setOnClickListener {
