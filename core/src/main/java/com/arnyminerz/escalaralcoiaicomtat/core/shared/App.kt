@@ -16,6 +16,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -143,6 +145,16 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      */
     @WorkerThread
     suspend fun getSector(sectorId: String): Sector? = searchSession.getSector(sectorId)
+
+    /**
+     * Searches for the specified [Path]s in [searchSession].
+     * Serves for a shortcut to [AppSearchSession.getPaths].
+     * @author Arnau Mora
+     * @since 20210820
+     * @see AppSearchSession.getSector
+     */
+    @WorkerThread
+    suspend fun getPaths(zoneId: String): List<Path> = searchSession.getPaths(zoneId)
 }
 
 /**
@@ -332,3 +344,15 @@ suspend fun AppSearchSession.getZones(areaId: String): List<Zone> =
 @WorkerThread
 suspend fun AppSearchSession.getSectors(zoneId: String): List<Sector> =
     getList<Sector, SectorData>(zoneId, Sector.NAMESPACE)
+
+/**
+ * Searches for all the [AppSearchSession] indexed [Path]s that have as a parent a zone with id
+ * [sectorId].
+ * @author Arnau Mora
+ * @since 20210820
+ * @param sectorId The parent [Sector] id of the [Path]s to search for.
+ * @return A [List] with the found [Path]s.
+ */
+@WorkerThread
+suspend fun AppSearchSession.getPaths(sectorId: String): List<Path> =
+    getList<Path, PathData>(sectorId, Path.NAMESPACE)
