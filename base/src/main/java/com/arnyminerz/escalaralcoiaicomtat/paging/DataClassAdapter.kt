@@ -18,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.then
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toPx
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
@@ -76,6 +77,9 @@ open class DataClassAdapter(
                 binding.progressIndicator.visibility(status.downloading)
                 binding.downloadImageButton.setImageResource(status.getIcon())
             }
+
+            binding.imageView.layoutParams.height =
+                activity.resources.getDimension(itemHeight).toPx.toInt()
 
             val oddColumns = columns % 2 == 0
             if (oddColumns)
