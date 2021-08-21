@@ -62,6 +62,13 @@ const val ARGUMENT_AREA_ID = "area_id"
 const val ARGUMENT_ZONE_ID = "zone_id"
 const val ARGUMENT_SECTOR_ID = "sector_id"
 
+/**
+ * This is used for passing to a fragment an activity the user has made.
+ * @author Arnau Mora
+ * @since 20210821
+ */
+const val ARGUMENT_ACTIVITY = "activity"
+
 const val MAP_MARKERS_BUNDLE_EXTRA = "Markers"
 const val MAP_GEOMETRIES_BUNDLE_EXTRA = "Geometries"
 
