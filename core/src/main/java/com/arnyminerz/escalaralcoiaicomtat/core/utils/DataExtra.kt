@@ -8,7 +8,9 @@ import android.util.SizeF
 import android.util.SparseArray
 import java.io.Serializable
 
-class DataExtra<T>(val key: String)
+class DataExtra<T>(val key: String) {
+    override fun toString(): String = key
+}
 
 inline fun <reified T> Bundle.getExtra(extra: DataExtra<T>): T? {
     if (containsKey(extra.key))
