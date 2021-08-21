@@ -35,6 +35,14 @@
             android:layout_marginBottom="8dp"
             android:indeterminate="true" />
 
+        <TextView
+            android:id="@+id/no_activities_textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/profile_last_activity_none"
+            android:textAlignment="center" />
+
         <LinearLayout
             android:id="@+id/last_activity_layout"
             android:layout_width="match_parent"
