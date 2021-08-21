@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
-import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -35,7 +34,6 @@ class ZoneActivity : DataClassListActivity<Sector, Area, Zone>(1, R.dimen.sector
          * @param activity The [Activity] that wants to launch the Intent
          * @param zoneId The id of the zone to display.
          */
-        @UiThread
         fun intent(activity: Activity, zoneId: String): Intent =
             Intent(activity, ZoneActivity::class.java).apply {
                 putExtra(EXTRA_ZONE, zoneId)

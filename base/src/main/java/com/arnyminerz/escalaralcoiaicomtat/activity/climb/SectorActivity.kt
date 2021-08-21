@@ -47,7 +47,6 @@ class SectorActivity : LanguageAppCompatActivity() {
          * @param zoneId The id of the zone to display.
          * @param sectorId The id of the sector to select by default.
          */
-        @UiThread
         fun intent(activity: Activity, zoneId: String, sectorId: String): Intent =
             Intent(activity, SectorActivity::class.java).apply {
                 putExtra(EXTRA_ZONE, zoneId)
