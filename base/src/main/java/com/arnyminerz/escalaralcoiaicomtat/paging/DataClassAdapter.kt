@@ -77,6 +77,24 @@ open class DataClassAdapter(
             fun updateDownloadStatus(status: DownloadStatus) {
                 binding.progressIndicator.visibility(status.downloading)
                 binding.downloadImageButton.setImageResource(status.getIcon())
+
+                if (status.downloading) {
+                    binding.progressIndicator.show()
+                    if (!binding.progressIndicator.isIndeterminate) {
+                        binding.progressIndicator.hide()
+                        binding.progressIndicator.isIndeterminate = true
+                        binding.progressIndicator.show()
+                    }
+                    val liveData = dataClass?.downloadWorkInfoLiveData(context) ?: return
+                    liveData.observe(activity as LifecycleOwner) { workInfos ->
+                        if (workInfos.isEmpty())
+                            return@observe
+                        val workInfo = workInfos[0]
+                        val finished = workInfo.state.isFinished
+                        if (finished)
+                            updateDownloadStatus(DownloadStatus.DOWNLOADED)
+                    }
+                }
             }
 
             binding.imageView.layoutParams.height =
@@ -119,12 +137,6 @@ open class DataClassAdapter(
                                         .observe(activity as LifecycleOwner) {
                                             val finished = it.state.isFinished
 
-                                            binding.progressIndicator.show()
-                                            if (!binding.progressIndicator.isIndeterminate) {
-                                                binding.progressIndicator.hide()
-                                                binding.progressIndicator.isIndeterminate = true
-                                                binding.progressIndicator.show()
-                                            }
                                             updateDownloadStatus(
                                                 if (finished)
                                                     DownloadStatus.DOWNLOADED
@@ -150,8 +162,7 @@ open class DataClassAdapter(
                             dataClass.downloadStatus(context, app.searchSession, storage)
                             { binding.progressIndicator.progress = it.percentage() }
                         uiContext {
-                            binding.progressIndicator.visibility(downloadStatus.downloading)
-                            binding.downloadImageButton.setImageResource(downloadStatus.getIcon())
+                            updateDownloadStatus(downloadStatus)
                         }
                     }
                 }
