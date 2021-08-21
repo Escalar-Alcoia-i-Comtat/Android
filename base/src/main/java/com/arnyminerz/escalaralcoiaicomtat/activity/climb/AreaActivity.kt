@@ -33,7 +33,7 @@ import timber.log.Timber
  * @see Area
  * @see DataClassListActivity
  */
-class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen.area_item_height) {
+class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen.zone_item_height) {
     /**
      * If the contents of the [Area] are being loaded.
      * @author Arnau Mora
