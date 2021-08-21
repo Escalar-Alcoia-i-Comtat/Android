@@ -30,6 +30,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_SECTOR_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_ZONE_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APPLICATION_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MAX
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DYNAMIC_LINKS_DOMAIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_STATIC
@@ -44,10 +46,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.DOWNLOAD_QUALITY_MAX
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.DOWNLOAD_QUALITY_MIN
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.DownloadData
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.DownloadWorker
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.google.firebase.dynamiclinks.ShortDynamicLink
@@ -507,7 +507,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @throws IllegalArgumentException If the specified quality is out of bounds
      */
     @Throws(IllegalArgumentException::class)
-    fun download(
+    inline fun <reified W : DownloadWorkerModel> download(
         context: Context,
         overwrite: Boolean = true,
         quality: Int = 100
@@ -520,7 +520,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         Timber.v("Preparing DownloadData...")
         val downloadData = DownloadData(this, overwrite, quality)
         Timber.v("Scheduling download...")
-        return DownloadWorker.schedule(context, pin, downloadData)
+        val workerClass = W::class.java
+        val schedule = workerClass.getMethod(
+            "schedule",
+            Context::class.java,
+            String::class.java,
+            DownloadData::class.java
+        )
+        return schedule.invoke(null, context, pin, downloadData) as LiveData<WorkInfo>
     }
 
     /**
