@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage
 
+import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.core.data.auth.User
 import com.arnyminerz.escalaralcoiaicomtat.core.data.auth.VisibleUserData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.CompletionType
@@ -23,14 +24,14 @@ import timber.log.Timber
  * @param notes The notes the user took.
  * @param likedBy The user uids that have liked the publication.
  */
-open class MarkedDataInt(
+abstract class MarkedDataInt(
     val documentPath: String,
     val timestamp: Timestamp?,
     val user: VisibleUserData,
     val comment: String?,
     val notes: String?,
     val likedBy: MutableList<String>
-) {
+) : Parcelable {
     companion object {
         /**
          * Initializes a new [MarkedDataInt] subinstance based on the data of [document].
