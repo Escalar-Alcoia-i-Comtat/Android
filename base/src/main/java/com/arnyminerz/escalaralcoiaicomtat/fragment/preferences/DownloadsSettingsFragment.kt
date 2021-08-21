@@ -10,12 +10,12 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.UpdatingActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AUTOMATIC_DOWNLOADS_UPDATE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOADS_QUALITY_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MAX
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MOBILE_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ROAMING_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.UPDATE_IMAGES
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.DOWNLOAD_QUALITY_MAX
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.DOWNLOAD_QUALITY_MIN
 
 class DownloadsSettingsFragment : PreferenceFragmentCompat() {
 
