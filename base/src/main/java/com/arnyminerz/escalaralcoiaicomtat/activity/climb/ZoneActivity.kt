@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
@@ -18,10 +19,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.put
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.view.model.DataClassListViewModel
+import com.arnyminerz.escalaralcoiaicomtat.view.model.DataClassListViewModelFactory
 import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber
 
-class ZoneActivity : DataClassListActivity<Sector, Area, Zone>(1, R.dimen.zone_item_height) {
+class ZoneActivity : DataClassListActivity<Sector, Area, Zone>(1, R.dimen.sector_item_height) {
     companion object {
         var errorNotStored: Boolean = false
 
@@ -59,6 +62,18 @@ class ZoneActivity : DataClassListActivity<Sector, Area, Zone>(1, R.dimen.zone_i
             return
         }
         zoneId = zoneIdExtra
+
+        Timber.v("Getting view model...")
+        val viewModel by viewModels<DataClassListViewModel> {
+            DataClassListViewModelFactory(
+                app,
+                null,
+                zoneId,
+                null
+            )
+        }
+        this.viewModel = viewModel
+
         doAsync {
             dataClass = app.getZone(zoneId) ?: run {
                 Timber.w("Could not find zone \"$zoneId\".")
