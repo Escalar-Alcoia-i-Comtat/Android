@@ -568,13 +568,16 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 if (child is DataClass<*, *>) {
                     uiContext { progressListener?.invoke(ValueMax(c, children.size)) }
                     val childDownloadStatus = child.downloadStatus(context, searchSession, storage)
-                    if (childDownloadStatus != DownloadStatus.DOWNLOADED) {
-                        Timber.d(
-                            "$pin has a non-downloaded children (${child.pin}): $childDownloadStatus"
-                        )
+                    if (!childDownloadStatus.downloaded) {
+                        // If at least one non-downloaded, that means that not all children are
+                        Timber.d("$pin has a non-downloaded children (${child.pin}): $childDownloadStatus")
                         allChildrenDownloaded = false
+                    } else {
+                        // This means there's at least one children downloaded (or downloading?)
+                        Timber.v("$pin has a downloaded/downloading children (${child.pin}): $childDownloadStatus")
+                        atLeastOneChildrenDownloaded = true
                         break
-                    } else atLeastOneChildrenDownloaded = true
+                    }
                 } else Timber.d("$pin Child is not DataClass")
             }
 
