@@ -438,10 +438,10 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                     "An AlreadyLoadingException has been thrown while loading the zones in ZoneActivity."
                 ) // Let's just warn the debugger this is controlled
             }
-        } else if (dataClassInitialized)
-            Timber.w("DataClass not initialized!")
-        else if (viewModelInitialized)
+        } else if (!viewModelInitialized)
             Timber.w("ViewModel not initialized!")
+        else if (!dataClassInitialized)
+            Timber.w("DataClass not initialized!")
         else
             Timber.w("Already loaded.")
     }
