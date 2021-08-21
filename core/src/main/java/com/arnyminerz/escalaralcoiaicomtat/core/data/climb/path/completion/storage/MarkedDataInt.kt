@@ -25,12 +25,12 @@ import timber.log.Timber
  * @param likedBy The user uids that have liked the publication.
  */
 abstract class MarkedDataInt(
-    val documentPath: String,
-    val timestamp: Timestamp?,
-    val user: VisibleUserData,
-    val comment: String?,
-    val notes: String?,
-    val likedBy: MutableList<String>
+    open val documentPath: String,
+    open val timestamp: Timestamp?,
+    open val user: VisibleUserData,
+    open val comment: String?,
+    open val notes: String?,
+    open var likedBy: List<String>
 ) : Parcelable {
     companion object {
         /**
@@ -126,10 +126,12 @@ abstract class MarkedDataInt(
      */
     fun like(firestore: FirebaseFirestore, user: FirebaseUser): Task<Void> {
         val userUid = user.uid
+        val likedBy = this.likedBy.toMutableList()
         if (likedBy.contains(userUid))
             likedBy.remove(userUid)
         else
             likedBy.add(userUid)
+        this.likedBy = likedBy
         return firestore.document(documentPath)
             .update("likedBy", likedBy)
     }
