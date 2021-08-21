@@ -26,6 +26,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.DownloadSectionViewHolder
+import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadWorker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.toCollection
@@ -104,7 +105,7 @@ class DownloadSectionsAdapter(
                     Timber.v("Cannot download, there's no internet connection.")
                     toast(mainActivity, R.string.toast_error_no_internet)
                 } else if (downloadStatus == DownloadStatus.NOT_DOWNLOADED)
-                    section.download(mainActivity)
+                    section.download<DownloadWorker>(mainActivity)
                         .observe(mainActivity) { workInfo ->
                             val state = workInfo.state
                             val data = workInfo.outputData

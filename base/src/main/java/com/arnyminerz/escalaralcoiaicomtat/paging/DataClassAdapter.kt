@@ -28,6 +28,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ListItemDwDataclassBinding
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ListItemPathBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
+import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadWorker
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
@@ -114,7 +115,7 @@ open class DataClassAdapter(
                                 binding.progressIndicator.hide()
 
                                 if (!downloadStatus.downloaded && !downloadStatus.downloading)
-                                    dataClass.download(context)
+                                    dataClass.download<DownloadWorker>(context)
                                         .observe(activity as LifecycleOwner) {
                                             val finished = it.state.isFinished
 
