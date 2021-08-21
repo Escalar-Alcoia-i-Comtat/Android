@@ -1,6 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
@@ -31,11 +31,11 @@ class ZoneActivity : DataClassListActivity<Sector, Area, Zone>(1, R.dimen.sector
          * Launches the [SectorActivity] with the specified arguments.
          * @author Arnau Mora
          * @since 20210820
-         * @param activity The [Activity] that wants to launch the Intent
+         * @param context The [Context] that wants to launch the Intent
          * @param zoneId The id of the zone to display.
          */
-        fun intent(activity: Activity, zoneId: String): Intent =
-            Intent(activity, ZoneActivity::class.java).apply {
+        fun intent(context: Context, zoneId: String): Intent =
+            Intent(context, ZoneActivity::class.java).apply {
                 putExtra(EXTRA_ZONE, zoneId)
             }
     }

@@ -1,6 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -43,12 +43,12 @@ class SectorActivity : LanguageAppCompatActivity() {
          * Launches the [SectorActivity] with the specified arguments.
          * @author Arnau Mora
          * @since 20210820
-         * @param activity The [Activity] that wants to launch the Intent
+         * @param context The [Context] that wants to launch the Intent
          * @param zoneId The id of the zone to display.
          * @param sectorId The id of the sector to select by default.
          */
-        fun intent(activity: Activity, zoneId: String, sectorId: String): Intent =
-            Intent(activity, SectorActivity::class.java).apply {
+        fun intent(context: Context, zoneId: String, sectorId: String): Intent =
+            Intent(context, SectorActivity::class.java).apply {
                 putExtra(EXTRA_ZONE, zoneId)
                 putExtra(EXTRA_SECTOR, sectorId)
             }
