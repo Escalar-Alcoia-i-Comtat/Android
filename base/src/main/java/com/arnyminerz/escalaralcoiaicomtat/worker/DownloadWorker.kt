@@ -441,16 +441,31 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                     ).await()
                     val areas = searchSession.getAreas()
                     Timber.v("Getting intent...")
-                    areas.getIntent(applicationContext, searchSession, displayName)
-                        ?.let { intent ->
-                            PendingIntent.getActivity(
-                                applicationContext,
-                                0,
-                                intent,
-                                PendingIntent.FLAG_IMMUTABLE
-                            )
+                    when (namespace) {
+                        // Area Skipped since not-downloadable
+                        Zone.NAMESPACE -> {
+                            // Example: Areas/<Area ID>/Zones/<Zone ID>
+                            val zoneId = downloadPath!!.split('/')[3]
+                            ZoneActivity.intent(applicationContext, zoneId)
                         }
-                    null
+                        Sector.NAMESPACE -> {
+                            // Example: Areas/<Area ID>/Zones/<Zone ID>/Sectors/<Sector ID>
+                            val zoneId = downloadPath!!.split('/')[3]
+                            val sectorId = downloadPath!!.split('/')[5]
+                            SectorActivity.intent(applicationContext, zoneId, sectorId)
+                        }
+                        else -> {
+                            downloadResult = failure(ERROR_UNKNOWN_NAMESPACE)
+                            null
+                        }
+                    }?.let { intent ->
+                        PendingIntent.getActivity(
+                            applicationContext,
+                            0,
+                            intent,
+                            PendingIntent.FLAG_IMMUTABLE
+                        )
+                    }
                 }
                 Timber.v("Showing download finished notification")
                 val text = applicationContext.getString(
