@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
@@ -34,6 +35,22 @@ import timber.log.Timber
  * @see DataClassListActivity
  */
 class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen.zone_item_height) {
+    companion object {
+        /**
+         * Launches the [AreaActivity] with the specified arguments.
+         * @author Arnau Mora
+         * @since 20210821
+         * @param activity The [Activity] that wants to launch the Intent
+         * @param areaId The id of the zone to display.
+         * @param position The position to move the list at.
+         */
+        fun intent(activity: Activity, areaId: String, position: Int = 0): Intent =
+            Intent(activity, AreaActivity::class.java).apply {
+                putExtra(EXTRA_AREA, areaId)
+                putExtra(EXTRA_POSITION, position)
+            }
+    }
+
     /**
      * If the contents of the [Area] are being loaded.
      * @author Arnau Mora
