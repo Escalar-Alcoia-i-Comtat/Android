@@ -6,6 +6,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.auth.User
 import com.arnyminerz.escalaralcoiaicomtat.core.data.auth.VisibleUserData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.CompletionType
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
@@ -166,5 +167,27 @@ abstract class MarkedDataInt(
             .get()
             .await()
         return Path(pathDocument)
+    }
+
+    /**
+     * Fetches the Zone data for the completion.
+     * @author Arnau Mora
+     * @since 20210821
+     */
+    @WorkerThread
+    suspend fun getZone(): Zone {
+        val firestore = Firebase.firestore
+        val zoneDocument = firestore
+            .document(documentPath) // This is the completion document path
+            .parent // Completions collection
+            .parent!! // Path document
+            .parent // Paths collection
+            .parent!! // Sector document
+            .parent // Sectors collection
+            .parent!! // Zone document
+            .get()
+            .await()
+        Timber.v("Got Zone data at ${zoneDocument.reference.path}, processing...")
+        return Zone(zoneDocument)
     }
 }
