@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.UIMetadata
@@ -47,7 +48,8 @@ class Area internal constructor(
         documentPath,
         webUrl,
         null
-    )
+    ),
+    DataClassDisplayOptions(1, false)
 ) {
     /**
      * Creates a new [Area] from the data of a [DocumentSnapshot].

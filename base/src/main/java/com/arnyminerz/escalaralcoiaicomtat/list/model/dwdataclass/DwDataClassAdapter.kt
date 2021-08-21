@@ -28,6 +28,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DownloadDialog
+import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadWorker
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageException
@@ -260,7 +261,7 @@ class DwDataClassAdapter<T : DataClass<*, *>, P : DataClass<*, *>>(
      */
     @UiThread
     fun requestDownload(data: T, holder: DwDataClassViewHolder) {
-        val result = data.download(activity)
+        val result = data.download<DownloadWorker>(activity)
         updateUi(holder, data, true)
         result.observe(activity) { workInfo ->
             val state = workInfo.state

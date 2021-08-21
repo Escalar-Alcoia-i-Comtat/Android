@@ -15,13 +15,32 @@ import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
+/**
+ * Shows the downloaded info of a downloaded DataClass with type [T].
+ * @author Arnau Mora
+ * @since 20210820
+ * @param T The type of the DataClass to display.
+ * @param activity The [Activity] where the dialog will be shown.
+ * @param data The [DataClass] to show.
+ * @param storage The [FirebaseStorage] reference.
+ * @param partialDownload Whether or not the [data] is completely downloaded including children.
+ * @param downloader When [partialDownload] is true, this will get called when the download button
+ * is clicked.
+ */
 class DownloadDialog<T : DataClass<*, *>>(
     private val activity: Activity,
     private val data: T,
     private val storage: FirebaseStorage,
-    private val partialDownload: Boolean,
-    private val downloader: (dataClass: T) -> Unit,
+    private val partialDownload: Boolean = false,
+    private val downloader: ((dataClass: T) -> Unit)? = null,
 ) {
+    /**
+     * Shows the dialog to the user.
+     * @author Arnau Mora
+     * @since 20210820
+     * @param deleteCallback This will get called when the user selects the option to delete the
+     * [DataClass].
+     */
     fun show(deleteCallback: (() -> Unit)? = null) {
         var builder =
             MaterialAlertDialogBuilder(activity, R.style.ThemeOverlay_App_MaterialAlertDialog)
@@ -35,7 +54,7 @@ class DownloadDialog<T : DataClass<*, *>>(
                     )
                 )
                 .setPositiveButton(R.string.action_download) { dialog, _ ->
-                    downloader(data)
+                    downloader?.invoke(data)
                     dialog.dismiss()
                 }
         } else {
@@ -81,25 +100,20 @@ class DownloadDialog<T : DataClass<*, *>>(
                             when (data) {
                                 is Area, is Zone, is Sector ->
                                     doAsync {
-                                        val children = data.getChildren(activity.app.searchSession)
+                                        val app = activity.app
+                                        val searchSession = app.searchSession
+                                        val children = data.getChildren(searchSession)
                                         for (child in children)
                                             if (child is DataClass<*, *>)
-                                                child.delete(
-                                                    activity.app,
-                                                    activity.app.searchSession
-                                                )
+                                                child.delete(app, searchSession)
 
-                                        data.delete(activity.app, activity.app.searchSession)
-                                        uiContext {
-                                            deleteCallback?.invoke()
-                                        }
+                                        data.delete(app, searchSession)
+                                        uiContext { deleteCallback?.invoke() }
                                     }
                                 else -> Timber.e("Data is not valid.")
                             }
                         }
-                        .setNegativeButton(R.string.action_cancel) { d, _ ->
-                            d.dismiss()
-                        }
+                        .setNegativeButton(R.string.action_cancel) { d, _ -> d.dismiss() }
                         .show()
                 }
                 .setNegativeButton(R.string.action_close, null)

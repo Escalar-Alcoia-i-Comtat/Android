@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -45,7 +46,8 @@ class Zone internal constructor(
         documentPath,
         webUrl,
         parentAreaId
-    )
+    ),
+    DataClassDisplayOptions(2, true)
 ) {
     /**
      * Creates a new [Zone] from the data of a [DocumentSnapshot].

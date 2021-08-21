@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.core.worker
+package com.arnyminerz.escalaralcoiaicomtat.worker
 
 import android.app.PendingIntent
 import android.content.Context
@@ -14,9 +14,9 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.await
 import androidx.work.workDataOf
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.R
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass.Companion.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
@@ -27,9 +27,25 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MOBILE_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ROAMING_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.getAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_DISPLAY_NAME
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_NAMESPACE
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_OVERWRITE
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_PATH
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_QUALITY
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerFactory
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_ALREADY_DOWNLOADED
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_CREATE_PARENT
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DATA_FETCH
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DELETE_OLD
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_MISSING_DATA
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_STORE_IMAGE
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UNKNOWN_NAMESPACE
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UPDATE_IMAGE_REF
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.failure
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.crashlytics.ktx.crashlytics
@@ -46,88 +62,9 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 
-const val DOWNLOAD_QUALITY_MIN = 1
-const val DOWNLOAD_QUALITY_MAX = 100
-
-const val DOWNLOAD_DISPLAY_NAME = "display_name"
-const val DOWNLOAD_NAMESPACE = "namespace"
-const val DOWNLOAD_PATH = "path"
-const val DOWNLOAD_OVERWRITE = "overwrite"
-const val DOWNLOAD_QUALITY = "quality"
-
-/**
- * When the DownloadWorker was ran with missing data
- * @since 20210313
- */
-const val ERROR_MISSING_DATA = "missing_data"
-
-/**
- * When old data was tried to be deleted but was not possible
- * @since 20210313
- */
-const val ERROR_DELETE_OLD = "delete_old"
-
-/**
- * When the target download could not be found
- * @since 20210313
- */
-const val ERROR_NOT_FOUND = "not_found"
-
-/**
- * When the target download has already been downloaded and overwrite is false
- * @since 20210313
- */
-const val ERROR_ALREADY_DOWNLOADED = "already_downloaded"
-
-/**
- * When trying to store an image, and the parent dir could not be created.
- * @since 20210323
- */
-const val ERROR_CREATE_PARENT = "create_parent"
-
-/**
- * When trying to fetch data from the server
- * @since 20210411
- */
-const val ERROR_DATA_FETCH = "data_fetch"
-
-/**
- * When there's an unkown error while storing the image.
- * @since 20210411
- */
-const val ERROR_STORE_IMAGE = "store_image"
-
-/**
- * When the specified namespace is not downloadable.
- * @since 20210412
- */
-const val ERROR_UNKNOWN_NAMESPACE = "unknown_namespace"
-
-/**
- * When the image reference could not be updated.
- * @since 20210422
- */
-const val ERROR_UPDATE_IMAGE_REF = "update_image_ref"
-
-class DownloadData
-/**
- * Initializes the class with specific parameters
- * @param dataClass The [DataClass] to download.
- * @param overwrite If the download should be overwritten if already downloaded. Note that if this
- * is false, if the download already exists the task will fail.
- * @param quality The compression quality of the image
- * @see DOWNLOAD_OVERWRITE_DEFAULT
- * @see DOWNLOAD_QUALITY_DEFAULT
- */
-constructor(
-    val dataClass: DataClass<*, *>,
-    val overwrite: Boolean = DOWNLOAD_OVERWRITE_DEFAULT,
-    val quality: Int = DOWNLOAD_QUALITY_DEFAULT
-)
-
 class DownloadWorker private constructor(appContext: Context, workerParams: WorkerParameters) :
-    Worker(appContext, workerParams) {
-    // TODO: Check if worker is working properly
+    DownloadWorkerModel, Worker(appContext, workerParams) {
+    override val factory: DownloadWorkerFactory = Companion
 
     private lateinit var namespace: String
     private lateinit var displayName: String
@@ -418,7 +355,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             Timber.v("Getting Firestore instance...")
             val firestore = Firebase.firestore
 
-            val downloadResult = when (namespace) {
+            var downloadResult = when (namespace) {
                 Zone.NAMESPACE -> runBlocking {
                     Timber.d("Downloading Zone...")
                     downloadZone(firestore, downloadPath!!)
@@ -435,22 +372,32 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
             if (downloadResult == Result.success()) {
                 val intent = runBlocking {
-                    val searchSession = LocalStorage.createSearchSession(
-                        LocalStorage.SearchContext.Builder(applicationContext, SEARCH_DATABASE_NAME)
-                            .build()
-                    ).await()
-                    val areas = searchSession.getAreas()
                     Timber.v("Getting intent...")
-                    areas.getIntent(applicationContext, searchSession, displayName)
-                        ?.let { intent ->
-                            PendingIntent.getActivity(
-                                applicationContext,
-                                0,
-                                intent,
-                                PendingIntent.FLAG_IMMUTABLE
-                            )
+                    when (namespace) {
+                        // Area Skipped since not-downloadable
+                        Zone.NAMESPACE -> {
+                            // Example: Areas/<Area ID>/Zones/<Zone ID>
+                            val zoneId = downloadPath!!.split('/')[3]
+                            ZoneActivity.intent(applicationContext, zoneId)
                         }
-                    null
+                        Sector.NAMESPACE -> {
+                            // Example: Areas/<Area ID>/Zones/<Zone ID>/Sectors/<Sector ID>
+                            val zoneId = downloadPath!!.split('/')[3]
+                            val sectorId = downloadPath!!.split('/')[5]
+                            SectorActivity.intent(applicationContext, zoneId, sectorId)
+                        }
+                        else -> {
+                            downloadResult = failure(ERROR_UNKNOWN_NAMESPACE)
+                            null
+                        }
+                    }?.let { intent ->
+                        PendingIntent.getActivity(
+                            applicationContext,
+                            0,
+                            intent,
+                            PendingIntent.FLAG_IMMUTABLE
+                        )
+                    }
                 }
                 Timber.v("Showing download finished notification")
                 val text = applicationContext.getString(
@@ -490,7 +437,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         }
     }
 
-    companion object {
+    companion object : DownloadWorkerFactory {
         /**
          * Schedules a new download as a new Worker.
          * @author Arnau Mora
@@ -510,7 +457,12 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
          * @see ERROR_STORE_IMAGE
          * @see ERROR_UPDATE_IMAGE_REF
          */
-        fun schedule(context: Context, tag: String, data: DownloadData): LiveData<WorkInfo> {
+        @JvmStatic
+        override fun schedule(
+            context: Context,
+            tag: String,
+            data: DownloadData
+        ): LiveData<WorkInfo> {
             Timber.v("Scheduling new download...")
             Timber.v("Building download constraints...")
             var constraints = Constraints.Builder()

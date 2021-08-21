@@ -1,5 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.UiThread
@@ -9,16 +11,13 @@ import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity.Companion.errorNotStored
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_AREA_ID
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_SECTOR_INDEX
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_ZONE_ID
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_POSITION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_COUNT
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
@@ -39,16 +38,38 @@ import timber.log.Timber
 
 @ExperimentalBadgeUtils
 class SectorActivity : LanguageAppCompatActivity() {
+    companion object {
+        /**
+         * Launches the [SectorActivity] with the specified arguments.
+         * @author Arnau Mora
+         * @since 20210820
+         * @param context The [Context] that wants to launch the Intent
+         * @param zoneId The id of the zone to display.
+         * @param sectorId The id of the sector to select by default.
+         */
+        fun intent(context: Context, zoneId: String, sectorId: String): Intent =
+            Intent(context, SectorActivity::class.java).apply {
+                putExtra(EXTRA_ZONE, zoneId)
+                putExtra(EXTRA_SECTOR, sectorId)
+            }
+    }
+
     private var transitionName: String? = null
 
-    lateinit var areaId: String
-        private set
     lateinit var zoneId: String
         private set
-    private var sectorCount: Int = -1
+    lateinit var sectorId: String
+        private set
+
     var currentPage: Int = 0
         private set
 
+    /**
+     * Stores the initialized [SectorFragment]s that should be displayed to the user.
+     * The key represents the [Sector.objectId] to display, the value is the [SectorFragment].
+     * @author Arnau Mora
+     * @since 20210820
+     */
     private val fragments = arrayListOf<SectorFragment>()
 
     private lateinit var binding: ActivitySectorBinding
@@ -121,25 +142,31 @@ class SectorActivity : LanguageAppCompatActivity() {
         binding.statusImageView.setOnClickListener { it.performLongClick() }
 
         doAsync {
+            val zone = app.getZone(zoneId) ?: run {
+                Timber.e("Could not find zone $zoneId.")
+                uiContext { onBackPressed() }
+                finish()
+                return@doAsync
+            }
+            val sectors = zone.getChildren(app.searchSession)
+            val sectorCount = sectors.size
+
+            Timber.v("Getting position extra...")
+            var positionExtra = savedInstanceState?.getInt(EXTRA_POSITION.key)
+
             Timber.v("There are $sectorCount sectors.")
             Timber.d("Initializing fragments...")
             fragments.clear()
-            for (i in 0 until sectorCount)
-                fragments.add(
-                    SectorFragment().apply {
-                        arguments = Bundle().apply {
-                            putString(ARGUMENT_AREA_ID, areaId)
-                            putString(ARGUMENT_ZONE_ID, zoneId)
-                            putInt(ARGUMENT_SECTOR_INDEX, i)
-                        }
-                    }
-                )
+            for ((i, sector) in sectors.withIndex()) {
+                fragments.add(SectorFragment.newInstance(sector.objectId))
+                if (positionExtra == null && sector.objectId == sectorId)
+                    positionExtra = i
+            }
 
-            val defaultPosition = savedInstanceState?.getInt(EXTRA_POSITION.key)
-                ?: intent.getExtra(EXTRA_SECTOR_INDEX, 0)
+            val defaultPosition = positionExtra ?: 0
             currentPage = defaultPosition
             if (fragments.size >= defaultPosition)
-                fragments[defaultPosition].load()
+                fragments[currentPage].load()
 
             uiContext {
                 Timber.v("Initializing view pager...")
@@ -181,8 +208,7 @@ class SectorActivity : LanguageAppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        if (this::areaId.isInitialized && this::zoneId.isInitialized) {
-            outState.putString(EXTRA_AREA.key, areaId)
+        if (this::zoneId.isInitialized) {
             outState.putString(EXTRA_ZONE.key, zoneId)
             outState.putInt(EXTRA_POSITION.key, binding.sectorViewPager.currentItem)
         }
@@ -192,7 +218,6 @@ class SectorActivity : LanguageAppCompatActivity() {
     override fun onBackPressed() {
         if (getExtra(EXTRA_STATIC, false))
             launch(ZoneActivity::class.java) {
-                putExtra(EXTRA_AREA, areaId)
                 putExtra(EXTRA_ZONE, zoneId)
             }
         else super.onBackPressed()
@@ -212,26 +237,21 @@ class SectorActivity : LanguageAppCompatActivity() {
             onBackPressed()
             false
         } else {
-            val areaIdExtra = intent.getExtra(EXTRA_AREA)
             val zoneIdExtra = intent.getExtra(EXTRA_ZONE)
-            val sectorCountExtra = intent.getExtra(EXTRA_SECTOR_COUNT, -1)
-            val areaIdInstanceState = savedInstanceState?.getString(EXTRA_AREA.key, null)
+            val sectorIdExtra = intent.getExtra(EXTRA_SECTOR)
             val zoneIdInstanceState = savedInstanceState?.getString(EXTRA_ZONE.key, null)
-            val sectorCountInstanceState = savedInstanceState?.getInt(EXTRA_SECTOR_COUNT.key, -1)
-            val areaIdBothInvalid = areaIdInstanceState == null && areaIdExtra == null
+            val sectorIdInstanceState = savedInstanceState?.getString(EXTRA_SECTOR.key, null)
             val zoneIdBothInvalid = zoneIdInstanceState == null && zoneIdExtra == null
-            val sectorCountBothInvalid =
-                (sectorCountInstanceState == null || sectorCountInstanceState < 0) && sectorCountExtra < 0
-            if (areaIdBothInvalid || zoneIdBothInvalid || sectorCountBothInvalid) {
+            val sectorIdBothInvalid = sectorIdInstanceState == null && sectorIdExtra == null
+            if (zoneIdBothInvalid || sectorIdBothInvalid) {
                 Timber.e("No loaded data for activity")
                 errorNotStored = true
                 onBackPressed()
                 false
             } else {
-                areaId = areaIdInstanceState ?: areaIdExtra!!
                 zoneId = zoneIdInstanceState ?: zoneIdExtra!!
-                sectorCount = sectorCountInstanceState ?: sectorCountExtra
-                Timber.d("Loading sectors from area $areaId, zone $zoneId...")
+                sectorId = sectorIdInstanceState ?: sectorIdExtra!!
+                Timber.d("Loading sectors from zone $zoneId...")
 
                 transitionName = intent.getExtra(EXTRA_SECTOR_TRANSITION_NAME)
                 if (transitionName == null)

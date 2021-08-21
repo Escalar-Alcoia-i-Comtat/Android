@@ -318,7 +318,7 @@ class MapsActivity : LanguageAppCompatActivity() {
                     Timber.v(
                         "Got ${markers.size} markers and ${geometries.size} geometries from intent."
                     )
-                    addMarkers(markers)
+                    addMarkers(*markers.toTypedArray())
                     addGeometries(geometries)
 
                     uiContext {

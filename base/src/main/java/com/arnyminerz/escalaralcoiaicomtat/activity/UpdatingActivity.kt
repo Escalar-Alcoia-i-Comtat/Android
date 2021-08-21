@@ -25,6 +25,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityUpdatingBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
+import com.arnyminerz.escalaralcoiaicomtat.worker.DownloadWorker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
@@ -130,14 +131,13 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
                 val app = application as App
                 val areas = app.getAreas()
                 for (area in areas) {
-                    if (area.downloadStatus(app, app.searchSession, storage).isDownloaded())
+                    if (area.downloadStatus(app, app.searchSession, storage).downloaded)
                         iterateUpdate(area)
                     else for (zone in area.getChildren(app.searchSession))
-                        if (zone.downloadStatus(app, app.searchSession, storage).isDownloaded())
+                        if (zone.downloadStatus(app, app.searchSession, storage).downloaded)
                             iterateUpdate(zone)
                         else for (sector in zone.getChildren(app.searchSession))
-                            if (sector.downloadStatus(app, app.searchSession, storage)
-                                    .isDownloaded()
+                            if (sector.downloadStatus(app, app.searchSession, storage).downloaded
                             )
                                 iterateUpdate(sector)
                 }
@@ -161,7 +161,7 @@ class UpdatingActivity : NetworkChangeListenerActivity() {
 
         Timber.v("Downloading area #$updateArea...")
         // TODO: The map won't be downloaded again
-        val result = dataClass.download(this)
+        val result = dataClass.download<DownloadWorker>(this)
         uiContext {
             result.observe(this) { workInfo ->
                 val state = workInfo.state

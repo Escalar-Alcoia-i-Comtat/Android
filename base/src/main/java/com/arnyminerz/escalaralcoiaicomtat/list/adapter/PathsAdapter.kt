@@ -34,11 +34,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.isUnknown
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_INDEX
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.INFO_VIBRATION
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
@@ -309,9 +306,6 @@ class PathsAdapter(
             holder.markCompletedButton.setOnClickListener {
                 markAsCompleteRequestHandler.launch(
                     Intent(activity, MarkCompletedActivity::class.java).apply {
-                        putExtra(EXTRA_AREA, activity.areaId)
-                        putExtra(EXTRA_ZONE, activity.zoneId)
-                        putExtra(EXTRA_SECTOR_INDEX, activity.currentPage)
                         putExtra(EXTRA_PATH, path.objectId)
                     }
                 )

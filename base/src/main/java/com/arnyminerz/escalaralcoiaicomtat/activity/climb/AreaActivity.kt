@@ -1,19 +1,20 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.viewModels
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.has
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_POSITION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
@@ -21,6 +22,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.put
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.view.model.DataClassListViewModel
+import com.arnyminerz.escalaralcoiaicomtat.view.model.DataClassListViewModelFactory
 import timber.log.Timber
 
 /**
@@ -31,7 +34,23 @@ import timber.log.Timber
  * @see Area
  * @see DataClassListActivity
  */
-class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen.area_item_height) {
+class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen.zone_item_height) {
+    companion object {
+        /**
+         * Launches the [AreaActivity] with the specified arguments.
+         * @author Arnau Mora
+         * @since 20210821
+         * @param activity The [Activity] that wants to launch the Intent
+         * @param areaId The id of the zone to display.
+         * @param position The position to move the list at.
+         */
+        fun intent(activity: Activity, areaId: String, position: Int = 0): Intent =
+            Intent(activity, AreaActivity::class.java).apply {
+                putExtra(EXTRA_AREA, areaId)
+                putExtra(EXTRA_POSITION, position)
+            }
+    }
+
     /**
      * If the contents of the [Area] are being loaded.
      * @author Arnau Mora
@@ -65,25 +84,39 @@ class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen
             return
         }
 
+        position = intent.getExtra(EXTRA_POSITION)
+            ?: savedInstanceState?.getInt(EXTRA_POSITION.key, 0) ?: 0
+        Timber.d("Current position: $position")
+
+        Timber.v("Getting view model...")
+        val viewModel by viewModels<DataClassListViewModel> {
+            DataClassListViewModelFactory(
+                app,
+                areaId,
+                null,
+                null
+            )
+        }
+        this.viewModel = viewModel
+
         this.areaId = areaId
         val app = application as App
+
         doAsync {
-            val areas = app.getAreas()
-            if (!areas.has(areaId))
+            // Get the corresponding Area and store it in [dataClass]
+            dataClass = app.getArea(areaId) ?: run {
                 uiContext {
-                    Timber.e("Area is not loaded in AREAS")
+                    Timber.e("Could not find area A/$areaId!")
                     onBackPressed()
+                    finish()
                 }
-            else {
-                // Get the corresponding Area and store it in [dataClass]
-                dataClass = areas[areaId]!!
-                Timber.d("DataClass id: ${dataClass.objectId}")
+                return@doAsync
+            }
+            Timber.d("DataClass id: A/${dataClass.objectId}")
 
-                position = intent.getExtra(EXTRA_POSITION)
-                    ?: savedInstanceState?.getInt(EXTRA_POSITION.key, 0) ?: 0
-                Timber.d("Current position: $position")
-
-                onStateChangeAsync(appNetworkState)
+            uiContext {
+                Timber.v("Refreshing UI with the loaded data...")
+                onStateChange(appNetworkState)
             }
         }
     }
@@ -107,8 +140,8 @@ class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen
         justAttached = false
     }
 
-    override fun intentExtra(index: Int, transitionName: String?): Intent =
+    override fun intentExtra(transitionName: String?, objectId: String): Intent =
         Intent(this@AreaActivity, ZoneActivity()::class.java)
             .putExtra(EXTRA_AREA, areaId)
-            .putExtra(EXTRA_ZONE, items[index].objectId)
+            .putExtra(EXTRA_ZONE, objectId)
 }

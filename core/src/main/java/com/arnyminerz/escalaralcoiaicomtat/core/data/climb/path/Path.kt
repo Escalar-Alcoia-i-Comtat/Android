@@ -50,6 +50,7 @@ class Path internal constructor(
     var rebuiltBy: String?,
     val downloaded: Boolean = false,
     override val documentPath: String,
+    val parentSectorId: String,
 ) : DataClassImpl(objectId, NAMESPACE, timestampMillis, displayName, documentPath),
     Comparable<Path> {
     /**
@@ -95,7 +96,8 @@ class Path internal constructor(
         data.getString("description"),
         data.getString("builtBy"),
         "",
-        documentPath = data.reference.path
+        documentPath = data.reference.path,
+        parentSectorId = data.reference.parent.parent!!.id
     ) {
         val pathData: Map<String, Any>? = data.data
 

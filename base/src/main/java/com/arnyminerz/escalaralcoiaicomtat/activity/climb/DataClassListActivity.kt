@@ -9,6 +9,7 @@ import androidx.annotation.DimenRes
 import androidx.annotation.UiThread
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -33,7 +34,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.LayoutListBinding
-import com.arnyminerz.escalaralcoiaicomtat.list.model.dwdataclass.DwDataClassAdapter
+import com.arnyminerz.escalaralcoiaicomtat.paging.DataClassAdapter
+import com.arnyminerz.escalaralcoiaicomtat.paging.DataClassComparator
+import com.arnyminerz.escalaralcoiaicomtat.view.model.DataClassListViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
@@ -42,6 +45,8 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.FileNotFoundException
 
@@ -122,6 +127,14 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
     internal var transitionName: String? = null
 
     /**
+     * Tells if the [viewModel] has been initialized.
+     * @author Arnau Mora
+     * @since 20210820
+     */
+    internal val viewModelInitialized: Boolean
+        get() = this::viewModel.isInitialized
+
+    /**
      * Tells if the [dataClass] has been initialized.
      * @author Arnau Mora
      * @since 20210815
@@ -130,19 +143,16 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
         get() = this::dataClass.isInitialized
 
     /**
-     * Stores the items that are being shown to the user.
-     * @author Arnau Mora
-     * @since 20210815
-     */
-    internal var items = listOf<C>()
-        private set
-
-    /**
      * Stores whether or not the map has been loaded.
      * @author Arnau Mora
      * @since 20210818
      */
     private var mapLoaded: Boolean = false
+
+    /**
+     * Stores the [DataClassListActivity]'s ViewModel.
+     */
+    lateinit var viewModel: DataClassListViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -200,97 +210,21 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         val hasInternet = state.hasInternet
         visibility(binding.noInternetCard.noInternetCardView, !hasInternet)
-        binding.mapProgressBarCard.show()
-        visibility(binding.mapProgressBar, false)
-        binding.mapProgressBar.isIndeterminate = true
-        visibility(binding.mapProgressBar, true)
 
+        updateList()
         updateIcon()
         loadMap()
-    }
-
-    /**
-     * Once [dataClass] has been initialized, which is indicated with [dataClassInitialized], and
-     * only if [loaded] is false, this is, for not loading the content multiple times when the
-     * network status gets updated, all the content gets loaded.
-     * Loads:
-     * - Title transition and text
-     * - [dataClass]'s children.
-     * - Recycler view
-     * @author Arnau Mora
-     * @since 20210818
-     */
-    override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
-        super.onStateChangeAsync(state)
-
-        if (!loaded && dataClassInitialized) {
-            uiContext {
-                binding.titleTextView.text = dataClass.displayName
-                binding.titleTextView.transitionName = transitionName
-            }
-
-            try {
-                Timber.v("Loading items...")
-                items = dataClass.getChildren(app.searchSession)
-
-                Timber.v("Got ${items.size} items of ${dataClass.namespace}.")
-
-                uiContext {
-                    if (mapLoaded)
-                        binding.mapProgressBarCard.hide()
-                    binding.recyclerView.layoutManager = if (itemsPerRow > 1)
-                        GridLayoutManager(this, itemsPerRow)
-                    else
-                        LinearLayoutManager(this)
-                    if (justAttached)
-                        binding.recyclerView.layoutAnimation =
-                            AnimationUtils.loadLayoutAnimation(
-                                this,
-                                R.anim.item_enter_left_animator
-                            )
-                    binding.recyclerView.adapter = DwDataClassAdapter(
-                        this,
-                        items,
-                        itemsPerRow,
-                        resources.getDimension(itemHeight).toInt()
-                    ) { _, viewHolder, index ->
-                        binding.loadingIndicator.show()
-
-                        Timber.v("Clicked item $index")
-                        val trn = ViewCompat.getTransitionName(viewHolder.titleTextView)
-                        Timber.v("Transition name: $trn")
-                        val intent = intentExtra(index, trn)
-                        val options = if (trn != null)
-                            ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                this, viewHolder.titleTextView, trn
-                            )
-                        else null
-
-                        startActivity(intent, options?.toBundle())
-                    }
-                    binding.recyclerView.scrollToPosition(position)
-                }
-
-                loaded = true
-            } catch (_: AlreadyLoadingException) {
-                // Ignore an already loading exception. The content will be loaded from somewhere else
-                Timber.v(
-                    "An AlreadyLoadingException has been thrown while loading the zones in ZoneActivity."
-                ) // Let's just warn the debugger this is controlled
-            }
-        } else if (dataClassInitialized)
-            Timber.i("Already loaded!")
-        else
-            Timber.w("DataClass not initialized!")
     }
 
     /**
      * This will get called when the user wants to navigate.
      * @author Arnau Mora
      * @since 20210815
+     * @param transitionName The transition name of the clicked item
+     * @param objectId The ID of the object that should be launched.
      * @return The [Intent] that should be launched with the data required for the target [Activity].
      */
-    abstract fun intentExtra(index: Int, transitionName: String?): Intent
+    abstract fun intentExtra(transitionName: String?, objectId: String): Intent
 
     /**
      * Updates the status icon at the actionbar.
@@ -318,7 +252,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
             Timber.v("Got download status: $downloadStatus")
 
             uiContext {
-                if (downloadStatus?.isDownloaded() == true) {
+                if (downloadStatus?.downloaded == true) {
                     i.setImageResource(R.drawable.cloud_check)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                         i.tooltipText = getString(R.string.status_downloaded)
@@ -343,6 +277,11 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
         val hasInternet = appNetworkState.hasInternet
         val initializationCheck = this::dataClass.isInitialized && this::mapHelper.isInitialized
         if (initializationCheck && !mapHelper.isLoaded && hasInternet) {
+            binding.mapProgressBarCard.show()
+            visibility(binding.mapProgressBar, false)
+            binding.mapProgressBar.isIndeterminate = true
+            visibility(binding.mapProgressBar, true)
+
             Timber.v("Loading map...")
             mapHelper
                 .show()
@@ -426,5 +365,84 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                 mapHelper.hide()
         } else
             binding.mapProgressBarCard.hide()
+    }
+
+    /**
+     * Updates the RecyclerView with the contents from [dataClass].
+     * @author Arnau Mora
+     * @since 20210820
+     */
+    private fun updateList() {
+        if (!loaded && viewModelInitialized && dataClassInitialized) {
+            Timber.v("Updating title...")
+            binding.titleTextView.text = dataClass.displayName
+            binding.titleTextView.transitionName = transitionName
+
+            try {
+                Timber.v("Updating RecyclerView...")
+                if (mapLoaded)
+                    binding.mapProgressBarCard.hide()
+                Timber.v("Setting layout manager...")
+                binding.recyclerView.layoutManager = if (itemsPerRow > 1)
+                    GridLayoutManager(this, itemsPerRow)
+                else
+                    LinearLayoutManager(this)
+                if (justAttached) {
+                    Timber.v("Setting animation...")
+                    binding.recyclerView.layoutAnimation =
+                        AnimationUtils.loadLayoutAnimation(
+                            this,
+                            R.anim.item_enter_left_animator
+                        )
+                }
+                Timber.v("Initializing adapter...")
+                val adapter = DataClassAdapter(
+                    itemsPerRow,
+                    false,
+                    itemHeight,
+                    { binding, position, item ->
+                        this.binding.loadingIndicator.show()
+
+                        Timber.v("Clicked item $position")
+                        val trn = ViewCompat.getTransitionName(binding.titleTextView)
+                        Timber.v("Transition name: $trn")
+                        val intent = intentExtra(trn, item.objectId)
+                        val options = if (trn != null)
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                this, binding.titleTextView, trn
+                            )
+                        else null
+
+                        startActivity(intent, options?.toBundle())
+                    },
+                    DataClassComparator()
+                )
+                Timber.v("Setting adapter...")
+                binding.recyclerView.adapter = adapter
+                Timber.v("Scrolling to position $position...")
+                binding.recyclerView.scrollToPosition(position)
+
+                Timber.v("Loading data...")
+                lifecycleScope.launch {
+                    Timber.v("Collecting flow from ViewModel...")
+                    viewModel.flow.collectLatest { pagingData ->
+                        Timber.v("Submitting paging data...")
+                        adapter.submitData(pagingData)
+                    }
+                }
+
+                loaded = true
+            } catch (_: AlreadyLoadingException) {
+                // Ignore an already loading exception. The content will be loaded from somewhere else
+                Timber.v(
+                    "An AlreadyLoadingException has been thrown while loading the zones in ZoneActivity."
+                ) // Let's just warn the debugger this is controlled
+            }
+        } else if (!viewModelInitialized)
+            Timber.w("ViewModel not initialized!")
+        else if (!dataClassInitialized)
+            Timber.w("DataClass not initialized!")
+        else
+            Timber.w("Already loaded.")
     }
 }

@@ -30,10 +30,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_SECTOR_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_ZONE_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APPLICATION_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MAX
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DYNAMIC_LINKS_DOMAIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_COUNT
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_STATIC
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
@@ -46,10 +46,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.readBitmap
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.DOWNLOAD_QUALITY_MAX
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.DOWNLOAD_QUALITY_MIN
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.DownloadData
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.DownloadWorker
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.google.firebase.dynamiclinks.ShortDynamicLink
@@ -83,7 +81,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     open val imageReferenceUrl: String,
     open val kmzReferenceUrl: String?,
     open val uiMetadata: UIMetadata,
-    open val metadata: DataClassMetadata
+    open val metadata: DataClassMetadata,
+    val displayOptions: DataClassDisplayOptions,
 ) : DataClassImpl(
     metadata.objectId,
     metadata.namespace,
@@ -149,10 +148,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                             zone.metadata.webURL.equals(queryName, true)
                         )
                             result = Intent(context, zoneActivityClass).apply {
-                                Timber.d("Found Zone id ${zone.objectId}!")
-                                putExtra(EXTRA_AREA, area.objectId)
                                 putExtra(EXTRA_ZONE, zone.objectId)
-                                putExtra(EXTRA_SECTOR_COUNT, zone.getSize(searchSession))
                             }
                         else
                             for ((counter, sector) in sectors.withIndex()) {
@@ -165,11 +161,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                                             Timber.d("Found Sector id ${sector.objectId} at $counter!")
                                             putExtra(EXTRA_AREA, area.objectId)
                                             putExtra(EXTRA_ZONE, zone.objectId)
-                                            putExtra(
-                                                EXTRA_SECTOR_COUNT,
-                                                zone.getSize(searchSession)
-                                            )
-                                            putExtra(EXTRA_SECTOR_INDEX, counter)
                                         }
 
                                 // If a result has been found, exit loop
@@ -239,8 +230,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val genericDocument = searchResult.genericDocument
         return when (genericDocument.schemaType) {
             "AreaData" -> null // Areas do not have parent
-            "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).zone()
-            "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).sector()
+            "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).data()
+            "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).data()
             else -> null // Just in case
         }
     }
@@ -273,10 +264,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             Timber.v("$this > [$p] Schema type: $schemaType")
             val data = try {
                 when (schemaType) {
-                    "AreaData" -> genericDocument.toDocumentClass(AreaData::class.java).area()
-                    "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).zone()
-                    "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).sector()
-                    "PathData" -> genericDocument.toDocumentClass(PathData::class.java).path()
+                    "AreaData" -> genericDocument.toDocumentClass(AreaData::class.java).data()
+                    "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).data()
+                    "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).data()
+                    "PathData" -> genericDocument.toDocumentClass(PathData::class.java).data()
                     else -> {
                         Timber.w("$this > [$p] Got unknown schema type.")
                         continue
@@ -474,6 +465,18 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
+     * Gets a [LiveData] of the [WorkInfo] for all works for the current [DataClass].
+     * @author Arnau Mora
+     * @since 20210417
+     * @param context The context to check from
+     */
+    @WorkerThread
+    fun downloadWorkInfoLiveData(context: Context): LiveData<List<WorkInfo>> {
+        val workManager = WorkManager.getInstance(context)
+        return workManager.getWorkInfosByTagLiveData(pin)
+    }
+
+    /**
      * Generates a list of [DownloadedSection].
      * @author Arnau Mora
      * @since 20210412
@@ -498,9 +501,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
                 val downloadStatus = dataClass.downloadStatus(context, searchSession, storage)
                 progressListener?.invoke(c, children.size)
-                if (showNonDownloaded ||
-                    downloadStatus.isDownloaded() || downloadStatus.partialDownload()
-                )
+                if (showNonDownloaded || downloadStatus.downloaded || downloadStatus.partialDownload)
                     emit(DownloadedSection(dataClass))
             }
         Timber.v("Got ${downloadedSectionsList.size} sections.")
@@ -518,7 +519,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @throws IllegalArgumentException If the specified quality is out of bounds
      */
     @Throws(IllegalArgumentException::class)
-    fun download(
+    inline fun <reified W : DownloadWorkerModel> download(
         context: Context,
         overwrite: Boolean = true,
         quality: Int = 100
@@ -531,7 +532,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         Timber.v("Preparing DownloadData...")
         val downloadData = DownloadData(this, overwrite, quality)
         Timber.v("Scheduling download...")
-        return DownloadWorker.schedule(context, pin, downloadData)
+        val workerClass = W::class.java
+        val schedule = workerClass.getMethod(
+            "schedule",
+            Context::class.java,
+            String::class.java,
+            DownloadData::class.java
+        )
+        return schedule.invoke(null, context, pin, downloadData) as LiveData<WorkInfo>
     }
 
     /**
@@ -548,7 +556,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         context: Context,
         searchSession: AppSearchSession,
         storage: FirebaseStorage,
-        progressListener: ((current: Int, max: Int) -> Unit)? = null
+        progressListener: (@UiThread (progress: ValueMax<Int>) -> Unit)? = null
     ): DownloadStatus {
         Timber.d("$pin Checking if downloaded")
 
@@ -577,15 +585,18 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             var atLeastOneChildrenDownloaded = false
             for ((c, child) in children.withIndex()) {
                 if (child is DataClass<*, *>) {
-                    progressListener?.invoke(c, children.size)
+                    uiContext { progressListener?.invoke(ValueMax(c, children.size)) }
                     val childDownloadStatus = child.downloadStatus(context, searchSession, storage)
-                    if (childDownloadStatus != DownloadStatus.DOWNLOADED) {
-                        Timber.d(
-                            "$pin has a non-downloaded children (${child.pin}): $childDownloadStatus"
-                        )
+                    if (!childDownloadStatus.downloaded) {
+                        // If at least one non-downloaded, that means that not all children are
+                        Timber.d("$pin has a non-downloaded children (${child.pin}): $childDownloadStatus")
                         allChildrenDownloaded = false
+                    } else {
+                        // This means there's at least one children downloaded (or downloading?)
+                        Timber.v("$pin has a downloaded/downloading children (${child.pin}): $childDownloadStatus")
+                        atLeastOneChildrenDownloaded = true
                         break
-                    } else atLeastOneChildrenDownloaded = true
+                    }
                 } else Timber.d("$pin Child is not DataClass")
             }
 

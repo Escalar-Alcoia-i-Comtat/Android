@@ -7,8 +7,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.DataExtra
 
 val EXTRA_AREA = DataExtra<String>("area")
 val EXTRA_ZONE = DataExtra<String>("zone")
-val EXTRA_SECTOR_COUNT = DataExtra<Int>("sector_count")
-val EXTRA_SECTOR_INDEX = DataExtra<Int>("sector_index")
+val EXTRA_SECTOR = DataExtra<String>("sector")
 val EXTRA_PATH = DataExtra<String>("path")
 val EXTRA_PATH_DOCUMENT = DataExtra<String>("path_document")
 

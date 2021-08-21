@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 import androidx.appsearch.annotation.Document
 import androidx.appsearch.app.AppSearchSchema
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 
@@ -33,11 +34,12 @@ data class PathData(
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var rebuiltBy: String,
     @Document.BooleanProperty var downloaded: Boolean,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var documentPath: String,
-) {
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var parentSectorId: String,
+) : DataRoot<Path> {
     @Document.Namespace
     var namespace: String = Path.NAMESPACE
 
-    fun path(): Path {
+    override fun data(): Path {
         val heightsArray = heights.split(",")
         val heights = arrayListOf<Long>()
         for (h in heightsArray)
@@ -77,7 +79,8 @@ data class PathData(
             builtBy.ifEmpty { null },
             rebuiltBy.ifEmpty { null },
             downloaded,
-            documentPath
+            documentPath,
+            parentSectorId,
         )
     }
 }
@@ -118,6 +121,7 @@ fun Path.data(): PathData {
         builtBy ?: "",
         rebuiltBy ?: "",
         downloaded,
-        documentPath
+        documentPath,
+        parentSectorId,
     )
 }
