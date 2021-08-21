@@ -1,15 +1,20 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage
 
 import android.os.Parcelable
+import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.core.data.auth.User
 import com.arnyminerz.escalaralcoiaicomtat.core.data.auth.VisibleUserData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.CompletionType
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.functions.FirebaseFunctionsException
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
 /**
@@ -145,4 +150,18 @@ abstract class MarkedDataInt(
     fun delete(firestore: FirebaseFirestore) =
         firestore.document(documentPath)
             .delete()
+
+    /**
+     * Fetches the Path data for the completion.
+     * @author Arnau Mora
+     * @since 20210821
+     */
+    @WorkerThread
+    suspend fun getPath(): Path {
+        val firestore = Firebase.firestore
+        val pathDocument = firestore.document(documentPath)
+            .get()
+            .await()
+        return Path(pathDocument)
+    }
 }
