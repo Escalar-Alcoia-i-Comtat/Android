@@ -151,13 +151,19 @@ class SectorActivity : LanguageAppCompatActivity() {
             val sectors = zone.getChildren(app.searchSession)
             val sectorCount = sectors.size
 
+            Timber.v("Getting position extra...")
+            var positionExtra = savedInstanceState?.getInt(EXTRA_POSITION.key)
+
             Timber.v("There are $sectorCount sectors.")
             Timber.d("Initializing fragments...")
             fragments.clear()
-            for (sector in sectors)
+            for ((i, sector) in sectors.withIndex()) {
                 fragments.add(SectorFragment.newInstance(sector.objectId))
+                if (positionExtra == null && sector.objectId == sectorId)
+                    positionExtra = i
+            }
 
-            val defaultPosition = savedInstanceState?.getInt(EXTRA_POSITION.key) ?: 0
+            val defaultPosition = positionExtra ?: 0
             currentPage = defaultPosition
             if (fragments.size >= defaultPosition)
                 fragments[currentPage].load()
