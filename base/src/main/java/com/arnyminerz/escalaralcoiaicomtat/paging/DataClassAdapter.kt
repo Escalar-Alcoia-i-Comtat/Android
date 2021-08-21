@@ -144,6 +144,8 @@ open class DataClassAdapter(
                                                     DownloadStatus.DOWNLOADING
                                             )
                                         }
+                                else if (downloadStatus.downloading)
+                                    toast(context, R.string.message_already_downloading)
                                 else {
                                     Timber.v("Showing download dialog")
                                     DownloadDialog(activity, dataClass, storage)
