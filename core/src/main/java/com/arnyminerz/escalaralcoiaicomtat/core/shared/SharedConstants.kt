@@ -155,6 +155,8 @@ const val METERS_PER_LAT_LON_DEGREE = EARTHS_CIRCUMFERENCE / 360
 // Downloads Constants
 const val DOWNLOAD_OVERWRITE_DEFAULT = true
 const val DOWNLOAD_QUALITY_DEFAULT = 85
+const val DOWNLOAD_QUALITY_MIN = 1
+const val DOWNLOAD_QUALITY_MAX = 100
 
 /**
  * The amount of margin in meters there should be left in the downloaded map around a marker.
