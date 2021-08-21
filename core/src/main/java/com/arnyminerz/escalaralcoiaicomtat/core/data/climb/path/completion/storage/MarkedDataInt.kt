@@ -10,6 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -170,14 +171,13 @@ abstract class MarkedDataInt(
     }
 
     /**
-     * Fetches the Zone data for the completion.
+     * Gives the [DocumentReference] of the [Zone] that contains the path that was marked.
      * @author Arnau Mora
      * @since 20210821
      */
-    @WorkerThread
-    suspend fun getZone(): Zone {
+    fun zoneReference(): DocumentReference {
         val firestore = Firebase.firestore
-        val zoneDocument = firestore
+        return firestore
             .document(documentPath) // This is the completion document path
             .parent // Completions collection
             .parent!! // Path document
@@ -185,6 +185,16 @@ abstract class MarkedDataInt(
             .parent!! // Sector document
             .parent // Sectors collection
             .parent!! // Zone document
+    }
+
+    /**
+     * Fetches the Zone data for the completion.
+     * @author Arnau Mora
+     * @since 20210821
+     */
+    @WorkerThread
+    suspend fun getZone(): Zone {
+        val zoneDocument = zoneReference()
             .get()
             .await()
         Timber.v("Got Zone data at ${zoneDocument.reference.path}, processing...")
