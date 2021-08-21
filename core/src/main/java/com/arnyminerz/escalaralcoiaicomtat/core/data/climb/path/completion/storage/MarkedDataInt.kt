@@ -159,7 +159,10 @@ abstract class MarkedDataInt(
     @WorkerThread
     suspend fun getPath(): Path {
         val firestore = Firebase.firestore
-        val pathDocument = firestore.document(documentPath)
+        val pathDocument = firestore
+            .document(documentPath) // This is the completion document path
+            .parent // Completions collection
+            .parent!! // Path document
             .get()
             .await()
         return Path(pathDocument)
