@@ -465,6 +465,18 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     }
 
     /**
+     * Gets a [LiveData] of the [WorkInfo] for all works for the current [DataClass].
+     * @author Arnau Mora
+     * @since 20210417
+     * @param context The context to check from
+     */
+    @WorkerThread
+    fun downloadWorkInfoLiveData(context: Context): LiveData<List<WorkInfo>> {
+        val workManager = WorkManager.getInstance(context)
+        return workManager.getWorkInfosByTagLiveData(pin)
+    }
+
+    /**
      * Generates a list of [DownloadedSection].
      * @author Arnau Mora
      * @since 20210412
