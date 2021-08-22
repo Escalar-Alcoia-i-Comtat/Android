@@ -15,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATACLASS_PREVIEW_SCALE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.then
@@ -174,7 +175,7 @@ open class DataClassAdapter(
                     val image = dataClass.image(
                         context,
                         storage,
-                        ImageLoadParameters().withResultImageScale(.5f)
+                        ImageLoadParameters().withResultImageScale(DATACLASS_PREVIEW_SCALE)
                     ) { }
                     uiContext {
                         if (image != null)
