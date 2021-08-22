@@ -11,6 +11,28 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityUserActivityBindi
  * @since 20210821
  */
 class UserActivityActivity : AppCompatActivity() {
+    companion object {
+        /**
+         * Returns the [Intent] with all the extras included for launching directly.
+         * @author Arnau Mora
+         * @since 20210821
+         * @param context The context where it's launching from.
+         * @param completions The list of [MarkedDataInt] to display.
+         * @param completionsCount The amount of items from [completions] which are completions and not projects.
+         */
+        fun intent(
+            context: Context,
+            completions: ArrayList<MarkedDataInt>,
+            completionsCount: Int,
+            projectsCount: Int
+        ): Intent =
+            Intent(context, UserActivityActivity::class.java).apply {
+                putParcelableArrayListExtra(EXTRA_COMPLETIONS.key, completions)
+                putExtra(EXTRA_COMPLETIONS_COUNT, completionsCount)
+                putExtra(EXTRA_PROJECTS_COUNT, projectsCount)
+            }
+    }
+
     private lateinit var binding: ActivityUserActivityBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
