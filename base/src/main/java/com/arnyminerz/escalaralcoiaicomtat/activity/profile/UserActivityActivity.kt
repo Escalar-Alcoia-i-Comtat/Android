@@ -40,6 +40,15 @@ class UserActivityActivity : AppCompatActivity() {
         binding = ActivityUserActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val completionsCount = intent.getExtra(EXTRA_COMPLETIONS_COUNT)
+        val projectsCount = intent.getExtra(EXTRA_PROJECTS_COUNT)
+        val completions = intent.getParcelableArrayListExtra<MarkedDataInt>(EXTRA_COMPLETIONS.key)
+            ?: return run {
+                Timber.e("${EXTRA_COMPLETIONS.key} extra not found in intent.")
+                onBackPressed()
+                finish()
+            }
+
         binding.backFab.setOnClickListener { onBackPressed() }
     }
 }
