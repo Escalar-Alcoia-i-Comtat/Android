@@ -19,6 +19,22 @@ val EXTRA_PATH_DOCUMENT = DataExtra<String>("path_document")
  */
 val EXTRA_COMPLETIONS = DataExtra<ArrayList<Parcelable>>("completions")
 
+/**
+ * Used together with [EXTRA_COMPLETIONS] for telling an activity how much of the items in
+ * [EXTRA_COMPLETIONS] are completions.
+ * @author Arnau Mora
+ * @since 20210821
+ */
+val EXTRA_COMPLETIONS_COUNT = DataExtra<Int>("completions")
+
+/**
+ * Used together with [EXTRA_COMPLETIONS] for telling an activity how much of the items in
+ * [EXTRA_COMPLETIONS] are projects.
+ * @author Arnau Mora
+ * @since 20210821
+ */
+val EXTRA_PROJECTS_COUNT = DataExtra<Int>("projects")
+
 val EXTRA_POSITION = DataExtra<Int>("position")
 
 val EXTRA_ZONE_TRANSITION_NAME = DataExtra<String>("zone_transition")
