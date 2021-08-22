@@ -9,7 +9,6 @@ import android.text.style.ForegroundColorSpan
 import androidx.annotation.ColorRes
 import androidx.annotation.IntRange
 import com.arnyminerz.escalaralcoiaicomtat.core.R
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.join
 import com.arnyminerz.escalaralcoiaicomtat.core.view.getColor
 import org.json.JSONArray
 import org.json.JSONException
@@ -71,7 +70,7 @@ class Grade(val displayName: String) : Parcelable {
     fun getSpannable(
         context: Context,
         @IntRange(from = 0, to = Int.MAX_VALUE.toLong()) count: Int = Int.MAX_VALUE
-    ): SpannableString = listOf(this).take(count).getSpannable(context, count)
+    ): SpannableString = listOf(this).take(count).getSpannable(context)
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(displayName)
@@ -183,47 +182,85 @@ fun Iterable<Grade>?.string(): String {
     return builder.toString()
 }
 
-fun Iterable<Grade>.getSpannable(
-    context: Context,
-    @IntRange(from = 0, to = Int.MAX_VALUE.toLong()) count: Int = Int.MAX_VALUE
-): SpannableString {
+fun Iterable<Grade>.getSpannable(context: Context): SpannableString {
+    // This is the full grade as a String
     val str = string()
-    val spannable = SpannableString(str.split("\n").take(count).join("\n"))
+        .replace("\n", "") // Remove all line jumps
+    Timber.v("Spanning grade text: $str")
+    // Sample str 1: 6b+(A1e)L1 6b+ (A1e)L2 6a+ (A1e)
+    // Sample str 2: 6b+
+    val lSplittedMutable = str.split('L').toMutableList()
+    // Splitted sample 1: [6b+(A1e),1 6b+ (A1e),2 6a+ (A1e)]
+    // Splitted sample 2: [6b+]
+    // Remove the first item if starts with L, since it's added wrongly
+    if (str.startsWith("L"))
+        lSplittedMutable.removeAt(0)
+    // Add all the "L"s again
+    val startingIndex = if (str.startsWith("L")) 0 else 1
+    if (lSplittedMutable.size > 1)
+        for (i in startingIndex until lSplittedMutable.size)
+            lSplittedMutable[i] = "L" + lSplittedMutable[i]
+    // Splitted sample 1: [6b+(A1e),L1 6b+ (A1e),L2 6a+ (A1e)]
+    // Splitted sample 2: [6b+]
+    // Builds a string with each parameter in new lines.
+    val stringBuilder = StringBuilder()
+    for (piece in lSplittedMutable)
+        stringBuilder.appendLine(piece)
+    // Transforms the builder into a string, and removes the last line jump.
+    val jumpedString = stringBuilder.toString().substringBeforeLast('\n')
+
+    // Create a new spannable with the built string
+    val spannable = SpannableString(jumpedString)
+
+    // Start coloring
+    val maxLength = jumpedString.length
     var charCounter = 0
-    for (line in str.split("\n").take(count))
-        if (line.isNotEmpty())
-            for (grade in line.split("/")) {
-                if (grade.isEmpty()) continue
-
-                Timber.v("Generating spannable for \"$grade\". Current char: $charCounter")
-                if (grade.indexOf(" ") >= 0) {
-                    val prefix = grade.substring(0, 1)
-                    val gradePiece = grade.substring(PATH_GRADE_SPAN_PADDING)
-                    Timber.v("  It is pitch! GradePiece: $gradePiece")
-                    spannable.setSpan(
-                        ForegroundColorSpan(getColor(context, Grade.gradeColor(prefix))),
-                        charCounter,
-                        charCounter + PATH_GRADE_SPAN_PADDING,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    spannable.setSpan(
-                        ForegroundColorSpan(getColor(context, Grade.gradeColor(gradePiece))),
-                        // Adding 3 for starting after L#
-                        charCounter + PATH_GRADE_SPAN_PADDING,
-                        // Should be the 3 added before and then -1 for the indexing of length
-                        charCounter + PATH_GRADE_SPAN_PADDING + gradePiece.length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                } else {
-                    spannable.setSpan(
-                        ForegroundColorSpan(getColor(context, Grade.gradeColor(grade))),
-                        charCounter,
-                        charCounter + grade.length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                }
-                charCounter += grade.length + 1 // Line jump
+    while (charCounter < maxLength) {
+        val char = jumpedString[charCounter]
+        if (char == '\n') {
+            // If it's a line jump, ignore
+            charCounter++
+        } else if (char.isDigit() || char == 'A') {
+            // If the character is a number, such as in "..[6]b+.."
+            val followingChar = jumpedString.getOrNull(charCounter + 1) // Get next char
+            if (followingChar == null) {
+                // If the next char was not found, can't do anything with the text, let default color
+                charCounter++
+                continue
             }
-
+            // Get the full chain
+            var subCharCounter = charCounter
+            while (subCharCounter < maxLength) {
+                val subChar = jumpedString[subCharCounter]
+                if (subChar.isLetterOrDigit() || subChar == '+' || subChar == '-')
+                    subCharCounter++
+                else break
+            }
+            val gradeChain = jumpedString.substring(charCounter, subCharCounter)
+            Timber.v("Detected grade $gradeChain. Painting...")
+            spannable.setSpan(
+                ForegroundColorSpan(getColor(context, Grade.gradeColor(gradeChain))),
+                charCounter,
+                subCharCounter,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            charCounter = subCharCounter + 1
+        } else if (char == 'L') {
+            // If it's an L indicator
+            // Get remaining text
+            val cut = jumpedString.substring(charCounter)
+            // Cut until next space
+            val lspace = cut.substringBefore(' ')
+            val subCharCount = charCounter + lspace.length
+            Timber.v("Detected L marker $lspace. Painting...")
+            spannable.setSpan(
+                ForegroundColorSpan(getColor(context, Grade.gradeColor(lspace))),
+                charCounter,
+                subCharCount,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            charCounter = subCharCount + 1
+        } else charCounter++
+    }
     return spannable
 }
