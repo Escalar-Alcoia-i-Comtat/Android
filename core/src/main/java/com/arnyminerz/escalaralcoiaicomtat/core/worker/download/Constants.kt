@@ -50,6 +50,20 @@ const val ERROR_DATA_FETCH = "data_fetch"
 const val ERROR_STORE_IMAGE = "store_image"
 
 /**
+ * When the Bitmap gotten from the server could not be compressed to the target file.
+ * @author Arnau Mora
+ * @since 20210822
+ */
+const val ERROR_COMPRESS_IMAGE = "compress_image"
+
+/**
+ * When there was an error while fetching the image from the server.
+ * @author Arnau Mora
+ * @since 20210822
+ */
+const val ERROR_FETCH_IMAGE = "fetch_image"
+
+/**
  * When the specified namespace is not downloadable.
  * @since 20210412
  */

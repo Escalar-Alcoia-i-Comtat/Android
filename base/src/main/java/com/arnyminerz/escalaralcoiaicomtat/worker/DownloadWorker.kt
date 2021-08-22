@@ -2,25 +2,29 @@ package com.arnyminerz.escalaralcoiaicomtat.worker
 
 import android.app.PendingIntent
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.localstorage.LocalStorage
 import androidx.lifecycle.LiveData
 import androidx.work.Constraints
+import androidx.work.CoroutineWorker
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.await
 import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATACLASS_PREVIEW_SCALE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_OVERWRITE_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
@@ -28,6 +32,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MOBILE_DOWNLOAD_
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ROAMING_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_DISPLAY_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_NAMESPACE
@@ -38,16 +43,17 @@ import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerFactory
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_ALREADY_DOWNLOADED
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_COMPRESS_IMAGE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_CREATE_PARENT
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DATA_FETCH
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DELETE_OLD
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_FETCH_IMAGE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_MISSING_DATA
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_STORE_IMAGE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UNKNOWN_NAMESPACE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UPDATE_IMAGE_REF
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.failure
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -56,14 +62,13 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
 
 class DownloadWorker private constructor(appContext: Context, workerParams: WorkerParameters) :
-    DownloadWorkerModel, Worker(appContext, workerParams) {
+    DownloadWorkerModel, CoroutineWorker(appContext, workerParams) {
     override val factory: DownloadWorkerFactory = Companion
 
     private lateinit var namespace: String
@@ -87,10 +92,26 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      */
     private lateinit var appSearchSession: AppSearchSession
 
-    private fun downloadImageFile(
+    /**
+     * Downloads the image file for the specified object.
+     * @author Arnau Mora
+     * @since 20210822
+     * @param imageReferenceUrl The [FirebaseStorage] reference url of the image to download.
+     * @param imageFile The [File] instance referencing where the object's image should be stored at.
+     * @param objectId The id of the object to download.
+     * @param scale The scale with which to download the object.
+     * @see ERROR_ALREADY_DOWNLOADED
+     * @see ERROR_DELETE_OLD
+     * @see ERROR_CREATE_PARENT
+     * @see ERROR_COMPRESS_IMAGE
+     * @see ERROR_FETCH_IMAGE
+     * @see ERROR_STORE_IMAGE
+     */
+    private suspend fun downloadImageFile(
         imageReferenceUrl: String,
         imageFile: File,
-        objectId: String
+        objectId: String,
+        scale: Float
     ): Result {
         val dataDir = imageFile.parentFile!!
 
@@ -104,24 +125,86 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         if (error != null)
             return error
 
+        val n = namespace[0] // The key for logs
+        val pin = "$n/$objectId" // This is for identifying progress logs
+
         notification
             .edit()
             .withInfoText(R.string.notification_download_progress_info_downloading_image)
             .buildAndShow()
 
         try {
+            var existingImage: File? = null
+            val cacheDir = applicationContext.cacheDir
+
+            // If there's a full version cached version of the image, select it
+            val cacheFile = File(cacheDir, DataClass.imageName(namespace, objectId, null))
+            if (existingImage == null && cacheFile.exists())
+                existingImage = cacheFile
+
+            // If there's an scaled (default scale) version of the image, select it
+            val scaledCacheFile = File(
+                cacheDir,
+                DataClass.imageName(namespace, objectId, "scale$DATACLASS_PREVIEW_SCALE")
+            )
+            if (existingImage == null && scaledCacheFile.exists())
+                existingImage = scaledCacheFile
+
+            // If there's an scaled (given scale) version of the image, select it
+            val scaledFile = File(
+                cacheDir,
+                DataClass.imageName(namespace, objectId, "scale$scale")
+            )
+            if (existingImage == null && scaledFile.exists())
+                existingImage = scaledFile
+
+            // This is the old image format. If there's one cached, select it
             val tempFile = File(applicationContext.cacheDir, "dataClass_$objectId")
-            if (tempFile.exists()) {
-                Timber.d("Copying cached image file from \"$tempFile\" to \"$imageFile\"")
-                tempFile.copyTo(imageFile, overwrite = true)
-            } else
-                runBlocking {
-                    Timber.d("Downloading image from Firebase Storage: $imageReferenceUrl...")
-                    storage.getReferenceFromUrl(imageReferenceUrl).getFile(imageFile).await()
-                }
+            if (existingImage == null && tempFile.exists())
+                existingImage = tempFile
+
+            // If an image has been selected, copy it to imageFile.
+            if (existingImage?.exists() == true) {
+                Timber.d("$pin > Copying cached image file from \"$existingImage\" to \"$imageFile\"")
+                existingImage.copyTo(imageFile, overwrite = true)
+            } else {
+                // Otherwise, download it from the server.
+                Timber.d("$pin > Downloading image from Firebase Storage: $imageReferenceUrl...")
+                Timber.v("$pin > Getting reference...")
+                val reference = storage.getReferenceFromUrl(imageReferenceUrl)
+                Timber.v("$pin > Fetching stream...")
+                val snapshot = reference.stream
+                    .addOnProgressListener { snapshot ->
+                        val progress = ValueMax(snapshot.bytesTransferred, snapshot.totalByteCount)
+                        Timber.v("$pin > Image progress: ${progress.percentage}")
+                    }
+                    .await()
+                Timber.v("$pin > Got image stream, decoding...")
+                val stream = snapshot.stream
+                val bitmap: Bitmap? = BitmapFactory.decodeStream(
+                    stream,
+                    null,
+                    BitmapFactory.Options().apply {
+                        inSampleSize = (1 / scale).toInt()
+                    }
+                )
+                if (bitmap != null) {
+                    Timber.v("$pin > Got bitmap.")
+                    val quality = (scale * 100).toInt()
+                    Timber.v("$pin > Compression quality: $quality")
+                    Timber.v("$pin > Compressing bitmap to \"$imageFile\"...")
+                    val compressed =
+                        bitmap.compress(WEBP_LOSSY_LEGACY, quality, imageFile.outputStream())
+                    if (compressed)
+                        Timber.v("$pin > Bitmap compressed successfully.")
+                    else
+                        return failure(ERROR_COMPRESS_IMAGE)
+                } else
+                    return failure(ERROR_FETCH_IMAGE)
+            }
         } catch (e: StorageException) {
             Timber.w(e, "Could not get image")
-            return failure(ERROR_STORE_IMAGE)
+            return failure(ERROR_FETCH_IMAGE)
         } catch (e: IOException) {
             Timber.e(e, "Could not copy image file")
             return failure(ERROR_STORE_IMAGE)
@@ -133,26 +216,31 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         return Result.success()
     }
 
-    private fun fixImageReferenceUrl(
+    /**
+     * Fixes the image reference URL just in case it's being fetched from the website instead of
+     * [FirebaseStorage].
+     * @author Arnau Mora
+     * @since 20210822
+     * @see ERROR_UPDATE_IMAGE_REF
+     */
+    private suspend fun fixImageReferenceUrl(
         image: String,
         firestore: FirebaseFirestore,
         path: String
     ): Pair<String?, Result?> =
         if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/"))
             try {
-                runBlocking {
-                    Timber.w("Fixing zone image reference ($image)...")
-                    val i = image.lastIndexOf('/') + 1
-                    val newImage =
-                        "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
-                    Timber.w("Changing image address to \"$newImage\"...")
-                    firestore
-                        .document(path)
-                        .update(mapOf("image" to newImage))
-                        .await()
-                    Timber.w("Image address updated.")
-                    newImage to null
-                }
+                Timber.w("Fixing zone image reference ($image)...")
+                val i = image.lastIndexOf('/') + 1
+                val newImage =
+                    "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
+                Timber.w("Changing image address to \"$newImage\"...")
+                firestore
+                    .document(path)
+                    .update(mapOf("image" to newImage))
+                    .await()
+                Timber.w("Image address updated.")
+                newImage to null
             } catch (e: FirebaseFirestoreException) {
                 Firebase.crashlytics.recordException(e)
                 Timber.e(e, "Could not update zone image reference")
@@ -170,25 +258,23 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @see ERROR_MISSING_DATA
      * @see ERROR_ALREADY_DOWNLOADED
      * @see ERROR_DELETE_OLD
-     * @see ERROR_NOT_FOUND
      * @see ERROR_DATA_FETCH
      * @see ERROR_STORE_IMAGE
+     * @see ERROR_COMPRESS_IMAGE
+     * @see ERROR_FETCH_IMAGE
      */
     private suspend fun downloadZone(firestore: FirebaseFirestore, path: String): Result {
         Timber.d("Downloading Zone $path...")
-        Timber.v("Getting document...")
-        val task = firestore.document(path).get()
-        Timber.v("Awaiting document task...")
-        Tasks.await(task)
-        val exception = task.exception
-        if (exception != null) {
-            Timber.e(exception, "Could not get data")
+        val document = try {
+            Timber.v("Getting document...")
+            firestore.document(path).get().await()
+        } catch (e: Exception) {
+            Timber.e(e, "Could not get data")
             return failure(ERROR_DATA_FETCH)
         }
         Timber.v("Got Zone document!")
 
-        val result = task.result
-        val zone = Zone(result)
+        val zone = Zone(document)
 
         Timber.v("Updating notification...")
         val newText = applicationContext.getString(
@@ -210,13 +296,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val imageRef = image.first!!
 
         val imageFile = zone.imageFile(applicationContext)
-        downloadImageFile(imageRef, imageFile, zone.objectId)
+        downloadImageFile(imageRef, imageFile, zone.objectId, DATACLASS_PREVIEW_SCALE)
 
         try {
             Timber.d("Downloading KMZ file...")
-            runBlocking {
-                zone.kmzFile(applicationContext, storage, true)
-            }
+            zone.kmzFile(applicationContext, storage, true)
         } catch (e: IllegalStateException) {
             Firebase.crashlytics.recordException(e)
             Timber.w("The Zone ($zone) does not contain a KMZ address")
@@ -246,26 +330,24 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @see ERROR_MISSING_DATA
      * @see ERROR_ALREADY_DOWNLOADED
      * @see ERROR_DELETE_OLD
-     * @see ERROR_NOT_FOUND
      * @see ERROR_DATA_FETCH
      * @see ERROR_STORE_IMAGE
+     * @see ERROR_COMPRESS_IMAGE
+     * @see ERROR_FETCH_IMAGE
      */
-    private fun downloadSector(
+    private suspend fun downloadSector(
         firestore: FirebaseFirestore,
         path: String,
         progress: ValueMax<Int>?
     ): Result {
         Timber.d("Downloading Sector $path...")
-        Timber.v("Getting document...")
-        val task = firestore.document(path).get()
-        Timber.v("Awaiting document task...")
-        Tasks.await(task)
-        val exception = task.exception
-        if (exception != null)
+        val document = try {
+            Timber.v("Getting document...")
+            firestore.document(path).get().await()
+        } catch (e: Exception) {
             return failure(ERROR_DATA_FETCH)
-
-        val result = task.result
-        val sector = Sector(result)
+        }
+        val sector = Sector(document)
 
         Timber.v("Updating notification...")
         val newText = applicationContext.getString(
@@ -287,13 +369,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val imageRef = image.first!!
 
         val imageFile = sector.imageFile(applicationContext)
-        downloadImageFile(imageRef, imageFile, sector.objectId)
+        downloadImageFile(imageRef, imageFile, sector.objectId, 1f)
 
         try {
             Timber.d("Downloading KMZ file...")
-            runBlocking {
-                sector.kmzFile(applicationContext, storage, true)
-            }
+            sector.kmzFile(applicationContext, storage, true)
         } catch (e: IllegalStateException) {
             Firebase.crashlytics.recordException(e)
             Timber.w("The Sector ($sector) does not contain a KMZ address")
@@ -307,7 +387,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         return Result.success()
     }
 
-    override fun doWork(): Result {
+    override suspend fun doWork(): Result {
         // Get all data
         val namespace = inputData.getString(DOWNLOAD_NAMESPACE)
         downloadPath = inputData.getString(DOWNLOAD_PATH)
@@ -325,12 +405,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             storage = Firebase.storage
 
             Timber.v("Initializing search session...")
-            appSearchSession = runBlocking {
+            appSearchSession =
                 LocalStorage.createSearchSession(
                     LocalStorage.SearchContext.Builder(applicationContext, SEARCH_DATABASE_NAME)
                         .build()
                 ).await()
-            }
 
             Timber.v("Downloading $namespace at $downloadPath...")
             this.namespace = namespace
@@ -356,7 +435,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             val firestore = Firebase.firestore
 
             var downloadResult = when (namespace) {
-                Zone.NAMESPACE -> runBlocking {
+                Zone.NAMESPACE -> {
                     Timber.d("Downloading Zone...")
                     downloadZone(firestore, downloadPath!!)
                 }
@@ -370,20 +449,23 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             Timber.v("Finished downloading $displayName. Result: $downloadResult")
             notification.destroy()
 
-            if (downloadResult == Result.success()) {
-                val intent = runBlocking {
+            val intent: PendingIntent? =
+                if (downloadResult == Result.success()) {
                     Timber.v("Getting intent...")
+                    val downloadPathSplit = downloadPath!!.split('/')
                     when (namespace) {
                         // Area Skipped since not-downloadable
                         Zone.NAMESPACE -> {
                             // Example: Areas/<Area ID>/Zones/<Zone ID>
-                            val zoneId = downloadPath!!.split('/')[3]
+                            val zoneId = downloadPathSplit[3]
+                            Timber.v("Intent will launch zone with id $zoneId")
                             ZoneActivity.intent(applicationContext, zoneId)
                         }
                         Sector.NAMESPACE -> {
                             // Example: Areas/<Area ID>/Zones/<Zone ID>/Sectors/<Sector ID>
-                            val zoneId = downloadPath!!.split('/')[3]
-                            val sectorId = downloadPath!!.split('/')[5]
+                            val zoneId = downloadPathSplit[3]
+                            val sectorId = downloadPathSplit[5]
+                            Timber.v("Intent will launch sector with id $sectorId in $zoneId.")
                             SectorActivity.intent(applicationContext, zoneId, sectorId)
                         }
                         else -> {
@@ -391,14 +473,17 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                             null
                         }
                     }?.let { intent ->
-                        PendingIntent.getActivity(
+                        val pendingIntent = PendingIntent.getActivity(
                             applicationContext,
-                            0,
+                            (System.currentTimeMillis() and 0xffffff).toInt(),
                             intent,
-                            PendingIntent.FLAG_IMMUTABLE
+                            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
                         )
+                        pendingIntent
                     }
-                }
+                } else null
+
+            if (downloadResult == Result.success()) {
                 Timber.v("Showing download finished notification")
                 val text = applicationContext.getString(
                     R.string.notification_download_complete_message,
@@ -452,10 +537,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
          * @see ERROR_MISSING_DATA
          * @see ERROR_ALREADY_DOWNLOADED
          * @see ERROR_DELETE_OLD
-         * @see ERROR_NOT_FOUND
          * @see ERROR_DATA_FETCH
          * @see ERROR_STORE_IMAGE
          * @see ERROR_UPDATE_IMAGE_REF
+         * @see ERROR_COMPRESS_IMAGE
+         * @see ERROR_FETCH_IMAGE
          */
         @JvmStatic
         override fun schedule(

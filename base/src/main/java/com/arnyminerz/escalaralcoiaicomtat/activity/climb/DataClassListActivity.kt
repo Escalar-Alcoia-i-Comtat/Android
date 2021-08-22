@@ -296,7 +296,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                                 storage,
                                 false
                             ) {
-                                binding.mapProgressBar.progress = it.percentage()
+                                binding.mapProgressBar.progress = it.percentage
                                 binding.mapProgressBar.max = 100
                             }
                             uiContext {

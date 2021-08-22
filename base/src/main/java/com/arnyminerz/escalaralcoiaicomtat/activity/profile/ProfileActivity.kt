@@ -146,7 +146,7 @@ class ProfileActivity : AppCompatActivity() {
                 try {
                     setProfileImage(firestore, user, bitmap) { progress ->
                         uiContext {
-                            progressIndicator.progress = progress.percentage()
+                            progressIndicator.progress = progress.percentage
                         }
                     }
                     uiContext {

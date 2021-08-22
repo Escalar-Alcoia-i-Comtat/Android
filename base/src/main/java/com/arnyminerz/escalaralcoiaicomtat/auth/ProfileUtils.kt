@@ -105,7 +105,7 @@ suspend fun setProfileImage(
             profileImageRef.putBytes(data)
                 .addOnProgressListener { task ->
                     val progress = ValueMax(task.bytesTransferred, task.totalByteCount)
-                    Timber.v("Upload: ${progress.percentage()}%")
+                    Timber.v("Upload: ${progress.percentage}%")
                     // TODO: Find another way of doing this, seems a bit jenky
                     doAsync { progressListener?.invoke(c, progress) }
                 }

@@ -21,8 +21,8 @@ constructor(val value: T, val max: T) {
      * @author Arnau Mora
      * @since 20210430
      */
-    fun percentage(): Int =
-        ((value.toDouble() / max.toDouble()) * 100.0).toInt()
+    val percentage: Int
+        get() = ((value.toDouble() / max.toDouble()) * 100.0).toInt()
 
     /**
      * Converts the proportion between [value] and [max] to a float. This is, a value between 0 and
@@ -31,5 +31,5 @@ constructor(val value: T, val max: T) {
      * @since 20210810
      */
     @FloatRange(from = 0.0, to = 1.0, fromInclusive = true, toInclusive = true)
-    fun float(): Float = (value.toDouble() / max.toDouble()).toFloat()
+    val toFloat: Float = (value.toDouble() / max.toDouble()).toFloat()
 }

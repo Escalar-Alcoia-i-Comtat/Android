@@ -191,6 +191,13 @@ const val DATACLASS_WAIT_CHILDREN_DELAY = 10L
 const val DATACLASS_WAIT_BLOCK_STATUS_DELAY = 10L
 
 /**
+ * The scale in which the DataClasses should be loaded when they are shown as a thumbnail.
+ * @author Arnau Mora
+ * @since 20210822
+ */
+const val DATACLASS_PREVIEW_SCALE = .5f
+
+/**
  * Specifies the redirect url for the confirmation mails
  * @author Arnau Mora
  * @since 20210425
