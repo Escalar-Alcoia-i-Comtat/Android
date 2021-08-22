@@ -17,10 +17,12 @@ import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATACLASS_PREVIEW_SCALE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_OVERWRITE_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
@@ -110,15 +112,37 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             .buildAndShow()
 
         try {
+            var existingImage: File? = null
+            val cacheDir = applicationContext.cacheDir
+
+            // If there's a full version cached version of the image, select it
+            val cacheFile = File(cacheDir, DataClass.imageName(namespace, objectId, null))
+            if (existingImage == null && cacheFile.exists())
+                existingImage = cacheFile
+
+            // If there's an scaled version of the image, select it
+            val scaledCacheFile = File(
+                cacheDir,
+                DataClass.imageName(namespace, objectId, "scale$DATACLASS_PREVIEW_SCALE")
+            )
+            if (existingImage == null && scaledCacheFile.exists())
+                existingImage = scaledCacheFile
+
+            // This is the old image format. If there's one cached, select it
             val tempFile = File(applicationContext.cacheDir, "dataClass_$objectId")
-            if (tempFile.exists()) {
-                Timber.d("Copying cached image file from \"$tempFile\" to \"$imageFile\"")
-                tempFile.copyTo(imageFile, overwrite = true)
-            } else
-                runBlocking {
-                    Timber.d("Downloading image from Firebase Storage: $imageReferenceUrl...")
-                    storage.getReferenceFromUrl(imageReferenceUrl).getFile(imageFile).await()
-                }
+            if (existingImage == null && tempFile.exists())
+                existingImage = tempFile
+
+            // If an image has been selected, copy it to imageFile.
+            if (existingImage?.exists() == true) {
+                Timber.d("Copying cached image file from \"$existingImage\" to \"$imageFile\"")
+                existingImage.copyTo(imageFile, overwrite = true)
+            } else {
+                // Otherwise, download it from the server.
+                Timber.d("Downloading image from Firebase Storage: $imageReferenceUrl...")
+                val task = storage.getReferenceFromUrl(imageReferenceUrl).getFile(imageFile)
+                Tasks.await(task)
+            }
         } catch (e: StorageException) {
             Timber.w(e, "Could not get image")
             return failure(ERROR_STORE_IMAGE)
@@ -246,7 +270,6 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @see ERROR_MISSING_DATA
      * @see ERROR_ALREADY_DOWNLOADED
      * @see ERROR_DELETE_OLD
-     * @see ERROR_NOT_FOUND
      * @see ERROR_DATA_FETCH
      * @see ERROR_STORE_IMAGE
      */
