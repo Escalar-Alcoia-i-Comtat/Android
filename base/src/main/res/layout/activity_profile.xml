@@ -106,4 +106,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/profileImage_cardView" />
 
+    <!-- Last Activity container for the Fragment. Margins are added in the Fragment's layout -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/last_activity_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/profileName_textView" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

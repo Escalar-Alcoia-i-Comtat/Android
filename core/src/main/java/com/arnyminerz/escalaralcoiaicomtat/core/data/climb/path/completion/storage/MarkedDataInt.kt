@@ -1,14 +1,22 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage
 
+import android.os.Parcelable
+import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.core.data.auth.User
 import com.arnyminerz.escalaralcoiaicomtat.core.data.auth.VisibleUserData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.CompletionType
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.functions.FirebaseFunctionsException
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
 /**
@@ -23,14 +31,14 @@ import timber.log.Timber
  * @param notes The notes the user took.
  * @param likedBy The user uids that have liked the publication.
  */
-open class MarkedDataInt(
-    val documentPath: String,
-    val timestamp: Timestamp?,
-    val user: VisibleUserData,
-    val comment: String?,
-    val notes: String?,
-    val likedBy: MutableList<String>
-) {
+abstract class MarkedDataInt(
+    open val documentPath: String,
+    open val timestamp: Timestamp?,
+    open val user: VisibleUserData,
+    open val comment: String?,
+    open val notes: String?,
+    open var likedBy: List<String>
+) : Parcelable {
     companion object {
         /**
          * Initializes a new [MarkedDataInt] subinstance based on the data of [document].
@@ -125,10 +133,12 @@ open class MarkedDataInt(
      */
     fun like(firestore: FirebaseFirestore, user: FirebaseUser): Task<Void> {
         val userUid = user.uid
+        val likedBy = this.likedBy.toMutableList()
         if (likedBy.contains(userUid))
             likedBy.remove(userUid)
         else
             likedBy.add(userUid)
+        this.likedBy = likedBy
         return firestore.document(documentPath)
             .update("likedBy", likedBy)
     }
@@ -142,4 +152,52 @@ open class MarkedDataInt(
     fun delete(firestore: FirebaseFirestore) =
         firestore.document(documentPath)
             .delete()
+
+    /**
+     * Fetches the Path data for the completion.
+     * @author Arnau Mora
+     * @since 20210821
+     */
+    @WorkerThread
+    suspend fun getPath(): Path {
+        val firestore = Firebase.firestore
+        val pathDocument = firestore
+            .document(documentPath) // This is the completion document path
+            .parent // Completions collection
+            .parent!! // Path document
+            .get()
+            .await()
+        return Path(pathDocument)
+    }
+
+    /**
+     * Gives the [DocumentReference] of the [Zone] that contains the path that was marked.
+     * @author Arnau Mora
+     * @since 20210821
+     */
+    fun zoneReference(): DocumentReference {
+        val firestore = Firebase.firestore
+        return firestore
+            .document(documentPath) // This is the completion document path
+            .parent // Completions collection
+            .parent!! // Path document
+            .parent // Paths collection
+            .parent!! // Sector document
+            .parent // Sectors collection
+            .parent!! // Zone document
+    }
+
+    /**
+     * Fetches the Zone data for the completion.
+     * @author Arnau Mora
+     * @since 20210821
+     */
+    @WorkerThread
+    suspend fun getZone(): Zone {
+        val zoneDocument = zoneReference()
+            .get()
+            .await()
+        Timber.v("Got Zone data at ${zoneDocument.reference.path}, processing...")
+        return Zone(zoneDocument)
+    }
 }

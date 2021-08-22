@@ -277,4 +277,12 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="status_processing_paths">Procesando vías…</string>
     <string name="action_clear_data">Vaciar los datos</string>
     <string name="search_no_results">Sin resultados</string>
+    <string name="action_view_activity">Ver Actividad</string>
+    <string name="profile_last_activity_title">Última Actividad</string>
+    <string name="profile_last_activity_none">El usuario no ha completado ninguna vía</string>
+    <string name="profile_last_activity_summary">Completadas %1$d vías. Proyectadas %2$d vías.</string>
+    <string name="activity_summary_title">Resumen</string>
+    <string name="activity_summary_projects">%d proyectos.</string>
+    <string name="activity_summary_completions">%d vías completadas.</string>
+    <string name="activity_summary_grades">Grados</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.shared
 
+import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -10,6 +11,29 @@ val EXTRA_ZONE = DataExtra<String>("zone")
 val EXTRA_SECTOR = DataExtra<String>("sector")
 val EXTRA_PATH = DataExtra<String>("path")
 val EXTRA_PATH_DOCUMENT = DataExtra<String>("path_document")
+
+/**
+ * Serves as an Activity's extra parameter for passing completed paths data.
+ * @author Arnau Mora
+ * @since 20210821
+ */
+val EXTRA_COMPLETIONS = DataExtra<ArrayList<Parcelable>>("completions")
+
+/**
+ * Used together with [EXTRA_COMPLETIONS] for telling an activity how much of the items in
+ * [EXTRA_COMPLETIONS] are completions.
+ * @author Arnau Mora
+ * @since 20210821
+ */
+val EXTRA_COMPLETIONS_COUNT = DataExtra<Int>("completions")
+
+/**
+ * Used together with [EXTRA_COMPLETIONS] for telling an activity how much of the items in
+ * [EXTRA_COMPLETIONS] are projects.
+ * @author Arnau Mora
+ * @since 20210821
+ */
+val EXTRA_PROJECTS_COUNT = DataExtra<Int>("projects")
 
 val EXTRA_POSITION = DataExtra<Int>("position")
 

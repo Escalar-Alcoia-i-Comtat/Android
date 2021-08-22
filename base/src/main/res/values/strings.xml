@@ -33,6 +33,7 @@
     <string name="action_do_not_remind">Do not remind</string>
     <string name="action_mark_completed">Mark</string>
     <string name="action_restart">Restart</string>
+    <string name="action_view_activity">View Activity</string>
 
     <string name="status_updating">Updating…</string>
     <string name="status_loading">Loading…</string>
@@ -311,6 +312,15 @@
     <string name="date_format">yyyy-MM-dd hh:mm:ss a</string>
 
     <string name="share_text">Hey! Would you try Escalar Alcoià i Comtat? It\'s free! https://play.google.com/store/apps/details?id=com.arnyminerz.escalaralcoiaicomtat</string>
+
+    <string name="profile_last_activity_title">Last Activity</string>
+    <string name="profile_last_activity_none">The user has not completed any path</string>
+    <string name="profile_last_activity_summary">Completed %1$d paths. Projected %2$d paths.</string>
+
+    <string name="activity_summary_title">Summary</string>
+    <string name="activity_summary_projects">%d projects.</string>
+    <string name="activity_summary_completions">%d completed paths.</string>
+    <string name="activity_summary_grades">Grades</string>
 
     <string name="update_progress_internet_waiting">Waiting for Internet connection…</string>
     <string name="update_progress_downloading_new_cache">Downloading new data…</string>

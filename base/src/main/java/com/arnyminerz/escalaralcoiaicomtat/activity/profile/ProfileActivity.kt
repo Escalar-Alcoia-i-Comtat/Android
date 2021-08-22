@@ -18,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityProfileBinding
+import com.arnyminerz.escalaralcoiaicomtat.fragment.activity.LastActivityFragment
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -85,6 +86,11 @@ class ProfileActivity : AppCompatActivity() {
         binding.backFab.setOnClickListener { onBackPressed() }
 
         progressIndicator.visibility(true)
+
+        supportFragmentManager
+            .beginTransaction()
+            .add(R.id.last_activity_layout, LastActivityFragment.newInstance(userUid))
+            .commit()
 
         doAsync {
             try {

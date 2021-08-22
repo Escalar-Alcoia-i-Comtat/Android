@@ -285,11 +285,11 @@ class MarkCompletedWorker private constructor(appContext: Context, workerParams:
                     put(MARK_COMPLETED_FALLS, completionData.falls.toString())
                     put(MARK_COMPLETED_GRADE, completionData.grade)
                     put(MARK_COMPLETED_TYPE, completionData.type.id)
-                    put(MARK_COMPLETED_IS_PROJECT, true)
+                    put(MARK_COMPLETED_IS_PROJECT, false)
                 }
             else
                 inputDataPairs.apply {
-                    put(MARK_COMPLETED_IS_PROJECT, false)
+                    put(MARK_COMPLETED_IS_PROJECT, true)
                 }
             val workData = inputDataPairs.toWorkData()
 
