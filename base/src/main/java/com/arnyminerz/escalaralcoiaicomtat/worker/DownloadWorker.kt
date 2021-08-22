@@ -6,11 +6,11 @@ import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.localstorage.LocalStorage
 import androidx.lifecycle.LiveData
 import androidx.work.Constraints
+import androidx.work.CoroutineWorker
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.await
 import androidx.work.workDataOf
@@ -49,7 +49,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UNKNOWN_NA
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UPDATE_IMAGE_REF
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.failure
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -58,14 +57,13 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
 
 class DownloadWorker private constructor(appContext: Context, workerParams: WorkerParameters) :
-    DownloadWorkerModel, Worker(appContext, workerParams) {
+    DownloadWorkerModel, CoroutineWorker(appContext, workerParams) {
     override val factory: DownloadWorkerFactory = Companion
 
     private lateinit var namespace: String
@@ -89,7 +87,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      */
     private lateinit var appSearchSession: AppSearchSession
 
-    private fun downloadImageFile(
+    private suspend fun downloadImageFile(
         imageReferenceUrl: String,
         imageFile: File,
         objectId: String
@@ -140,8 +138,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             } else {
                 // Otherwise, download it from the server.
                 Timber.d("Downloading image from Firebase Storage: $imageReferenceUrl...")
-                val task = storage.getReferenceFromUrl(imageReferenceUrl).getFile(imageFile)
-                Tasks.await(task)
+                Timber.v("Getting reference...")
+                val reference = storage.getReferenceFromUrl(imageReferenceUrl)
+                val taskSnapshot = reference
+                    .getFile(imageFile)
+                    .await()
             }
         } catch (e: StorageException) {
             Timber.w(e, "Could not get image")
@@ -157,26 +158,24 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         return Result.success()
     }
 
-    private fun fixImageReferenceUrl(
+    private suspend fun fixImageReferenceUrl(
         image: String,
         firestore: FirebaseFirestore,
         path: String
     ): Pair<String?, Result?> =
         if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/"))
             try {
-                runBlocking {
-                    Timber.w("Fixing zone image reference ($image)...")
-                    val i = image.lastIndexOf('/') + 1
-                    val newImage =
-                        "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
-                    Timber.w("Changing image address to \"$newImage\"...")
-                    firestore
-                        .document(path)
-                        .update(mapOf("image" to newImage))
-                        .await()
-                    Timber.w("Image address updated.")
-                    newImage to null
-                }
+                Timber.w("Fixing zone image reference ($image)...")
+                val i = image.lastIndexOf('/') + 1
+                val newImage =
+                    "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
+                Timber.w("Changing image address to \"$newImage\"...")
+                firestore
+                    .document(path)
+                    .update(mapOf("image" to newImage))
+                    .await()
+                Timber.w("Image address updated.")
+                newImage to null
             } catch (e: FirebaseFirestoreException) {
                 Firebase.crashlytics.recordException(e)
                 Timber.e(e, "Could not update zone image reference")
@@ -194,25 +193,21 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @see ERROR_MISSING_DATA
      * @see ERROR_ALREADY_DOWNLOADED
      * @see ERROR_DELETE_OLD
-     * @see ERROR_NOT_FOUND
      * @see ERROR_DATA_FETCH
      * @see ERROR_STORE_IMAGE
      */
     private suspend fun downloadZone(firestore: FirebaseFirestore, path: String): Result {
         Timber.d("Downloading Zone $path...")
-        Timber.v("Getting document...")
-        val task = firestore.document(path).get()
-        Timber.v("Awaiting document task...")
-        Tasks.await(task)
-        val exception = task.exception
-        if (exception != null) {
-            Timber.e(exception, "Could not get data")
+        val document = try {
+            Timber.v("Getting document...")
+            firestore.document(path).get().await()
+        } catch (e: Exception) {
+            Timber.e(e, "Could not get data")
             return failure(ERROR_DATA_FETCH)
         }
         Timber.v("Got Zone document!")
 
-        val result = task.result
-        val zone = Zone(result)
+        val zone = Zone(document)
 
         Timber.v("Updating notification...")
         val newText = applicationContext.getString(
@@ -238,9 +233,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
         try {
             Timber.d("Downloading KMZ file...")
-            runBlocking {
-                zone.kmzFile(applicationContext, storage, true)
-            }
+            zone.kmzFile(applicationContext, storage, true)
         } catch (e: IllegalStateException) {
             Firebase.crashlytics.recordException(e)
             Timber.w("The Zone ($zone) does not contain a KMZ address")
@@ -273,22 +266,19 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @see ERROR_DATA_FETCH
      * @see ERROR_STORE_IMAGE
      */
-    private fun downloadSector(
+    private suspend fun downloadSector(
         firestore: FirebaseFirestore,
         path: String,
         progress: ValueMax<Int>?
     ): Result {
         Timber.d("Downloading Sector $path...")
-        Timber.v("Getting document...")
-        val task = firestore.document(path).get()
-        Timber.v("Awaiting document task...")
-        Tasks.await(task)
-        val exception = task.exception
-        if (exception != null)
+        val document = try {
+            Timber.v("Getting document...")
+            firestore.document(path).get().await()
+        } catch (e: Exception) {
             return failure(ERROR_DATA_FETCH)
-
-        val result = task.result
-        val sector = Sector(result)
+        }
+        val sector = Sector(document)
 
         Timber.v("Updating notification...")
         val newText = applicationContext.getString(
@@ -314,9 +304,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
         try {
             Timber.d("Downloading KMZ file...")
-            runBlocking {
-                sector.kmzFile(applicationContext, storage, true)
-            }
+            sector.kmzFile(applicationContext, storage, true)
         } catch (e: IllegalStateException) {
             Firebase.crashlytics.recordException(e)
             Timber.w("The Sector ($sector) does not contain a KMZ address")
@@ -330,7 +318,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         return Result.success()
     }
 
-    override fun doWork(): Result {
+    override suspend fun doWork(): Result {
         // Get all data
         val namespace = inputData.getString(DOWNLOAD_NAMESPACE)
         downloadPath = inputData.getString(DOWNLOAD_PATH)
@@ -348,12 +336,11 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             storage = Firebase.storage
 
             Timber.v("Initializing search session...")
-            appSearchSession = runBlocking {
+            appSearchSession =
                 LocalStorage.createSearchSession(
                     LocalStorage.SearchContext.Builder(applicationContext, SEARCH_DATABASE_NAME)
                         .build()
                 ).await()
-            }
 
             Timber.v("Downloading $namespace at $downloadPath...")
             this.namespace = namespace
@@ -379,7 +366,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             val firestore = Firebase.firestore
 
             var downloadResult = when (namespace) {
-                Zone.NAMESPACE -> runBlocking {
+                Zone.NAMESPACE -> {
                     Timber.d("Downloading Zone...")
                     downloadZone(firestore, downloadPath!!)
                 }
@@ -394,7 +381,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             notification.destroy()
 
             if (downloadResult == Result.success()) {
-                val intent = runBlocking {
+                val intent: PendingIntent? = run {
                     Timber.v("Getting intent...")
                     when (namespace) {
                         // Area Skipped since not-downloadable
