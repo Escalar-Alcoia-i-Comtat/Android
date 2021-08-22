@@ -2,6 +2,8 @@ package com.arnyminerz.escalaralcoiaicomtat.worker
 
 import android.app.PendingIntent
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.localstorage.LocalStorage
 import androidx.lifecycle.LiveData
@@ -30,6 +32,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MOBILE_DOWNLOAD_
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ROAMING_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_DISPLAY_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_NAMESPACE
@@ -40,9 +43,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerFactory
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_ALREADY_DOWNLOADED
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_COMPRESS_IMAGE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_CREATE_PARENT
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DATA_FETCH
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DELETE_OLD
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_FETCH_IMAGE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_MISSING_DATA
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_STORE_IMAGE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UNKNOWN_NAMESPACE
@@ -87,10 +92,20 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      */
     private lateinit var appSearchSession: AppSearchSession
 
+    /**
+     * Downloads the image file for the specified object.
+     * @author Arnau Mora
+     * @since 20210822
+     * @param imageReferenceUrl The [FirebaseStorage] reference url of the image to download.
+     * @param imageFile The [File] instance referencing where the object's image should be stored at.
+     * @param objectId The id of the object to download.
+     * @param scale The scale with which to download the object.
+     */
     private suspend fun downloadImageFile(
         imageReferenceUrl: String,
         imageFile: File,
-        objectId: String
+        objectId: String,
+        scale: Float
     ): Result {
         val dataDir = imageFile.parentFile!!
 
@@ -103,6 +118,9 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             error = failure(ERROR_CREATE_PARENT)
         if (error != null)
             return error
+
+        val n = namespace[0] // The key for logs
+        val pin = "$n/$objectId" // This is for identifying progress logs
 
         notification
             .edit()
@@ -118,13 +136,21 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             if (existingImage == null && cacheFile.exists())
                 existingImage = cacheFile
 
-            // If there's an scaled version of the image, select it
+            // If there's an scaled (default scale) version of the image, select it
             val scaledCacheFile = File(
                 cacheDir,
                 DataClass.imageName(namespace, objectId, "scale$DATACLASS_PREVIEW_SCALE")
             )
             if (existingImage == null && scaledCacheFile.exists())
                 existingImage = scaledCacheFile
+
+            // If there's an scaled (given scale) version of the image, select it
+            val scaledFile = File(
+                cacheDir,
+                DataClass.imageName(namespace, objectId, "scale$scale")
+            )
+            if (existingImage == null && scaledFile.exists())
+                existingImage = scaledFile
 
             // This is the old image format. If there's one cached, select it
             val tempFile = File(applicationContext.cacheDir, "dataClass_$objectId")
@@ -133,20 +159,46 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
 
             // If an image has been selected, copy it to imageFile.
             if (existingImage?.exists() == true) {
-                Timber.d("Copying cached image file from \"$existingImage\" to \"$imageFile\"")
+                Timber.d("$pin > Copying cached image file from \"$existingImage\" to \"$imageFile\"")
                 existingImage.copyTo(imageFile, overwrite = true)
             } else {
                 // Otherwise, download it from the server.
-                Timber.d("Downloading image from Firebase Storage: $imageReferenceUrl...")
-                Timber.v("Getting reference...")
+                Timber.d("$pin > Downloading image from Firebase Storage: $imageReferenceUrl...")
+                Timber.v("$pin > Getting reference...")
                 val reference = storage.getReferenceFromUrl(imageReferenceUrl)
-                val taskSnapshot = reference
-                    .getFile(imageFile)
+                Timber.v("$pin > Fetching stream...")
+                val snapshot = reference.stream
+                    .addOnProgressListener { snapshot ->
+                        val progress = ValueMax(snapshot.bytesTransferred, snapshot.totalByteCount)
+                        Timber.v("$pin > Image progress: ${progress.percentage}")
+                    }
                     .await()
+                Timber.v("$pin > Got image stream, decoding...")
+                val stream = snapshot.stream
+                val bitmap: Bitmap? = BitmapFactory.decodeStream(
+                    stream,
+                    null,
+                    BitmapFactory.Options().apply {
+                        inSampleSize = (1 / scale).toInt()
+                    }
+                )
+                if (bitmap != null) {
+                    Timber.v("$pin > Got bitmap.")
+                    val quality = (scale * 100).toInt()
+                    Timber.v("$pin > Compression quality: $quality")
+                    Timber.v("$pin > Compressing bitmap to \"$imageFile\"...")
+                    val compressed =
+                        bitmap.compress(WEBP_LOSSY_LEGACY, quality, imageFile.outputStream())
+                    if (compressed)
+                        Timber.v("$pin > Bitmap compressed successfully.")
+                    else
+                        return failure(ERROR_COMPRESS_IMAGE)
+                } else
+                    return failure(ERROR_FETCH_IMAGE)
             }
         } catch (e: StorageException) {
             Timber.w(e, "Could not get image")
-            return failure(ERROR_STORE_IMAGE)
+            return failure(ERROR_FETCH_IMAGE)
         } catch (e: IOException) {
             Timber.e(e, "Could not copy image file")
             return failure(ERROR_STORE_IMAGE)
@@ -229,7 +281,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val imageRef = image.first!!
 
         val imageFile = zone.imageFile(applicationContext)
-        downloadImageFile(imageRef, imageFile, zone.objectId)
+        downloadImageFile(imageRef, imageFile, zone.objectId, DATACLASS_PREVIEW_SCALE)
 
         try {
             Timber.d("Downloading KMZ file...")
@@ -300,7 +352,7 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         val imageRef = image.first!!
 
         val imageFile = sector.imageFile(applicationContext)
-        downloadImageFile(imageRef, imageFile, sector.objectId)
+        downloadImageFile(imageRef, imageFile, sector.objectId, 1f)
 
         try {
             Timber.d("Downloading KMZ file...")
@@ -462,7 +514,6 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
          * @see ERROR_MISSING_DATA
          * @see ERROR_ALREADY_DOWNLOADED
          * @see ERROR_DELETE_OLD
-         * @see ERROR_NOT_FOUND
          * @see ERROR_DATA_FETCH
          * @see ERROR_STORE_IMAGE
          * @see ERROR_UPDATE_IMAGE_REF
