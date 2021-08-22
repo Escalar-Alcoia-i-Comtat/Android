@@ -122,7 +122,13 @@ class Path internal constructor(
      */
     val grades: List<Grade>
         get() {
-            val gradeValues = rawGrades.split(" ")
+            // Grades should be split in each L
+            val gradeValues = rawGrades
+                .replace("\n", "") // Remove all line jumps
+                .split("L").toMutableList()
+            if (gradeValues.size > 1)
+                for (i in 1 until gradeValues.size)
+                    gradeValues[i] = 'L' + gradeValues[i]
             return Grade.listFromStrings(gradeValues)
         }
 
