@@ -100,6 +100,12 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @param imageFile The [File] instance referencing where the object's image should be stored at.
      * @param objectId The id of the object to download.
      * @param scale The scale with which to download the object.
+     * @see ERROR_ALREADY_DOWNLOADED
+     * @see ERROR_DELETE_OLD
+     * @see ERROR_CREATE_PARENT
+     * @see ERROR_COMPRESS_IMAGE
+     * @see ERROR_FETCH_IMAGE
+     * @see ERROR_STORE_IMAGE
      */
     private suspend fun downloadImageFile(
         imageReferenceUrl: String,
@@ -210,6 +216,13 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
         return Result.success()
     }
 
+    /**
+     * Fixes the image reference URL just in case it's being fetched from the website instead of
+     * [FirebaseStorage].
+     * @author Arnau Mora
+     * @since 20210822
+     * @see ERROR_UPDATE_IMAGE_REF
+     */
     private suspend fun fixImageReferenceUrl(
         image: String,
         firestore: FirebaseFirestore,
@@ -247,6 +260,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @see ERROR_DELETE_OLD
      * @see ERROR_DATA_FETCH
      * @see ERROR_STORE_IMAGE
+     * @see ERROR_COMPRESS_IMAGE
+     * @see ERROR_FETCH_IMAGE
      */
     private suspend fun downloadZone(firestore: FirebaseFirestore, path: String): Result {
         Timber.d("Downloading Zone $path...")
@@ -317,6 +332,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
      * @see ERROR_DELETE_OLD
      * @see ERROR_DATA_FETCH
      * @see ERROR_STORE_IMAGE
+     * @see ERROR_COMPRESS_IMAGE
+     * @see ERROR_FETCH_IMAGE
      */
     private suspend fun downloadSector(
         firestore: FirebaseFirestore,
@@ -432,20 +449,23 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
             Timber.v("Finished downloading $displayName. Result: $downloadResult")
             notification.destroy()
 
-            if (downloadResult == Result.success()) {
-                val intent: PendingIntent? = run {
+            val intent: PendingIntent? =
+                if (downloadResult == Result.success()) {
                     Timber.v("Getting intent...")
+                    val downloadPathSplit = downloadPath!!.split('/')
                     when (namespace) {
                         // Area Skipped since not-downloadable
                         Zone.NAMESPACE -> {
                             // Example: Areas/<Area ID>/Zones/<Zone ID>
-                            val zoneId = downloadPath!!.split('/')[3]
+                            val zoneId = downloadPathSplit[3]
+                            Timber.v("Intent will launch zone with id $zoneId")
                             ZoneActivity.intent(applicationContext, zoneId)
                         }
                         Sector.NAMESPACE -> {
                             // Example: Areas/<Area ID>/Zones/<Zone ID>/Sectors/<Sector ID>
-                            val zoneId = downloadPath!!.split('/')[3]
-                            val sectorId = downloadPath!!.split('/')[5]
+                            val zoneId = downloadPathSplit[3]
+                            val sectorId = downloadPathSplit[5]
+                            Timber.v("Intent will launch sector with id $sectorId in $zoneId.")
                             SectorActivity.intent(applicationContext, zoneId, sectorId)
                         }
                         else -> {
@@ -453,14 +473,22 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                             null
                         }
                     }?.let { intent ->
-                        PendingIntent.getActivity(
+                        Timber.v("Pending Intent extras:")
+                        val extras = intent.extras
+                        if (extras != null)
+                            for (key in extras.keySet())
+                                Timber.v(">> $key: ${extras.get(key)}")
+                        val pendingIntent = PendingIntent.getActivity(
                             applicationContext,
-                            0,
+                            (System.currentTimeMillis() and 0xffffff).toInt(),
                             intent,
-                            PendingIntent.FLAG_IMMUTABLE
+                            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
                         )
+                        pendingIntent
                     }
-                }
+                } else null
+
+            if (downloadResult == Result.success()) {
                 Timber.v("Showing download finished notification")
                 val text = applicationContext.getString(
                     R.string.notification_download_complete_message,
@@ -517,6 +545,8 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
          * @see ERROR_DATA_FETCH
          * @see ERROR_STORE_IMAGE
          * @see ERROR_UPDATE_IMAGE_REF
+         * @see ERROR_COMPRESS_IMAGE
+         * @see ERROR_FETCH_IMAGE
          */
         @JvmStatic
         override fun schedule(
