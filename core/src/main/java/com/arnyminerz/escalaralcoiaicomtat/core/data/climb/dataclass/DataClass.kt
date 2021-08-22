@@ -92,6 +92,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 ) {
     companion object {
         /**
+         * Returns the correct image name for the desired [objectId] and [namespace].
+         * @author Arnau Mora
+         * @since 20210822
+         */
+        fun imageName(namespace: String, objectId: String, suffix: String?) =
+            "$namespace-$objectId${suffix ?: ""}"
+
+        /**
          * Searches in the [app] search instance and tries to get an intent from them.
          * @author Arnau Mora
          * @since 20210416
@@ -717,7 +725,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to run from
      * @return The path of the image file that can be downloaded
      */
-    fun imageFile(context: Context): File = File(dataDir(context), "$namespace-$objectId")
+    fun imageFile(context: Context): File =
+        File(dataDir(context), imageName(namespace, objectId, null))
 
     /**
      * Returns the File that represents the image of the DataClass in cache.
@@ -728,7 +737,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @return The path of the image file that can be downloaded
      */
     fun cacheImageFile(context: Context, suffix: String? = null): File =
-        File(context.cacheDir, "$namespace-$objectId${suffix ?: ""}")
+        File(context.cacheDir, imageName(namespace, objectId, suffix))
 
     /**
      * Creates a dynamic link access for the DataClass
