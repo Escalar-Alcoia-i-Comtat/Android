@@ -933,7 +933,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
         doAsync {
             val bmp = image(activity, storage, imageLoadParameters) { progress ->
-                progressBar?.progress = progress.percentage()
+                progressBar?.progress = progress.percentage
             }
             uiContext { imageView.setImageBitmap(bmp) }
         }

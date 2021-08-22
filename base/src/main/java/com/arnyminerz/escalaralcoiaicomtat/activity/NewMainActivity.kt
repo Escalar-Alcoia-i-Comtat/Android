@@ -95,7 +95,7 @@ class NewMainActivity : AppCompatActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
                     if (areas.isEmpty())
-                        LoadingScreen(areasViewModel.progress.value?.float() ?: 0f)
+                        LoadingScreen(areasViewModel.progress.value?.toFloat ?: 0f)
                     else
                         MainContent()
                 }

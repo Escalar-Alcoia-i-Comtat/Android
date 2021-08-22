@@ -163,7 +163,7 @@ open class DataClassAdapter(
                     doAsync {
                         val downloadStatus =
                             dataClass.downloadStatus(context, app.searchSession, storage)
-                            { binding.progressIndicator.progress = it.percentage() }
+                            { binding.progressIndicator.progress = it.percentage }
                         uiContext {
                             updateDownloadStatus(downloadStatus)
                         }
