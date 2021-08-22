@@ -656,16 +656,21 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         Timber.v("Deleting $objectId")
         val lst = arrayListOf<Boolean>() // Stores all the delection success statuses
 
+        // KMZ should be deleted
         val kmzFile = kmzFile(context, true)
         if (kmzFile.exists()) {
             Timber.v("$this > Deleting \"$kmzFile\"")
             lst.add(kmzFile.deleteIfExists())
         }
 
+        // Instead of deleting image, move to cache. System will manage it if necessary.
         val imgFile = imageFile(context)
         if (imgFile.exists()) {
+            val cacheImageFile = cacheImageFile(context)
+            Timber.v("$this > Copying \"$imgFile\" to \"$cacheImageFile\"...")
+            imgFile.copyTo(cacheImageFile, true)
             Timber.v("$this > Deleting \"$imgFile\"")
-            lst.add(imgFile.deleteIfExists())
+            lst.add(imgFile.delete())
         }
 
         val children = getChildren(searchSession)
