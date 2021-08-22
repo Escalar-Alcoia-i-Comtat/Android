@@ -473,11 +473,6 @@ class DownloadWorker private constructor(appContext: Context, workerParams: Work
                             null
                         }
                     }?.let { intent ->
-                        Timber.v("Pending Intent extras:")
-                        val extras = intent.extras
-                        if (extras != null)
-                            for (key in extras.keySet())
-                                Timber.v(">> $key: ${extras.get(key)}")
                         val pendingIntent = PendingIntent.getActivity(
                             applicationContext,
                             (System.currentTimeMillis() and 0xffffff).toInt(),

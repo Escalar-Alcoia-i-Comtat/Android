@@ -148,6 +148,7 @@ class SectorActivity : LanguageAppCompatActivity() {
                 finish()
                 return@doAsync
             }
+            Timber.v("Loading sectors from $zone...")
             val sectors = zone.getChildren(app.searchSession)
             val sectorCount = sectors.size
 
@@ -159,8 +160,10 @@ class SectorActivity : LanguageAppCompatActivity() {
             fragments.clear()
             for ((i, sector) in sectors.withIndex()) {
                 fragments.add(SectorFragment.newInstance(sector.objectId))
-                if (positionExtra == null && sector.objectId == sectorId)
+                if (positionExtra == null && sector.objectId == sectorId) {
+                    Timber.v("The desired sector S/$sectorId in at #$i.")
                     positionExtra = i
+                }
             }
 
             val defaultPosition = positionExtra ?: 0
@@ -249,8 +252,14 @@ class SectorActivity : LanguageAppCompatActivity() {
                 onBackPressed()
                 false
             } else {
-                zoneId = zoneIdInstanceState ?: zoneIdExtra!!
-                sectorId = sectorIdInstanceState ?: sectorIdExtra!!
+                zoneId = zoneIdExtra ?: run {
+                    Timber.v("Loading zoneId from savedInstanceState")
+                    zoneIdInstanceState!!
+                }
+                sectorId = sectorIdExtra ?: run {
+                    Timber.v("Loading sectorId from savedInstanceState")
+                    sectorIdInstanceState!!
+                }
                 Timber.d("Loading sectors from zone $zoneId...")
 
                 transitionName = intent.getExtra(EXTRA_SECTOR_TRANSITION_NAME)
