@@ -68,6 +68,10 @@ $dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity.profile/ProfileActi
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity.profile/ProfileActivity.Companion/hasProfileImageBeenChanged/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity.profile/-profile-activity/-companion/has-profile-image-been-changed.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity.profile/ProfileActivity///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity.profile/-profile-activity/index.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity.profile/ProfileActivity/ProfileActivity/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity.profile/-profile-activity/-profile-activity.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity.profile/UserActivityActivity.Companion///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity.profile/-user-activity-activity/-companion/index.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity.profile/UserActivityActivity.Companion/intent/#android.content.Context#java.util.ArrayList[com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt]#kotlin.Int#kotlin.Int/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity.profile/-user-activity-activity/-companion/intent.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity.profile/UserActivityActivity///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity.profile/-user-activity-activity/index.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity.profile/UserActivityActivity/UserActivityActivity/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity.profile/-user-activity-activity/-user-activity-activity.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity////PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity/index.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity//launch/com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl#android.app.Activity/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity/launch.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.activity/IntroActivity.Companion///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.activity/-intro-activity/-companion/index.html
@@ -139,6 +143,14 @@ $dokka.location:com.arnyminerz.escalaralcoiaicomtat.auth/AuthenticatorService/Au
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.auth/AuthenticatorService/onBind/#android.content.Intent?/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.auth/-authenticator-service/on-bind.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.device////PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.device/index.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.device//vibrate/#android.content.Context#kotlin.Long/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.device/vibrate.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.activity////PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.activity/index.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.activity/LastActivityFragment.Companion///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.activity/-last-activity-fragment/-companion/index.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.activity/LastActivityFragment.Companion/newInstance/#kotlin.String/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.activity/-last-activity-fragment/-companion/new-instance.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.activity/LastActivityFragment///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.activity/-last-activity-fragment/index.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.activity/LastActivityFragment/onCreate/#android.os.Bundle?/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.activity/-last-activity-fragment/on-create.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.activity/LastActivityFragment/onCreateView/#android.view.LayoutInflater#android.view.ViewGroup?#android.os.Bundle?/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.activity/-last-activity-fragment/on-create-view.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.activity/LastActivityFragment/onDestroyView/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.activity/-last-activity-fragment/on-destroy-view.html
+$dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.activity/LastActivityFragment/onStart/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.activity/-last-activity-fragment/on-start.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.auth////PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.auth/index.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.auth/LoginFragment.Companion///PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.auth/-login-fragment/-companion/index.html
 $dokka.location:com.arnyminerz.escalaralcoiaicomtat.fragment.auth/LoginFragment.Companion/newInstance/#/PointingToDeclaration/base/com.arnyminerz.escalaralcoiaicomtat.fragment.auth/-login-fragment/-companion/new-instance.html
@@ -532,6 +544,7 @@ com.arnyminerz.escalaralcoiaicomtat.activity.profile
 com.arnyminerz.escalaralcoiaicomtat.auth
 com.arnyminerz.escalaralcoiaicomtat.device
 com.arnyminerz.escalaralcoiaicomtat.fragment
+com.arnyminerz.escalaralcoiaicomtat.fragment.activity
 com.arnyminerz.escalaralcoiaicomtat.fragment.auth
 com.arnyminerz.escalaralcoiaicomtat.fragment.climb
 com.arnyminerz.escalaralcoiaicomtat.fragment.dialog
