@@ -89,7 +89,7 @@ Google Dependencies's last version cannot be displayed because of the inavailabi
 
 ---
 
-[pages]: https://escalar-alcoia-i-comtat.github.io/Android/html/index.html
+[pages]: https://escalar-alcoia-i-comtat.github.io/Android/htmlMultiModule/index.html
 
 [sponsors]: https://github.com/sponsors/ArnyminerZ
 [play-store]: https://play.google.com/store/apps/details?id=com.arnyminerz.escalaralcoiaicomtat
