@@ -222,12 +222,17 @@ class PathsAdapter(
 
         val descriptionDialog = DescriptionDialog.create(activity, path)
 
-        val chips = createChips(
-            path.endings,
-            path.pitches,
-            path.fixedSafesData,
-            path.requiredSafesData
-        )
+        val chips: List<Chip> = try {
+            createChips(
+                path.endings,
+                path.pitches,
+                path.fixedSafesData,
+                path.requiredSafesData
+            )
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            Timber.e(e, "Could not create chips for Path $path.")
+            emptyList()
+        }
 
         // Now, with all the data loaded, update the UI
         uiContext {
@@ -545,6 +550,7 @@ class PathsAdapter(
 
         if (endings.size == 1 && !endings[0].isUnknown) {
             val ending = endings.first()
+            Timber.v("Adding chip \"$ending\"")
             val endingVal = ending.index
 
             add(
