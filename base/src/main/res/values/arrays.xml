@@ -10,16 +10,17 @@
         <item>@string/path_warning_rope_length</item>
     </string-array>
     <string-array name="path_endings" translatable="false">
+        <item>@string/path_ending_unknown</item>
         <item>@string/path_ending_plate</item>
         <item>@string/path_ending_plate_ring</item>
         <item>@string/path_ending_plate_lanyard</item>
         <item>@string/path_ending_plate_ring</item>
         <item>@string/path_ending_chain_carabiner</item>
-        <item>@string/path_ending_none</item>
         <item>@string/path_ending_piton</item>
         <item>@string/path_ending_walking</item>
         <item>@string/path_ending_rappel</item>
         <item>@string/path_ending_lanyard</item>
+        <item>@string/path_ending_none</item>
     </string-array>
     <string-array name="app_languages" translatable="false">
         <item>English</item>

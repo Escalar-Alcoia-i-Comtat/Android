@@ -137,6 +137,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             Timber.v("Skipped load since already loading")
             return
         }
+        Timber.i("Started download from server.")
         loading = true
         uiContext {
             binding.progressTextView.setText(R.string.status_downloading)
@@ -160,6 +161,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                 binding.progressTextView.setText(R.string.status_storing)
             }
         }
+        Timber.v("Finished loading areas.")
         if (areas.isNotEmpty()) {
             if (deepLinkPath != null) {
                 uiContext {
@@ -176,12 +178,15 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                     else
                         launch(MainActivity::class.java)
                 }
-            } else uiContext {
-                launch(MainActivity::class.java)
-            }
+            } else
+                uiContext {
+                    Timber.v("Launching MainActivity...")
+                    launch(MainActivity::class.java)
+                }
         } else if (!appNetworkState.hasInternet)
             uiContext {
                 noInternetAccess()
             }
+        else Timber.v("Areas is empty, but no handle was called.")
     }
 }
