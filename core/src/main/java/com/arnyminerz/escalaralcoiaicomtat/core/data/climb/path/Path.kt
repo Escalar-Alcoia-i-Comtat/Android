@@ -3,6 +3,9 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 import android.app.Activity
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.appsearch.app.AppSearchSession
+import androidx.appsearch.app.SearchSpec
+import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
@@ -22,7 +25,6 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
-import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
 import timber.log.Timber
@@ -54,15 +56,6 @@ class Path internal constructor(
     val parentSectorId: String,
 ) : DataClassImpl(objectId, NAMESPACE, timestampMillis, displayName, documentPath),
     Comparable<Path> {
-    /**
-     * Stores is the path is blocked.
-     * @author Arnau Mora
-     * @since 20210724
-     */
-    @IgnoredOnParcel
-    var blockingType: BlockingType = BlockingType.UNKNOWN
-        private set
-
     /**
      * Creates a new [Path] from the data of a [DocumentSnapshot].
      * @author Arnau Mora
@@ -262,38 +255,7 @@ class Path internal constructor(
             }
 
     /**
-     * Observes the block status of the path, and notifies the app whenever it changes.
-     * @author Arnau Mora
-     * @since 20210730
-     * @param firestore The [FirebaseFirestore] reference to fetch the updates from the server.
-     * @param activity The [Activity] to attach the listener to. When the activity is destroyed,
-     * the observer will also be removed.
-     * @param listener This will get called when a new completed path is added.
-     * @return The listener registration for cancelling the listener when needed.
-     */
-    @UiThread
-    fun observeBlockStatus(
-        firestore: FirebaseFirestore,
-        activity: Activity,
-        @UiThread listener: (blocking: BlockingType) -> Unit
-    ) =
-        firestore.document(documentPath)
-            .addSnapshotListener(activity) { snapshot, error ->
-                Timber.v("$this > Got snapshot update!")
-                if (error != null)
-                    Timber.e(error, "$this > Detected an error in a snapshot.")
-                else if (snapshot != null && snapshot.exists()) {
-                    Timber.v("$this > Processing blocked status...")
-                    val blocked = snapshot.getString("blocked")
-                    val blockingType = BlockingType.find(blocked)
-                    this.blockingType = blockingType
-                    listener(blockingType)
-                }
-            }
-
-    /**
-     * Fetches the blocking status of the path from the server. Also updates [blockingType] with the
-     * result.
+     * Fetches the [BlockingType] of the [Path] from the server.
      * @author Arnau Mora
      * @since 20210824
      * @param firestore The [FirebaseFirestore] instance to fetch the data from.
@@ -305,10 +267,45 @@ class Path internal constructor(
         Timber.v("$this > Extracting blocked from document...")
         val blocked = document.getString("blocked")
         Timber.v("$this > Searching for blocking type...")
-        val blockingType = BlockingType.find(blocked)
-        Timber.v("$this > Blocking type: $blockingType")
-        this.blockingType = blockingType
-        return blockingType
+        return BlockingType.find(blocked)
+    }
+
+    /**
+     * Fetches the blocking status of the path from the server. Also updates [blockingType] with the
+     * result.
+     * @author Arnau Mora
+     * @since 20210824
+     */
+    @WorkerThread
+    suspend fun getBlockStatus(
+        searchSession: AppSearchSession,
+        firestore: FirebaseFirestore
+    ): BlockingType {
+        Timber.v("$this > Getting block status...")
+        Timber.v("$this > Building search spec...")
+        val searchSpec = SearchSpec.Builder()
+            .addFilterNamespaces(BlockingData.NAMESPACE) // Search for BlockingData
+            .setResultCountPerPage(1) // Get just one result
+            .build()
+        Timber.v("$this > Searching for path in session...")
+        val searchResults = searchSession.search(objectId, searchSpec)
+        Timber.v("$this > Awaiting for page results...")
+        val searchPage = searchResults.nextPage.await()
+        return if (searchPage.isEmpty()) {
+            Timber.v("$this > There's no block status in search session.")
+            val blockingType = singleBlockStatusFetch(firestore)
+            Timber.v("$this > Blocking type: $blockingType")
+            blockingType
+        } else {
+            Timber.v("$this > Getting first search result...")
+            val searchResult = searchPage[0]
+            Timber.v("$this > Getting generic document...")
+            val document = searchResult.genericDocument
+            Timber.v("$this > Converting document class...")
+            val data = document.toDocumentClass(BlockingData::class.java)
+            Timber.v("$this > Converting to BlockingType...")
+            data.blockingType
+        }
     }
 
     companion object {
