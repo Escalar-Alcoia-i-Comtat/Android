@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.utils.maps
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -23,7 +24,12 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.edit
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.MapType
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass.Companion.getIntent
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_ZOOM
@@ -35,12 +41,19 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MapFeatures
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MapObjectWindowData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.addToMap
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.getWindow
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_AREA_META
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_SECTOR_META
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_ZONE_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_KMZ_FILE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MAP_MARKERS_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getData
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.includeAll
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putParcelableList
@@ -77,17 +90,58 @@ import java.io.InvalidObjectException
 class MapHelper {
 
     companion object {
+        /**
+         * Gets the target intent to launch the correct activity from a [Marker].
+         * @author Arnau Mora
+         * @since 20210825
+         * @param activity The [Activity] that is requesting the [Intent].
+         * @return The target intent, or if not found, null.
+         */
         @WorkerThread
-        suspend fun getTarget(
-            activity: Activity,
-            marker: Marker
-        ): Intent? {
-            val app = activity.application as App
-            val areas = app.getAreas()
+        suspend fun Marker.getTarget(activity: Activity): Intent? {
             Timber.d("Getting marker's title...")
-            val title = uiContext { marker.getWindow().title }
-            Timber.v("Searching in ${areas.size} cached areas...")
-            return areas.getIntent(app, app.searchSession, title)
+            val title = uiContext { getWindow().title }
+
+            Timber.v("Getting Activities...")
+            val appInfo = activity.packageManager.getApplicationInfo(
+                activity.packageName,
+                PackageManager.GET_META_DATA
+            )
+            val appBundle = appInfo.metaData
+            val areaActivityPackage = appBundle.getString(ACTIVITY_AREA_META)
+            val zoneActivityPackage = appBundle.getString(ACTIVITY_ZONE_META)
+            val sectorActivityPackage = appBundle.getString(ACTIVITY_SECTOR_META)
+            if (areaActivityPackage == null)
+                throw IllegalArgumentException("$ACTIVITY_AREA_META was not specified in manifest")
+            if (zoneActivityPackage == null)
+                throw IllegalArgumentException("$ACTIVITY_ZONE_META was not specified in manifest")
+            if (sectorActivityPackage == null)
+                throw IllegalArgumentException("$ACTIVITY_SECTOR_META was not specified in manifest")
+            val areaActivityClass = Class.forName(areaActivityPackage)
+            val zoneActivityClass = Class.forName(zoneActivityPackage)
+            val sectorActivityClass = Class.forName(sectorActivityPackage)
+
+            val app = activity.application as App
+            return app.searchSession.getData<Area, AreaData>(title, Area.NAMESPACE)?.let {
+                Intent(activity, areaActivityClass).apply {
+                    putExtra(EXTRA_AREA, it.objectId)
+                }
+            } ?: run {
+                app.searchSession.getData<Zone, ZoneData>(title, Zone.NAMESPACE)?.let {
+                    Intent(activity, zoneActivityClass).apply {
+                        putExtra(EXTRA_ZONE, it.objectId)
+                    }
+                } ?: run {
+                    app.searchSession.getData<Sector, SectorData>(title, Sector.NAMESPACE)?.let {
+                        Intent(activity, sectorActivityClass).apply {
+                            val sectorPath = it.documentPath
+                            val splittedPath = sectorPath.split("/")
+                            putExtra(EXTRA_ZONE, splittedPath[3])
+                            putExtra(EXTRA_SECTOR, it.objectId)
+                        }
+                    }
+                }
+            }
         }
 
         fun getImageUrl(description: String?): String? {
@@ -915,7 +969,7 @@ class MapHelper {
 
             doAsync {
                 // Info Window Data Class
-                val activityIntent = getTarget(activity, marker)
+                val activityIntent = marker.getTarget(activity)
 
                 uiContext {
                     visibility(enterButton, activityIntent != null)
