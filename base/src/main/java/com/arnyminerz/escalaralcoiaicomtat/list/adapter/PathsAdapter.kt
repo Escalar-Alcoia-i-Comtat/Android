@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -20,7 +21,6 @@ import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.CommentsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.MarkCompletedActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
@@ -33,10 +33,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.index
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.isUnknown
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.INFO_VIBRATION
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.LinePattern
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
@@ -44,6 +46,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toStringLineJumping
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.databinding.ListItemPathBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.ArtifoPathEndingDialog
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.DescriptionDialog
@@ -81,9 +84,39 @@ const val ANIMATION_DURATION = 300L
 @ExperimentalBadgeUtils
 class PathsAdapter(
     private val paths: List<Path>,
-    private val activity: SectorActivity,
     private val markAsCompleteRequestHandler: ActivityResultLauncher<Intent>
 ) : RecyclerView.Adapter<SectorViewHolder>() {
+    /**
+     * The current application context.
+     * Gets initialized in [onCreateViewHolder].
+     * @author Arnau Mora
+     * @since 20210824
+     */
+    private lateinit var context: Context
+
+    /**
+     * The current [Activity] instance.
+     * Gets initialized in [onCreateViewHolder].
+     * @author Arnau Mora
+     * @since 20210824
+     */
+    private lateinit var activity: Activity
+
+    /**
+     * The current [App] instance.
+     * Gets initialized in [onCreateViewHolder].
+     * @author Arnau Mora
+     * @since 20210824
+     */
+    private lateinit var app: App
+
+    /**
+     * The view binding of the adapter.
+     * Gets initialized in [onCreateViewHolder].
+     * @author Arnau Mora
+     * @since 20210824
+     */
+    private lateinit var binding: ListItemPathBinding
 
     /**
      * Specifies the toggled status of all the paths.
@@ -145,13 +178,14 @@ class PathsAdapter(
 
     override fun getItemCount(): Int = paths.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SectorViewHolder =
-        SectorViewHolder(
-            activity,
-            LayoutInflater.from(activity).inflate(
-                R.layout.list_item_path, parent, false
-            )
-        )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SectorViewHolder {
+        context = parent.context
+        activity = context as Activity
+        app = activity.app
+        val inflater = LayoutInflater.from(context)
+        val view = ListItemPathBinding.inflate(inflater, parent, false)
+        return SectorViewHolder(activity, view.root)
+    }
 
     override fun onBindViewHolder(holder: SectorViewHolder, position: Int) {
         if (position >= paths.size) {
@@ -318,7 +352,7 @@ class PathsAdapter(
         }
 
         Timber.v("${path.objectId} > Checking if blocked...")
-        val blocked = path.blockingType
+        val blocked = path.getBlockStatus(app.searchSession, firestore)
         Timber.d("${path.objectId} > Block status: $blocked")
 
         uiContext {
