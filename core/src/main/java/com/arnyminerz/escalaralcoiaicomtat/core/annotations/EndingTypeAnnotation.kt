@@ -13,6 +13,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_RAPPEL
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_UNKNOWN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_WALKING
 
+/**
+ * Serves for annotating all Path's Ending Type strings.
+ * @author Arnau Mora
+ * @since 20210825
+ */
 @Target(AnnotationTarget.TYPE, AnnotationTarget.VALUE_PARAMETER)
 @StringDef(
     ENDING_TYPE_UNKNOWN,

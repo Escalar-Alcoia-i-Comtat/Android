@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.auth
 
 import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.functions.FirebaseFunctionsException
@@ -15,7 +16,20 @@ import kotlin.coroutines.suspendCoroutine
 
 fun FirebaseUser.user(): User = User(uid)
 
-class User(val uid: String) {
+/**
+ * The EAIC User class. Includes all the functions required to manipulate the user and get its data.
+ * @author Arnau Mora
+ * @since 20210825
+ * @param uid The UID of the user from [FirebaseAuth].
+ */
+class User(
+    /**
+     * The UID of the user from [FirebaseAuth].
+     * @author Arnau Mora
+     * @since 20210825
+     */
+    val uid: String
+) {
     /**
      * Fetches the [User]'s [VisibleUserData] from the server.
      * @author Arnau Mora
