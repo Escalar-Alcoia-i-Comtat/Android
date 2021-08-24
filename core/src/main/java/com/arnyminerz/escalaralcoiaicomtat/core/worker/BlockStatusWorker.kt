@@ -98,6 +98,9 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     val successes = putResponse.successes
                     val failures = putResponse.failures
 
+                    Timber.v("Closing search session...")
+                    searchSession.close()
+
                     notification.edit()
                         .withChannelId(TASK_COMPLETED_CHANNEL_ID)
                         .withTitle(R.string.notification_block_status_error_title)
@@ -123,6 +126,9 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     try {
                         Timber.v("Storing results to disk...")
                         searchSession.requestFlush().await()
+
+                        Timber.v("Closing search session...")
+                        searchSession.close()
 
                         Timber.v("Destroying notification...")
                         notification.destroy()
