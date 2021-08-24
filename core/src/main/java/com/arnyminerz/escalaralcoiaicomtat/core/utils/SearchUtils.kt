@@ -227,3 +227,13 @@ suspend fun AppSearchSession.getSectors(zoneId: String): List<Sector> =
 @WorkerThread
 suspend fun AppSearchSession.getPaths(sectorId: String): List<Path> =
     getList<Path, PathData>(sectorId, Path.NAMESPACE)
+
+/**
+ * Searches for all the [AppSearchSession] indexed [Path]s.
+ * @author Arnau Mora
+ * @since 20210820
+ * @return A [List] with the found [Path]s.
+ */
+@WorkerThread
+suspend fun AppSearchSession.getPaths(): List<Path> =
+    getList<Path, PathData>("", Path.NAMESPACE)
