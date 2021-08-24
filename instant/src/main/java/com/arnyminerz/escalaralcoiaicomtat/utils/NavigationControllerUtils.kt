@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.appsearch.app.GenericDocument
 import androidx.appsearch.app.SearchSpec
 import androidx.appsearch.exceptions.AppSearchException
-import androidx.appsearch.localstorage.LocalStorage
 import androidx.navigation.NavController
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
@@ -12,7 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import timber.log.Timber
@@ -30,11 +29,7 @@ fun NavController.searchNavigation(uri: Uri) {
         return // Just load the Areas section that is selected by default
     else doAsync {
         Timber.v("Initializing search session...")
-        val sessionFuture = LocalStorage.createSearchSession(
-            LocalStorage.SearchContext.Builder(context, SEARCH_DATABASE_NAME)
-                .build()
-        )
-        val session = sessionFuture.await()
+        val session = createSearchSession(context)
         try {
             Timber.i("Searching for \"$uri\"")
             val searchResults = session.search(
