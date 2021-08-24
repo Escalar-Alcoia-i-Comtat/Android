@@ -46,8 +46,16 @@ suspend fun FirebaseFirestore.loadAreas(
     @UiThread progressCallback: ((current: Int, total: Int) -> Unit)? = null
 ): List<Area> {
     val indexedSearch = PREF_INDEXED_SEARCH.get()
-    if (indexedSearch)
-        return application.getAreas()
+    if (indexedSearch) {
+        Timber.v("Search results already indexed. Fetching from application...")
+        return application.getAreas() // If not empty, return areas
+            .ifEmpty {
+                // If empty, reset the preference, and launch loadAreas again
+                Timber.w("Areas is empty, reseting search indexed pref and launching again.")
+                PREF_INDEXED_SEARCH.put(false)
+                this.loadAreas(application, progressCallback)
+            }
+    }
 
     val performance = Firebase.performance
     val trace = performance.newTrace("loadAreasTrace")
