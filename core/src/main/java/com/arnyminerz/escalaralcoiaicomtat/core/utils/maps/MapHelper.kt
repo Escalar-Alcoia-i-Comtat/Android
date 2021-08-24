@@ -23,7 +23,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.edit
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.MapType
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass.Companion.getIntent
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_ZOOM
@@ -35,10 +35,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MapFeatures
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MapObjectWindowData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.addToMap
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.getWindow
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_KMZ_FILE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MAP_MARKERS_BUNDLE_EXTRA
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.includeAll
@@ -77,17 +77,21 @@ import java.io.InvalidObjectException
 class MapHelper {
 
     companion object {
+        /**
+         * Gets the target intent to launch the correct activity from a [Marker].
+         * @author Arnau Mora
+         * @since 20210825
+         * @param activity The [Activity] that is requesting the [Intent].
+         * @return The target intent, or if not found, null.
+         */
         @WorkerThread
-        suspend fun getTarget(
-            activity: Activity,
-            marker: Marker
-        ): Intent? {
-            val app = activity.application as App
-            val areas = app.getAreas()
+        suspend fun Marker.getTarget(activity: Activity): Intent? {
             Timber.d("Getting marker's title...")
-            val title = uiContext { marker.getWindow().title }
-            Timber.v("Searching in ${areas.size} cached areas...")
-            return areas.getIntent(app, app.searchSession, title)
+            val title = uiContext { getWindow().title }
+
+            val app = activity.app
+
+            return DataClass.getIntent(activity, app.searchSession, title)
         }
 
         fun getImageUrl(description: String?): String? {
@@ -915,7 +919,7 @@ class MapHelper {
 
             doAsync {
                 // Info Window Data Class
-                val activityIntent = getTarget(activity, marker)
+                val activityIntent = marker.getTarget(activity)
 
                 uiContext {
                     visibility(enterButton, activityIntent != null)

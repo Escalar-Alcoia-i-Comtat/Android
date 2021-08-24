@@ -21,7 +21,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.CouldNotCreateDynamicLinkException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
@@ -34,13 +36,14 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DYNAMIC_LINKS_DOMAIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_STATIC
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getData
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.readBitmap
@@ -100,21 +103,21 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             "$namespace-$objectId${suffix ?: ""}"
 
         /**
-         * Searches in the [app] search instance and tries to get an intent from them.
+         * Gets the [Intent] used to launch the [Activity] of a [DataClass] using [query] as the
+         * search requirement.
          * @author Arnau Mora
-         * @since 20210416
-         * @param app The [App] instance.
-         * @param queryName What to search. May be [DataClass.displayName] or [DataClassMetadata.webURL].
+         * @since 20210825
+         * @param context The [Context] that is requesting the [Intent].
+         * @param searchSession The [AppSearchSession] that has all the data stored.
+         * @param query What to search for. May be [DataClass.displayName] or [DataClassMetadata.webURL].
          * @return An [Intent] if the [DataClass] was found, or null.
          */
         @WorkerThread
-        suspend fun List<Area>.getIntent(
+        suspend fun getIntent(
             context: Context,
             searchSession: AppSearchSession,
-            queryName: String
+            query: String
         ): Intent? {
-            var result: Intent? = null
-
             Timber.v("Getting Activities...")
             val appInfo = context.packageManager.getApplicationInfo(
                 context.packageName,
@@ -134,54 +137,25 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             val zoneActivityClass = Class.forName(zoneActivityPackage)
             val sectorActivityClass = Class.forName(sectorActivityPackage)
 
-            Timber.d("Trying to generate intent from \"$queryName\". Searching in $size areas.")
-            for (area in this) {
-                Timber.d("  Finding in ${area.displayName}.")
-                if (area.displayName.equals(queryName, true) ||
-                    area.metadata.webURL.equals(queryName, true)
-                )
-                    result = Intent(context, areaActivityClass).apply {
-                        Timber.d("Found Area id ${area.objectId}!")
-                        putExtra(EXTRA_AREA, area.objectId)
+            return searchSession.getData<Area, AreaData>(query, Area.NAMESPACE)?.let {
+                Intent(context, areaActivityClass).apply {
+                    putExtra(EXTRA_AREA, it.objectId)
+                }
+            } ?: run {
+                searchSession.getData<Zone, ZoneData>(query, Zone.NAMESPACE)?.let {
+                    Intent(context, zoneActivityClass).apply {
+                        putExtra(EXTRA_ZONE, it.objectId)
                     }
-                else {
-                    Timber.d("  Iterating area's children...")
-                    val zones = area.getChildren(searchSession)
-                    for (zone in zones) {
-                        Timber.d("    Finding in ${zone.displayName}.")
-                        // Children must be loaded so `count` is fetched correctly.
-                        val sectors = zone.getChildren(searchSession)
-
-                        if (zone.displayName.equals(queryName, true) ||
-                            zone.metadata.webURL.equals(queryName, true)
-                        )
-                            result = Intent(context, zoneActivityClass).apply {
-                                putExtra(EXTRA_ZONE, zone.objectId)
-                            }
-                        else
-                            for ((counter, sector) in sectors.withIndex()) {
-                                Timber.d("      Finding in ${sector.displayName}.")
-                                if (sector.displayName.equals(queryName, true) ||
-                                    sector.metadata.webURL.equals(queryName, true)
-                                )
-                                    result = Intent(context, sectorActivityClass)
-                                        .apply {
-                                            Timber.d("Found Sector id ${sector.objectId} at $counter!")
-                                            putExtra(EXTRA_AREA, area.objectId)
-                                            putExtra(EXTRA_ZONE, zone.objectId)
-                                        }
-
-                                // If a result has been found, exit loop
-                                if (result != null) break
-                            }
-                        // If a result has been found, exit loop
-                        if (result != null) break
+                } ?: run {
+                    searchSession.getData<Sector, SectorData>(query, Sector.NAMESPACE)?.let {
+                        Intent(context, sectorActivityClass).apply {
+                            val sectorPath = it.documentPath
+                            val splittedPath = sectorPath.split("/")
+                            putExtra(EXTRA_ZONE, splittedPath[3])
+                            putExtra(EXTRA_SECTOR, it.objectId)
+                        }
                     }
                 }
-                if (result != null) break
-            }
-            return result?.also {
-                it.putExtra(EXTRA_STATIC, true)
             }
         }
     }
