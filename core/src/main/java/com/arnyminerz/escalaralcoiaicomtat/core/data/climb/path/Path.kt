@@ -107,7 +107,9 @@ class Path internal constructor(
 
         Timber.d("Loading endings for Path $objectId")
         val endingsList = pathData?.get("ending") as List<*>?
-        endingsList?.forEachIndexed { i, _ -> endings.add(endingsList[i].toString()) }
+        endingsList?.forEachIndexed { i, _ ->
+            endings.add(endingsList[i].toString().lowercase())
+        }
 
         Timber.d("Loading rebuilders...")
         val rebuilders = pathData?.get("rebuiltBy") as List<*>?
