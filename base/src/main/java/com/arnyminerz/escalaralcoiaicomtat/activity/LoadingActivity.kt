@@ -17,10 +17,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIR
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.BlockStatusWorker
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.ktx.auth
@@ -70,6 +72,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             Timber.v("  Won't show intro.")
 
         deepLinkPath = getExtra(EXTRA_LINK_PATH)
+
+        doAsync { initializeBlockStatusWorker() }
     }
 
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
@@ -96,6 +100,21 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
         Firebase.performance.isPerformanceCollectionEnabled = enableErrorReporting
         Timber.v("Set Performance collection enabled to $enableErrorReporting")
+    }
+
+    /**
+     * Initializes and starts the [BlockStatusWorker] if not already running.
+     * @author Arnau Mora
+     * @since 20210824
+     */
+    private suspend fun initializeBlockStatusWorker() {
+        val isScheduled = BlockStatusWorker.isScheduled(this)
+        if (isScheduled) {
+            Timber.v("Won't start BlockStatusWorker since already running.")
+        } else {
+            Timber.v("Scheduling BlockStatusWorker...")
+            BlockStatusWorker.schedule(this)
+        }
     }
 
     /**

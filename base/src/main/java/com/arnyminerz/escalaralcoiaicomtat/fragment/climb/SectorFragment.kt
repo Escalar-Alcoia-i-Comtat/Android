@@ -287,12 +287,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
                             requireContext(),
                             R.anim.item_enter_left_animator
                         )
-                    binding?.pathsRecyclerView?.adapter =
-                        PathsAdapter(
-                            paths,
-                            requireActivity() as SectorActivity,
-                            markAsCompleteRequest
-                        )
+                    binding?.pathsRecyclerView?.adapter = PathsAdapter(paths, markAsCompleteRequest)
                     binding?.pathsRecyclerView?.show()
 
                     // Load info bar

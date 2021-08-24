@@ -285,4 +285,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="activity_summary_projects">%d proyectos.</string>
     <string name="activity_summary_completions">%d vías completadas.</string>
     <string name="activity_summary_grades">Grados</string>
+    <string name="notification_channel_task_in_progress_name">Tarea en progreso</string>
+    <string name="notification_channel_task_in_progress_desc">Esto te informará de que hay una tarea en ejecución en segundo plano.</string>
 </resources>

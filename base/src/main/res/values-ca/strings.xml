@@ -284,4 +284,6 @@
     <string name="activity_summary_projects">%d projectes.</string>
     <string name="activity_summary_completions">%d vies completades.</string>
     <string name="activity_summary_grades">Graus</string>
+    <string name="notification_channel_task_in_progress_name">Tasca en progrés</string>
+    <string name="notification_channel_task_in_progress_desc">Açò t\'informarà quan hi haja una tasca en procés en segon pla.</string>
 </resources>

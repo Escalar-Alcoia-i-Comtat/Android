@@ -84,6 +84,14 @@
     <string name="notification_mark_completed_marking_complete_message">Marcant %1$s com a completat.</string>
     <string name="notification_mark_completed_marking_project_title">Marcant com a projecte</string>
     <string name="notification_mark_completed_marking_project_message">Marcant %1$s com a projecte.</string>
+    <string name="notification_block_status_title">Obtenint estat de bloqueig</string>
+    <string name="notification_block_status_message">S\'està obtenint la informació de bloqueig de les vies…</string>
+    <string name="notification_block_status_progress">Obtenint estat de bloqueig de %s…</string>
+    <string name="notification_block_status_storing">Desant estats de bloqueig…</string>
+    <string name="notification_block_status_error_title">No s\'ha pogut obtenir</string>
+    <string name="notification_block_status_error_store_short">No s\'han pogut desar els estats de bloqueig.</string>
+    <string name="notification_block_status_error_store">No s\'han pogut desar els estats de bloqueig.<br />Desats correctament %1$d elements.<br />No s\'han pogut desar %2$d elements.</string>
+    <string name="notification_block_status_error_persist">No s\'han pogut desar els estats de bloqueig a la memòria.</string>
 
     <string name="dialog_gps_disabled_title">GPS deshabilitat</string>
     <string name="dialog_gps_disabled_message">Tens el proveïdor d\'ubiació desconnectat.</string>

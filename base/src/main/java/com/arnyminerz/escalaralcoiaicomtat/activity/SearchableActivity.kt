@@ -10,7 +10,6 @@ import androidx.annotation.WorkerThread
 import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
 import androidx.appsearch.exceptions.AppSearchException
-import androidx.appsearch.localstorage.LocalStorage
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -71,11 +70,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone.Companion.SAMPLE_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.SearchItemTypeColor
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.LoadingIndicator
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
@@ -317,9 +315,7 @@ class SearchableActivity : ComponentActivity() {
             val searchItems = arrayListOf<DataClassImpl>()
 
             Timber.v("Creating search session...")
-            val session = LocalStorage.createSearchSession(
-                LocalStorage.SearchContext.Builder(context, SEARCH_DATABASE_NAME).build()
-            ).await()
+            val session = app.searchSession
             Timber.v("Creating search spec...")
             val searchSpec = SearchSpec.Builder()
                 .addFilterPackageNames(BuildConfig.APPLICATION_ID)

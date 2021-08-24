@@ -2,9 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.hilt
 
 import android.content.Context
 import androidx.appsearch.app.AppSearchSession
-import androidx.appsearch.localstorage.LocalStorage
-import androidx.work.await
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,10 +20,7 @@ class AppSearchModule {
         @ApplicationContext appContext: Context
     ): AppSearchSession {
         return runBlocking {
-            LocalStorage.createSearchSession(
-                LocalStorage.SearchContext.Builder(appContext, SEARCH_DATABASE_NAME)
-                    .build()
-            ).await()
+            createSearchSession(appContext)
         }
     }
 }

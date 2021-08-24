@@ -84,6 +84,14 @@
     <string name="notification_mark_completed_marking_complete_message">Marcando %1$s como completada.</string>
     <string name="notification_mark_completed_marking_project_title">Marcando como proyecto</string>
     <string name="notification_mark_completed_marking_project_message">Marcando %1$s como proyecto.</string>
+    <string name="notification_block_status_title">Obteniendo estados de bloqueo</string>
+    <string name="notification_block_status_message">Se está obteniendo la información de bloqueo de las vías…</string>
+    <string name="notification_block_status_progress">Obteniendo estado de bloqueo de %s…</string>
+    <string name="notification_block_status_storing">Guardando estados de bloqueo…</string>
+    <string name="notification_block_status_error_title">No se ha podido obtener</string>
+    <string name="notification_block_status_error_store_short">No se han podido guardar los estados de bloqueo.</string>
+    <string name="notification_block_status_error_store">No se han podido guardar los estados de bloqueo.<br />Guardados correctamente %1$d elementos.<br />No se han podido guardar %2$d elementos.</string>
+    <string name="notification_block_status_error_persist">No se han podido guardar los estados de bloqueo en la memoria.</string>
 
     <string name="dialog_gps_disabled_title">GPS deshabilitado</string>
     <string name="dialog_gps_disabled_message">Tienes el proveedor de ubicación desconectado.</string>

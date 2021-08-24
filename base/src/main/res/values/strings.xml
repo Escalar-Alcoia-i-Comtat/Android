@@ -161,6 +161,8 @@
     <string name="notification_channel_people_group_name">People</string>
     <string name="notification_channel_task_completed_name">Task completed</string>
     <string name="notification_channel_task_completed_desc">This will notify you whenever a task in background has been completed.</string>
+    <string name="notification_channel_task_in_progress_name">Task in progress</string>
+    <string name="notification_channel_task_in_progress_desc">This will tell you the progress of a task running in background.</string>
     <string name="notification_channel_new_update_name">New update available</string>
     <string name="notification_channel_new_update_desc">This will tell you when a new update is available, and will help you downloading it.</string>
 

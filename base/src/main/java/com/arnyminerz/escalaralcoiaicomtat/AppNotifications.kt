@@ -12,6 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_C
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.PEOPLE_NOTIFICATION_CHANNEL_GROUP
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_COMPLETED_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_IN_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.UPDATE_AVAILABLE_CHANNEL_ID
 
 @TargetApi(Build.VERSION_CODES.O)
@@ -33,6 +34,18 @@ private fun Context.createTaskCompletedChannel(): NotificationChannel {
     val importance = NotificationManager.IMPORTANCE_HIGH
 
     val channel = NotificationChannel(TASK_COMPLETED_CHANNEL_ID, name, importance)
+    channel.description = description
+
+    return channel
+}
+
+@TargetApi(Build.VERSION_CODES.O)
+private fun Context.createTaskInProgressChannel(): NotificationChannel {
+    val name = getString(R.string.notification_channel_task_in_progress_name)
+    val description = getString(R.string.notification_channel_task_in_progress_desc)
+    val importance = NotificationManager.IMPORTANCE_LOW
+
+    val channel = NotificationChannel(TASK_IN_PROGRESS_CHANNEL_ID, name, importance)
     channel.description = description
 
     return channel
@@ -101,9 +114,14 @@ fun Context.createNotificationChannels() {
         )
     }
 
-    notificationManager.createNotificationChannel(createDownloadProgressChannel())
-    notificationManager.createNotificationChannel(createDownloadCompleteChannel())
-    notificationManager.createNotificationChannel(createAlertsChannel())
-    notificationManager.createNotificationChannel(createTaskCompletedChannel())
-    notificationManager.createNotificationChannel(createNewUpdateChannel())
+    notificationManager.createNotificationChannels(
+        listOf(
+            createDownloadProgressChannel(),
+            createDownloadCompleteChannel(),
+            createAlertsChannel(),
+            createTaskInProgressChannel(),
+            createTaskCompletedChannel(),
+            createNewUpdateChannel(),
+        )
+    )
 }

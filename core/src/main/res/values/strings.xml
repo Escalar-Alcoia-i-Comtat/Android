@@ -84,6 +84,14 @@
     <string name="notification_mark_completed_marking_project_message">Marking %1$s as project.</string>
     <string name="notification_mark_completed_error_title">Could not mark as completed</string>
     <string name="notification_mark_completed_error_message">The path \"%1$s\" was scheduled to be marked as completed, but an error occurred. Error code: %2$s</string>
+    <string name="notification_block_status_title">Fetching block status</string>
+    <string name="notification_block_status_message">Fetching the block status of the paths…</string>
+    <string name="notification_block_status_progress">Fetching block status of %s…</string>
+    <string name="notification_block_status_storing">Storing block status…</string>
+    <string name="notification_block_status_error_title">Could not fetch</string>
+    <string name="notification_block_status_error_store_short">Could not store block statuses.</string>
+    <string name="notification_block_status_error_store">Could not store block statuses.<br />Stored correctly %1$d items.<br />Could not store %2$d items.</string>
+    <string name="notification_block_status_error_persist">Could not write block statuses to disk.</string>
 
     <string name="dialog_gps_disabled_title">GPS disabled</string>
     <string name="dialog_gps_disabled_message">You have the device\'s location provider turned off.</string>
