@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
 import android.app.Activity
 import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
@@ -270,6 +271,7 @@ class Path internal constructor(
      * @param listener This will get called when a new completed path is added.
      * @return The listener registration for cancelling the listener when needed.
      */
+    @UiThread
     fun observeBlockStatus(
         firestore: FirebaseFirestore,
         activity: Activity,
@@ -288,6 +290,26 @@ class Path internal constructor(
                     listener(blockingType)
                 }
             }
+
+    /**
+     * Fetches the blocking status of the path from the server. Also updates [blockingType] with the
+     * result.
+     * @author Arnau Mora
+     * @since 20210824
+     * @param firestore The [FirebaseFirestore] instance to fetch the data from.
+     */
+    @WorkerThread
+    suspend fun singleBlockStatusFetch(firestore: FirebaseFirestore): BlockingType {
+        Timber.v("$this > Getting path document from the server...")
+        val document = firestore.document(documentPath).get().await()
+        Timber.v("$this > Extracting blocked from document...")
+        val blocked = document.getString("blocked")
+        Timber.v("$this > Searching for blocking type...")
+        val blockingType = BlockingType.find(blocked)
+        Timber.v("$this > Blocking type: $blockingType")
+        this.blockingType = blockingType
+        return blockingType
+    }
 
     companion object {
         const val NAMESPACE = "Path"
