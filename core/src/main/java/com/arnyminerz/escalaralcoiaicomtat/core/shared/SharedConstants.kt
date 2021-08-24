@@ -56,7 +56,7 @@ const val REMOTE_CONFIG_MIN_FETCH_INTERVAL = 43200L // 12 hours
  * @since 20210811
  * @see <a href="https://developer.android.com/guide/topics/search/appsearch">AppSearch docs</a>
  */
-const val SEARCH_DATABASE_NAME = "escalaralcoiaicomtat"
+const val SEARCH_DATABASE_NAME = "escalaralcoiaicomtat_v2"
 
 const val ARGUMENT_AREA_ID = "area_id"
 const val ARGUMENT_ZONE_ID = "zone_id"
