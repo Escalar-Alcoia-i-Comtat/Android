@@ -101,7 +101,7 @@ android {
     }
 }
 
-tasks.named("dokkaHtml") {
+tasks.named("dokkaHtmlPartial") {
     dokkaSourceSets {
         configureEach {
             noAndroidSdkLink.set(false)

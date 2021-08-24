@@ -41,7 +41,7 @@ jobs:
           echo "${{ secrets.GOOGLE_SERVICES }}" >> instant/google-services.json
       - name: Run dokka 📝
         id: test
-        run: bash ./gradlew :base:dokkaHtml
+        run: bash ./gradlew dokkaHtmlMultiModule
       - name: Add redirect 🔁
         id: redirection
         run: |
@@ -51,4 +51,4 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           BRANCH: gh-pages
-          FOLDER: base/build/dokka/
+          FOLDER: build/dokka/
