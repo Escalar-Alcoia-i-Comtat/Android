@@ -110,14 +110,6 @@ class PathsAdapter(
     private lateinit var app: App
 
     /**
-     * The view binding of the adapter.
-     * Gets initialized in [onCreateViewHolder].
-     * @author Arnau Mora
-     * @since 20210824
-     */
-    private lateinit var binding: ListItemPathBinding
-
-    /**
      * Specifies the toggled status of all the paths.
      * @author Arnau Mora
      * @since 20210427
