@@ -11,6 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.google.android.material.badge.ExperimentalBadgeUtils
 import timber.log.Timber
 
 /**
@@ -20,6 +21,7 @@ import timber.log.Timber
  * @param activity The [Activity] that is requesting the launch.
  */
 @WorkerThread
+@ExperimentalBadgeUtils
 @Throws(IllegalArgumentException::class)
 suspend fun DataClassImpl.launch(activity: Activity) {
     val pathPieces = documentPath.split("/")

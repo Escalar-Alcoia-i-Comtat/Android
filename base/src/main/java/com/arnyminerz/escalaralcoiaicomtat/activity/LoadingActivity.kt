@@ -190,7 +190,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                     binding.progressBar.visibility(true)
                 }
 
-                val intent = areas.getIntent(app, app.searchSession, deepLinkPath!!)
+                val intent = getIntent(app, app.searchSession, deepLinkPath!!)
                 uiContext {
                     if (intent != null)
                         startActivity(intent)
