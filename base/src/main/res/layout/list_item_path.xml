@@ -34,9 +34,9 @@
                     android:layout_marginStart="16dp"
                     android:contentDescription="@string/image_desc_path_completed"
                     android:src="@drawable/circle_transparent"
-                    app:layout_constraintBottom_toBottomOf="@+id/name_textView"
+                    app:layout_constraintBottom_toBottomOf="@+id/name_layout"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/name_textView" />
+                    app:layout_constraintTop_toTopOf="@+id/name_layout" />
 
                 <TextView
                     android:id="@+id/id_textView"
@@ -54,21 +54,40 @@
                     app:layout_constraintStart_toStartOf="@+id/completion_imageView"
                     app:layout_constraintTop_toTopOf="@+id/completion_imageView" />
 
-                <TextView
-                    android:id="@+id/name_textView"
+                <LinearLayout
+                    android:id="@+id/name_layout"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
-                    android:ellipsize="end"
-                    android:singleLine="true"
-                    android:text="@string/status_loading"
-                    android:textSize="18sp"
+                    android:animateLayoutChanges="true"
+                    android:orientation="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/alert_name_imageView"
                     app:layout_constraintStart_toEndOf="@id/completion_imageView"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/name_textView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:text="@string/status_loading"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/builtBy_textView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:text="@string/status_loading"
+                        android:textSize="12sp"
+                        android:textStyle="italic" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/difficulty_textView"
@@ -101,9 +120,9 @@
                     android:contentDescription="@string/image_desc_view_more"
                     android:scaleType="fitCenter"
                     android:src="@drawable/round_keyboard_arrow_down_24"
-                    app:layout_constraintBottom_toBottomOf="@+id/name_textView"
+                    app:layout_constraintBottom_toBottomOf="@+id/name_layout"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/name_textView" />
+                    app:layout_constraintTop_toTopOf="@+id/name_layout" />
 
                 <ImageView
                     android:id="@+id/alert_name_imageView"
@@ -112,9 +131,9 @@
                     android:layout_marginEnd="4dp"
                     android:contentDescription="@string/image_desc_warning"
                     android:src="@drawable/hazard_warning_96"
-                    app:layout_constraintBottom_toBottomOf="@id/name_textView"
+                    app:layout_constraintBottom_toBottomOf="@id/name_layout"
                     app:layout_constraintEnd_toStartOf="@+id/difficulty_textView"
-                    app:layout_constraintTop_toTopOf="@id/name_textView" />
+                    app:layout_constraintTop_toTopOf="@id/name_layout" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -186,8 +205,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="8dp"
-                    android:padding="8dp"
                     android:orientation="vertical"
+                    android:padding="8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/safesChipGroup"
                     app:layout_constraintTop_toBottomOf="@+id/alert_cardView">

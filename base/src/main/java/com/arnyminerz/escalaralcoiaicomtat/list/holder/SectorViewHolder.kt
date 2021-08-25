@@ -24,6 +24,7 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
     val expandedLayout: ConstraintLayout = view.findViewById(R.id.expanded_layout)
 
     val idTextView: TextView = view.findViewById(R.id.id_textView)
+    val builtByTextView: TextView = view.findViewById(R.id.builtBy_textView)
     val titleTextView: TextView = view.findViewById(R.id.name_textView)
     val difficultyTextView: TextView = view.findViewById(R.id.difficulty_textView)
     val heightTextView: TextView = view.findViewById(R.id.height_textView)
@@ -60,6 +61,7 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
     ) {
         visibility(expandedLayout, toggled)
         visibility(infoImageButton, hasInfo)
+        visibility(builtByTextView, toggled && builtByTextView.text.isNotBlank())
         if (toggled) {
             titleTextView.ellipsize = null
             titleTextView.isSingleLine = false
