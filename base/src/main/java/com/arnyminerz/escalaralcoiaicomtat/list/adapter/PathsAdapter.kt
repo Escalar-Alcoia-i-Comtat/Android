@@ -77,7 +77,6 @@ const val ANIMATION_DURATION = 300L
  * @author Arnau Mora
  * @since 20210427
  * @param paths The paths list
- * @param activity the activity that is loading the recycler view
  * @param markAsCompleteRequestHandler The request handler when it's asked to mark a path as complete
  * @see SectorViewHolder
  */
@@ -272,6 +271,7 @@ class PathsAdapter(
         uiContext {
             val cardView = holder.cardView
             val titleTextView = holder.titleTextView
+            val builtByTextView = holder.builtByTextView
             val infoImageButton = holder.infoImageButton
             val heightTextView = holder.heightTextView
             val safesChipGroup = holder.safesChipGroup
@@ -286,6 +286,11 @@ class PathsAdapter(
                         ?: Timber.e("Could not create dialog")
                 }
             else visibility(infoImageButton, false)
+
+            // Will be null if null or blank
+            val hasBuiltBy = path.builtBy?.ifBlank { null } == null
+            builtByTextView.text = path.builtBy
+            builtByTextView.visibility(hasBuiltBy)
 
             titleTextView.text = path.displayName
             heightTextView.text = heightFull
