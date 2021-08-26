@@ -69,10 +69,32 @@ class Area internal constructor(
     )
 
     @IgnoredOnParcel
-    override val imageQuality: Int = 65
+    override val imageQuality: Int = IMAGE_QUALITY
 
     companion object {
         const val NAMESPACE = "Area"
+
+        const val IMAGE_QUALITY = 65
+
+        const val SAMPLE_AREA_OBJECT_ID = "PL5j43cBRP7F24ecXGOR"
+        const val SAMPLE_AREA_DISPLAY_NAME = "Cocentaina"
+        const val SAMPLE_AREA_TIMESTAMP = 1618160598000L
+        const val SAMPLE_AREA_IMAGE_REF =
+            "gs://escalaralcoiaicomtat.appspot.com/images/areas/Vista panoramica Cocentaina-app.jpg"
+        const val SAMPLE_AREA_KMZ_REF =
+            "gs://escalaralcoiaicomtat.appspot.com/kmz/Zones Cocentaina.kmz"
+        const val SAMPLE_AREA_DOC_PATH = "/Areas/PL5j43cBRP7F24ecXGOR"
+        const val SAMPLE_AREA_WEB_URL =
+            "https://escalaralcoiaicomtat.org/zones-escalada-cocentaina.html"
+        val SAMPLE_AREA = Area(
+            objectId = SAMPLE_AREA_OBJECT_ID,
+            displayName = SAMPLE_AREA_DISPLAY_NAME,
+            timestampMillis = SAMPLE_AREA_TIMESTAMP,
+            imageReferenceUrl = SAMPLE_AREA_IMAGE_REF,
+            kmzReferenceUrl = SAMPLE_AREA_KMZ_REF,
+            documentPath = SAMPLE_AREA_DOC_PATH,
+            webUrl = SAMPLE_AREA_WEB_URL,
+        )
 
         /**
          * Checks if [data] contains the valid data for creating an instance of [Area].
