@@ -218,6 +218,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
          * @author Arnau Mora
          * @since 20210825
          * @param context The [Context] that wants to make the check.
+         * @return true if the worker is scheduled badly, and should be updated.
          */
         @WorkerThread
         suspend fun shouldUpdateSchedule(context: Context): Boolean {
