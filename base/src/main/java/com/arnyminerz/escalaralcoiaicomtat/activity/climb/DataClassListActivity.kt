@@ -238,12 +238,15 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
     override fun onProvideAssistContent(outContent: AssistContent) {
         super.onProvideAssistContent(outContent)
 
-        outContent.webUri = Uri.parse(dataClass.metadata.webURL)
-        outContent.structuredData = JSONObject()
-            .put("@type", dataClass.namespace)
-            .put("name", dataClass.displayName)
-            .put("url", dataClass.metadata.webURL)
-            .toString()
+        val webUrl = dataClass.metadata.webURL
+        if (webUrl != null)
+            outContent.webUri = Uri.parse(webUrl)
+        outContent.structuredData = JSONObject().apply {
+            put("@type", dataClass.namespace)
+            put("name", dataClass.displayName)
+            if (webUrl != null)
+                put("url", webUrl)
+        }.toString()
     }
 
     /**

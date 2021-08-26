@@ -256,12 +256,16 @@ class SectorActivity : LanguageAppCompatActivity() {
             return
 
         val sector = sectors[currentPage]
-        outContent.webUri = Uri.parse(sector.metadata.webURL)
-        outContent.structuredData = JSONObject()
-            .put("@type", sector.namespace)
-            .put("name", sector.displayName)
-            .put("url", sector.metadata.webURL)
-            .toString()
+        val webUrl = sector.webUrl
+
+        if (webUrl != null)
+            outContent.webUri = Uri.parse(sector.metadata.webURL)
+        outContent.structuredData = JSONObject().apply {
+            put("@type", sector.namespace)
+            put("name", sector.displayName)
+            if (webUrl != null)
+                put("url", webUrl)
+        }.toString()
     }
 
     /**
