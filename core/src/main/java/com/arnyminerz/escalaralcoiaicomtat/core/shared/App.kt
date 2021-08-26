@@ -18,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPath
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getSector
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZone
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -33,7 +34,19 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     private val provider: ConnectivityProvider
         get() = appNetworkProvider
 
+    /**
+     * The [FirebaseFirestore] instance reference for requesting data to the server.
+     * @author Arnau Mora
+     * @since 20210617
+     */
     private lateinit var firestore: FirebaseFirestore
+
+    /**
+     * The [FirebaseAnalytics] instance reference for analyzing the user actions.
+     * @author Arnau Mora
+     * @since 20210826
+     */
+    private lateinit var analytics: FirebaseAnalytics
 
     private var areas: List<Area> = listOf()
 
@@ -50,7 +63,8 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
                     Timber.w(e, "Could not remove account.")
                 }
             }
-        }
+        } else
+            analytics.setUserId(user.uid)
     }
 
     /**
