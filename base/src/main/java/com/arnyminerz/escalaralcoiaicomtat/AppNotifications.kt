@@ -13,6 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_C
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.PEOPLE_NOTIFICATION_CHANNEL_GROUP
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASKS_NOTIFICATION_CHANNEL_GROUP
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_COMPLETED_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_FAILED_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_IN_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.UPDATE_AVAILABLE_CHANNEL_ID
 
@@ -35,6 +36,20 @@ private fun Context.createTaskCompletedChannel(): NotificationChannel {
     val importance = NotificationManager.IMPORTANCE_HIGH
 
     val channel = NotificationChannel(TASK_COMPLETED_CHANNEL_ID, name, importance)
+    channel.description = description
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+        channel.group = TASKS_NOTIFICATION_CHANNEL_GROUP
+
+    return channel
+}
+
+@TargetApi(Build.VERSION_CODES.O)
+private fun Context.createTaskFailedChannel(): NotificationChannel {
+    val name = getString(R.string.notification_channel_task_failed_name)
+    val description = getString(R.string.notification_channel_task_failed_desc)
+    val importance = NotificationManager.IMPORTANCE_DEFAULT
+
+    val channel = NotificationChannel(TASK_FAILED_CHANNEL_ID, name, importance)
     channel.description = description
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
         channel.group = TASKS_NOTIFICATION_CHANNEL_GROUP
@@ -132,6 +147,7 @@ fun Context.createNotificationChannels() {
             createDownloadCompleteChannel(),
             createAlertsChannel(),
             createTaskInProgressChannel(),
+            createTaskFailedChannel(),
             createTaskCompletedChannel(),
             createNewUpdateChannel(),
         )
