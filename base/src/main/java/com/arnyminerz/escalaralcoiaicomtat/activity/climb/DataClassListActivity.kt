@@ -1,7 +1,9 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.app.Activity
+import android.app.assist.AssistContent
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.animation.AnimationUtils
@@ -50,6 +52,7 @@ import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import timber.log.Timber
 import java.io.FileNotFoundException
 
@@ -225,6 +228,22 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
         updateList()
         updateIcon()
         loadMap()
+    }
+
+    /**
+     * Provides context for improving the user experience.
+     * @author Arnau Mora
+     * @since 20210826
+     */
+    override fun onProvideAssistContent(outContent: AssistContent) {
+        super.onProvideAssistContent(outContent)
+
+        outContent.webUri = Uri.parse(dataClass.metadata.webURL)
+        outContent.structuredData = JSONObject()
+            .put("@type", dataClass.namespace)
+            .put("name", dataClass.displayName)
+            .put("url", dataClass.metadata.webURL)
+            .toString()
     }
 
     /**
