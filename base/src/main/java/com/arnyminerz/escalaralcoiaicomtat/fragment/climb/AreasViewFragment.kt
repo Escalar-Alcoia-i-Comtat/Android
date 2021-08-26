@@ -34,6 +34,7 @@ import com.arnyminerz.escalaralcoiaicomtat.view.model.AreasViewModel
 import com.arnyminerz.escalaralcoiaicomtat.view.model.AreasViewModelFactory
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -154,6 +155,13 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                         )
                 val adapter = AreaAdapter { holder, position, area ->
                     Timber.v("Clicked item %s", position)
+                    analytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM) {
+                        param(FirebaseAnalytics.Param.ITEM_ID, area.objectId)
+                        param(FirebaseAnalytics.Param.ITEM_LIST_ID, area.documentPath)
+                        param(FirebaseAnalytics.Param.ITEM_CATEGORY, area.namespace)
+                        param(FirebaseAnalytics.Param.CONTENT_TYPE, area.namespace)
+                        param(FirebaseAnalytics.Param.ITEM_NAME, area.displayName)
+                    }
 
                     val transition = ViewCompat.getTransitionName(holder.titleTextView)
                     val optionsBundle = transition?.let { transitionName ->
