@@ -108,13 +108,22 @@ class LoadingActivity : NetworkChangeListenerActivity() {
      * @since 20210824
      */
     private suspend fun initializeBlockStatusWorker() {
+        // First check if already scheduled.
         val isScheduled = BlockStatusWorker.isScheduled(this)
         if (isScheduled) {
-            Timber.v("Won't start BlockStatusWorker since already running.")
-        } else {
-            Timber.v("Scheduling BlockStatusWorker...")
-            BlockStatusWorker.schedule(this)
+            // It's scheduled, check if we should refresh the schedule
+            val incorrectSchedule = BlockStatusWorker.shouldUpdateSchedule(this)
+            if (incorrectSchedule) {
+                // Cancel the worker for reescheduling it
+                Timber.v("The worker's schedule is incorrect. Cancelling...")
+                BlockStatusWorker.cancel(this)
+            } else {
+                Timber.v("Won't start BlockStatusWorker since already running.")
+                return
+            }
         }
+        Timber.v("Scheduling BlockStatusWorker...")
+        BlockStatusWorker.schedule(this)
     }
 
     /**
