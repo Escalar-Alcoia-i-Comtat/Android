@@ -88,10 +88,14 @@
     <string name="notification_block_status_message">Fetching the block status of the paths…</string>
     <string name="notification_block_status_progress">Fetching block status of %s…</string>
     <string name="notification_block_status_storing">Storing block status…</string>
-    <string name="notification_block_status_error_title">Could not fetch</string>
+    <string name="notification_block_status_error_title">Could not fetch block status</string>
     <string name="notification_block_status_error_store_short">Could not store block statuses.</string>
     <string name="notification_block_status_error_store">Could not store block statuses.<br />Stored correctly %1$d items.<br />Could not store %2$d items.</string>
     <string name="notification_block_status_error_persist">Could not write block statuses to disk.</string>
+    <string name="notification_block_status_error_item">Could not get block status of %s.</string>
+    <string name="notification_block_status_error_server">There was a server-side issue while loading %s.</string>
+    <string name="notification_block_status_error_fetch">Could not fetch data from the server for %s.</string>
+    <string name="notification_block_status_error_schema">Could not update schema for storing block statuses.</string>
 
     <string name="dialog_gps_disabled_title">GPS disabled</string>
     <string name="dialog_gps_disabled_message">You have the device\'s location provider turned off.</string>

@@ -92,6 +92,10 @@
     <string name="notification_block_status_error_store_short">No s\'han pogut desar els estats de bloqueig.</string>
     <string name="notification_block_status_error_store">No s\'han pogut desar els estats de bloqueig.<br />Desats correctament %1$d elements.<br />No s\'han pogut desar %2$d elements.</string>
     <string name="notification_block_status_error_persist">No s\'han pogut desar els estats de bloqueig a la memòria.</string>
+    <string name="notification_block_status_error_item">No s\'ha pogut obtenir l\'estat de bloqueig de %s.</string>
+    <string name="notification_block_status_error_server">Ha hagut un error de servidor a l\'obtenir l\'estat de bloqueig de %s.</string>
+    <string name="notification_block_status_error_fetch">No s\'ha pogut obtenir l\'estat de bloqueig de %s.</string>
+    <string name="notification_block_status_error_schema">No s\'ha pogut crear l\'esquema d\'emmagatzematge dels estats de bloqueig.</string>
 
     <string name="dialog_gps_disabled_title">GPS deshabilitat</string>
     <string name="dialog_gps_disabled_message">Tens el proveïdor d\'ubiació desconnectat.</string>
