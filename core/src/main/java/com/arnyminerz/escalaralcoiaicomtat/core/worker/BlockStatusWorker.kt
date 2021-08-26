@@ -198,6 +198,12 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
         val WORKER_SCHEDULE_TAG: String
             get() = "BSW" + WORKER_SCHEDULE.second.toMinutes(WORKER_SCHEDULE.first)
 
+        /**
+         * Checks if the worker is scheduled.
+         * @author Arnau Mora
+         * @since 20210826
+         * @param context The [Context] that wants to make the check.
+         */
         @WorkerThread
         suspend fun isScheduled(context: Context): Boolean {
             val workInfos = WorkManager
@@ -211,7 +217,9 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
          * Checks if the worker is scheduled correctly with the latest update.
          * @author Arnau Mora
          * @since 20210825
+         * @param context The [Context] that wants to make the check.
          */
+        @WorkerThread
         suspend fun shouldUpdateSchedule(context: Context): Boolean {
             val workManager = WorkManager.getInstance(context)
             val workInfo = workManager
@@ -227,6 +235,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
          * Cancels all ongoing BlockStatusWorkers.
          * @author Arnau Mora
          * @since 20210824
+         * @param context The [Context] that wants to cancel the worker.
          */
         @WorkerThread
         suspend fun cancel(context: Context) =
