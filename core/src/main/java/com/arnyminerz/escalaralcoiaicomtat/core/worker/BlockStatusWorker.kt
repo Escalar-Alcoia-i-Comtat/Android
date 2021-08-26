@@ -16,7 +16,7 @@ import androidx.work.await
 import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
-import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_COMPLETED_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_FAILED_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_IN_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
@@ -67,7 +67,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                 // Destroy the progress notification
                 notification.destroy()
                 Notification.Builder(applicationContext)
-                    .withChannelId(TASK_COMPLETED_CHANNEL_ID)
+                    .withChannelId(TASK_FAILED_CHANNEL_ID)
                     .withIcon(R.drawable.ic_notifications)
                     .withTitle(R.string.notification_block_status_error_title)
                     .withText(R.string.notification_block_status_error_schema)
@@ -95,7 +95,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     )
                 } catch (e: RuntimeException) {
                     Notification.Builder(applicationContext)
-                        .withChannelId(TASK_COMPLETED_CHANNEL_ID)
+                        .withChannelId(TASK_FAILED_CHANNEL_ID)
                         .withIcon(R.drawable.ic_notifications)
                         .withTitle(R.string.notification_block_status_error_title)
                         .withText(
@@ -113,7 +113,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                         .buildAndShow()
                 } catch (e: FirebaseFirestoreException) {
                     Notification.Builder(applicationContext)
-                        .withChannelId(TASK_COMPLETED_CHANNEL_ID)
+                        .withChannelId(TASK_FAILED_CHANNEL_ID)
                         .withIcon(R.drawable.ic_notifications)
                         .withTitle(R.string.notification_block_status_error_title)
                         .withText(
@@ -153,7 +153,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     searchSession.close()
 
                     notification.edit()
-                        .withChannelId(TASK_COMPLETED_CHANNEL_ID)
+                        .withChannelId(TASK_FAILED_CHANNEL_ID)
                         .withTitle(R.string.notification_block_status_error_title)
                         .withText(R.string.notification_block_status_error_store_short)
                         .withLongText(
@@ -190,7 +190,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                         Timber.e(e, "Could not persist to disk.")
 
                         notification.edit()
-                            .withChannelId(TASK_COMPLETED_CHANNEL_ID)
+                            .withChannelId(TASK_FAILED_CHANNEL_ID)
                             .withTitle(R.string.notification_block_status_error_title)
                             .withText(R.string.notification_block_status_error_store_short)
                             .setPersistent(false)
@@ -204,7 +204,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                 // Destroy the progress notification
                 notification.destroy()
                 Notification.Builder(applicationContext)
-                    .withChannelId(TASK_COMPLETED_CHANNEL_ID)
+                    .withChannelId(TASK_FAILED_CHANNEL_ID)
                     .withIcon(R.drawable.ic_notifications)
                     .withTitle(R.string.notification_block_status_error_title)
                     .withText(R.string.notification_block_status_error_store_short)
