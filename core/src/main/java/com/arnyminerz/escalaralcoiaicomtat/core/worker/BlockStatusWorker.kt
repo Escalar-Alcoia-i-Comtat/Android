@@ -208,6 +208,22 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
         }
 
         /**
+         * Checks if the worker is scheduled correctly with the latest update.
+         * @author Arnau Mora
+         * @since 20210825
+         */
+        suspend fun shouldUpdateSchedule(context: Context): Boolean {
+            val workManager = WorkManager.getInstance(context)
+            val workInfo = workManager
+                .getWorkInfosByTag(WORKER_TAG) // Gets the work info
+                .await() // Awaits the result
+                .ifEmpty { null } // If not results were found, update to null
+                ?.get(0) // Get the first element if not null
+            val tags = workInfo?.tags ?: emptySet() // Get the work's tags
+            return !tags.contains(WORKER_SCHEDULE_TAG)
+        }
+
+        /**
          * Cancels all ongoing BlockStatusWorkers.
          * @author Arnau Mora
          * @since 20210824
@@ -233,10 +249,11 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                 .build()
 
             val builder = PeriodicWorkRequestBuilder<BlockStatusWorker>(
-                6, TimeUnit.HOURS, // Repeat interval
+                WORKER_SCHEDULE.first, WORKER_SCHEDULE.second, // Repeat interval
             )
             val workRequest = builder
                 .addTag(WORKER_TAG)
+                .addTag(WORKER_SCHEDULE_TAG)
                 .setConstraints(workConstraints)
                 .build()
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
