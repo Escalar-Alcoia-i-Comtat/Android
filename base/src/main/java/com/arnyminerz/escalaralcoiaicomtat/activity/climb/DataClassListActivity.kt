@@ -1,7 +1,9 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.app.Activity
+import android.app.assist.AssistContent
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.animation.AnimationUtils
@@ -38,6 +40,9 @@ import com.arnyminerz.escalaralcoiaicomtat.paging.DataClassAdapter
 import com.arnyminerz.escalaralcoiaicomtat.paging.DataClassComparator
 import com.arnyminerz.escalaralcoiaicomtat.view.model.DataClassListViewModel
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -47,6 +52,7 @@ import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import timber.log.Timber
 import java.io.FileNotFoundException
 
@@ -90,6 +96,13 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
      * @since 20210604
      */
     lateinit var firestore: FirebaseFirestore
+
+    /**
+     * The [FirebaseAnalytics] instance reference for analyzing the user actions.
+     * @author Arnau Mora
+     * @since 20210826
+     */
+    private lateinit var analytics: FirebaseAnalytics
 
     /**
      * The Firebase Storage reference for getting images and KMZs from the server.
@@ -159,6 +172,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
 
         firestore = Firebase.firestore
         storage = Firebase.storage
+        analytics = Firebase.analytics
         mapHelper = MapHelper()
 
         binding = LayoutListBinding.inflate(layoutInflater)
@@ -214,6 +228,25 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
         updateList()
         updateIcon()
         loadMap()
+    }
+
+    /**
+     * Provides context for improving the user experience.
+     * @author Arnau Mora
+     * @since 20210826
+     */
+    override fun onProvideAssistContent(outContent: AssistContent) {
+        super.onProvideAssistContent(outContent)
+
+        val webUrl = dataClass.metadata.webURL
+        if (webUrl != null)
+            outContent.webUri = Uri.parse(webUrl)
+        outContent.structuredData = JSONObject().apply {
+            put("@type", dataClass.namespace)
+            put("name", dataClass.displayName)
+            if (webUrl != null)
+                put("url", webUrl)
+        }.toString()
     }
 
     /**
@@ -404,6 +437,15 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                         this.binding.loadingIndicator.show()
 
                         Timber.v("Clicked item $position")
+
+                        analytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM) {
+                            param(FirebaseAnalytics.Param.ITEM_ID, item.objectId)
+                            param(FirebaseAnalytics.Param.ITEM_LIST_ID, item.documentPath)
+                            param(FirebaseAnalytics.Param.ITEM_CATEGORY, item.namespace)
+                            param(FirebaseAnalytics.Param.CONTENT_TYPE, item.namespace)
+                            param(FirebaseAnalytics.Param.ITEM_NAME, item.displayName)
+                        }
+
                         val trn = ViewCompat.getTransitionName(binding.titleTextView)
                         Timber.v("Transition name: $trn")
                         val intent = intentExtra(trn, item.objectId)

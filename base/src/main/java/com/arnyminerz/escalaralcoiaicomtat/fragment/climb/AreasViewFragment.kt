@@ -7,26 +7,34 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.NearbyZonesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_DISABLE_NEARBY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentViewAreasBinding
-import com.arnyminerz.escalaralcoiaicomtat.databinding.ListItemDwDataclassBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.model.NetworkChangeListenerFragment
 import com.arnyminerz.escalaralcoiaicomtat.paging.AreaAdapter
 import com.arnyminerz.escalaralcoiaicomtat.view.model.AreasViewModel
 import com.arnyminerz.escalaralcoiaicomtat.view.model.AreasViewModelFactory
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -56,6 +64,13 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     private lateinit var firestore: FirebaseFirestore
 
     /**
+     * The [FirebaseAnalytics] instance reference for analyzing the user actions.
+     * @author Arnau Mora
+     * @since 20210826
+     */
+    private lateinit var analytics: FirebaseAnalytics
+
+    /**
      * The nearby zones module for showing the user the zones that are nearby, if enabled.
      * @author Arnau Mora
      * @since 20210617
@@ -69,14 +84,6 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
      */
     val mapHelper: MapHelper?
         get() = nearbyZones?.mapHelper
-
-    /**
-     * What will get called when an area is clicked.
-     * @author Arnau Mora
-     * @since 20210617
-     */
-    var areaClickListener: ((binding: ListItemDwDataclassBinding, position: Int, item: DataClassImpl) -> Unit)? =
-        null
 
     /**
      * The View Binding of the Fragment, for accessing the views.
@@ -106,6 +113,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         _binding = FragmentViewAreasBinding.inflate(inflater, container, false)
 
         firestore = Firebase.firestore
+        analytics = Firebase.analytics
 
         return binding.root
     }
@@ -145,7 +153,31 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
                             requireContext(),
                             R.anim.item_fall_animator
                         )
-                val adapter = AreaAdapter(areaClickListener)
+                val adapter = AreaAdapter { holder, position, area ->
+                    Timber.v("Clicked item %s", position)
+                    analytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM) {
+                        param(FirebaseAnalytics.Param.ITEM_ID, area.objectId)
+                        param(FirebaseAnalytics.Param.ITEM_LIST_ID, area.documentPath)
+                        param(FirebaseAnalytics.Param.ITEM_CATEGORY, area.namespace)
+                        param(FirebaseAnalytics.Param.CONTENT_TYPE, area.namespace)
+                        param(FirebaseAnalytics.Param.ITEM_NAME, area.displayName)
+                    }
+
+                    val transition = ViewCompat.getTransitionName(holder.titleTextView)
+                    val optionsBundle = transition?.let { transitionName ->
+                        ActivityOptionsCompat.makeSceneTransitionAnimation(
+                            requireActivity(),
+                            holder.titleTextView,
+                            transitionName
+                        ).toBundle()
+                    } ?: Bundle()
+
+                    requireActivity().launch(AreaActivity::class.java, optionsBundle) {
+                        putExtra(EXTRA_AREA, area.objectId)
+                        if (transition != null)
+                            putExtra(EXTRA_AREA_TRANSITION_NAME, transition)
+                    }
+                }
                 binding.areasRecyclerView.adapter = adapter
 
                 viewLifecycleOwner.lifecycleScope.launch {

@@ -1,7 +1,9 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
+import android.app.assist.AssistContent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.UiThread
@@ -12,6 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity.Companion.errorNotStored
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_POSITION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_TRANSITION_NAME
@@ -34,6 +37,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
+import org.json.JSONObject
 import timber.log.Timber
 
 @ExperimentalBadgeUtils
@@ -75,6 +79,20 @@ class SectorActivity : LanguageAppCompatActivity() {
     private lateinit var binding: ActivitySectorBinding
     lateinit var firestore: FirebaseFirestore
     lateinit var storage: FirebaseStorage
+
+    /**
+     * The currectly loaded zone.
+     * @author Arnau Mora
+     * @since 20210826
+     */
+    private lateinit var zone: Zone
+
+    /**
+     * The list of sectors contained in [zone].
+     * @author Arnau Mora
+     * @since 20210826
+     */
+    private lateinit var sectors: List<Sector>
 
     /**
      * Tells if the content has been loaded correctly
@@ -142,14 +160,14 @@ class SectorActivity : LanguageAppCompatActivity() {
         binding.statusImageView.setOnClickListener { it.performLongClick() }
 
         doAsync {
-            val zone = app.getZone(zoneId) ?: run {
+            zone = app.getZone(zoneId) ?: run {
                 Timber.e("Could not find zone $zoneId.")
                 uiContext { onBackPressed() }
                 finish()
                 return@doAsync
             }
             Timber.v("Loading sectors from $zone...")
-            val sectors = zone.getChildren(app.searchSession)
+            sectors = zone.getChildren(app.searchSession)
             val sectorCount = sectors.size
 
             Timber.v("Getting position extra...")
@@ -224,6 +242,30 @@ class SectorActivity : LanguageAppCompatActivity() {
                 putExtra(EXTRA_ZONE, zoneId)
             }
         else super.onBackPressed()
+    }
+
+    /**
+     * Provides context for improving the user experience.
+     * @author Arnau Mora
+     * @since 20210826
+     */
+    override fun onProvideAssistContent(outContent: AssistContent) {
+        super.onProvideAssistContent(outContent)
+
+        if (!this::zone.isInitialized || !this::sectors.isInitialized)
+            return
+
+        val sector = sectors[currentPage]
+        val webUrl = sector.webUrl
+
+        if (webUrl != null)
+            outContent.webUri = Uri.parse(sector.metadata.webURL)
+        outContent.structuredData = JSONObject().apply {
+            put("@type", sector.namespace)
+            put("name", sector.displayName)
+            if (webUrl != null)
+                put("url", webUrl)
+        }.toString()
     }
 
     /**
