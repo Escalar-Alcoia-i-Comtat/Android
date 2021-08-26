@@ -19,6 +19,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getSector
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZone
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -83,6 +84,8 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
 
         Timber.v("Getting Firestore instance...")
         firestore = Firebase.firestore
+        Timber.v("Getting Analytics instance...")
+        analytics = Firebase.analytics
 
         Timber.v("Initializing network provider...")
         appNetworkProvider = ConnectivityProvider.createProvider(this)
