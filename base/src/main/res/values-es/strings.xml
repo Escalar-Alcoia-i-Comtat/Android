@@ -287,4 +287,7 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="activity_summary_grades">Grados</string>
     <string name="notification_channel_task_in_progress_name">Tarea en progreso</string>
     <string name="notification_channel_task_in_progress_desc">Esto te informará de que hay una tarea en ejecución en segundo plano.</string>
+    <string name="notification_channel_tasks_group_name">Tareas</string>
+    <string name="notification_channel_task_failed_name">Tarea fallida</string>
+    <string name="notification_channel_task_failed_desc">Te notificará de cuando una tarea en segundo plano haya fallado.</string>
 </resources>

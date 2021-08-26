@@ -16,11 +16,12 @@ import androidx.work.await
 import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
-import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_COMPLETED_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_FAILED_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_IN_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
@@ -62,10 +63,22 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     .build()
                 Timber.v("Applying schema to search session...")
                 searchSession.setSchema(setSchemaRequest).await()
+            } catch (e: AppSearchException) {
+                // Destroy the progress notification
+                notification.destroy()
+                Notification.Builder(applicationContext)
+                    .withChannelId(TASK_FAILED_CHANNEL_ID)
+                    .withIcon(R.drawable.ic_notifications)
+                    .withTitle(R.string.notification_block_status_error_title)
+                    .withText(R.string.notification_block_status_error_schema)
+                    .buildAndShow()
+                return Result.failure()
+            }
 
-                Timber.v("Extracting block statuses...")
-                val blockingStatuses = arrayListOf<BlockingData>()
-                for ((i, path) in paths.withIndex()) {
+            Timber.v("Extracting block statuses...")
+            val blockingStatuses = arrayListOf<BlockingData>()
+            for ((i, path) in paths.withIndex()) {
+                try {
                     notification = notification.edit()
                         .withText(
                             applicationContext.getString(
@@ -80,14 +93,52 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     blockingStatuses.add(
                         BlockingData(path.objectId, blockStatus.idName)
                     )
+                } catch (e: RuntimeException) {
+                    Notification.Builder(applicationContext)
+                        .withChannelId(TASK_FAILED_CHANNEL_ID)
+                        .withIcon(R.drawable.ic_notifications)
+                        .withTitle(R.string.notification_block_status_error_title)
+                        .withText(
+                            applicationContext.getString(
+                                R.string.notification_block_status_error_item,
+                                path.displayName
+                            )
+                        )
+                        .withLongText(
+                            applicationContext.getString(
+                                R.string.notification_block_status_error_server,
+                                path.displayName
+                            )
+                        )
+                        .buildAndShow()
+                } catch (e: FirebaseFirestoreException) {
+                    Notification.Builder(applicationContext)
+                        .withChannelId(TASK_FAILED_CHANNEL_ID)
+                        .withIcon(R.drawable.ic_notifications)
+                        .withTitle(R.string.notification_block_status_error_title)
+                        .withText(
+                            applicationContext.getString(
+                                R.string.notification_block_status_error_item,
+                                path.displayName
+                            )
+                        )
+                        .withLongText(
+                            applicationContext.getString(
+                                R.string.notification_block_status_error_fetch,
+                                path.displayName
+                            )
+                        )
+                        .buildAndShow()
                 }
+            }
 
-                Timber.v("Building storing notification...")
-                notification = notification.edit()
-                    .withText(R.string.notification_block_status_storing)
-                    .withProgress(-1, 0)
-                    .buildAndShow()
+            Timber.v("Building storing notification...")
+            notification = notification.edit()
+                .withText(R.string.notification_block_status_storing)
+                .withProgress(-1, 0)
+                .buildAndShow()
 
+            try {
                 Timber.v("Building put request...")
                 val putRequest = PutDocumentsRequest.Builder()
                     .addDocuments(blockingStatuses)
@@ -102,7 +153,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     searchSession.close()
 
                     notification.edit()
-                        .withChannelId(TASK_COMPLETED_CHANNEL_ID)
+                        .withChannelId(TASK_FAILED_CHANNEL_ID)
                         .withTitle(R.string.notification_block_status_error_title)
                         .withText(R.string.notification_block_status_error_store_short)
                         .withLongText(
@@ -139,7 +190,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                         Timber.e(e, "Could not persist to disk.")
 
                         notification.edit()
-                            .withChannelId(TASK_COMPLETED_CHANNEL_ID)
+                            .withChannelId(TASK_FAILED_CHANNEL_ID)
                             .withTitle(R.string.notification_block_status_error_title)
                             .withText(R.string.notification_block_status_error_store_short)
                             .setPersistent(false)
@@ -149,23 +200,30 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                         Result.failure()
                     }
                 }
-            } catch (e: Exception) {
-                Timber.e(e, "Could not update block statuses.")
-                notification.edit()
-                    .withChannelId(TASK_COMPLETED_CHANNEL_ID)
+            } catch (e: AppSearchException) {
+                // Destroy the progress notification
+                notification.destroy()
+                Notification.Builder(applicationContext)
+                    .withChannelId(TASK_FAILED_CHANNEL_ID)
+                    .withIcon(R.drawable.ic_notifications)
                     .withTitle(R.string.notification_block_status_error_title)
-                    .withText(R.string.notification_block_status_error_title)
-                    .setPersistent(false)
-                    .apply { progress = null }
+                    .withText(R.string.notification_block_status_error_store_short)
                     .buildAndShow()
-
-                Result.failure()
+                return Result.failure()
             }
         }
     }
 
     companion object {
         const val WORKER_TAG = "BlockStatusWorker"
+
+        /**
+         * The amount of time that should be between status updates.
+         * The first element is the amount, and the second one the time unit.
+         * @author Arnau Mora
+         * @since 20210825
+         */
+        val WORKER_SCHEDULE: Pair<Long, TimeUnit> = 12L to TimeUnit.HOURS
 
         /**
          * Serves as the error work result for showing how much successes there were.
@@ -181,6 +239,21 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
          */
         const val WORK_RESULT_STORE_FAILURES = "StoreFailures"
 
+        /**
+         * Generates a tag from [WORKER_SCHEDULE] so it can be detected when the schedule should
+         * be updated.
+         * @author Arnau Mora
+         * @since 20210825
+         */
+        val WORKER_SCHEDULE_TAG: String
+            get() = "BSW" + WORKER_SCHEDULE.second.toMinutes(WORKER_SCHEDULE.first)
+
+        /**
+         * Checks if the worker is scheduled.
+         * @author Arnau Mora
+         * @since 20210826
+         * @param context The [Context] that wants to make the check.
+         */
         @WorkerThread
         suspend fun isScheduled(context: Context): Boolean {
             val workInfos = WorkManager
@@ -191,9 +264,29 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
         }
 
         /**
+         * Checks if the worker is scheduled correctly with the latest update.
+         * @author Arnau Mora
+         * @since 20210825
+         * @param context The [Context] that wants to make the check.
+         * @return true if the worker is scheduled badly, and should be updated.
+         */
+        @WorkerThread
+        suspend fun shouldUpdateSchedule(context: Context): Boolean {
+            val workManager = WorkManager.getInstance(context)
+            val workInfo = workManager
+                .getWorkInfosByTag(WORKER_TAG) // Gets the work info
+                .await() // Awaits the result
+                .ifEmpty { null } // If not results were found, update to null
+                ?.get(0) // Get the first element if not null
+            val tags = workInfo?.tags ?: emptySet() // Get the work's tags
+            return !tags.contains(WORKER_SCHEDULE_TAG)
+        }
+
+        /**
          * Cancels all ongoing BlockStatusWorkers.
          * @author Arnau Mora
          * @since 20210824
+         * @param context The [Context] that wants to cancel the worker.
          */
         @WorkerThread
         suspend fun cancel(context: Context) =
@@ -216,10 +309,11 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                 .build()
 
             val builder = PeriodicWorkRequestBuilder<BlockStatusWorker>(
-                6, TimeUnit.HOURS, // Repeat interval
+                WORKER_SCHEDULE.first, WORKER_SCHEDULE.second, // Repeat interval
             )
             val workRequest = builder
                 .addTag(WORKER_TAG)
+                .addTag(WORKER_SCHEDULE_TAG)
                 .setConstraints(workConstraints)
                 .build()
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(

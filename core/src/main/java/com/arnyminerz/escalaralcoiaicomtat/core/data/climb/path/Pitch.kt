@@ -16,7 +16,10 @@ data class Pitch(
          * @param string Should be formatted "{inclination} {descent type}"
          */
         fun fromEndingDataString(string: String): Pitch? {
-            val split = string.replace("\r", "").split(" ")
+            val split = string
+                .replace("\r", "")
+                .replace("\n", "")
+                .split(" ")
 
             if (split.size < 2) return null
 

@@ -259,8 +259,12 @@ class Path internal constructor(
      * @author Arnau Mora
      * @since 20210824
      * @param firestore The [FirebaseFirestore] instance to fetch the data from.
+     * @throws RuntimeException If the blocked parameter of the found item is not a string.
+     * @throws FirebaseFirestoreException When there was an error while fetching the data from the
+     * server.
      */
     @WorkerThread
+    @Throws(RuntimeException::class, FirebaseFirestoreException::class)
     suspend fun singleBlockStatusFetch(firestore: FirebaseFirestore): BlockingType {
         Timber.v("$this > Getting path document from the server...")
         val document = firestore.document(documentPath).get().await()
