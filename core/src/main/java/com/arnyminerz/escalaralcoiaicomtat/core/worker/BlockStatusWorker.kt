@@ -168,6 +168,14 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
         const val WORKER_TAG = "BlockStatusWorker"
 
         /**
+         * The amount of time that should be between status updates.
+         * The first element is the amount, and the second one the time unit.
+         * @author Arnau Mora
+         * @since 20210825
+         */
+        val WORKER_SCHEDULE: Pair<Long, TimeUnit> = 12L to TimeUnit.HOURS
+
+        /**
          * Serves as the error work result for showing how much successes there were.
          * @author Arnau Mora
          * @since 20210824
@@ -180,6 +188,15 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
          * @since 20210824
          */
         const val WORK_RESULT_STORE_FAILURES = "StoreFailures"
+
+        /**
+         * Generates a tag from [WORKER_SCHEDULE] so it can be detected when the schedule should
+         * be updated.
+         * @author Arnau Mora
+         * @since 20210825
+         */
+        val WORKER_SCHEDULE_TAG: String
+            get() = "BSW" + WORKER_SCHEDULE.second.toMinutes(WORKER_SCHEDULE.first)
 
         @WorkerThread
         suspend fun isScheduled(context: Context): Boolean {
