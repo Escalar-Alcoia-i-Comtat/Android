@@ -12,13 +12,10 @@ import android.os.Bundle
 import android.provider.Settings
 import android.widget.PopupMenu
 import androidx.annotation.UiThread
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.graphics.drawable.toDrawable
-import androidx.core.view.ViewCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.ProfileActivity
@@ -26,8 +23,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA_TRANSITION_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.LOCATION_PERMISSION_REQUEST_CODE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WARN_BATTERY
@@ -41,7 +36,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.TAB_ITEM_SETTINGS
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.isLocationPermissionGranted
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
@@ -511,25 +505,6 @@ class MainActivity : LanguageAppCompatActivity() {
         binding.actionMap.setOnClickListener { navigate(TAB_ITEM_MAP) }
         binding.actionDownloads.setOnClickListener { navigate(TAB_ITEM_DOWNLOADS) }
         binding.actionExtra.setOnClickListener { navigate(TAB_ITEM_EXTRA) }
-
-        areasViewFragment.areaClickListener = { holder, position, _ ->
-            Timber.v("Clicked item %s", position)
-
-            val transition = ViewCompat.getTransitionName(holder.titleTextView)
-            val optionsBundle = transition?.let { transitionName ->
-                ActivityOptionsCompat.makeSceneTransitionAnimation(
-                    this,
-                    findViewById(R.id.title_textView),
-                    transitionName
-                ).toBundle()
-            } ?: Bundle.EMPTY
-
-            launch(AreaActivity::class.java, optionsBundle) {
-                putExtra(EXTRA_AREA, areas[position].objectId)
-                if (transition != null)
-                    putExtra(EXTRA_AREA_TRANSITION_NAME, transition)
-            }
-        }
 
         binding.authFab.setOnClickListener {
             loginRequest.launch(null)
