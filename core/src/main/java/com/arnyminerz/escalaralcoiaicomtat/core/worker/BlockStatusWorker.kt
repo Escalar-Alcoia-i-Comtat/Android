@@ -21,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_IN_PROGRESS_CH
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
@@ -62,10 +63,22 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     .build()
                 Timber.v("Applying schema to search session...")
                 searchSession.setSchema(setSchemaRequest).await()
+            } catch (e: AppSearchException) {
+                // Destroy the progress notification
+                notification.destroy()
+                Notification.Builder(applicationContext)
+                    .withChannelId(TASK_COMPLETED_CHANNEL_ID)
+                    .withIcon(R.drawable.ic_notifications)
+                    .withTitle(R.string.notification_block_status_error_title)
+                    .withText(R.string.notification_block_status_error_schema)
+                    .buildAndShow()
+                return Result.failure()
+            }
 
-                Timber.v("Extracting block statuses...")
-                val blockingStatuses = arrayListOf<BlockingData>()
-                for ((i, path) in paths.withIndex()) {
+            Timber.v("Extracting block statuses...")
+            val blockingStatuses = arrayListOf<BlockingData>()
+            for ((i, path) in paths.withIndex()) {
+                try {
                     notification = notification.edit()
                         .withText(
                             applicationContext.getString(
@@ -80,14 +93,52 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     blockingStatuses.add(
                         BlockingData(path.objectId, blockStatus.idName)
                     )
+                } catch (e: RuntimeException) {
+                    Notification.Builder(applicationContext)
+                        .withChannelId(TASK_COMPLETED_CHANNEL_ID)
+                        .withIcon(R.drawable.ic_notifications)
+                        .withTitle(R.string.notification_block_status_error_title)
+                        .withText(
+                            applicationContext.getString(
+                                R.string.notification_block_status_error_item,
+                                path.displayName
+                            )
+                        )
+                        .withLongText(
+                            applicationContext.getString(
+                                R.string.notification_block_status_error_server,
+                                path.displayName
+                            )
+                        )
+                        .buildAndShow()
+                } catch (e: FirebaseFirestoreException) {
+                    Notification.Builder(applicationContext)
+                        .withChannelId(TASK_COMPLETED_CHANNEL_ID)
+                        .withIcon(R.drawable.ic_notifications)
+                        .withTitle(R.string.notification_block_status_error_title)
+                        .withText(
+                            applicationContext.getString(
+                                R.string.notification_block_status_error_item,
+                                path.displayName
+                            )
+                        )
+                        .withLongText(
+                            applicationContext.getString(
+                                R.string.notification_block_status_error_fetch,
+                                path.displayName
+                            )
+                        )
+                        .buildAndShow()
                 }
+            }
 
-                Timber.v("Building storing notification...")
-                notification = notification.edit()
-                    .withText(R.string.notification_block_status_storing)
-                    .withProgress(-1, 0)
-                    .buildAndShow()
+            Timber.v("Building storing notification...")
+            notification = notification.edit()
+                .withText(R.string.notification_block_status_storing)
+                .withProgress(-1, 0)
+                .buildAndShow()
 
+            try {
                 Timber.v("Building put request...")
                 val putRequest = PutDocumentsRequest.Builder()
                     .addDocuments(blockingStatuses)
@@ -149,17 +200,16 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                         Result.failure()
                     }
                 }
-            } catch (e: Exception) {
-                Timber.e(e, "Could not update block statuses.")
-                notification.edit()
+            } catch (e: AppSearchException) {
+                // Destroy the progress notification
+                notification.destroy()
+                Notification.Builder(applicationContext)
                     .withChannelId(TASK_COMPLETED_CHANNEL_ID)
+                    .withIcon(R.drawable.ic_notifications)
                     .withTitle(R.string.notification_block_status_error_title)
-                    .withText(R.string.notification_block_status_error_title)
-                    .setPersistent(false)
-                    .apply { progress = null }
+                    .withText(R.string.notification_block_status_error_store_short)
                     .buildAndShow()
-
-                Result.failure()
+                return Result.failure()
             }
         }
     }
