@@ -77,6 +77,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.LoadingIndicator
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
+import com.google.android.material.badge.ExperimentalBadgeUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -88,6 +89,7 @@ import timber.log.Timber
  * @author Arnau Mora
  * @since 20210811
  */
+@ExperimentalBadgeUtils
 class SearchableActivity : ComponentActivity() {
     /**
      * Stores the last performed search so multiple searches are not made at once.

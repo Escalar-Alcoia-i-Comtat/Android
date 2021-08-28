@@ -52,6 +52,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UNKNOWN_NA
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UPDATE_IMAGE_REF
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.failure
 import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
+import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -65,7 +66,9 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 
-class DownloadWorker private constructor(appContext: Context, workerParams: WorkerParameters) :
+@ExperimentalBadgeUtils
+class DownloadWorker
+private constructor(appContext: Context, workerParams: WorkerParameters) :
     DownloadWorkerModel, CoroutineWorker(appContext, workerParams) {
     override val factory: DownloadWorkerFactory = Companion
 

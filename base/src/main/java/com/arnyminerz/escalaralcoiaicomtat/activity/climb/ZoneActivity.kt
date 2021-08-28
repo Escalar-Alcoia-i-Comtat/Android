@@ -20,9 +20,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.view.model.DataClassListViewModel
 import com.arnyminerz.escalaralcoiaicomtat.view.model.DataClassListViewModelFactory
+import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber
 
+@ExperimentalBadgeUtils
 class ZoneActivity : DataClassListActivity<Sector, Area, Zone>(1, R.dimen.sector_item_height) {
     companion object {
         var errorNotStored: Boolean = false
