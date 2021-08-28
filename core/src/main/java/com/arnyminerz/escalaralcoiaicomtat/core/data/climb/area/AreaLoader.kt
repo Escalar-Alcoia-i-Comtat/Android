@@ -8,7 +8,6 @@ import androidx.appsearch.app.SetSchemaRequest
 import androidx.collection.arrayMapOf
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.R
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.data
@@ -20,6 +19,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.data
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_SCHEMAS
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.firestore.FirebaseFirestore
@@ -236,11 +236,7 @@ suspend fun FirebaseFirestore.loadAreas(
         val time = System.currentTimeMillis()
         Timber.v("Search > Adding document classes...")
         val setSchemaRequest = SetSchemaRequest.Builder()
-            .addDocumentClasses(AreaData::class.java)
-            .addDocumentClasses(ZoneData::class.java)
-            .addDocumentClasses(SectorData::class.java)
-            .addDocumentClasses(PathData::class.java)
-            .addDocumentClasses(BlockingData::class.java)
+            .addDocumentClasses(SEARCH_SCHEMAS)
             .build()
         session.setSchema(setSchemaRequest).await()
         Timber.i("Set schema time: ${System.currentTimeMillis() - time}")
