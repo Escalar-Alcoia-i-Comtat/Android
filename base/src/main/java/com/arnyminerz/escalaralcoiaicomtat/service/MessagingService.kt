@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.core.app.NotificationManagerCompat
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.ALERT_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ALERT_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.generateUUID
 import com.arnyminerz.escalaralcoiaicomtat.core.view.getColor
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -17,6 +18,9 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        if (SETTINGS_ALERT_PREF.get().not())
+            return Timber.w("Will not show notification since they are disabled.")
+
         Timber.v("Received message from: ${remoteMessage.from}")
 
         val data = remoteMessage.data
