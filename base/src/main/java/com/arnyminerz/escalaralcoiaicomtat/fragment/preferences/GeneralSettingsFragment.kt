@@ -19,8 +19,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_NEARBY_DISTANCE_
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import timber.log.Timber
 
-private const val PREVIEW_SCALE_REDUCER = 10f
-
 class GeneralSettingsFragment : PreferenceFragmentCompat() {
     private var errorReportingPreference: SwitchPreference? = null
     private var languagePreference: ListPreference? = null
