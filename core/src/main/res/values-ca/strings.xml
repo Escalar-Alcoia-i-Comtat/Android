@@ -41,7 +41,7 @@
     <string name="path_stats_chart_title">"Graus"</string>
 
     <string name="sector_info_dialog_sun_morning_title">"Sol de Matí"</string>
-    <string name="sector_info_dialog_sun_morning_msg">"Aquest sector té sol de matí. Parets fredes als matins, càlides per la vesprada. Ara ja, tu tries."</string>
+    <string name="sector_info_dialog_sun_morning_msg">"Aquest sector té sol de matí, i ombra de vesprada."</string>
     <string name="sector_info_dialog_sun_afternoon_title">"Sol de Vesprada"</string>
     <string name="sector_info_dialog_sun_afternoon_msg">"Aquest sector té sol de vesprada. És possible que faça frescoreta pels matins…"</string>
     <string name="sector_info_dialog_sun_all_title">"Sol tot el dia"</string>
