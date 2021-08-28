@@ -171,7 +171,8 @@ class Sector internal constructor(
                 this
             }
 
-            val valueTextColor = getAttribute(context, com.google.android.material.R.attr.colorOnPrimary)
+            val valueTextColor =
+                getAttribute(context, com.google.android.material.R.attr.colorOnBackground)
             xAxis.apply {
                 granularity = 1f
                 valueFormatter = chartHelper.xFormatter
