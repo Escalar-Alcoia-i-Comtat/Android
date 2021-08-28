@@ -8,7 +8,6 @@ import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreference
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.UpdatingActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.AUTOMATIC_DOWNLOADS_UPDATE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOADS_QUALITY_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MIN
@@ -22,8 +21,6 @@ class DownloadsSettingsFragment : PreferenceFragmentCompat() {
     private var mobileDataDownloadPref: SwitchPreference? = null
     private var roamingDownloadPref: SwitchPreference? = null
     private var downloadDownloadsPref: Preference? = null
-
-    private var downloadsAutoUpdatePref: SwitchPreference? = null
 
     private var downloadQualityPref: SeekBarPreference? = null
 
@@ -59,15 +56,6 @@ class DownloadsSettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
-        downloadsAutoUpdatePref = findPreference("pref_download_auto_update")
-        downloadsAutoUpdatePref?.isChecked = AUTOMATIC_DOWNLOADS_UPDATE_PREF.get()
-        downloadsAutoUpdatePref?.setOnPreferenceClickListener { p ->
-            val pref = p as SwitchPreference
-            AUTOMATIC_DOWNLOADS_UPDATE_PREF.put(pref.isChecked)
-
-            true
-        }
-
         downloadQualityPref = findPreference("pref_download_quality")
         downloadQualityPref?.value = DOWNLOADS_QUALITY_PREF.get()
         downloadQualityPref?.max = DOWNLOAD_QUALITY_MAX
@@ -87,10 +75,6 @@ class DownloadsSettingsFragment : PreferenceFragmentCompat() {
 
         roamingDownloadPref = roamingDownloadPref ?: findPreference("pref_roaming_download")
         roamingDownloadPref?.isChecked = SETTINGS_ROAMING_DOWNLOAD_PREF.get()
-
-        downloadsAutoUpdatePref =
-            downloadsAutoUpdatePref ?: findPreference("pref_download_auto_update")
-        downloadsAutoUpdatePref?.isChecked = AUTOMATIC_DOWNLOADS_UPDATE_PREF.get()
 
         downloadQualityPref = downloadQualityPref ?: findPreference("pref_download_quality")
         downloadQualityPref?.value = DOWNLOADS_QUALITY_PREF.get()

@@ -132,13 +132,9 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="pref_down_title">Almacenamiento</string>
     <string name="pref_down_sum">Configuración de almacenamiento, incluyendo datos de la app y descargas.</string>
     <string name="pref_down_cat_downloads">Descargas</string>
-    <string name="pref_down_downloads_update_title">Actualizar descargas</string>
-    <string name="pref_down_downloads_update_sum">Vuelve a descargar todas las descargas completamente. Atención: Elevado uso de datos!</string>
     <string name="pref_info_cat_app">Aplicación</string>
     <string name="notification_channel_new_update_name">Nueva actualización disponible</string>
     <string name="notification_channel_new_update_desc">Esto te avisará de nuevas versiones, y cuando haya una nueva, te ayudará a descargarla.</string>
-    <string name="pref_down_automatic_updates_title">Actualización Automática de Descargas</string>
-    <string name="pref_down_automatic_updates_sum">Instala actualizaciones de las descargas automáticamente</string>
     <string name="action_send">Enviar</string>
     <string name="action_send_feedback">Enviar comentarios</string>
     <string name="pref_feedback_title">Enviar comentarios</string>

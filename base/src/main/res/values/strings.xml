@@ -131,10 +131,6 @@
     <string name="pref_down_mobile_sum">Use mobile data for downloads</string>
     <string name="pref_down_roaming_title">Roaming</string>
     <string name="pref_down_roaming_sum">Use roaming for downloads</string>
-    <string name="pref_down_automatic_updates_title">Automatic Downloads Update</string>
-    <string name="pref_down_automatic_updates_sum">Install updates to the downloads automatically.</string>
-    <string name="pref_down_downloads_update_title">Update Downloads</string>
-    <string name="pref_down_downloads_update_sum">Re-download all the stored downloads completely. Warning: High data usage!</string>
     <string name="pref_down_quality_title">Download quality</string>
     <string name="pref_down_quality_sum">Select the image compression quality of the downloads. If greater, more quality, but also larger files.</string>
 

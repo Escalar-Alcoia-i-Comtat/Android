@@ -125,7 +125,6 @@
     <string name="update_progress_internet_waiting">Esperant a una connexió a Internet…</string>
     <string name="update_progress_downloading_new_cache">Baixant les dades noves…</string>
     <string name="update_progress_error">Error!</string>
-    <string name="pref_down_downloads_update_sum">Torna a baixar totes les descàrregues completament. Alerta: Alt ús de dades!</string>
     <string name="pref_info_cat_app">Aplicació</string>
     <string name="notification_channel_new_update_name">Nova actualització disponible</string>
     <string name="notification_channel_new_update_desc">Açò t\'advertirà de noves versions, i t\'ajudarà a descarregar-les.</string>
@@ -135,9 +134,6 @@
     <string name="pref_down_title">Emmagatzematge</string>
     <string name="pref_down_sum">Configuració d\'emmagatzematge, incloent les dades de l\'app i les baixades</string>
     <string name="pref_down_cat_downloads">Baixades</string>
-    <string name="pref_down_downloads_update_title">Actualitzar Baixades</string>
-    <string name="pref_down_automatic_updates_title">Actualització Automàtica de Baixades</string>
-    <string name="pref_down_automatic_updates_sum">Instal·la actualitzacions a les baixades automàticament.</string>
     <string name="action_send">Enviar</string>
     <string name="action_send_feedback">Enviar comentaris</string>
     <string name="pref_feedback_title">Enviar comentaris</string>

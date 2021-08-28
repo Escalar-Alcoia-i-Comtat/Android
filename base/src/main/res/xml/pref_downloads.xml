@@ -5,11 +5,6 @@
     <PreferenceCategory app:title="@string/pref_down_cat_downloads">
 
         <SwitchPreference
-            app:key="pref_download_auto_update"
-            android:title="@string/pref_down_automatic_updates_title"
-            android:summary="@string/pref_down_automatic_updates_sum" />
-
-        <SwitchPreference
             app:key="pref_mobile_download"
             android:title="@string/pref_down_mobile_title"
             android:summary="@string/pref_down_mobile_sum" />
@@ -18,11 +13,6 @@
             app:key="pref_roaming_download"
             android:title="@string/pref_down_roaming_title"
             android:summary="@string/pref_down_roaming_sum" />
-
-        <Preference
-            app:key="pref_download_downloads"
-            android:title="@string/pref_down_downloads_update_title"
-            android:summary="@string/pref_down_downloads_update_sum" />
 
         <SeekBarPreference
             android:max="100"
