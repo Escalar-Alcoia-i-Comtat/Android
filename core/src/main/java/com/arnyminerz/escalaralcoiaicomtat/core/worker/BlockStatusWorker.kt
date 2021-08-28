@@ -152,9 +152,6 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     Timber.v("Closing search session...")
                     searchSession.close()
 
-                    // Destroy the progress notification
-                    notification.destroy()
-
                     // Show the error notification
                     Notification.Builder(applicationContext)
                         .withChannelId(TASK_FAILED_CHANNEL_ID)
@@ -184,16 +181,10 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                         Timber.v("Closing search session...")
                         searchSession.close()
 
-                        Timber.v("Destroying notification...")
-                        notification.destroy()
-
                         Timber.v("Finished fetching block statuses...")
                         Result.success()
                     } catch (e: AppSearchException) {
                         Timber.e(e, "Could not persist to disk.")
-
-                        // Destroy the progress notification
-                        notification.destroy()
 
                         // Show the error notification
                         Notification.Builder(applicationContext)
@@ -207,8 +198,6 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     }
                 }
             } catch (e: AppSearchException) {
-                // Destroy the progress notification
-                notification.destroy()
                 // Show the error notification
                 Notification.Builder(applicationContext)
                     .withChannelId(TASK_FAILED_CHANNEL_ID)
@@ -217,6 +206,10 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     .withText(R.string.notification_block_status_error_store_short)
                     .buildAndShow()
                 return Result.failure()
+            } finally {
+                // Destroy the progress notification
+                Timber.v("Destroying progress notification.")
+                notification.destroy()
             }
         }
     }
