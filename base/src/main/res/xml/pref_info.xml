@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <PreferenceCategory app:title="@string/pref_info_cat_services">
+
+        <Preference
+            app:key="pref_service_block_status"
+            app:summary="@string/pref_info_service_block_status_summary"
+            app:title="@string/pref_info_service_block_status_title" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/pref_info_cat_app">
 
         <Preference
@@ -19,7 +28,7 @@
             app:icon="@drawable/github"
             app:key="pref_github"
             app:summary="@string/pref_info_git_sum"
-            app:title="@string/pref_info_git_title"/>
+            app:title="@string/pref_info_git_title" />
 
     </PreferenceCategory>
 </PreferenceScreen>
