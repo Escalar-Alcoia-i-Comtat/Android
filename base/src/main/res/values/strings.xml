@@ -47,6 +47,9 @@
     <string name="status_processing_paths">Processing paths…</string>
     <string name="status_no_internet">No Internet Connection</string>
     <string name="status_loading_deep_link">Processing link…</string>
+    <string name="status_not_running">Not running</string>
+    <string name="status_running">Running</string>
+    <string name="status_finished">Finished</string>
 
     <string name="data_type_area">Area</string>
     <string name="data_type_zone">Zone</string>
@@ -132,8 +135,11 @@
     <string name="pref_down_roaming_title">Roaming</string>
     <string name="pref_down_roaming_sum">Use roaming for downloads</string>
 
+    <string name="pref_info_cat_services">Services</string>
     <string name="pref_info_cat_app">Application</string>
     <string name="pref_info_cat_source">Source</string>
+    <string name="pref_info_service_block_status_title">Block Status checker</string>
+    <string name="pref_info_service_block_status_summary">The service for updating the path\'s block status is currently: %s</string>
     <string name="pref_info_version_title">Version</string>
     <string name="pref_info_build_title">Build Number</string>
     <string name="pref_info_git_title">Github</string>

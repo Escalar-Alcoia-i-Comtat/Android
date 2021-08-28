@@ -277,4 +277,10 @@
     <string name="notification_channel_tasks_group_name">Tasques</string>
     <string name="notification_channel_task_failed_name">Tasca fallida</string>
     <string name="notification_channel_task_failed_desc">T\'informaran de quan una tasca en segon pla haja fallat.</string>
+    <string name="pref_info_cat_services">Serveis</string>
+    <string name="pref_info_service_block_status_title">Comprovador dels estat de bloqueig</string>
+    <string name="pref_info_service_block_status_summary">El servei per a la comprovació dels estats de bloqueig de les vies està actualment: %s</string>
+    <string name="status_finished">Finalitzat</string>
+    <string name="status_not_running">Detès</string>
+    <string name="status_running">En execució</string>
 </resources>

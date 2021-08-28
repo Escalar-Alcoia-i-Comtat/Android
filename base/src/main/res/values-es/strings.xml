@@ -278,4 +278,10 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="notification_channel_tasks_group_name">Tareas</string>
     <string name="notification_channel_task_failed_name">Tarea fallida</string>
     <string name="notification_channel_task_failed_desc">Te notificará de cuando una tarea en segundo plano haya fallado.</string>
+    <string name="pref_info_cat_services">Servicios</string>
+    <string name="pref_info_service_block_status_title">Comprobador de los estados de bloqueo</string>
+    <string name="pref_info_service_block_status_summary">El servicio para la comprobación de los estados de bloqueo de las vías está actualmente: %s</string>
+    <string name="status_finished">Finalizado</string>
+    <string name="status_not_running">Detenido</string>
+    <string name="status_running">En ejecución</string>
 </resources>
