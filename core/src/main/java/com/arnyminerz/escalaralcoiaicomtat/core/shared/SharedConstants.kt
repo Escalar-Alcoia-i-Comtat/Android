@@ -1,5 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.shared
 
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.MEGABYTE
 
 const val APPLICATION_ID = "com.arnyminerz.escalaralcoiaicomtat"
@@ -57,6 +62,19 @@ const val REMOTE_CONFIG_MIN_FETCH_INTERVAL = 43200L // 12 hours
  * @see <a href="https://developer.android.com/guide/topics/search/appsearch">AppSearch docs</a>
  */
 const val SEARCH_DATABASE_NAME = "escalaralcoiaicomtat_v2"
+
+/**
+ * Stores all the schemas that are used by the search engine.
+ * @author Arnau Mora
+ * @since 20210828
+ */
+val SEARCH_SCHEMAS = listOf<Class<*>>(
+    AreaData::class.java,
+    ZoneData::class.java,
+    SectorData::class.java,
+    PathData::class.java,
+    BlockingData::class.java,
+)
 
 const val ARGUMENT_AREA_ID = "area_id"
 const val ARGUMENT_ZONE_ID = "zone_id"
