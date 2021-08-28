@@ -5,6 +5,7 @@ import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchSpec
+import androidx.appsearch.exceptions.AppSearchException
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
@@ -284,7 +285,7 @@ class Path internal constructor(
     suspend fun getBlockStatus(
         searchSession: AppSearchSession,
         firestore: FirebaseFirestore
-    ): BlockingType {
+    ): BlockingType = try {
         Timber.v("$this > Getting block status...")
         Timber.v("$this > Building search spec...")
         val searchSpec = SearchSpec.Builder()
@@ -295,7 +296,7 @@ class Path internal constructor(
         val searchResults = searchSession.search(objectId, searchSpec)
         Timber.v("$this > Awaiting for page results...")
         val searchPage = searchResults.nextPage.await()
-        return if (searchPage.isEmpty()) {
+        if (searchPage.isEmpty()) {
             Timber.v("$this > There's no block status in search session.")
             val blockingType = singleBlockStatusFetch(firestore)
             Timber.v("$this > Blocking type: $blockingType")
@@ -310,6 +311,9 @@ class Path internal constructor(
             Timber.v("$this > Converting to BlockingType...")
             data.blockingType
         }
+    } catch (e: AppSearchException) {
+        Timber.e(e, "$this > Could not get blocking type.")
+        BlockingType.UNKNOWN
     }
 
     companion object {

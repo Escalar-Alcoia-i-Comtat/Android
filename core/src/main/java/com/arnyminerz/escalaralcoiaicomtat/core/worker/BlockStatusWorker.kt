@@ -152,8 +152,10 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     Timber.v("Closing search session...")
                     searchSession.close()
 
-                    notification.edit()
+                    // Show the error notification
+                    Notification.Builder(applicationContext)
                         .withChannelId(TASK_FAILED_CHANNEL_ID)
+                        .withIcon(R.drawable.ic_notifications)
                         .withTitle(R.string.notification_block_status_error_title)
                         .withText(R.string.notification_block_status_error_store_short)
                         .withLongText(
@@ -163,8 +165,6 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                                 failures.size,
                             )
                         )
-                        .setPersistent(false)
-                        .apply { progress = null }
                         .buildAndShow()
 
                     Result.failure(
@@ -181,28 +181,24 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                         Timber.v("Closing search session...")
                         searchSession.close()
 
-                        Timber.v("Destroying notification...")
-                        notification.destroy()
-
                         Timber.v("Finished fetching block statuses...")
                         Result.success()
                     } catch (e: AppSearchException) {
                         Timber.e(e, "Could not persist to disk.")
 
-                        notification.edit()
+                        // Show the error notification
+                        Notification.Builder(applicationContext)
                             .withChannelId(TASK_FAILED_CHANNEL_ID)
+                            .withIcon(R.drawable.ic_notifications)
                             .withTitle(R.string.notification_block_status_error_title)
                             .withText(R.string.notification_block_status_error_store_short)
-                            .setPersistent(false)
-                            .apply { progress = null }
                             .buildAndShow()
 
                         Result.failure()
                     }
                 }
             } catch (e: AppSearchException) {
-                // Destroy the progress notification
-                notification.destroy()
+                // Show the error notification
                 Notification.Builder(applicationContext)
                     .withChannelId(TASK_FAILED_CHANNEL_ID)
                     .withIcon(R.drawable.ic_notifications)
@@ -210,6 +206,10 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     .withText(R.string.notification_block_status_error_store_short)
                     .buildAndShow()
                 return Result.failure()
+            } finally {
+                // Destroy the progress notification
+                Timber.v("Destroying progress notification.")
+                notification.destroy()
             }
         }
     }
