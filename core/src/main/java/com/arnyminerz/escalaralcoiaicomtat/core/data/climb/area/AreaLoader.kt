@@ -19,7 +19,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.data
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_FULL_DATA_LOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.firestore.FirebaseFirestore
@@ -61,9 +60,6 @@ suspend fun FirebaseFirestore.loadAreas(
     val trace = performance.newTrace("loadAreasTrace")
 
     trace.start()
-
-    val fullDataLoad = SETTINGS_FULL_DATA_LOAD_PREF.get()
-    trace.putAttribute("full_load", fullDataLoad.toString())
 
     Timber.d("Fetching areas...")
     try {

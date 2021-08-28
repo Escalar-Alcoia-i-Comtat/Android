@@ -51,11 +51,6 @@
             android:summary="@string/pref_gene_preview_scale_sum" />
 
         <SwitchPreference
-            android:key="pref_full_data_loading"
-            android:summary="@string/pref_gene_full_data_loading_sum"
-            android:title="@string/pref_gene_full_data_loading_title" />
-
-        <SwitchPreference
             android:key="pref_error_reporting"
             android:summary="@string/pref_gene_error_reporting_sum"
             android:title="@string/pref_gene_error_reporting_title" />

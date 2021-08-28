@@ -129,8 +129,6 @@
     <string name="pref_gene_section_advanced">Advanced</string>
     <string name="pref_gene_error_reporting_title">Enable error reporting</string>
     <string name="pref_gene_error_reporting_sum">This will send an anonymous error report to the developers when the app crashes or there\'s an error, so it can be fixed as soon as possible. Please, we kindly ask you to keep this enabled, but you are free to disable it.</string>
-    <string name="pref_gene_full_data_loading_title">Full data loading</string>
-    <string name="pref_gene_full_data_loading_sum">If enabled, when you enter the app the whole data package will be loaded. This will make launching the app slower, but will give you a faster movement through the app.</string>
 
     <string name="pref_down_cat_downloads">Downloads</string>
     <string name="pref_down_mobile_title">Mobile Data</string>
