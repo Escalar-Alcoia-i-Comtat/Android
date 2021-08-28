@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <ListPreference
         android:entries="@array/app_languages"
         android:entryValues="@array/app_languages_values"
@@ -33,15 +32,6 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_gene_section_advanced">
-        <SeekBarPreference
-            android:key="pref_preview_scale"
-            app:seekBarIncrement="1"
-            app:showSeekBarValue="true"
-            app:min="1"
-            android:max="10"
-            android:title="@string/pref_gene_preview_scale_title"
-            android:summary="@string/pref_gene_preview_scale_sum" />
-
         <SwitchPreference
             android:key="pref_error_reporting"
             android:summary="@string/pref_gene_error_reporting_sum"

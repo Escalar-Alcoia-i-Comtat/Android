@@ -94,8 +94,6 @@
     <string name="intro_main_message">"Anem a guiar-te per un procés curt de configuració. No et preocupes, és ràpid i ben senzill"</string>
     <string name="date_format">"dd-MM-yyy kk:mm:ss"</string>
     <string name="action_clear_settings">Netejar Configuració</string>
-    <string name="pref_gene_preview_scale_title">Escala de Previsualització d\'Imatges</string>
-    <string name="pref_gene_preview_scale_sum">L\'escala de les imatges en previsualització</string>
     <string name="pref_gene_section_advanced">Avançat</string>
     <string name="pref_down_mobile_title">Dades Mòbils</string>
     <string name="pref_down_mobile_sum">Fes ús de les dades mòbils per a les descàrregues</string>

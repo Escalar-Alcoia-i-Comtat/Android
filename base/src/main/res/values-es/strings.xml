@@ -97,8 +97,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="action_clear_settings">Limpiar Configuración</string>
     <string name="intro_beta_title">Prueba Beta</string>
     <string name="intro_beta_message">Hola usuario! Has escojido usar una versión de prueba de la aplicación i eso te convierte en una persona genial! Muchas gracias! Però, todo sea dicho, es posible que esta versión tenga errores, ya que aún se encuentra en desarrollo, incluso puede que te topes con funcionalidades no finalizadas, o que la aplicación se cierre de manera forzosa. Es triste para nosotros que puedas tener problemas, pero todos los errores que te ocurran a ti, serán errores que no habrán en la versión final, y te lo agradecemos mucho!</string>
-    <string name="pref_gene_preview_scale_title">Escala de previsualización de imágenes</string>
-    <string name="pref_gene_preview_scale_sum">La escala de las imágenes al momento de su previsualización</string>
     <string name="pref_gene_section_advanced">Avanzado</string>
     <string name="pref_down_mobile_title">Datos móbiles</string>
     <string name="pref_down_mobile_sum">Usar los datos móbiles para las descargas</string>
