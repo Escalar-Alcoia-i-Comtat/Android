@@ -167,8 +167,6 @@
     <string name="image_desc_nav_map">Veure mapa d\'àrees</string>
     <string name="image_desc_nav_downloads">Veure baixades</string>
     <string name="image_desc_nav_extra">Opcions extra</string>
-    <string name="pref_down_quality_sum">Selecciona la qualitat de compressió de les imatges baixades. Quant més gran, més qualitat, però també ocuparan més.</string>
-    <string name="pref_down_quality_title">Qualitat de baixades</string>
     <string name="toast_error_language">No s\'ha pogut canviar l\'idioma</string>
     <string name="feedback_error_empty_message">Has d\'escriure el missatge a enviar</string>
     <string name="pref_gene_error_reporting_title">Habilitar reports d\'error</string>

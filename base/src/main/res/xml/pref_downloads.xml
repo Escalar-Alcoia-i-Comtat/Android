@@ -13,13 +13,5 @@
             app:key="pref_roaming_download"
             android:title="@string/pref_down_roaming_title"
             android:summary="@string/pref_down_roaming_sum" />
-
-        <SeekBarPreference
-            android:max="100"
-            android:summary="@string/pref_down_quality_sum"
-            android:title="@string/pref_down_quality_title"
-            app:key="pref_download_quality"
-            app:min="0"
-            app:showSeekBarValue="true" />
     </PreferenceCategory>
 </PreferenceScreen>
