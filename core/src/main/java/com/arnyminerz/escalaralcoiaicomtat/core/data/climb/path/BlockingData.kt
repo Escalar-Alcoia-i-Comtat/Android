@@ -6,7 +6,7 @@ import androidx.appsearch.app.AppSearchSchema
 @Document
 data class BlockingData(
     @Document.Id var pathId: String,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) val rawBlockingType: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) val rawBlockingType: String?,
 ) {
     companion object {
         const val NAMESPACE = "PathBlockingData"
