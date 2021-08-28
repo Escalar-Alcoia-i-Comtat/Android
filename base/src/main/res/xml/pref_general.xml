@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <ListPreference
         android:entries="@array/app_languages"
         android:entryValues="@array/app_languages_values"
@@ -26,14 +25,6 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_gene_section_map">
-        <SeekBarPreference
-            android:key="pref_marker_size"
-            android:defaultValue="3"
-            app:min="1"
-            android:max="5"
-            android:title="@string/pref_gene_map_icon_scale_title"
-            android:summary="@string/pref_gene_map_icon_scale_sum" />
-
         <SwitchPreference
             android:key="pref_move_marker"
             android:title="@string/pref_gene_map_move_marker_title"
@@ -41,20 +32,6 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_gene_section_advanced">
-        <SeekBarPreference
-            android:key="pref_preview_scale"
-            app:seekBarIncrement="1"
-            app:showSeekBarValue="true"
-            app:min="1"
-            android:max="10"
-            android:title="@string/pref_gene_preview_scale_title"
-            android:summary="@string/pref_gene_preview_scale_sum" />
-
-        <SwitchPreference
-            android:key="pref_full_data_loading"
-            android:summary="@string/pref_gene_full_data_loading_sum"
-            android:title="@string/pref_gene_full_data_loading_title" />
-
         <SwitchPreference
             android:key="pref_error_reporting"
             android:summary="@string/pref_gene_error_reporting_sum"

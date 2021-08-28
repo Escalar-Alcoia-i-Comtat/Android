@@ -47,6 +47,9 @@
     <string name="status_processing_paths">Processing paths…</string>
     <string name="status_no_internet">No Internet Connection</string>
     <string name="status_loading_deep_link">Processing link…</string>
+    <string name="status_not_running">Not running</string>
+    <string name="status_running">Running</string>
+    <string name="status_finished">Finished</string>
 
     <string name="data_type_area">Area</string>
     <string name="data_type_zone">Zone</string>
@@ -118,10 +121,6 @@
     <string name="pref_gene_nearby_distance_sum">At what distance will a zone be considered as nearby</string>
     <string name="pref_gene_nearby_distance_dialog_title">Nearby Zones Distance (m)</string>
     <string name="pref_gene_nearby_distance_dialog_message">Enter the maximum distance to consider as nearby zone in meters.</string>
-    <string name="pref_gene_map_icon_scale_title">Marker Scale</string>
-    <string name="pref_gene_map_icon_scale_sum">The scale of the icons in the map</string>
-    <string name="pref_gene_preview_scale_title">Image Preview Scale</string>
-    <string name="pref_gene_preview_scale_sum">The scale of the images when previewing</string>
     <string name="pref_gene_map_move_marker_title">Center marker on click</string>
     <string name="pref_gene_map_move_marker_sum">If a marker should me centered in the screen when clicked on it</string>
     <string name="pref_gene_section_nearby">Nearby Zones</string>
@@ -129,23 +128,18 @@
     <string name="pref_gene_section_advanced">Advanced</string>
     <string name="pref_gene_error_reporting_title">Enable error reporting</string>
     <string name="pref_gene_error_reporting_sum">This will send an anonymous error report to the developers when the app crashes or there\'s an error, so it can be fixed as soon as possible. Please, we kindly ask you to keep this enabled, but you are free to disable it.</string>
-    <string name="pref_gene_full_data_loading_title">Full data loading</string>
-    <string name="pref_gene_full_data_loading_sum">If enabled, when you enter the app the whole data package will be loaded. This will make launching the app slower, but will give you a faster movement through the app.</string>
 
     <string name="pref_down_cat_downloads">Downloads</string>
     <string name="pref_down_mobile_title">Mobile Data</string>
     <string name="pref_down_mobile_sum">Use mobile data for downloads</string>
     <string name="pref_down_roaming_title">Roaming</string>
     <string name="pref_down_roaming_sum">Use roaming for downloads</string>
-    <string name="pref_down_automatic_updates_title">Automatic Downloads Update</string>
-    <string name="pref_down_automatic_updates_sum">Install updates to the downloads automatically.</string>
-    <string name="pref_down_downloads_update_title">Update Downloads</string>
-    <string name="pref_down_downloads_update_sum">Re-download all the stored downloads completely. Warning: High data usage!</string>
-    <string name="pref_down_quality_title">Download quality</string>
-    <string name="pref_down_quality_sum">Select the image compression quality of the downloads. If greater, more quality, but also larger files.</string>
 
+    <string name="pref_info_cat_services">Services</string>
     <string name="pref_info_cat_app">Application</string>
     <string name="pref_info_cat_source">Source</string>
+    <string name="pref_info_service_block_status_title">Block Status checker</string>
+    <string name="pref_info_service_block_status_summary">The service for updating the path\'s block status is currently: %s</string>
     <string name="pref_info_version_title">Version</string>
     <string name="pref_info_build_title">Build Number</string>
     <string name="pref_info_git_title">Github</string>

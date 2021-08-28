@@ -17,8 +17,7 @@ class NotificationsSettingsFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.pref_noti, rootKey)
 
         val alertEnableSwitch: SwitchPreference? = findPreference("pref_alert_enable")
-        alertEnableSwitch?.isChecked =
-            SETTINGS_ALERT_PREF.get()
+        alertEnableSwitch?.isChecked = SETTINGS_ALERT_PREF.get()
         alertEnableSwitch?.setOnPreferenceClickListener { p ->
             val pref = p as SwitchPreference
             SETTINGS_ALERT_PREF.put(pref.isChecked)

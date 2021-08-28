@@ -17,7 +17,17 @@ import timber.log.Timber
 const val SETTINGS_HEIGHT_MAIN = 0
 const val SETTINGS_HEIGHT_UPPER = 1
 
+/**
+ * The Fragment that manages the settings screen.
+ * @author Arnau Mora
+ * @since 20210828
+ */
 class SettingsFragmentManager : Fragment() {
+    /**
+     * The current page height.
+     * @author Arnau Mora
+     * @since 20210828
+     */
     var height = 0
         private set
 
@@ -28,6 +38,13 @@ class SettingsFragmentManager : Fragment() {
     ): View? =
         inflater.inflate(R.layout.fragment_settings_manager, container, false)
 
+    /**
+     * Selects a page in the settings screen.
+     * @author Arnau Mora
+     * @since 20210828
+     * @param page The page to select
+     * @param backPressed If the change is requested through a back press.
+     */
     fun loadPage(page: SettingsPage, backPressed: Boolean) {
         if (view == null) {
             Timber.w("View not showing, shouldn't load any pages.")

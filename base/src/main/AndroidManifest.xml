@@ -115,9 +115,6 @@
             android:name=".activity.isolated.StorageActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.UpdatingActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activity.IntroActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Intro" />

@@ -38,8 +38,6 @@
     <string name="pref_gene_nearby_distance_sum">"Qué distancia será considerada como cercana"</string>
     <string name="pref_gene_nearby_distance_dialog_title">"Distancia a Zonas Cercanas (m)"</string>
     <string name="pref_gene_nearby_distance_dialog_message">"Introduce la distancia máxima que será usada para considerar una zona como cercana"</string>
-    <string name="pref_gene_map_icon_scale_title">"Escala del marcador"</string>
-    <string name="pref_gene_map_icon_scale_sum">"La escala de los iconos en el mapa"</string>
     <string name="pref_gene_section_nearby">"Zonas Cercanas"</string>
     <string name="pref_gene_section_map">"Mapa"</string>
     <string name="pref_info_version_title">"Versión"</string>
@@ -99,8 +97,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="action_clear_settings">Limpiar Configuración</string>
     <string name="intro_beta_title">Prueba Beta</string>
     <string name="intro_beta_message">Hola usuario! Has escojido usar una versión de prueba de la aplicación i eso te convierte en una persona genial! Muchas gracias! Però, todo sea dicho, es posible que esta versión tenga errores, ya que aún se encuentra en desarrollo, incluso puede que te topes con funcionalidades no finalizadas, o que la aplicación se cierre de manera forzosa. Es triste para nosotros que puedas tener problemas, pero todos los errores que te ocurran a ti, serán errores que no habrán en la versión final, y te lo agradecemos mucho!</string>
-    <string name="pref_gene_preview_scale_title">Escala de previsualización de imágenes</string>
-    <string name="pref_gene_preview_scale_sum">La escala de las imágenes al momento de su previsualización</string>
     <string name="pref_gene_section_advanced">Avanzado</string>
     <string name="pref_down_mobile_title">Datos móbiles</string>
     <string name="pref_down_mobile_sum">Usar los datos móbiles para las descargas</string>
@@ -136,13 +132,9 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="pref_down_title">Almacenamiento</string>
     <string name="pref_down_sum">Configuración de almacenamiento, incluyendo datos de la app y descargas.</string>
     <string name="pref_down_cat_downloads">Descargas</string>
-    <string name="pref_down_downloads_update_title">Actualizar descargas</string>
-    <string name="pref_down_downloads_update_sum">Vuelve a descargar todas las descargas completamente. Atención: Elevado uso de datos!</string>
     <string name="pref_info_cat_app">Aplicación</string>
     <string name="notification_channel_new_update_name">Nueva actualización disponible</string>
     <string name="notification_channel_new_update_desc">Esto te avisará de nuevas versiones, y cuando haya una nueva, te ayudará a descargarla.</string>
-    <string name="pref_down_automatic_updates_title">Actualización Automática de Descargas</string>
-    <string name="pref_down_automatic_updates_sum">Instala actualizaciones de las descargas automáticamente</string>
     <string name="action_send">Enviar</string>
     <string name="action_send_feedback">Enviar comentarios</string>
     <string name="pref_feedback_title">Enviar comentarios</string>
@@ -176,8 +168,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="image_desc_nav_map">Ver mapa de áreas</string>
     <string name="image_desc_nav_downloads">Ver descargas</string>
     <string name="image_desc_nav_extra">Opciones extra</string>
-    <string name="pref_down_quality_sum">Selecciona la calidad de compresión de las imágenes descargadas. Cuanto más grande, más calidad, pero también archivos más grandes.</string>
-    <string name="pref_down_quality_title">Calidad de descargas</string>
     <string name="toast_error_language">No se ha podido cambiar el idioma</string>
     <string name="feedback_error_empty_message">Debes escribir el mensaje a mandar</string>
     <string name="pref_gene_error_reporting_title">Habilitar reportes de error</string>
@@ -264,8 +254,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="toast_error_delete_post">No se ha podido eliminar el post</string>
     <string name="toast_error_gps_disabled">El GPS está deshabilitado</string>
     <string name="placeholder">Marcador</string>
-    <string name="pref_gene_full_data_loading_title">Carga completa de datos</string>
-    <string name="pref_gene_full_data_loading_sum">Si está habilitado, cuando entres a la aplicación todos los datos serán cargados en la memoria. Esto hará que se cargue la app más lentamente, pero te permitirá navegar con más agilidad.</string>
     <string name="action_restart">Reiniciar</string>
     <string name="toast_update_downloaded">Una nueva actualización ha sido descargada</string>
     <string name="toast_error_not_found">No se ha encontrado el elemento</string>
@@ -290,4 +278,10 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="notification_channel_tasks_group_name">Tareas</string>
     <string name="notification_channel_task_failed_name">Tarea fallida</string>
     <string name="notification_channel_task_failed_desc">Te notificará de cuando una tarea en segundo plano haya fallado.</string>
+    <string name="pref_info_cat_services">Servicios</string>
+    <string name="pref_info_service_block_status_title">Comprobador de los estados de bloqueo</string>
+    <string name="pref_info_service_block_status_summary">El servicio para la comprobación de los estados de bloqueo de las vías está actualmente: %s</string>
+    <string name="status_finished">Finalizado</string>
+    <string name="status_not_running">Detenido</string>
+    <string name="status_running">En ejecución</string>
 </resources>

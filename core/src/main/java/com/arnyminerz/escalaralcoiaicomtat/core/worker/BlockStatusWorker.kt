@@ -10,6 +10,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.await
@@ -262,6 +263,22 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                 .await()
             return workInfos.isNotEmpty()
         }
+
+        /**
+         * Fetches the work info for the [BlockStatusWorker].
+         * @author Arnau Mora
+         * @since 20210825
+         * @param context The [Context] that wants to make the check.
+         * @return The [WorkInfo] of the job, or null if no job is scheduled.
+         */
+        @WorkerThread
+        suspend fun info(context: Context): WorkInfo? =
+            WorkManager
+                .getInstance(context)
+                .getWorkInfosByTag(WORKER_TAG) // Gets the work info
+                .await() // Awaits the result
+                .ifEmpty { null } // If not results were found, update to null
+                ?.get(0) // Get the first element if not null
 
         /**
          * Checks if the worker is scheduled correctly with the latest update.

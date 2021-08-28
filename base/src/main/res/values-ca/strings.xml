@@ -38,8 +38,6 @@
     <string name="pref_gene_nearby_distance_sum">"A partir de quina distància es considera propera"</string>
     <string name="pref_gene_nearby_distance_dialog_title">"Distància a Zones Properes (m)"</string>
     <string name="pref_gene_nearby_distance_dialog_message">"Introdueix la distància màxima que s'acceptarà per a considerar una zona com a propera (en metres)."</string>
-    <string name="pref_gene_map_icon_scale_title">"Escala de marcador"</string>
-    <string name="pref_gene_map_icon_scale_sum">"La escala de les icones al mapa"</string>
     <string name="pref_gene_section_nearby">"Zones Properes"</string>
     <string name="pref_gene_section_map">"Mapa"</string>
     <string name="pref_info_version_title">"Versió"</string>
@@ -96,8 +94,6 @@
     <string name="intro_main_message">"Anem a guiar-te per un procés curt de configuració. No et preocupes, és ràpid i ben senzill"</string>
     <string name="date_format">"dd-MM-yyy kk:mm:ss"</string>
     <string name="action_clear_settings">Netejar Configuració</string>
-    <string name="pref_gene_preview_scale_title">Escala de Previsualització d\'Imatges</string>
-    <string name="pref_gene_preview_scale_sum">L\'escala de les imatges en previsualització</string>
     <string name="pref_gene_section_advanced">Avançat</string>
     <string name="pref_down_mobile_title">Dades Mòbils</string>
     <string name="pref_down_mobile_sum">Fes ús de les dades mòbils per a les descàrregues</string>
@@ -129,7 +125,6 @@
     <string name="update_progress_internet_waiting">Esperant a una connexió a Internet…</string>
     <string name="update_progress_downloading_new_cache">Baixant les dades noves…</string>
     <string name="update_progress_error">Error!</string>
-    <string name="pref_down_downloads_update_sum">Torna a baixar totes les descàrregues completament. Alerta: Alt ús de dades!</string>
     <string name="pref_info_cat_app">Aplicació</string>
     <string name="notification_channel_new_update_name">Nova actualització disponible</string>
     <string name="notification_channel_new_update_desc">Açò t\'advertirà de noves versions, i t\'ajudarà a descarregar-les.</string>
@@ -139,9 +134,6 @@
     <string name="pref_down_title">Emmagatzematge</string>
     <string name="pref_down_sum">Configuració d\'emmagatzematge, incloent les dades de l\'app i les baixades</string>
     <string name="pref_down_cat_downloads">Baixades</string>
-    <string name="pref_down_downloads_update_title">Actualitzar Baixades</string>
-    <string name="pref_down_automatic_updates_title">Actualització Automàtica de Baixades</string>
-    <string name="pref_down_automatic_updates_sum">Instal·la actualitzacions a les baixades automàticament.</string>
     <string name="action_send">Enviar</string>
     <string name="action_send_feedback">Enviar comentaris</string>
     <string name="pref_feedback_title">Enviar comentaris</string>
@@ -175,8 +167,6 @@
     <string name="image_desc_nav_map">Veure mapa d\'àrees</string>
     <string name="image_desc_nav_downloads">Veure baixades</string>
     <string name="image_desc_nav_extra">Opcions extra</string>
-    <string name="pref_down_quality_sum">Selecciona la qualitat de compressió de les imatges baixades. Quant més gran, més qualitat, però també ocuparan més.</string>
-    <string name="pref_down_quality_title">Qualitat de baixades</string>
     <string name="toast_error_language">No s\'ha pogut canviar l\'idioma</string>
     <string name="feedback_error_empty_message">Has d\'escriure el missatge a enviar</string>
     <string name="pref_gene_error_reporting_title">Habilitar reports d\'error</string>
@@ -263,8 +253,6 @@
     <string name="toast_error_delete_post">No s\'ha pogut eliminar la publicació</string>
     <string name="toast_error_gps_disabled">El GPS està deshabilitat</string>
     <string name="placeholder">Marcador</string>
-    <string name="pref_gene_full_data_loading_title">Càrrega completa de dades</string>
-    <string name="pref_gene_full_data_loading_sum">Si està habilitat, quan accedeixes a l\'aplicació es carreguen totes les dades a la memòria. Açò farà que es tarde més en iniciar l\'app, però et permetrà més agilitat a l\'interaccionar amb l\'app.</string>
     <string name="action_restart">Reiniciar</string>
     <string name="toast_update_downloaded">Una nova actualització ha sigut baixada</string>
     <string name="toast_error_not_found">No s\'ha trobat l\'element</string>
@@ -289,4 +277,10 @@
     <string name="notification_channel_tasks_group_name">Tasques</string>
     <string name="notification_channel_task_failed_name">Tasca fallida</string>
     <string name="notification_channel_task_failed_desc">T\'informaran de quan una tasca en segon pla haja fallat.</string>
+    <string name="pref_info_cat_services">Serveis</string>
+    <string name="pref_info_service_block_status_title">Comprovador dels estat de bloqueig</string>
+    <string name="pref_info_service_block_status_summary">El servei per a la comprovació dels estats de bloqueig de les vies està actualment: %s</string>
+    <string name="status_finished">Finalitzat</string>
+    <string name="status_not_running">Detès</string>
+    <string name="status_running">En execució</string>
 </resources>
