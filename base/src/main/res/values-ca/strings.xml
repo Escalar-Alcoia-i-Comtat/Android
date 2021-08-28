@@ -38,8 +38,6 @@
     <string name="pref_gene_nearby_distance_sum">"A partir de quina distància es considera propera"</string>
     <string name="pref_gene_nearby_distance_dialog_title">"Distància a Zones Properes (m)"</string>
     <string name="pref_gene_nearby_distance_dialog_message">"Introdueix la distància màxima que s'acceptarà per a considerar una zona com a propera (en metres)."</string>
-    <string name="pref_gene_map_icon_scale_title">"Escala de marcador"</string>
-    <string name="pref_gene_map_icon_scale_sum">"La escala de les icones al mapa"</string>
     <string name="pref_gene_section_nearby">"Zones Properes"</string>
     <string name="pref_gene_section_map">"Mapa"</string>
     <string name="pref_info_version_title">"Versió"</string>

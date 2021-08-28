@@ -118,8 +118,6 @@
     <string name="pref_gene_nearby_distance_sum">At what distance will a zone be considered as nearby</string>
     <string name="pref_gene_nearby_distance_dialog_title">Nearby Zones Distance (m)</string>
     <string name="pref_gene_nearby_distance_dialog_message">Enter the maximum distance to consider as nearby zone in meters.</string>
-    <string name="pref_gene_map_icon_scale_title">Marker Scale</string>
-    <string name="pref_gene_map_icon_scale_sum">The scale of the icons in the map</string>
     <string name="pref_gene_preview_scale_title">Image Preview Scale</string>
     <string name="pref_gene_preview_scale_sum">The scale of the images when previewing</string>
     <string name="pref_gene_map_move_marker_title">Center marker on click</string>

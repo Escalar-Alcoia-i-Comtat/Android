@@ -38,8 +38,6 @@
     <string name="pref_gene_nearby_distance_sum">"Qué distancia será considerada como cercana"</string>
     <string name="pref_gene_nearby_distance_dialog_title">"Distancia a Zonas Cercanas (m)"</string>
     <string name="pref_gene_nearby_distance_dialog_message">"Introduce la distancia máxima que será usada para considerar una zona como cercana"</string>
-    <string name="pref_gene_map_icon_scale_title">"Escala del marcador"</string>
-    <string name="pref_gene_map_icon_scale_sum">"La escala de los iconos en el mapa"</string>
     <string name="pref_gene_section_nearby">"Zonas Cercanas"</string>
     <string name="pref_gene_section_map">"Mapa"</string>
     <string name="pref_info_version_title">"Versión"</string>

@@ -17,7 +17,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREVIEW_SCALE_PREFERENCE_
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_LANGUAGE_PREF
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MARKER_SIZE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_NEARBY_DISTANCE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_PREVIEW_SCALE_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
@@ -27,7 +26,6 @@ private const val PREVIEW_SCALE_REDUCER = 10f
 
 class GeneralSettingsFragment : PreferenceFragmentCompat() {
     private var errorReportingPreference: SwitchPreference? = null
-    private var markerSizePreference: SeekBarPreference? = null
     private var previewScalePreference: SeekBarPreference? = null
     private var languagePreference: ListPreference? = null
     private var enableNearby: SwitchPreference? = null
@@ -107,12 +105,6 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
-        markerSizePreference = findPreference("pref_marker_size")
-        markerSizePreference?.setOnPreferenceChangeListener { _, value ->
-            SETTINGS_MARKER_SIZE_PREF.put(value as Int)
-            true
-        }
-
         centerMarkerPreference = findPreference("pref_move_marker")
         centerMarkerPreference?.setOnPreferenceChangeListener { _, value ->
             SETTINGS_CENTER_MARKER_PREF.put(value as Boolean)
@@ -156,7 +148,6 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
         Timber.d("Nearby distance: $nearbyDistancePref")
         nearbyDistance?.text = nearbyDistancePref
 
-        markerSizePreference?.value = SETTINGS_MARKER_SIZE_PREF.get()
         previewScalePreference?.value =
             (SETTINGS_PREVIEW_SCALE_PREF.get() * PREVIEW_SCALE_PREFERENCE_MULTIPLIER).toInt()
 
