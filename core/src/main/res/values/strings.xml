@@ -41,7 +41,7 @@
     <string name="path_stats_chart_title">Grades</string>
 
     <string name="sector_info_dialog_sun_morning_title">Morning Sun</string>
-    <string name="sector_info_dialog_sun_morning_msg">This sector gets shiny on the mornings. Cold walls on the morning, warm on the evening, you choose.</string>
+    <string name="sector_info_dialog_sun_morning_msg">This sector gets shiny on the mornings, and the shade comes on the afternoon.</string>
     <string name="sector_info_dialog_sun_afternoon_title">Afternoon Sun</string>
     <string name="sector_info_dialog_sun_afternoon_msg">This sector gets shiny on the afternoons. In the morning this may get quite cold…</string>
     <string name="sector_info_dialog_sun_all_title">All-day Sun</string>
