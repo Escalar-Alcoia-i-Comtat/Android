@@ -1,26 +1,20 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.preferences
 
-import android.content.Intent
 import android.os.Bundle
-import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreference
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.UpdatingActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOADS_QUALITY_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MOBILE_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ROAMING_DOWNLOAD_PREF
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.UPDATE_IMAGES
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 
 class DownloadsSettingsFragment : PreferenceFragmentCompat() {
 
     private var mobileDataDownloadPref: SwitchPreference? = null
     private var roamingDownloadPref: SwitchPreference? = null
-    private var downloadDownloadsPref: Preference? = null
 
     private var downloadQualityPref: SeekBarPreference? = null
 
@@ -45,17 +39,7 @@ class DownloadsSettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
-        downloadDownloadsPref = findPreference("pref_download_downloads")
-        downloadDownloadsPref?.setOnPreferenceClickListener {
-            startActivity(
-                Intent(requireContext(), UpdatingActivity::class.java).apply {
-                    putExtra(UPDATE_IMAGES, true)
-                }
-            )
-
-            true
-        }
-
+        // Todo: Remove preference
         downloadQualityPref = findPreference("pref_download_quality")
         downloadQualityPref?.value = DOWNLOADS_QUALITY_PREF.get()
         downloadQualityPref?.max = DOWNLOAD_QUALITY_MAX
