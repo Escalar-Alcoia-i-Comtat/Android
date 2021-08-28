@@ -8,6 +8,7 @@ import androidx.appsearch.app.SetSchemaRequest
 import androidx.collection.arrayMapOf
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.data
@@ -239,6 +240,7 @@ suspend fun FirebaseFirestore.loadAreas(
             .addDocumentClasses(ZoneData::class.java)
             .addDocumentClasses(SectorData::class.java)
             .addDocumentClasses(PathData::class.java)
+            .addDocumentClasses(BlockingData::class.java)
             .build()
         session.setSchema(setSchemaRequest).await()
         Timber.i("Set schema time: ${System.currentTimeMillis() - time}")
