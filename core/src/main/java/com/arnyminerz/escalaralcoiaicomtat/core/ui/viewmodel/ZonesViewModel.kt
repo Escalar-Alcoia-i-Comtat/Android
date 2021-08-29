@@ -31,6 +31,7 @@ class ZonesViewModel<A : Activity>(activity: A, private val areaId: String) :
         val zones = area?.getChildren(app.searchSession)
         if (zones != null) {
             for (zone in zones)
+                // TODO: Add error handlers
                 zone.image(context, storage)
             emit(zones)
         } else Timber.e("Could not find A/$areaId")

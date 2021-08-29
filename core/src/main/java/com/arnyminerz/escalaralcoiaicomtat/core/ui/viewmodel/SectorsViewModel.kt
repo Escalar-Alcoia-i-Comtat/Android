@@ -38,6 +38,7 @@ class SectorsViewModel<A : Activity>(
         val sectors = zone?.getChildren(app.searchSession)
         if (sectors != null) {
             for (sector in sectors)
+                // TODO: Add error handlers
                 sector.image(context, storage)
             emit(sectors)
         } else Timber.e("Could not find Z/$zoneId in A/$areaId")
