@@ -128,7 +128,7 @@ class SearchableActivity : ComponentActivity() {
                         }
                         Timber.v("Search results: $list")
                         if (list.isEmpty())
-                            Text("No results") // TODO: Use resource
+                            Text(stringResource(R.string.search_no_results))
                         else
                             SearchResultsView(list)
                     }
