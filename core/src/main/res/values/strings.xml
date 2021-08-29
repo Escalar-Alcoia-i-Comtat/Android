@@ -65,6 +65,8 @@
     <string name="toast_error_storage_authentication">Could not access private file</string>
     <string name="toast_error_load_areas">Could not load areas</string>
     <string name="toast_error_load_image">Could not load image</string>
+    <string name="toast_error_load_image_sector">Could not load sector image: %s</string>
+    <string name="toast_error_io_access_denied">Access denied</string>
 
     <string name="notification_download_progress_title">Downloading…</string>
     <string name="notification_download_progress_message">Downloading %s</string>
