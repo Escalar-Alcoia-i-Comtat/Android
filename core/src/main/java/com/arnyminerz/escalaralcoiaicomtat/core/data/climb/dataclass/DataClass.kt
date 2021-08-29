@@ -892,10 +892,17 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param imageLoadParameters The parameters to use for loading the image
      * @throws StorageException When there was an error while loading from [storage].
      * @throws IllegalArgumentException When the stored reference url ([imageReferenceUrl]) is not well formatted.
+     * @throws IOException When there's an issue while reading or writing the image from the fs.
+     * @throws ArithmeticException When there's been an error while compressing the image.
      * @see imageReferenceUrl
      */
     @UiThread
-    @Throws(StorageException::class, IllegalArgumentException::class)
+    @Throws(
+        StorageException::class,
+        IllegalArgumentException::class,
+        IOException::class,
+        ArithmeticException::class
+    )
     fun loadImage(
         activity: Activity,
         storage: FirebaseStorage,
