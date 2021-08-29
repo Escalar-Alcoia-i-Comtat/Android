@@ -64,7 +64,7 @@ class SectorsViewModel<A : Activity>(
                         )
                     }
                 } catch (e: ArithmeticException) {
-
+                    uiContext { context.toast(R.string.toast_error_load_image_compression) }
                 }
             emit(sectors)
         } else Timber.e("Could not find Z/$zoneId in A/$areaId")
