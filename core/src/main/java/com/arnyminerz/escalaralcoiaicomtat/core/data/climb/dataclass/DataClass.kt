@@ -401,8 +401,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * be cached.
      * @param progressListener This will get called for updating the progress.
      * @throws IllegalStateException When [kmzReferenceUrl] is null, so a [File] can't be retrieved.
+     * @throws StorageException When there's an error while downloading the KMZ file from the server.
      */
-    @Throws(IllegalStateException::class)
+    @Throws(IllegalStateException::class, StorageException::class)
     @WorkerThread
     suspend fun kmzFile(
         context: Context,
@@ -464,7 +465,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210412
      * @param context The currently calling [Context].
      * @param searchSession The search session for fetching data.
-     * @param storage The [FirebaseStorage] instance to load the files from the server.
      * @param showNonDownloaded If the non-downloaded sections should be added.
      * @param progressListener A listener for the progress of the load.
      */
@@ -472,7 +472,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     suspend fun downloadedSectionList(
         context: Context,
         searchSession: AppSearchSession,
-        storage: FirebaseStorage,
         showNonDownloaded: Boolean,
         progressListener: (suspend (current: Int, max: Int) -> Unit)? = null
     ): Flow<DownloadedSection> = flow {
@@ -481,7 +480,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val children = getChildren(searchSession)
         for ((c, child) in children.withIndex())
             (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
-                val downloadStatus = dataClass.downloadStatus(context, searchSession, storage)
+                val downloadStatus = dataClass.downloadStatus(context, searchSession)
                 progressListener?.invoke(c, children.size)
                 if (showNonDownloaded || downloadStatus.downloaded || downloadStatus.partialDownload)
                     emit(DownloadedSection(dataClass))
@@ -529,7 +528,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20210313
      * @param context The currently calling [Context].
-     * @param storage The [FirebaseStorage] instance to load children from the server.
      * @param progressListener A progress updater.
      * @return a matching DownloadStatus representing the Data Class' download status
      */
@@ -537,7 +535,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     suspend fun downloadStatus(
         context: Context,
         searchSession: AppSearchSession,
-        storage: FirebaseStorage,
         progressListener: (@UiThread (progress: ValueMax<Int>) -> Unit)? = null
     ): DownloadStatus {
         Timber.d("$pin Checking if downloaded")
@@ -568,7 +565,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             for ((c, child) in children.withIndex()) {
                 if (child is DataClass<*, *>) {
                     uiContext { progressListener?.invoke(ValueMax(c, children.size)) }
-                    val childDownloadStatus = child.downloadStatus(context, searchSession, storage)
+                    val childDownloadStatus = child.downloadStatus(context, searchSession)
                     if (!childDownloadStatus.downloaded) {
                         // If at least one non-downloaded, that means that not all children are
                         Timber.d("$pin has a non-downloaded children (${child.pin}): $childDownloadStatus")
@@ -599,19 +596,17 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @date 2020/09/14
      * @param context The currently calling [Context].
      * @param searchSession The search session for fetching data.
-     * @param storage The [FirebaseStorage] instance to load children from the server.
      * @return If the data class has any downloaded children
      */
     @WorkerThread
     suspend fun hasAnyDownloadedChildren(
         context: Context,
-        searchSession: AppSearchSession,
-        storage: FirebaseStorage
+        searchSession: AppSearchSession
     ): Boolean {
         val children = getChildren(searchSession)
         for (child in children)
             if (child is DataClass<*, *> &&
-                child.downloadStatus(context, searchSession, storage) == DownloadStatus.DOWNLOADED
+                child.downloadStatus(context, searchSession) == DownloadStatus.DOWNLOADED
             )
                 return true
         return false
@@ -728,8 +723,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * defined in [metadata].
      * @throws CouldNotCreateDynamicLinkException When there was an unknown exception while creating
      * the dynamic link.
+     * @throws StorageException When there's an error while fetching the download url of the image.
      */
-    @Throws(IllegalStateException::class, CouldNotCreateDynamicLinkException::class)
+    @Throws(
+        IllegalStateException::class,
+        CouldNotCreateDynamicLinkException::class,
+        StorageException::class
+    )
     suspend fun getDynamicLink(
         dynamicLinks: FirebaseDynamicLinks,
         firebaseStorage: FirebaseStorage
@@ -812,10 +812,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param storage The [FirebaseStorage] reference for loading the image file.
      * @param imageLoadParameters The parameters desired to load the image.
      * @param progress The progress listener, for supervising loading.
+     * @throws StorageException When there's an issue while downloading the image from the server.
+     * @throws IOException When there's an issue while reading or writing the image from the fs.
+     * @throws ArithmeticException When there's been an error while compressing the image.
      * @see ValueMax
      * @see ImageLoadParameters
      */
     @WorkerThread
+    @Throws(StorageException::class, IOException::class, ArithmeticException::class)
     suspend fun image(
         context: Context,
         storage: FirebaseStorage,
@@ -861,7 +865,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                             bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
                         if (!compressedBitmap) {
                             Timber.e("$this > Could not compress image!")
-                            throw IOException("Could not compress image for $this.")
+                            throw ArithmeticException("Could not compress image for $this.")
                         } else {
                             Timber.v("$this > Storing image...")
                             baos.writeTo(cacheImage.outputStream())
@@ -911,6 +915,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             imageView.setImageResource(uiMetadata.placeholderDrawable)
 
         doAsync {
+            // TODO: Add error handlers
             val bmp = image(activity, storage, imageLoadParameters) { progress ->
                 progressBar?.progress = progress.percentage
             }
