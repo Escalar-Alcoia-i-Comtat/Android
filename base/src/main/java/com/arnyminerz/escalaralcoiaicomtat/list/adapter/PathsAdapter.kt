@@ -11,7 +11,6 @@ import android.view.animation.RotateAnimation
 import android.widget.ImageButton
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.collection.arrayMapOf
@@ -284,8 +283,8 @@ class PathsAdapter(
             val hasBuiltBy = builtBy?.ifBlank { null } != null
             val hasRebuilder = rebuilders.isNotEmpty()
             builtByTextView.text = when {
-                hasBuiltBy -> builtBy
-                hasRebuilder -> rebuilders[0]
+                hasBuiltBy -> activity.getString(R.string.path_builder, builtBy!!)
+                hasRebuilder -> activity.getString(R.string.path_rebuilder, rebuilders[0])
                 else -> ""
             }
             builtByTextView.visibility(hasBuiltBy || hasRebuilder)
@@ -538,15 +537,6 @@ class PathsAdapter(
     }
 
     /**
-     * Gets a [String] from the resources of [activity].
-     * @author Arnau Mora
-     * @since 20210406
-     * @param stringRes The string resource to get
-     * @return The string value from the resources with key [stringRes].
-     */
-    fun getString(@StringRes stringRes: Int) = activity.resources.getString(stringRes)
-
-    /**
      * Creates all the [Chip]s that should be shown in the [ChipGroup].
      * @author Arnau Mora
      * @since 20210406
@@ -569,7 +559,7 @@ class PathsAdapter(
                         requiredSafesData
                     ).createChip(
                         activity,
-                        getString(R.string.safe_strings),
+                        activity.getString(R.string.safe_strings),
                         fixedSafesData.stringCount
                     )
                 else
@@ -582,7 +572,7 @@ class PathsAdapter(
                         requiredSafesData
                     ).createChip(
                         activity,
-                        getString(R.string.safe_strings_plural),
+                        activity.getString(R.string.safe_strings_plural),
                         null,
                     )
             )
@@ -617,7 +607,7 @@ class PathsAdapter(
                     requiredSafesData
                 ).createChip(
                     activity,
-                    getString(R.string.path_ending_multiple),
+                    activity.getString(R.string.path_ending_multiple),
                     null
                 )
             )
@@ -632,7 +622,7 @@ class PathsAdapter(
                     requiredSafesData
                 ).createChip(
                     activity,
-                    getString(R.string.path_ending_none),
+                    activity.getString(R.string.path_ending_none),
                     null
                 )
             )
