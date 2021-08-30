@@ -279,10 +279,18 @@ class PathsAdapter(
                 }
             else visibility(infoImageButton, false)
 
-            // Will be null if null or blank
-            val hasBuiltBy = path.builtBy?.ifBlank { null } == null
-            builtByTextView.text = path.builtBy
-            builtByTextView.visibility(hasBuiltBy)
+            val rebuilders = path.rebuilders
+            val builtBy = path.builtBy
+            val hasBuiltBy = builtBy?.ifBlank { null } != null
+            val hasRebuilder = rebuilders.isNotEmpty()
+            builtByTextView.text = when {
+                hasBuiltBy -> builtBy
+                hasRebuilder -> rebuilders[0]
+                else -> ""
+            }
+            builtByTextView.visibility(hasBuiltBy || hasRebuilder)
+            Timber.v("$path > Rebuilt by: ${path.rebuiltBy}. Rebuilders: $rebuilders")
+            Timber.v("$path > Has built by: $hasBuiltBy. Has rebuilder: $hasRebuilder")
 
             titleTextView.text = path.displayName
             heightTextView.text = heightFull
