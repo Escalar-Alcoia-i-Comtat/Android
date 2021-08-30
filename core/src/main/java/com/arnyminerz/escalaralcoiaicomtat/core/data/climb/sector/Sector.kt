@@ -10,7 +10,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.annotations.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toLatLng
@@ -42,7 +41,7 @@ class Sector internal constructor(
     @SunTime val sunTime: Int,
     val kidsApt: Boolean,
     val walkingTime: Long,
-    val location: LatLng?,
+    override val location: LatLng?,
     val weight: String,
     override val imageReferenceUrl: String,
     override val documentPath: String,
@@ -53,10 +52,7 @@ class Sector internal constructor(
     timestampMillis,
     imageReferenceUrl,
     null,
-    UIMetadata(
-        R.drawable.ic_wide_placeholder,
-        R.drawable.ic_wide_placeholder,
-    ),
+    location,
     DataClassMetadata(
         objectId,
         NAMESPACE,
@@ -66,7 +62,13 @@ class Sector internal constructor(
         webUrl,
         parentZoneId
     ),
-    DataClassDisplayOptions(1, true)
+    DataClassDisplayOptions(
+        R.drawable.ic_wide_placeholder,
+        R.drawable.ic_wide_placeholder,
+        1,
+        downloadable = true,
+        showLocation = location != null,
+    )
 ) {
     /**
      * Creates a new [Sector] from the data of a [DocumentSnapshot].
