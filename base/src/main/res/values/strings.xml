@@ -65,6 +65,7 @@
     <string name="dialog_description_description_title">Description</string>
     <string name="dialog_description_builder_title">Built By</string>
     <string name="dialog_description_rebuilder_title">Rebuilt By</string>
+    <string name="dialog_description_reference">Reference: <br />%s</string>
     <string name="dialog_high_data_usage_title">High data usage Alert</string>
     <string name="dialog_high_data_usage_message">You are about to do something that usually requires a high amount of Internet communication, and we have detected that you don\'t have a WiFi connection, are you sure that you want to continue?</string>
     <string name="dialog_logout_title">Log out</string>

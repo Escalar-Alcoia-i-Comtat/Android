@@ -287,4 +287,5 @@
     <string name="path_builder">Equipador: %s</string>
     <string name="path_rebuilder">Últim reequipador: %s</string>
     <string name="path_chip_info">Info</string>
+    <string name="dialog_description_reference">Referència: <br />%s</string>
 </resources>
