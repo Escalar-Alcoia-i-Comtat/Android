@@ -18,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATACLASS_PREVIEW_SCALE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.then
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toPx
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
@@ -114,14 +115,27 @@ open class DataClassAdapter(
             } else {
                 Timber.v("DataClass is not null, displaying data...")
                 val downloadable = dataClass.displayOptions.downloadable
+                val showLocation = dataClass.displayOptions.showLocation
                 binding.titleTextView.show()
-                binding.actionButtons.visibility(downloadable)
+                binding.actionButtons.visibility(downloadable || showLocation)
+                binding.downloadImageButton.visibility(downloadable)
+                binding.mapImageButton.visibility(showLocation)
 
                 if (!oddColumns)
                     binding.titleTextView.textAlignment = View.TEXT_ALIGNMENT_CENTER
                 binding.titleTextView.text = dataClass.displayName
                 binding.imageView.setOnClickListener {
                     clickListener?.invoke(binding, position, dataClass)
+                }
+
+                // dataClass.location check is a bit redundant, but just in case
+                val dataClassLocation = dataClass.location
+                if (showLocation && dataClassLocation != null) {
+                    binding.mapImageButton.setOnClickListener {
+                        context.startActivity(
+                            dataClassLocation.mapsIntent(true, dataClass.displayName)
+                        )
+                    }
                 }
 
                 if (downloadable) {

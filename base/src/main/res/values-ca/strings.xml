@@ -283,4 +283,5 @@
     <string name="status_finished">Finalitzat</string>
     <string name="status_not_running">Detès</string>
     <string name="status_running">En execució</string>
+    <string name="image_desc_view_map">Veure al mapa</string>
 </resources>

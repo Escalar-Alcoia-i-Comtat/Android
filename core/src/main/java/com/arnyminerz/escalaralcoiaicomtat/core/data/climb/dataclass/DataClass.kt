@@ -51,6 +51,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.google.firebase.dynamiclinks.ShortDynamicLink
@@ -76,15 +77,64 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-// A: List type
-// B: Parent Type
+/**
+ * The main data storage class.
+ * @author Arnau Mora
+ * @since 20210830
+ * @param A The children type.
+ * @param B A reference of the current type.
+ * @param displayName The name that will be displayed to the user.
+ * @param timestampMillis The creation date of the [DataClass] in milliseconds.
+ * @param imageReferenceUrl The [FirebaseStorage] reference url of the image of the [DataClass].
+ * @param kmzReferenceUrl The [FirebaseStorage] reference url of the KMZ file of the [DataClass].
+ * May be null if not applicable or non-existing.
+ * @param location The coordinates of the [DataClass] to show in a map.
+ * @param metadata Some metadata of the [DataClass].
+ * @param displayOptions Options for displaying in the UI.
+ */
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
+    /**
+     * The name that will be displayed to the user.
+     * @author Arnau Mora
+     * @since 20210830
+     */
     override val displayName: String,
+    /**
+     * The creation date of the [DataClass] in milliseconds.
+     * @author Arnau Mora
+     * @since 20210830
+     */
     override val timestampMillis: Long,
+    /**
+     * The [FirebaseStorage] reference url of the image of the [DataClass].
+     * @author Arnau Mora
+     * @since 20210830
+     */
     open val imageReferenceUrl: String,
+    /**
+     * The [FirebaseStorage] reference url of the KMZ file of the [DataClass].
+     * May be null if not applicable or non-existing.
+     * @author Arnau Mora
+     * @since 20210830
+     */
     open val kmzReferenceUrl: String?,
-    open val uiMetadata: UIMetadata,
+    /**
+     * The coordinates of the [DataClass] to show in a map.
+     * @author Arnau Mora
+     * @since 20210830
+     */
+    open val location: LatLng?,
+    /**
+     * Some metadata of the [DataClass].
+     * @author Arnau Mora
+     * @since 20210830
+     */
     open val metadata: DataClassMetadata,
+    /**
+     * Options for displaying in the UI.
+     * @author Arnau Mora
+     * @since 20210830
+     */
     val displayOptions: DataClassDisplayOptions,
 ) : DataClassImpl(
     metadata.objectId,
@@ -919,7 +969,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
         val showPlaceholder = imageLoadParameters?.showPlaceholder ?: true
         if (showPlaceholder)
-            imageView.setImageResource(uiMetadata.placeholderDrawable)
+            imageView.setImageResource(displayOptions.placeholderDrawable)
 
         doAsync {
             // TODO: Add error handlers
@@ -935,8 +985,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         result = 31 * result + displayName.hashCode()
         result = 31 * result + timestamp.hashCode()
         result = 31 * result + imageReferenceUrl.hashCode()
-        result = 31 * result + uiMetadata.placeholderDrawable
-        result = 31 * result + uiMetadata.errorPlaceholderDrawable
+        result = 31 * result + displayOptions.hashCode()
         result = 31 * result + namespace.hashCode()
         return result
     }

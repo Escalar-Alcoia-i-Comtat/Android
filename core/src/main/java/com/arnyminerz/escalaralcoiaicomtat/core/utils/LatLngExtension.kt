@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.utils
 
+import android.content.Intent
 import android.location.Location
 import android.net.Uri
 import com.google.android.gms.maps.model.LatLng
@@ -16,6 +17,18 @@ fun LatLng.toUri(showMarker: Boolean = false, markerTitle: String? = null): Uri 
         else "geo:$latitude,$longitude"
     )
 }
+
+/**
+ * Creates an [Intent] for launching Google Maps app showing the [LatLng] specified.
+ * @author Arnau Mora
+ * @since 20210830
+ * @param showMarker If Google Maps should be showing a marker in the location.
+ * @param markerTitle The title of the shown marker.
+ * @return An [Intent] ready to be started that shows Google Maps with the configuration set.
+ */
+fun LatLng.mapsIntent(showMarker: Boolean = true, markerTitle: String? = null): Intent =
+    Intent(Intent.ACTION_VIEW, toUri(showMarker, markerTitle))
+        .setPackage("com.google.android.apps.maps")
 
 fun Location.toLatLng(): LatLng = LatLng(latitude, longitude)
 

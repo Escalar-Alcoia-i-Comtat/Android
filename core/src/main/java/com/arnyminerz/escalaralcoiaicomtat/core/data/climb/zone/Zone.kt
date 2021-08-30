@@ -5,7 +5,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toLatLng
 import com.google.android.gms.maps.model.LatLng
@@ -34,10 +33,7 @@ class Zone internal constructor(
     timestampMillis,
     imageReferenceUrl,
     kmzReferenceUrl,
-    UIMetadata(
-        R.drawable.ic_tall_placeholder,
-        R.drawable.ic_tall_placeholder,
-    ),
+    position,
     DataClassMetadata(
         objectId,
         NAMESPACE,
@@ -47,7 +43,13 @@ class Zone internal constructor(
         webUrl,
         parentAreaId
     ),
-    DataClassDisplayOptions(2, true)
+    DataClassDisplayOptions(
+        R.drawable.ic_tall_placeholder,
+        R.drawable.ic_tall_placeholder,
+        2,
+        downloadable = true,
+        showLocation = true
+    )
 ) {
     /**
      * Creates a new [Zone] from the data of a [DocumentSnapshot].

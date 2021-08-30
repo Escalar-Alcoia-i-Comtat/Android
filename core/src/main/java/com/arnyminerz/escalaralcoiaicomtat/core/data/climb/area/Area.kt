@@ -5,7 +5,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.UIMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.parcelize.IgnoredOnParcel
@@ -36,10 +35,7 @@ class Area internal constructor(
     timestampMillis,
     imageReferenceUrl,
     kmzReferenceUrl,
-    UIMetadata(
-        R.drawable.ic_wide_placeholder,
-        R.drawable.ic_wide_placeholder,
-    ),
+    null,
     DataClassMetadata(
         objectId,
         NAMESPACE,
@@ -49,7 +45,13 @@ class Area internal constructor(
         webUrl,
         null
     ),
-    DataClassDisplayOptions(1, false)
+    DataClassDisplayOptions(
+        R.drawable.ic_wide_placeholder,
+        R.drawable.ic_wide_placeholder,
+        1,
+        downloadable = false,
+        showLocation = false,
+    )
 ) {
     /**
      * Creates a new [Area] from the data of a [DocumentSnapshot].
