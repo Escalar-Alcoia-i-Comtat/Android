@@ -77,8 +77,6 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-// A: List type
-// B: Parent Type
 /**
  * The main data storage class.
  * @author Arnau Mora
@@ -90,16 +88,53 @@ import kotlin.coroutines.suspendCoroutine
  * @param imageReferenceUrl The [FirebaseStorage] reference url of the image of the [DataClass].
  * @param kmzReferenceUrl The [FirebaseStorage] reference url of the KMZ file of the [DataClass].
  * May be null if not applicable or non-existing.
+ * @param location The coordinates of the [DataClass] to show in a map.
  * @param metadata Some metadata of the [DataClass].
  * @param displayOptions Options for displaying in the UI.
  */
 abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
+    /**
+     * The name that will be displayed to the user.
+     * @author Arnau Mora
+     * @since 20210830
+     */
     override val displayName: String,
+    /**
+     * The creation date of the [DataClass] in milliseconds.
+     * @author Arnau Mora
+     * @since 20210830
+     */
     override val timestampMillis: Long,
+    /**
+     * The [FirebaseStorage] reference url of the image of the [DataClass].
+     * @author Arnau Mora
+     * @since 20210830
+     */
     open val imageReferenceUrl: String,
+    /**
+     * The [FirebaseStorage] reference url of the KMZ file of the [DataClass].
+     * May be null if not applicable or non-existing.
+     * @author Arnau Mora
+     * @since 20210830
+     */
     open val kmzReferenceUrl: String?,
-    open val location: LatLng,
+    /**
+     * The coordinates of the [DataClass] to show in a map.
+     * @author Arnau Mora
+     * @since 20210830
+     */
+    open val location: LatLng?,
+    /**
+     * Some metadata of the [DataClass].
+     * @author Arnau Mora
+     * @since 20210830
+     */
     open val metadata: DataClassMetadata,
+    /**
+     * Options for displaying in the UI.
+     * @author Arnau Mora
+     * @since 20210830
+     */
     val displayOptions: DataClassDisplayOptions,
 ) : DataClassImpl(
     metadata.objectId,
