@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb
 
-import android.app.Activity
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageButton
@@ -16,7 +15,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.ROTATION_A
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ROTATION_B
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.TOGGLE_ANIMATION_DURATION
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
-import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
@@ -33,8 +31,6 @@ data class DownloadedSection(val section: DataClass<*, *>) {
          * @date 14/05/2020
          * @patch Arnau Mora - 2020/09/11
          * @author ArnyminerZ
-         * @param activity The [Activity] where the function is being ran on.
-         * @param storage The [FirebaseStorage] instance to load files from the server.
          * @param showNonDownloaded If the non-downloaded sections should be added.
          * @param progressListener A listener for the progress of the load.
          * @return The sections that have been downloaded
@@ -42,7 +38,6 @@ data class DownloadedSection(val section: DataClass<*, *>) {
         @WorkerThread
         suspend fun list(
             app: App,
-            storage: FirebaseStorage,
             showNonDownloaded: Boolean,
             progressListener: suspend (current: Int, max: Int) -> Unit
         ) = flow {
@@ -52,7 +47,6 @@ data class DownloadedSection(val section: DataClass<*, *>) {
                     area.downloadedSectionList(
                         app,
                         app.searchSession,
-                        storage,
                         showNonDownloaded,
                         progressListener
                     )

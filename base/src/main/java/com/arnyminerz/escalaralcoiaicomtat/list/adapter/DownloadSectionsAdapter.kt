@@ -98,7 +98,7 @@ class DownloadSectionsAdapter(
         doAsync {
             Timber.v("Downloading section \"$section\"")
             val downloadStatus =
-                section.downloadStatus(mainActivity.app, mainActivity.app.searchSession, storage)
+                section.downloadStatus(mainActivity.app, mainActivity.app.searchSession)
 
             uiContext {
                 if (!appNetworkState.hasInternet) {
@@ -176,13 +176,12 @@ class DownloadSectionsAdapter(
             section.delete(mainActivity.app, mainActivity.app.searchSession)
             Timber.v("Section deleted, getting new download status...")
             val newDownloadStatus =
-                section.downloadStatus(mainActivity.app, mainActivity.app.searchSession, storage)
+                section.downloadStatus(mainActivity.app, mainActivity.app.searchSession)
             Timber.v("Section download status loaded, getting downloaded section list...")
             val newChildSectionList = arrayListOf<DownloadedSection>()
             section.downloadedSectionList(
                 mainActivity.app,
                 mainActivity.app.searchSession,
-                storage,
                 true
             )
                 .toCollection(newChildSectionList)
@@ -240,14 +239,13 @@ class DownloadSectionsAdapter(
         doAsync {
             Timber.v("Checking section's downloaded children.")
             val sectionDownloadStatus =
-                section.downloadStatus(mainActivity.app, mainActivity.app.searchSession, storage)
+                section.downloadStatus(mainActivity.app, mainActivity.app.searchSession)
             // Get all the children for the section
             Timber.v("Loading section list for \"${section.displayName}\"...")
             val childSectionList = arrayListOf<DownloadedSection>()
             section.downloadedSectionList(
                 mainActivity.app,
                 mainActivity.app.searchSession,
-                storage,
                 true
             )
                 .toCollection(childSectionList)

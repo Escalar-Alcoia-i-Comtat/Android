@@ -139,6 +139,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
     private fun loadImage() {
         if (imageLoaded) return
         val iv = binding?.sectorImageView ?: return
+        // TODO: Add error handler
         sector.loadImage(
             requireActivity(),
             storage,
@@ -233,9 +234,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
                 binding?.sectorTextView?.text = sector.displayName
             }
 
-            isDownloaded = if (sectorActivity != null)
-                sector.downloadStatus(app, app.searchSession, sectorActivity.storage).downloaded
-            else false
+            isDownloaded = sector.downloadStatus(app, app.searchSession).downloaded
 
             if (activity != null && activity?.isDestroyed == false) {
                 val size = activity?.let { getDisplaySize(it).second } ?: 0

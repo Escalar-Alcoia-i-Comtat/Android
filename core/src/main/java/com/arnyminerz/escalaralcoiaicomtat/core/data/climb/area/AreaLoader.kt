@@ -106,7 +106,7 @@ suspend fun FirebaseFirestore.loadAreas(
             .sortedBy { snapshot -> snapshot.getString("sketchId")?.toInt() }
         Timber.v("Getting sector documents...")
         val sectorDocuments = sectorsSnapshot.documents
-            .sortedBy { snapshot -> snapshot.getString("displayName") }
+            .sortedBy { snapshot -> snapshot.getString("weight") }
         Timber.v("Getting zone documents...")
         val zoneDocuments = zonesSnapshot.documents
         Timber.v("Getting area documents...")

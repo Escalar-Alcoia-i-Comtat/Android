@@ -129,7 +129,7 @@ open class DataClassAdapter(
                         binding.progressIndicator.show()
                         doAsync {
                             val downloadStatus =
-                                dataClass.downloadStatus(context, app.searchSession, storage)
+                                dataClass.downloadStatus(context, app.searchSession)
                             uiContext {
                                 binding.progressIndicator.hide()
 
@@ -162,7 +162,7 @@ open class DataClassAdapter(
                     // Check download status
                     doAsync {
                         val downloadStatus =
-                            dataClass.downloadStatus(context, app.searchSession, storage)
+                            dataClass.downloadStatus(context, app.searchSession)
                             { binding.progressIndicator.progress = it.percentage }
                         uiContext {
                             updateDownloadStatus(downloadStatus)
@@ -172,6 +172,7 @@ open class DataClassAdapter(
 
                 // Load the image asyncronously
                 doAsync {
+                    // TODO: Add error handlers
                     val image = dataClass.image(
                         context,
                         storage,

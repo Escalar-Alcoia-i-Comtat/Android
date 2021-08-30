@@ -111,4 +111,7 @@
 
     <string name="placeholder">"Marcador"</string>
     <string name="attr_gpx">Este GPX ha sido ofrecido por Escalar Alcoià i Comtat. Descarga la app desde https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
+    <string name="toast_error_load_image_sector">No se ha podido cargar la imagen de sector: %s</string>
+    <string name="toast_error_io_access_denied">Acceso denegado</string>
+    <string name="toast_error_load_image_compression">No se ha podido comprimir la imagen</string>
 </resources>

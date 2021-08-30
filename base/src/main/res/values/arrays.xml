@@ -32,23 +32,4 @@
         <item>ca</item>
         <item>es</item>
     </string-array>
-
-    <string-array name="suns" translatable="false">
-        <item>@string/sector_sun_day</item>
-        <item>@string/sector_sun_morning</item>
-        <item>@string/sector_sun_afternoon</item>
-        <item>@string/sector_sun_no</item>
-    </string-array>
-    <string-array name="suns_dialog_title" translatable="false">
-        <item>@string/sector_info_dialog_sun_all_title</item>
-        <item>@string/sector_info_dialog_sun_morning_title</item>
-        <item>@string/sector_info_dialog_sun_afternoon_title</item>
-        <item>@string/sector_info_dialog_sun_no_title</item>
-    </string-array>
-    <string-array name="suns_dialog_msg" translatable="false">
-        <item>@string/sector_info_dialog_sun_all_msg</item>
-        <item>@string/sector_info_dialog_sun_morning_msg</item>
-        <item>@string/sector_info_dialog_sun_afternoon_msg</item>
-        <item>@string/sector_info_dialog_sun_no_msg</item>
-    </string-array>
 </resources>
