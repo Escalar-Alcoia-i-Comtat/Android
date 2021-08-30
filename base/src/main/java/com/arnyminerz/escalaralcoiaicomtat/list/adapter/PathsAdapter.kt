@@ -551,7 +551,7 @@ class PathsAdapter(
     ): List<Chip> = with(arrayListOf<Chip>()) {
         if (fixedSafesData.sum() > 0)
             add(
-                if (!fixedSafesData.hasSafeCount())
+                if (!fixedSafesData.hasSafeCount() || fixedSafesData.stringCount > 0)
                     ChipData(
                         ChipType.SAFE,
                         R.drawable.ic_icona_express,
