@@ -33,14 +33,14 @@ class DescriptionDialog private constructor(private val context: Context, privat
         val referenceTextView = view.findViewById<TextView>(R.id.reference_textView)
 
         val markwon = Markwon.create(context)
-        if (path.builtBy != null)
+        if (path.builtBy?.ifBlank { null } != null)
             markwon.setMarkdown(builderTextView, path.builtBy!!)
         else
             viewListOf(builderTextView, builderTitleTextView).visibility(false)
-        if (path.rebuiltBy != null)
+        if (path.rebuiltBy?.ifBlank { null } != null)
             markwon.setMarkdown(rebuilderTextView, path.rebuiltBy!!)
         else viewListOf(rebuilderTextView, rebuilderTitleTextView).visibility(false)
-        if (path.description != null)
+        if (path.description?.ifBlank { null } != null)
             markwon.setMarkdown(descriptionTextView, path.description!!)
         else viewListOf(descriptionTextView, descriptionTitleTextView).visibility(false)
 
