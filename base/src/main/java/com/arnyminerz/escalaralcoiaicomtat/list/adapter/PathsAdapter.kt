@@ -218,7 +218,6 @@ class PathsAdapter(
     private suspend fun loadPathData(path: Path, position: Int, holder: SectorViewHolder) {
         // First load all the required data
         val toggled = this@PathsAdapter.toggled[position]
-        val hasInfo = path.hasInfo()
         val pathSpannable = path.grade().getSpannable(activity)
         val gradesCount = path.grades.size
         val toggledPathSpannable =
@@ -251,7 +250,8 @@ class PathsAdapter(
                 path.endings,
                 path.pitches,
                 path.fixedSafesData,
-                path.requiredSafesData
+                path.requiredSafesData,
+                descriptionDialog
             )
         } catch (e: ArrayIndexOutOfBoundsException) {
             Timber.e(e, "Could not create chips for Path $path.")
@@ -263,20 +263,12 @@ class PathsAdapter(
             val cardView = holder.cardView
             val titleTextView = holder.titleTextView
             val builtByTextView = holder.builtByTextView
-            val infoImageButton = holder.infoImageButton
             val heightTextView = holder.heightTextView
             val safesChipGroup = holder.safesChipGroup
             val warningCardView = holder.warningCardView
 
             visibility(holder.warningNameImageView, false)
             visibility(warningCardView, false)
-
-            if (hasInfo)
-                infoImageButton.setOnClickListener {
-                    descriptionDialog?.show()
-                        ?: Timber.e("Could not create dialog")
-                }
-            else visibility(infoImageButton, false)
 
             val rebuilders = path.rebuilders
             val builtBy = path.builtBy
@@ -301,7 +293,6 @@ class PathsAdapter(
                 if (toggled) ROTATION_B else ROTATION_A
             holder.updateCardToggleStatus(
                 toggled,
-                hasInfo,
                 pathSpannable to toggledPathSpannable,
                 heightFull to heightOther
             )
@@ -323,7 +314,6 @@ class PathsAdapter(
 
                 holder.updateCardToggleStatus(
                     newToggled,
-                    hasInfo,
                     pathSpannable to toggledPathSpannable,
                     heightFull to heightOther
                 )
@@ -545,7 +535,8 @@ class PathsAdapter(
         endings: List<@EndingType String>,
         pitches: List<Pitch>,
         fixedSafesData: FixedSafesData,
-        requiredSafesData: RequiredSafesData
+        requiredSafesData: RequiredSafesData,
+        descriptionDialog: DescriptionDialog?
     ): List<Chip> = with(arrayListOf<Chip>()) {
         if (fixedSafesData.sum() > 0)
             add(
@@ -625,6 +616,20 @@ class PathsAdapter(
                     activity.getString(R.string.path_ending_none),
                     null
                 )
+            )
+
+        if (descriptionDialog != null)
+            add(
+                Chip(activity).apply {
+                    setText(R.string.path_chip_info)
+
+                    isClickable = true
+                    setOnClickListener { descriptionDialog.show() }
+
+                    isCloseIconVisible = true
+                    closeIcon = ContextCompat.getDrawable(activity, R.drawable.round_launch_24)
+                    setOnCloseIconClickListener { performClick() }
+                }
             )
 
         this
