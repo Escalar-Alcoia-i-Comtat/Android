@@ -186,13 +186,14 @@ class Path internal constructor(
         }
 
     /**
-     * Checks if the Path has a description or built by information
+     * Checks if the Path has a description, built by or rebuilt by information
      * @author Arnau Mora
      * @since 20210316
      * @return True if the path has information
      */
-    fun hasInfo(): Boolean =
-        (description != null && description.isNotBlank()) || (builtBy != null && builtBy.isNotBlank())
+    fun hasInfo(): Boolean = (description != null && description.isNotBlank()) ||
+            (builtBy != null && builtBy.isNotBlank()) ||
+            (rebuilders.isNotEmpty())
 
     /**
      * Gets the first [Grade] from the [grades] list.

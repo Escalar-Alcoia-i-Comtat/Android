@@ -34,7 +34,6 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
     val warningNameImageView: ImageView = view.findViewById(R.id.alert_name_imageView)
 
     val toggleImageButton: ImageButton = view.findViewById(R.id.toggle_imageButton)
-    val infoImageButton: ImageButton = view.findViewById(R.id.info_imageButton)
     val commentsImageButton: ImageButton = view.findViewById(R.id.comments_imageButton)
 
     val safesChipGroup: ChipGroup = view.findViewById(R.id.safesChipGroup)
@@ -47,7 +46,6 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
      * @since 20210406
      * @param toggled If the card should be toggled or not. If true, the card will be large, and more
      * info will be shown.
-     * @param hasInfo If true, the [Path] has a description
      * @param pathSpannables The first element should be pathSpannable, the second one, toggledPathSpannable.
      * @param heights The first element should be the full height, the second one, the other cases'
      * height.
@@ -55,12 +53,10 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
     @UiThread
     fun updateCardToggleStatus(
         toggled: Boolean,
-        hasInfo: Boolean,
         pathSpannables: Pair<SpannableString, SpannableString>,
         heights: Pair<String?, String?>
     ) {
         visibility(expandedLayout, toggled)
-        visibility(infoImageButton, hasInfo)
         visibility(builtByTextView, toggled && builtByTextView.text.isNotBlank())
         if (toggled) {
             titleTextView.ellipsize = null

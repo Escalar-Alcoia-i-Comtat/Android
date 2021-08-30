@@ -65,6 +65,7 @@
     <string name="dialog_description_description_title">Description</string>
     <string name="dialog_description_builder_title">Built By</string>
     <string name="dialog_description_rebuilder_title">Rebuilt By</string>
+    <string name="dialog_description_reference">Reference: <br />%s</string>
     <string name="dialog_high_data_usage_title">High data usage Alert</string>
     <string name="dialog_high_data_usage_message">You are about to do something that usually requires a high amount of Internet communication, and we have detected that you don\'t have a WiFi connection, are you sure that you want to continue?</string>
     <string name="dialog_logout_title">Log out</string>
@@ -213,6 +214,7 @@
     <string name="path_chip_safe">Safes amount and type</string>
     <string name="path_chip_ending">Ending type for choosing the descent maneuver to use or top-rope.</string>
     <string name="path_chip_required">The shown component is required</string>
+    <string name="path_chip_info">Info</string>
     <string name="path_fixed_equipment">Path fixed equipment</string>
     <string name="path_required_equipment">Required equipment</string>
     <string name="path_pitch_id">R%s: </string>
