@@ -6,7 +6,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.runners.MockitoJUnitRunner
+import org.mockito.junit.MockitoJUnitRunner
 
 /**
  * Contains the unit tests for checking [Area]-related issues.
@@ -27,10 +27,6 @@ class AreaUnitTests {
         assertEquals(area.documentPath, Area.SAMPLE_AREA_DOC_PATH)
         assertEquals(area.webUrl, Area.SAMPLE_AREA_WEB_URL)
 
-        val uiMetadata = area.uiMetadata
-        assertEquals(uiMetadata.placeholderDrawable, R.drawable.ic_wide_placeholder)
-        assertEquals(uiMetadata.errorPlaceholderDrawable, R.drawable.ic_wide_placeholder)
-
         val metadata = area.metadata
         assertEquals(metadata.objectId, Area.SAMPLE_AREA_OBJECT_ID)
         assertEquals(metadata.namespace, Area.NAMESPACE)
@@ -43,5 +39,7 @@ class AreaUnitTests {
         val displayOptions = area.displayOptions
         assertEquals(displayOptions.columns, 1)
         assertEquals(displayOptions.downloadable, false)
+        assertEquals(displayOptions.placeholderDrawable, R.drawable.ic_wide_placeholder)
+        assertEquals(displayOptions.errorPlaceholderDrawable, R.drawable.ic_wide_placeholder)
     }
 }
