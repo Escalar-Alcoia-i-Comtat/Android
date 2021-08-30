@@ -57,4 +57,13 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="@string/placeholder" />
+
+    <TextView
+        android:id="@+id/reference_textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        android:text="@string/placeholder"
+        android:textSize="12sp" />
 </LinearLayout>

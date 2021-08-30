@@ -30,6 +30,8 @@ class DescriptionDialog private constructor(private val context: Context, privat
         val rebuilderTitleTextView = view.findViewById<TextView>(R.id.rebuiltBy_titleTextView)
         val descriptionTitleTextView = view.findViewById<TextView>(R.id.description_titleTextView)
 
+        val referenceTextView = view.findViewById<TextView>(R.id.reference_textView)
+
         val markwon = Markwon.create(context)
         if (path.builtBy != null)
             markwon.setMarkdown(builderTextView, path.builtBy!!)
@@ -41,6 +43,13 @@ class DescriptionDialog private constructor(private val context: Context, privat
         if (path.description != null)
             markwon.setMarkdown(descriptionTextView, path.description!!)
         else viewListOf(descriptionTextView, descriptionTitleTextView).visibility(false)
+
+        referenceTextView.text =
+            context.getString(R.string.dialog_description_reference, path.documentPath)
+                .replace("Areas/", "")
+                .replace("Zones/", "")
+                .replace("Sectors/", "")
+                .replace("Paths/", "")
 
         dialog.setView(view)
         dialog.show()
