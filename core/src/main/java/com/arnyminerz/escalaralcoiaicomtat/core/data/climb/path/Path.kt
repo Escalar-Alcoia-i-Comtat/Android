@@ -90,7 +90,7 @@ class Path internal constructor(
         ),
         data.getString("description"),
         data.getString("builtBy"),
-        "",
+        "", // This gets initialized later
         documentPath = data.reference.path,
         parentSectorId = data.reference.parent.parent!!.id
     ) {
@@ -108,7 +108,7 @@ class Path internal constructor(
 
         Timber.d("Loading rebuilders...")
         val rebuilders = pathData?.get("rebuiltBy") as List<*>?
-        val d = rebuilders?.joinToString(separator = ", ")
+        val d = rebuilders?.joinToString(separator = ",")
         rebuiltBy = d
     }
 
@@ -146,6 +146,20 @@ class Path internal constructor(
                             ?.let { artifoEnding -> add(artifoEnding) }
                 }
         }
+
+    /**
+     * Returns [rebuiltBy] as a list of strings.
+     * @author Arnau Mora
+     * @since 20210830
+     */
+    val rebuilders: List<String>
+        get() = rebuiltBy?.let {
+            arrayListOf<String>().apply {
+                val rebuilders = it.split(',')
+                for (rebuilder in rebuilders)
+                    add(rebuilder)
+            }
+        } ?: emptyList()
 
     /**
      * Returns the parent [Sector] of the [Path].

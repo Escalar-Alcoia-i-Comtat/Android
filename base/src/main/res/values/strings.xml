@@ -216,6 +216,8 @@
     <string name="path_fixed_equipment">Path fixed equipment</string>
     <string name="path_required_equipment">Required equipment</string>
     <string name="path_pitch_id">R%s: </string>
+    <string name="path_builder">Builder: %s</string>
+    <string name="path_rebuilder">Last rebuilder: %s</string>
 
     <string name="feedback_title">Send feedback</string>
     <string name="feedback_name">Name</string>
