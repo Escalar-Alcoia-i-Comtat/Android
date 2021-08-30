@@ -213,6 +213,7 @@
     <string name="path_chip_safe">Safes amount and type</string>
     <string name="path_chip_ending">Ending type for choosing the descent maneuver to use or top-rope.</string>
     <string name="path_chip_required">The shown component is required</string>
+    <string name="path_chip_info">Info</string>
     <string name="path_fixed_equipment">Path fixed equipment</string>
     <string name="path_required_equipment">Required equipment</string>
     <string name="path_pitch_id">R%s: </string>

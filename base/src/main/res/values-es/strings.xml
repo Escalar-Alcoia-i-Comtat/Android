@@ -287,4 +287,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="image_desc_view_map">Ver en el mapa</string>
     <string name="path_builder">Equipador: %s</string>
     <string name="path_rebuilder">Último reequipador: %s</string>
+    <string name="path_chip_info">Info</string>
 </resources>
