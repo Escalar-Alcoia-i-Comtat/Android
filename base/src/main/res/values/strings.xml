@@ -247,6 +247,7 @@
     <string name="image_desc_area_image">Area image</string>
     <string name="image_desc_fixed_equipment">Fixed Equipment</string>
     <string name="image_desc_download">Download</string>
+    <string name="image_desc_view_map">View in map</string>
     <string name="image_desc_go_back">Go Back</string>
     <string name="image_desc_warning">Warning</string>
     <string name="image_desc_view_more">View More</string>

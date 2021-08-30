@@ -284,4 +284,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="status_finished">Finalizado</string>
     <string name="status_not_running">Detenido</string>
     <string name="status_running">En ejecución</string>
+    <string name="image_desc_view_map">Ver en el mapa</string>
 </resources>
