@@ -73,7 +73,7 @@ dependencies {
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.5.1'
 
     // Android Jetpack
-    def jetpack_work_version = '2.7.0-alpha05'
+    def jetpack_work_version = '2.7.0-beta01'
     api "androidx.work:work-runtime-ktx:$jetpack_work_version"
     api "androidx.work:work-gcm:$jetpack_work_version"
     androidTestApi "androidx.work:work-testing:$jetpack_work_version"
