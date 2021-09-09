@@ -92,9 +92,6 @@
     <string name="notification_block_status_error_store_short">No se han podido guardar los estados de bloqueo.</string>
     <string name="notification_block_status_error_store">No se han podido guardar los estados de bloqueo.<br />Guardados correctamente %1$d elementos.<br />No se han podido guardar %2$d elementos.</string>
     <string name="notification_block_status_error_persist">No se han podido guardar los estados de bloqueo en la memoria.</string>
-    <string name="notification_block_status_error_item">No se ha podido obtener el estado de bloqueo de %s.</string>
-    <string name="notification_block_status_error_server">Ha habido un error del servidor al cargar %s.</string>
-    <string name="notification_block_status_error_fetch">No se han podido obtener los datos del servidor para %s.</string>
     <string name="notification_block_status_error_schema">No se ha podido actualizar el esquema de datos para guardar los estados de bloqueo.</string>
 
     <string name="dialog_gps_disabled_title">GPS deshabilitado</string>
