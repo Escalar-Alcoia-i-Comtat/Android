@@ -111,4 +111,8 @@
     <string name="toast_error_load_image_sector">No s\'ha pogut carregar la imatge de sector: %s</string>
     <string name="toast_error_io_access_denied">Accés denegat</string>
     <string name="toast_error_load_image_compression">No s\'ha pogut comprimir la imatge</string>
+    <string name="action_copy">Copiar al portapapers</string>
+    <string name="notification_block_status_error_count">No s\'ha pogut obtenir l\'estat de bloqueig de %d vies.</string>
+    <string name="notification_block_status_error_count_long">No s\'ha pogut obtenir l\'estat de bloqueig de %d vies. Per favor, escala amb compte, ja que algunes advertències podrien no estar actualitzades.</string>
+    <string name="notification_block_status_error_log">No s\'ha pogut obtenir l\'estat de bloqueig de %d vies.<br />Elements que han fallat:<br />%s</string>
 </resources>
