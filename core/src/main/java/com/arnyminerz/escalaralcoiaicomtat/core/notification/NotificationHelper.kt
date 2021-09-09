@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.arnyminerz.escalaralcoiaicomtat.notification
+package com.arnyminerz.escalaralcoiaicomtat.core.notification
 
 import android.app.PendingIntent
 import android.content.Context
