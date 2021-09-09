@@ -40,53 +40,6 @@ since we have put a lot of hours in the app, we really love that people love our
 
 The simplest way of donating some money is through [Github Sponsors][sponsors]. You can access it
 from the link specified, or through the repository's button.
-
-## Dependencies ##
-### Maven Central ###
-| Package | Installed Version | Latest version |
-|-|-|-|
-| `org.jetbrains.kotlin:kotlin-stdlib-jdk7` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.5.10-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/org.jetbrains.kotlin/kotlin-stdlib-jdk7?style=for-the-badge&label=kotlin-stdlib-jdk7) |
-| `junit:junit` | ![Installed version](https://img.shields.io/badge/Installed%20version-4.13.2-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/junit/junit?style=for-the-badge) |
-| `org.jetbrains.kotlinx:kotlinx-coroutines-core` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.5.0-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx/kotlinx-coroutines-core?style=for-the-badge) |
-| `org.jetbrains.kotlinx:kotlinx-coroutines-android` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.5.0-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx/kotlinx-coroutines-android?style=for-the-badge) |
-| `org.jetbrains.kotlinx:kotlinx-coroutines-play-services` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.5.0-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx/kotlinx-coroutines-play-services?style=for-the-badge) |
-| `com.jakewharton.timber:timber` | ![Installed version](https://img.shields.io/badge/Installed%20version-4.7.1-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/com.jakewharton.timber/timber?style=for-the-badge) |
-| `io.noties.markwon:core` | ![Installed version](https://img.shields.io/badge/Installed%20version-4.6.2-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/maven-central/v/io.noties.markwon/core?style=for-the-badge) |
-### Jitpack
-| Package | Installed Version | Latest version |
-|-|-|-|
-| `com.github.PhilJay:MPAndroidChart` | ![Installed version](https://img.shields.io/badge/Installed%20version-v3.1.0-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/jitpack/v/github/PhilJay/MPAndroidChart?style=for-the-badge) |
-| `com.github.chrisbanes:PhotoView` | ![Installed version](https://img.shields.io/badge/Installed%20version-2.3.0-brightgreen?style=for-the-badge) | ![Last Version](https://img.shields.io/jitpack/v/github/Baseflow/PhotoView?style=for-the-badge) |
-### Google
-| Package | Installed Version |
-|-|-|
-| `androidx.appcompat:appcompat` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.3.0-brightgreen?style=for-the-badge) |
-| `androidx.constraintlayout:constraintlayout` | ![Installed version](https://img.shields.io/badge/Installed%20version-2.0.4-brightgreen?style=for-the-badge) |
-| `androidx.core:core-ktx` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.6.0-brightgreen?style=for-the-badge) |
-| `androidx.preference:preference-ktx` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.1.1-brightgreen?style=for-the-badge) |
-| `androidx.startup:startup-runtime` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.0.0-brightgreen?style=for-the-badge) |
-| `androidx.work:work-gcm` | ![Installed version](https://img.shields.io/badge/Installed%20version-2.7.0--alpha03-brightgreen?style=for-the-badge) |
-| `androidx.work:work-runtime-ktx` | ![Installed version](https://img.shields.io/badge/Installed%20version-2.7.0--alpha03-brightgreen?style=for-the-badge) |
-| `com.google.android.gms:play-services-auth` | ![Installed version](https://img.shields.io/badge/Installed%20version-19.0.0-brightgreen?style=for-the-badge) |
-| `com.google.android.gms:play-services-maps` | ![Installed version](https://img.shields.io/badge/Installed%20version-17.0.1-brightgreen?style=for-the-badge) |
-| `com.google.android.material:material` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.4.0-brightgreen?style=for-the-badge) |
-| `com.google.android.play:core` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.10.0-brightgreen?style=for-the-badge) |
-| `com.google.android.play:core-ktx` | ![Installed version](https://img.shields.io/badge/Installed%20version-1.8.1-brightgreen?style=for-the-badge) |
-| `com.google.firebase:firebase-bom` | ![Installed version](https://img.shields.io/badge/Installed%20version-28.1.0-brightgreen?style=for-the-badge) |
-| `com.google.firebase:firebase-analytics-ktx` | BOM |
-| `com.google.firebase:firebase-auth-ktx` | BOM |
-| `com.google.firebase:firebase-config-ktx` | BOM |
-| `com.google.firebase:firebase-crashlytics-ktx` | BOM |
-| `com.google.firebase:firebase-dynamic-links-ktx` | BOM |
-| `com.google.firebase:firebase-firestore-ktx` | BOM |
-| `com.google.firebase:firebase-messaging-ktx` | BOM |
-| `com.google.firebase:firebase-perf-ktx` | BOM |
-| `com.google.firebase:firebase-storage-ktx` | BOM |
-| `com.google.firebase:firebase-functions-ktx` | BOM |
-| `com.google.firebase:firebase-messaging-directboot-ktx` | ![Installed version](https://img.shields.io/badge/Installed%20version-22.0.0-brightgreen?style=for-the-badge) |
-
-Google Dependencies's last version cannot be displayed because of the inavailability of APIs for badge generation on Google's Maven servers.
-
 ---
 
 [pages]: https://escalar-alcoia-i-comtat.github.io/Android/htmlMultiModule/index.html
