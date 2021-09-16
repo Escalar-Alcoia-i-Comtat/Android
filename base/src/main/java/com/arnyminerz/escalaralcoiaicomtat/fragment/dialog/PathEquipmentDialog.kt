@@ -10,10 +10,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
-import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.DialogPathEquipmentBinding
 import com.arnyminerz.escalaralcoiaicomtat.list.adapter.EquipmentAdapter
-import com.arnyminerz.escalaralcoiaicomtat.list.adapter.EquipmentAdapterType
 import timber.log.Timber
 
 /**
@@ -43,10 +41,9 @@ class PathEquipmentDialog(
         setContentView(view)
 
         Timber.v("Instantiating fixed equipment adapter...")
-        val fixedAdapter = EquipmentAdapter(context, fixedSafesData, EquipmentAdapterType.FIXED)
+        val fixedAdapter = EquipmentAdapter(context, fixedSafesData)
         Timber.v("Instantiating required equipment adapter...")
-        val requiredAdapter =
-            EquipmentAdapter(context, requiredSafesData, EquipmentAdapterType.REQUIRED)
+        val requiredAdapter = EquipmentAdapter(context, requiredSafesData)
 
         Timber.v("Updating path equipment recycler view...")
         binding.pathEquipmentRecyclerView.layoutManager = LinearLayoutManager(context)
