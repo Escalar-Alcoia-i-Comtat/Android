@@ -40,12 +40,7 @@ abstract class SafesData : Parcelable, Iterable<SafeCountData> {
      * @since 20210316
      * @return The total count of safes. If using booleans, it will be the amount of trues
      */
-    fun sum(): Long {
-        var count: Long = 0
-        for (i in this)
-            count += i.count
-        return count
-    }
+    fun sum(): Long = sumOf { it.count }
 
     /**
      * Checks if there's at least one count of safes.
