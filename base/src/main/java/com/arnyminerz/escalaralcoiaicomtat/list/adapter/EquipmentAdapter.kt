@@ -10,9 +10,16 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.*
 import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ListItemFixedEquipmentBinding
+import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.PathEquipmentDialog
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.PathEquipmentViewHolder
 import timber.log.Timber
 
+/**
+ * Provides the [RecyclerView.Adapter] model for the [PathEquipmentDialog].
+ * @author Arnau Mora
+ * @since 20210916
+ * @param D The [SafesData] type of the adapter.
+ */
 class EquipmentAdapter <D: SafesData>
 /**
  * The constructor of the [EquipmentAdapter] class.
@@ -34,22 +41,11 @@ constructor(
             )
         )
 
-    private val showableSafes = arrayListOf<SafeCountData>()
-    override fun getItemCount(): Int {
-        Timber.v("Calculating showable safes")
-        showableSafes.clear()
-        for (safe in safes)
-            if (safe.count > 0) {
-                showableSafes.add(safe)
-                Timber.v("  Added $safe")
-            }
-        Timber.v("There are ${showableSafes.size} showable safes")
-        return showableSafes.size
-    }
+    override fun getItemCount(): Int = safes.sum().toInt()
 
     override fun onBindViewHolder(holder: PathEquipmentViewHolder, position: Int) {
         val binding = holder.binding
-        val safe = showableSafes[position]
+        val safe = safes[position]
 
         if (safe.count > 0 || (safes is RequiredSafesData && (safes.any()))) {
             val color = (safes as? RequiredSafesData)
