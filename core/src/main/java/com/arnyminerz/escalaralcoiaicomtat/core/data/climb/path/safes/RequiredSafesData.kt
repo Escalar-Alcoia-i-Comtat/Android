@@ -4,6 +4,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -26,11 +27,9 @@ data class RequiredSafesData(
     val pitonRequired: Boolean,
     val nailRequired: Boolean
 ) : SafesData() {
-    /**
-     * Converts the [RequiredSafesData] to a JSON-formatted [String].
-     * @author Arnau Mora
-     * @since 20210916
-     */
+    @IgnoredOnParcel
+    override val color: Int = R.color.dialog_blue
+
     override fun toJSONString(): String {
         return "{" +
                 "\"lanyard_required\":\"$lanyardRequired\"," +
@@ -42,11 +41,6 @@ data class RequiredSafesData(
                 "}"
     }
 
-    /**
-     * Returns the class as a [SafeCountData] which can be used for displaying in the UI easily.
-     * @author Arnau Mora
-     * @since 20210916
-     */
     override fun list(): List<SafeCountData> =
         listOf(
             SafeCountData(
