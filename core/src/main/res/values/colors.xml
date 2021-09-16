@@ -9,4 +9,7 @@
     <color name="grade_black">#000</color>
     <color name="grade_yellow">#ffeb3b</color>
     <color name="grade_purple">#7b1fa2</color>
+
+    <color name="dialog_green">#c0ca33</color>
+    <color name="dialog_blue">#039be5</color>
 </resources>
