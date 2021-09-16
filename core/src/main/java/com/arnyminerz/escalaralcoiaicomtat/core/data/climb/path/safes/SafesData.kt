@@ -9,6 +9,13 @@ import android.os.Parcelable
  */
 abstract class SafesData : Parcelable, Iterable<SafeCountData> {
     /**
+     * The color that will be shown on the card's background when displaying the data to the user.
+     * @author Arnau Mora
+     * @since 20210916
+     */
+    abstract val color: Int
+
+    /**
      * @author Arnau Mora
      * @since 20210316
      * @return The amount of parameters there are
