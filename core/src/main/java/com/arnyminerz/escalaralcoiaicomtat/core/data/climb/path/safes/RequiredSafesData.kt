@@ -3,7 +3,21 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes
 import android.os.Parcel
 import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import kotlinx.parcelize.Parcelize
 
+/**
+ * Stores the data for the required safes of a [Path].
+ * @author Arnau Mora
+ * @since 20210916
+ * @param lanyardRequired Sets if it's required to bring lanyards to climb the [Path].
+ * @param crackerRequired Sets if it's required to bring crackers to climb the [Path].
+ * @param friendRequired Sets if it's required to bring friends to climb the [Path].
+ * @param stripsRequired Sets if it's required to bring strips to climb the [Path].
+ * @param pitonRequired Sets if it's required to bring pitons to climb the [Path].
+ * @param nailRequired Sets if it's required to bring nails to climb the [Path].
+ */
+@Parcelize
 data class RequiredSafesData(
     val lanyardRequired: Boolean,
     val crackerRequired: Boolean,
@@ -12,15 +26,11 @@ data class RequiredSafesData(
     val pitonRequired: Boolean,
     val nailRequired: Boolean
 ) : SafesData() {
-    constructor(parcel: Parcel) : this(
-        parcel.readByte() != 0.toByte(),
-        parcel.readByte() != 0.toByte(),
-        parcel.readByte() != 0.toByte(),
-        parcel.readByte() != 0.toByte(),
-        parcel.readByte() != 0.toByte(),
-        parcel.readByte() != 0.toByte()
-    )
-
+    /**
+     * Converts the [RequiredSafesData] to a JSON-formatted [String].
+     * @author Arnau Mora
+     * @since 20210916
+     */
     override fun toJSONString(): String {
         return "{" +
                 "\"lanyard_required\":\"$lanyardRequired\"," +
@@ -32,6 +42,11 @@ data class RequiredSafesData(
                 "}"
     }
 
+    /**
+     * Returns the class as a [SafeCountData] which can be used for displaying in the UI easily.
+     * @author Arnau Mora
+     * @since 20210916
+     */
     override fun list(): List<SafeCountData> =
         listOf(
             SafeCountData(
@@ -66,24 +81,12 @@ data class RequiredSafesData(
             )
         )
 
+    /**
+     * Checks if any of the objects is required to climb the [Path].
+     * @author Arnau Mora
+     * @since 20210916
+     * @return True if any of the attributes of the class is true.
+     */
     fun any(): Boolean = lanyardRequired || crackerRequired || friendRequired || stripsRequired ||
             pitonRequired || nailRequired
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeByte(if (lanyardRequired) 1 else 0)
-        parcel.writeByte(if (crackerRequired) 1 else 0)
-        parcel.writeByte(if (friendRequired) 1 else 0)
-        parcel.writeByte(if (stripsRequired) 1 else 0)
-        parcel.writeByte(if (pitonRequired) 1 else 0)
-        parcel.writeByte(if (nailRequired) 1 else 0)
-    }
-
-    override fun describeContents(): Int = 0
-
-    companion object CREATOR : Parcelable.Creator<RequiredSafesData> {
-        override fun createFromParcel(parcel: Parcel): RequiredSafesData =
-            RequiredSafesData(parcel)
-
-        override fun newArray(size: Int): Array<RequiredSafesData?> = arrayOfNulls(size)
-    }
 }
