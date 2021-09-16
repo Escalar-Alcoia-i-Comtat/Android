@@ -48,7 +48,7 @@
     <string name="sector_info_dialog_sun_all_title">All-day Sun</string>
     <string name="sector_info_dialog_sun_all_msg">This sector is shiny all the day! This may get hot on summer. Please, take care.</string>
     <string name="sector_info_dialog_sun_no_title">No Sun</string>
-    <string name="sector_info_dialog_sun_no_msg">This sector doesn\'t receive run in the whole day! Bring a jacket.</string>
+    <string name="sector_info_dialog_sun_no_msg">This sector doesn\'t receive sun in the whole day! Bring a jacket.</string>
     <string name="sector_info_dialog_kids_title">Kids Apt</string>
     <string name="sector_info_dialog_kids_msg">This sector has good places to sit nearby. Bringing young children may not be that bad, but please, have caution.</string>
 
