@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes
 
 import android.os.Parcelable
+import androidx.annotation.ColorRes
 
 /**
  * Specifies some kind of safes data.
@@ -13,6 +14,7 @@ abstract class SafesData : Parcelable, Iterable<SafeCountData> {
      * @author Arnau Mora
      * @since 20210916
      */
+    @get:ColorRes
     abstract val color: Int
 
     /**
@@ -26,11 +28,12 @@ abstract class SafesData : Parcelable, Iterable<SafeCountData> {
      * Gets the SafeCountData at a index
      * @author Arnau Mora
      * @since 20210316
+     * @return The attribute at [index] of [list].
+     * @see list
      */
     operator fun get(index: Int): SafeCountData = list()[index]
 
-    override fun iterator(): Iterator<SafeCountData> =
-        list().iterator()
+    override fun iterator(): Iterator<SafeCountData> = list().iterator()
 
     /**
      * @author Arnau Mora
@@ -58,7 +61,19 @@ abstract class SafesData : Parcelable, Iterable<SafeCountData> {
         return false
     }
 
+    /**
+     * Returns the class as a [SafeCountData] which can be used for displaying in the UI easily.
+     * @author Arnau Mora
+     * @since 20210916
+     * @return A list of [SafeCountData] for each of the class' attributes.
+     */
     abstract fun list(): List<SafeCountData>
 
+    /**
+     * Converts the class to a JSON-formatted [String].
+     * @author Arnau Mora
+     * @since 20210916
+     * @return The class as a JSON-formatted [String].
+     */
     abstract fun toJSONString(): String
 }
