@@ -9,6 +9,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityFeedbackBinding
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 
@@ -34,6 +35,13 @@ class FeedbackActivity : LanguageAppCompatActivity() {
         // If EXTRA_FEEDBACK is set, update message text
         getExtra(EXTRA_FEEDBACK)?.let { feedback ->
             binding.messageEditText.setText(feedback)
+        }
+
+        // If the user is logged in, initialize the text of the name and email fields
+        val auth = Firebase.auth
+        auth.currentUser?.let { currentUser ->
+            binding.emailEditText.setText(currentUser.email)
+            binding.nameEditText.setText(currentUser.displayName)
         }
 
         binding.messageEditText.addTextChangedListener { clearErrors(binding.messageLayout) }
