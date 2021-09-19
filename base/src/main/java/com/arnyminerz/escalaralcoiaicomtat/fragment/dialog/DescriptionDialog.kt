@@ -3,9 +3,15 @@ package com.arnyminerz.escalaralcoiaicomtat.fragment.dialog
 import android.app.AlertDialog
 import android.content.Context
 import android.view.LayoutInflater
+import android.widget.Button
 import android.widget.TextView
+import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.FeedbackActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_FEEDBACK
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.view.viewListOf
 import io.noties.markwon.Markwon
 
@@ -39,10 +45,17 @@ class DescriptionDialog private constructor(context: Context, path: Path) {
      * @see show
      * @see hide
      */
-    private val dialog: AlertDialog
+    private lateinit var dialog: AlertDialog
+
+    /**
+     * The builder instance for creating the dialog.
+     * @author Arnau Mora
+     * @since 20210919
+     */
+    private val dialogBuilder: AlertDialog.Builder =
+        AlertDialog.Builder(context, R.style.ThemeOverlay_App_AlertDialog)
 
     init {
-        val dialogBuilder = AlertDialog.Builder(context, R.style.ThemeOverlay_App_AlertDialog)
         val factory = LayoutInflater.from(context)
         val view = factory.inflate(R.layout.dialog_description, null)
 
@@ -54,7 +67,7 @@ class DescriptionDialog private constructor(context: Context, path: Path) {
         val rebuilderTitleTextView = view.findViewById<TextView>(R.id.rebuiltBy_titleTextView)
         val descriptionTitleTextView = view.findViewById<TextView>(R.id.description_titleTextView)
 
-        val referenceTextView = view.findViewById<TextView>(R.id.reference_textView)
+        val sendFeedbackButton = view.findViewById<Button>(R.id.sendFeedback_button)
 
         val markwon = Markwon.create(context)
         if (path.builtBy?.ifBlank { null } != null)
@@ -68,15 +81,19 @@ class DescriptionDialog private constructor(context: Context, path: Path) {
             markwon.setMarkdown(descriptionTextView, path.description!!)
         else viewListOf(descriptionTextView, descriptionTitleTextView).visibility(false)
 
-        referenceTextView.text =
-            context.getString(R.string.dialog_description_reference, path.documentPath)
-                .replace("Areas/", "")
-                .replace("Zones/", "")
-                .replace("Sectors/", "")
-                .replace("Paths/", "")
+        sendFeedbackButton.setOnClickListener {
+            val reference =
+                context.getString(R.string.dialog_description_reference, path.documentPath)
+                    .replace("Areas/", "")
+                    .replace("Zones/", "")
+                    .replace("Sectors/", "")
+                    .replace("Paths/", "")
+            context.launch(FeedbackActivity::class.java) {
+                putExtra(EXTRA_FEEDBACK, "\n---\n$reference")
+            }
+        }
 
         dialogBuilder.setView(view)
-        dialog = dialogBuilder.create()
     }
 
     /**
@@ -84,7 +101,10 @@ class DescriptionDialog private constructor(context: Context, path: Path) {
      * @author Arnau Mora
      * @since 20210919
      */
+    @UiThread
     fun show() {
+        if (!this::dialog.isInitialized)
+            dialog = dialogBuilder.create()
         dialog.show()
     }
 
@@ -93,6 +113,7 @@ class DescriptionDialog private constructor(context: Context, path: Path) {
      * @author Arnau Mora
      * @since 20210919
      */
+    @UiThread
     fun hide() {
         dialog.hide()
     }
