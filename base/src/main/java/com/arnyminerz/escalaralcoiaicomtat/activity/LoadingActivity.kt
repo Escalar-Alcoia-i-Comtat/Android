@@ -24,6 +24,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.BlockStatusWorker
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
+import com.google.android.gms.common.ConnectionResult.SUCCESS
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.ktx.crashlytics
@@ -54,6 +56,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         Timber.v("Getting Firebase Storage instance...")
         storage = Firebase.storage
 
+        checkGooglePlayServices()
         dataCollectionSetUp()
         authSetup()
     }
@@ -79,6 +82,22 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
         super.onStateChangeAsync(state)
         load()
+    }
+
+    /**
+     * Checks if the device supports Google Play services, if not, tell the user that this might
+     * affect the experience on the app.
+     * @author Arnau Mora
+     * @since 20210919
+     */
+    @UiThread
+    private fun checkGooglePlayServices() {
+        val googleApiAvailability = GoogleApiAvailability.getInstance()
+        val servicesAvailable = googleApiAvailability.isGooglePlayServicesAvailable(this)
+        if (servicesAvailable != SUCCESS)
+            googleApiAvailability
+                .getErrorDialog(this, servicesAvailable, 0)
+                ?.show()
     }
 
     /**
