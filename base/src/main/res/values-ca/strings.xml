@@ -288,4 +288,10 @@
     <string name="path_rebuilder">Últim reequipador: %s</string>
     <string name="path_chip_info">Info</string>
     <string name="dialog_description_reference">Referència: <br />%s</string>
+    <string name="notification_new_version_waiting_title">Nova versió disponible</string>
+    <string name="notification_new_version_waiting_short">Hi ha una nova versió disponible per a les dades de l\'aplicació.</string>
+    <string name="notification_new_version_waiting_message">Hi ha una nova versió disponible de les dades de l\'aplicació. Descarregarem les dades tant prompte com siga possible. Tot passarà automàticament.</string>
+    <string name="notification_new_version_downloading_title">Descarregant nova versió</string>
+    <string name="notification_new_version_downloading_short">Descarregant una nova versió de les dades de l\'aplicació.</string>
+    <string name="notification_new_version_downloading_message">Descarregant una nova versió de les dades de l\'aplicació. <br />Progrés: %d/%d</string>
 </resources>

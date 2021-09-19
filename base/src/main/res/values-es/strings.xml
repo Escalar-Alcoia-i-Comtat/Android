@@ -289,4 +289,10 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="path_rebuilder">Último reequipador: %s</string>
     <string name="path_chip_info">Info</string>
     <string name="dialog_description_reference">Referencia: <br />%s</string>
+    <string name="notification_new_version_waiting_title">Nueva versión disponible</string>
+    <string name="notification_new_version_waiting_short">Hay una nueva versión disponible para los datos de la aplicación.</string>
+    <string name="notification_new_version_waiting_message">Hay una nueva versión disponible para los datos de la aplicación. Los descargaremos tan pronto como sea posible. Todo pasará automáticamente.</string>
+    <string name="notification_new_version_downloading_title">Descargando nueva versión</string>
+    <string name="notification_new_version_downloading_short">Descargando una nueva versión de los datos de la aplicación.</string>
+    <string name="notification_new_version_downloading_message">Descargando nueva versión de los datos de la aplicación. <br />Progresso %d/%d</string>
 </resources>
