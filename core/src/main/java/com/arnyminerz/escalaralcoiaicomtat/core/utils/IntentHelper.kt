@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.utils
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
@@ -104,7 +105,7 @@ inline fun <reified T> Activity.getExtra(key: DataExtra<T>, default: T): T {
  * @param properties The setter for the properties of the Intent.
  */
 @UiThread
-fun Activity.launch(target: Class<*>, properties: (Intent.() -> Unit)? = null) =
+fun Context.launch(target: Class<*>, properties: (Intent.() -> Unit)? = null) =
     startActivity(Intent(this, target).also {
         properties?.invoke(it)
     })
@@ -119,7 +120,7 @@ fun Activity.launch(target: Class<*>, properties: (Intent.() -> Unit)? = null) =
  * @param properties The setter for the properties of the Intent.
  */
 @UiThread
-fun Activity.launch(target: Class<*>, options: Bundle, properties: (Intent.() -> Unit)? = null) =
+fun Context.launch(target: Class<*>, options: Bundle, properties: (Intent.() -> Unit)? = null) =
     startActivity(Intent(this, target).also {
         properties?.invoke(it)
     }, options)
