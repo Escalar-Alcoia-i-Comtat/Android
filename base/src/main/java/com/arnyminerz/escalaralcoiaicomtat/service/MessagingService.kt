@@ -6,8 +6,10 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.ALERT_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ALERT_PREF
+import com.arnyminerz.escalaralcoiaicomtat.worker.UpdateWorker
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import java.util.*
 
 @SuppressLint("LogNotTimber")
 class MessagingService : FirebaseMessagingService() {
@@ -62,6 +64,8 @@ class MessagingService : FirebaseMessagingService() {
                 when (val type = data["type"]) {
                     MESSAGE_TYPE_UPDATE -> {
                         Log.i(TAG, "There's a new version available.")
+
+                        UpdateWorker.schedule(this, UUID.randomUUID().toString())
                     }
                     else -> Log.w(TAG, "Got invalid hidden notification. Type: $type")
                 }
