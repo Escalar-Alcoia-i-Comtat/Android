@@ -150,7 +150,7 @@
             android:value="true" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_api_key" />
+            android:value="${GOOGLE_AUTH_CLIENT_ID}" />
         <meta-data
             android:name="com.arnyminerz.escalaralcoiaicomtat.core.activity.AreaActivity"
             android:value="com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity" />
@@ -160,6 +160,16 @@
         <meta-data
             android:name="com.arnyminerz.escalaralcoiaicomtat.core.activity.SectorActivity"
             android:value="com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity" />
+        <!-- Firebase Messaging default values -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notifications" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorAccent" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="Alert" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
