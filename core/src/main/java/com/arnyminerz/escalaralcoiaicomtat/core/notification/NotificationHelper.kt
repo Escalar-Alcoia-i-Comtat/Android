@@ -40,6 +40,16 @@ class Notification private constructor(private val builder: Builder) {
         fun get(id: Int): Builder? {
             return builders[id]
         }
+
+        /**
+         * Dismisses the desired notification.
+         * @author Arnau Mora
+         * @since 202100919
+         */
+        fun dismiss(context: Context, id: Int) {
+            NotificationManagerCompat.from(context)
+                .cancel(id)
+        }
     }
 
     /**
@@ -381,7 +391,11 @@ class Notification private constructor(private val builder: Builder) {
          * @param listener What to call when the button is pressed.
          * @return The builder instance.
          */
-        fun addAction(@DrawableRes icon: Int, @StringRes text: Int, listener: Builder.() -> Unit): Builder {
+        fun addAction(
+            @DrawableRes icon: Int,
+            @StringRes text: Int,
+            listener: Builder.() -> Unit
+        ): Builder {
             // Create the receiver for calling the intent
             val brReceiver = object : BroadcastReceiver() {
                 override fun onReceive(receiverContext: Context?, intent: Intent?) {
@@ -483,6 +497,8 @@ class Notification private constructor(private val builder: Builder) {
 
             if (exception != null)
                 throw exception
+
+            builders[id] = this
 
             return Notification(this)
         }
