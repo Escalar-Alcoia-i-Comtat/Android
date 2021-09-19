@@ -32,6 +32,8 @@ import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.ktx.messaging
 import com.google.firebase.perf.ktx.performance
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
@@ -45,6 +47,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
+    private lateinit var messaging: FirebaseMessaging
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,9 +58,13 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         firestore = Firebase.firestore
         Timber.v("Getting Firebase Storage instance...")
         storage = Firebase.storage
+        Timber.v("Getting Firebase Messaging instance...")
+        messaging = Firebase.messaging
 
         checkGooglePlayServices()
         dataCollectionSetUp()
+        messagingTokenGet()
+        messagingSubscribeTest()
         authSetup()
     }
 
@@ -122,6 +129,38 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     }
 
     /**
+     * Fetches the current Firebase Messaging token and logs it.
+     * @author Arnau Mora
+     * @since 20210919
+     */
+    private fun messagingTokenGet() {
+        Timber.v("Getting Firebase Messaging token...")
+        messaging.token
+            .addOnSuccessListener { token ->
+                Timber.i("Firebase messaging token: $token")
+            }
+            .addOnFailureListener { error ->
+                Timber.e(error, "Could not get Firebase Messaging token.")
+            }
+    }
+
+    /**
+     * Subscribes to the testing channel if the app version is compiled in debug mode.
+     * @author Arnau Mora
+     * @since 20210919
+     */
+    private fun messagingSubscribeTest() {
+        if (BuildConfig.DEBUG)
+            messaging.subscribeToTopic("testing")
+                .addOnSuccessListener {
+                    Timber.i("Subscribed to topic \"testing\".")
+                }
+                .addOnFailureListener { error ->
+                    Timber.e(error, "Could not subscribe to testing topic.")
+                }
+    }
+
+    /**
      * Initializes and starts the [BlockStatusWorker] if not already running.
      * @author Arnau Mora
      * @since 20210824
@@ -133,7 +172,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             // It's scheduled, check if we should refresh the schedule
             val incorrectSchedule = BlockStatusWorker.shouldUpdateSchedule(this)
             if (incorrectSchedule) {
-                // Cancel the worker for reescheduling it
+                // Cancel the worker for rescheduling it
                 Timber.v("The worker's schedule is incorrect. Cancelling...")
                 BlockStatusWorker.cancel(this)
             } else {
