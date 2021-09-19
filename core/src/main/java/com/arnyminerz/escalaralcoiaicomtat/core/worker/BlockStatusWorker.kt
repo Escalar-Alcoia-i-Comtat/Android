@@ -1,10 +1,13 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.worker
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.PutDocumentsRequest
 import androidx.appsearch.app.SetSchemaRequest
 import androidx.appsearch.exceptions.AppSearchException
+import androidx.core.app.NotificationManagerCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -21,7 +24,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_FAILED_CHANNEL
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_IN_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
-import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -78,6 +81,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
 
             Timber.v("Extracting block statuses...")
             val blockingStatuses = arrayListOf<BlockingData>()
+            val failedBlockStatus = arrayListOf<String>()
             for ((i, path) in paths.withIndex()) {
                 try {
                     notification = notification.edit()
@@ -95,42 +99,59 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                         BlockingData(path.objectId, blockStatus.idName)
                     )
                 } catch (e: RuntimeException) {
-                    Notification.Builder(applicationContext)
-                        .withChannelId(TASK_FAILED_CHANNEL_ID)
-                        .withIcon(R.drawable.ic_notifications)
-                        .withTitle(R.string.notification_block_status_error_title)
-                        .withText(
-                            applicationContext.getString(
-                                R.string.notification_block_status_error_item,
-                                path.displayName
-                            )
-                        )
-                        .withLongText(
-                            applicationContext.getString(
-                                R.string.notification_block_status_error_server,
-                                path.displayName
-                            )
-                        )
-                        .buildAndShow()
+                    Timber.e(e, "Could not fetch block status of ${path.displayName}")
+                    failedBlockStatus.add(path.displayName)
                 } catch (e: FirebaseFirestoreException) {
-                    Notification.Builder(applicationContext)
-                        .withChannelId(TASK_FAILED_CHANNEL_ID)
-                        .withIcon(R.drawable.ic_notifications)
-                        .withTitle(R.string.notification_block_status_error_title)
-                        .withText(
-                            applicationContext.getString(
-                                R.string.notification_block_status_error_item,
-                                path.displayName
-                            )
-                        )
-                        .withLongText(
-                            applicationContext.getString(
-                                R.string.notification_block_status_error_fetch,
-                                path.displayName
-                            )
-                        )
-                        .buildAndShow()
+                    Timber.e(e, "Could not process block status of ${path.displayName}")
+                    failedBlockStatus.add(path.displayName)
                 }
+            }
+
+            if (failedBlockStatus.isNotEmpty()) {
+                Timber.v("Showing failed block status fetch notification")
+                Notification.Builder(applicationContext)
+                    .withChannelId(TASK_FAILED_CHANNEL_ID)
+                    .withIcon(R.drawable.ic_notifications)
+                    .withTitle(R.string.notification_block_status_error_title)
+                    .withText(
+                        applicationContext.getString(
+                            R.string.notification_block_status_error_count,
+                            failedBlockStatus.size
+                        )
+                    )
+                    .withLongText(
+                        applicationContext.getString(
+                            R.string.notification_block_status_error_count,
+                            failedBlockStatus.size
+                        )
+                    )
+                    .addAction(
+                        R.drawable.content_copy,
+                        R.string.action_copy
+                    ) {
+                        // Generate the items list
+                        val sb = StringBuilder()
+                        for (pathName in failedBlockStatus)
+                            sb.appendLine("- $pathName")
+
+                        // Copy to clipboard
+                        val clipboard =
+                            applicationContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText(
+                            "label",
+                            context.getString(
+                                R.string.notification_block_status_error_log,
+                                failedBlockStatus.size,
+                                sb.toString()
+                            )
+                        )
+                        clipboard.setPrimaryClip(clip)
+
+                        // Hide the notification
+                        NotificationManagerCompat.from(applicationContext)
+                            .cancel(this.id)
+                    }
+                    .buildAndShow()
             }
 
             Timber.v("Building storing notification...")

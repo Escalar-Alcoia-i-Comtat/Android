@@ -3,60 +3,56 @@ package com.arnyminerz.escalaralcoiaicomtat.list.adapter
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.SafeCountData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.SafesData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.*
+import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
+import com.arnyminerz.escalaralcoiaicomtat.databinding.ListItemFixedEquipmentBinding
+import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.PathEquipmentDialog
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.PathEquipmentViewHolder
 import timber.log.Timber
 
-enum class EquipmentAdapterType {
-    FIXED, REQUIRED;
-
-    @ColorRes
-    fun getColor(): Int = when (this) {
-        REQUIRED -> R.color.dialog_blue
-        FIXED -> R.color.dialog_green
-    }
-}
-
-class EquipmentAdapter(
+/**
+ * Provides the [RecyclerView.Adapter] model for the [PathEquipmentDialog].
+ * @author Arnau Mora
+ * @since 20210916
+ * @param D The [SafesData] type of the adapter.
+ */
+class EquipmentAdapter <D: SafesData>
+/**
+ * The constructor of the [EquipmentAdapter] class.
+ * @author Arnau Mora
+ * @since 20210916
+ * @param context The context where the adapter is placed at.
+ * @param safes The [SafesData] that provides the required information to display.
+ */
+constructor(
     private val context: Context,
-    private val safes: SafesData,
-    private val equipmentType: EquipmentAdapterType
+    private val safes: D
 ) : RecyclerView.Adapter<PathEquipmentViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PathEquipmentViewHolder =
         PathEquipmentViewHolder(
-            LayoutInflater.from(context).inflate(
-                R.layout.list_item_fixed_equipment, parent, false
+            ListItemFixedEquipmentBinding.inflate(
+                LayoutInflater.from(context),
+                parent,
+                false
             )
         )
 
-    private val showableSafes = arrayListOf<SafeCountData>()
-    override fun getItemCount(): Int {
-        Timber.v("Calculating showable safes")
-        showableSafes.clear()
-        for (safe in safes)
-            if (safe.count > 0) {
-                showableSafes.add(safe)
-                Timber.v("  Added $safe")
-            }
-        Timber.v("There are ${showableSafes.size} showable safes")
-        return showableSafes.size
-    }
+    override fun getItemCount(): Int = safes.sum().toInt()
 
     override fun onBindViewHolder(holder: PathEquipmentViewHolder, position: Int) {
-        val safe = showableSafes[position]
+        val binding = holder.binding
+        val safe = safes[position]
 
         if (safe.count > 0 || (safes is RequiredSafesData && (safes.any()))) {
-            val color = ContextCompat.getColorStateList(context, equipmentType.getColor())
+            val color = (safes as? RequiredSafesData)
+                ?.let { ContextCompat.getColorStateList(context, safes.color) }
 
-            holder.textView.text =
-                if (equipmentType == EquipmentAdapterType.REQUIRED) context.getString(safe.displayName)
+            binding.fixedEquipmentTextView.text =
+                if (safes is RequiredSafesData) context.getString(safe.displayName)
                 else {
                     var str = context.getString(safe.displayName, safe.count)
                     if (safe.count == 1L)
@@ -64,10 +60,9 @@ class EquipmentAdapter(
                     str
                 }
             if (color != null)
-                holder.cardView.setCardBackgroundColor(color)
-            holder.imageView.setImageResource(safe.image)
-        } else {
-            visibility(holder.layout, false)
-        }
+                binding.fixedEquipmentCardView.setCardBackgroundColor(color)
+            binding.fixedEquipmentImageView.setImageResource(safe.image)
+        } else
+            binding.fixedEquipmentLayout.hide()
     }
 }

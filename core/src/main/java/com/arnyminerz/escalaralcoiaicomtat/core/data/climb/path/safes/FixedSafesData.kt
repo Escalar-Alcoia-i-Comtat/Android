@@ -3,7 +3,23 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes
 import android.os.Parcel
 import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
+/**
+ * Stores the data for the installed safes in a [Path].
+ * @author Arnau Mora
+ * @since 20210916
+ * @param stringCount The amount of strings that are required in the [Path]. This is usually the
+ * sum of the rest of the attributes.
+ * @param paraboltCount The amount of safes that are parabolts on the [Path].
+ * @param spitCount The amount of safes that are spits on the [Path].
+ * @param tensorCount The amount of safes that are tensors on the [Path].
+ * @param pitonCount The amount of safes that are pitons on the [Path].
+ * @param burilCount The amount of safes that are burils on the [Path].
+ */
+@Parcelize
 data class FixedSafesData(
     val stringCount: Long,
     val paraboltCount: Long,
@@ -12,14 +28,8 @@ data class FixedSafesData(
     val pitonCount: Long,
     val burilCount: Long
 ) : SafesData() {
-    constructor(parcel: Parcel) : this(
-        parcel.readLong(),
-        parcel.readLong(),
-        parcel.readLong(),
-        parcel.readLong(),
-        parcel.readLong(),
-        parcel.readLong()
-    )
+    @IgnoredOnParcel
+    override val color: Int = R.color.dialog_green
 
     override fun list(): List<SafeCountData> =
         listOf(
@@ -59,22 +69,5 @@ data class FixedSafesData(
                 "\"piton_count\":\"$pitonCount\"," +
                 "\"buril_count\":\"$burilCount\"" +
                 "}"
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeLong(stringCount)
-        parcel.writeLong(paraboltCount)
-        parcel.writeLong(spitCount)
-        parcel.writeLong(tensorCount)
-        parcel.writeLong(pitonCount)
-        parcel.writeLong(burilCount)
-    }
-
-    override fun describeContents(): Int = 0
-
-    companion object CREATOR : Parcelable.Creator<FixedSafesData> {
-        override fun createFromParcel(parcel: Parcel): FixedSafesData = FixedSafesData(parcel)
-
-        override fun newArray(size: Int): Array<FixedSafesData?> = arrayOfNulls(size)
     }
 }

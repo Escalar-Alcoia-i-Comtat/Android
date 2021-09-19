@@ -15,9 +15,6 @@
 
     <color name="image_card_label_bg">#50000000</color>
 
-    <color name="dialog_green">#c0ca33</color>
-    <color name="dialog_blue">#039be5</color>
-
     <color name="path_description_button_color">#0033FF</color>
     <color name="path_blocked_card_color_light">#FFCDD2</color>
     <color name="path_blocked_card_color_dark">#e57373</color>

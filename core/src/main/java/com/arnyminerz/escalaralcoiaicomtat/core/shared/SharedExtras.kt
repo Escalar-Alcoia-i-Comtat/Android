@@ -10,6 +10,13 @@ val EXTRA_PATH = DataExtra<String>("path")
 val EXTRA_PATH_DOCUMENT = DataExtra<String>("path_document")
 
 /**
+ * Used for passing some initial feedback for the feedback send activity.
+ * @author Arnau Mora
+ * @since 20210919
+ */
+val EXTRA_FEEDBACK = DataExtra<String>("feedback")
+
+/**
  * Serves as an Activity's extra parameter for passing completed paths data.
  * @author Arnau Mora
  * @since 20210821

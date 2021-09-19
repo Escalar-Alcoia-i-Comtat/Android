@@ -92,9 +92,6 @@
     <string name="notification_block_status_error_store_short">No s\'han pogut desar els estats de bloqueig.</string>
     <string name="notification_block_status_error_store">No s\'han pogut desar els estats de bloqueig.<br />Desats correctament %1$d elements.<br />No s\'han pogut desar %2$d elements.</string>
     <string name="notification_block_status_error_persist">No s\'han pogut desar els estats de bloqueig a la memòria.</string>
-    <string name="notification_block_status_error_item">No s\'ha pogut obtenir l\'estat de bloqueig de %s.</string>
-    <string name="notification_block_status_error_server">Ha hagut un error de servidor a l\'obtenir l\'estat de bloqueig de %s.</string>
-    <string name="notification_block_status_error_fetch">No s\'ha pogut obtenir l\'estat de bloqueig de %s.</string>
     <string name="notification_block_status_error_schema">No s\'ha pogut crear l\'esquema d\'emmagatzematge dels estats de bloqueig.</string>
 
     <string name="dialog_gps_disabled_title">GPS deshabilitat</string>
@@ -114,4 +111,9 @@
     <string name="toast_error_load_image_sector">No s\'ha pogut carregar la imatge de sector: %s</string>
     <string name="toast_error_io_access_denied">Accés denegat</string>
     <string name="toast_error_load_image_compression">No s\'ha pogut comprimir la imatge</string>
+    <string name="action_copy">Copiar al portapapers</string>
+    <string name="notification_block_status_error_count">No s\'ha pogut obtenir l\'estat de bloqueig de %d vies.</string>
+    <string name="notification_block_status_error_count_long">No s\'ha pogut obtenir l\'estat de bloqueig de %d vies. Per favor, escala amb compte, ja que algunes advertències podrien no estar actualitzades.</string>
+    <string name="notification_block_status_error_log">No s\'ha pogut obtenir l\'estat de bloqueig de %d vies.<br />Elements que han fallat:<br />%s</string>
+    <string name="action_send_feedback">Enviar comentaris</string>
 </resources>

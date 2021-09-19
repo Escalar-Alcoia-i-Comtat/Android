@@ -51,7 +51,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_STORE_IMAG
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UNKNOWN_NAMESPACE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UPDATE_IMAGE_REF
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.failure
-import com.arnyminerz.escalaralcoiaicomtat.notification.Notification
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore

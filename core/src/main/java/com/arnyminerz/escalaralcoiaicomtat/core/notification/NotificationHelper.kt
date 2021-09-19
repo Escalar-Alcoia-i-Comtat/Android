@@ -1,19 +1,25 @@
 @file:Suppress("unused")
 
-package com.arnyminerz.escalaralcoiaicomtat.notification
+package com.arnyminerz.escalaralcoiaicomtat.core.notification
 
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.collection.arrayMapOf
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.arnyminerz.escalaralcoiaicomtat.core.BuildConfig
+import com.arnyminerz.escalaralcoiaicomtat.core.data.TranslatableString
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.notification.NullChannelIdException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.notification.NullIconException
-import com.arnyminerz.escalaralcoiaicomtat.core.notification.NotificationButton
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import timber.log.Timber
+import java.util.*
+import kotlin.collections.ArrayList
 
 private var notificationIdCounter = 0
 private fun generateNotificationId(): Int = notificationIdCounter++
@@ -338,6 +344,43 @@ class Notification private constructor(private val builder: Builder) {
          */
         fun addAction(button: NotificationButton): Builder {
             actions.add(button)
+            return this
+        }
+
+        /**
+         * Adds a button to the notification.
+         * @author Arnau Mora
+         * @since 20210909
+         * @param icon The icon to display in the button.
+         * @param text The text to display in the button.
+         * @param listener What to call when the button is pressed.
+         * @return The builder instance.
+         */
+        fun addAction(@DrawableRes icon: Int, @StringRes text: Int, listener: Builder.() -> Unit): Builder {
+            // Create the receiver for calling the intent
+            val brReceiver = object : BroadcastReceiver() {
+                override fun onReceive(receiverContext: Context?, intent: Intent?) {
+                    listener(this@Builder)
+                }
+            }
+            // Register the receiver with a name
+            val actionName = "${BuildConfig.LIBRARY_PACKAGE_NAME}.${UUID.randomUUID()}"
+            val intentFilter = IntentFilter(actionName)
+            context.registerReceiver(brReceiver, intentFilter)
+
+            // Create the pending intent
+            val intent = Intent(actionName)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
+            )
+
+            // Add the action
+            val button = NotificationButton(icon, TranslatableString(context, text), pendingIntent)
+            actions.add(button)
+
             return this
         }
 

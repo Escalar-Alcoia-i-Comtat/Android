@@ -4,6 +4,8 @@
     <string name="action_open_maps">Open Google Maps</string>
     <string name="action_close">Close</string>
     <string name="action_enable_location">Enable Location</string>
+    <string name="action_copy">Copy to clipboard</string>
+    <string name="action_send_feedback">Send feedback</string>
 
     <string name="path_ending_plate">Plate</string>
     <string name="path_ending_plate_ring">Plate Ring</string>
@@ -47,7 +49,7 @@
     <string name="sector_info_dialog_sun_all_title">All-day Sun</string>
     <string name="sector_info_dialog_sun_all_msg">This sector is shiny all the day! This may get hot on summer. Please, take care.</string>
     <string name="sector_info_dialog_sun_no_title">No Sun</string>
-    <string name="sector_info_dialog_sun_no_msg">This sector doesn\'t receive run in the whole day! Bring a jacket.</string>
+    <string name="sector_info_dialog_sun_no_msg">This sector doesn\'t receive sun in the whole day! Bring a jacket.</string>
     <string name="sector_info_dialog_kids_title">Kids Apt</string>
     <string name="sector_info_dialog_kids_msg">This sector has good places to sit nearby. Bringing young children may not be that bad, but please, have caution.</string>
 
@@ -95,10 +97,10 @@
     <string name="notification_block_status_error_store_short">Could not store block statuses.</string>
     <string name="notification_block_status_error_store">Could not store block statuses.<br />Stored correctly %1$d items.<br />Could not store %2$d items.</string>
     <string name="notification_block_status_error_persist">Could not write block statuses to disk.</string>
-    <string name="notification_block_status_error_item">Could not get block status of %s.</string>
-    <string name="notification_block_status_error_server">There was a server-side issue while loading %s.</string>
-    <string name="notification_block_status_error_fetch">Could not fetch data from the server for %s.</string>
     <string name="notification_block_status_error_schema">Could not update schema for storing block statuses.</string>
+    <string name="notification_block_status_error_count">Could not get block status of %d paths.</string>
+    <string name="notification_block_status_error_count_long">Could not get block status of %d paths. Please, be cautious while climbing since some warnings may not be updated.</string>
+    <string name="notification_block_status_error_log">Could not fetch %d paths\' block status from server.<br />Failed elements:<br />%s</string>
 
     <string name="dialog_gps_disabled_title">GPS disabled</string>
     <string name="dialog_gps_disabled_message">You have the device\'s location provider turned off.</string>
