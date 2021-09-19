@@ -98,7 +98,11 @@ class Path internal constructor(
 
         Timber.d("Loading heights for Path $objectId")
         val heights = pathData?.get("height") as List<*>?
-        heights?.forEach { this.heights.add(it.toString().toLong()) } ?: Timber.w("Heights is null")
+        heights?.forEach { height ->
+            height.toString().toLongOrNull()?.let {
+                this.heights.add(it)
+            }
+        } ?: Timber.w("Heights is null")
 
         Timber.d("Loading endings for Path $objectId")
         val endingsList = pathData?.get("ending") as List<*>?
