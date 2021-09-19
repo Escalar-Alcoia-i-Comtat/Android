@@ -115,4 +115,5 @@
     <string name="notification_block_status_error_count">No s\'ha pogut obtenir l\'estat de bloqueig de %d vies.</string>
     <string name="notification_block_status_error_count_long">No s\'ha pogut obtenir l\'estat de bloqueig de %d vies. Per favor, escala amb compte, ja que algunes advertències podrien no estar actualitzades.</string>
     <string name="notification_block_status_error_log">No s\'ha pogut obtenir l\'estat de bloqueig de %d vies.<br />Elements que han fallat:<br />%s</string>
+    <string name="action_send_feedback">Enviar comentaris</string>
 </resources>
