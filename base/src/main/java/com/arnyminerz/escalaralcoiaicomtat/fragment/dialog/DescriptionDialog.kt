@@ -9,16 +9,40 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.view.viewListOf
 import io.noties.markwon.Markwon
 
-class DescriptionDialog private constructor(private val context: Context, private val path: Path) {
+/**
+ * The dialog for displaying extra path info to the user.
+ * @author Arnau Mora
+ * @since 20210919
+ */
+class DescriptionDialog private constructor(context: Context, path: Path) {
     companion object {
+        /**
+         * Creates a new [DescriptionDialog] instance based on a [Path].
+         * @author Arnau Mora
+         * @since 20210919
+         * @param context The context that is requesting the dialog creation.
+         * @param path The path that contains the data to display.
+         * @return A new [DescriptionDialog] instance if [path] has information ([Path.hasInfo]) is
+         * true, or null otherwise.
+         */
         fun create(context: Context, path: Path): DescriptionDialog? =
             if (path.hasInfo())
                 DescriptionDialog(context, path)
             else null
     }
 
-    fun show() {
-        val dialog = AlertDialog.Builder(context, R.style.ThemeOverlay_App_AlertDialog)
+    /**
+     * This will get initialized together with [show], and can be used for dismissing the dialog if
+     * necessary.
+     * @author Arnau Mora
+     * @since 20210919
+     * @see show
+     * @see hide
+     */
+    private val dialog: AlertDialog
+
+    init {
+        val dialogBuilder = AlertDialog.Builder(context, R.style.ThemeOverlay_App_AlertDialog)
         val factory = LayoutInflater.from(context)
         val view = factory.inflate(R.layout.dialog_description, null)
 
@@ -51,7 +75,25 @@ class DescriptionDialog private constructor(private val context: Context, privat
                 .replace("Sectors/", "")
                 .replace("Paths/", "")
 
-        dialog.setView(view)
+        dialogBuilder.setView(view)
+        dialog = dialogBuilder.create()
+    }
+
+    /**
+     * Shows the dialog to the user.
+     * @author Arnau Mora
+     * @since 20210919
+     */
+    fun show() {
         dialog.show()
+    }
+
+    /**
+     * Hides the dialog to the user.
+     * @author Arnau Mora
+     * @since 20210919
+     */
+    fun hide() {
+        dialog.hide()
     }
 }
