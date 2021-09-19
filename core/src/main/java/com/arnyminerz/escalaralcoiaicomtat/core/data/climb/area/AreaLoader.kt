@@ -20,6 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.data
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_SCHEMAS
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.firestore.FirebaseFirestore
@@ -43,7 +44,7 @@ import timber.log.Timber
 @WorkerThread
 suspend fun FirebaseFirestore.loadAreas(
     application: App,
-    @UiThread progressCallback: ((current: Int, total: Int) -> Unit)? = null
+    @UiThread progressCallback: ((progress: ValueMax<Int>) -> Unit)? = null
 ): List<Area> {
     val indexedSearch = PREF_INDEXED_SEARCH.get()
     if (indexedSearch) {
@@ -130,7 +131,7 @@ suspend fun FirebaseFirestore.loadAreas(
         // This is what takes the most of the time, more than 7 seconds.
         val sectorIdPathDocument = arrayMapOf<String, ArrayList<Path>>()
         // Notify 0 progress, 0 max, for telling the UI that paths are being processed
-        uiContext { progressCallback?.invoke(0, 0) }
+        uiContext { progressCallback?.invoke(ValueMax(0, 0)) }
         for (pathDocument in pathDocuments) {
             val pathId = pathDocument.id
             Timber.v("P/$pathId > Processing path...")
@@ -146,7 +147,7 @@ suspend fun FirebaseFirestore.loadAreas(
 
         Timber.v("Iterating $sectorsCount sector documents...")
         for ((i, sectorDocument) in sectorDocuments.withIndex()) {
-            uiContext { progressCallback?.invoke(++progressCounter, progressMax) }
+            uiContext { progressCallback?.invoke(ValueMax(++progressCounter, progressMax)) }
 
             val sectorId = sectorDocument.id
             Timber.v("S/$sectorId > Getting sector's reference...")
@@ -159,7 +160,7 @@ suspend fun FirebaseFirestore.loadAreas(
             Timber.v("S/$sectorId > Getting sector's parent zone's id.")
             val zoneId = sectorParentZone.id
             if (!zonesCache.containsKey(zoneId)) {
-                uiContext { progressCallback?.invoke(++progressCounter, progressMax) }
+                uiContext { progressCallback?.invoke(ValueMax(++progressCounter, progressMax)) }
                 Timber.v("S/$sectorId > There's no cached version for Z/$zoneId.")
                 val zoneDocument = zoneDocuments.find { it.id == zoneId }
                 if (zoneDocument == null) {
@@ -207,7 +208,7 @@ suspend fun FirebaseFirestore.loadAreas(
             Timber.v("Z/$zoneId > Getting Zone's parent Area id...")
             val zoneParentAreaId = zoneParentAreaReference.id
             if (!areasCache.containsKey(zoneParentAreaId)) {
-                uiContext { progressCallback?.invoke(++progressCounter, progressMax) }
+                uiContext { progressCallback?.invoke(ValueMax(++progressCounter, progressMax)) }
                 Timber.v("Z/$zoneId > Could not find A/$zoneParentAreaId in cache...")
                 val areaDocument = areaDocuments.find { it.id == zoneParentAreaId }
                 if (areaDocument == null) {

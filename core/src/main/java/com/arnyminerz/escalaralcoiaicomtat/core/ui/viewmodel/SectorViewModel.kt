@@ -40,9 +40,11 @@ class SectorViewModel(
         val areas = app.getAreas()
         if (areas.isEmpty()) {
             val application = (context as? Activity)?.application ?: context as Application
-            firestore.loadAreas(application as App, progressCallback = { current, total ->
+            firestore.loadAreas(application as App) { progress ->
+                val current = progress.value
+                val total = progress.max
                 Timber.i("Loading areas: $current/$total")
-            })
+            }
         }
         emit(getInnerSector())
     }
