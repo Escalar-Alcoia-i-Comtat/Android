@@ -110,3 +110,4 @@ jobs:
           inAppUpdatePriority: 2
 #          mappingFile: ./base/build/outputs/mapping/release/mapping.txt
           whatsNewDirectory: ./changelog
+          status: completed
