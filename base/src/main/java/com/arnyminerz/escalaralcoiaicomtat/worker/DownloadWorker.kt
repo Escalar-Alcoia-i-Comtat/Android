@@ -17,11 +17,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_C
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.*
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.failure
 import com.google.android.material.badge.ExperimentalBadgeUtils
@@ -33,6 +33,9 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.io.File
@@ -73,6 +76,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @param imageFile The [File] instance referencing where the object's image should be stored at.
      * @param objectId The id of the object to download.
      * @param scale The scale with which to download the object.
+     * @param progressListener A listener for observing the download progress.
      * @see ERROR_ALREADY_DOWNLOADED
      * @see ERROR_DELETE_OLD
      * @see ERROR_CREATE_PARENT
@@ -80,12 +84,13 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @see ERROR_FETCH_IMAGE
      * @see ERROR_STORE_IMAGE
      */
-    private suspend fun downloadImageFile(
+    private suspend fun CoroutineScope.downloadImageFile(
         imageReferenceUrl: String,
         imageFile: File,
         objectId: String,
-        scale: Float
-    ): Result {
+        scale: Float,
+        progressListener: suspend (progress: ValueMax<Long>) -> Unit
+    ): Result = coroutineScope {
         val dataDir = imageFile.parentFile!!
 
         var error: Result? = null
@@ -96,7 +101,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         if (!dataDir.exists() && !dataDir.mkdirs())
             error = failure(ERROR_CREATE_PARENT)
         if (error != null)
-            return error
+            return@coroutineScope error
 
         val n = namespace[0] // The key for logs
         val pin = "$n/$objectId" // This is for identifying progress logs
@@ -149,6 +154,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 val snapshot = reference.stream
                     .addOnProgressListener { snapshot ->
                         val progress = ValueMax(snapshot.bytesTransferred, snapshot.totalByteCount)
+                        CoroutineScope(coroutineContext).launch { progressListener(progress) }
                         Timber.v("$pin > Image progress: ${progress.percentage}")
                     }
                     .await()
@@ -171,22 +177,22 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     if (compressed)
                         Timber.v("$pin > Bitmap compressed successfully.")
                     else
-                        return failure(ERROR_COMPRESS_IMAGE)
+                        return@coroutineScope failure(ERROR_COMPRESS_IMAGE)
                 } else
-                    return failure(ERROR_FETCH_IMAGE)
+                    return@coroutineScope failure(ERROR_FETCH_IMAGE)
             }
         } catch (e: StorageException) {
             Timber.w(e, "Could not get image")
-            return failure(ERROR_FETCH_IMAGE)
+            return@coroutineScope failure(ERROR_FETCH_IMAGE)
         } catch (e: IOException) {
             Timber.e(e, "Could not copy image file")
-            return failure(ERROR_STORE_IMAGE)
+            return@coroutineScope failure(ERROR_STORE_IMAGE)
         }
 
         if (!imageFile.exists())
-            return failure(ERROR_STORE_IMAGE)
+            return@coroutineScope failure(ERROR_STORE_IMAGE)
 
-        return Result.success()
+        return@coroutineScope Result.success()
     }
 
     /**
@@ -196,6 +202,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @since 20210822
      * @see ERROR_UPDATE_IMAGE_REF
      */
+    @Deprecated("Should not be used anymore, all the references have been fixed.")
     private suspend fun fixImageReferenceUrl(
         image: String,
         firestore: FirebaseFirestore,
@@ -236,7 +243,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @see ERROR_COMPRESS_IMAGE
      * @see ERROR_FETCH_IMAGE
      */
-    private suspend fun downloadZone(firestore: FirebaseFirestore, path: String): Result {
+    /*private suspend fun downloadZone(firestore: FirebaseFirestore, path: String): Result =
+        coroutineScope {
         Timber.d("Downloading Zone $path...")
         val document = try {
             Timber.v("Getting document...")
@@ -291,7 +299,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             downloadSector(firestore, sector.metadata.documentPath, ValueMax(s, total))
 
         return Result.success()
-    }
+    }*/
 
     /**
      * Downloads the data of a [Sector] for using it offline.
@@ -308,7 +316,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @see ERROR_COMPRESS_IMAGE
      * @see ERROR_FETCH_IMAGE
      */
-    private suspend fun downloadSector(
+    /*private suspend fun downloadSector(
         firestore: FirebaseFirestore,
         path: String,
         progress: ValueMax<Int>?
@@ -358,6 +366,53 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         }
 
         return Result.success()
+    }*/
+
+    /**
+     * Fetches the data from [FirebaseFirestore] at the specified [path]. And downloads the image
+     * file.
+     * @author Arnau Mora
+     * @since 20210926
+     * @param firestore The [FirebaseFirestore] instance to fetch the data from.
+     * @param path The path where the data is stored at.
+     * @throws FirebaseFirestoreException If there happens an exception while fetching the data
+     * from the server.
+     * @throws RuntimeException When there is an unexpected type exception in the data from the server.
+     * @throws IllegalStateException If the document at [path] doesn't contain a required field.
+     */
+    @Throws(FirebaseFirestoreException::class)
+    private suspend fun downloadData(
+        firestore: FirebaseFirestore,
+        path: String,
+        progressListener: suspend (progress: ValueMax<Long>) -> Unit
+    ) = coroutineScope {
+        progressListener(ValueMax(0, -1)) // Set to -1 for indeterminate
+
+        Timber.v("Getting document ($path)...")
+        val document = firestore.document(path).get().await()
+
+        Timber.v("Processing namespace...")
+        val namespace = document.reference.parent.id.let { collectionName ->
+            collectionName.substring(0, collectionName.length - 1)
+        }
+
+        Timber.v("Getting fields...")
+        val objectId = document.id
+        val imageReferenceUrl = document.getString("image") ?: run {
+            Timber.w("Object at \"$path\" doesn't have an image field.")
+            throw IllegalStateException("Object at \"$path\" doesn't have an image field.")
+        }
+
+        val imageFileName = DataClass.imageName(namespace, objectId, null)
+        val imageFile = File(dataDir(applicationContext), imageFileName)
+        // If the download is Zone, store the image in lower res, if it's Sector, download HD
+        val isPreview = namespace == Zone.NAMESPACE
+        val scale = if (isPreview) DATACLASS_PREVIEW_SCALE else 1f
+
+        Timber.v("Downloading image file...")
+        downloadImageFile(imageReferenceUrl, imageFile, objectId, scale, progressListener)
+
+        // TODO: KMZ downloading
     }
 
     override suspend fun doWork(): Result {
@@ -403,6 +458,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             Timber.v("Getting Firestore instance...")
             val firestore = Firebase.firestore
 
+            // TODO: Use downloadData
             var downloadResult = when (namespace) {
                 Zone.NAMESPACE -> {
                     Timber.d("Downloading Zone...")
