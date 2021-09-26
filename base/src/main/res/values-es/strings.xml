@@ -302,4 +302,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="notification_new_version_cache_clear_message">Eliminando los archivos de imagen obsoletos… <br />Progreso: %d/%d</string>
     <string name="notification_new_version_referencing_message">Obteniendo los archivos de imagen del servidor… <br />Progreso: %d/%d</string>
     <string name="notification_new_version_downloading_images_message">Descargando las imágenes del servidor… <br />Imagen: %d/%d. Progreso: %d\%</string>
+    <string name="notification_new_version_image_check_message">Comprobando actualizaciones de las imágenes… <br />Progreso: %d/%d</string>
 </resources>

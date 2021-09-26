@@ -301,4 +301,5 @@
     <string name="notification_new_version_cache_clear_message">Eliminant els arxius d\'imatge obsolets… <br />Progrés: %d/%d</string>
     <string name="notification_new_version_referencing_message">Buscando los archivos de image… <br />Progreso: %d/%d</string>
     <string name="notification_new_version_downloading_images_message">Baixant les imatges del servidor… <br />Imatge: %d/%d. Progrés: %d\%</string>
+    <string name="notification_new_version_image_check_message">Comprovant actualitzacions de les imatges… <br />Progrés: %d/%d</string>
 </resources>

@@ -181,6 +181,7 @@
     <string name="notification_new_version_image_files_message">Searching for image files… <br />Progress: %d/%d</string>
     <string name="notification_new_version_cache_clear_message">Removing obsolete image files… <br />Progress: %d/%d</string>
     <string name="notification_new_version_referencing_message">Fetching files from the server… <br />Progress: %d/%d</string>
+    <string name="notification_new_version_image_check_message">Checking for updates on the images… <br />Progress: %d/%d</string>
     <string name="notification_new_version_downloading_images_message">Downloading images from server… <br />Image: %d/%d. Progress: %d\%</string>
 
     <string name="no_internet_title">You have no Internet access</string>
