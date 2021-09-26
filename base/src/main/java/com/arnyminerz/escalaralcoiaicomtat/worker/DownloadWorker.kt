@@ -239,6 +239,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @param firestore The [FirebaseFirestore] instance to fetch the data from.
      * @param storage The [FirebaseStorage] instance to fetch files from the server.
      * @param path The path where the data is stored at.
+     * @param progressListener A callback function for observing the download progress.
      * @throws FirebaseFirestoreException If there happens an exception while fetching the data
      * from the server.
      * @throws RuntimeException When there is an unexpected type exception in the data from the server.
@@ -249,7 +250,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         firestore: FirebaseFirestore,
         storage: FirebaseStorage,
         path: String,
-        progressListener: suspend (progress: ValueMax<Long>) -> Unit
+        progressListener: suspend (progress: ValueMax<Long>) -> Unit,
+        iterateChildren: Boolean = true
     ) = coroutineScope {
         progressListener(ValueMax(0, -1)) // Set to -1 for indeterminate
 
@@ -282,6 +284,17 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             val kmzFileName = "${namespace}_$objectId"
             val kmzFile = File(dataDir(applicationContext), kmzFileName)
             downloadKmz(storage, kmzReferenceUrl, kmzFile, progressListener)
+        }
+
+        // Zones have children
+        if (iterateChildren && namespace == Zone.NAMESPACE) {
+            val sectorsCollection = document.reference.collection("Sectors")
+            val collectionsReference = sectorsCollection.get().await()
+            val documents = collectionsReference.documents
+            for (sectorDocument in documents) {
+                val documentPath: String = sectorDocument.reference.path
+                downloadData(firestore, storage, documentPath, progressListener, false)
+            }
         }
     }
 
@@ -328,17 +341,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             Timber.v("Getting Firestore instance...")
             val firestore = Firebase.firestore
 
-            // TODO: Use downloadData
-            var downloadResult = when (namespace) {
-                Zone.NAMESPACE -> {
-                    Timber.d("Downloading Zone...")
-                    downloadZone(firestore, downloadPath!!)
-                }
-                Sector.NAMESPACE -> {
-                    Timber.d("Downloading Sector...")
-                    downloadSector(firestore, downloadPath!!, null)
-                }
-                else -> failure(ERROR_UNKNOWN_NAMESPACE)
+            downloadData(firestore, storage, downloadPath!!) {
+
             }
 
             Timber.v("Finished downloading $displayName. Result: $downloadResult")
