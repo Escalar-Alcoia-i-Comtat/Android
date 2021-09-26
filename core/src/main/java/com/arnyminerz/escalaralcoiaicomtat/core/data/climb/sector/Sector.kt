@@ -93,7 +93,7 @@ class Sector internal constructor(
     )
 
     @IgnoredOnParcel
-    override val imageQuality: Int = 100
+    override val imageQuality: Int = IMAGE_QUALITY
 
     /**
      * Sets the content for the chip as a kids apt chip.
@@ -192,5 +192,7 @@ class Sector internal constructor(
 
     companion object {
         const val NAMESPACE = "Sector"
+
+        const val IMAGE_QUALITY = 100
     }
 }

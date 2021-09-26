@@ -71,10 +71,12 @@ class Zone internal constructor(
     )
 
     @IgnoredOnParcel
-    override val imageQuality: Int = 65
+    override val imageQuality: Int = IMAGE_QUALITY
 
     companion object {
         const val NAMESPACE = "Zone"
+
+        const val IMAGE_QUALITY = 65
 
         val SAMPLE_ZONE = Zone(
             objectId = "LtYZWlzTPwqHsWbYIDTt",
