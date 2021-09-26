@@ -11,6 +11,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MOBILE_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ROAMING_DOWNLOAD_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.google.common.util.concurrent.ListenableFuture
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
@@ -37,6 +39,14 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         // Get the worker data
         val notificationId = inputData.getInt(WORKER_PARAMETER_NOTIFICATION_ID, -1)
 
+        setProgress(
+            workDataOf(
+                PROGRESS_KEY_STEP to PROGRESS_STEP_PRE,
+                PROGRESS_KEY_VALUE to 0,
+                PROGRESS_KEY_INFO_NOTIFICATION to notificationId
+            )
+        )
+
         // Remove already indexed value so data will be fetched again.
         PREF_INDEXED_SEARCH.put(false)
 
@@ -53,6 +63,14 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         // Dismiss the old content
         Notification.dismiss(applicationContext, notificationId)
 
+        setProgress(
+            workDataOf(
+                PROGRESS_KEY_STEP to PROGRESS_STEP_PRE,
+                PROGRESS_KEY_VALUE to 100,
+                PROGRESS_KEY_INFO_NOTIFICATION to notificationId
+            )
+        )
+
         notificationBuilder = notificationBuilder
             .withId(Random.nextInt())
             .withTitle(R.string.notification_new_version_downloading_title)
@@ -65,10 +83,28 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             )
         var noti = notificationBuilder.buildAndShow()
 
+        setProgress(
+            workDataOf(
+                PROGRESS_KEY_STEP to PROGRESS_STEP_DATA_DOWNLOAD,
+                PROGRESS_KEY_VALUE to 0,
+                PROGRESS_KEY_INFO_NOTIFICATION to notificationId
+            )
+        )
+
         // Load areas
         Timber.d("Downloading areas...")
         firestore.loadAreas(app) { progress ->
             Timber.v("Areas load progress: ${progress.percentage}")
+
+            doAsync {
+                setProgress(
+                    workDataOf(
+                        PROGRESS_KEY_STEP to PROGRESS_STEP_DATA_DOWNLOAD,
+                        PROGRESS_KEY_VALUE to progress.percentage,
+                        PROGRESS_KEY_INFO_NOTIFICATION to notificationId
+                    )
+                )
+            }
 
             // Hide and destroy the notification
             noti.destroy()
@@ -86,8 +122,17 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         }
         noti.destroy()
 
+        setProgress(
+            workDataOf(
+                PROGRESS_KEY_STEP to PROGRESS_STEP_DATA_DOWNLOAD,
+                PROGRESS_KEY_VALUE to 100,
+                PROGRESS_KEY_INFO_NOTIFICATION to notificationId
+            )
+        )
+
         // TODO: Update downloads
 
+        Timber.v("Finished updating data.")
         return Result.success()
     }
 
@@ -101,6 +146,42 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         private const val WORKER_PARAMETER_NOTIFICATION_ID = "NotificationId"
 
         /**
+         * The key of the progress work data for the progress value.
+         * @author Arnau Mora
+         * @since 20210926
+         */
+        const val PROGRESS_KEY_VALUE = "Progress"
+
+        /**
+         * The key of the step in which the worker is at for the progress work data.
+         * @author Arnau Mora
+         * @since 20210926
+         */
+        const val PROGRESS_KEY_STEP = "ProgressStep"
+
+        /**
+         * The info key for the progress work data that contains the id of the notification that
+         * is being displayed.
+         * @author Arnau Mora
+         * @since 20210926
+         */
+        const val PROGRESS_KEY_INFO_NOTIFICATION = "NotificationId"
+
+        /**
+         * The name of the first update step, before it starts downloading anything.
+         * @author Arnau Mora
+         * @since 20210926
+         */
+        const val PROGRESS_STEP_PRE = "PreLoad"
+
+        /**
+         * The name of the data download step.
+         * @author Arnau Mora
+         * @since 20210926
+         */
+        const val PROGRESS_STEP_DATA_DOWNLOAD = "DataDownload"
+
+        /**
          * Gets the [LiveData] with a list of [WorkInfo] matching all the jobs that are updating the
          * app's data.
          * @author Arnau Mora
@@ -109,13 +190,13 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
          * @return A [LiveData] with a [List] of the app update data jobs. It should be empty or
          * length 1.
          */
-        fun getWorkInfo(context: Context): LiveData<List<WorkInfo>> {
+        fun getWorkInfo(context: Context): ListenableFuture<MutableList<WorkInfo>> {
             Timber.v("Getting WorkManager instance...")
             val workManager = WorkManager
                 .getInstance(context)
 
             Timber.v("Getting work info...")
-            return workManager.getWorkInfosByTagLiveData(UPDATE_WORKER_TAG)
+            return workManager.getWorkInfosByTag(UPDATE_WORKER_TAG)
         }
 
         /**
