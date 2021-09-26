@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.utils
 
 import androidx.annotation.FloatRange
+import com.google.firebase.storage.StreamDownloadTask
 
 data class ValueMax<T : Number>
 /**
@@ -33,3 +34,11 @@ constructor(val value: T, val max: T) {
     @FloatRange(from = 0.0, to = 1.0, fromInclusive = true, toInclusive = true)
     val toFloat: Float = (value.toDouble() / max.toDouble()).toFloat()
 }
+
+/**
+ * Gets a [ValueMax] instance from the current progress of the task.
+ * @author Arnau Mora
+ * @since 20210926
+ */
+fun StreamDownloadTask.TaskSnapshot.progress(): ValueMax<Long> =
+    ValueMax(bytesTransferred, totalByteCount)
