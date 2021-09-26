@@ -17,9 +17,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.data
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.data
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_SCHEMAS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
@@ -30,6 +28,8 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Loads all the areas available in the server.
@@ -263,6 +263,13 @@ suspend fun FirebaseFirestore.loadAreas(
 
         Timber.v("Search > Storing to preferences...")
         PREF_INDEXED_SEARCH.put(true)
+
+        Timber.v("Storing version and update date...")
+        val calendar = Calendar.getInstance()
+        val now = calendar.time
+        val versionDateFormatting = SimpleDateFormat("yyyyMMddHHmm", Locale.getDefault())
+        PREF_DATA_VERSION.put(versionDateFormatting.format(now))
+        PREF_DATA_DATE.put(now.time)
 
         trace.stop()
 
