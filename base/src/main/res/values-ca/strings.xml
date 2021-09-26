@@ -288,4 +288,18 @@
     <string name="path_rebuilder">Últim reequipador: %s</string>
     <string name="path_chip_info">Info</string>
     <string name="dialog_description_reference">Referència: <br />%s</string>
+    <string name="notification_new_version_waiting_title">Nova versió disponible</string>
+    <string name="notification_new_version_waiting_short">Hi ha una nova versió disponible per a les dades de l\'aplicació.</string>
+    <string name="notification_new_version_waiting_message">Hi ha una nova versió disponible de les dades de l\'aplicació. Descarregarem les dades tant prompte com siga possible. Tot passarà automàticament.</string>
+    <string name="notification_new_version_downloading_title">Descarregant nova versió</string>
+    <string name="notification_new_version_downloading_short">Descarregant una nova versió de les dades de l\'aplicació.</string>
+    <string name="notification_new_version_downloading_message">Descarregant una nova versió de les dades de l\'aplicació. <br />Progrés: %d/%d</string>
+    <string name="pref_gene_download_data_title">Actualitza les dades del dispositiu</string>
+    <string name="pref_gene_download_data_sum">Açò tornarà a descarregar totes les dades del servidor, per a assegurar-se que estan actualitzades. Tingues en compte que açò pot utilitzar moltes dades si es troba en una xarxa d\'ús mesurat.</string>
+    <string name="pref_info_data_version_title">Versió de les dades</string>
+    <string name="notification_new_version_image_files_message">Cercant els fitxers d\'image… <br />Progrés: %d/%d</string>
+    <string name="notification_new_version_cache_clear_message">Eliminant els arxius d\'imatge obsolets… <br />Progrés: %d/%d</string>
+    <string name="notification_new_version_referencing_message">Buscando los archivos de image… <br />Progreso: %d/%d</string>
+    <string name="notification_new_version_downloading_images_message">Baixant les imatges del servidor… <br />Imatge: %d/%d. Progrés: %d\%</string>
+    <string name="notification_new_version_image_check_message">Comprovant actualitzacions de les imatges… <br />Progrés: %d/%d</string>
 </resources>

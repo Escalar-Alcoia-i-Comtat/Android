@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.collection.arrayMapOf
@@ -17,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.TranslatableString
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.notification.NullChannelIdException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.notification.NullIconException
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
+import com.arnyminerz.escalaralcoiaicomtat.core.view.getColor
 import timber.log.Timber
 import java.util.*
 import kotlin.collections.ArrayList
@@ -37,6 +39,16 @@ class Notification private constructor(private val builder: Builder) {
          */
         fun get(id: Int): Builder? {
             return builders[id]
+        }
+
+        /**
+         * Dismisses the desired notification.
+         * @author Arnau Mora
+         * @since 202100919
+         */
+        fun dismiss(context: Context, id: Int) {
+            NotificationManagerCompat.from(context)
+                .cancel(id)
         }
     }
 
@@ -74,6 +86,8 @@ class Notification private constructor(private val builder: Builder) {
                 notificationBuilder.setContentText(text)
             if (info != null)
                 notificationBuilder.setContentInfo(info)
+            if (color != null)
+                notificationBuilder.color = color!!
             if (longText != null)
                 notificationBuilder.setStyle(
                     NotificationCompat.BigTextStyle()
@@ -160,6 +174,7 @@ class Notification private constructor(private val builder: Builder) {
         var progress: ValueMax<Int>? = null
         val actions: ArrayList<NotificationButton> = arrayListOf()
         var alertOnce = true
+        var color: Int? = null
 
         /**
          * Sets an id to the notification
@@ -198,6 +213,26 @@ class Notification private constructor(private val builder: Builder) {
          */
         fun withIcon(@DrawableRes icon: Int): Builder {
             this.icon = icon
+            return this
+        }
+
+        /**
+         * Sets the desired color to the notification.
+         * @author Arnau Mora
+         * @since 20210919
+         */
+        fun withColor(color: Int): Builder {
+            this.color = color
+            return this
+        }
+
+        /**
+         * Sets the desired color from resources to the notification.
+         * @author Arnau Mora
+         * @since 20210919
+         */
+        fun withColorResource(@ColorRes color: Int): Builder {
+            this.color = getColor(context, color)
             return this
         }
 
@@ -356,7 +391,11 @@ class Notification private constructor(private val builder: Builder) {
          * @param listener What to call when the button is pressed.
          * @return The builder instance.
          */
-        fun addAction(@DrawableRes icon: Int, @StringRes text: Int, listener: Builder.() -> Unit): Builder {
+        fun addAction(
+            @DrawableRes icon: Int,
+            @StringRes text: Int,
+            listener: Builder.() -> Unit
+        ): Builder {
             // Create the receiver for calling the intent
             val brReceiver = object : BroadcastReceiver() {
                 override fun onReceive(receiverContext: Context?, intent: Intent?) {
@@ -458,6 +497,8 @@ class Notification private constructor(private val builder: Builder) {
 
             if (exception != null)
                 throw exception
+
+            builders[id] = this
 
             return Notification(this)
         }

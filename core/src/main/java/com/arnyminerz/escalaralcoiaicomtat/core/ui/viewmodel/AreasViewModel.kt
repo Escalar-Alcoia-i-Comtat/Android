@@ -23,10 +23,12 @@ class AreasViewModel<A : Activity>(activity: A) : DataClassViewModel<Area, A>(ac
         if (areas.isEmpty()) {
             Timber.v("Areas is empty, loading...")
             val application = (context as? Activity)?.application ?: context as Application
-            firestore.loadAreas(application as App, progressCallback = { current, total ->
+            firestore.loadAreas(application as App) { progress ->
+                val current = progress.value
+                val total = progress.max
                 Timber.i("Loading areas: $current/$total")
-                progress.value = ValueMax(current, total)
-            })
+                this@AreasViewModel.progress.value = progress
+            }
         }
         emit(areas)
     }

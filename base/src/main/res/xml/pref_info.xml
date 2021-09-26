@@ -20,6 +20,10 @@
             app:key="pref_build"
             app:title="@string/pref_info_build_title" />
 
+        <Preference
+            app:key="pref_data_version"
+            app:title="@string/pref_info_data_version_title" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/pref_info_cat_source">

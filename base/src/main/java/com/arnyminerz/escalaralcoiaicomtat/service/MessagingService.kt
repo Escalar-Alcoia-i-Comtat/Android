@@ -1,54 +1,74 @@
 package com.arnyminerz.escalaralcoiaicomtat.service
 
-import android.app.Notification
-import android.os.Build
-import androidx.core.app.NotificationManagerCompat
+import android.annotation.SuppressLint
+import android.util.Log
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.ALERT_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ALERT_PREF
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.generateUUID
-import com.arnyminerz.escalaralcoiaicomtat.core.view.getColor
+import com.arnyminerz.escalaralcoiaicomtat.worker.UpdateWorker
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import timber.log.Timber
 
+@SuppressLint("LogNotTimber")
 class MessagingService : FirebaseMessagingService() {
+    companion object {
+        private const val TAG = "MessagingService"
+
+        /**
+         * This type is used when a new update is available.
+         * @author Arnau Mora
+         * @since 20210919
+         */
+        private const val MESSAGE_TYPE_UPDATE = "update"
+    }
+
+    init {
+        Log.v(TAG, "Initialized messaging service.")
+    }
+
     override fun onNewToken(token: String) {
-        Timber.v("Got new messaging token: $token.")
+        Log.i(TAG, "Got new messaging token: $token.")
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        if (SETTINGS_ALERT_PREF.get().not())
-            return Timber.w("Will not show notification since they are disabled.")
+        if (SETTINGS_ALERT_PREF.get().not()) {
+            Log.w(TAG, "Will not show notification since they are disabled.")
+            return
+        }
 
-        Timber.v("Received message from: ${remoteMessage.from}")
+        Log.v(TAG, "Received message from: ${remoteMessage.from}")
 
         val data = remoteMessage.data
-        if (data.isNotEmpty()) {
-            Timber.v("Message payload: $data")
-        }
+        if (data.isNotEmpty())
+            Log.v(TAG, "Message payload: $data")
 
         remoteMessage.notification?.let { notificationData ->
             val body = notificationData.body
             val title = notificationData.title
+            val shouldDisplay = notificationData.sound != null
 
-            Timber.v("Received notification: $body")
+            Log.v(TAG, "Received notification: $body")
 
-            @Suppress("DEPRECATION")
-            val builder =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    Notification.Builder(applicationContext, ALERT_CHANNEL_ID)
-                else
-                    Notification.Builder(applicationContext)
-            val notification = builder.apply {
-                setContentTitle(title)
-                setContentText(body)
-                setColor(getColor(applicationContext, R.color.colorAccent))
-            }.build()
-            val id = generateUUID().hashCode()
+            if (shouldDisplay && title != null && body != null)
+                Notification.Builder(applicationContext)
+                    .withChannelId(ALERT_CHANNEL_ID)
+                    .withIcon(R.drawable.ic_notifications)
+                    .withTitle(title)
+                    .withText(body)
+                    .withColor(R.color.colorAccent)
+                    .buildAndShow()
+            else if (!shouldDisplay) {
+                Log.v(TAG, "Got hidden notification.")
+                when (val type = data["type"]) {
+                    MESSAGE_TYPE_UPDATE -> {
+                        Log.i(TAG, "There's a new version available.")
 
-            NotificationManagerCompat.from(applicationContext)
-                .notify(id, notification)
+                        UpdateWorker.schedule(this)
+                    }
+                    else -> Log.w(TAG, "Got invalid hidden notification. Type: $type")
+                }
+            } else Log.w(TAG, "Received notification without title nor body.")
         }
     }
 }

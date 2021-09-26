@@ -34,9 +34,11 @@ class SectorsViewModel<A : Activity>(
         val areas = app.getAreas()
         if (areas.isEmpty()) {
             val application = (context as? Activity)?.application ?: context as Application
-            firestore.loadAreas(application as App, progressCallback = { current, total ->
+            firestore.loadAreas(application as App) { progress ->
+                val current = progress.value
+                val total = progress.max
                 Timber.i("Loading areas: $current/$total")
-            })
+            }
         }
         val zone = areas[areaId]?.get(app.searchSession, zoneId)
         uiContext { currentUrl.value = zone?.webUrl }

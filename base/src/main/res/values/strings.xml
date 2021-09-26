@@ -129,6 +129,8 @@
     <string name="pref_gene_section_advanced">Advanced</string>
     <string name="pref_gene_error_reporting_title">Enable error reporting</string>
     <string name="pref_gene_error_reporting_sum">This will send an anonymous error report to the developers when the app crashes or there\'s an error, so it can be fixed as soon as possible. Please, we kindly ask you to keep this enabled, but you are free to disable it.</string>
+    <string name="pref_gene_download_data_title">Update device\'s data</string>
+    <string name="pref_gene_download_data_sum">This will re-download all the data from the server for getting the latest version. Take into account that this might use a bunch of data.</string>
 
     <string name="pref_down_cat_downloads">Downloads</string>
     <string name="pref_down_mobile_title">Mobile Data</string>
@@ -143,6 +145,7 @@
     <string name="pref_info_service_block_status_summary">The service for updating the path\'s block status is currently: %s</string>
     <string name="pref_info_version_title">Version</string>
     <string name="pref_info_build_title">Build Number</string>
+    <string name="pref_info_data_version_title">Data Version</string>
     <string name="pref_info_git_title">Github</string>
     <string name="pref_info_git_sum">View the Github repository</string>
 
@@ -168,6 +171,18 @@
     <string name="notification_gpx_stored_message">Press to open</string>
     <string name="notification_kmz_stored_title">KMZ Stored correctly</string>
     <string name="notification_kmz_stored_message">Press to open</string>
+
+    <string name="notification_new_version_waiting_title">New version available</string>
+    <string name="notification_new_version_waiting_short">There\'s a new version available of the app\'s data.</string>
+    <string name="notification_new_version_waiting_message">We have released a new version of the app\'s data. We will download the update as soon as possible. Everything will happen automatically.</string>
+    <string name="notification_new_version_downloading_title">Downloading new version</string>
+    <string name="notification_new_version_downloading_short">Downloading new version of the app data.</string>
+    <string name="notification_new_version_downloading_message">Downloading new version of the app data. <br />Progress: %d/%d</string>
+    <string name="notification_new_version_image_files_message">Searching for image files… <br />Progress: %d/%d</string>
+    <string name="notification_new_version_cache_clear_message">Removing obsolete image files… <br />Progress: %d/%d</string>
+    <string name="notification_new_version_referencing_message">Fetching files from the server… <br />Progress: %d/%d</string>
+    <string name="notification_new_version_image_check_message">Checking for updates on the images… <br />Progress: %d/%d</string>
+    <string name="notification_new_version_downloading_images_message">Downloading images from server… <br />Image: %d/%d. Progress: %d\%</string>
 
     <string name="no_internet_title">You have no Internet access</string>
     <string name="no_internet_message">You can access the downloaded content, or try again.</string>

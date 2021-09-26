@@ -6,9 +6,14 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.webkit.MimeTypeMap
 import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.math.BigInteger
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 import java.text.CharacterIterator
 import java.text.StringCharacterIterator
-import java.util.Locale
+import java.util.*
 import kotlin.math.abs
 
 fun deleteDir(dir: File?): Boolean {
@@ -99,6 +104,33 @@ fun humanReadableByteCountBin(bytes: Long, locale: Locale = Locale.getDefault())
 fun File.size(): Long = if (isDirectory) dirSize(this) else length()
 
 fun File.sizeString(): String = humanReadableByteCountBin(size())
+
+/**
+ * Gets the MD5 file hash from the instance.
+ * @author Arnau Mora
+ * @since 20210926
+ * @throws NoSuchAlgorithmException When the MD5 algorithm is not available in the device.
+ * @throws IOException When there's an exception while processing the file.
+ */
+@Throws(NoSuchAlgorithmException::class, IOException::class)
+fun File.md5Hash(): String {
+    val digest = MessageDigest.getInstance("MD5")
+
+    if (!exists())
+        throw FileNotFoundException("The file at \"$path\" doesn't exist.")
+
+    val stream = inputStream()
+    val buffer = ByteArray(8192)
+    var read = stream.read(buffer)
+    while (read > 0) {
+        digest.update(buffer, 0, read)
+        read = stream.read(buffer)
+    }
+    val md5sum = digest.digest()
+    val bigInt = BigInteger(1, md5sum)
+    val output = bigInt.toString(16)
+    return output.format("%32s").replace(' ', '0')
+}
 
 /**
  * Gets the file name from an Uri
