@@ -8,6 +8,13 @@ const val DOWNLOAD_OVERWRITE = "overwrite"
 const val DOWNLOAD_QUALITY = "quality"
 
 /**
+ * The tag added to all workers that work on app data downloads.
+ * @author Arnau Mora
+ * @since 20210926
+ */
+const val WORKER_TAG_DOWNLOAD = "DataDownload"
+
+/**
  * When the DownloadWorker was ran with missing data
  * @since 20210313
  */
