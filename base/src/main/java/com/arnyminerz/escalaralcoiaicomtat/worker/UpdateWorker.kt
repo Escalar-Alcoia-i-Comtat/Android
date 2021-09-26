@@ -4,17 +4,24 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.work.*
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MOBILE_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ROAMING_DOWNLOAD_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
+import java.io.File
 import kotlin.random.Random
 
 
@@ -38,19 +45,24 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         // Get the worker data
         val notificationId = inputData.getInt(WORKER_PARAMETER_NOTIFICATION_ID, -1)
 
-        setProgress(
-            workDataOf(
-                PROGRESS_KEY_STEP to PROGRESS_STEP_PRE,
-                PROGRESS_KEY_VALUE to 0,
-                PROGRESS_KEY_INFO_NOTIFICATION to notificationId
+        suspend fun updateProgress(step: String, value: Int) {
+            setProgress(
+                workDataOf(
+                    PROGRESS_KEY_STEP to step,
+                    PROGRESS_KEY_VALUE to value,
+                    PROGRESS_KEY_INFO_NOTIFICATION to notificationId
+                )
             )
-        )
+        }
+
+        updateProgress(PROGRESS_STEP_PRE, 0)
 
         // Remove already indexed value so data will be fetched again.
         PREF_INDEXED_SEARCH.put(false)
 
-        // Get the Firestore instance
+        // Get the required Firebase instances
         val firestore = Firebase.firestore
+        val storage = Firebase.storage
 
         // Get the app instance
         val app = applicationContext as App
@@ -62,13 +74,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         // Dismiss the old content
         Notification.dismiss(applicationContext, notificationId)
 
-        setProgress(
-            workDataOf(
-                PROGRESS_KEY_STEP to PROGRESS_STEP_PRE,
-                PROGRESS_KEY_VALUE to 100,
-                PROGRESS_KEY_INFO_NOTIFICATION to notificationId
-            )
-        )
+        updateProgress(PROGRESS_STEP_PRE, 100)
 
         notificationBuilder = notificationBuilder
             .withId(Random.nextInt())
@@ -82,13 +88,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             )
         var noti = notificationBuilder.buildAndShow()
 
-        setProgress(
-            workDataOf(
-                PROGRESS_KEY_STEP to PROGRESS_STEP_DATA_DOWNLOAD,
-                PROGRESS_KEY_VALUE to 0,
-                PROGRESS_KEY_INFO_NOTIFICATION to notificationId
-            )
-        )
+        updateProgress(PROGRESS_STEP_DATA_DOWNLOAD, 0)
 
         // Load areas
         Timber.d("Downloading areas...")
@@ -96,13 +96,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             Timber.v("Areas load progress: ${progress.percentage}")
 
             doAsync {
-                setProgress(
-                    workDataOf(
-                        PROGRESS_KEY_STEP to PROGRESS_STEP_DATA_DOWNLOAD,
-                        PROGRESS_KEY_VALUE to progress.percentage,
-                        PROGRESS_KEY_INFO_NOTIFICATION to notificationId
-                    )
-                )
+                updateProgress(PROGRESS_STEP_DATA_DOWNLOAD, progress.percentage)
             }
 
             // Hide and destroy the notification
@@ -121,18 +115,62 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         }
         noti.destroy()
 
-        setProgress(
-            workDataOf(
-                PROGRESS_KEY_STEP to PROGRESS_STEP_DATA_DOWNLOAD,
-                PROGRESS_KEY_VALUE to 100,
-                PROGRESS_KEY_INFO_NOTIFICATION to notificationId
-            )
-        )
+        updateProgress(PROGRESS_STEP_DATA_DOWNLOAD, 100)
+        updateProgress(PROGRESS_STEP_IMAGE_PROCESS, 0)
 
-        // TODO: Update downloads
+        // Get all the image files, both from cache and downloads
+        Timber.v("Getting image files...")
+        val imageFiles = fetchImageFiles { progress ->
+            updateProgress(PROGRESS_STEP_IMAGE_PROCESS, progress.percentage)
+        }
+        updateProgress(PROGRESS_STEP_IMAGE_PROCESS, 100)
+
+        // Now, for each image, compare its metadata with the one from the server, and create a new
+        //   list with the images that have been updated.
+        for (cachedImage in imageFiles.first) {
+
+        }
 
         Timber.v("Finished updating data.")
         return Result.success()
+    }
+
+    /**
+     * Gets a list of all the cached and downloaded image files.
+     * @author Arnau Mora
+     * @since 20210926
+     * @return A pair of list of files. The first element is a list of the cached image files, the
+     * second one a list of the downloaded image files.
+     */
+    private suspend fun fetchImageFiles(progress: suspend (progress: ValueMax<Int>) -> Unit): Pair<List<File>, List<File>> {
+        val cacheDir = applicationContext.cacheDir
+        val cacheFiles = cacheDir.listFiles()
+        val dataFiles = dataDir(applicationContext).listFiles()
+
+        val cacheFilesCount = cacheFiles?.size ?: 0
+        val dataFilesCount = dataFiles?.size ?: 0
+        val max = cacheFilesCount + dataFilesCount
+
+        suspend fun iterateFiles(offset: Int, files: Array<File>?): List<File> {
+            val imageFiles = arrayListOf<File>()
+            if (files != null)
+                for ((f, file) in files.withIndex()) {
+                    progress(ValueMax(offset + f, max))
+                    if (file.isDirectory)
+                        continue
+                    val name = file.name
+                    val isDataClassFile = name.startsWith(Area.NAMESPACE) ||
+                            name.startsWith(Zone.NAMESPACE) || name.startsWith(Sector.NAMESPACE)
+                    if (isDataClassFile)
+                        imageFiles.add(file)
+                }
+            return imageFiles
+        }
+
+        val cacheImageFiles = iterateFiles(0, cacheFiles)
+        val imageFiles = iterateFiles(cacheFilesCount, dataFiles)
+
+        return cacheImageFiles to imageFiles
     }
 
     companion object {
@@ -179,6 +217,13 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
          * @since 20210926
          */
         const val PROGRESS_STEP_DATA_DOWNLOAD = "DataDownload"
+
+        /**
+         * The name of the image processing step.
+         * @author Arnau Mora
+         * @since 20210926
+         */
+        const val PROGRESS_STEP_IMAGE_PROCESS = "ImageProcessing"
 
         /**
          * Gets the [LiveData] with a list of [WorkInfo] matching all the jobs that are updating the
