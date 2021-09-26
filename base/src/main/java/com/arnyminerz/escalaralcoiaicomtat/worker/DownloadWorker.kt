@@ -17,15 +17,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_C
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.*
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.failure
 import com.google.android.material.badge.ExperimentalBadgeUtils
-import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.ktx.firestore
@@ -84,7 +80,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @see ERROR_FETCH_IMAGE
      * @see ERROR_STORE_IMAGE
      */
-    private suspend fun CoroutineScope.downloadImageFile(
+    private suspend fun downloadImageFile(
         imageReferenceUrl: String,
         imageFile: File,
         objectId: String,
@@ -196,37 +192,44 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
     }
 
     /**
-     * Fixes the image reference URL just in case it's being fetched from the website instead of
-     * [FirebaseStorage].
+     * Downloads the KMZ file from the server.
      * @author Arnau Mora
-     * @since 20210822
-     * @see ERROR_UPDATE_IMAGE_REF
+     * @since 20210926
+     * @param storage The [FirebaseStorage] reference for fetching files from the server.
+     * @param referenceUrl The url in [storage] where the KMZ is stored at.
+     * @param targetFile The [File] to store the KMZ data at.
+     * @param progressListener A callback function for observing the download progress.
      */
-    @Deprecated("Should not be used anymore, all the references have been fixed.")
-    private suspend fun fixImageReferenceUrl(
-        image: String,
-        firestore: FirebaseFirestore,
-        path: String
-    ): Pair<String?, Result?> =
-        if (image.startsWith("https://escalaralcoiaicomtat.centrexcursionistalcoi.org/"))
-            try {
-                Timber.w("Fixing zone image reference ($image)...")
-                val i = image.lastIndexOf('/') + 1
-                val newImage =
-                    "gs://escalaralcoiaicomtat.appspot.com/images/sectors/" + image.substring(i)
-                Timber.w("Changing image address to \"$newImage\"...")
-                firestore
-                    .document(path)
-                    .update(mapOf("image" to newImage))
-                    .await()
-                Timber.w("Image address updated.")
-                newImage to null
-            } catch (e: FirebaseFirestoreException) {
-                Firebase.crashlytics.recordException(e)
-                Timber.e(e, "Could not update zone image reference")
-                null to failure(ERROR_UPDATE_IMAGE_REF)
+    private suspend fun downloadKmz(
+        storage: FirebaseStorage,
+        referenceUrl: String,
+        targetFile: File,
+        progressListener: suspend (progress: ValueMax<Long>) -> Unit
+    ) = coroutineScope {
+        progressListener(ValueMax(0, -1))
+
+        Timber.v("Getting kmz file reference ($referenceUrl)...")
+        val reference = storage.getReferenceFromUrl(referenceUrl)
+
+        val snapshot = reference
+            .stream
+            .addOnProgressListener { snapshot ->
+                CoroutineScope(coroutineContext).launch { progressListener(snapshot.progress()) }
             }
-        else image to null
+            .await()
+        progressListener(snapshot.progress())
+
+        Timber.v("Got the KMZ stream. Writing to the output file...")
+        val stream = snapshot.stream
+        val outputStream = targetFile.outputStream()
+        var read = stream.read()
+        while (read > 0) {
+            outputStream.write(read)
+            read = stream.read()
+        }
+        outputStream.close()
+        stream.close()
+    }
 
     /**
      * Downloads the data of a [Zone] for using it offline.
@@ -402,6 +405,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             Timber.w("Object at \"$path\" doesn't have an image field.")
             throw IllegalStateException("Object at \"$path\" doesn't have an image field.")
         }
+        val kmzReferenceUrl = document.getString("kmz")
 
         val imageFileName = DataClass.imageName(namespace, objectId, null)
         val imageFile = File(dataDir(applicationContext), imageFileName)
@@ -412,6 +416,9 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         Timber.v("Downloading image file...")
         downloadImageFile(imageReferenceUrl, imageFile, objectId, scale, progressListener)
 
+        if (kmzReferenceUrl != null) {
+
+        }
         // TODO: KMZ downloading
     }
 
