@@ -268,7 +268,9 @@ suspend fun FirebaseFirestore.loadAreas(
         val calendar = Calendar.getInstance()
         val now = calendar.time
         val versionDateFormatting = SimpleDateFormat("yyyyMMddHHmm", Locale.getDefault())
-        PREF_DATA_VERSION.put(versionDateFormatting.format(now))
+        val version = versionDateFormatting.format(now)
+        Timber.v("New version: $version")
+        PREF_DATA_VERSION.put(version)
         PREF_DATA_DATE.put(now.time)
 
         trace.stop()
