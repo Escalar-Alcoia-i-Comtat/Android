@@ -6,14 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.appsearch.app.AppSearchSession
 import androidx.lifecycle.LiveData
-import androidx.work.Constraints
-import androidx.work.CoroutineWorker
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
-import androidx.work.WorkerParameters
-import androidx.work.workDataOf
+import androidx.work.*
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.R
@@ -22,36 +15,15 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATACLASS_PREVIEW_SCALE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_OVERWRITE_DEFAULT
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_DEFAULT
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MOBILE_DOWNLOAD_PREF
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ROAMING_DOWNLOAD_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_DISPLAY_NAME
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_NAMESPACE
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_OVERWRITE
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_PATH
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_QUALITY
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerFactory
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_ALREADY_DOWNLOADED
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_COMPRESS_IMAGE
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_CREATE_PARENT
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DATA_FETCH
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DELETE_OLD
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_FETCH_IMAGE
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_MISSING_DATA
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_STORE_IMAGE
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UNKNOWN_NAMESPACE
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UPDATE_IMAGE_REF
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.*
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.failure
-import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
@@ -548,18 +520,20 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         ): LiveData<WorkInfo> {
             Timber.v("Scheduling new download...")
             Timber.v("Building download constraints...")
-            var constraints = Constraints.Builder()
-            constraints = if (SETTINGS_MOBILE_DOWNLOAD_PREF.get())
-                constraints.setRequiredNetworkType(NetworkType.UNMETERED)
-            else
-                constraints.setRequiredNetworkType(NetworkType.METERED)
-            if (!SETTINGS_ROAMING_DOWNLOAD_PREF.get())
-                constraints = constraints.setRequiredNetworkType(NetworkType.NOT_ROAMING)
-            constraints = constraints.setRequiredNetworkType(NetworkType.CONNECTED)
+            val constraints = Constraints.Builder()
+                .apply {
+                    if (SETTINGS_MOBILE_DOWNLOAD_PREF.get())
+                        setRequiredNetworkType(NetworkType.UNMETERED)
+                    else if (!SETTINGS_ROAMING_DOWNLOAD_PREF.get())
+                        setRequiredNetworkType(NetworkType.NOT_ROAMING)
+                    else
+                        setRequiredNetworkType(NetworkType.CONNECTED)
+                }
 
             Timber.v("Building DownloadWorker request...")
             val request = OneTimeWorkRequestBuilder<DownloadWorker>()
                 .setConstraints(constraints.build())
+                .addTag(WORKER_TAG_DOWNLOAD)
                 .addTag(tag)
                 .setInputData(
                     with(data) {
