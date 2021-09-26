@@ -121,7 +121,6 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 .withProgress(progress)
             noti = notificationBuilder.buildAndShow()
         }
-        noti.destroy()
 
         updateProgress(PROGRESS_STEP_DATA_DOWNLOAD, 100)
         updateProgress(PROGRESS_STEP_IMAGE_PROCESS, 0)
@@ -130,6 +129,20 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         Timber.v("Getting image files...")
         val imageFiles = fetchImageFiles { progress ->
             updateProgress(PROGRESS_STEP_IMAGE_PROCESS, progress.percentage)
+
+            // Hide and destroy the notification
+            noti.destroy()
+
+            notificationBuilder = notificationBuilder
+                .withLongText(
+                    applicationContext.getString(
+                        R.string.notification_new_version_image_files_message,
+                        progress.value,
+                        progress.max
+                    )
+                )
+                .withProgress(progress)
+            noti = notificationBuilder.buildAndShow()
         }
         updateProgress(PROGRESS_STEP_IMAGE_PROCESS, 100)
 
@@ -139,11 +152,28 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         val dataImageFilesCount = dataImageFiles.size
         val processedImageFilesCount = cacheImageFilesCount + dataImageFilesCount
 
+        Timber.v("Got $cacheImageFilesCount cached image files.")
+        Timber.v("Got $dataImageFilesCount data image files.")
+
         // Remove all cached files
         Timber.v("Removing all cached files...")
         for ((f, cachedFile) in imageFiles.first.withIndex()) {
             val vm = ValueMax(f, processedImageFilesCount)
             updateProgress(PROGRESS_STEP_IMAGE_REFERENCING, vm.percentage)
+
+            // Hide and destroy the notification
+            noti.destroy()
+            notificationBuilder = notificationBuilder
+                .withLongText(
+                    applicationContext.getString(
+                        R.string.notification_new_version_cache_clear_message,
+                        vm.value,
+                        vm.max
+                    )
+                )
+                .withProgress(vm)
+            noti = notificationBuilder.buildAndShow()
+
             if (!cachedFile.deleteIfExists())
                 Timber.w("Could not delete $cachedFile")
         }
@@ -153,6 +183,19 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         val referencedImageFiles = processImageFiles(firestore, imageFiles.second) {
             val vm = ValueMax(it + cacheImageFilesCount, processedImageFilesCount)
             updateProgress(PROGRESS_STEP_IMAGE_REFERENCING, vm.percentage)
+
+            // Hide and destroy the notification
+            noti.destroy()
+            notificationBuilder = notificationBuilder
+                .withLongText(
+                    applicationContext.getString(
+                        R.string.notification_new_version_referencing_message,
+                        vm.value,
+                        vm.max
+                    )
+                )
+                .withProgress(vm)
+            noti = notificationBuilder.buildAndShow()
         }
         Timber.v("Got ${referencedImageFiles.size} referenced image files.")
 
@@ -166,10 +209,28 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         Timber.v("Got ${imageFileReferences.size} updatable image files.")
 
         Timber.v("Downloading images from server...")
-        updateFiles(imageFileReferences) { progress, _ ->
+        updateFiles(imageFileReferences) { progress, individual ->
             val vm = ValueMax(progress, imageFileReferences.size)
             updateProgress(PROGRESS_STEP_IMAGE_DOWNLOAD, vm.percentage)
+
+            val imageDownloadProgress = ValueMax(individual.percentage, 100)
+
+            // Hide and destroy the notification
+            noti.destroy()
+            notificationBuilder = notificationBuilder
+                .withLongText(
+                    applicationContext.getString(
+                        R.string.notification_new_version_downloading_images_message,
+                        vm.value,
+                        vm.max,
+                        individual.percentage
+                    )
+                )
+                .withProgress(imageDownloadProgress)
+            noti = notificationBuilder.buildAndShow()
         }
+
+        noti.destroy()
 
         Timber.v("Finished updating data.")
         return Result.success()
