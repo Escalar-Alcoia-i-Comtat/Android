@@ -232,151 +232,12 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
     }
 
     /**
-     * Downloads the data of a [Zone] for using it offline.
-     * @author Arnau Mora
-     * @since 20210323
-     * @param firestore The [FirebaseFirestore] instance.
-     * @param path The path to download
-     *
-     * @see ERROR_MISSING_DATA
-     * @see ERROR_ALREADY_DOWNLOADED
-     * @see ERROR_DELETE_OLD
-     * @see ERROR_DATA_FETCH
-     * @see ERROR_STORE_IMAGE
-     * @see ERROR_COMPRESS_IMAGE
-     * @see ERROR_FETCH_IMAGE
-     */
-    /*private suspend fun downloadZone(firestore: FirebaseFirestore, path: String): Result =
-        coroutineScope {
-        Timber.d("Downloading Zone $path...")
-        val document = try {
-            Timber.v("Getting document...")
-            firestore.document(path).get().await()
-        } catch (e: Exception) {
-            Timber.e(e, "Could not get data")
-            return failure(ERROR_DATA_FETCH)
-        }
-        Timber.v("Got Zone document!")
-
-        val zone = Zone(document)
-
-        Timber.v("Updating notification...")
-        val newText = applicationContext.getString(
-            R.string.notification_download_progress_message,
-            zone.displayName
-        )
-        notification = notification
-            .edit()
-            .withText(newText)
-            .withInfoText(R.string.notification_download_progress_info_fetching)
-            .withProgress(ValueMax(0, -1))
-            .buildAndShow()
-
-        Timber.v("Fixing image reference URL...")
-        val image = fixImageReferenceUrl(zone.imageReferenceUrl, firestore, path)
-        if (image.second != null)
-            return image.second!!
-        Timber.v("Got valid URL!")
-        val imageRef = image.first!!
-
-        val imageFile = zone.imageFile(applicationContext)
-        downloadImageFile(imageRef, imageFile, zone.objectId, DATACLASS_PREVIEW_SCALE)
-
-        try {
-            Timber.d("Downloading KMZ file...")
-            zone.kmzFile(applicationContext, storage, true)
-        } catch (e: IllegalStateException) {
-            Firebase.crashlytics.recordException(e)
-            Timber.w("The Zone ($zone) does not contain a KMZ address")
-        } catch (e: StorageException) {
-            Firebase.crashlytics.recordException(e)
-            val handler = handleStorageException(e)
-            if (handler != null)
-                Timber.e(e, handler.second)
-        }
-
-        Timber.d("Downloading child sectors...")
-        val sectors = zone.getChildren(appSearchSession)
-        val total = sectors.size
-        for ((s, sector) in sectors.withIndex())
-            downloadSector(firestore, sector.metadata.documentPath, ValueMax(s, total))
-
-        return Result.success()
-    }*/
-
-    /**
-     * Downloads the data of a [Sector] for using it offline.
-     * @author Arnau Mora
-     * @since 20210323
-     * @param firestore The [FirebaseFirestore] instance.
-     * @param path The path to download
-     *
-     * @see ERROR_MISSING_DATA
-     * @see ERROR_ALREADY_DOWNLOADED
-     * @see ERROR_DELETE_OLD
-     * @see ERROR_DATA_FETCH
-     * @see ERROR_STORE_IMAGE
-     * @see ERROR_COMPRESS_IMAGE
-     * @see ERROR_FETCH_IMAGE
-     */
-    /*private suspend fun downloadSector(
-        firestore: FirebaseFirestore,
-        path: String,
-        progress: ValueMax<Int>?
-    ): Result {
-        Timber.d("Downloading Sector $path...")
-        val document = try {
-            Timber.v("Getting document...")
-            firestore.document(path).get().await()
-        } catch (e: Exception) {
-            return failure(ERROR_DATA_FETCH)
-        }
-        val sector = Sector(document)
-
-        Timber.v("Updating notification...")
-        val newText = applicationContext.getString(
-            R.string.notification_download_progress_message,
-            sector.displayName
-        )
-        notification = notification
-            .edit()
-            .apply {
-                withText(newText)
-                withInfoText(R.string.notification_download_progress_info_fetching)
-                withProgress(progress ?: ValueMax(0, -1))
-            }
-            .buildAndShow()
-
-        val image = fixImageReferenceUrl(sector.imageReferenceUrl, firestore, path)
-        if (image.second != null)
-            return image.second!!
-        val imageRef = image.first!!
-
-        val imageFile = sector.imageFile(applicationContext)
-        downloadImageFile(imageRef, imageFile, sector.objectId, 1f)
-
-        try {
-            Timber.d("Downloading KMZ file...")
-            sector.kmzFile(applicationContext, storage, true)
-        } catch (e: IllegalStateException) {
-            Firebase.crashlytics.recordException(e)
-            Timber.w("The Sector ($sector) does not contain a KMZ address")
-        } catch (e: StorageException) {
-            Firebase.crashlytics.recordException(e)
-            val handler = handleStorageException(e)
-            if (handler != null)
-                Timber.e(e, handler.second)
-        }
-
-        return Result.success()
-    }*/
-
-    /**
      * Fetches the data from [FirebaseFirestore] at the specified [path]. And downloads the image
      * file.
      * @author Arnau Mora
      * @since 20210926
      * @param firestore The [FirebaseFirestore] instance to fetch the data from.
+     * @param storage The [FirebaseStorage] instance to fetch files from the server.
      * @param path The path where the data is stored at.
      * @throws FirebaseFirestoreException If there happens an exception while fetching the data
      * from the server.
@@ -386,6 +247,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
     @Throws(FirebaseFirestoreException::class)
     private suspend fun downloadData(
         firestore: FirebaseFirestore,
+        storage: FirebaseStorage,
         path: String,
         progressListener: suspend (progress: ValueMax<Long>) -> Unit
     ) = coroutineScope {
@@ -417,9 +279,10 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         downloadImageFile(imageReferenceUrl, imageFile, objectId, scale, progressListener)
 
         if (kmzReferenceUrl != null) {
-
+            val kmzFileName = "${namespace}_$objectId"
+            val kmzFile = File(dataDir(applicationContext), kmzFileName)
+            downloadKmz(storage, kmzReferenceUrl, kmzFile, progressListener)
         }
-        // TODO: KMZ downloading
     }
 
     override suspend fun doWork(): Result {
