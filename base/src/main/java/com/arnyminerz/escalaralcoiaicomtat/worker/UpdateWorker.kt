@@ -17,12 +17,15 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ROAMING_DOWNLOAD
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.md5Hash
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -141,14 +144,26 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         for ((f, cachedFile) in imageFiles.first.withIndex()) {
             val vm = ValueMax(f, processedImageFilesCount)
             updateProgress(PROGRESS_STEP_IMAGE_REFERENCING, vm.percentage)
-            cachedFile.deleteIfExists() // TODO: Result should be checked
+            if (!cachedFile.deleteIfExists())
+                Timber.w("Could not delete $cachedFile")
         }
 
         // Create the relations between the downloaded files, and its references in Firebase Storage.
+        Timber.v("Referencing image files...")
         val referencedImageFiles = processImageFiles(firestore, imageFiles.second) {
             val vm = ValueMax(it + cacheImageFilesCount, processedImageFilesCount)
             updateProgress(PROGRESS_STEP_IMAGE_REFERENCING, vm.percentage)
         }
+        Timber.v("Got ${referencedImageFiles.size} referenced image files.")
+
+        // Compare the md5 hash from the server and the downloaded file, and add to the list the
+        // hashes that don't match.
+        Timber.v("Running checksum of image files...")
+        val imageFileReferences = getDownloadableImages(storage, referencedImageFiles) {
+            val vm = ValueMax(it + cacheImageFilesCount, processedImageFilesCount)
+            updateProgress(PROGRESS_STEP_IMAGE_CHECKSUM, vm.percentage)
+        }
+        Timber.v("Got ${imageFileReferences.size} updatable image files.")
 
         Timber.v("Finished updating data.")
         return Result.success()
@@ -282,6 +297,36 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         return builtImageRelationList
     }
 
+    /**
+     * Checks if each of the files in [referencedImageFiles] has to be downloaded or not, and
+     * elaborates a list of the references from [FirebaseStorage] for downloading the new files.
+     * @author Arnau Mora
+     * @since 20210926
+     * @param storage The [FirebaseStorage] reference for checking the files from the server.
+     * @param referencedImageFiles A list of pairs of references from [storage] and image files from
+     * the Filesystem.
+     * @param progress A listener for knowing the progress of the function.
+     */
+    private suspend fun getDownloadableImages(
+        storage: FirebaseStorage,
+        referencedImageFiles: List<Pair<File, String>>,
+        progress: suspend (progress: Int) -> Unit
+    ): ArrayList<Pair<File, StorageReference>> {
+        val updatableFiles = arrayListOf<Pair<File, StorageReference>>()
+        for ((i, imageFileReference) in referencedImageFiles.withIndex()) {
+            progress(i)
+            val imageFile = imageFileReference.first
+            val referenceUrl = imageFileReference.second
+            val reference = storage.getReferenceFromUrl(referenceUrl)
+            val serverMd5 = reference.metadata.await().md5Hash
+            val fsMd5 = imageFile.md5Hash()
+            Timber.v("Got MD5 hashes. Server=$serverMd5. FileSystem=$fsMd5")
+            if (serverMd5 != fsMd5)
+                updatableFiles.add(imageFile to reference)
+        }
+        return updatableFiles
+    }
+
     companion object {
         /**
          * This is used for passing to the worker the id of the notification that is used for
@@ -340,6 +385,13 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
          * @since 20210926
          */
         const val PROGRESS_STEP_IMAGE_REFERENCING = "ImageReferencing"
+
+        /**
+         * The name of the image hash checking step.
+         * @author Arnau Mora
+         * @since 20210926
+         */
+        const val PROGRESS_STEP_IMAGE_CHECKSUM = "ImageChecksum"
 
         /**
          * Gets the [LiveData] with a list of [WorkInfo] matching all the jobs that are updating the
