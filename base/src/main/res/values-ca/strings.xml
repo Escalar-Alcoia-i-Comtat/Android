@@ -297,4 +297,8 @@
     <string name="pref_gene_download_data_title">Actualitza les dades del dispositiu</string>
     <string name="pref_gene_download_data_sum">Açò tornarà a descarregar totes les dades del servidor, per a assegurar-se que estan actualitzades. Tingues en compte que açò pot utilitzar moltes dades si es troba en una xarxa d\'ús mesurat.</string>
     <string name="pref_info_data_version_title">Versió de les dades</string>
+    <string name="notification_new_version_image_files_message">Cercant els fitxers d\'image… <br />Progrés: %d/%d</string>
+    <string name="notification_new_version_cache_clear_message">Eliminant els arxius d\'imatge obsolets… <br />Progrés: %d/%d</string>
+    <string name="notification_new_version_referencing_message">Buscando los archivos de image… <br />Progreso: %d/%d</string>
+    <string name="notification_new_version_downloading_images_message">Baixant les imatges del servidor… <br />Imatge: %d/%d. Progrés: %d\%</string>
 </resources>
