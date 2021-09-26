@@ -1,6 +1,8 @@
 package com.arnyminerz.escalaralcoiaicomtat.worker
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.lifecycle.LiveData
 import androidx.work.*
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -14,10 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MOBILE_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ROAMING_DOWNLOAD_PREF
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.md5Hash
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -29,6 +28,7 @@ import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
+import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlin.random.Random
 
@@ -164,6 +164,12 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             updateProgress(PROGRESS_STEP_IMAGE_CHECKSUM, vm.percentage)
         }
         Timber.v("Got ${imageFileReferences.size} updatable image files.")
+
+        Timber.v("Downloading images from server...")
+        updateFiles(imageFileReferences) { progress, _ ->
+            val vm = ValueMax(progress, imageFileReferences.size)
+            updateProgress(PROGRESS_STEP_IMAGE_DOWNLOAD, vm.percentage)
+        }
 
         Timber.v("Finished updating data.")
         return Result.success()
@@ -311,7 +317,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         storage: FirebaseStorage,
         referencedImageFiles: List<Pair<File, String>>,
         progress: suspend (progress: Int) -> Unit
-    ): ArrayList<Pair<File, StorageReference>> {
+    ): List<Pair<File, StorageReference>> {
         val updatableFiles = arrayListOf<Pair<File, StorageReference>>()
         for ((i, imageFileReference) in referencedImageFiles.withIndex()) {
             progress(i)
@@ -325,6 +331,77 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 updatableFiles.add(imageFile to reference)
         }
         return updatableFiles
+    }
+
+    /**
+     * Downloads the new image files from the server, and replaces the ones in the device's filesystem.
+     * @author Arnau Mora
+     * @since 20210926
+     * @param imagesList A list of pairs that contain the [File] from the device's filesystem to
+     * update, and a [StorageReference] for reference on the server.
+     */
+    private suspend fun updateFiles(
+        imagesList: List<Pair<File, StorageReference>>,
+        progress: suspend (progress: Int, individual: ValueMax<Long>) -> Unit
+    ) {
+        for ((i, imageFileReference) in imagesList.withIndex()) {
+            progress(i, ValueMax(0, 0))
+            val imageFile = imageFileReference.first
+            val imageFileName = imageFile.nameWithoutExtension
+            val reference = imageFileReference.second
+
+            Timber.v("Deleting file at \"$imageFile\"...")
+            if (!imageFile.deleteIfExists()) {
+                Timber.w("Could not delete file at \"$imageFile\"!")
+                continue
+            }
+
+            Timber.v("Getting image scale...")
+            val scale = if (imageFileName.contains("scale"))
+                imageFileName.substringAfter("scale", "1").toFloat()
+            else 1f
+
+            val imageQuality = when {
+                imageFileName.startsWith(Area.NAMESPACE) -> Area.IMAGE_QUALITY
+                imageFileName.startsWith(Zone.NAMESPACE) -> Zone.IMAGE_QUALITY
+                else -> Sector.IMAGE_QUALITY
+            }
+
+            Timber.v("Downloading image from server: ${reference.path}")
+            val fileStreamSnapshot = reference
+                .stream
+                .addOnProgressListener { taskSnapshot ->
+                    val current = taskSnapshot.bytesTransferred
+                    val max = taskSnapshot.totalByteCount
+                    val vm = ValueMax(current, max)
+                    Timber.i("Download progress: ${vm.percentage}%")
+                    doAsync { progress(i, vm) }
+                }
+                .await()
+            Timber.v("Got stream, decoding...")
+            val stream = fileStreamSnapshot.stream
+            val bitmap: Bitmap? = BitmapFactory.decodeStream(
+                stream,
+                null,
+                BitmapFactory.Options().apply {
+                    inSampleSize = (1 / scale).toInt()
+                }
+            )
+            if (bitmap != null) {
+                Timber.v("$this > Compressing image...")
+                val baos = ByteArrayOutputStream()
+                val compressedBitmap: Boolean =
+                    bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
+                if (!compressedBitmap) {
+                    Timber.e("$this > Could not compress image!")
+                    throw ArithmeticException("Could not compress image for $this.")
+                } else {
+                    Timber.v("$this > Storing image...")
+                    baos.writeTo(imageFile.outputStream())
+                    Timber.v("$this > Image stored.")
+                }
+            }
+        }
     }
 
     companion object {
@@ -392,6 +469,13 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
          * @since 20210926
          */
         const val PROGRESS_STEP_IMAGE_CHECKSUM = "ImageChecksum"
+
+        /**
+         * The name of the image download step.
+         * @author Arnau Mora
+         * @since 20210926
+         */
+        const val PROGRESS_STEP_IMAGE_DOWNLOAD = "ImageDownload"
 
         /**
          * Gets the [LiveData] with a list of [WorkInfo] matching all the jobs that are updating the
