@@ -12,7 +12,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MOBILE_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ROAMING_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.google.common.util.concurrent.ListenableFuture
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
@@ -187,16 +186,31 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
          * @author Arnau Mora
          * @since 20210926
          * @param context The [Context] that is requesting the [LiveData].
-         * @return A [LiveData] with a [List] of the app update data jobs. It should be empty or
-         * length 1.
+         * @return A [LiveData] of the [WorkInfo] for the worker, or null if no worker running.
          */
-        fun getWorkInfo(context: Context): ListenableFuture<MutableList<WorkInfo>> {
+        suspend fun getWorkInfo(context: Context): LiveData<WorkInfo>? {
             Timber.v("Getting WorkManager instance...")
             val workManager = WorkManager
                 .getInstance(context)
 
-            Timber.v("Getting work info...")
-            return workManager.getWorkInfosByTag(UPDATE_WORKER_TAG)
+            Timber.v("Getting work infos by tag...")
+            val workInfosFuture = workManager.getWorkInfosByTag(UPDATE_WORKER_TAG)
+            val workInfos = workInfosFuture.await()
+            if (workInfos.isNotEmpty()) {
+                Timber.v("Searching for a non-finished worker...")
+                val workInfoIterator = workInfos.iterator()
+                while (workInfoIterator.hasNext()) {
+                    val workInfo = workInfoIterator.next()
+                    val workInfoId = workInfo.id
+                    val workState = workInfo.state
+                    if (!workState.isFinished) {
+                        Timber.v("Found a running worker. Id: $workInfoId")
+                        return workManager.getWorkInfoByIdLiveData(workInfoId)
+                    }
+                }
+            }
+            Timber.v("Could not find a running worker.")
+            return null
         }
 
         /**
