@@ -107,9 +107,6 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 updateProgress(PROGRESS_STEP_DATA_DOWNLOAD, progress.percentage)
             }
 
-            // Hide and destroy the notification
-            noti.destroy()
-
             notificationBuilder = notificationBuilder
                 .withLongText(
                     applicationContext.getString(
@@ -129,9 +126,6 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         Timber.v("Getting image files...")
         val imageFiles = fetchImageFiles { progress ->
             updateProgress(PROGRESS_STEP_IMAGE_PROCESS, progress.percentage)
-
-            // Hide and destroy the notification
-            noti.destroy()
 
             notificationBuilder = notificationBuilder
                 .withLongText(
@@ -161,8 +155,6 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             val vm = ValueMax(f, processedImageFilesCount)
             updateProgress(PROGRESS_STEP_IMAGE_REFERENCING, vm.percentage)
 
-            // Hide and destroy the notification
-            noti.destroy()
             notificationBuilder = notificationBuilder
                 .withLongText(
                     applicationContext.getString(
@@ -184,8 +176,6 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             val vm = ValueMax(it + cacheImageFilesCount, processedImageFilesCount)
             updateProgress(PROGRESS_STEP_IMAGE_REFERENCING, vm.percentage)
 
-            // Hide and destroy the notification
-            noti.destroy()
             notificationBuilder = notificationBuilder
                 .withLongText(
                     applicationContext.getString(
@@ -205,6 +195,16 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         val imageFileReferences = getDownloadableImages(storage, referencedImageFiles) {
             val vm = ValueMax(it + cacheImageFilesCount, processedImageFilesCount)
             updateProgress(PROGRESS_STEP_IMAGE_CHECKSUM, vm.percentage)
+
+            notificationBuilder = notificationBuilder
+                .withLongText(
+                    applicationContext.getString(
+                        R.string.notification_new_version_image_check_message,
+                        vm.value,
+                        vm.max
+                    )
+                )
+                .withProgress(vm)
         }
         Timber.v("Got ${imageFileReferences.size} updatable image files.")
 
@@ -215,8 +215,6 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
 
             val imageDownloadProgress = ValueMax(individual.percentage, 100)
 
-            // Hide and destroy the notification
-            noti.destroy()
             notificationBuilder = notificationBuilder
                 .withLongText(
                     applicationContext.getString(
@@ -449,17 +447,17 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 }
             )
             if (bitmap != null) {
-                Timber.v("$this > Compressing image...")
+                Timber.v("Compressing image...")
                 val baos = ByteArrayOutputStream()
                 val compressedBitmap: Boolean =
                     bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
                 if (!compressedBitmap) {
-                    Timber.e("$this > Could not compress image!")
+                    Timber.e("Could not compress image!")
                     throw ArithmeticException("Could not compress image for $this.")
                 } else {
-                    Timber.v("$this > Storing image...")
+                    Timber.v("Storing image...")
                     baos.writeTo(imageFile.outputStream())
-                    Timber.v("$this > Image stored.")
+                    Timber.v("Image stored.")
                 }
             }
         }
