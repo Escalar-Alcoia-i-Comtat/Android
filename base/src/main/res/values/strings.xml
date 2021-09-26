@@ -129,6 +129,8 @@
     <string name="pref_gene_section_advanced">Advanced</string>
     <string name="pref_gene_error_reporting_title">Enable error reporting</string>
     <string name="pref_gene_error_reporting_sum">This will send an anonymous error report to the developers when the app crashes or there\'s an error, so it can be fixed as soon as possible. Please, we kindly ask you to keep this enabled, but you are free to disable it.</string>
+    <string name="pref_gene_download_data_title">Update device\'s data</string>
+    <string name="pref_gene_download_data_sum">This will re-download all the data from the server for getting the latest version. Take into account that this might use a bunch of data.</string>
 
     <string name="pref_down_cat_downloads">Downloads</string>
     <string name="pref_down_mobile_title">Mobile Data</string>
@@ -143,6 +145,7 @@
     <string name="pref_info_service_block_status_summary">The service for updating the path\'s block status is currently: %s</string>
     <string name="pref_info_version_title">Version</string>
     <string name="pref_info_build_title">Build Number</string>
+    <string name="pref_info_data_version_title">Data Version</string>
     <string name="pref_info_git_title">Github</string>
     <string name="pref_info_git_sum">View the Github repository</string>
 

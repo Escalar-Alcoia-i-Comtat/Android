@@ -295,4 +295,7 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="notification_new_version_downloading_title">Descargando nueva versión</string>
     <string name="notification_new_version_downloading_short">Descargando una nueva versión de los datos de la aplicación.</string>
     <string name="notification_new_version_downloading_message">Descargando nueva versión de los datos de la aplicación. <br />Progresso %d/%d</string>
+    <string name="pref_gene_download_data_title">Actualiza los datos del dispositivo</string>
+    <string name="pref_gene_download_data_sum">Esto volverá a descargar todos los datos del servidor para asegurarse que se tiene la última versión. Tenga en cuenta que esto puede usar muchos datos si se encuentra en una red de uso medido.</string>
+    <string name="pref_info_data_version_title">Versión de los datos</string>
 </resources>
