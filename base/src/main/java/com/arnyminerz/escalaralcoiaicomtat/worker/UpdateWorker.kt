@@ -2,14 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.worker
 
 import android.content.Context
 import androidx.lifecycle.LiveData
-import androidx.work.Constraints
-import androidx.work.CoroutineWorker
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
-import androidx.work.WorkerParameters
-import androidx.work.workDataOf
+import androidx.work.*
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
@@ -22,6 +15,14 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 import kotlin.random.Random
+
+
+/**
+ * The tag used for identifying the worker and fetching its livedata.
+ * @author Arnau Mora
+ * @since 20210926
+ */
+const val UPDATE_WORKER_TAG = "data_updater"
 
 /**
  * The worker that aims to keep the app's data updated. When called, when all the requirements are
@@ -104,7 +105,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
          * @author Arnau Mora
          * @since 20210919
          */
-        fun schedule(context: Context, tag: String): LiveData<WorkInfo> {
+        fun schedule(context: Context): LiveData<WorkInfo> {
             // Create the notification for displaying the progress to the user
             val notificationBuilder = Notification.Builder(context)
                 .withChannelId(DOWNLOAD_PROGRESS_CHANNEL_ID)
@@ -128,7 +129,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             Timber.v("Building DownloadWorker request...")
             val request = OneTimeWorkRequestBuilder<UpdateWorker>()
                 .setConstraints(constraints.build())
-                .addTag(tag)
+                .addTag(UPDATE_WORKER_TAG)
                 .setInputData(workDataOf(WORKER_PARAMETER_NOTIFICATION_ID to notificationBuilder.id))
                 .build()
 
