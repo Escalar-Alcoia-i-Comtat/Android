@@ -101,6 +101,24 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         private const val WORKER_PARAMETER_NOTIFICATION_ID = "NotificationId"
 
         /**
+         * Gets the [LiveData] with a list of [WorkInfo] matching all the jobs that are updating the
+         * app's data.
+         * @author Arnau Mora
+         * @since 20210926
+         * @param context The [Context] that is requesting the [LiveData].
+         * @return A [LiveData] with a [List] of the app update data jobs. It should be empty or
+         * length 1.
+         */
+        fun getWorkInfo(context: Context): LiveData<List<WorkInfo>> {
+            Timber.v("Getting WorkManager instance...")
+            val workManager = WorkManager
+                .getInstance(context)
+
+            Timber.v("Getting work info...")
+            return workManager.getWorkInfosByTagLiveData(UPDATE_WORKER_TAG)
+        }
+
+        /**
          * Schedules the worker to be ran as soon as possible.
          * @author Arnau Mora
          * @since 20210919
