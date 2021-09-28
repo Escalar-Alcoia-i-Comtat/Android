@@ -20,8 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.exception.notification.NullIconE
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.view.getColor
 import timber.log.Timber
-import java.util.*
-import kotlin.collections.ArrayList
+import java.util.UUID
 
 private var notificationIdCounter = 0
 private fun generateNotificationId(): Int = notificationIdCounter++
@@ -69,6 +68,17 @@ class Notification private constructor(private val builder: Builder) {
      * @see Builder
      */
     fun edit(): Builder = builder
+
+    /**
+     * Updates some data of the notification, and refreshes it from the UI.
+     * @author Arnau Mora
+     * @since 20210928
+     * @return The modified instance of the [Notification].
+     */
+    fun update(edit: Builder.() -> Unit): Notification {
+        builder.apply(edit)
+        return builder.buildAndShow()
+    }
 
     /**
      * Shows the notification.
