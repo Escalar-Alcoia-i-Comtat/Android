@@ -51,6 +51,20 @@ const val ERROR_CREATE_PARENT = "create_parent"
 const val ERROR_DATA_FETCH = "data_fetch"
 
 /**
+ * When the type of data gotten from the server was not expected
+ * @author Arnau Mora
+ * @since 20210928
+ */
+const val ERROR_DATA_TYPE = "data_type"
+
+/**
+ * When there's missing data on the server
+ * @author Arnau Mora
+ * @since 20210928
+ */
+const val ERROR_DATA_FRAGMENTED = "data_fragmented"
+
+/**
  * When there's an unkown error while storing the image.
  * @since 20210411
  */
