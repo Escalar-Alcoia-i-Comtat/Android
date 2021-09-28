@@ -31,12 +31,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ROAMING_DOWNLOAD
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.progress
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toInt
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_DISPLAY_NAME
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_NAMESPACE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_OVERWRITE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_QUALITY
@@ -49,7 +47,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_CREATE_PAR
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DATA_FETCH
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DATA_FRAGMENTED
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DATA_TYPE
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DELETE_OLD
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_FETCH_IMAGE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_MISSING_DATA
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_STORE_IMAGE
@@ -79,13 +76,24 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
     DownloadWorkerModel, CoroutineWorker(appContext, workerParams) {
     override val factory: DownloadWorkerFactory = Companion
 
-    private lateinit var namespace: String
     private lateinit var displayName: String
     private var downloadPath: String? = null
     private var overwrite: Boolean = false
     private var quality: Int = -1
 
+    /**
+     * A reference to a [FirebaseStorage] instance for doing file-related operations.
+     * @author Arnau Mora
+     * @since 20210928
+     */
     private lateinit var storage: FirebaseStorage
+
+    /**
+     * A reference to a [FirebaseFirestore] instance for fetching data from the server.
+     * @author Arnau Mora
+     * @since 20210928
+     */
+    private lateinit var firestore: FirebaseFirestore
 
     /**
      * Specifies the downloading notification. For modifying it later.
@@ -104,6 +112,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         val imageReference: StorageReference,
         val imageFile: File,
         val objectId: String,
+        val namespace: String,
         val scale: Float
     )
 
@@ -119,6 +128,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @param imageReference The [FirebaseStorage] reference of the image to download.
      * @param imageFile The [File] instance referencing where the object's image should be stored at.
      * @param objectId The id of the object to download.
+     * @param namespace The namespace of the object to download.
      * @param scale The scale with which to download the object.
      * @param progressListener A listener for observing the download progress.
      */
@@ -126,30 +136,33 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         imageReference: StorageReference,
         imageFile: File,
         objectId: String,
+        namespace: String,
         scale: Float,
         progressListener: suspend (progress: ValueMax<Long>) -> Unit
     ): Result = coroutineScope {
         val dataDir = imageFile.parentFile!!
 
-        var error: Result? = null
-        if (imageFile.exists() && !overwrite)
-            error = failure(ERROR_ALREADY_DOWNLOADED)
-        if (!imageFile.deleteIfExists())
-            error = failure(ERROR_DELETE_OLD)
-        if (!dataDir.exists() && !dataDir.mkdirs())
-            error = failure(ERROR_CREATE_PARENT)
-        if (error != null)
+        // Check that everything is ready for downloading the image file.
+        when {
+            imageFile.exists() && !overwrite ->
+                // If the image has already been downloaded and override is set to false
+                failure(ERROR_ALREADY_DOWNLOADED)
+            !dataDir.exists() && !dataDir.mkdirs() ->
+                // If the images data dir could not be created
+                failure(ERROR_CREATE_PARENT)
+            else -> null
+        }?.let { error ->
             return@coroutineScope error
+        }
 
-        val n = namespace[0] // The key for logs
-        val pin = "$n/$objectId" // This is for identifying progress logs
-
-        notification
-            .edit()
-            .withInfoText(R.string.notification_download_progress_info_downloading_image)
-            .buildAndShow()
+        // Update the info text
+        notification.update {
+            withInfoText(R.string.notification_download_progress_info_downloading_image)
+        }
 
         try {
+            // Check if there's already an image downloaded to be used.
+            // This is done this way so the server is not overloaded
             var existingImage: File? = null
             val cacheDir = applicationContext.cacheDir
 
@@ -181,21 +194,24 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
 
             // If an image has been selected, copy it to imageFile.
             if (existingImage?.exists() == true) {
-                Timber.d("$pin > Copying cached image file from \"$existingImage\" to \"$imageFile\"")
+                Timber.d("Copying cached image file from \"$existingImage\" to \"$imageFile\"")
                 existingImage.copyTo(imageFile, overwrite = true)
             } else {
                 // Otherwise, download it from the server.
-                Timber.d("$pin > Downloading image from Firebase Storage: $imageReference...")
-                Timber.v("$pin > Fetching stream...")
+                Timber.d("Downloading image from Firebase Storage: $imageReference...")
+                Timber.v("Fetching stream...")
                 val snapshot = imageReference
                     .stream
                     .addOnProgressListener { snapshot ->
-                        val progress = ValueMax(snapshot.bytesTransferred, snapshot.totalByteCount)
+                        val progress = snapshot.progress()
                         CoroutineScope(coroutineContext).launch { progressListener(progress) }
-                        Timber.v("$pin > Image progress: ${progress.percentage}")
+                        Timber.v("Image progress: ${progress.percentage}")
                     }
                     .await()
-                Timber.v("$pin > Got image stream, decoding...")
+
+                // First decode the stream into a Bitmap, and then encode it to the file. This way
+                // the compression can be controlled better, as well of the strain on the server.
+                Timber.v("Got image stream, decoding...")
                 val stream = snapshot.stream
                 val bitmap: Bitmap? = BitmapFactory.decodeStream(
                     stream,
@@ -204,15 +220,16 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                         inSampleSize = (1 / scale).toInt()
                     }
                 )
+
                 if (bitmap != null) {
-                    Timber.v("$pin > Got bitmap.")
+                    Timber.v("Got bitmap.")
                     val quality = (scale * 100).toInt()
-                    Timber.v("$pin > Compression quality: $quality")
-                    Timber.v("$pin > Compressing bitmap to \"$imageFile\"...")
+                    Timber.v("Compression quality: $quality")
+                    Timber.v("Compressing bitmap to \"$imageFile\"...")
                     val compressed =
                         bitmap.compress(WEBP_LOSSY_LEGACY, quality, imageFile.outputStream())
                     if (compressed)
-                        Timber.v("$pin > Bitmap compressed successfully.")
+                        Timber.v("Bitmap compressed successfully.")
                     else
                         return@coroutineScope failure(ERROR_COMPRESS_IMAGE)
                 } else
@@ -274,12 +291,11 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * file.
      * @author Arnau Mora
      * @since 20210926
-     * @param firestore The [FirebaseFirestore] instance to fetch the data from.
-     * @param storage The [FirebaseStorage] instance to fetch files from the server.
      * @param path The path where the data is stored at.
      * @param progressListener A callback function for observing the download progress. When the
      * data is being fetched from the server, an undeterminate state will be returned. Once files
      * start getting downloaded, an overall progress will be passed.
+     * @return A [Pair] of two strings, the downloaded object namespace and objectId.
      * @throws FirebaseFirestoreException If there happens an exception while fetching the data
      * from the server.
      * @throws RuntimeException When there is an unexpected type exception in the data from the server.
@@ -287,11 +303,9 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      */
     @Throws(FirebaseFirestoreException::class)
     private suspend fun downloadData(
-        firestore: FirebaseFirestore,
-        storage: FirebaseStorage,
         path: String,
         progressListener: suspend (progress: ValueMax<Long>) -> Unit
-    ) = coroutineScope {
+    ): Pair<String, String> = coroutineScope {
         val imageFiles = arrayListOf<ImageDownloadData>()
         val kmzFiles = arrayListOf<KMZDownloadData>()
 
@@ -301,8 +315,9 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
          * @author Arnau Mora
          * @since 20210928
          * @param path The path inside [firestore] where to download the data from.
+         * @return A [Pair] of two strings, the downloaded object namespace and objectId.
          */
-        suspend fun scheduleDownload(path: String) {
+        suspend fun scheduleDownload(path: String): Pair<String, String> {
             // Get the document data from Firestore
             Timber.v("Getting document ($path)...")
             val document = firestore.document(path).get().await()
@@ -332,7 +347,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             val imageReference = storage.getReferenceFromUrl(imageReferenceUrl)
 
             Timber.v("Adding image download request data to the imageFiles list...")
-            imageFiles.add(ImageDownloadData(imageReference, imageFile, objectId, scale))
+            imageFiles.add(ImageDownloadData(imageReference, imageFile, objectId, namespace, scale))
 
             if (kmzReferenceUrl != null) {
                 Timber.v("Processing KMZ file download data...")
@@ -357,12 +372,14 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     scheduleDownload(documentPath)
                 }
             }
+
+            return namespace to objectId
         }
 
         Timber.v("Calling progress listener...")
         progressListener(ValueMax(0, -1)) // Set to -1 for indeterminate
         Timber.v("Initializing data fetch...")
-        scheduleDownload(path)
+        val parentData = scheduleDownload(path)
 
         // This total byte count is used for displaying the total progress, not individually on each
         // item.
@@ -388,6 +405,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     imageReference,
                     imageFile,
                     objectId,
+                    namespace,
                     scale,
                     downloadProgressListener
                 )
@@ -401,11 +419,12 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 downloadKmz(kmzReference, kmzFile, downloadProgressListener)
                 bytesCounter += lastElementByteCount
             }
+
+        parentData
     }
 
     override suspend fun doWork(): Result {
         // Get all data
-        val namespace = inputData.getString(DOWNLOAD_NAMESPACE)
         downloadPath = inputData.getString(DOWNLOAD_PATH)
         val displayName = inputData.getString(DOWNLOAD_DISPLAY_NAME)
         overwrite = inputData.getBoolean(DOWNLOAD_OVERWRITE, DOWNLOAD_OVERWRITE_DEFAULT)
@@ -414,17 +433,19 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         Timber.v("Starting download for %s".format(displayName))
 
         // Check if any required data is missing
-        return if (namespace == null || downloadPath == null || displayName == null)
+        return if (downloadPath == null || displayName == null)
             failure(ERROR_MISSING_DATA)
         else {
             Timber.v("Initializing Firebase Storage instance...")
             storage = Firebase.storage
 
+            Timber.v("Initializing Firebase Firestore instance...")
+            firestore = Firebase.firestore
+
             Timber.v("Initializing search session...")
             appSearchSession = createSearchSession(applicationContext)
 
-            Timber.v("Downloading $namespace at $downloadPath...")
-            this.namespace = namespace
+            Timber.v("Downloading $downloadPath...")
             this.displayName = displayName
 
             val message = applicationContext.getString(
@@ -443,14 +464,14 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 .setPersistent(true)
             notification = notificationBuilder.buildAndShow()
 
-            Timber.v("Getting Firestore instance...")
-            val firestore = Firebase.firestore
-
+            var namespace: String? = null
             var downloadResult = try {
-                downloadData(firestore, storage, downloadPath!!) { progress ->
+                downloadData(downloadPath!!) { progress ->
                     notification = notification.update {
                         withProgress(progress.toInt())
                     }
+                }.let {
+                    namespace = it.first
                 }
                 Result.success()
             } catch (e: FirebaseFirestoreException) {
@@ -582,7 +603,6 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 .setInputData(
                     with(data) {
                         workDataOf(
-                            DOWNLOAD_NAMESPACE to dataClass.namespace,
                             DOWNLOAD_PATH to dataClass.metadata.documentPath,
                             DOWNLOAD_DISPLAY_NAME to dataClass.displayName,
                             DOWNLOAD_OVERWRITE to overwrite,
