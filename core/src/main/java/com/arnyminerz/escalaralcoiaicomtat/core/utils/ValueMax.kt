@@ -36,6 +36,14 @@ constructor(val value: T, val max: T) {
 }
 
 /**
+ * Converts the [ValueMax] to a [Int]-based one, using the [ValueMax.percentage] function.
+ * @author Arnau Mora
+ * @since 20210928
+ * @return A new instance of [ValueMax] that uses the percentage as value and 100 as the max.
+ */
+fun ValueMax<Long>.toInt(): ValueMax<Int> = ValueMax(percentage, 100)
+
+/**
  * Gets a [ValueMax] instance from the current progress of the task.
  * @author Arnau Mora
  * @since 20210926
