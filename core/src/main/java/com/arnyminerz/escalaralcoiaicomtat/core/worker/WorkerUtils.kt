@@ -18,6 +18,11 @@ fun dataOf(data: Map<String, Any>): Data {
 }
 
 fun failure(error: String) =
-    ListenableWorker.Result.failure(dataOf(
-        "error" to error
-    ))
+    ListenableWorker.Result.failure(
+        dataOf(
+            "error" to error
+        )
+    )
+
+val Data.error: String?
+    get() = getString("error")

@@ -2,22 +2,22 @@ package com.arnyminerz.escalaralcoiaicomtat.core.worker.download
 
 
 const val DOWNLOAD_DISPLAY_NAME = "display_name"
-const val DOWNLOAD_NAMESPACE = "namespace"
 const val DOWNLOAD_PATH = "path"
 const val DOWNLOAD_OVERWRITE = "overwrite"
 const val DOWNLOAD_QUALITY = "quality"
+
+/**
+ * The tag added to all workers that work on app data downloads.
+ * @author Arnau Mora
+ * @since 20210926
+ */
+const val WORKER_TAG_DOWNLOAD = "DataDownload"
 
 /**
  * When the DownloadWorker was ran with missing data
  * @since 20210313
  */
 const val ERROR_MISSING_DATA = "missing_data"
-
-/**
- * When old data was tried to be deleted but was not possible
- * @since 20210313
- */
-const val ERROR_DELETE_OLD = "delete_old"
 
 /**
  * When the target download could not be found
@@ -42,6 +42,20 @@ const val ERROR_CREATE_PARENT = "create_parent"
  * @since 20210411
  */
 const val ERROR_DATA_FETCH = "data_fetch"
+
+/**
+ * When the type of data gotten from the server was not expected
+ * @author Arnau Mora
+ * @since 20210928
+ */
+const val ERROR_DATA_TYPE = "data_type"
+
+/**
+ * When there's missing data on the server
+ * @author Arnau Mora
+ * @since 20210928
+ */
+const val ERROR_DATA_FRAGMENTED = "data_fragmented"
 
 /**
  * When there's an unkown error while storing the image.

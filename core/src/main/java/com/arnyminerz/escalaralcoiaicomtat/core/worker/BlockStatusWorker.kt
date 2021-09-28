@@ -1,13 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.worker
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.PutDocumentsRequest
 import androidx.appsearch.app.SetSchemaRequest
 import androidx.appsearch.exceptions.AppSearchException
-import androidx.core.app.NotificationManagerCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -20,11 +17,13 @@ import androidx.work.await
 import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_FAILED_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_IN_PROGRESS_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.clipboard
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.copy
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
-import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -108,6 +107,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
             }
 
             if (failedBlockStatus.isNotEmpty()) {
+                notification.destroy()
                 Timber.v("Showing failed block status fetch notification")
                 Notification.Builder(applicationContext)
                     .withChannelId(TASK_FAILED_CHANNEL_ID)
@@ -135,21 +135,16 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                             sb.appendLine("- $pathName")
 
                         // Copy to clipboard
-                        val clipboard =
-                            applicationContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        val clip = ClipData.newPlainText(
-                            "label",
-                            context.getString(
-                                R.string.notification_block_status_error_log,
-                                failedBlockStatus.size,
-                                sb.toString()
-                            )
+                        val clipboard = applicationContext.clipboard
+                        val text = context.getString(
+                            R.string.notification_block_status_error_log,
+                            failedBlockStatus.size,
+                            sb.toString()
                         )
-                        clipboard.setPrimaryClip(clip)
+                        text.copy(clipboard)
 
                         // Hide the notification
-                        NotificationManagerCompat.from(applicationContext)
-                            .cancel(this.id)
+                        Notification.dismiss(applicationContext, id)
                     }
                     .buildAndShow()
             }
