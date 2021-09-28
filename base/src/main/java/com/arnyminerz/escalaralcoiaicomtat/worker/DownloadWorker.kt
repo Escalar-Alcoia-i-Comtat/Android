@@ -52,6 +52,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_MISSING_DA
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_STORE_IMAGE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UNKNOWN_NAMESPACE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.WORKER_TAG_DOWNLOAD
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.error
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.failure
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.firestore.FirebaseFirestore
@@ -70,6 +71,11 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 
+/**
+ * The [CoroutineWorker] for scheduling [DataClass] downloads.
+ * @author Arnau Mora
+ * @since 20210928
+ */
 @ExperimentalBadgeUtils
 class DownloadWorker
 private constructor(appContext: Context, workerParams: WorkerParameters) :
@@ -170,14 +176,6 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             val cacheFile = File(cacheDir, DataClass.imageName(namespace, objectId, null))
             if (existingImage == null && cacheFile.exists())
                 existingImage = cacheFile
-
-            // If there's an scaled (default scale) version of the image, select it
-            val scaledCacheFile = File(
-                cacheDir,
-                DataClass.imageName(namespace, objectId, "scale$DATACLASS_PREVIEW_SCALE")
-            )
-            if (existingImage == null && scaledCacheFile.exists())
-                existingImage = scaledCacheFile
 
             // If there's an scaled (given scale) version of the image, select it
             val scaledFile = File(
@@ -552,7 +550,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     .withLongText(
                         R.string.notification_download_failed_message_long,
                         displayName,
-                        downloadResult.outputData.getString("error") ?: "unknown"
+                        downloadResult.outputData.error ?: "unknown"
                     )
                     .buildAndShow()
             }
