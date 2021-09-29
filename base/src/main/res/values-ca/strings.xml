@@ -302,4 +302,6 @@
     <string name="notification_new_version_referencing_message">Buscando los archivos de image… <br />Progreso: %d/%d</string>
     <string name="notification_new_version_downloading_images_message">Baixant les imatges del servidor… <br />Imatge: %d/%d. Progrés: %d\%</string>
     <string name="notification_new_version_image_check_message">Comprovant actualitzacions de les imatges… <br />Progrés: %d/%d</string>
+    <string name="dialog_md5_incompatible_title">Decodificació MD5 no suportada</string>
+    <string name="dialog_md5_incompatible_message">El teu dispositiu no té suport per a la decodificació MD5. Tindràs problemes al rebre actualitzacions de les dades.</string>
 </resources>

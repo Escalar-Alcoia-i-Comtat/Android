@@ -72,6 +72,8 @@
     <string name="dialog_logout_message">Are you sure that you want to get logged out?</string>
     <string name="dialog_background_restricted_title">Background restricted</string>
     <string name="dialog_background_restricted_message">You, or your system have blocked the application for being executed in the background, so you may not be able to receive alert notifications. Please, go to your system\'s settings and disable battery optimization for Escalar Alcoià i Comtat, or you can disable the alerts system completely.</string>
+    <string name="dialog_md5_incompatible_title">MD5 hashing not supported</string>
+    <string name="dialog_md5_incompatible_message">Your device does not support MD5 hashing. You will have issues while receiveing data updates.</string>
 
     <string name="mark_completed_title">Mark Path</string>
     <string name="mark_completed_name">Path Name</string>
