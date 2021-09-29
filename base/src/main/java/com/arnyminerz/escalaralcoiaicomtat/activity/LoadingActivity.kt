@@ -13,6 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvide
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_SHOWN_MD5_WARNING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
@@ -20,13 +21,17 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.md5Compatible
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.BlockStatusWorker
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
 import com.google.android.gms.common.ConnectionResult.SUCCESS
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
@@ -48,6 +53,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
     private lateinit var messaging: FirebaseMessaging
+    private lateinit var analytics: FirebaseAnalytics
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,8 +66,11 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         storage = Firebase.storage
         Timber.v("Getting Firebase Messaging instance...")
         messaging = Firebase.messaging
+        Timber.v("Getting Firebase Analytics instance...")
+        analytics = Firebase.analytics
 
         checkGooglePlayServices()
+        checkMD5Support()
         dataCollectionSetUp()
         messagingTokenGet()
         messagingSubscribeTest()
@@ -89,6 +98,32 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
         super.onStateChangeAsync(state)
         load()
+    }
+
+    /**
+     * Checks if the device supports MD5 hashing. If it isn't supported, it shows a warning to the
+     * user.
+     * @author Arnau Mora
+     * @since 20210929
+     */
+    private fun checkMD5Support() {
+        val md5Supported = md5Compatible()
+        Timber.i("Is MD5 hashing supported: $md5Supported")
+        if (!md5Supported) {
+            Timber.w("MD5 hashing is not compatible")
+            analytics.logEvent("MD5NotSupported") { }
+            if (!PREF_SHOWN_MD5_WARNING.get()) {
+                Timber.i("Showing MD5 hashing warning dialog")
+                MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_App)
+                    .setTitle(R.string.dialog_md5_incompatible_title)
+                    .setMessage(R.string.dialog_md5_incompatible_message)
+                    .setPositiveButton(R.string.action_ok) { dialog, _ ->
+                        PREF_SHOWN_MD5_WARNING.put(true)
+                        dialog.dismiss()
+                    }
+                    .show()
+            }
+        }
     }
 
     /**
