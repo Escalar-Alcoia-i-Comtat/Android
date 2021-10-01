@@ -26,7 +26,7 @@ buildscript {
         classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.5.30'
 
         // Hilt dependency injection
-        classpath 'com.google.dagger:hilt-android-gradle-plugin:2.38.1'
+        classpath 'com.google.dagger:hilt-android-gradle-plugin:2.39.1'
     }
 }
 
