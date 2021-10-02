@@ -2,7 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.map
 
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 
-const val LOCATION_UPDATE_MIN_TIME: Long = 10 * 1000 // 10 seconds
+const val LOCATION_UPDATE_MIN_TIME: Long = 10L * 1000L // 10 seconds
 const val LOCATION_UPDATE_MIN_DIST: Float = 1.5f // 1.5 meters
 
 val ICON_WAYPOINT_ESCALADOR_BLANC =
