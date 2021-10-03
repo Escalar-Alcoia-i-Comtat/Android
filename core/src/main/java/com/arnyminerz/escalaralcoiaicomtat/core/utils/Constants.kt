@@ -12,4 +12,4 @@ const val MBYTE = 1024 * 1024
  * @author Arnau Mora
  * @since 20210416
  */
-const val MEGABYTE: Long = 1024 * 1024
+const val MEGABYTE: Long = 1024L * 1024L
