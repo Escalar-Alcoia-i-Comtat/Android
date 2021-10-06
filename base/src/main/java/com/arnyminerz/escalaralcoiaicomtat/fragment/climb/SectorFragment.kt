@@ -40,8 +40,13 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
+/**
+ * A fragment that displays the contents of a Sector.
+ * @author Arnau Mora
+ * @since 20211006
+ */
 @ExperimentalBadgeUtils
-class SectorFragment : NetworkChangeListenerFragment() {
+class SectorFragment private constructor() : NetworkChangeListenerFragment() {
     companion object {
         /**
          * Creates a new [SectorFragment] instance with the specified arguments.
@@ -58,25 +63,98 @@ class SectorFragment : NetworkChangeListenerFragment() {
         }
     }
 
+    /**
+     * The id of the sector that is being displayed.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private lateinit var sectorId: String
+
+    /**
+     * The data of the sector that is being displayed.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private lateinit var sector: Sector
 
+    /**
+     * Will be true when the contents are being loaded.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private var loading = false
+
+    /**
+     * Will be true once the contents have been loaded.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private var loaded = false
+
+    /**
+     * Will be true once the sector's image has been loaded.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private var imageLoaded = false
 
+    /**
+     * Stores temporally if the sector is downloaded.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private var isDownloaded = false
+
+    /**
+     * True if the sector's image is maximized. False otherwise.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private var maximized = false
+
+    /**
+     * The height that the image should have when it's not maximized. It gets calculated from a
+     * proportions with the size of the device.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private var notMaximizedImageHeight = 0
 
+    /**
+     * The view binding of the layout of the fragment.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     internal var binding: FragmentSectorBinding? = null
 
+    /**
+     * A reference to the [FirebaseFirestore] instance.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private lateinit var firestore: FirebaseFirestore
+
+    /**
+     * A reference of the [FirebaseStorage] instance.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private lateinit var storage: FirebaseStorage
 
+    /**
+     * An automatic cast of [getActivity] to [SectorActivity].
+     * Is null if not attached to an activity, or if parent Activity is null.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private val sectorActivity: SectorActivity?
         get() = (activity as? SectorActivity?)
 
+    /**
+     * The intent request for marking a path as complete.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     val markAsCompleteRequest =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             val data = it.data
@@ -113,6 +191,11 @@ class SectorFragment : NetworkChangeListenerFragment() {
             } else Timber.w("Could not get the path's document.")
         }
 
+    /**
+     * Refreshes the UI to match the state of maximization.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     @UiThread
     private fun refreshMaximizeStatus() {
         binding?.sizeChangeFab?.setImageResource(
@@ -123,6 +206,11 @@ class SectorFragment : NetworkChangeListenerFragment() {
         sectorActivity?.userInputEnabled(!maximized)
     }
 
+    /**
+     * Minimizes the sector's image view and updates the UI.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     @UiThread
     fun minimize() {
         maximized = false
