@@ -63,19 +63,33 @@ class MapFragment : NetworkChangeListenerFragment() {
         return binding!!.root
     }
 
-    @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("onViewCreated()")
-        binding!!.loadingMapCardView.show()
 
+        Timber.v("Initializing Firebase Storage...")
         firebaseStorage = Firebase.storage
+        Timber.v("Initializing Firebase Firestore...")
         firestore = Firebase.firestore
 
         Timber.v("Preparing MapHelper...")
         mapHelper = MapHelper()
             .withMapView(binding!!.pageMapView)
-        mapHelper.onCreate(savedInstanceState ?: Bundle.EMPTY)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        mapHelper.onCreate(savedInstanceState)
+
+        binding!!.loadingMapCardView.show()
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun onStart() {
+        super.onStart()
+        mapHelper.onStart()
+
+        Timber.v("Loading map...")
         mapHelper
             .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
             .loadMap { map ->
@@ -161,11 +175,6 @@ class MapFragment : NetworkChangeListenerFragment() {
             }
     }
 
-    override fun onStart() {
-        super.onStart()
-        mapHelper.onStart()
-    }
-
     override fun onPause() {
         super.onPause()
         mapHelper.onPause()
@@ -210,7 +219,7 @@ class MapFragment : NetworkChangeListenerFragment() {
     }
 
     /**
-     * Loads all the map features from [AREAS]. Note that [mapHelper] must be loaded before running.
+     * Loads all the map features from cached areas. Note that [mapHelper] must be loaded before running.
      * @author Arnau Mora
      * @since 20210521
      * @see mapLoaded
