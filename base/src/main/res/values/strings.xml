@@ -199,6 +199,8 @@
     <string name="toast_error_no_internet">No Internet Access detected</string>
     <string name="toast_error_language">Cannot change language</string>
     <string name="toast_error_no_kmz">Could not find KMZ file</string>
+    <string name="toast_error_kmz_corrupt">The stored KMZ file is corrupt, will be downloaded again</string>
+    <string name="toast_error_kmz_corrupt_again">The stored KMZ file is corrupt, try again later</string>
     <string name="toast_error_confirmation_send">Could not send confirmation mail</string>
     <string name="toast_error_confirmation">Could not verify email!</string>
     <string name="toast_error_profile_image_update">Could not update profile image</string>
