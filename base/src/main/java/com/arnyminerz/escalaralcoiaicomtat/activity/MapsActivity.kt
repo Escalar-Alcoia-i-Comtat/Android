@@ -220,6 +220,11 @@ class MapsActivity : LanguageAppCompatActivity() {
             toast(R.string.toast_error_map_load)
             finish()
             return
+        } catch (e: SAXParseException) {
+            Timber.e(e, "KMZ file is corrupt, deleting file and closing activity.")
+            toast(R.string.toast_error_kmz_corrupt_again)
+            finish()
+            return
         }
     }
 
