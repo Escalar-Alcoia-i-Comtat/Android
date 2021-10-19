@@ -263,11 +263,9 @@ class SectorFragment private constructor() : NetworkChangeListenerFragment() {
         binding = null
     }
 
-    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
+    override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
         if (isResumed)
-            doAsync {
-                load()
-            }
+            load()
     }
 
     /**
