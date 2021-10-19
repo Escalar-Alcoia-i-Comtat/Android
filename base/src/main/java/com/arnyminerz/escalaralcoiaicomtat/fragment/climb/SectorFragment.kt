@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.climb
 
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +25,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
+import com.arnyminerz.escalaralcoiaicomtat.core.view.getTypedAttribute
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
@@ -198,6 +198,24 @@ class SectorFragment private constructor() : NetworkChangeListenerFragment() {
      */
     @UiThread
     private fun refreshMaximizeStatus() {
+        val context = context
+        if (context != null)
+            (binding?.sectorImageViewLayout?.layoutParams as? ViewGroup.MarginLayoutParams)
+                ?.apply {
+                    setMargins(
+                        0,
+                        if (maximized) {
+                            val tv = context.getTypedAttribute(android.R.attr.actionBarSize)
+                            resources.getDimensionPixelSize(tv.resourceId)
+                        } else 0,
+                        0,
+                        0
+                    )
+                    height =
+                        if (maximized) LinearLayout.LayoutParams.MATCH_PARENT else notMaximizedImageHeight
+                }
+        binding?.sectorImageViewLayout?.requestLayout()
+
         binding?.sizeChangeFab?.setImageResource(
             if (maximized) R.drawable.round_flip_to_front_24
             else R.drawable.round_flip_to_back_24
