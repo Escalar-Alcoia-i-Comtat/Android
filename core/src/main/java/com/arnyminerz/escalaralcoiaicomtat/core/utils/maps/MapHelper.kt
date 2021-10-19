@@ -63,6 +63,7 @@ import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.storage.FirebaseStorage
+import org.xml.sax.SAXParseException
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
@@ -331,6 +332,7 @@ class MapHelper {
      * @param addToMap If true, the loaded features will be added automatically to the map
      */
     @WorkerThread
+    @Throws(SAXParseException::class)
     fun loadKMZ(
         context: Context,
         kmzFile: File,
