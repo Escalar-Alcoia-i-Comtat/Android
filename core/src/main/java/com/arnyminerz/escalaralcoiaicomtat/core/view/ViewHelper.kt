@@ -119,8 +119,25 @@ fun getColorFromAttribute(context: Context, @AttrRes attributeRes: Int): Int {
     return resources.getColor(colorRes, theme)
 }
 
-fun getAttribute(context: Context, resId: Int): Int {
+/**
+ * Gets an attribute with id [resId], and returns it as [TypedValue].
+ * @author Arnau Mora
+ * @since 20211006
+ * @param resId The id of the attribute to get.
+ */
+fun Context.getTypedAttribute(resId: Int): TypedValue {
     val typedValue = TypedValue()
-    context.theme.resolveAttribute(resId, typedValue, true)
-    return typedValue.data
+    theme.resolveAttribute(resId, typedValue, true)
+    return typedValue
+}
+
+/**
+ * Gets the value of an attribute with id [resId].
+ * @author Arnau Mora
+ * @since 20211006
+ * @param context The context to get the attribute from.
+ * @param resId The id of the attribute to get.
+ */
+fun getAttribute(context: Context, resId: Int): Int {
+    return context.getTypedAttribute(resId).data
 }

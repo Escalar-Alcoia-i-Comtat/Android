@@ -304,4 +304,5 @@
     <string name="notification_new_version_image_check_message">Comprovant actualitzacions de les imatges… <br />Progrés: %d/%d</string>
     <string name="dialog_md5_incompatible_title">Decodificació MD5 no suportada</string>
     <string name="dialog_md5_incompatible_message">El teu dispositiu no té suport per a la decodificació MD5. Tindràs problemes al rebre actualitzacions de les dades.</string>
+    <string name="toast_error_google_play">Escalar Alcoià i Comtat necessita els serveis de Google Play</string>
 </resources>

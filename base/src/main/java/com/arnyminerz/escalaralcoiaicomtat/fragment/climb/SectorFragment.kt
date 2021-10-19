@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.fragment.climb
 
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +25,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
+import com.arnyminerz.escalaralcoiaicomtat.core.view.getTypedAttribute
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
@@ -40,8 +40,13 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
+/**
+ * A fragment that displays the contents of a Sector.
+ * @author Arnau Mora
+ * @since 20211006
+ */
 @ExperimentalBadgeUtils
-class SectorFragment : NetworkChangeListenerFragment() {
+class SectorFragment private constructor() : NetworkChangeListenerFragment() {
     companion object {
         /**
          * Creates a new [SectorFragment] instance with the specified arguments.
@@ -58,25 +63,98 @@ class SectorFragment : NetworkChangeListenerFragment() {
         }
     }
 
+    /**
+     * The id of the sector that is being displayed.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private lateinit var sectorId: String
+
+    /**
+     * The data of the sector that is being displayed.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private lateinit var sector: Sector
 
+    /**
+     * Will be true when the contents are being loaded.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private var loading = false
+
+    /**
+     * Will be true once the contents have been loaded.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private var loaded = false
+
+    /**
+     * Will be true once the sector's image has been loaded.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private var imageLoaded = false
 
+    /**
+     * Stores temporally if the sector is downloaded.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private var isDownloaded = false
+
+    /**
+     * True if the sector's image is maximized. False otherwise.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private var maximized = false
+
+    /**
+     * The height that the image should have when it's not maximized. It gets calculated from a
+     * proportions with the size of the device.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private var notMaximizedImageHeight = 0
 
+    /**
+     * The view binding of the layout of the fragment.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     internal var binding: FragmentSectorBinding? = null
 
+    /**
+     * A reference to the [FirebaseFirestore] instance.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private lateinit var firestore: FirebaseFirestore
+
+    /**
+     * A reference of the [FirebaseStorage] instance.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private lateinit var storage: FirebaseStorage
 
+    /**
+     * An automatic cast of [getActivity] to [SectorActivity].
+     * Is null if not attached to an activity, or if parent Activity is null.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     private val sectorActivity: SectorActivity?
         get() = (activity as? SectorActivity?)
 
+    /**
+     * The intent request for marking a path as complete.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     val markAsCompleteRequest =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             val data = it.data
@@ -113,8 +191,31 @@ class SectorFragment : NetworkChangeListenerFragment() {
             } else Timber.w("Could not get the path's document.")
         }
 
+    /**
+     * Refreshes the UI to match the state of maximization.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     @UiThread
     private fun refreshMaximizeStatus() {
+        val context = context
+        if (context != null)
+            (binding?.sectorImageViewLayout?.layoutParams as? ViewGroup.MarginLayoutParams)
+                ?.apply {
+                    setMargins(
+                        0,
+                        if (maximized) {
+                            val tv = context.getTypedAttribute(android.R.attr.actionBarSize)
+                            resources.getDimensionPixelSize(tv.resourceId)
+                        } else 0,
+                        0,
+                        0
+                    )
+                    height =
+                        if (maximized) LinearLayout.LayoutParams.MATCH_PARENT else notMaximizedImageHeight
+                }
+        binding?.sectorImageViewLayout?.requestLayout()
+
         binding?.sizeChangeFab?.setImageResource(
             if (maximized) R.drawable.round_flip_to_front_24
             else R.drawable.round_flip_to_back_24
@@ -123,6 +224,11 @@ class SectorFragment : NetworkChangeListenerFragment() {
         sectorActivity?.userInputEnabled(!maximized)
     }
 
+    /**
+     * Minimizes the sector's image view and updates the UI.
+     * @author Arnau Mora
+     * @since 20211006
+     */
     @UiThread
     fun minimize() {
         maximized = false
@@ -175,11 +281,9 @@ class SectorFragment : NetworkChangeListenerFragment() {
         binding = null
     }
 
-    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
+    override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
         if (isResumed)
-            doAsync {
-                load()
-            }
+            load()
     }
 
     /**
@@ -189,128 +293,103 @@ class SectorFragment : NetworkChangeListenerFragment() {
      */
     @WorkerThread
     suspend fun load() {
-        var error = false
         val sectorActivity = this.sectorActivity
         if (!this::sectorId.isInitialized) {
             Timber.w("Could not load since class is not initialized")
-            error = true
+            return
         }
         if (loaded && imageLoaded) {
             Timber.i("Will not load again.")
-            error = true
+            return
         }
         if (loading) {
             Timber.i("Already loading.")
-            error = true
+            return
         }
         if (sectorActivity == null) {
             Timber.w("Activity is null")
-            error = true
-        }
-        if (error)
             return
+        }
+        val binding = this.binding
+        if (binding == null) {
+            Timber.w("Binding is null")
+            return
+        }
         loading = true
 
         uiContext {
-            binding?.sectorProgressBar?.visibility(true)
+            binding.sectorProgressBar.visibility(true)
         }
 
-        if (loaded && this::sector.isInitialized)
-            uiContext {
-                sectorActivity?.updateTitle(sector.displayName, isDownloaded)
-                loadImage()
-            }
-        else {
-            val app = requireActivity().application as App
-            Timber.d("Loading sector S/$sectorId")
-            sector = app.getSector(sectorId) ?: run {
-                Timber.e("Could not get sector S/$sectorId")
-                uiContext { toast(R.string.toast_error_not_found) }
-                activity?.onBackPressed()
-                return
-            }
-
-            uiContext {
-                binding?.sectorTextView?.text = sector.displayName
-            }
-
-            isDownloaded = sector.downloadStatus(app, app.searchSession).downloaded
-
-            if (activity != null && activity?.isDestroyed == false) {
-                val size = activity?.let { getDisplaySize(it).second } ?: 0
-                notMaximizedImageHeight = size / 2
-
-                uiContext {
-                    binding?.sectorImageViewLayout?.layoutParams?.height = notMaximizedImageHeight
-                    binding?.sectorImageViewLayout?.requestLayout()
-                }
-
-                Timber.v("Loading paths...")
-                val paths = sector.getChildren(app.searchSession).sortedBy { it.sketchId }
-                Timber.v("Finished loading children sectors")
-
-                uiContext {
-                    Timber.v("Loading sector fragment")
-                    loadImage()
-
-                    Timber.v("Finished loading paths, performing UI updates")
-                    (this as? SectorActivity?)?.updateTitle(sector.displayName, isDownloaded)
-
-                    binding?.sizeChangeFab?.setOnClickListener {
-                        maximized = !maximized
-
-                        (binding?.sectorImageViewLayout?.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-                            val tv = TypedValue()
-                            requireContext().theme.resolveAttribute(
-                                android.R.attr.actionBarSize,
-                                tv,
-                                true
-                            )
-                            val actionBarHeight = resources.getDimensionPixelSize(tv.resourceId)
-                            setMargins(0, if (maximized) actionBarHeight else 0, 0, 0)
-                            height =
-                                if (maximized) LinearLayout.LayoutParams.MATCH_PARENT else notMaximizedImageHeight
-                        }
-                        binding?.sectorImageViewLayout?.requestLayout()
-
-                        refreshMaximizeStatus()
-                    }
-                    binding?.dataScrollView?.show()
-                    refreshMaximizeStatus()
-
-                    // Load Paths
-                    binding?.pathsRecyclerView?.layoutManager =
-                        LinearLayoutManager(requireContext())
-                    binding?.pathsRecyclerView?.layoutAnimation =
-                        AnimationUtils.loadLayoutAnimation(
-                            requireContext(),
-                            R.anim.item_enter_left_animator
-                        )
-                    binding?.pathsRecyclerView?.adapter = PathsAdapter(paths, markAsCompleteRequest)
-                    binding?.pathsRecyclerView?.show()
-
-                    // Load info bar
-                    binding?.sunChip?.let {
-                        appendChip(requireContext(), sector.sunTime, it)
-                    }
-                    binding?.kidsAptChip?.let {
-                        sector.kidsAptChip(requireContext(), it)
-                    }
-                    binding?.walkingTimeTextView?.let {
-                        sector.walkingTimeView(requireContext(), it)
-                    }
-
-                    // Load chart
-                    binding?.sectorBarChart?.let {
-                        sector.loadChart(requireActivity(), it, paths)
-                    }
-                }
-            } else
-                Timber.e("Could not start loading sectors since context is null. Activity destroyed: ${activity?.isDestroyed}")
+        val app = sectorActivity.application as App
+        Timber.d("Loading sector S/$sectorId")
+        sector = app.getSector(sectorId) ?: run {
+            Timber.e("Could not get sector S/$sectorId")
+            uiContext { toast(R.string.toast_error_not_found) }
+            activity?.onBackPressed()
+            return
         }
 
         uiContext {
-            binding?.sectorProgressBar?.visibility(false)
+            binding.sectorTextView.text = sector.displayName
+        }
+
+        isDownloaded = sector.downloadStatus(app, app.searchSession).downloaded
+
+        if (!sectorActivity.isDestroyed) {
+            Timber.v("Calculating sector image size...")
+            val size = getDisplaySize(sectorActivity).second
+            notMaximizedImageHeight = size / 2
+
+            uiContext {
+                binding.sectorImageViewLayout.layoutParams?.height = notMaximizedImageHeight
+                binding.sectorImageViewLayout.requestLayout()
+            }
+
+            Timber.v("Loading paths...")
+            val paths = sector
+                .getChildren(app.searchSession)
+                .sortedBy { it.sketchId }
+            Timber.v("Finished loading children sectors")
+
+            uiContext {
+                Timber.v("Loading sector fragment")
+                loadImage()
+
+                Timber.v("Finished loading paths, performing UI updates")
+                sectorActivity.updateTitle(sector.displayName, isDownloaded)
+
+                binding.sizeChangeFab.setOnClickListener {
+                    maximized = !maximized
+
+                    refreshMaximizeStatus()
+                }
+                binding.dataScrollView.show()
+                refreshMaximizeStatus()
+
+                // Load Paths
+                binding.pathsRecyclerView.layoutManager = LinearLayoutManager(sectorActivity)
+                binding.pathsRecyclerView.layoutAnimation =
+                    AnimationUtils.loadLayoutAnimation(
+                        sectorActivity,
+                        R.anim.item_enter_left_animator
+                    )
+                binding.pathsRecyclerView.adapter = PathsAdapter(paths, markAsCompleteRequest)
+                binding.pathsRecyclerView.show()
+
+                // Load info bar
+                appendChip(sectorActivity, sector.sunTime, binding.sunChip)
+                sector.kidsAptChip(sectorActivity, binding.kidsAptChip)
+                sector.walkingTimeView(sectorActivity, binding.walkingTimeTextView)
+
+                // Load chart
+                sector.loadChart(requireActivity(), binding.sectorBarChart, paths)
+            }
+        } else
+            Timber.e("Could not start loading sectors since context is null. Activity destroyed: ${activity?.isDestroyed}")
+
+        uiContext {
+            binding.sectorProgressBar.hide()
         }
 
         loaded = true
