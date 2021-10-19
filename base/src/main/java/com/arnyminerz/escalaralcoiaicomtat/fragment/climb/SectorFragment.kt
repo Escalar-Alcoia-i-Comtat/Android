@@ -293,26 +293,28 @@ class SectorFragment private constructor() : NetworkChangeListenerFragment() {
      */
     @WorkerThread
     suspend fun load() {
-        var error = false
         val sectorActivity = this.sectorActivity
         if (!this::sectorId.isInitialized) {
             Timber.w("Could not load since class is not initialized")
-            error = true
+            return
         }
         if (loaded && imageLoaded) {
             Timber.i("Will not load again.")
-            error = true
+            return
         }
         if (loading) {
             Timber.i("Already loading.")
-            error = true
+            return
         }
         if (sectorActivity == null) {
             Timber.w("Activity is null")
-            error = true
-        }
-        if (error)
             return
+        }
+        val binding = this.binding
+        if (binding == null) {
+            Timber.w("Binding is null")
+            return
+        }
         loading = true
 
         uiContext {
