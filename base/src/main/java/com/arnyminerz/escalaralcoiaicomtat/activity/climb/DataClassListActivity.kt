@@ -27,6 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvide
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapAnyDataToLoadException
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
@@ -53,7 +54,9 @@ import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import org.xml.sax.SAXParseException
 import timber.log.Timber
+import java.io.File
 import java.io.FileNotFoundException
 
 /**
@@ -323,22 +326,46 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                 .loadMap { map ->
                     try {
                         doAsync {
-                            Timber.v("Getting KMZ file...")
-                            val kmzFile = dataClass.kmzFile(
-                                this@DataClassListActivity,
-                                storage,
-                                false
-                            ) {
-                                binding.mapProgressBar.progress = it.percentage
-                                binding.mapProgressBar.max = 100
+                            suspend fun getKMZFile(): File {
+                                Timber.v("Getting KMZ file...")
+                                val kmzFile = dataClass.kmzFile(
+                                    this@DataClassListActivity,
+                                    storage,
+                                    false
+                                ) {
+                                    binding.mapProgressBar.progress = it.percentage
+                                    binding.mapProgressBar.max = 100
+                                }
+                                uiContext {
+                                    visibility(binding.mapProgressBar, false)
+                                    binding.mapProgressBar.isIndeterminate = true
+                                    visibility(binding.mapProgressBar, true)
+                                }
+                                return kmzFile
                             }
-                            uiContext {
-                                visibility(binding.mapProgressBar, false)
-                                binding.mapProgressBar.isIndeterminate = true
-                                visibility(binding.mapProgressBar, true)
+
+                            var kmzFile = getKMZFile()
+                            val features = try {
+                                Timber.v("Getting map features...")
+                                mapHelper.loadKMZ(this@DataClassListActivity, kmzFile)
+                            } catch (e: SAXParseException) {
+                                Timber.e(e, "KMZ is corrupt. Removing old KMZ...")
+                                kmzFile.deleteIfExists()
+
+                                Timber.v("Downloading KMZ again...")
+                                kmzFile = getKMZFile()
+                                try {
+                                    Timber.v("Getting map features...")
+                                    mapHelper.loadKMZ(this@DataClassListActivity, kmzFile)
+                                } catch (e: SAXParseException) {
+                                    Timber.e(
+                                        e,
+                                        "There's a major issue on the KMZ File. Reporting..."
+                                    )
+                                    Firebase.crashlytics.recordException(e)
+                                    null
+                                }
                             }
-                            Timber.v("Getting map features...")
-                            val features = mapHelper.loadKMZ(this@DataClassListActivity, kmzFile)
 
                             if (features != null) {
                                 Timber.v("Adding map features...")
