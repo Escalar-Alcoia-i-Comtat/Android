@@ -22,6 +22,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.md5Compatible
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.BlockStatusWorker
@@ -137,9 +138,14 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         val googleApiAvailability = GoogleApiAvailability.getInstance()
         val servicesAvailable = googleApiAvailability.isGooglePlayServicesAvailable(this)
         if (servicesAvailable != SUCCESS)
-            googleApiAvailability
-                .getErrorDialog(this, servicesAvailable, 0)
-                ?.show()
+            try {
+                googleApiAvailability
+                    .getErrorDialog(this, servicesAvailable, 0)
+                    ?.show()
+            } catch (e: IllegalArgumentException) {
+                Timber.e(e, "Google Play Services required.")
+                toast(R.string.toast_error_google_play)
+            }
     }
 
     /**
