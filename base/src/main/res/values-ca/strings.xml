@@ -305,4 +305,6 @@
     <string name="dialog_md5_incompatible_title">Decodificació MD5 no suportada</string>
     <string name="dialog_md5_incompatible_message">El teu dispositiu no té suport per a la decodificació MD5. Tindràs problemes al rebre actualitzacions de les dades.</string>
     <string name="toast_error_google_play">Escalar Alcoià i Comtat necessita els serveis de Google Play</string>
+    <string name="toast_error_kmz_corrupt">El fitxer KMZ desat està corromput, es tornarà a descarregar</string>
+    <string name="toast_error_kmz_corrupt_again">El fitxer KMZ està corromput, tornar-ho a provar més tard</string>
 </resources>

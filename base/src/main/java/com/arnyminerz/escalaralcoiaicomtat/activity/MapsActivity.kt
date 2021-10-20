@@ -19,6 +19,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.map.GeoMarker
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MAP_LOAD_PADDING
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.getWindow
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CENTER_CURRENT_LOCATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_KMZ_FILE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.INFO_VIBRATION
@@ -44,11 +45,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMapsBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAskerFragment
-import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
+import org.xml.sax.SAXParseException
 import timber.log.Timber
 import java.io.File
 
@@ -219,6 +220,11 @@ class MapsActivity : LanguageAppCompatActivity() {
             toast(R.string.toast_error_map_load)
             finish()
             return
+        } catch (e: SAXParseException) {
+            Timber.e(e, "KMZ file is corrupt, deleting file and closing activity.")
+            toast(R.string.toast_error_kmz_corrupt_again)
+            finish()
+            return
         }
     }
 
@@ -296,7 +302,7 @@ class MapsActivity : LanguageAppCompatActivity() {
      * @see mapHelper
      */
     @UiThread
-    @Throws(IllegalStateException::class)
+    @Throws(IllegalStateException::class, SAXParseException::class)
     private fun loadMap(
         savedInstanceState: Bundle?,
         kmzFile: File?,

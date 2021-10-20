@@ -39,7 +39,9 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
+import org.xml.sax.SAXParseException
 import timber.log.Timber
+import java.io.File
 import java.io.FileNotFoundException
 
 class MapFragment : NetworkChangeListenerFragment() {
@@ -271,11 +273,14 @@ class MapFragment : NetworkChangeListenerFragment() {
      * @author Arnau Mora
      * @since 20210521
      * @param area The [Area] to load the map's contents from.
+     * @param shouldIterateCorrupt If true, if the contents of the KMZ file are found corrupt, they
+     * will be deleted and downloaded again.
      */
-    private suspend fun loadAreaOnMap(area: Area) {
+    private suspend fun loadAreaOnMap(area: Area, shouldIterateCorrupt: Boolean = true) {
+        var kmzFile: File? = null
         try {
             Timber.v("Getting KMZ file of $area...")
-            val kmzFile = area.kmzFile(requireContext(), firebaseStorage, false)
+            kmzFile = area.kmzFile(requireContext(), firebaseStorage, false)
             Timber.v("Loading KMZ features...")
             val features = mapHelper.loadKMZ(
                 requireContext(),
@@ -304,6 +309,20 @@ class MapFragment : NetworkChangeListenerFragment() {
             if (handler != null) {
                 Timber.e(e, handler.second)
                 toast(context, handler.first)
+            }
+        } catch (e: SAXParseException) {
+            Timber.e(e, "Could not parse KMZ, may be corrupt.")
+            Firebase.crashlytics.recordException(e)
+
+            Timber.i("Removing old KMZ...")
+            kmzFile?.delete()
+
+            Timber.v("Showing toast to the user")
+            uiContext { toast(context, R.string.toast_error_kmz_corrupt) }
+
+            if (shouldIterateCorrupt) {
+                Timber.v("Running loadAreaOnMap again...")
+                loadAreaOnMap(area, false)
             }
         }
     }

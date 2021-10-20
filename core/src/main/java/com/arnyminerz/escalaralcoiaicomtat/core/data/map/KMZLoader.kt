@@ -12,6 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.toElementList
 import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import org.w3c.dom.Element
+import org.xml.sax.SAXParseException
 import timber.log.Timber
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -30,9 +31,10 @@ import javax.xml.parsers.DocumentBuilderFactory
  * @param context The context to load from
  * @param kmzFile The file to load
  * @throws FileNotFoundException When the KMZ file could not be found
+ * @throws SAXParseException When the data at [kmzFile] is invalid or corrupt
  * @return The MapFeatures with the loaded data
  */
-@Throws(FileNotFoundException::class)
+@Throws(FileNotFoundException::class, SAXParseException::class)
 @WorkerThread
 fun loadKMZ(
     context: Context,
