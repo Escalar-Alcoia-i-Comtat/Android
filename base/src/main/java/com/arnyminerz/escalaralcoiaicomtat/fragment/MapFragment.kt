@@ -77,10 +77,6 @@ class MapFragment : NetworkChangeListenerFragment() {
         Timber.v("Preparing MapHelper...")
         mapHelper = MapHelper()
             .withMapView(binding!!.pageMapView)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         mapHelper.onCreate(savedInstanceState)
 
         binding!!.loadingMapCardView.show()
