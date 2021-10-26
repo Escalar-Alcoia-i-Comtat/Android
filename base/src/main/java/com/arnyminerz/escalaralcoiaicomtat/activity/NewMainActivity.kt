@@ -142,11 +142,11 @@ class NewMainActivity : AppCompatActivity() {
                                 targetState = expanded,
                                 transitionSpec = {
                                     if (targetState) {
-                                        slideInHorizontally { width: Int -> width } + fadeIn() with
-                                                slideOutHorizontally { width: Int -> -width } + fadeOut()
+                                        slideInHorizontally(initialOffsetX = { width: Int -> width }) + fadeIn() with
+                                                slideOutHorizontally(targetOffsetX = { width: Int -> -width }) + fadeOut()
                                     } else {
-                                        slideInHorizontally { width: Int -> -width } + fadeIn() with
-                                                slideOutHorizontally { width: Int -> width } + fadeOut()
+                                        slideInHorizontally(initialOffsetX = { width: Int -> -width }) + fadeIn() with
+                                                slideOutHorizontally(targetOffsetX = { width: Int -> width }) + fadeOut()
                                     }.using(SizeTransform(clip = false))
                                 }
                             ) { isExpanded ->

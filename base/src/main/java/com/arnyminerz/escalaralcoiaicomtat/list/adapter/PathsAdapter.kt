@@ -568,25 +568,27 @@ class PathsAdapter(
                     )
             )
 
-        if (endings.size == 1 && !endings[0].isUnknown) {
+        if (endings.size == 1 && endings[0].isNotBlank() && !endings[0].isUnknown) {
             val ending = endings.first()
             Timber.v("Adding chip \"$ending\"")
             val endingVal = ending.index
 
-            add(
-                ChipData(
-                    ChipType.ENDING,
-                    ending.image,
-                    endings,
-                    pitches,
-                    fixedSafesData,
-                    requiredSafesData
-                ).createChip(
-                    activity,
-                    activity.resources.getStringArray(R.array.path_endings)[endingVal],
-                    null
+            if (endingVal >= 0)
+                add(
+                    ChipData(
+                        ChipType.ENDING,
+                        ending.image,
+                        endings,
+                        pitches,
+                        fixedSafesData,
+                        requiredSafesData
+                    ).createChip(
+                        activity,
+                        activity.resources.getStringArray(R.array.path_endings)[endingVal],
+                        null
+                    )
                 )
-            )
+            else Timber.w("Chip \"$ending\" is not valid.")
         } else if (endings.size > 1)
             add(
                 ChipData(
