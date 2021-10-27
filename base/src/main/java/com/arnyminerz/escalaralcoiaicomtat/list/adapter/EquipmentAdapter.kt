@@ -5,14 +5,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.*
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.SafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
-import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ListItemFixedEquipmentBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.PathEquipmentDialog
 import com.arnyminerz.escalaralcoiaicomtat.list.holder.PathEquipmentViewHolder
-import timber.log.Timber
 
 /**
  * Provides the [RecyclerView.Adapter] model for the [PathEquipmentDialog].
@@ -41,7 +39,7 @@ constructor(
             )
         )
 
-    override fun getItemCount(): Int = safes.sum().toInt()
+    override fun getItemCount(): Int = safes.count()
 
     override fun onBindViewHolder(holder: PathEquipmentViewHolder, position: Int) {
         val binding = holder.binding
@@ -63,6 +61,6 @@ constructor(
                 binding.fixedEquipmentCardView.setCardBackgroundColor(color)
             binding.fixedEquipmentImageView.setImageResource(safe.image)
         } else
-            binding.fixedEquipmentLayout.hide()
+            binding.root.hide()
     }
 }
