@@ -115,7 +115,7 @@ dependencies {
     implementation project(":core")
 
     // Live Data
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.1'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.0'
 
     // Coil image loading
     implementation 'io.coil-kt:coil:1.4.0'
