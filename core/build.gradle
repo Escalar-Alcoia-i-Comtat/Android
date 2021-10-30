@@ -131,7 +131,7 @@ dependencies {
 
     // Hilt dependency injection
     api "com.google.dagger:hilt-android:2.40"
-    kapt "com.google.dagger:hilt-compiler:2.39.1"
+    kapt "com.google.dagger:hilt-compiler:2.40"
 
     // Maps SDK
     api 'com.google.android.gms:play-services-maps:18.0.0'
