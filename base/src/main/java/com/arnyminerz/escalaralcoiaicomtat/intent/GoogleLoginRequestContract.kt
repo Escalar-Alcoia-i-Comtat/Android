@@ -10,10 +10,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
  * @author Arnau Mora
  * @since 20210519
  */
-class GoogleLoginRequestContract : ActivityResultContract<GoogleSignInClient, Intent>() {
-    override fun createIntent(context: Context, client: GoogleSignInClient): Intent =
-        client.signInIntent
+class GoogleLoginRequestContract : ActivityResultContract<GoogleSignInClient, Intent?>() {
+    override fun createIntent(context: Context, input: GoogleSignInClient): Intent =
+        input.signInIntent
 
     override fun parseResult(resultCode: Int, intent: Intent?): Intent? = intent
 }
-
