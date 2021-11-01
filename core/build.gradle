@@ -124,7 +124,7 @@ dependencies {
     api 'com.google.firebase:firebase-functions-ktx'
     api 'com.google.firebase:firebase-auth-ktx'
     api 'com.google.firebase:firebase-messaging-ktx'
-    api 'com.google.firebase:firebase-messaging-directboot:22.0.0'
+    api 'com.google.firebase:firebase-messaging-directboot:23.0.0'
 
     // Google Firebase Auth Google Sign-In
     api 'com.google.android.gms:play-services-auth:19.2.0'
