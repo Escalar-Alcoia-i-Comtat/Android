@@ -133,6 +133,9 @@ dependencies {
     api "com.google.dagger:hilt-android:2.40"
     kapt "com.google.dagger:hilt-compiler:2.40"
 
+    // Gson for JSON parsing
+    implementation 'com.google.code.gson:gson:2.8.9'
+
     // Maps SDK
     api 'com.google.android.gms:play-services-maps:18.0.0'
 
