@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.loadLocale
 
 abstract class LanguageAppCompatActivity : AppCompatActivity() {
-    @ExperimentalUnsignedTypes
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(loadLocale(newBase))
     }

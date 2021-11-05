@@ -39,7 +39,6 @@ fun Fragment.toast(@StringRes text: Int) =
 
 class ContextUtils(base: Context) : ContextWrapper(base)
 
-@ExperimentalUnsignedTypes
 fun loadLocale(context: Context): ContextWrapper {
     Timber.v("Loading app language...")
     val resources = context.resources

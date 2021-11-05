@@ -5,7 +5,6 @@ import androidx.fragment.app.FragmentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.loadLocale
 
 abstract class LanguageFragmentActivity : FragmentActivity() {
-    @ExperimentalUnsignedTypes
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(loadLocale(newBase))
     }
