@@ -11,10 +11,13 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATACLASS_PREVIEW_SCALE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
@@ -121,9 +124,19 @@ open class DataClassAdapter(
                 binding.downloadImageButton.visibility(downloadable)
                 binding.mapImageButton.visibility(showLocation)
 
-                if (!oddColumns)
-                    binding.titleTextView.textAlignment = View.TEXT_ALIGNMENT_CENTER
                 binding.titleTextView.text = dataClass.displayName
+                binding.infoTextView.setText(R.string.status_loading)
+                doAsync {
+                    val size = dataClass.getSize(app.searchSession)
+                    uiContext {
+                        binding.infoTextView.text = when(dataClass) {
+                            is Area -> context.resources.getString(R.string.dataclass_area_children_count, size)
+                            is Zone -> context.resources.getString(R.string.dataclass_zone_children_count, size)
+                            is Sector -> context.resources.getString(R.string.dataclass_sector_children_count, size)
+                            else -> ""
+                        }
+                    }
+                }
                 binding.imageView.setOnClickListener {
                     clickListener?.invoke(binding, position, dataClass)
                 }
