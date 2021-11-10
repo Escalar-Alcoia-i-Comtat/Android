@@ -35,6 +35,11 @@
         <item name="colorPrimaryInverse">@color/md_theme_light_primaryInverse</item>
     </style>
 
+    <style name="AppTheme.AppBar" parent="@style/TextAppearance.Material3.TitleLarge">
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="fontFamily">@font/tektonpro_bold</item>
+    </style>
+
     <!--
     Old Theme:
     <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
