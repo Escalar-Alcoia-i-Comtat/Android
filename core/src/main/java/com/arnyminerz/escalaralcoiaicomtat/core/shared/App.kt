@@ -12,6 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPath
@@ -25,12 +26,11 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import javax.inject.Inject
 
-@HiltAndroidApp
 class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     private val provider: ConnectivityProvider
         get() = appNetworkProvider
@@ -78,6 +78,8 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
 
     override fun onCreate() {
         super.onCreate()
+
+        searchSession = runBlocking { createSearchSession(applicationContext) }
 
         sharedPreferences =
             applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
