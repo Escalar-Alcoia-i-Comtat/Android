@@ -12,7 +12,6 @@ import androidx.annotation.UiThread
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
@@ -185,8 +184,20 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
         mapHelper = mapHelper.withMapFragment(this, R.id.map)
         mapHelper.onCreate(savedInstanceState)
 
-        binding.backImageButton.setOnClickListener { onBackPressed() }
-        binding.statusImageView.setOnClickListener { it.performLongClick() }
+        binding.toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
+
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.download_status -> {
+                    item.actionView.performLongClick()
+                    true
+                }
+                else -> false
+            }
+        }
+
         updateIcon()
     }
 
@@ -269,16 +280,16 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
      */
     @UiThread
     private fun updateIcon() {
-        val i = binding.statusImageView
-        binding.statusImageView.hide(setGone = false)
+        val item = binding.toolbar.menu.getItem(0)
+        item.isVisible = false
         val dataClassInitialized = this::dataClass.isInitialized
         doAsync {
             if (!appNetworkState.hasInternet)
                 uiContext {
-                    i.setImageResource(R.drawable.ic_round_signal_cellular_off_24)
+                    item.setIcon(R.drawable.ic_round_signal_cellular_off_24)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                        i.tooltipText = getString(R.string.status_no_internet)
-                    i.show()
+                        item.tooltipText = getString(R.string.status_no_internet)
+                    item.isVisible = true
                 }
 
             Timber.v("Updating icon, getting download status...")
@@ -289,17 +300,17 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
 
             uiContext {
                 if (downloadStatus?.downloaded == true) {
-                    i.setImageResource(R.drawable.cloud_check)
+                    item.setIcon(R.drawable.cloud_check)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                        i.tooltipText = getString(R.string.status_downloaded)
-                    i.show()
+                        item.tooltipText = getString(R.string.status_downloaded)
+                    item.isVisible = true
                 } else if (!appNetworkState.hasInternet) {
-                    i.setImageResource(R.drawable.ic_round_signal_cellular_off_24)
+                    item.setIcon(R.drawable.ic_round_signal_cellular_off_24)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                        i.tooltipText = getString(R.string.status_no_internet)
-                    i.show()
+                        item.tooltipText = getString(R.string.status_no_internet)
+                    item.isVisible = true
                 } else
-                    i.hide(setGone = false)
+                    item.isVisible = false
             }
         }
     }
@@ -435,18 +446,15 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
     private fun updateList() {
         if (!loaded && viewModelInitialized && dataClassInitialized) {
             Timber.v("Updating title...")
-            binding.titleTextView.text = dataClass.displayName
-            binding.titleTextView.transitionName = transitionName
+            binding.toolbar.title = dataClass.displayName
+            binding.toolbar.transitionName = transitionName
 
             try {
                 Timber.v("Updating RecyclerView...")
                 if (mapLoaded)
                     binding.mapProgressBarCard.hide()
                 Timber.v("Setting layout manager...")
-                binding.recyclerView.layoutManager = if (itemsPerRow > 1)
-                    GridLayoutManager(this, itemsPerRow)
-                else
-                    LinearLayoutManager(this)
+                binding.recyclerView.layoutManager = LinearLayoutManager(this)
                 if (justAttached) {
                     Timber.v("Setting animation...")
                     binding.recyclerView.layoutAnimation =

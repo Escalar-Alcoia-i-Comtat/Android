@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/tektonpro_bold"
             android:text="@string/placeholder"
-            android:textColor="?attr/text_dark"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -106,7 +106,7 @@
                             android:text="@string/placeholder"
                             app:checkedIconVisible="false"
                             app:chipIcon="@drawable/weather_sunset_up"
-                            app:chipIconTint="?attr/text_dark"
+                            app:chipIconTint="?android:attr/textColorPrimary"
                             app:chipIconVisible="true"
                             app:closeIconVisible="false"
                             tools:ignore="UnusedAttribute" />
@@ -118,7 +118,7 @@
                             android:text="@string/sector_kids_apt"
                             app:checkedIconVisible="false"
                             app:chipIcon="@drawable/human_child"
-                            app:chipIconTint="?attr/text_dark"
+                            app:chipIconTint="?android:attr/textColorPrimary"
                             app:chipIconVisible="true"
                             app:closeIconVisible="false" />
                     </com.google.android.material.chip.ChipGroup>

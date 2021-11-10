@@ -224,6 +224,10 @@
     <string name="toast_confirmation_sent">Confirmation sent!</string>
     <string name="toast_update_downloaded">An update has just been downloaded</string>
 
+    <string name="dataclass_area_children_count">%d zones</string>
+    <string name="dataclass_zone_children_count">%d sectors</string>
+    <string name="dataclass_sector_children_count">%d paths</string>
+
     <string name="path_warning_dry">This path has some safes getting dry. This may be because some kind of chemical safe has been using for the safes. This should be active for 2 days more or less.</string>
     <string name="path_warning_build">This path is under construction or revision. This may take from days to weeks. Please, be patient. You can enable alert notifications on settings, and we will alert you when this is ready.</string>
     <string name="path_warning_bird">This path has a nest on its way, so it is forbidden to climb. This may take the whole nesting season, so it may take weeks to be available again. You can enable alert notifications on settings, and we will alert you when this is ready.</string>
