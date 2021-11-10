@@ -51,7 +51,6 @@ com.arnyminerz.escalaralcoiaicomtat.core.data.preference
 com.arnyminerz.escalaralcoiaicomtat.core.exception
 com.arnyminerz.escalaralcoiaicomtat.core.exception.notification
 com.arnyminerz.escalaralcoiaicomtat.core.firebase
-com.arnyminerz.escalaralcoiaicomtat.core.hilt
 com.arnyminerz.escalaralcoiaicomtat.core.maps
 com.arnyminerz.escalaralcoiaicomtat.core.network
 com.arnyminerz.escalaralcoiaicomtat.core.network.base
