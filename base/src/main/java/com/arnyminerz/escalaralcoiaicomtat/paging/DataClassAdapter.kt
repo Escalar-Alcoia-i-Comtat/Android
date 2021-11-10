@@ -77,18 +77,20 @@ open class DataClassAdapter(
             val activity = context as Activity
             val app = activity.app
             val storage = Firebase.storage
+            val oddColumns = columns % 2 == 0
 
             @UiThread
             fun updateDownloadStatus(status: DownloadStatus) {
-                binding.progressIndicator.visibility(status.downloading)
-                binding.downloadImageButton.setImageResource(status.getIcon())
+                binding.wideProgressBar.visibility(status.downloading)
+                binding.wideDownloadButton.setIconResource(status.getIcon())
+                binding.wideDownloadButton.isEnabled = !status.downloading
 
                 if (status.downloading) {
-                    binding.progressIndicator.show()
-                    if (!binding.progressIndicator.isIndeterminate) {
-                        binding.progressIndicator.hide()
-                        binding.progressIndicator.isIndeterminate = true
-                        binding.progressIndicator.show()
+                    binding.wideProgressBar.show()
+                    if (!binding.wideProgressBar.isIndeterminate) {
+                        binding.wideProgressBar.hide()
+                        binding.wideProgressBar.isIndeterminate = true
+                        binding.wideProgressBar.show()
                     }
                     val liveData = dataClass?.downloadWorkInfoLiveData(context) ?: return
                     liveData.observe(activity as LifecycleOwner) { workInfos ->
@@ -102,49 +104,70 @@ open class DataClassAdapter(
                 }
             }
 
-            binding.imageView.layoutParams.height =
-                activity.resources.getDimension(itemHeight).toPx.toInt()
+            val itemHeight = activity.resources.getDimension(itemHeight).toPx
+            binding.cardView.layoutParams.height = itemHeight.toInt()
 
-            val oddColumns = columns % 2 == 0
-            if (oddColumns)
-                binding.imageView.setImageResource(R.drawable.ic_tall_placeholder)
-            else
-                binding.imageView.setImageResource(R.drawable.ic_wide_placeholder)
+            binding.wideImageView.layoutParams.width = (itemHeight * (3f / 5f)).toInt()
+
+            binding.imageView.setImageResource(R.drawable.ic_tall_placeholder)
+            binding.wideImageView.setImageResource(R.drawable.ic_tall_placeholder)
+
+            binding.wideProgressBar.hide()
+            binding.wideLayout.visibility(oddColumns)
+            binding.thinLayout.visibility(!oddColumns)
 
             if (dataClass == null) {
                 Timber.v("DataClass is null, showing placeholder...")
                 binding.titleTextView.hide()
-                binding.actionButtons.hide()
+                binding.wideTitleTextView.hide()
+                binding.wideDownloadButton.hide()
+                binding.wideMapButton.hide()
             } else {
                 Timber.v("DataClass is not null, displaying data...")
                 val downloadable = dataClass.displayOptions.downloadable
                 val showLocation = dataClass.displayOptions.showLocation
                 binding.titleTextView.show()
-                binding.actionButtons.visibility(downloadable || showLocation)
-                binding.downloadImageButton.visibility(downloadable)
-                binding.mapImageButton.visibility(showLocation)
+                binding.wideTitleTextView.show()
+                binding.wideDownloadButton.visibility(downloadable)
+                binding.wideMapButton.visibility(showLocation)
 
+                binding.wideTitleTextView.text = dataClass.displayName
+                binding.wideInfoTextView.setText(R.string.status_loading)
                 binding.titleTextView.text = dataClass.displayName
                 binding.infoTextView.setText(R.string.status_loading)
                 doAsync {
                     val size = dataClass.getSize(app.searchSession)
                     uiContext {
-                        binding.infoTextView.text = when(dataClass) {
-                            is Area -> context.resources.getString(R.string.dataclass_area_children_count, size)
-                            is Zone -> context.resources.getString(R.string.dataclass_zone_children_count, size)
-                            is Sector -> context.resources.getString(R.string.dataclass_sector_children_count, size)
+                        val info = when (dataClass) {
+                            is Area -> context.resources.getString(
+                                R.string.dataclass_area_children_count,
+                                size
+                            )
+                            is Zone -> context.resources.getString(
+                                R.string.dataclass_zone_children_count,
+                                size
+                            )
+                            is Sector -> context.resources.getString(
+                                R.string.dataclass_sector_children_count,
+                                size
+                            )
                             else -> ""
                         }
+                        binding.infoTextView.text = info
+                        binding.wideInfoTextView.text = info
                     }
                 }
                 binding.imageView.setOnClickListener {
+                    clickListener?.invoke(binding, position, dataClass)
+                }
+                binding.enterButton.setOnClickListener {
                     clickListener?.invoke(binding, position, dataClass)
                 }
 
                 // dataClass.location check is a bit redundant, but just in case
                 val dataClassLocation = dataClass.location
                 if (showLocation && dataClassLocation != null) {
-                    binding.mapImageButton.setOnClickListener {
+                    binding.wideMapButton.setOnClickListener {
                         context.startActivity(
                             dataClassLocation.mapsIntent(true, dataClass.displayName)
                         )
@@ -152,13 +175,13 @@ open class DataClassAdapter(
                 }
 
                 if (downloadable) {
-                    binding.downloadImageButton.setOnClickListener {
-                        binding.progressIndicator.show()
+                    binding.wideDownloadButton.setOnClickListener {
+                        binding.wideProgressBar.show()
                         doAsync {
                             val downloadStatus =
                                 dataClass.downloadStatus(context, app.searchSession)
                             uiContext {
-                                binding.progressIndicator.hide()
+                                binding.wideProgressBar.hide()
 
                                 if (!downloadStatus.downloaded && !downloadStatus.downloading)
                                     dataClass.download<DownloadWorker>(context)
@@ -190,14 +213,14 @@ open class DataClassAdapter(
                     doAsync {
                         val downloadStatus =
                             dataClass.downloadStatus(context, app.searchSession)
-                            { binding.progressIndicator.progress = it.percentage }
+                            { binding.wideProgressBar.progress = it.percentage }
                         uiContext {
                             updateDownloadStatus(downloadStatus)
                         }
                     }
                 }
 
-                // Load the image asyncronously
+                // Load the image asynchronously
                 doAsync {
                     // TODO: Add error handlers
                     val image = dataClass.image(
@@ -207,7 +230,10 @@ open class DataClassAdapter(
                     ) { }
                     uiContext {
                         if (image != null)
-                            binding.imageView.setImageBitmap(image)
+                            if (oddColumns)
+                                binding.wideImageView.setImageBitmap(image)
+                            else
+                                binding.imageView.setImageBitmap(image)
                         else {
                             Timber.e("Could not load image")
                             context.toast(R.string.toast_error_load_image)

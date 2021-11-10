@@ -4,6 +4,6 @@
     <dimen name="artifo_ending_text_size">18sp</dimen>
 
     <dimen name="area_item_height">65dp</dimen>
-    <dimen name="zone_item_height">90dp</dimen>
-    <dimen name="sector_item_height">73dp</dimen>
+    <dimen name="zone_item_height">60dp</dimen>
+    <dimen name="sector_item_height">60dp</dimen>
 </resources>
