@@ -443,10 +443,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                 if (mapLoaded)
                     binding.mapProgressBarCard.hide()
                 Timber.v("Setting layout manager...")
-                binding.recyclerView.layoutManager = if (itemsPerRow > 1)
-                    GridLayoutManager(this, itemsPerRow)
-                else
-                    LinearLayoutManager(this)
+                binding.recyclerView.layoutManager = LinearLayoutManager(this)
                 if (justAttached) {
                     Timber.v("Setting animation...")
                     binding.recyclerView.layoutAnimation =
