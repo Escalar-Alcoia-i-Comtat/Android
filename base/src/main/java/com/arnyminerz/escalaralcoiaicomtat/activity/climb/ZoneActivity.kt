@@ -25,7 +25,7 @@ import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber
 
 @ExperimentalBadgeUtils
-class ZoneActivity : DataClassListActivity<Sector, Area, Zone>(1, R.dimen.sector_item_height) {
+class ZoneActivity : DataClassListActivity<Sector, Area, Zone>(2, R.dimen.sector_item_height) {
     companion object {
         var errorNotStored: Boolean = false
 
