@@ -13,7 +13,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/placeholder"
         android:textSize="24sp"
-        android:textColor="?attr/text_dark"
+        android:textColor="?android:attr/textColorPrimary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -36,7 +36,7 @@
         android:layout_height="0dp"
         android:layout_marginStart="4dp"
         android:contentDescription="@string/image_desc_ending_type"
-        app:tint="?attr/text_dark"
+        app:tint="?android:attr/textColorPrimary"
         app:layout_constraintBottom_toBottomOf="@+id/artifoTitle_textView"
         app:layout_constraintStart_toEndOf="@+id/artifoTitle_textView"
         app:layout_constraintTop_toTopOf="@+id/artifoTitle_textView"

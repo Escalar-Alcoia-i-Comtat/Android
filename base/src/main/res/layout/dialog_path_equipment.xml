@@ -16,7 +16,7 @@
             android:layout_marginEnd="16dp"
             android:text="@string/path_fixed_equipment"
             android:textAlignment="center"
-            android:textColor="?attr/text_dark"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="24sp" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -37,7 +37,7 @@
             android:layout_marginEnd="16dp"
             android:text="@string/path_required_equipment"
             android:textAlignment="center"
-            android:textColor="?attr/text_dark"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="24sp" />
 
         <androidx.recyclerview.widget.RecyclerView
