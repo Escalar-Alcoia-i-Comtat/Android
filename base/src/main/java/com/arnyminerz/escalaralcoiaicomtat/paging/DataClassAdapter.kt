@@ -83,6 +83,14 @@ open class DataClassAdapter(
             fun updateDownloadStatus(status: DownloadStatus) {
                 binding.wideProgressBar.visibility(status.downloading)
                 binding.wideDownloadButton.setIconResource(status.getIcon())
+                binding.wideDownloadButton.setText(
+                    when(status) {
+                        DownloadStatus.DOWNLOADED -> R.string.status_downloaded
+                        DownloadStatus.DOWNLOADING -> R.string.status_downloading
+                        DownloadStatus.NOT_DOWNLOADED -> R.string.action_download
+                        DownloadStatus.PARTIALLY -> R.string.status_not_downloaded
+                    }
+                )
                 binding.wideDownloadButton.isEnabled = !status.downloading
 
                 if (status.downloading) {
