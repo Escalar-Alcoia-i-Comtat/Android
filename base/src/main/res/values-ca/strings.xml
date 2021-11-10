@@ -307,4 +307,7 @@
     <string name="toast_error_google_play">Escalar Alcoià i Comtat necessita els serveis de Google Play</string>
     <string name="toast_error_kmz_corrupt">El fitxer KMZ desat està corromput, es tornarà a descarregar</string>
     <string name="toast_error_kmz_corrupt_again">El fitxer KMZ està corromput, tornar-ho a provar més tard</string>
+    <string name="dataclass_area_children_count">%d zones</string>
+    <string name="dataclass_zone_children_count">%d sectors</string>
+    <string name="dataclass_sector_children_count">%d vies</string>
 </resources>

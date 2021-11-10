@@ -308,4 +308,7 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="toast_error_google_play">Escalar Alcoià i Comtat necesita los servicios de Google Play</string>
     <string name="toast_error_kmz_corrupt">El archivo KMZ està corrompido, se volverá a descargar</string>
     <string name="toast_error_kmz_corrupt_again">El fichero KMZ está corrupto, vuelve a probar más tarde</string>
+    <string name="dataclass_area_children_count">%d zonas</string>
+    <string name="dataclass_zone_children_count">%d sectores</string>
+    <string name="dataclass_sector_children_count">%d vías</string>
 </resources>
