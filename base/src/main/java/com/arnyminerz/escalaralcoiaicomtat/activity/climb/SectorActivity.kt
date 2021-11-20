@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -15,18 +16,8 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity.Companion
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_POSITION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_TRANSITION_NAME
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_STATIC
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
@@ -110,20 +101,20 @@ class SectorActivity : LanguageAppCompatActivity() {
     @UiThread
     fun updateTitle(newTitle: String? = null, isDownloaded: Boolean = false) {
         if (newTitle == null)
-            binding.titleTextView.hide()
+            binding.toolbar.title = null
         else {
-            binding.titleTextView.text = newTitle
-            binding.titleTextView.transitionName = transitionName
-            binding.titleTextView.show()
+            binding.toolbar.title = newTitle
+            binding.toolbar.transitionName = transitionName
         }
-        binding.statusImageView.apply {
+        val item: MenuItem? = null // binding.toolbar.menu.getItem(0)
+        item?.apply {
             if (isDownloaded) {
-                setImageResource(R.drawable.cloud_check)
+                setIcon(R.drawable.cloud_check)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     tooltipText = getString(R.string.status_downloaded)
                 show()
             } else if (!appNetworkState.hasInternet) {
-                setImageResource(R.drawable.ic_round_signal_cellular_off_24)
+                setIcon(R.drawable.ic_round_signal_cellular_off_24)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     tooltipText = getString(R.string.status_no_internet)
                 show()
@@ -153,11 +144,14 @@ class SectorActivity : LanguageAppCompatActivity() {
 
         loadExtras(savedInstanceState)
 
-        binding.backImageButton.bringToFront()
-        updateTitle()
+        setSupportActionBar(binding.toolbar)
+        binding.toolbar.setNavigationOnClickListener { onBackPressed() }
+        binding.toolbar.menu.getItem(0).setOnMenuItemClickListener {
+            it.actionView.performLongClick()
+            true
+        }
 
-        binding.backImageButton.setOnClickListener { onBackPressed() }
-        binding.statusImageView.setOnClickListener { it.performLongClick() }
+        updateTitle()
 
         doAsync {
             zone = app.getZone(zoneId) ?: run {
@@ -219,7 +213,7 @@ class SectorActivity : LanguageAppCompatActivity() {
                 binding.sectorViewPager.adapter = adapter
                 Timber.d("  Registering callback...")
                 binding.sectorViewPager.registerOnPageChangeCallback(callback)
-                // If there's an stored positon, load it
+                // If there's an stored position, load it
                 Timber.d("  Setting position")
                 binding.sectorViewPager.setCurrentItem(defaultPosition, false)
 

@@ -4,35 +4,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/actionBar_cardView"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize"
-        app:cardBackgroundColor="@color/colorPrimary"
-        app:cardElevation="6dp"
-        app:cardPreventCornerOverlap="true"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/title_textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/tektonpro_bold"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="24sp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
+        app:layout_constraintTop_toTopOf="parent"
+        app:menu="@menu/menu_dataclass_end"
+        app:navigationIcon="@drawable/round_chevron_left_24"
+        app:navigationIconTint="?attr/colorOnPrimary"
+        app:title="@string/placeholder"
+        app:titleCentered="true"
+        app:titleTextAppearance="@style/AppTheme.AppBar" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/sectorViewPager"
@@ -42,33 +27,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageButton
-        android:id="@+id/backImageButton"
-        android:layout_width="?android:attr/actionBarSize"
-        android:layout_height="?android:attr/actionBarSize"
-        android:background="@drawable/transparent"
-        android:contentDescription="@string/image_desc_go_back"
-        android:src="@drawable/round_chevron_left_24"
-        android:translationZ="10dp"
-        android:visibility="visible"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/statusImageView"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_margin="12dp"
-        android:background="@drawable/transparent"
-        android:contentDescription="@string/image_desc_no_internet"
-        android:src="@drawable/ic_round_signal_cellular_off_24"
-        android:tooltipText="@string/image_desc_no_internet"
-        android:translationZ="10dp"
-        app:tint="@color/bg_color"
-        app:layout_constraintBottom_toBottomOf="@+id/actionBar_cardView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

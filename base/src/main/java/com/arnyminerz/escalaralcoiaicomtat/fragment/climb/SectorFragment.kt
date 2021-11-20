@@ -19,13 +19,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvide
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_SECTOR_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDisplaySize
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
-import com.arnyminerz.escalaralcoiaicomtat.core.view.getTypedAttribute
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.FragmentSectorBinding
@@ -202,15 +197,6 @@ class SectorFragment private constructor() : NetworkChangeListenerFragment() {
         if (context != null)
             (binding?.sectorImageViewLayout?.layoutParams as? ViewGroup.MarginLayoutParams)
                 ?.apply {
-                    setMargins(
-                        0,
-                        if (maximized) {
-                            val tv = context.getTypedAttribute(android.R.attr.actionBarSize)
-                            resources.getDimensionPixelSize(tv.resourceId)
-                        } else 0,
-                        0,
-                        0
-                    )
                     height =
                         if (maximized) LinearLayout.LayoutParams.MATCH_PARENT else notMaximizedImageHeight
                 }
@@ -331,7 +317,7 @@ class SectorFragment private constructor() : NetworkChangeListenerFragment() {
         }
 
         uiContext {
-            binding.sectorTextView.text = sector.displayName
+            (activity as? SectorActivity?)?.setTitle(sector.displayName)
         }
 
         isDownloaded = sector.downloadStatus(app, app.searchSession).downloaded
