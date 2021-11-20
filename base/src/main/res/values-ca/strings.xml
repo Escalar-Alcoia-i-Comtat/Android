@@ -310,4 +310,5 @@
     <string name="dataclass_area_children_count">%d zones</string>
     <string name="dataclass_zone_children_count">%d sectors</string>
     <string name="dataclass_sector_children_count">%d vies</string>
+    <string name="image_desc_enter">Entrar</string>
 </resources>
