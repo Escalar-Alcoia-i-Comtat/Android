@@ -853,6 +853,18 @@ class MapHelper {
         return this
     }
 
+    /**
+     * Enables or disables the map's compass.
+     * @author Arnau Mora
+     * @since 20211120
+     * @param enabled Whether or not to enable the compass.
+     */
+    @UiThread
+    fun setCompassEnabled(enabled: Boolean): MapHelper {
+        map?.uiSettings?.isCompassEnabled = enabled
+        return this
+    }
+
     inner class MarkerWindow
     @UiThread constructor(
         private val activity: Activity,
