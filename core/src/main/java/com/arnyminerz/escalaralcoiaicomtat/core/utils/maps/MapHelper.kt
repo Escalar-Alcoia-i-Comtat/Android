@@ -24,43 +24,14 @@ import androidx.core.content.edit
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.MapType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LATITUDE
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_ZOOM
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.GeoGeometry
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.GeoMarker
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MARKER_WINDOW_HIDE_DURATION
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MARKER_WINDOW_SHOW_DURATION
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MapFeatures
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MapObjectWindowData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.addToMap
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.getWindow
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_KMZ_FILE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.MAP_MARKERS_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.includeAll
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.putParcelableList
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toUri
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.data.map.*
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.MapView
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.Polygon
-import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.storage.FirebaseStorage
 import org.xml.sax.SAXParseException
@@ -199,39 +170,46 @@ class MapHelper {
         get() = map != null && mapSetUp && locationComponent != null
 
     fun onCreate(mapViewBundle: Bundle?) {
-        mapView?.onCreate(mapViewBundle)
-            ?: Timber.e("Could not call onStart() since mapView is null")
+        if (isLoaded)
+            mapView?.onCreate(mapViewBundle)
+                ?: Timber.e("Could not call onStart() since mapView is null")
         Timber.d("onCreate()")
     }
 
     fun onStart() {
-        mapView?.onStart() ?: Timber.e("Could not call onStart() since mapView is null")
+        if (isLoaded)
+            mapView?.onStart() ?: Timber.e("Could not call onStart() since mapView is null")
         Timber.d("onStart()")
     }
 
     fun onResume() {
-        mapView?.onResume() ?: Timber.e("Could not call onResume() since mapView is null")
+        if (isLoaded)
+            mapView?.onResume() ?: Timber.e("Could not call onResume() since mapView is null")
         Timber.d("onResume()")
     }
 
     fun onPause() {
-        mapView?.onPause() ?: Timber.e("Could not call onPause() since mapView is null")
+        if (isLoaded)
+            mapView?.onPause() ?: Timber.e("Could not call onPause() since mapView is null")
         Timber.d("onPause()")
     }
 
     fun onStop() {
-        mapView?.onStop() ?: Timber.e("Could not call onStop() since mapView is null")
+        if (isLoaded)
+            mapView?.onStop() ?: Timber.e("Could not call onStop() since mapView is null")
         Timber.d("onStop()")
     }
 
     fun onLowMemory() {
-        mapView?.onLowMemory() ?: Timber.e("Could not call onLowMemory() since mapView is null")
+        if (isLoaded)
+            mapView?.onLowMemory() ?: Timber.e("Could not call onLowMemory() since mapView is null")
         Timber.d("onLowMemory()")
     }
 
     fun onDestroy() {
         locationComponent?.destroy()
-        mapView?.onDestroy() ?: Timber.e("Could not call onDestroy() since mapView is null")
+        if (isLoaded)
+            mapView?.onDestroy() ?: Timber.e("Could not call onDestroy() since mapView is null")
         Timber.d("onDestroy()")
     }
 
