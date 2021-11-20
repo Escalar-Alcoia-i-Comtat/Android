@@ -19,12 +19,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.isLocationPermissionGranted
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapNotInitializedException
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
@@ -87,90 +84,92 @@ class MapFragment : NetworkChangeListenerFragment() {
         super.onStart()
         mapHelper.onStart()
 
-        Timber.v("Loading map...")
-        mapHelper
-            .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
-            .loadMap { map ->
-                if (context != null)
-                    try {
-                        val permissionGranted = try {
-                            requireContext().isLocationPermissionGranted()
-                        } catch (_: IllegalStateException) {
-                            Timber.w("Tried to check location permission without being attached to a context.")
-                            false
-                        }
-                        if (permissionGranted)
-                            try {
-                                mapHelper.locationComponent?.enable(requireContext())
-                            } catch (_: IllegalStateException) {
-                                Timber.w("The GPS is disabled.")
-                                toast(R.string.toast_error_gps_disabled)
-                            }
-                        else
-                            Timber.w("User hasn't granted the location permission. Marker won't be enabled.")
+        doOnMain {
+            Timber.v("Loading map...")
+            mapHelper
+                .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
+                .loadMap().first
+
+            if (context != null)
+                try {
+                    val permissionGranted = try {
+                        requireContext().isLocationPermissionGranted()
                     } catch (_: IllegalStateException) {
-                        Timber.d("GPS not enabled.")
-                        MaterialAlertDialogBuilder(
-                            requireContext(),
-                            R.style.ThemeOverlay_App_MaterialAlertDialog
-                        )
-                            .setTitle(R.string.dialog_gps_disabled_title)
-                            .setMessage(R.string.dialog_gps_disabled_message)
-                            .setPositiveButton(R.string.action_enable_location) { _, _ ->
-                                startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-                            }
-                            .setNegativeButton(R.string.action_cancel) { dialog, _ ->
-                                dialog.dismiss()
-                            }
-                            .show()
+                        Timber.w("Tried to check location permission without being attached to a context.")
+                        false
+                    }
+                    if (permissionGranted)
+                        try {
+                            mapHelper.locationComponent?.enable(requireContext())
+                        } catch (_: IllegalStateException) {
+                            Timber.w("The GPS is disabled.")
+                            toast(R.string.toast_error_gps_disabled)
+                        }
+                    else
+                        Timber.w("User hasn't granted the location permission. Marker won't be enabled.")
+                } catch (_: IllegalStateException) {
+                    Timber.d("GPS not enabled.")
+                    MaterialAlertDialogBuilder(
+                        requireContext(),
+                        R.style.ThemeOverlay_App_MaterialAlertDialog
+                    )
+                        .setTitle(R.string.dialog_gps_disabled_title)
+                        .setMessage(R.string.dialog_gps_disabled_message)
+                        .setPositiveButton(R.string.action_enable_location) { _, _ ->
+                            startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                        }
+                        .setNegativeButton(R.string.action_cancel) { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        .show()
+                }
+
+            mapHelper.addMarkerClickListener {
+                Timber.v("Tapped on symbol.")
+                if (SETTINGS_CENTER_MARKER_PREF.get())
+                    mapHelper.move(position, DEFAULT_ZOOM)
+
+                markerWindow?.hide()
+                activity?.let {
+                    Timber.v("There's an available activity")
+                    if (it is MainActivity) {
+                        it.binding.bottomAppBar.performHide()
+                        it.binding.authFab.hide()
                     }
 
-                mapHelper.addMarkerClickListener {
-                    Timber.v("Tapped on symbol.")
-                    if (SETTINGS_CENTER_MARKER_PREF.get())
-                        mapHelper.move(position, DEFAULT_ZOOM)
-
-                    markerWindow?.hide()
-                    activity?.let {
-                        Timber.v("There's an available activity")
-                        if (it is MainActivity) {
-                            it.binding.bottomAppBar.performHide()
-                            it.binding.authFab.hide()
-                        }
-
-                        Timber.v("Creating marker window...")
-                        binding?.root?.let { viewRoot ->
-                            markerWindow = mapHelper.infoCard(it, firebaseStorage, this, viewRoot)
-                                .also { markerWindow ->
-                                    markerWindow.show()
-                                    markerWindow.listenHide {
-                                        if (it is MainActivity) {
-                                            it.binding.bottomAppBar.performShow()
-                                            if (ENABLE_AUTHENTICATION)
-                                                it.binding.authFab.show()
-                                        }
+                    Timber.v("Creating marker window...")
+                    binding?.root?.let { viewRoot ->
+                        markerWindow = mapHelper.infoCard(it, firebaseStorage, this, viewRoot)
+                            .also { markerWindow ->
+                                markerWindow.show()
+                                markerWindow.listenHide {
+                                    if (it is MainActivity) {
+                                        it.binding.bottomAppBar.performShow()
+                                        if (ENABLE_AUTHENTICATION)
+                                            it.binding.authFab.show()
                                     }
                                 }
-                        }
-                    } ?: Timber.w("Could not get activity")
-
-                    true
-                }
-
-                map.setOnMapClickListener {
-                    try {
-                        markerWindow?.hide()
-                    } catch (e: IllegalStateException) {
-                        Timber.i(e, "The card has already been hidden.")
+                            }
                     }
-                    markerWindow = null
-                }
+                } ?: Timber.w("Could not get activity")
 
-                Timber.v("Finished loading map. Calling loadMap...")
-                doAsync {
-                    loadMap()
-                }
+                true
             }
+
+            mapHelper.setOnMapClickListener {
+                try {
+                    markerWindow?.hide()
+                } catch (e: IllegalStateException) {
+                    Timber.i(e, "The card has already been hidden.")
+                }
+                markerWindow = null
+            }
+
+            Timber.v("Finished loading map. Calling loadMap...")
+            doAsync {
+                loadMap()
+            }
+        }
     }
 
     override fun onPause() {

@@ -20,28 +20,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MAP_LOAD_PADDING
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.getWindow
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CENTER_CURRENT_LOCATION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_KMZ_FILE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.INFO_VIBRATION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.LOCATION_PERMISSION_REQUEST_CODE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.MAP_MARKERS_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.MIME_TYPE_GPX
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.MIME_TYPE_KMZ
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PERMISSION_DIALOG_TAG
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_CENTER_MARKER_PREF
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.fileName
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getParcelableList
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.isLocationPermissionGranted
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapNotInitializedException
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.TrackMode
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.mime
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityMapsBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.fragment.dialog.BottomPermissionAskerFragment
@@ -311,74 +294,80 @@ class MapsActivity : LanguageAppCompatActivity() {
         mapHelper = MapHelper()
             .withMapFragment(this, R.id.map)
         mapHelper.onCreate(savedInstanceState)
-        mapHelper = mapHelper
-            .loadMap { map ->
-                Timber.v("Map loaded successfully")
-                doAsync {
-                    val kmlResult = kmzFile?.let { loadKMZ(this@MapsActivity, it) }
+        doOnMain {
+            mapHelper = mapHelper.loadMap().first
+            if (!mapHelper.isLoaded)
+                return@doOnMain
 
-                    if (kmlResult != null)
-                        add(kmlResult)
+            Timber.v("Map loaded successfully")
+            doAsync {
+                val kmlResult = kmzFile?.let { mapHelper.loadKMZ(this@MapsActivity, it) }
 
-                    // Add the features from the intent
-                    Timber.v(
-                        "Got ${markers.size} markers and ${geometries.size} geometries from intent."
+                if (kmlResult != null)
+                    mapHelper.add(kmlResult)
+
+                // Add the features from the intent
+                Timber.v(
+                    "Got ${markers.size} markers and ${geometries.size} geometries from intent."
+                )
+                mapHelper.addMarkers(*markers.toTypedArray())
+                mapHelper.addGeometries(geometries)
+
+                uiContext {
+                    mapHelper.display()
+                    mapHelper.center(
+                        MAP_LOAD_PADDING,
+                        includeCurrentLocation = centerCurrentLocation
                     )
-                    addMarkers(*markers.toTypedArray())
-                    addGeometries(geometries)
-
-                    uiContext {
-                        display()
-                        center(MAP_LOAD_PADDING, includeCurrentLocation = centerCurrentLocation)
-                    }
                 }
-
-                Timber.v("Loading current location")
-                tryToShowCurrentLocation()
-
-                map.uiSettings.isCompassEnabled = true
-
-                map.setOnCameraMoveListener {
-                    if (mapHelper.locationComponent?.lastKnownLocation != null)
-                        binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
-                }
-                map.setOnMapClickListener {
-                    showingPolyline = null
-
-                    try {
-                        markerWindow?.hide()
-                    } catch (_: IllegalStateException) {
-                    }
-                    markerWindow = null
-                }
-
-                mapHelper.addMarkerClickListener {
-                    if (SETTINGS_CENTER_MARKER_PREF.get())
-                        mapHelper.move(position)
-                    markerWindow?.hide()
-                    val window = this.getWindow()
-                    val title = window.title
-
-                    if (title.isNotEmpty()) {
-                        markerWindow = mapHelper.infoCard(
-                            this@MapsActivity,
-                            storage,
-                            this,
-                            binding.root
-                        ).also {
-                            it.show()
-                        }
-
-                        true
-                    } else
-                        false
-                }
-
-                if (kmzFile != null)
-                    binding.mapDownloadedImageView.visibility = View.VISIBLE
-
-                binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
             }
+
+            Timber.v("Loading current location")
+            tryToShowCurrentLocation()
+
+            mapHelper.setCompassEnabled(true)
+
+            mapHelper.setOnCameraMoveListener {
+                if (mapHelper.locationComponent?.lastKnownLocation != null)
+                    binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
+            }
+            mapHelper.setOnMapClickListener {
+                showingPolyline = null
+
+                try {
+                    markerWindow?.hide()
+                } catch (_: IllegalStateException) {
+                }
+                markerWindow = null
+            }
+
+            mapHelper.addMarkerClickListener {
+                if (SETTINGS_CENTER_MARKER_PREF.get())
+                    mapHelper.move(position)
+                markerWindow?.hide()
+                val window = this.getWindow()
+                val title = window.title
+
+                if (title.isNotEmpty()) {
+                    markerWindow = mapHelper.infoCard(
+                        this@MapsActivity,
+                        storage,
+                        this,
+                        binding.root
+                    ).also {
+                        it.show()
+                    }
+
+                    true
+                } else
+                    false
+            }
+
+            if (kmzFile != null)
+                binding.mapDownloadedImageView.visibility = View.VISIBLE
+
+            binding.fabCurrentLocation.setImageResource(R.drawable.round_gps_not_fixed_24)
+        }
     }
 
     @SuppressLint("MissingPermission")
