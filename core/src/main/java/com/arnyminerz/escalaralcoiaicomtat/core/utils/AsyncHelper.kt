@@ -23,7 +23,7 @@ val asyncCoroutineScope
  * @since 20210510
  */
 val mainCoroutineScope
-    get() = CoroutineScope(Dispatchers.Default)
+    get() = CoroutineScope(Dispatchers.Main)
 
 /**
  * Runs some code asyncronously.
