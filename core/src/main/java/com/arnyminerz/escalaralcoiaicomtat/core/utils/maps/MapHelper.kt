@@ -854,6 +854,19 @@ class MapHelper {
     }
 
     /**
+     * Sets the click listener for when the user moves around the camera of the map.
+     * @author Arnau Mora
+     * @since 20211120
+     * @param listener The callback that will be executed when the camera gets moved.
+     * @return The current instance of [MapHelper]
+     */
+    @UiThread
+    fun setOnCameraMoveListener(listener: (() -> Unit)?): MapHelper {
+        map?.setOnCameraMoveListener(listener)
+        return this
+    }
+
+    /**
      * Enables or disables the map's compass.
      * @author Arnau Mora
      * @since 20211120
