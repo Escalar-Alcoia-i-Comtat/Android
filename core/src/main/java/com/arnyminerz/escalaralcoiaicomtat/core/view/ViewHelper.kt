@@ -81,6 +81,33 @@ fun View.visibility(
     visibility(this, visible, setGone, debug, clearAnimation)
 
 /**
+ * Updates the visibility of the [MenuItem] to [visible].
+ * Works as an alias for [MenuItem.setVisible].
+ * @author Arnau Mora
+ * @since 20211120
+ */
+@UiThread
+fun MenuItem?.visibility(
+    visible: Boolean
+): MenuItem? = this?.setVisible(visible)
+
+/**
+ * Forces the [MenuItem] to be visible.
+ * @author Arnau Mora
+ * @since 20211120
+ */
+@UiThread
+fun MenuItem?.show(): MenuItem? = this?.visibility(true)
+
+/**
+ * Forces the [MenuItem] to be invisible.
+ * @author Arnau Mora
+ * @since 20211120
+ */
+@UiThread
+fun MenuItem?.hide(): MenuItem? = this?.visibility(false)
+
+/**
  * Sets the visibility of a view to gone
  */
 @UiThread

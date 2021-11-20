@@ -6,27 +6,22 @@
     android:layout_height="match_parent"
     tools:context=".activity.climb.AreaActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:menu="@menu/menu_dataclass_end"
-            app:navigationIcon="@drawable/round_chevron_left_24"
-            app:navigationIconTint="?attr/colorOnPrimary"
-            app:title="@string/placeholder"
-            app:titleCentered="true"
-            app:titleTextAppearance="@style/AppTheme.AppBar" />
-    </com.google.android.material.appbar.AppBarLayout>
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        app:menu="@menu/menu_dataclass_end"
+        app:navigationIcon="@drawable/round_chevron_left_24"
+        app:navigationIconTint="?attr/colorOnPrimary"
+        app:title="@string/placeholder"
+        app:titleCentered="true"
+        app:titleTextAppearance="@style/AppTheme.AppBar" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?android:attr/actionBarSize"
+        android:layout_marginTop="?attr/actionBarSize"
         android:overScrollMode="never"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -46,7 +41,7 @@
                 app:hideAnimationBehavior="none"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/actionBar_cardView"
+                app:layout_constraintTop_toTopOf="parent"
                 app:showAnimationBehavior="none" />
 
             <include
