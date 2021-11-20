@@ -20,7 +20,7 @@
             android:id="@+id/wide_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/wide_imageView"
@@ -51,6 +51,7 @@
                 android:layout_height="wrap_content"
                 android:backgroundTint="?attr/colorTertiary"
                 android:src="@drawable/round_chevron_right_24"
+                android:contentDescription="@string/image_desc_enter"
                 app:fabSize="mini"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -113,8 +114,8 @@
                         android:layout_marginStart="2dp"
                         android:layout_marginEnd="4dp"
                         android:layout_weight="1"
-                        android:textSize="13sp"
                         android:text="@string/action_view_map"
+                        android:textSize="13sp"
                         app:icon="@drawable/map_marker" />
                 </LinearLayout>
             </LinearLayout>
@@ -124,7 +125,7 @@
             android:id="@+id/thin_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <ImageView
                 android:id="@+id/imageView"
@@ -138,8 +139,8 @@
                 android:foreground="?android:attr/selectableItemBackground"
                 android:scaleType="centerCrop"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:ignore="UnusedAttribute"
                 tools:srcCompat="@drawable/ic_tall_placeholder" />
@@ -152,7 +153,8 @@
                 android:paddingStart="12dp"
                 android:paddingTop="8dp"
                 android:paddingEnd="12dp"
-                android:paddingBottom="12dp"
+                android:gravity="bottom"
+                android:paddingBottom="8dp"
                 app:layout_constraintBottom_toBottomOf="@+id/imageView"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
