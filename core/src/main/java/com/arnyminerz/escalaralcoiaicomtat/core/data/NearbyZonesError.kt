@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data
 
 enum class NearbyZonesError(val message: String) {
-    MAP_NOT_READY("Map not ready"),
     NOT_LOADED("MapHelper is not loaded"),
     CONTEXT("Not showing fragment (context is null)"),
     NOT_ENABLED("Nearby Zones not enabled"),
