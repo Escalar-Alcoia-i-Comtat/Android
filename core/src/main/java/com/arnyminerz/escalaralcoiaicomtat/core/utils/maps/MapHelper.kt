@@ -39,6 +39,8 @@ import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.InvalidObjectException
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Initializes the MapHelper instance. This also prepares the Mapbox interface with the access token.
@@ -271,18 +273,19 @@ class MapHelper {
      * the required variables for the rest of the functions of [MapHelper].
      * @author Arnau Mora
      * @param type The type to set to the map.
-     * @param callback What to call when the map gets loaded
      * @throws IllegalStateException When prepared map and [isLoaded] is false.
+     * @return A pair of the current [MapHelper] class, and a boolean, that will be true if the map
+     * was loaded successfully, and false if there has been an exception.
      * @see MapHelper
      * @see MapView
      * @see GoogleMap
      * @see isLoaded
      */
     @Throws(IllegalStateException::class)
-    fun loadMap(
-        @MapType type: Int = GoogleMap.MAP_TYPE_SATELLITE,
-        callback: MapHelper.(map: GoogleMap) -> Unit
-    ): MapHelper {
+    @UiThread
+    suspend fun loadMap(
+        @MapType type: Int = GoogleMap.MAP_TYPE_SATELLITE
+    ): Pair<MapHelper, Boolean> = suspendCoroutine { cont ->
         Timber.d("Loading map...")
         val mapReadyCallback = OnMapReadyCallback { map ->
             Timber.d("Setting map type...")
@@ -291,14 +294,16 @@ class MapHelper {
             mapSetup(map)
             if (!isLoaded)
                 throw IllegalStateException("There was an issue while initializing MapHelper.")
-            callback(this, map)
+            cont.resume(this to true)
         }
-        mapView?.getMapAsync(mapReadyCallback)
-            ?: Timber.e("Could not call loadMap() since mapView is null")
-        mapFragment?.getMapAsync(mapReadyCallback)
-            ?: Timber.e("Could not call loadMap() since mapFragment is null")
-
-        return this
+        when {
+            mapView != null -> mapView?.getMapAsync(mapReadyCallback)
+            mapFragment != null -> mapFragment?.getMapAsync(mapReadyCallback)
+            else -> {
+                Timber.e("Could not load map since both mapView and mapFragment are null")
+                cont.resume(this to false)
+            }
+        }
     }
 
     /**
@@ -821,6 +826,32 @@ class MapHelper {
      */
     @UiThread
     fun show() = visibility(true)
+
+    /**
+     * Sets the click listener for when the user taps the map.
+     * @author Arnau Mora
+     * @since 20211120
+     * @param listener The callback that will be executed when the map gets clicked.
+     * @return The current instance of [MapHelper]
+     */
+    @UiThread
+    fun setOnMapClickListener(listener: GoogleMap.OnMapClickListener?): MapHelper {
+        map?.setOnMapClickListener(listener)
+        return this
+    }
+
+    /**
+     * Sets the click listener for when the user taps a marker in the map.
+     * @author Arnau Mora
+     * @since 20211120
+     * @param listener The callback that will be executed when the marker gets clicked.
+     * @return The current instance of [MapHelper]
+     */
+    @UiThread
+    fun setOnMarkerClickListener(listener: GoogleMap.OnMarkerClickListener?): MapHelper {
+        map?.setOnMarkerClickListener(listener)
+        return this
+    }
 
     inner class MarkerWindow
     @UiThread constructor(
