@@ -126,6 +126,7 @@ class Path internal constructor(
             // Grades should be split in each L
             val gradeValues = rawGrades
                 .replace("\n", "") // Remove all line jumps
+                .replace("Â", "") // Remove corrupt characters
                 .split("L").toMutableList()
             if (gradeValues.size > 1)
                 for (i in 1 until gradeValues.size)
