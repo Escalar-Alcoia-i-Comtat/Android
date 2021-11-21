@@ -11,11 +11,12 @@ import android.os.LocaleList
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_LANGUAGE_PREF
 import timber.log.Timber
-import java.util.Locale
+import java.util.*
 
 @UiThread
 fun Context.toast(text: String, duration: Int = Toast.LENGTH_SHORT) =
@@ -66,3 +67,22 @@ fun Context?.isLocationPermissionGranted(): Boolean =
         false
     else ContextCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED ||
             ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
+
+/**
+ * Returns the fragment's [Activity] as an [AppCompatActivity] and makes sure it's non-null.
+ * @author Arnau Mora
+ * @since 20211121
+ * @throws IllegalStateException If not currently associated with an activity or if associated only
+ * with a context.
+ * @throws ClassCastException If the holding activity is not an [AppCompatActivity].
+ */
+@Throws(IllegalStateException::class, ClassCastException::class)
+fun Fragment.requireActivityCompat() = requireActivity() as AppCompatActivity
+
+/**
+ * Returns the fragment's [Activity] as an [AppCompatActivity] with null-check.
+ * @author Arnau Mora
+ * @since 20211121
+ */
+val Fragment.activityCompat: AppCompatActivity?
+    get() = activity as? AppCompatActivity?
