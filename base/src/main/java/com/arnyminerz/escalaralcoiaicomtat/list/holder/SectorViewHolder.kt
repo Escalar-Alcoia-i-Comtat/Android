@@ -6,6 +6,7 @@ import android.text.TextUtils
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.cardview.widget.CardView
@@ -22,6 +23,8 @@ import com.google.android.material.chip.ChipGroup
 class SectorViewHolder(private val activity: Activity, view: View) : RecyclerView.ViewHolder(view) {
     val cardView: CardView = view.findViewById(R.id.cardView)
     val expandedLayout: ConstraintLayout = view.findViewById(R.id.expanded_layout)
+
+    val nameLayout: LinearLayout = view.findViewById(R.id.name_layout)
 
     val idTextView: TextView = view.findViewById(R.id.id_textView)
     val builtByTextView: TextView = view.findViewById(R.id.builtBy_textView)
