@@ -23,27 +23,12 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.CommentsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.MarkCompletedActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Pitch
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.*
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.getSpannable
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.image
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.index
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.isUnknown
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.INFO_VIBRATION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.LinePattern
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toStringLineJumping
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ListItemPathBinding
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
@@ -191,6 +176,8 @@ class PathsAdapter(
         val loggedIn = user != null
         Timber.v("Updating Mark completed button visibility: $loggedIn")
         holder.markCompletedButton.visibility(loggedIn && ENABLE_AUTHENTICATION)
+
+        holder.nameLayout.layoutTransition.setAnimateParentHierarchy(false)
 
         Timber.d("Loading path data")
         doAsync {
