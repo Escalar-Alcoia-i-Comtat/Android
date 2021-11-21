@@ -21,6 +21,7 @@ import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.edit
+import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.MapType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
@@ -222,8 +223,24 @@ class MapHelper {
         return this
     }
 
-    fun withMapFragment(activity: AppCompatActivity, @IdRes id: Int): MapHelper {
-        mapFragment = activity.supportFragmentManager.findFragmentById(id) as? SupportMapFragment
+    fun withMapFragment(activity: AppCompatActivity, @IdRes id: Int): MapHelper =
+        (activity.supportFragmentManager.findFragmentById(id) as? SupportMapFragment)?.let {
+            withMapFragment(it)
+        } ?: run {
+            Timber.e("Could not get SupportMapFragment")
+            this
+        }
+
+    fun withMapFragment(fragment: Fragment, @IdRes id: Int): MapHelper =
+        (fragment.childFragmentManager.findFragmentById(id) as? SupportMapFragment)?.let {
+            withMapFragment(it)
+        } ?: run {
+            Timber.e("Could not get SupportMapFragment")
+            this
+        }
+
+    fun withMapFragment(fragment: SupportMapFragment): MapHelper {
+        mapFragment = fragment
         return this
     }
 
