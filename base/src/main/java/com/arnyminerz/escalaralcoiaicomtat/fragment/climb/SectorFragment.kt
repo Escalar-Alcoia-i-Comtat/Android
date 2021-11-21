@@ -260,6 +260,8 @@ class SectorFragment private constructor() : NetworkChangeListenerFragment() {
 
         firestore = Firebase.firestore
         storage = Firebase.storage
+
+        binding?.sectorImageViewLayout?.layoutTransition?.setAnimateParentHierarchy(false)
     }
 
     override fun onDestroyView() {
