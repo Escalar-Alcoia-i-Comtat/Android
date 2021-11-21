@@ -10,38 +10,26 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.coroutineScope
 import androidx.viewbinding.ViewBinding
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.NearbyZonesError
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.getChildren
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LATITUDE
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.GeoMarker
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.ICON_WAYPOINT_ESCALADOR_BLANC
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MapObjectWindowData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.map.*
 import com.arnyminerz.escalaralcoiaicomtat.core.databinding.NearbyZonesCardBinding
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CENTER_CURRENT_LOCATION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.LOCATION_PERMISSION_REQUEST_CODE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_DISABLE_NEARBY
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_NEARBY_DISTANCE_PREF
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.distanceTo
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.isLocationPermissionGranted
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapAnyDataToLoadException
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toLatLng
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
+import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
@@ -72,14 +60,7 @@ class NearbyZonesModule(
      * @author Arnau Mora
      * @since 20210617
      */
-    var mapHelper: MapHelper? = null
-
-    /**
-     * A [FirebaseFirestore] instance for loading data from the server.
-     * @author Arnau Mora
-     * @since 20210617
-     */
-    private val firestore: FirebaseFirestore = Firebase.firestore
+    var mapHelper: MapHelper = MapHelper()
 
     /**
      * An alias for getting the [fragment]'s [Context].
@@ -106,6 +87,13 @@ class NearbyZonesModule(
         get() = fragment.requireActivity().application as App
 
     /**
+     * Stores if the map is being loaded.
+     * @author Arnau Mora
+     * @since 20211120
+     */
+    private var loadingMap = false
+
+    /**
      * Checks if nearby zones is available to be shown.
      * @author Arnau Mora
      * @since 20210617
@@ -117,9 +105,7 @@ class NearbyZonesModule(
     suspend fun nearbyZonesReady(): List<NearbyZonesError> {
         val errors = arrayListOf<NearbyZonesError>()
 
-        if (mapHelper == null)
-            errors.add(NearbyZonesError.MAP_NOT_READY)
-        if (mapHelper?.isLoaded != true)
+        if (!mapHelper.isLoaded)
             errors.add(NearbyZonesError.NOT_LOADED)
         else {
             if (context == null)
@@ -128,7 +114,7 @@ class NearbyZonesModule(
                 errors.add(NearbyZonesError.NOT_ENABLED)
             else if (context.isLocationPermissionGranted()) {
                 try {
-                    mapHelper?.locationComponent?.enable(context!!)
+                    mapHelper.locationComponent?.enable(context!!)
                 } catch (_: IllegalStateException) {
                     errors.add(NearbyZonesError.GPS_DISABLED)
                 }
@@ -156,8 +142,8 @@ class NearbyZonesModule(
     private fun nearbyZonesClick(): Boolean =
         try {
             val intent = mapHelper
-                ?.mapsActivityIntent(activity!!, mapsActivity)
-                ?.putExtra(EXTRA_CENTER_CURRENT_LOCATION, true)
+                .mapsActivityIntent(activity!!, mapsActivity)
+                .putExtra(EXTRA_CENTER_CURRENT_LOCATION, true)
             Timber.v("Starting MapsActivity...")
             activity!!.startActivity(intent)
             true
@@ -179,15 +165,22 @@ class NearbyZonesModule(
         visibility(binding.nearbyZonesCardView, nearbyZonesErrors.isEmpty())
 
         if (nearbyZonesErrors.isNotEmpty()) {
+            if (nearbyZonesErrors.contains(NearbyZonesError.NOT_LOADED))
+                (activity as? LifecycleOwner?)?.lifecycle?.coroutineScope?.launchWhenCreated {
+                    initializeMap()
+                    updateNearbyZones(location)
+                    return@launchWhenCreated
+                } ?: Timber.w("Could not get lifecycle owner")
+
             Timber.i("Nearby Zones errors: $nearbyZonesErrors")
 
             // The location permission is not granted. Show permissions message.
             // Having PERMISSION also implies that Nearby Zones is enabled.
             if (nearbyZonesErrors.contains(NearbyZonesError.PERMISSION)) {
                 Timber.v("The Location permission is not granted")
-                visibility(binding.map, false)
-                visibility(binding.nearbyZonesPermissionMessage, true)
-                visibility(binding.nearbyZonesCardView, true)
+                binding.map.hide()
+                binding.nearbyZonesPermissionMessage.show()
+                binding.nearbyZonesCardView.show()
 
                 binding.nearbyZonesCardView.isClickable = true
                 binding.nearbyZonesCardView.setOnClickListener {
@@ -223,51 +216,53 @@ class NearbyZonesModule(
             return
         }
 
-        if (location != null) {
+        doAsync {
+            if (location == null)
+                return@doAsync
+
             Timber.v("Updating nearby zones...")
             val position = location.toLatLng()
 
-            binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
+            uiContext {
+                binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
 
-            visibility(binding.map, true)
-            visibility(binding.nearbyZonesPermissionMessage, false)
+                visibility(binding.map, true)
+                visibility(binding.nearbyZonesPermissionMessage, false)
 
-            binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
-            binding.nearbyZonesCardView.isClickable = false
+                binding.nearbyZonesIcon.setImageResource(R.drawable.rotating_explore)
+                binding.nearbyZonesCardView.isClickable = false
+
+                mapHelper.clearSymbols()
+            }
 
             val requiredDistance = SETTINGS_NEARBY_DISTANCE_PREF.get()
-
-            mapHelper?.clearSymbols()
-
-            doAsync {
-                val zones = app.getAreas().getChildren(app.searchSession)
-                Timber.v("Iterating through ${zones.size} zones.")
-                Timber.v("Current Location: [${location.latitude},${location.longitude}]")
-                for (zone in zones) {
-                    val zoneLocation = zone.position
-                    if (zoneLocation.distanceTo(position) <= requiredDistance) {
-                        Timber.d("Adding zone #${zone.objectId}. Creating marker...")
-                        val marker = GeoMarker(
-                            zoneLocation,
-                            windowData = MapObjectWindowData(zone.displayName, null),
-                            icon = ICON_WAYPOINT_ESCALADOR_BLANC.toGeoIcon(context!!)!!
-                        ).apply {
-                            val icon = ICON_WAYPOINT_ESCALADOR_BLANC.toGeoIcon(context!!)
-                            if (icon != null)
-                                withImage(icon)
-                        }
-                        Timber.d("Adding marker to map")
-                        mapHelper?.add(marker)
+            val zones = app.getAreas().getChildren(app.searchSession)
+            Timber.v("Iterating through ${zones.size} zones.")
+            Timber.v("Current Location: [${location.latitude},${location.longitude}]")
+            for (zone in zones) {
+                val zoneLocation = zone.position
+                if (zoneLocation.distanceTo(position) <= requiredDistance) {
+                    Timber.d("Adding zone #${zone.objectId}. Creating marker...")
+                    val marker = GeoMarker(
+                        zoneLocation,
+                        windowData = MapObjectWindowData(zone.displayName, null),
+                        icon = ICON_WAYPOINT_ESCALADOR_BLANC.toGeoIcon(context!!)!!
+                    ).apply {
+                        val icon = ICON_WAYPOINT_ESCALADOR_BLANC.toGeoIcon(context!!)
+                        if (icon != null)
+                            withImage(icon)
                     }
+                    Timber.d("Adding marker to map")
+                    mapHelper.add(marker)
                 }
+            }
 
-                Timber.d("Finished adding markers.")
-                uiContext {
-                    mapHelper?.display()
-                    mapHelper?.center(includeCurrentLocation = true)
+            Timber.d("Finished adding markers.")
+            uiContext {
+                mapHelper.display()
+                mapHelper.center(includeCurrentLocation = true)
 
-                    binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
-                }
+                binding.nearbyZonesIcon.setImageResource(R.drawable.round_explore_24)
             }
         }
     }
@@ -276,71 +271,78 @@ class NearbyZonesModule(
      * Initializes the map through the [MapHelper].
      * @author Arnau Mora
      * @since 20210617
+     * @return true if the map was initialized correctly, or has already been initialized before.
+     * false otherwise.
      */
-    fun initializeMap() {
-        if (mapHelper?.isLoaded == true)
+    @UiThread
+    private suspend fun initializeMap() {
+        if (loadingMap) {
+            Timber.d("The map is already loading, awaiting...")
+            while (loadingMap) {
+                delay(10)
+            }
+        }
+
+        // If already initialized, return
+        if (mapHelper.isLoaded)
             return
 
-        val appCompatActivity = fragment.activity as? AppCompatActivity ?: return
+        loadingMap = true
 
         Timber.d("Loading map...")
         mapHelper = mapHelper
-            ?.withMapFragment(appCompatActivity, R.id.map)
-            ?.withControllable(false)
-            ?.withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE))
-            ?.loadMap { map ->
-                Timber.d("Map is ready.")
+            .withMapFragment(fragment, R.id.map)
+            .withControllable(false)
+            .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE))
+            .loadMap()
 
-                mapHelper?.locationComponent?.addLocationUpdateCallback { location ->
-                    Timber.v("Got new location: [${location.latitude}, ${location.longitude}]")
+        Timber.i("Map is ready.")
 
-                    updateNearbyZones(location)
+        mapHelper.locationComponent?.addLocationUpdateCallback { location ->
+            Timber.v("Got new location: [${location.latitude}, ${location.longitude}]")
 
-                    binding.nearbyZonesTitle.setOnClickListener {
-                        updateNearbyZones(location)
-                    }
-                }
+            updateNearbyZones(location)
 
-                map.setOnMapClickListener {
-                    nearbyZonesClick()
-                }
-                map.setOnMarkerClickListener {
-                    nearbyZonesClick()
-                    true
-                }
-
-                updateNearbyZones()
+            binding.nearbyZonesTitle.setOnClickListener {
+                updateNearbyZones(location)
             }
+        }
+
+        mapHelper.setOnMapClickListener { nearbyZonesClick() }
+        mapHelper.setOnMarkerClickListener {
+            nearbyZonesClick()
+            true
+        }
+
+        loadingMap = false
+        updateNearbyZones()
     }
 
     fun onCreate(savedInstanceBundle: Bundle?) {
-        if (mapHelper == null)
-            mapHelper = MapHelper()
-
-        mapHelper?.onCreate(savedInstanceBundle)
+        mapHelper.onCreate(savedInstanceBundle)
     }
 
     fun onStart() {
-        mapHelper?.onStart()
+        mapHelper.onStart()
     }
 
     fun onResume() {
-        mapHelper?.onResume()
+        mapHelper.onResume()
     }
 
     fun onPause() {
-        mapHelper?.onPause()
+        mapHelper.onPause()
     }
 
     fun onStop() {
-        mapHelper?.onStop()
+        mapHelper.onStop()
     }
 
     fun onDestroy() {
-        mapHelper?.onDestroy()
+        mapHelper.onDestroy()
     }
 
     fun onLowMemory() {
-        mapHelper?.onLowMemory()
+        mapHelper.onLowMemory()
     }
 }
