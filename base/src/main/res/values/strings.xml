@@ -224,6 +224,7 @@
     <string name="toast_message_sent">Message sent!</string>
     <string name="toast_confirmation_sent">Confirmation sent!</string>
     <string name="toast_update_downloaded">An update has just been downloaded</string>
+    <string name="toast_downloaded">The data is stored in the device and can be accessed while offline</string>
 
     <string name="dataclass_area_children_count">%d zones</string>
     <string name="dataclass_zone_children_count">%d sectors</string>
