@@ -20,7 +20,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvide
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA_TRANSITION_NAME
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_DISABLE_NEARBY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
@@ -124,17 +123,12 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
         val app = requireActivity().application as App
         val viewModel by viewModels<AreasViewModel> { AreasViewModelFactory(app) }
 
-        if (PREF_DISABLE_NEARBY.get())
-            Timber.i("Nearby Zones is disabled, won't load")
-        else {
-            Timber.v("Initializing Nearby Zones...")
-            nearbyZones = NearbyZonesModule(this, MapsActivity::class.java, binding.nearbyZonesCard)
+        Timber.v("Initializing Nearby Zones...")
+        nearbyZones = NearbyZonesModule(this, MapsActivity::class.java, binding.nearbyZonesCard)
 
-            Timber.v("Initializing MapHelper")
-            nearbyZones?.onCreate(savedInstanceState)
-
-            nearbyZones?.initializeMap()
-        }
+        Timber.v("Initializing MapHelper")
+        nearbyZones?.onCreate(savedInstanceState)
+        nearbyZones?.updateNearbyZones()
 
         Timber.v("Initializing search engine...")
         val searchManager =
@@ -199,7 +193,7 @@ class AreasViewFragment : NetworkChangeListenerFragment() {
     override fun onResume() {
         super.onResume()
 
-        nearbyZones?.initializeMap()
+        nearbyZones?.updateNearbyZones()
         justAttached = false
         nearbyZones?.onResume()
     }

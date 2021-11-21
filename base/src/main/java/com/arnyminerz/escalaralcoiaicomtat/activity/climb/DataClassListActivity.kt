@@ -26,12 +26,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvide
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapAnyDataToLoadException
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
@@ -329,105 +326,106 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
             binding.mapProgressBar.isIndeterminate = true
             visibility(binding.mapProgressBar, true)
 
-            Timber.v("Loading map...")
-            mapHelper
-                .show()
-                .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
-                .withControllable(false)
-                .loadMap { map ->
-                    try {
-                        doAsync {
-                            suspend fun getKMZFile(): File {
-                                Timber.v("Getting KMZ file...")
-                                val kmzFile = dataClass.kmzFile(
-                                    this@DataClassListActivity,
-                                    storage,
-                                    false
-                                ) {
-                                    binding.mapProgressBar.progress = it.percentage
-                                    binding.mapProgressBar.max = 100
-                                }
-                                uiContext {
-                                    visibility(binding.mapProgressBar, false)
-                                    binding.mapProgressBar.isIndeterminate = true
-                                    visibility(binding.mapProgressBar, true)
-                                }
-                                return kmzFile
+            doOnMain {
+                Timber.v("Loading map...")
+                mapHelper
+                    .show()
+                    .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
+                    .withControllable(false)
+                    .loadMap()
+                try {
+                    doAsync {
+                        suspend fun getKMZFile(): File {
+                            Timber.v("Getting KMZ file...")
+                            val kmzFile = dataClass.kmzFile(
+                                this@DataClassListActivity,
+                                storage,
+                                false
+                            ) {
+                                binding.mapProgressBar.progress = it.percentage
+                                binding.mapProgressBar.max = 100
                             }
+                            uiContext {
+                                visibility(binding.mapProgressBar, false)
+                                binding.mapProgressBar.isIndeterminate = true
+                                visibility(binding.mapProgressBar, true)
+                            }
+                            return kmzFile
+                        }
 
-                            var kmzFile = getKMZFile()
-                            val features = try {
+                        var kmzFile = getKMZFile()
+                        val features = try {
+                            Timber.v("Getting map features...")
+                            mapHelper.loadKMZ(this@DataClassListActivity, kmzFile)
+                        } catch (e: SAXParseException) {
+                            Timber.e(e, "KMZ is corrupt. Removing old KMZ...")
+                            kmzFile.deleteIfExists()
+
+                            Timber.v("Downloading KMZ again...")
+                            kmzFile = getKMZFile()
+                            try {
                                 Timber.v("Getting map features...")
                                 mapHelper.loadKMZ(this@DataClassListActivity, kmzFile)
                             } catch (e: SAXParseException) {
-                                Timber.e(e, "KMZ is corrupt. Removing old KMZ...")
-                                kmzFile.deleteIfExists()
+                                Timber.e(
+                                    e,
+                                    "There's a major issue on the KMZ File. Reporting..."
+                                )
+                                Firebase.crashlytics.recordException(e)
+                                null
+                            }
+                        }
 
-                                Timber.v("Downloading KMZ again...")
-                                kmzFile = getKMZFile()
+                        if (features != null) {
+                            Timber.v("Adding map features...")
+                            mapHelper.add(features)
+                        }
+
+                        uiContext {
+                            mapHelper.display()
+                            mapHelper.center(animate = false)
+                            binding.map.show()
+                            binding.mapLayout.show()
+                            binding.mapProgressBarCard.hide()
+
+                            mapHelper.setOnMapClickListener {
                                 try {
-                                    Timber.v("Getting map features...")
-                                    mapHelper.loadKMZ(this@DataClassListActivity, kmzFile)
-                                } catch (e: SAXParseException) {
-                                    Timber.e(
-                                        e,
-                                        "There's a major issue on the KMZ File. Reporting..."
+                                    val intent = mapHelper.mapsActivityIntent(
+                                        this@DataClassListActivity,
+                                        MapsActivity::class.java
                                     )
-                                    Firebase.crashlytics.recordException(e)
-                                    null
+                                    Timber.v("Starting MapsActivity...")
+                                    startActivity(intent)
+                                } catch (_: MapAnyDataToLoadException) {
+                                    Timber.w("Clicked on map and any data has been loaded")
                                 }
                             }
-
-                            if (features != null) {
-                                Timber.v("Adding map features...")
-                                mapHelper.add(features)
-                            }
-
-                            uiContext {
-                                mapHelper.display()
-                                mapHelper.center(animate = false)
-                                binding.map.show()
-                                binding.mapLayout.show()
-                                binding.mapProgressBarCard.hide()
-
-                                map.setOnMapClickListener {
-                                    try {
-                                        val intent = mapHelper.mapsActivityIntent(
-                                            this@DataClassListActivity,
-                                            MapsActivity::class.java
-                                        )
-                                        Timber.v("Starting MapsActivity...")
-                                        startActivity(intent)
-                                    } catch (_: MapAnyDataToLoadException) {
-                                        Timber.w("Clicked on map and any data has been loaded")
-                                    }
-                                }
-                            }
-                            mapLoaded = true
                         }
-                    } catch (_: FileNotFoundException) {
-                        Timber.w("KMZ file not found")
-                        binding.map.hide()
-                        binding.mapLayout.hide()
-                        binding.mapProgressBarCard.hide()
-                    } catch (e: IllegalStateException) {
-                        Firebase.crashlytics.recordException(e)
-                        Timber.w("The DataClass ($dataClass) does not contain a KMZ address")
-                        toast(R.string.toast_error_no_kmz)
-                        binding.map.hide()
-                        binding.mapLayout.hide()
-                        binding.mapProgressBarCard.hide()
-                    } catch (e: StorageException) {
-                        Firebase.crashlytics.recordException(e)
-                        val handler = handleStorageException(e)
-                        if (handler != null) {
-                            Timber.e(e, handler.second)
-                            toast(handler.first)
-                        }
-                    } finally {
-                        binding.loadingIndicator.hide()
+                        mapLoaded = true
                     }
+                } catch (_: FileNotFoundException) {
+                    Timber.w("KMZ file not found")
+                    binding.map.hide()
+                    binding.mapLayout.hide()
+                    binding.mapProgressBarCard.hide()
+                } catch (e: IllegalStateException) {
+                    Firebase.crashlytics.recordException(e)
+                    Timber.w("The DataClass ($dataClass) does not contain a KMZ address")
+                    toast(R.string.toast_error_no_kmz)
+                    binding.map.hide()
+                    binding.mapLayout.hide()
+                    binding.mapProgressBarCard.hide()
+                } catch (e: StorageException) {
+                    Firebase.crashlytics.recordException(e)
+                    val handler = handleStorageException(e)
+                    if (handler != null) {
+                        Timber.e(e, handler.second)
+                        toast(handler.first)
+                    }
+                } finally {
+                    binding.loadingIndicator.hide()
                 }
+            }
         } else if (!hasInternet) {
             binding.loadingIndicator.hide()
             binding.mapProgressBarCard.hide()

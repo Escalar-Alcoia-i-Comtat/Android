@@ -5,6 +5,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
+import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
 import android.os.Build
@@ -20,19 +21,8 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationAc
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.ProfileActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.LOCATION_PERMISSION_REQUEST_CODE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WARN_BATTERY
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_MAX_SIZE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ALERT_PREF
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.TAB_ITEM_DOWNLOADS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.TAB_ITEM_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.TAB_ITEM_HOME
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.TAB_ITEM_MAP
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.TAB_ITEM_SETTINGS
+import com.arnyminerz.escalaralcoiaicomtat.core.exception.MissingPermissionException
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.isLocationPermissionGranted
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
@@ -151,6 +141,33 @@ class MainActivity : LanguageAppCompatActivity() {
      * @since 20210817
      */
     private var areas: List<Area> = listOf()
+
+    /**
+     * The watcher for preference changes. This is useful for detecting when the Nearby Zones are
+     * enabled or disabled.
+     * @author Arnau Mora
+     * @since 20211120
+     */
+    @SuppressLint("MissingPermission")
+    private val sharedPreferencesWatcher =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == PREF_DISABLE_NEARBY.key) {
+                val nearbyDisabled = PREF_DISABLE_NEARBY.get()
+                Timber.i("Changed Nearby Zones disable state to: $nearbyDisabled")
+
+                if (nearbyDisabled) {
+                    Timber.i("Disabling location component...")
+                    areasViewFragment.nearbyZones?.mapHelper?.locationComponent?.disable()
+                } else try {
+                    Timber.i("Enabling location component")
+                    areasViewFragment.nearbyZones?.mapHelper?.locationComponent?.enable(this)
+                } catch (e: MissingPermissionException) {
+                    Timber.w("The location permission is not granted, will ask when updating Nearby Zones.")
+                }
+
+                areasViewFragment.nearbyZones?.updateNearbyZones()
+            }
+        }
 
     /**
      * Updates the bottom app bar icons according to the position of the [ActivityMainBinding.mainViewPager].
@@ -387,6 +404,16 @@ class MainActivity : LanguageAppCompatActivity() {
 
         updateBottomAppBar()
         refreshLoginStatus()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferencesWatcher)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(sharedPreferencesWatcher)
     }
 
     override fun onBackPressed() {

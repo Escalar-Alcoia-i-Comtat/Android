@@ -25,6 +25,14 @@ class LocationComponent(private val mapHelper: MapHelper) {
     val isReady: Boolean
         get() = this::locationManager.isInitialized
 
+    /**
+     * Stores whether or not the location listeners are enabled.
+     * @author Arnau Mora
+     * @since 20211121
+     */
+    var listeningForUpdates: Boolean = false
+        private set
+
     private lateinit var locationManager: LocationManager
 
     var lastKnownLocation: LatLng? = null
@@ -97,24 +105,41 @@ class LocationComponent(private val mapHelper: MapHelper) {
 
         if (this::locationManager.isInitialized) {
             Timber.v("Location component already enabled")
-            return
-        }
-
-        locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        } else
+            locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         if (!locationManager.isProviderEnabled(provider))
             throw IllegalStateException("The specified provider ($provider) is not enabled.")
 
-        locationManager.requestLocationUpdates(
-            provider,
-            LOCATION_UPDATE_MIN_TIME,
-            LOCATION_UPDATE_MIN_DIST,
-            locationUpdateCallback
-        )
+        if (!listeningForUpdates) {
+            locationManager.requestLocationUpdates(
+                provider,
+                LOCATION_UPDATE_MIN_TIME,
+                LOCATION_UPDATE_MIN_DIST,
+                locationUpdateCallback
+            )
+            listeningForUpdates = true
+        }
 
         mapHelper.map!!.isMyLocationEnabled = true
         mapHelper.map!!.uiSettings.isMyLocationButtonEnabled = false
         Timber.i("Enabled location component for MapHelper")
+    }
+
+    /**
+     * Disables the location updates. Can be enabled again calling [enable].
+     * @author Arnau Mora
+     * @since 20211121
+     */
+    @SuppressLint("MissingPermission")
+    fun disable() {
+        if (!isReady)
+            return
+
+        locationManager.removeUpdates(locationUpdateCallback)
+        listeningForUpdates = false
+
+        mapHelper.map!!.isMyLocationEnabled = false
     }
 
     /**

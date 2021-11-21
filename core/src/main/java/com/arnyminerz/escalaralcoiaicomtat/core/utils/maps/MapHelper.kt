@@ -21,48 +21,24 @@ import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.edit
+import androidx.fragment.app.Fragment
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.MapType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LATITUDE
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_ZOOM
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.GeoGeometry
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.GeoMarker
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MARKER_WINDOW_HIDE_DURATION
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MARKER_WINDOW_SHOW_DURATION
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MapFeatures
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.MapObjectWindowData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.addToMap
-import com.arnyminerz.escalaralcoiaicomtat.core.data.map.getWindow
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_KMZ_FILE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.MAP_GEOMETRIES_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.MAP_MARKERS_BUNDLE_EXTRA
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.includeAll
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.putParcelableList
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toUri
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.data.map.*
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
-import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.Polygon
-import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.storage.FirebaseStorage
+import com.google.maps.android.ktx.awaitMap
 import org.xml.sax.SAXParseException
 import timber.log.Timber
 import java.io.File
@@ -199,39 +175,46 @@ class MapHelper {
         get() = map != null && mapSetUp && locationComponent != null
 
     fun onCreate(mapViewBundle: Bundle?) {
-        mapView?.onCreate(mapViewBundle)
-            ?: Timber.e("Could not call onStart() since mapView is null")
+        if (isLoaded)
+            mapView?.onCreate(mapViewBundle)
+                ?: Timber.e("Could not call onStart() since mapView is null")
         Timber.d("onCreate()")
     }
 
     fun onStart() {
-        mapView?.onStart() ?: Timber.e("Could not call onStart() since mapView is null")
+        if (isLoaded)
+            mapView?.onStart() ?: Timber.e("Could not call onStart() since mapView is null")
         Timber.d("onStart()")
     }
 
     fun onResume() {
-        mapView?.onResume() ?: Timber.e("Could not call onResume() since mapView is null")
+        if (isLoaded)
+            mapView?.onResume() ?: Timber.e("Could not call onResume() since mapView is null")
         Timber.d("onResume()")
     }
 
     fun onPause() {
-        mapView?.onPause() ?: Timber.e("Could not call onPause() since mapView is null")
+        if (isLoaded)
+            mapView?.onPause() ?: Timber.e("Could not call onPause() since mapView is null")
         Timber.d("onPause()")
     }
 
     fun onStop() {
-        mapView?.onStop() ?: Timber.e("Could not call onStop() since mapView is null")
+        if (isLoaded)
+            mapView?.onStop() ?: Timber.e("Could not call onStop() since mapView is null")
         Timber.d("onStop()")
     }
 
     fun onLowMemory() {
-        mapView?.onLowMemory() ?: Timber.e("Could not call onLowMemory() since mapView is null")
+        if (isLoaded)
+            mapView?.onLowMemory() ?: Timber.e("Could not call onLowMemory() since mapView is null")
         Timber.d("onLowMemory()")
     }
 
     fun onDestroy() {
         locationComponent?.destroy()
-        mapView?.onDestroy() ?: Timber.e("Could not call onDestroy() since mapView is null")
+        if (isLoaded)
+            mapView?.onDestroy() ?: Timber.e("Could not call onDestroy() since mapView is null")
         Timber.d("onDestroy()")
     }
 
@@ -240,8 +223,24 @@ class MapHelper {
         return this
     }
 
-    fun withMapFragment(activity: AppCompatActivity, @IdRes id: Int): MapHelper {
-        mapFragment = activity.supportFragmentManager.findFragmentById(id) as? SupportMapFragment
+    fun withMapFragment(activity: AppCompatActivity, @IdRes id: Int): MapHelper =
+        (activity.supportFragmentManager.findFragmentById(id) as? SupportMapFragment)?.let {
+            withMapFragment(it)
+        } ?: run {
+            Timber.e("Could not get SupportMapFragment")
+            this
+        }
+
+    fun withMapFragment(fragment: Fragment, @IdRes id: Int): MapHelper =
+        (fragment.childFragmentManager.findFragmentById(id) as? SupportMapFragment)?.let {
+            withMapFragment(it)
+        } ?: run {
+            Timber.e("Could not get SupportMapFragment")
+            this
+        }
+
+    fun withMapFragment(fragment: SupportMapFragment): MapHelper {
+        mapFragment = fragment
         return this
     }
 
@@ -293,33 +292,42 @@ class MapHelper {
      * the required variables for the rest of the functions of [MapHelper].
      * @author Arnau Mora
      * @param type The type to set to the map.
-     * @param callback What to call when the map gets loaded
      * @throws IllegalStateException When prepared map and [isLoaded] is false.
+     * @return A pair of the current [MapHelper] class, and a boolean, that will be true if the map
+     * was loaded successfully, and false if there has been an exception.
      * @see MapHelper
      * @see MapView
      * @see GoogleMap
      * @see isLoaded
      */
     @Throws(IllegalStateException::class)
-    fun loadMap(
-        @MapType type: Int = GoogleMap.MAP_TYPE_SATELLITE,
-        callback: MapHelper.(map: GoogleMap) -> Unit
+    @UiThread
+    suspend fun loadMap(
+        @MapType type: Int = GoogleMap.MAP_TYPE_SATELLITE
     ): MapHelper {
         Timber.d("Loading map...")
-        val mapReadyCallback = OnMapReadyCallback { map ->
-            Timber.d("Setting map type...")
-            map.mapType = type
-
-            mapSetup(map)
-            if (!isLoaded)
-                throw IllegalStateException("There was an issue while initializing MapHelper.")
-            callback(this, map)
+        val map: GoogleMap? = when {
+            mapView != null -> {
+                Timber.d("Getting mapView map async...")
+                mapView?.awaitMap()
+            }
+            mapFragment != null -> {
+                Timber.d("Getting mapFragment map async...")
+                mapFragment?.awaitMap()
+            }
+            else -> {
+                Timber.e("Could not load map since both mapView and mapFragment are null")
+                return this
+            }
         }
-        mapView?.getMapAsync(mapReadyCallback)
-            ?: Timber.e("Could not call loadMap() since mapView is null")
-        mapFragment?.getMapAsync(mapReadyCallback)
-            ?: Timber.e("Could not call loadMap() since mapFragment is null")
+        this.map = map
+        Timber.d("Setting map type...")
+        map?.mapType = type
 
+        if (map != null)
+            mapSetup(map)
+        if (!isLoaded)
+            throw IllegalStateException("There was an issue while initializing MapHelper.")
         return this
     }
 
@@ -843,6 +851,57 @@ class MapHelper {
      */
     @UiThread
     fun show() = visibility(true)
+
+    /**
+     * Sets the click listener for when the user taps the map.
+     * @author Arnau Mora
+     * @since 20211120
+     * @param listener The callback that will be executed when the map gets clicked.
+     * @return The current instance of [MapHelper]
+     */
+    @UiThread
+    fun setOnMapClickListener(listener: GoogleMap.OnMapClickListener?): MapHelper {
+        map?.setOnMapClickListener(listener)
+        return this
+    }
+
+    /**
+     * Sets the click listener for when the user taps a marker in the map.
+     * @author Arnau Mora
+     * @since 20211120
+     * @param listener The callback that will be executed when the marker gets clicked.
+     * @return The current instance of [MapHelper]
+     */
+    @UiThread
+    fun setOnMarkerClickListener(listener: GoogleMap.OnMarkerClickListener?): MapHelper {
+        map?.setOnMarkerClickListener(listener)
+        return this
+    }
+
+    /**
+     * Sets the click listener for when the user moves around the camera of the map.
+     * @author Arnau Mora
+     * @since 20211120
+     * @param listener The callback that will be executed when the camera gets moved.
+     * @return The current instance of [MapHelper]
+     */
+    @UiThread
+    fun setOnCameraMoveListener(listener: (() -> Unit)?): MapHelper {
+        map?.setOnCameraMoveListener(listener)
+        return this
+    }
+
+    /**
+     * Enables or disables the map's compass.
+     * @author Arnau Mora
+     * @since 20211120
+     * @param enabled Whether or not to enable the compass.
+     */
+    @UiThread
+    fun setCompassEnabled(enabled: Boolean): MapHelper {
+        map?.uiSettings?.isCompassEnabled = enabled
+        return this
+    }
 
     inner class MarkerWindow
     @UiThread constructor(
