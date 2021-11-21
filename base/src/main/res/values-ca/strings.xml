@@ -311,4 +311,5 @@
     <string name="dataclass_zone_children_count">%d sectors</string>
     <string name="dataclass_sector_children_count">%d vies</string>
     <string name="image_desc_enter">Entrar</string>
+    <string name="dialog_sectors_title">Sectors</string>
 </resources>
