@@ -21,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationAc
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.profile.ProfileActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.exception.MissingPermissionException
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.isLocationPermissionGranted
@@ -147,11 +148,22 @@ class MainActivity : LanguageAppCompatActivity() {
      * @author Arnau Mora
      * @since 20211120
      */
+    @SuppressLint("MissingPermission")
     private val sharedPreferencesWatcher =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key == PREF_DISABLE_NEARBY.key) {
                 val nearbyDisabled = PREF_DISABLE_NEARBY.get()
                 Timber.i("Changed Nearby Zones disable state to: $nearbyDisabled")
+
+                if (nearbyDisabled) {
+                    Timber.i("Disabling location component...")
+                    areasViewFragment.nearbyZones?.mapHelper?.locationComponent?.disable()
+                } else try {
+                    Timber.i("Enabling location component")
+                    areasViewFragment.nearbyZones?.mapHelper?.locationComponent?.enable(this)
+                } catch (e: MissingPermissionException) {
+                    Timber.w("The location permission is not granted, will ask when updating Nearby Zones.")
+                }
 
                 areasViewFragment.nearbyZones?.updateNearbyZones()
             }
