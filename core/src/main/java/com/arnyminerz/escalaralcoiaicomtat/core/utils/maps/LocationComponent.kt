@@ -131,12 +131,15 @@ class LocationComponent(private val mapHelper: MapHelper) {
      * @author Arnau Mora
      * @since 20211121
      */
+    @SuppressLint("MissingPermission")
     fun disable() {
         if (!isReady)
             return
 
         locationManager.removeUpdates(locationUpdateCallback)
         listeningForUpdates = false
+
+        mapHelper.map!!.isMyLocationEnabled = false
     }
 
     /**
