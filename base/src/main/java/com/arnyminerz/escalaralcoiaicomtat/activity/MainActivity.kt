@@ -404,6 +404,7 @@ class MainActivity : LanguageAppCompatActivity() {
 
         updateBottomAppBar()
         refreshLoginStatus()
+        updatesCheck()
     }
 
     override fun onStart() {
