@@ -332,7 +332,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                     .show()
                     .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
                     .withControllable(false)
-                    .loadMap().first
+                    .loadMap()
                 try {
                     doAsync {
                         suspend fun getKMZFile(): File {

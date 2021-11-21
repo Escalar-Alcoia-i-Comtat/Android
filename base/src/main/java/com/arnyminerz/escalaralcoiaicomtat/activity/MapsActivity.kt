@@ -295,7 +295,7 @@ class MapsActivity : LanguageAppCompatActivity() {
             .withMapFragment(this, R.id.map)
         mapHelper.onCreate(savedInstanceState)
         doOnMain {
-            mapHelper = mapHelper.loadMap().first
+            mapHelper = mapHelper.loadMap()
             if (!mapHelper.isLoaded)
                 return@doOnMain
 

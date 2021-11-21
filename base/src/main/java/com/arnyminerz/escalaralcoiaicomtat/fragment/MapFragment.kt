@@ -7,6 +7,7 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.coroutineScope
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
@@ -19,9 +20,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_CENTER_MARKER_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.isLocationPermissionGranted
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapHelper
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.maps.MapNotInitializedException
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
@@ -73,7 +77,6 @@ class MapFragment : NetworkChangeListenerFragment() {
 
         Timber.v("Preparing MapHelper...")
         mapHelper = MapHelper()
-            .withMapView(binding!!.pageMapView)
         mapHelper.onCreate(savedInstanceState)
 
         binding!!.loadingMapCardView.show()
@@ -84,11 +87,12 @@ class MapFragment : NetworkChangeListenerFragment() {
         super.onStart()
         mapHelper.onStart()
 
-        doOnMain {
+        lifecycle.coroutineScope.launchWhenCreated {
             Timber.v("Loading map...")
             mapHelper
+                .withMapFragment(this@MapFragment, R.id.page_mapView)
                 .withStartingPosition(LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_ZOOM)
-                .loadMap().first
+                .loadMap()
 
             if (context != null)
                 try {
