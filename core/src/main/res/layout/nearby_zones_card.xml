@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nearbyZonesCardView"
     android:layout_width="match_parent"
-    android:layout_height="0dp"
+    android:layout_height="wrap_content"
     android:layout_marginStart="16dp"
     android:layout_marginTop="8dp"
     android:layout_marginEnd="16dp"
@@ -25,6 +25,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_marginTop="8dp"
+            app:cardBackgroundColor="?attr/colorPrimarySurface"
             app:cardCornerRadius="12dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -41,7 +42,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/image_desc_nearby_zones"
-                    android:src="@drawable/rotating_explore" />
+                    android:src="@drawable/rotating_explore"
+                    app:tint="?attr/colorOnPrimarySurface" />
 
                 <TextView
                     android:id="@+id/nearbyZonesTitle"
@@ -49,7 +51,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
                     android:text="@string/message_nearby_zones"
-                    android:textColor="?attr/colorOnBackground"
+                    android:textColor="?attr/colorOnPrimarySurface"
                     android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -71,9 +73,9 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="130dp"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
