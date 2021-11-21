@@ -23,6 +23,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
 import com.arnyminerz.escalaralcoiaicomtat.fragment.climb.SectorFragment
 import com.google.android.material.badge.ExperimentalBadgeUtils
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -170,8 +171,10 @@ class SectorActivity : LanguageAppCompatActivity() {
             Timber.v("There are $sectorCount sectors.")
             Timber.d("Initializing fragments...")
             fragments.clear()
+            val sectorNames = arrayListOf<String>()
             for ((i, sector) in sectors.withIndex()) {
                 fragments.add(SectorFragment.newInstance(sector.objectId))
+                sectorNames.add(sector.displayName)
                 if (positionExtra == null && sector.objectId == sectorId) {
                     Timber.v("The desired sector S/$sectorId in at #$i.")
                     positionExtra = i
@@ -184,6 +187,23 @@ class SectorActivity : LanguageAppCompatActivity() {
                 fragments[currentPage].load()
 
             uiContext {
+                Timber.v("Adding listener for sectors dialog")
+                binding.toolbar.setOnClickListener {
+                    MaterialAlertDialogBuilder(this@SectorActivity)
+                        .setTitle(getString(R.string.dialog_sectors_title))
+                        .setSingleChoiceItems(
+                            sectorNames.toTypedArray(),
+                            currentPage
+                        ) { dialog, which ->
+                            dialog.dismiss()
+                            binding.sectorViewPager.setCurrentItem(which, true)
+                        }
+                        .setNegativeButton(R.string.action_close) { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        .show()
+                }
+
                 Timber.v("Initializing view pager...")
                 Timber.d("  Initializing adapter for ${fragments.size} pages...")
                 val adapter = object : FragmentStateAdapter(this@SectorActivity) {
