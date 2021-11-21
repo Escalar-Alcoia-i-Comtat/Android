@@ -18,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.MapsActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_ZOOM
@@ -37,6 +38,7 @@ import com.arnyminerz.escalaralcoiaicomtat.paging.DataClassAdapter
 import com.arnyminerz.escalaralcoiaicomtat.paging.DataClassComparator
 import com.arnyminerz.escalaralcoiaicomtat.view.model.DataClassListViewModel
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
@@ -143,7 +145,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
      * @author Arnau Mora
      * @since 20210820
      */
-    internal val viewModelInitialized: Boolean
+    private val viewModelInitialized: Boolean
         get() = this::viewModel.isInitialized
 
     /**
@@ -151,7 +153,7 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
      * @author Arnau Mora
      * @since 20210815
      */
-    internal val dataClassInitialized: Boolean
+    private val dataClassInitialized: Boolean
         get() = this::dataClass.isInitialized
 
     /**
@@ -165,6 +167,13 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
      * Stores the [DataClassListActivity]'s ViewModel.
      */
     lateinit var viewModel: DataClassListViewModel
+
+    /**
+     * Stores the last download status, for making it easier to update the UI
+     * @author Arnau Mora
+     * @since 20211121
+     */
+    private var downloadStatus: DownloadStatus? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -188,7 +197,13 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.download_status -> {
-                    item.actionView.performLongClick()
+                    Snackbar.make(
+                        binding.root,
+                        if (downloadStatus?.downloaded == true)
+                            R.string.toast_downloaded
+                        else R.string.toast_error_no_internet,
+                        Snackbar.LENGTH_SHORT
+                    ).show()
                     true
                 }
                 else -> false
@@ -286,11 +301,12 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                     item.setIcon(R.drawable.ic_round_signal_cellular_off_24)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                         item.tooltipText = getString(R.string.status_no_internet)
+                    item.title = getString(R.string.status_no_internet)
                     item.isVisible = true
                 }
 
             Timber.v("Updating icon, getting download status...")
-            val downloadStatus = if (dataClassInitialized)
+            downloadStatus = if (dataClassInitialized)
                 dataClass.downloadStatus(app, app.searchSession)
             else null
             Timber.v("Got download status: $downloadStatus")
@@ -300,11 +316,13 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                     item.setIcon(R.drawable.cloud_check)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                         item.tooltipText = getString(R.string.status_downloaded)
+                    item.title = getString(R.string.status_downloaded)
                     item.isVisible = true
                 } else if (!appNetworkState.hasInternet) {
                     item.setIcon(R.drawable.ic_round_signal_cellular_off_24)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                         item.tooltipText = getString(R.string.status_no_internet)
+                    item.title = getString(R.string.status_no_internet)
                     item.isVisible = true
                 } else
                     item.isVisible = false
