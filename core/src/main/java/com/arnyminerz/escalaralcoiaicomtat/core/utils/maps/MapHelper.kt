@@ -30,17 +30,19 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
-import com.google.android.gms.maps.*
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.storage.FirebaseStorage
+import com.google.maps.android.ktx.awaitMap
 import org.xml.sax.SAXParseException
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.InvalidObjectException
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * Initializes the MapHelper instance. This also prepares the Mapbox interface with the access token.
@@ -285,25 +287,31 @@ class MapHelper {
     @UiThread
     suspend fun loadMap(
         @MapType type: Int = GoogleMap.MAP_TYPE_SATELLITE
-    ): Pair<MapHelper, Boolean> = suspendCoroutine { cont ->
+    ): MapHelper {
         Timber.d("Loading map...")
-        val mapReadyCallback = OnMapReadyCallback { map ->
-            Timber.d("Setting map type...")
-            map.mapType = type
-
-            mapSetup(map)
-            if (!isLoaded)
-                throw IllegalStateException("There was an issue while initializing MapHelper.")
-            cont.resume(this to true)
-        }
-        when {
-            mapView != null -> mapView?.getMapAsync(mapReadyCallback)
-            mapFragment != null -> mapFragment?.getMapAsync(mapReadyCallback)
+        val map: GoogleMap? = when {
+            mapView != null -> {
+                Timber.d("Getting mapView map async...")
+                mapView?.awaitMap()
+            }
+            mapFragment != null -> {
+                Timber.d("Getting mapFragment map async...")
+                mapFragment?.awaitMap()
+            }
             else -> {
                 Timber.e("Could not load map since both mapView and mapFragment are null")
-                cont.resume(this to false)
+                return this
             }
         }
+        this.map = map
+        Timber.d("Setting map type...")
+        map?.mapType = type
+
+        if (map != null)
+            mapSetup(map)
+        if (!isLoaded)
+            throw IllegalStateException("There was an issue while initializing MapHelper.")
+        return this
     }
 
     /**
