@@ -33,6 +33,9 @@
         <item name="colorOnSurfaceInverse">@color/md_theme_light_inverseOnSurface</item>
         <item name="colorSurfaceInverse">@color/md_theme_light_inverseSurface</item>
         <item name="colorPrimaryInverse">@color/md_theme_light_primaryInverse</item>
+
+        <item name="artifo_ending_badge_color">@color/artifo_ending_badge_color_light</item>
+        <item name="pathBlockedCardColor">@color/path_blocked_card_color_light</item>
     </style>
 
     <style name="AppTheme.AppBar" parent="@style/TextAppearance.Material3.TitleLarge">
