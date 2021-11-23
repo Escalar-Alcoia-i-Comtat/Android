@@ -2,28 +2,32 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>AccountAuthenticator</title>
-</head><body><link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script><script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script><link href="../../../styles/style.css" rel="Stylesheet"><link href="../../../styles/logo-styles.css" rel="Stylesheet"><link href="../../../styles/jetbrains-mono.css" rel="Stylesheet"><link href="../../../styles/main.css" rel="Stylesheet"><script type="text/javascript" src="../../../scripts/clipboard.js" async></script><script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script><script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script><script type="text/javascript" src="../../../scripts/main.js" async></script>
+</head><body><link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script><link href="../../../styles/style.css" rel="Stylesheet"><link href="../../../styles/jetbrains-mono.css" rel="Stylesheet"><link href="../../../styles/main.css" rel="Stylesheet"><link href="../../../styles/prism.css" rel="Stylesheet"><link href="../../../styles/logo-styles.css" rel="Stylesheet"><script type="text/javascript" src="../../../scripts/clipboard.js" async></script><script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script><script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script><script type="text/javascript" src="../../../scripts/main.js" async></script><script type="text/javascript" src="../../../scripts/prism.js" async></script><script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+
   
+    <div class="navigation-wrapper" id="navigation-wrapper">
+      <div id="leftToggler"><span class="icon-toggler"></span></div>
+      <div class="library-name"><a href="../../../index.html"><span>Escalar Alcoia i Comtat</span></a></div>
+      <div></div>
+      <div class="pull-right d-flex"><button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+      </div>
+    </div>
     <div id="container">
-      <div id="leftColumn"><a href="../../../index.html">
-            <div id="logo"></div>
-          </a>
-        <div id="paneSearch"></div>
+      <div id="leftColumn">
         <div id="sideMenu"></div>
       </div>
-      <div id="main">
-        <script type="text/javascript" src="../../../scripts/main.js"></script><div id="leftToggler"><span class="icon-toggler"></span></div>
-
+      <div id="main"><script type="text/javascript" src="../../../scripts/main.js"></script>
         <div class="main-content" id="content" pageids="base::com.arnyminerz.escalaralcoiaicomtat.auth/AccountAuthenticator///PointingToDeclaration//-1445146142">
-          <div class="navigation-wrapper" id="navigation-wrapper">
-            <div class="breadcrumbs"><a href="../../index.html">base</a>/<a href="../index.html">com.arnyminerz.escalaralcoiaicomtat.auth</a>/<a href="index.html">AccountAuthenticator</a></div>
-            <div class="pull-right d-flex">
-              <div id="searchBar"></div>
-            </div>
-          </div>
+          <div class="breadcrumbs"><a href="../../index.html">base</a>/<a href="../index.html">com.arnyminerz.escalaralcoiaicomtat.auth</a>/<a href="index.html">AccountAuthenticator</a></div>
           <div class="cover ">
             <h1 class="cover"><span>Account</span><wbr><span><span>Authenticator</span></span></h1>
-            <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">class <a href="index.html">AccountAuthenticator</a>(context: <a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a>) : <a href="https://developer.android.com/reference/kotlin/android/accounts/AbstractAccountAuthenticator.html">AbstractAccountAuthenticator</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+            <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">AccountAuthenticator</a><span class="token punctuation">(</span>context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/android/accounts/AbstractAccountAuthenticator.html">AbstractAccountAuthenticator</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
           </div>
           <div class="tabbedcontent">
             <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button></div>
@@ -36,13 +40,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">open override fun <a href="add-account.html">addAccount</a>(response: <a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a>, accountType: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, authTokenType: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, requiredFeatures: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;out <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;?, options: <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a>): <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="add-account.html"><span class="token function">addAccount</span></a><span class="token punctuation">(</span>response<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a><span class="token punctuation">, </span>accountType<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span>authTokenType<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>requiredFeatures<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token punctuation">, </span>options<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -53,13 +53,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">open fun <a href="index.html#1645553331%2FFunctions%2F-1445146142">addAccountFromCredentials</a>(p0: <a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a>, p1: <a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a>, p2: <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a>): <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#1645553331%2FFunctions%2F-1445146142"><span class="token function">addAccountFromCredentials</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a><span class="token punctuation">, </span>p1<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a><span class="token punctuation">, </span>p2<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -70,13 +66,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">open override fun <a href="confirm-credentials.html">confirmCredentials</a>(p0: <a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a>?, p1: <a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a>?, p2: <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a>?): <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="confirm-credentials.html"><span class="token function">confirmCredentials</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a><span class="token operator">?</span><span class="token punctuation">, </span>p1<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a><span class="token operator">?</span><span class="token punctuation">, </span>p2<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="token operator">?</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -87,13 +79,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">open override fun <a href="edit-properties.html">editProperties</a>(p0: <a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a>?, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?): <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="edit-properties.html"><span class="token function">editProperties</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a><span class="token operator">?</span><span class="token punctuation">, </span>p1<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -104,13 +92,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">open fun <a href="index.html#878753078%2FFunctions%2F-1445146142">finishSession</a>(p0: <a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p2: <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a>): <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#878753078%2FFunctions%2F-1445146142"><span class="token function">finishSession</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a><span class="token punctuation">, </span>p1<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span>p2<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -121,13 +105,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">open fun <a href="index.html#2144350061%2FFunctions%2F-1445146142">getAccountCredentialsForCloning</a>(p0: <a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a>, p1: <a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a>): <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#2144350061%2FFunctions%2F-1445146142"><span class="token function">getAccountCredentialsForCloning</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a><span class="token punctuation">, </span>p1<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -138,13 +118,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">open fun <a href="index.html#-397779146%2FFunctions%2F-1445146142">getAccountRemovalAllowed</a>(p0: <a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a>, p1: <a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a>): <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-397779146%2FFunctions%2F-1445146142"><span class="token function">getAccountRemovalAllowed</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a><span class="token punctuation">, </span>p1<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -155,13 +131,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">open override fun <a href="get-auth-token.html">getAuthToken</a>(p0: <a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a>?, p1: <a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a>?, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, p3: <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a>?): <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-auth-token.html"><span class="token function">getAuthToken</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a><span class="token operator">?</span><span class="token punctuation">, </span>p1<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a><span class="token operator">?</span><span class="token punctuation">, </span>p2<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>p3<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="token operator">?</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -172,13 +144,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">open override fun <a href="get-auth-token-label.html">getAuthTokenLabel</a>(p0: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-auth-token-label.html"><span class="token function">getAuthTokenLabel</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -189,13 +157,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">fun <a href="index.html#643811459%2FFunctions%2F-1445146142">getIBinder</a>(): <a href="https://developer.android.com/reference/kotlin/android/os/IBinder.html">IBinder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#643811459%2FFunctions%2F-1445146142"><span class="token function">getIBinder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/IBinder.html">IBinder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -206,13 +170,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">open override fun <a href="has-features.html">hasFeatures</a>(p0: <a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a>?, p1: <a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a>?, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;out <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;?): <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="has-features.html"><span class="token function">hasFeatures</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a><span class="token operator">?</span><span class="token punctuation">, </span>p1<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a><span class="token operator">?</span><span class="token punctuation">, </span>p2<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -223,13 +183,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">open fun <a href="index.html#-1197145690%2FFunctions%2F-1445146142">isCredentialsUpdateSuggested</a>(p0: <a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a>, p1: <a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a>, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>): <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-1197145690%2FFunctions%2F-1445146142"><span class="token function">isCredentialsUpdateSuggested</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a><span class="token punctuation">, </span>p1<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a><span class="token punctuation">, </span>p2<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -240,13 +196,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">open fun <a href="index.html#197124687%2FFunctions%2F-1445146142">startAddAccountSession</a>(p0: <a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p3: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;, p4: <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a>): <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#197124687%2FFunctions%2F-1445146142"><span class="token function">startAddAccountSession</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a><span class="token punctuation">, </span>p1<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span>p2<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span>p3<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span>p4<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -257,13 +209,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">open fun <a href="index.html#-1009383143%2FFunctions%2F-1445146142">startUpdateCredentialsSession</a>(p0: <a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a>, p1: <a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a>, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, p3: <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a>): <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-1009383143%2FFunctions%2F-1445146142"><span class="token function">startUpdateCredentialsSession</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a><span class="token punctuation">, </span>p1<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a><span class="token punctuation">, </span>p2<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span>p3<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -274,13 +222,9 @@
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace">open override fun <a href="update-credentials.html">updateCredentials</a>(p0: <a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a>?, p1: <a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a>?, p2: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, p3: <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a>?): <a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-</div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="update-credentials.html"><span class="token function">updateCredentials</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/AccountAuthenticatorResponse.html">AccountAuthenticatorResponse</a><span class="token operator">?</span><span class="token punctuation">, </span>p1<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/accounts/Account.html">Account</a><span class="token operator">?</span><span class="token punctuation">, </span>p2<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>p3<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="token operator">?</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Bundle.html">Bundle</a><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -288,7 +232,7 @@
             </div>
           </div>
         </div>
-        <div class="footer"><span class="go-to-top-icon"><a href="#content"></a></span><span>© 2021 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span></div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2021 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span></div>
       </div>
     </div>
   
