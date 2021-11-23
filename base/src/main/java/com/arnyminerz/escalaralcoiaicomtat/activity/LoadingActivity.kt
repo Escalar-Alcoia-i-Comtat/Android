@@ -254,9 +254,12 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             auth.removeAuthStateListener((application as App).authStateListener)
         }
         if (auth.currentUser == null) {
-            Timber.i("Signing in anonymously...")
+            Timber.d("Signing in anonymously...")
             auth.signInAnonymously()
-        }
+                .addOnSuccessListener { Timber.i("Logged in anonymously.") }
+                .addOnFailureListener { Timber.e(it, "Could not login anonymously:") }
+        } else
+            Timber.d("Anonymous login not performed.")
     }
 
     @WorkerThread
