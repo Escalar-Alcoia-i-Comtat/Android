@@ -29,6 +29,5 @@
         <item name="colorPrimaryInverse">@color/md_theme_dark_primaryInverse</item>
 
         <item name="artifo_ending_badge_color">@color/artifo_ending_badge_color_dark</item>
-        <item name="pathBlockedCardColor">@color/path_blocked_card_color_dark</item>
     </style>
 </resources>
