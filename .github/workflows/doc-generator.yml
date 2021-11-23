@@ -25,8 +25,6 @@ jobs:
 
       - name: Prepare secure files 🔒
         run: |
-          echo 'MAPBOX_DOWNLOADS_TOKEN=${{ secrets.MAPBOX_TOKEN_SECRET }}' >> local.properties
-          echo 'MAPBOX_PUBLIC_TOKEN=${{ secrets.MAPBOX_TOKEN_PUBLIC }}' >> local.properties
           echo 'SIGNING_KEYSTORE_PASSWORD=${{ secrets.SIGNING_KEYSTORE_PASSWORD }}' >> local.properties
           echo 'SIGNING_KEY_ALIAS=${{ secrets.SIGNING_KEY_ALIAS }}' >> local.properties
           echo 'SIGNING_KEY_PASSWORD=${{ secrets.SIGNING_KEY_PASSWORD }}' >> local.properties
@@ -37,8 +35,8 @@ jobs:
           echo "VERSION_NAME=\"${{ steps.create_release.outputs.tag_name }}\"" >> base/version.gradle
           echo "}" >> base/version.gradle
 
-          echo "${{ secrets.GOOGLE_SERVICES }}" >> base/google-services.json
-          echo "${{ secrets.GOOGLE_SERVICES }}" >> instant/google-services.json
+          echo '${{ secrets.GOOGLE_SERVICES }}' >> base/google-services.json
+          echo '${{ secrets.GOOGLE_SERVICES }}' >> instant/google-services.json
       - name: Run dokka 📝
         id: test
         run: bash ./gradlew dokkaHtmlMultiModule
