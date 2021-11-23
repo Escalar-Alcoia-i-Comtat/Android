@@ -8,22 +8,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - name: Set up JDK 15
+        uses: actions/setup-java@v2.3.1
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          distribution: 'adopt'
+          java-version: '15'
+          java-package: jdk
+          cache: 'gradle'
       - name: Prepare google-services.json
         run: |
-          echo "${{ secrets.GOOGLE_SERVICES }}" >> base/google-services.json
-          echo "${{ secrets.GOOGLE_SERVICES }}" >> instant/google-services.json
+          echo '${{ secrets.GOOGLE_SERVICES }}' >> base/google-services.json
+          echo '${{ secrets.GOOGLE_SERVICES }}' >> instant/google-services.json
       - name: Prepare Gradle secure file
         run: |
-          echo 'MAPBOX_DOWNLOADS_TOKEN=${{ secrets.MAPBOX_TOKEN_SECRET }}' >> local.properties
-          echo 'MAPBOX_PUBLIC_TOKEN=${{ secrets.MAPBOX_TOKEN_PUBLIC }}' >> local.properties
           echo 'SIGNING_KEYSTORE_PASSWORD=${{ secrets.SIGNING_KEYSTORE_PASSWORD }}' >> local.properties
           echo 'SIGNING_KEY_ALIAS=${{ secrets.SIGNING_KEY_ALIAS }}' >> local.properties
           echo 'SIGNING_KEY_PASSWORD=${{ secrets.SIGNING_KEY_PASSWORD }}' >> local.properties

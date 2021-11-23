@@ -18,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIR
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.auth.loggedIn
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
@@ -33,6 +34,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
@@ -55,6 +57,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     private lateinit var storage: FirebaseStorage
     private lateinit var messaging: FirebaseMessaging
     private lateinit var analytics: FirebaseAnalytics
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +72,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         messaging = Firebase.messaging
         Timber.v("Getting Firebase Analytics instance...")
         analytics = Firebase.analytics
+        Timber.v("Getting Firebase Auth instance...")
+        auth = Firebase.auth
 
         checkGooglePlayServices()
         checkMD5Support()
@@ -246,8 +251,15 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     private fun authSetup() {
         if (!ENABLE_AUTHENTICATION) {
             Timber.v("Removing auth state listener...")
-            Firebase.auth.removeAuthStateListener((application as App).authStateListener)
+            auth.removeAuthStateListener((application as App).authStateListener)
         }
+        if (auth.currentUser == null) {
+            Timber.d("Signing in anonymously...")
+            auth.signInAnonymously()
+                .addOnSuccessListener { Timber.i("Logged in anonymously.") }
+                .addOnFailureListener { Timber.e(it, "Could not login anonymously:") }
+        } else
+            Timber.d("Anonymous login not performed.")
     }
 
     @WorkerThread
