@@ -125,6 +125,21 @@ fun setTextColor(view: TextView, context: Context, @ColorRes color: Int) {
     view.setTextColor(context.resources.getColor(color, context.theme))
 }
 
+/**
+ * Sets the text color of the [view] from the set attribute [color].
+ * @author Arnau Mora
+ * @since 20211123
+ * @param view The [TextView] to update.
+ * @param context The [Context] that is requesting the update.
+ * @param color The color attribute to set.
+ */
+@UiThread
+fun setTextColorAttr(view: TextView, context: Context, @AttrRes color: Int) {
+    view.setTextColor(
+        getColorFromAttribute(context, color)
+    )
+}
+
 @UiThread
 @Suppress("DEPRECATION")
 fun getColor(context: Context, @ColorRes color: Int): Int = ContextCompat.getColor(context, color)

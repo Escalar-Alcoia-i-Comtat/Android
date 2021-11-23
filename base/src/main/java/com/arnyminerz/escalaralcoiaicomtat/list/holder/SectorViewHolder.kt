@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.core.view.getColorFromAttribute
 import com.arnyminerz.escalaralcoiaicomtat.core.view.setTextColor
+import com.arnyminerz.escalaralcoiaicomtat.core.view.setTextColorAttr
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.ChipGroup
@@ -96,10 +97,10 @@ class SectorViewHolder(private val activity: Activity, view: View) : RecyclerVie
     fun updateBlockedStatus(status: BlockingType) {
         val anyBlocking = status != BlockingType.UNKNOWN
         if (anyBlocking) {
-            setTextColor(titleTextView, activity, R.color.path_blocked_text_color)
-            setTextColor(idTextView, activity, R.color.path_blocked_text_color)
+            setTextColorAttr(titleTextView, activity, R.attr.colorOnErrorContainer)
+            setTextColorAttr(idTextView, activity, R.attr.colorOnErrorContainer)
             cardView.setCardBackgroundColor(
-                getColorFromAttribute(activity, R.attr.pathBlockedCardColor)
+                getColorFromAttribute(activity, R.attr.colorErrorContainer)
             )
             warningTextView.text =
                 activity.resources.getStringArray(R.array.path_warnings)[status.index]
