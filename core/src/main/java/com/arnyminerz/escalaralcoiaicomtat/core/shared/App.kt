@@ -12,6 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.auth.loggedIn
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getAreas
@@ -49,12 +50,10 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      */
     private lateinit var analytics: FirebaseAnalytics
 
-    private var areas: List<Area> = listOf()
-
     val authStateListener: FirebaseAuth.AuthStateListener = FirebaseAuth.AuthStateListener {
-        val user = it.currentUser
-        Timber.v("Auth State updated. Logged in: ${user != null}")
-        if (user == null) {
+        val loggedIn = it.loggedIn
+        Timber.v("Auth State updated. Logged in: $loggedIn. Anonymous: ${it.currentUser?.isAnonymous ?: "N/A"}")
+        if (!loggedIn) {
             val am = AccountManager.get(this)
             for (account in am.accounts) {
                 Timber.v("Removing account \"${account.name}\"...")
@@ -64,8 +63,9 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
                     Timber.w(e, "Could not remove account.")
                 }
             }
-        } else
+        } else it.currentUser?.let { user ->
             analytics.setUserId(user.uid)
+        }
     }
 
     /**
