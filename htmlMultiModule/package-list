@@ -63,6 +63,7 @@ com.arnyminerz.escalaralcoiaicomtat.core.ui.element
 com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 com.arnyminerz.escalaralcoiaicomtat.core.utils
+com.arnyminerz.escalaralcoiaicomtat.core.utils.auth
 com.arnyminerz.escalaralcoiaicomtat.core.utils.maps
 com.arnyminerz.escalaralcoiaicomtat.core.utils.storage
 com.arnyminerz.escalaralcoiaicomtat.core.view
