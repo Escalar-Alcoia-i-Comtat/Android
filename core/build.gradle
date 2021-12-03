@@ -135,7 +135,7 @@ dependencies {
     api 'com.google.android.gms:play-services-maps:18.0.0'
     api 'com.google.maps.android:maps-ktx:3.2.1'
     api 'com.google.maps.android:android-maps-utils:2.3.0'
-    api 'com.google.maps.android:maps-utils-ktx:3.2.1'
+    api 'com.google.maps.android:maps-utils-ktx:3.3.0'
 
     // Timber
     api 'com.jakewharton.timber:timber:5.0.1'
