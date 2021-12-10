@@ -104,7 +104,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-instantapps:18.0.0'
 
     // Firebase Dependencies
-    implementation platform('com.google.firebase:firebase-bom:29.0.1')
+    implementation platform('com.google.firebase:firebase-bom:29.0.2')
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-perf-ktx'
