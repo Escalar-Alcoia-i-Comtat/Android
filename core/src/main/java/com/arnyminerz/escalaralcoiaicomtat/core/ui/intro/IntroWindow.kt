@@ -82,6 +82,10 @@ fun IntroWindowDemo() {
                 IntroPageData(
                     stringResource(R.string.intro_main_title, "Escalar Alcoià i Comtat"),
                     stringResource(R.string.intro_main_message)
+                ),
+                IntroPageData(
+                    stringResource(R.string.intro_warning_title),
+                    stringResource(R.string.intro_warning_message)
                 )
             )
         ) { }
@@ -99,6 +103,10 @@ fun IntroWindowDarkDemo() {
                 IntroPageData(
                     stringResource(R.string.intro_main_title, "Escalar Alcoià i Comtat"),
                     stringResource(R.string.intro_main_message)
+                ),
+                IntroPageData(
+                    stringResource(R.string.intro_warning_title),
+                    stringResource(R.string.intro_warning_message)
                 )
             )
         ) { }
