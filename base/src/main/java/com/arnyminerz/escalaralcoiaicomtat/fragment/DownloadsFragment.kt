@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.MainThread
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
@@ -21,6 +22,7 @@ import com.arnyminerz.escalaralcoiaicomtat.list.adapter.DownloadSectionsAdapter
 import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
+@ExperimentalMaterial3Api
 class DownloadsFragment : Fragment() {
     private var _binding: FragmentDownloadsBinding? = null
     private val binding get() = _binding!!

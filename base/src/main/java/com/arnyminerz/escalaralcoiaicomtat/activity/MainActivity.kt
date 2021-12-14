@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.widget.PopupMenu
 import androidx.annotation.UiThread
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.widget.ImageViewCompat
 import androidx.viewpager2.widget.ViewPager2
@@ -64,6 +65,7 @@ private const val APP_UPDATE_REQUEST_CODE = 8 // This number was chosen by Eva
  * @author Arnau Mora
  * @since 20210617
  */
+@ExperimentalMaterial3Api
 class MainActivity : LanguageAppCompatActivity() {
 
     /**

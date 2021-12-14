@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
@@ -24,6 +25,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.view.model.DataClassListViewModel
 import com.arnyminerz.escalaralcoiaicomtat.view.model.DataClassListViewModelFactory
+import com.google.android.material.badge.ExperimentalBadgeUtils
 import timber.log.Timber
 
 /**
@@ -34,6 +36,8 @@ import timber.log.Timber
  * @see Area
  * @see DataClassListActivity
  */
+@ExperimentalMaterial3Api
+@ExperimentalBadgeUtils
 class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen.zone_item_height) {
     companion object {
         /**

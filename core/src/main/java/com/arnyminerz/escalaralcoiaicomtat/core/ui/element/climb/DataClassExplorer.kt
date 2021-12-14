@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -28,7 +26,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.animation.EnterAnimation
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.DataClassViewModel
 
 @Composable
-@ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
@@ -47,7 +44,8 @@ fun <T : DataClass<*, *>, V : DataClassViewModel<T, *>> Explorer(
             .padding(top = 24.dp)
     ) {
         EnterAnimation(visible = items.isEmpty(), modifier = Modifier.size(52.dp)) {
-            CircularProgressIndicator()
+            // TODO: Add progress indicator when implemented in MD3
+            // CircularProgressIndicator()
         }
     }
     AnimatedVisibility(

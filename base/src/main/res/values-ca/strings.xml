@@ -78,7 +78,6 @@
     <string name="fab_desc_back">"Tornar"</string>
     <string name="fab_desc_position">"Posició Actual"</string>
     <string name="fab_desc_download">"Descarregar"</string>
-    <string name="fab_desc_next">"Següent"</string>
     <string name="image_desc_downloaded">"Descarregat"</string>
     <string name="image_desc_no_internet">"Sense Internet"</string>
     <string name="image_desc_app_icon">@string/app_name</string>
@@ -90,8 +89,6 @@
     <string name="button_desc_download">"Descarregar"</string>
     <string name="button_desc_toggle">"Canviar"</string>
     <string name="button_desc_delete">"Eliminar"</string>
-    <string name="intro_main_title">"Benvingut a %s"</string>
-    <string name="intro_main_message">"Anem a guiar-te per un procés curt de configuració. No et preocupes, és ràpid i ben senzill"</string>
     <string name="date_format">"dd-MM-yyy kk:mm:ss"</string>
     <string name="action_clear_settings">Netejar Configuració</string>
     <string name="pref_gene_section_advanced">Avançat</string>
@@ -102,8 +99,6 @@
     <string name="item_map">Mapa</string>
     <string name="item_downloads">Baixades</string>
     <string name="item_settings">Configuració</string>
-    <string name="intro_beta_message">Hola usuari! Has triat emprar una versió de prova de l\'aplicació i això et fa genial! Moltes gràcies! Però tot s\'ha de dir, aquesta versió pot ser tinga errors, ja que encara es troba en desenvolupament, inclús pots trobar-te amb coses sense acabar, o que l\'aplicació es tanque de manera sobtada. Ens sap molt mal que pugues patir problemes, però tots els errors que et surgisquen a tu, seràn errors que no hi seràn a la versió final. Moltes gràcies!</string>
-    <string name="intro_beta_title">Prova Beta</string>
     <string name="notification_channel_task_completed_name">Tasca completada</string>
     <string name="notification_channel_task_completed_desc">Et notificarem en el moment s\'haja completat una tasca en segon pla.</string>
     <string name="dialog_description_description_title">Descripció</string>
@@ -171,10 +166,7 @@
     <string name="feedback_error_empty_message">Has d\'escriure el missatge a enviar</string>
     <string name="pref_gene_error_reporting_title">Habilitar reports d\'error</string>
     <string name="pref_gene_error_reporting_sum">Si està habilitat, cada vegada que l\'app es tanque de manera sobtada, o hi haja algun error, s\'enviarà un report anònim als desenvolupadors per a que l\'arreglen el més prompte possible. Et demanem que mantingues aquesta opció activada, però eres lliure de deshabilitar-la si vols.</string>
-   <string name="downloads_no_download">No hi ha res baixat</string>
-    <string name="intro_warning_title">Atenció</string>
-    <string name="intro_warning_message">L\'escalada és un esport considerat de risc, tot el que el practique té que preocupar-se del seu coneixement i correcta execució. L\'informació d\'aquesta aplicació és purament informativa i pot ser errònia. Tingues cura, el material en bon estat, i vigila\'t no tant sols a tu mateix, sinó també als teus companys, i sobre tot, gaudeix.</string>
-    <string name="dialog_downloaded_partially_msg">Alguns elements s\'han baixat, però no %s sencera. Vols descarregar-la sencera?</string>
+   <string name="downloads_no_download">No hi ha res baixat</string><string name="dialog_downloaded_partially_msg">Alguns elements s\'han baixat, però no %s sencera. Vols descarregar-la sencera?</string>
     <string name="toast_error_no_kmz">No s\'ha pogut trobar el fitxer KMZ</string>
     <string name="action_register">Registrar-se</string>
     <string name="action_login">Accedir</string>

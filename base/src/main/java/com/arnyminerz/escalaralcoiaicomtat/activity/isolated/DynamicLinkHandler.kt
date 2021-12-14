@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.isolated
 import android.app.Activity
 import android.net.Uri
 import android.os.Bundle
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.LoadingActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ESCALAR_ALCOIA_I_COMTAT_HOSTNAME
@@ -16,6 +17,7 @@ import com.google.firebase.dynamiclinks.ktx.dynamicLinks
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 
+@ExperimentalMaterial3Api
 class DynamicLinkHandler : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

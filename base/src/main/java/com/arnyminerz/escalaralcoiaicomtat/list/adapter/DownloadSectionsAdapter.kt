@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import androidx.annotation.MainThread
 import androidx.annotation.UiThread
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
@@ -32,6 +33,7 @@ import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.toCollection
 import timber.log.Timber
 
+@ExperimentalMaterial3Api
 class DownloadSectionsAdapter(
     private val downloadedSections: ArrayList<DownloadedSection>,
     private val mainActivity: MainActivity

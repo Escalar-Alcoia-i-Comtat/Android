@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.isolated
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.LoadingActivity
@@ -20,6 +21,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
+@ExperimentalMaterial3Api
 class EmailConfirmationActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEmailConfirmationBinding
 
