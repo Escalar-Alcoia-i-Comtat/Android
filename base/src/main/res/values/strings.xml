@@ -267,7 +267,6 @@
     <string name="fab_desc_back">Go Back</string>
     <string name="fab_desc_position">Current Location</string>
     <string name="fab_desc_download">Download</string>
-    <string name="fab_desc_next">Next</string>
 
     <string name="image_desc_downloaded">Downloaded</string>
     <string name="image_desc_no_internet">No Internet</string>

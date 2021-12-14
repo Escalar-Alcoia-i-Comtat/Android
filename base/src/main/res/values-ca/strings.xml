@@ -78,7 +78,6 @@
     <string name="fab_desc_back">"Tornar"</string>
     <string name="fab_desc_position">"Posició Actual"</string>
     <string name="fab_desc_download">"Descarregar"</string>
-    <string name="fab_desc_next">"Següent"</string>
     <string name="image_desc_downloaded">"Descarregat"</string>
     <string name="image_desc_no_internet">"Sense Internet"</string>
     <string name="image_desc_app_icon">@string/app_name</string>

@@ -99,6 +99,7 @@
 
     <string name="fab_desc_map">"Obrir Google Maps"</string>
     <string name="fab_desc_enter">Accedir</string>
+    <string name="fab_desc_next">"Següent"</string>
 
     <string name="image_desc_nearby_zones">Zones Properes</string>
     <string name="image_desc_marker_image">Imatge del marcador</string>
@@ -124,4 +125,5 @@
     <string name="notification_block_status_error_log">No s\'ha pogut obtenir l\'estat de bloqueig de %d vies.<br />Elements que han fallat:<br />%s</string>
     <string name="action_send_feedback">Enviar comentaris</string>
     <string name="action_view_map">Veure Mapa</string>
+    <string name="fab_desc_finish">Finalitzar</string>
 </resources>

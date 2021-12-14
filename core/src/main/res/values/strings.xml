@@ -111,6 +111,8 @@
 
     <string name="image_desc_nearby_zones">Nearby Zones</string>
     <string name="image_desc_marker_image">Marker image</string>
+    <string name="fab_desc_next">Next</string>
+    <string name="fab_desc_finish">Finish</string>
 
     <string name="message_nearby_zones">Nearby zones</string>
     <string name="message_nearby_zones_no_perm">You have not granted access to the location of the device, so this functionality is not usable. Press once to ask for permission, or press and hold to disable.</string>

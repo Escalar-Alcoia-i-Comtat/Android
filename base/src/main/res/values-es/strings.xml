@@ -79,7 +79,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="fab_desc_back">"Vovler"</string>
     <string name="fab_desc_position">"Ubicación Actual"</string>
     <string name="fab_desc_download">"Descargar"</string>
-    <string name="fab_desc_next">"Siguiente"</string>
     <string name="image_desc_downloaded">"Descargado"</string>
     <string name="image_desc_no_internet">"Sin Internet"</string>
     <string name="image_desc_app_icon">@string/app_name</string>
