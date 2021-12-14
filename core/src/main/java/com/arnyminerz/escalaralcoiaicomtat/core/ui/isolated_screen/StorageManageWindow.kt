@@ -217,11 +217,19 @@ fun StorageManagerWindow(launchApp: () -> Unit, sendFeedback: () -> Unit) {
                 .fillMaxWidth(1f)
         )
 
-        Button(onClick = launchApp) {
+        Button(
+            onClick = launchApp,
+            modifier = Modifier
+                .fillMaxWidth(1f)
+        ) {
             Text(stringResource(R.string.action_launch_app))
         }
 
-        Button(onClick = sendFeedback) {
+        Button(
+            onClick = sendFeedback,
+            modifier = Modifier
+                .fillMaxWidth(1f)
+        ) {
             Text(stringResource(R.string.action_send_feedback))
         }
     }
