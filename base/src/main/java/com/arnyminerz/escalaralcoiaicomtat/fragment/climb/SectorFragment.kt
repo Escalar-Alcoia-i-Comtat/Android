@@ -41,7 +41,7 @@ import timber.log.Timber
  * @since 20211006
  */
 @ExperimentalBadgeUtils
-class SectorFragment private constructor() : NetworkChangeListenerFragment() {
+class SectorFragment : NetworkChangeListenerFragment() {
     companion object {
         /**
          * Creates a new [SectorFragment] instance with the specified arguments.
