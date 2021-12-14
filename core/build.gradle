@@ -83,6 +83,8 @@ dependencies {
     api "androidx.compose.ui:ui-tooling:$compose_version"
     api "androidx.compose.foundation:foundation:$compose_version"
     api "androidx.compose.material:material:$compose_version"
+    // Use Material Design 3
+    api "androidx.compose.material3:material3:1.0.0-alpha02"
     api "androidx.compose.material:material-icons-core:$compose_version"
     api "androidx.compose.material:material-icons-extended:$compose_version"
     api "androidx.compose.runtime:runtime-livedata:$compose_version"
