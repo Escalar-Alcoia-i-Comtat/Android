@@ -109,11 +109,11 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         super.onStart()
 
         // Check takes around 5ms
-        val showIntro = ComposeIntroActivity.shouldShow()
+        val showIntro = IntroActivity.shouldShow()
         if (showIntro) {
             Timber.w("  Showing intro!")
             finish()
-            launch(ComposeIntroActivity::class.java)
+            launch(IntroActivity::class.java)
             return
         } else
             Timber.v("  Won't show intro.")
