@@ -311,7 +311,9 @@ class MapFragment : NetworkChangeListenerFragment() {
             }
         } catch (e: SAXParseException) {
             Timber.e(e, "Could not parse KMZ, may be corrupt.")
-            Firebase.crashlytics.recordException(e)
+            Firebase.crashlytics.recordException(
+                Exception("There's a major issue on the KMZ for $area", e)
+            )
 
             Timber.i("Removing old KMZ...")
             kmzFile?.delete()

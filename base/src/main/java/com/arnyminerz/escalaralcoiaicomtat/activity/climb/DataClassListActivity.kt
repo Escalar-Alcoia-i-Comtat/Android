@@ -385,11 +385,13 @@ abstract class DataClassListActivity<C : DataClass<*, *>, B : DataClassImpl, T :
                                 Timber.v("Getting map features...")
                                 mapHelper.loadKMZ(this@DataClassListActivity, kmzFile)
                             } catch (e: SAXParseException) {
-                                Timber.e(
+                                Timber.w(
                                     e,
                                     "There's a major issue on the KMZ File. Reporting..."
                                 )
-                                Firebase.crashlytics.recordException(e)
+                                Firebase.crashlytics.recordException(
+                                    Exception("There's a major issue on the KMZ for $dataClass", e)
+                                )
                                 null
                             }
                         }
