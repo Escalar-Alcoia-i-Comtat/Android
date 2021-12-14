@@ -39,9 +39,4 @@
         <item name="android:textColor">?attr/colorOnPrimary</item>
         <item name="fontFamily">@font/tektonpro_bold</item>
     </style>
-
-    <style name="AppTheme.Intro">
-        <item name="android:windowBackground">@color/intro_green</item>
-    </style>
-
 </resources>
