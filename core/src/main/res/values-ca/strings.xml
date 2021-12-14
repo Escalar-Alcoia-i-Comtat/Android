@@ -106,6 +106,13 @@
     <string name="message_nearby_zones">"Zones properes"</string>
     <string name="message_nearby_zones_no_perm">"No has donat accés a la ubicació del dispositiu a l'aplicació, així que aquesta funcionalitat no està disponible. Prem una vegada per a donar permís, o prem i manté per a deshabilitar."</string>
 
+    <string name="intro_main_title">"Benvingut a %s"</string>
+    <string name="intro_main_message">"Anem a guiar-te per un procés curt de configuració. No et preocupes, és ràpid i ben senzill"</string>
+    <string name="intro_beta_message">Hola usuari! Has triat emprar una versió de prova de l\'aplicació i això et fa genial! Moltes gràcies! Però tot s\'ha de dir, aquesta versió pot ser tinga errors, ja que encara es troba en desenvolupament, inclús pots trobar-te amb coses sense acabar, o que l\'aplicació es tanque de manera sobtada. Ens sap molt mal que pugues patir problemes, però tots els errors que et surgisquen a tu, seràn errors que no hi seràn a la versió final. Moltes gràcies!</string>
+    <string name="intro_beta_title">Prova Beta</string>
+    <string name="intro_warning_title">Atenció</string>
+    <string name="intro_warning_message">L\'escalada és un esport considerat de risc, tot el que el practique té que preocupar-se del seu coneixement i correcta execució. L\'informació d\'aquesta aplicació és purament informativa i pot ser errònia. Tingues cura, el material en bon estat, i vigila\'t no tant sols a tu mateix, sinó també als teus companys, i sobre tot, gaudeix.</string>
+
     <string name="placeholder">"Marcador"</string>
     <string name="attr_gpx">Este GPX ha sigut oferit per Escalar Alcoià i Comtat. Baixa l\'app des de https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
     <string name="toast_error_load_image_sector">No s\'ha pogut carregar la imatge de sector: %s</string>

@@ -91,12 +91,8 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="button_desc_download">"Descargar"</string>
     <string name="button_desc_toggle">"Cambiar"</string>
     <string name="button_desc_delete">"Eliminar"</string>
-    <string name="intro_main_title">"Bienvenido a %s"</string>
-    <string name="intro_main_message">"Te vamos a guiar por un proceso de configuración breve. No te preocupes, es rápido y sencillo."</string>
     <string name="date_format">"dd-MM-yyyy kk:mm:ss"</string>
     <string name="action_clear_settings">Limpiar Configuración</string>
-    <string name="intro_beta_title">Prueba Beta</string>
-    <string name="intro_beta_message">Hola usuario! Has escojido usar una versión de prueba de la aplicación i eso te convierte en una persona genial! Muchas gracias! Però, todo sea dicho, es posible que esta versión tenga errores, ya que aún se encuentra en desarrollo, incluso puede que te topes con funcionalidades no finalizadas, o que la aplicación se cierre de manera forzosa. Es triste para nosotros que puedas tener problemas, pero todos los errores que te ocurran a ti, serán errores que no habrán en la versión final, y te lo agradecemos mucho!</string>
     <string name="pref_gene_section_advanced">Avanzado</string>
     <string name="pref_down_mobile_title">Datos móbiles</string>
     <string name="pref_down_mobile_sum">Usar los datos móbiles para las descargas</string>
@@ -173,8 +169,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="pref_gene_error_reporting_title">Habilitar reportes de error</string>
     <string name="pref_gene_error_reporting_sum">Si está activado, cada vez que la app se cierre inesperadamente o haya un error, se mandará un reporte anónimo a los desarrolladores para que pueda ser reparado lo más pronto posible. Por favor, te pedimos que mantengas esta opción activada, aunque eres libre que desactivarla si lo deseas.</string>
     <string name="downloads_no_download">No hay nada descargado</string>
-    <string name="intro_warning_title">Atención</string>
-    <string name="intro_warning_message">La escalada es un deporte considerado de riesgo, todo lo que lo practico tiene que preocuparse de su conocimiento y correcta ejecución. La información de esta aplicación es puramente informativa y puede ser errónea. Ten cuidado, el material en buen estado, y vigila\'t no sólo a ti mismo, sino también a tus compañeros, y sobre todo, disfruta.</string>
     <string name="dialog_downloaded_partially_msg">Algunos elementos se han descargado, pero no %s completamente. Quieres descargarla entera?</string>
     <string name="toast_error_no_kmz">No sé ha podido encontrar el archivo KMZ</string>
     <string name="action_register">Registrarse</string>
