@@ -14,6 +14,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -70,15 +71,34 @@ fun IntroWindow(pages: List<IntroPageData>, finishListener: () -> Unit) {
 
 @ExperimentalMaterial3Api
 @ExperimentalPagerApi
-@Preview(showSystemUi = true)
+@Preview(showSystemUi = true, name = "Intro Window Preview")
 @Composable
 fun IntroWindowDemo() {
-    IntroWindow(
-        pages = listOf(
-            IntroPageData(
-                stringResource(R.string.intro_main_title, "Escalar Alcoià i Comtat"),
-                stringResource(R.string.intro_main_message)
+    AppTheme {
+        IntroWindow(
+            pages = listOf(
+                IntroPageData(
+                    stringResource(R.string.intro_main_title, "Escalar Alcoià i Comtat"),
+                    stringResource(R.string.intro_main_message)
+                )
             )
-        )
-    ) { }
+        ) { }
+    }
+}
+
+@ExperimentalMaterial3Api
+@ExperimentalPagerApi
+@Preview(showSystemUi = true, name = "Intro Window Dark Preview")
+@Composable
+fun IntroWindowDarkDemo() {
+    AppTheme(useDarkTheme = true) {
+        IntroWindow(
+            pages = listOf(
+                IntroPageData(
+                    stringResource(R.string.intro_main_title, "Escalar Alcoià i Comtat"),
+                    stringResource(R.string.intro_main_message)
+                )
+            )
+        ) { }
+    }
 }
