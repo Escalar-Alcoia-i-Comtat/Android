@@ -10,13 +10,14 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.launch
 
 /**
  * A composable for displaying a set of [IntroPage]s.
@@ -27,8 +28,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
  */
 @Composable
 @ExperimentalMaterial3Api
+@ExperimentalPagerApi
 fun IntroWindow(pages: List<IntroPageData>, finishListener: () -> Unit) {
-    var currentPage: Int by remember { mutableStateOf(0) }
+    val pagerState = rememberPagerState()
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
@@ -36,14 +39,15 @@ fun IntroWindow(pages: List<IntroPageData>, finishListener: () -> Unit) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    if (currentPage + 1 >= pages.size) {
+                    if (pagerState.currentPage + 1 >= pages.size) {
                         // Reached the end, exit and enter MainActivity
                         finishListener()
-                    } else
-                        currentPage++
+                    } else scope.launch {
+                        pagerState.scrollToPage(pagerState.currentPage + 1)
+                    }
                 }
             ) {
-                if (currentPage + 1 >= pages.size)
+                if (pagerState.currentPage + 1 >= pages.size)
                     Icon(
                         imageVector = Icons.Rounded.Check,
                         contentDescription = "" // TODO: Add content description
@@ -56,13 +60,16 @@ fun IntroWindow(pages: List<IntroPageData>, finishListener: () -> Unit) {
             }
         }
     ) {
-        val page = pages[currentPage]
+        HorizontalPager(count = pages.size, state = pagerState) { currentPage ->
+            val page = pages[currentPage]
 
-        IntroPage(page)
+            IntroPage(page)
+        }
     }
 }
 
 @ExperimentalMaterial3Api
+@ExperimentalPagerApi
 @Preview(showSystemUi = true)
 @Composable
 fun IntroWindowDemo() {
