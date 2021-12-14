@@ -44,7 +44,7 @@ fun IntroWindow(pages: List<IntroPageData>, finishListener: () -> Unit) {
                         // Reached the end, exit and enter MainActivity
                         finishListener()
                     } else scope.launch {
-                        pagerState.scrollToPage(pagerState.currentPage + 1)
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
                     }
                 }
             ) {
