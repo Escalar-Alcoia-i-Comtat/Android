@@ -11,15 +11,23 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerA
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass.Companion.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_SHOWN_MD5_WARNING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE_KEY
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_DEFAULTS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.auth.loggedIn
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
@@ -32,6 +40,7 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
 import com.google.android.gms.common.ConnectionResult.SUCCESS
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.FirebaseException
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
@@ -44,8 +53,12 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.ktx.messaging
 import com.google.firebase.perf.ktx.performance
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
 @ExperimentalMaterial3Api
@@ -60,6 +73,7 @@ class LoadingActivity : NetworkChangeListenerActivity() {
     private lateinit var messaging: FirebaseMessaging
     private lateinit var analytics: FirebaseAnalytics
     private lateinit var auth: FirebaseAuth
+    private lateinit var remoteConfig: FirebaseRemoteConfig
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +90,10 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         analytics = Firebase.analytics
         Timber.v("Getting Firebase Auth instance...")
         auth = Firebase.auth
+        Timber.v("Getting Firebase Remote Config instance...")
+        remoteConfig = Firebase.remoteConfig
+
+        doAsync { initializeRemoteConfig() }
 
         checkGooglePlayServices()
         checkMD5Support()
@@ -89,11 +107,11 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         super.onStart()
 
         // Check takes around 5ms
-        val showIntro = IntroActivity.shouldShow()
+        val showIntro = ComposeIntroActivity.shouldShow()
         if (showIntro) {
             Timber.w("  Showing intro!")
             finish()
-            launch(IntroActivity::class.java)
+            launch(ComposeIntroActivity::class.java)
             return
         } else
             Timber.v("  Won't show intro.")
@@ -206,6 +224,45 @@ class LoadingActivity : NetworkChangeListenerActivity() {
                 .addOnFailureListener { error ->
                     Timber.e(error, "Could not subscribe to testing topic.")
                 }
+    }
+
+    private suspend fun initializeRemoteConfig() {
+        Timber.v("Getting remote configuration...")
+        val configSettings = remoteConfigSettings {
+            minimumFetchIntervalInSeconds = REMOTE_CONFIG_MIN_FETCH_INTERVAL
+        }
+
+        try {
+            remoteConfig
+                .setConfigSettingsAsync(configSettings)
+                .await()
+
+            remoteConfig
+                .setDefaultsAsync(REMOTE_CONFIG_DEFAULTS)
+                .await()
+
+            val remoteConfigFetched = remoteConfig
+                .fetchAndActivate()
+                .await()
+
+            if (remoteConfigFetched) {
+                APP_UPDATE_MAX_TIME_DAYS =
+                    remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
+                SHOW_NON_DOWNLOADED =
+                    remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
+                ENABLE_AUTHENTICATION =
+                    remoteConfig.getBoolean(ENABLE_AUTHENTICATION_KEY)
+                PROFILE_IMAGE_SIZE = remoteConfig.getLong(PROFILE_IMAGE_SIZE_KEY)
+
+                Timber.v("APP_UPDATE_MAX_TIME_DAYS: $APP_UPDATE_MAX_TIME_DAYS")
+                Timber.v("SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
+                Timber.v("ENABLE_AUTHENTICATION: $ENABLE_AUTHENTICATION")
+                Timber.v("PROFILE_IMAGE_SIZE: $PROFILE_IMAGE_SIZE")
+            } else
+                Timber.w("Could not fetch default remote config.")
+        } catch (e: FirebaseException) {
+            Timber.e(e, "Could not get remote config.")
+        }
     }
 
     /**

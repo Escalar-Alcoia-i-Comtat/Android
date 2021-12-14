@@ -188,9 +188,6 @@
             <meta-data
                 android:name="com.arnyminerz.escalaralcoiaicomtat.worker.startup.NotificationChannelsInitializer"
                 android:value="androidx.startup" />
-            <meta-data
-                android:name="com.arnyminerz.escalaralcoiaicomtat.worker.startup.RemoteConfigInitializer"
-                android:value="androidx.startup" />
         </provider>
 
         <service
