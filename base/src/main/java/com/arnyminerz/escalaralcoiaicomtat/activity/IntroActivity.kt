@@ -12,6 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_SHOWN_INTRO
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.IntroPageData
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.IntroWindow
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import timber.log.Timber
 
@@ -33,33 +34,35 @@ class IntroActivity : ComponentActivity() {
         Timber.v("Launching")
 
         setContent {
-            val introPages = mutableListOf(
-                IntroPageData(
-                    stringResource(R.string.intro_main_title, "Escalar Alcoià i Comtat"),
-                    stringResource(R.string.intro_main_message)
-                ),
-                IntroPageData(
-                    stringResource(R.string.intro_warning_title),
-                    stringResource(R.string.intro_warning_message)
-                )
-            ).apply {
-                if (BuildConfig.DEBUG)
-                // If debug build, warn user
-                    add(
-                        IntroPageData(
-                            stringResource(R.string.intro_beta_title),
-                            stringResource(R.string.intro_beta_message)
-                        )
+            AppTheme {
+                val introPages = mutableListOf(
+                    IntroPageData(
+                        stringResource(R.string.intro_main_title, "Escalar Alcoià i Comtat"),
+                        stringResource(R.string.intro_main_message)
+                    ),
+                    IntroPageData(
+                        stringResource(R.string.intro_warning_title),
+                        stringResource(R.string.intro_warning_message)
                     )
-            }
-            val context = LocalContext.current
+                ).apply {
+                    if (BuildConfig.DEBUG)
+                    // If debug build, warn user
+                        add(
+                            IntroPageData(
+                                stringResource(R.string.intro_beta_title),
+                                stringResource(R.string.intro_beta_message)
+                            )
+                        )
+                }
+                val context = LocalContext.current
 
-            IntroWindow(
-                introPages
-            ) {
-                Timber.v("Finished showing intro pages. Loading LoadingActivity")
-                PREF_SHOWN_INTRO.put(true)
-                context.startActivity(Intent(this, MainActivity::class.java))
+                IntroWindow(
+                    introPages
+                ) {
+                    Timber.v("Finished showing intro pages. Loading LoadingActivity")
+                    PREF_SHOWN_INTRO.put(true)
+                    context.startActivity(Intent(this, MainActivity::class.java))
+                }
             }
         }
     }

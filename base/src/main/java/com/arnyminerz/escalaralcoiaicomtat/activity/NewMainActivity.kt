@@ -67,9 +67,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.PassiveAreasExp
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.SectorExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.SectorsExplorer
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.ZonesExplorer
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.AreasViewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.arnyminerz.escalaralcoiaicomtat.ui.theme.EscalarAlcoiaIComtatTheme
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
@@ -91,7 +91,7 @@ class NewMainActivity : AppCompatActivity() {
             val areasViewModel = AreasViewModel(this)
             val areas: List<Area> by areasViewModel.items.observeAsState(listOf())
 
-            EscalarAlcoiaIComtatTheme {
+            AppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
                     if (areas.isEmpty())
