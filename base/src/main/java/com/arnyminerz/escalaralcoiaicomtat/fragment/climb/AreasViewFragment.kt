@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.viewModels
@@ -46,6 +47,7 @@ import timber.log.Timber
  * @author Arnau Mora
  * @since 20210617
  */
+@ExperimentalMaterial3Api
 class AreasViewFragment : NetworkChangeListenerFragment() {
     /**
      * If the fragment has just been attached. This will tell whether or not to animate the items

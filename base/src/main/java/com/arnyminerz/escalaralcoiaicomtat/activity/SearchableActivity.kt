@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -90,6 +91,7 @@ import timber.log.Timber
  * @since 20210811
  */
 @ExperimentalBadgeUtils
+@ExperimentalMaterial3Api
 class SearchableActivity : ComponentActivity() {
     /**
      * Stores the last performed search so multiple searches are not made at once.

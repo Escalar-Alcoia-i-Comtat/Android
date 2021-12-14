@@ -7,6 +7,7 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.coroutineScope
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
@@ -45,6 +46,7 @@ import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
 
+@ExperimentalMaterial3Api
 class MapFragment : NetworkChangeListenerFragment() {
     private lateinit var mapHelper: MapHelper
     private var mapLoaded = false

@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.isolated
 
 import android.os.Bundle
 import androidx.appsearch.app.SearchSpec
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -19,7 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityStorageBinding
 import com.google.android.material.snackbar.Snackbar
 import java.io.IOException
 
-@ExperimentalUnsignedTypes
+@ExperimentalMaterial3Api
 class StorageActivity : LanguageAppCompatActivity() {
     private lateinit var binding: ActivityStorageBinding
 

@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.app.Activity
 import androidx.annotation.WorkerThread
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
@@ -22,6 +23,7 @@ import timber.log.Timber
  */
 @WorkerThread
 @ExperimentalBadgeUtils
+@ExperimentalMaterial3Api
 @Throws(IllegalArgumentException::class)
 suspend fun DataClassImpl.launch(activity: Activity) {
     val pathPieces = documentPath.split("/")

@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 import android.os.Bundle
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
@@ -47,6 +48,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
+@ExperimentalMaterial3Api
 class LoadingActivity : NetworkChangeListenerActivity() {
     private lateinit var binding: ActivityLoadingBinding
     private var loading = false
