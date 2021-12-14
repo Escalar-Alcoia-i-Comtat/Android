@@ -50,11 +50,13 @@ fun IntroWindow(pages: List<IntroPageData>, finishListener: () -> Unit) {
             ) {
                 if (pagerState.currentPage + 1 >= pages.size)
                     Icon(
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         imageVector = Icons.Rounded.Check,
                         contentDescription = stringResource(R.string.fab_desc_finish)
                     )
                 else
                     Icon(
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         imageVector = Icons.Rounded.ChevronRight,
                         contentDescription = stringResource(R.string.fab_desc_next)
                     )
