@@ -93,13 +93,15 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         Timber.v("Getting Firebase Remote Config instance...")
         remoteConfig = Firebase.remoteConfig
 
-        doAsync { initializeRemoteConfig() }
+        doAsync {
+            initializeRemoteConfig()
+            messagingSubscribeTest()
+        }
 
         checkGooglePlayServices()
         checkMD5Support()
         dataCollectionSetUp()
         messagingTokenGet()
-        messagingSubscribeTest()
         authSetup()
     }
 
@@ -215,15 +217,17 @@ class LoadingActivity : NetworkChangeListenerActivity() {
      * @author Arnau Mora
      * @since 20210919
      */
-    private fun messagingSubscribeTest() {
+    private suspend fun messagingSubscribeTest() {
         if (BuildConfig.DEBUG)
-            messaging.subscribeToTopic("testing")
-                .addOnSuccessListener {
-                    Timber.i("Subscribed to topic \"testing\".")
-                }
-                .addOnFailureListener { error ->
-                    Timber.e(error, "Could not subscribe to testing topic.")
-                }
+            try {
+                Timber.v("Subscribing to \"testing\" topic...")
+                messaging.subscribeToTopic("testing")
+                    .await()
+
+                Timber.i("Subscribed to topic \"testing\".")
+            } catch (e: FirebaseException) {
+                Timber.e(e, "Could not subscribe to testing topic.")
+            }
     }
 
     private suspend fun initializeRemoteConfig() {
@@ -233,19 +237,23 @@ class LoadingActivity : NetworkChangeListenerActivity() {
         }
 
         try {
+            Timber.d("Setting remote config settings...")
             remoteConfig
                 .setConfigSettingsAsync(configSettings)
                 .await()
 
+            Timber.d("Setting remote config defaults...")
             remoteConfig
                 .setDefaultsAsync(REMOTE_CONFIG_DEFAULTS)
                 .await()
 
+            Timber.d("Fetching remote config values...")
             val remoteConfigFetched = remoteConfig
                 .fetchAndActivate()
                 .await()
 
             if (remoteConfigFetched) {
+                Timber.i("Got remote config values!")
                 APP_UPDATE_MAX_TIME_DAYS =
                     remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
                 SHOW_NON_DOWNLOADED =
@@ -261,6 +269,8 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             } else
                 Timber.w("Could not fetch default remote config.")
         } catch (e: FirebaseException) {
+            Timber.e(e, "Could not get remote config.")
+        } catch (e: NullPointerException) {
             Timber.e(e, "Could not get remote config.")
         }
     }
