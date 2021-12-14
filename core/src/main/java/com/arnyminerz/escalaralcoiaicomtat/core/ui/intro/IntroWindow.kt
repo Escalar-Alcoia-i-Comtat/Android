@@ -50,12 +50,12 @@ fun IntroWindow(pages: List<IntroPageData>, finishListener: () -> Unit) {
                 if (pagerState.currentPage + 1 >= pages.size)
                     Icon(
                         imageVector = Icons.Rounded.Check,
-                        contentDescription = "" // TODO: Add content description
+                        contentDescription = stringResource(R.string.fab_desc_finish)
                     )
                 else
                     Icon(
                         imageVector = Icons.Rounded.ChevronRight,
-                        contentDescription = "" // TODO: Add content description
+                        contentDescription = stringResource(R.string.fab_desc_next)
                     )
             }
         }
