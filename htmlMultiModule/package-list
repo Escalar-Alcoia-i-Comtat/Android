@@ -15,7 +15,6 @@ com.arnyminerz.escalaralcoiaicomtat.fragment.activity
 com.arnyminerz.escalaralcoiaicomtat.fragment.auth
 com.arnyminerz.escalaralcoiaicomtat.fragment.climb
 com.arnyminerz.escalaralcoiaicomtat.fragment.dialog
-com.arnyminerz.escalaralcoiaicomtat.fragment.intro
 com.arnyminerz.escalaralcoiaicomtat.fragment.model
 com.arnyminerz.escalaralcoiaicomtat.fragment.preferences
 com.arnyminerz.escalaralcoiaicomtat.intent
@@ -26,7 +25,6 @@ com.arnyminerz.escalaralcoiaicomtat.list.holder
 com.arnyminerz.escalaralcoiaicomtat.paging
 com.arnyminerz.escalaralcoiaicomtat.service
 com.arnyminerz.escalaralcoiaicomtat.shared
-com.arnyminerz.escalaralcoiaicomtat.ui.theme
 com.arnyminerz.escalaralcoiaicomtat.view.model
 com.arnyminerz.escalaralcoiaicomtat.worker
 com.arnyminerz.escalaralcoiaicomtat.worker.startup
@@ -61,6 +59,8 @@ com.arnyminerz.escalaralcoiaicomtat.core.ui
 com.arnyminerz.escalaralcoiaicomtat.core.ui.animation
 com.arnyminerz.escalaralcoiaicomtat.core.ui.element
 com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
+com.arnyminerz.escalaralcoiaicomtat.core.ui.intro
+com.arnyminerz.escalaralcoiaicomtat.core.ui.theme
 com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 com.arnyminerz.escalaralcoiaicomtat.core.utils
 com.arnyminerz.escalaralcoiaicomtat.core.utils.auth
