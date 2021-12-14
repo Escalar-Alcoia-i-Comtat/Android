@@ -7,34 +7,6 @@
     <string name="sector_height">%1$sm</string>
     <string name="sector_kids_apt">Kids Apt</string>
 
-    <string name="action_download">Download</string>
-    <string name="action_delete">Delete</string>
-    <string name="action_ok">OK</string>
-    <string name="action_grant">Grant</string>
-    <string name="action_back">Go Back</string>
-    <string name="action_clear_cache">Clear Cache</string>
-    <string name="action_clear_storage">Clear Storage</string>
-    <string name="action_clear_downloads">Clear Downloads</string>
-    <string name="action_clear_settings">Clear Settings</string>
-    <string name="action_launch_app">Launch App</string>
-    <string name="action_clear_data">Clear Data</string>
-    <string name="action_share_with">Share with</string>
-    <string name="action_continue">Continue</string>
-    <string name="action_send">Send</string>
-    <string name="action_send_feedback">Send feedback</string>
-    <string name="action_export_kmz">Export KMZ</string>
-    <string name="action_export_gpx">Export GPX</string>
-    <string name="action_register">Register</string>
-    <string name="action_login">Login</string>
-    <string name="action_logout">Log out</string>
-    <string name="action_google_auth">Login with Google</string>
-    <string name="action_resend_email">Resend confirmation email</string>
-    <string name="action_open_settings">Open Settings</string>
-    <string name="action_do_not_remind">Do not remind</string>
-    <string name="action_mark_completed">Mark</string>
-    <string name="action_restart">Restart</string>
-    <string name="action_view_activity">View Activity</string>
-
     <string name="status_updating">Updating…</string>
     <string name="status_loading">Loading…</string>
     <string name="status_null" translatable="false">-</string>
@@ -195,36 +167,6 @@
     <string name="downloads_delete_dialog_title">Are you sure?</string>
     <string name="downloads_delete_dialog_msg">This will delete %s from your device FOREVER. You will have to download it again.</string>
     <string name="downloads_no_download">There\'s nothing downloaded</string>
-
-    <string name="toast_error_internal">An internal error occurred</string>
-    <string name="toast_error_no_internet">No Internet Access detected</string>
-    <string name="toast_error_language">Cannot change language</string>
-    <string name="toast_error_no_kmz">Could not find KMZ file</string>
-    <string name="toast_error_kmz_corrupt">The stored KMZ file is corrupt, will be downloaded again</string>
-    <string name="toast_error_kmz_corrupt_again">The stored KMZ file is corrupt, try again later</string>
-    <string name="toast_error_confirmation_send">Could not send confirmation mail</string>
-    <string name="toast_error_confirmation">Could not verify email!</string>
-    <string name="toast_error_profile_image_update">Could not update profile image</string>
-    <string name="toast_error_profile_image_load">Could not load profile image</string>
-    <string name="toast_error_login_required">You must be logged in to do this</string>
-    <string name="toast_error_login_google">Could not login with Google</string>
-    <string name="toast_error_login_one_tap">Could not launch One-Tap login</string>
-    <string name="toast_error_like">Could not like comment</string>
-    <string name="toast_error_account_manager_store">Could not store account data</string>
-    <string name="toast_error_map_load">Could not load map</string>
-    <string name="toast_error_delete_post">Could not delete post</string>
-    <string name="toast_error_gps_disabled">The GPS is disabled</string>
-    <string name="toast_error_not_found">Could not find element</string>
-    <string name="toast_error_google_play">Escalar Alcoià i Comtat requires Google Play Services</string>
-    <string name="toast_profile_image_updated">Updated profile image successfully</string>
-    <string name="toast_location_not_shown">Current location won\'t be shown</string>
-    <string name="toast_stored_gpx">GPX stored!</string>
-    <string name="toast_stored_kmz">KMZ stored!</string>
-    <string name="toast_clear_ok">Cleared correctly</string>
-    <string name="toast_message_sent">Message sent!</string>
-    <string name="toast_confirmation_sent">Confirmation sent!</string>
-    <string name="toast_update_downloaded">An update has just been downloaded</string>
-    <string name="toast_downloaded">The data is stored in the device and can be accessed while offline</string>
 
     <string name="dataclass_area_children_count">%d zones</string>
     <string name="dataclass_zone_children_count">%d sectors</string>
