@@ -190,7 +190,7 @@ fun StorageManagerWindow(launchApp: () -> Unit, sendFeedback: () -> Unit) {
                 R.string.action_clear_storage,
                 storageDir,
                 modifier = Modifier
-                    .fillMaxWidth(.5f)
+                    .fillMaxWidth(1f)
                     .padding(start = 4.dp)
             )
         }
@@ -206,7 +206,7 @@ fun StorageManagerWindow(launchApp: () -> Unit, sendFeedback: () -> Unit) {
                 R.string.action_clear_settings,
                 sharedPreferences,
                 modifier = Modifier
-                    .fillMaxWidth(.5f)
+                    .fillMaxWidth(1f)
                     .padding(start = 4.dp)
             )
         }
