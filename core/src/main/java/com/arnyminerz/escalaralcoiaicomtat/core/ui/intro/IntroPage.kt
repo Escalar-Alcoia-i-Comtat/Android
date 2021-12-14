@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -33,16 +34,18 @@ fun IntroPage(data: IntroPageData) {
                 .fillMaxWidth(1f)
                 .padding(start = 50.dp, end = 50.dp, top = 120.dp),
             fontSize = 30.sp,
-            textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onTertiaryContainer,
+            textAlign = TextAlign.Center,
             text = data.title
         )
         Text(
             modifier = Modifier
                 .fillMaxWidth(1f)
                 .padding(top = 16.dp, start = 40.dp, end = 40.dp),
-            textAlign = TextAlign.Center,
             fontSize = 19.sp,
+            color = MaterialTheme.colorScheme.onTertiaryContainer,
+            textAlign = TextAlign.Center,
             text = data.content
         )
     }
