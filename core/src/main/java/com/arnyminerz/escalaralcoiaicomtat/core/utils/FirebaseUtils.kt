@@ -52,14 +52,15 @@ private fun JSONObject.parseTimestamp(): Date {
  * @since 20211224
  * @param key The key of the object to get.
  * @return The parsed [Date] object.
- * @throws InvalidObjectTypeException When the JSONObject does not follow the format.
- * @throws InvalidDataTypeException When the data type specified in "__datatype__" is not "timestamp".
  */
-@Throws(InvalidObjectTypeException::class, InvalidDataTypeException::class)
 fun JSONObject.getDate(key: String, defaultValue: Date? = null): Date? =
     try {
         getJSONObject(key).parseTimestamp()
     } catch (e: JsonParseException) {
+        defaultValue
+    } catch (e: InvalidDataTypeException) {
+        defaultValue
+    } catch (e: InvalidObjectTypeException) {
         defaultValue
     }
 
@@ -109,13 +110,14 @@ private fun JSONObject.parseGeoPoint(): LatLng {
  * @since 20211224
  * @param key The key of the object to get.
  * @return The parsed [LatLng] object.
- * @throws InvalidObjectTypeException When the JSONObject does not follow the format.
- * @throws InvalidDataTypeException When the data type specified in "__datatype__" is not "geopoint".
  */
-@Throws(InvalidObjectTypeException::class, InvalidDataTypeException::class)
 fun JSONObject.getLatLng(key: String, defaultValue: LatLng? = null): LatLng? =
     try {
         getJSONObject(key).parseGeoPoint()
     } catch (e: JsonParseException) {
+        defaultValue
+    } catch (e: InvalidDataTypeException) {
+        defaultValue
+    } catch (e: InvalidObjectTypeException) {
         defaultValue
     }
