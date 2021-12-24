@@ -1,12 +1,12 @@
 package com.arnyminerz.escalaralcoiaicomtat.data
 
 import android.content.Context
+import androidx.annotation.WorkerThread
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
-import java.lang.StringBuilder
 
 /**
  * Fetches the data from assets.
@@ -17,8 +17,9 @@ import java.lang.StringBuilder
  * @throws IOException When there's an error while loading the data file.
  * @throws JSONException When there's an error while parsing the JSON file.
  */
+@WorkerThread
 @Throws(IOException::class, JSONException::class)
-fun fetchData(context: Context): JSONObject {
+suspend fun fetchData(context: Context): JSONObject {
     val assetManager = context.assets
     val dataStream = assetManager.open("data.json")
     val streamReader = BufferedReader(InputStreamReader(dataStream))
