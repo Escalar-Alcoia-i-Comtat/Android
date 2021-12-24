@@ -5,41 +5,25 @@ import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
+import com.arnyminerz.escalaralcoiaicomtat.DataLoaderInterface
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkChangeListenerActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass.Companion.getIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS_KEY
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION_KEY
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_SHOWN_MD5_WARNING
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE_KEY
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_DEFAULTS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED_KEY
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.md5Compatible
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.BlockStatusWorker
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivityLoadingBinding
 import com.google.android.gms.common.ConnectionResult.SUCCESS
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
+import com.google.android.play.core.splitinstall.SplitInstallRequest
+import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
+import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.google.firebase.FirebaseException
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
@@ -120,12 +104,46 @@ class LoadingActivity : NetworkChangeListenerActivity() {
 
         deepLinkPath = getExtra(EXTRA_LINK_PATH)
 
+        Timber.v("Installing data module...")
+        val splitInstallManager = SplitInstallManagerFactory.create(this)
+        val request = SplitInstallRequest.newBuilder()
+            .addModule("data")
+            .build()
+        Timber.v("Requesting installation of the data module...")
+        splitInstallManager.apply {
+            val listener = SplitInstallStateUpdatedListener { state ->
+                Timber.v("Got split install update. State: $state")
+                when (val status = state.status()) {
+                    SplitInstallSessionStatus.FAILED ->
+                        Timber.e("Data module download status: Failed")
+                    SplitInstallSessionStatus.INSTALLING ->
+                        Timber.i("Data module download status: Installing")
+                    SplitInstallSessionStatus.INSTALLED -> {
+                        Timber.i("Data module download status: Installed")
+                        doAsync { load() }
+                    }
+                    else -> Timber.v("Data module install status: $status")
+                }
+            }
+            Timber.v("Registering listener for data module installation..")
+            registerListener(listener)
+            Timber.v("Starting data module installation...")
+            startInstall(request)
+                .addOnSuccessListener { sessionId ->
+                    Timber.i("Started install of the data module (sessionId=$sessionId)")
+                }
+                .addOnFailureListener { exception ->
+                    Timber.e(exception, "Could not install data module!")
+                    unregisterListener(listener)
+                }
+        }
+
         doAsync { initializeBlockStatusWorker() }
     }
 
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
         super.onStateChangeAsync(state)
-        load()
+        //load()
     }
 
     /**
@@ -351,7 +369,14 @@ class LoadingActivity : NetworkChangeListenerActivity() {
             binding.progressTextView.setText(R.string.status_downloading)
         }
 
-        val areas = firestore.loadAreas(application as App) { valueMax ->
+        Timber.v("Getting DataLoader instance...")
+        val dataLoader = Class
+            .forName("com.arnyminerz.escalaralcoiaicomtat.data.DataLoader")
+            .kotlin.objectInstance as DataLoaderInterface
+        Timber.v("Fetching data...")
+        val data = dataLoader.fetchData(this)
+        Timber.i("Data fetched from data module!")
+        val areas = loadAreas(application as App, data) { valueMax ->
             val max = valueMax.max
             val progress = valueMax.value
             Timber.i("Download progress: $progress / $max")
