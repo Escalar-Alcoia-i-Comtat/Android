@@ -60,6 +60,9 @@ dependencies {
     implementation 'com.google.android.material:material:1.6.0-alpha01'
     implementation 'androidx.preference:preference-ktx:1.1.1'
 
+    // Data module
+    implementation project(":core:data")
+
     // Testing
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:4.2.0'
