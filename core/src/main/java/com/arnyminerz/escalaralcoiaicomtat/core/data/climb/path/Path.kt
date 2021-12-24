@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
+import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 
@@ -91,8 +92,16 @@ class Path internal constructor(
             data.getBoolean("pitonRequired") ?: false,
             data.getBoolean("nailRequired") ?: false,
         ),
-        data.getString("description"),
-        data.getString("builtBy"),
+        try {
+            data.getString("description")
+        } catch (e: JSONException) {
+            null
+        },
+        try {
+            data.getString("builtBy")
+        } catch (e: JSONException) {
+            null
+        },
         "", // This gets initialized later
         documentPath = data.reference.path,
         parentSectorId = data.reference.parent.parent!!.id

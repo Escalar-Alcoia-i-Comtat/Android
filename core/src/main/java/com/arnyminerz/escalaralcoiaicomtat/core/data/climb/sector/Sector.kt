@@ -28,6 +28,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 
@@ -92,7 +93,11 @@ class Sector internal constructor(
         data.getString("weight")!!,
         data.getString("image")!!,
         documentPath = data.reference.path,
-        data.getString("webURL"),
+        try {
+            data.getString("webURL")
+        } catch (e: JSONException) {
+            null
+        },
         data.reference.parent.parent!!.id
     )
 

@@ -13,6 +13,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -70,7 +71,11 @@ class Zone internal constructor(
         data.getString("kmz")!!,
         data.getGeoPoint("location")!!.toLatLng(),
         documentPath = data.reference.path,
-        data.getString("webURL"),
+        try {
+            data.getString("webURL")
+        } catch (e: JSONException) {
+            null
+        },
         data.reference.parent.parent!!.id
     )
 

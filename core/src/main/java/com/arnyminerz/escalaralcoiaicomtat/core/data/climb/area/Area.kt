@@ -10,6 +10,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -70,7 +71,11 @@ class Area internal constructor(
         data.getString("image")!!,
         data.getString("kmz")!!,
         documentPath = data.reference.path,
-        data.getString("webURL")
+        try {
+            data.getString("webURL")
+        } catch (e: JSONException) {
+            null
+        }
     )
 
     /**
