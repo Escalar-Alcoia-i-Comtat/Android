@@ -2,8 +2,8 @@ package com.arnyminerz.escalaralcoiaicomtat.core.utils
 
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.InvalidDataTypeException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.InvalidObjectTypeException
+import com.google.android.gms.maps.model.LatLng
 import com.google.gson.JsonParseException
-import com.google.type.LatLng
 import org.json.JSONObject
 import java.util.*
 
@@ -90,10 +90,7 @@ private fun JSONObject.parseGeoPoint(): LatLng {
     val value = getJSONObject("value")
     val latitude = value.getDouble("_latitude")
     val longitude = value.getDouble("_longitude")
-    return LatLng.newBuilder()
-        .setLatitude(latitude)
-        .setLongitude(longitude)
-        .build()
+    return LatLng(latitude, longitude)
 }
 
 /**
