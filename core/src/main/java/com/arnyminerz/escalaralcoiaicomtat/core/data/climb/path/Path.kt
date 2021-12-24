@@ -161,8 +161,16 @@ class Path internal constructor(
             data.getBoolean("pitonRequired"),
             data.getBoolean("nailRequired"),
         ),
-        data.getString("description"),
-        data.getString("builtBy"),
+        try {
+            data.getString("description")
+        } catch (e: JSONException) {
+            null
+        },
+        try {
+            data.getString("builtBy")
+        } catch (e: JSONException) {
+            null
+        },
         "", // This gets initialized later
         documentPath = path,
         parentSectorId = parentSectorId
@@ -183,13 +191,16 @@ class Path internal constructor(
         }
 
         Timber.d("Loading rebuilders...")
-        val reBuildersList = data.getJSONArray("rebuiltBy")
-        val rebuilders = arrayListOf<String>()
-        for (k in 0 until reBuildersList.length()) {
-            rebuilders.add(reBuildersList.getString(k))
+        try {
+            val reBuildersList = data.getJSONArray("rebuiltBy")
+            val rebuilders = arrayListOf<String>()
+            for (k in 0 until reBuildersList.length()) {
+                rebuilders.add(reBuildersList.getString(k))
+            }
+            val d = rebuilders.joinToString(separator = ",")
+            rebuiltBy = d
+        } catch (_: JSONException) {
         }
-        val d = rebuilders.joinToString(separator = ",")
-        rebuiltBy = d
     }
 
     /**
