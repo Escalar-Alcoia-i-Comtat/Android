@@ -3,7 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.utils
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.InvalidDataTypeException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.InvalidObjectTypeException
 import com.google.android.gms.maps.model.LatLng
-import com.google.gson.JsonParseException
+import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 
@@ -56,7 +56,7 @@ private fun JSONObject.parseTimestamp(): Date {
 fun JSONObject.getDate(key: String, defaultValue: Date? = null): Date? =
     try {
         getJSONObject(key).parseTimestamp()
-    } catch (e: JsonParseException) {
+    } catch (e: JSONException) {
         defaultValue
     } catch (e: InvalidDataTypeException) {
         defaultValue
@@ -114,7 +114,7 @@ private fun JSONObject.parseGeoPoint(): LatLng {
 fun JSONObject.getLatLng(key: String, defaultValue: LatLng? = null): LatLng? =
     try {
         getJSONObject(key).parseGeoPoint()
-    } catch (e: JsonParseException) {
+    } catch (e: JSONException) {
         defaultValue
     } catch (e: InvalidDataTypeException) {
         defaultValue
