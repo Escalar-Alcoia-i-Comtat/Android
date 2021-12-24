@@ -5,15 +5,13 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
-import androidx.preference.*
-import androidx.work.WorkInfo
+import androidx.preference.EditTextPreference
+import androidx.preference.ListPreference
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreference
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
-import com.arnyminerz.escalaralcoiaicomtat.worker.UpdateWorker
 import timber.log.Timber
 
 class GeneralSettingsFragment : PreferenceFragmentCompat() {
@@ -22,18 +20,9 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
     private var enableNearby: SwitchPreference? = null
     private var centerMarkerPreference: SwitchPreference? = null
     private var nearbyDistance: EditTextPreference? = null
-    private var downloadDataPreference: Preference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.pref_general, rootKey)
-
-        downloadDataPreference = findPreference("pref_download_data")
-        downloadDataPreference?.setOnPreferenceClickListener {
-            Timber.v("Scheduling UpdateWorker...")
-            UpdateWorker.schedule(requireContext())
-            observeUpdateWorkerState()
-            true
-        }
 
         errorReportingPreference = findPreference("pref_error_reporting")
         errorReportingPreference?.setOnPreferenceChangeListener { _, value ->
@@ -141,53 +130,5 @@ class GeneralSettingsFragment : PreferenceFragmentCompat() {
         nearbyDistance?.text = nearbyDistancePref
 
         errorReportingPreference?.isChecked = SETTINGS_ERROR_REPORTING_PREF.get()
-
-        observeUpdateWorkerState()
-    }
-
-    /**
-     * Starts observing the work info of the [UpdateWorker] for updating the enabled state of
-     * [downloadDataPreference].
-     * @author Arnau Mora
-     * @since 20210926
-     */
-    private fun observeUpdateWorkerState() {
-        if (downloadDataPreference == null) {
-            Timber.d("Won't observe UpdateWorker state since pref is null.")
-            return
-        }
-
-        Timber.v("Observing UpdateWorker state...")
-        val lifecycleOwner = requireActivity() as LifecycleOwner
-        doAsync {
-            UpdateWorker.getWorkInfo(requireContext())?.let { liveData ->
-                uiContext {
-                    liveData.observe(lifecycleOwner) { workInfo ->
-                        handleWorkInfo(workInfo) {
-                            Timber.i("Removing UpdateWorker observer since already finished.")
-                            liveData.removeObservers(lifecycleOwner)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun handleWorkInfo(workInfo: WorkInfo, removeListener: () -> Unit) {
-        val state = workInfo.state
-        val finished = state.isFinished
-        Timber.v("UpdateWorker's state update: $state")
-
-        if (!finished) {
-            val progressData = workInfo.progress
-            val step = progressData.getString(UpdateWorker.PROGRESS_KEY_STEP)
-            val progress = progressData.getInt(UpdateWorker.PROGRESS_KEY_VALUE, -1)
-            Timber.v("UpdateWorker step: $step. Progress: $progress.")
-        }
-
-        downloadDataPreference?.isEnabled = finished
-
-        if (finished)
-            removeListener()
     }
 }
