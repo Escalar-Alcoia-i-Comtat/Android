@@ -135,6 +135,10 @@ suspend fun loadAreas(
             }
         }
 
+        Timber.v("Sorting areas...")
+        areas.sortBy { it.displayName }
+        areasIndex.sortBy { it.displayName }
+
         Timber.v("Search > Initializing session future...")
         val session = application.searchSession
         val time = System.currentTimeMillis()
