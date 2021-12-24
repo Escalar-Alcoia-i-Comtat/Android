@@ -29,7 +29,7 @@ import java.util.*
 private fun JSONObject.parseTimestamp(): Date {
     if (!has("__datatype__") || !has("value"))
         throw InvalidObjectTypeException("The JSONObject is not a valid Firebase object type.")
-    if (getString("__datatype__").equals("timestamp", ignoreCase = true))
+    if (!getString("__datatype__").equals("timestamp", ignoreCase = true))
         throw InvalidDataTypeException("The Firebase object's type is not of timestamp.")
     val value = getJSONObject("value")
     val seconds = value.getLong("_seconds")
@@ -85,7 +85,7 @@ fun JSONObject.getDate(key: String, defaultValue: Date? = null): Date? =
 private fun JSONObject.parseGeoPoint(): LatLng {
     if (!has("__datatype__") || !has("value"))
         throw InvalidObjectTypeException("The JSONObject is not a valid Firebase object type.")
-    if (getString("__datatype__").equals("geopoint", ignoreCase = true))
+    if (!getString("__datatype__").equals("geopoint", ignoreCase = true))
         throw InvalidDataTypeException("The Firebase object's type is not of geopoint.")
     val value = getJSONObject("value")
     val latitude = value.getDouble("_latitude")
