@@ -12,14 +12,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.auth.loggedIn
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getAreas
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPath
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getSector
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZone
+import com.google.android.play.core.splitcompat.SplitCompat
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
@@ -96,6 +91,11 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
 
         Timber.v("Adding auth state listener...")
         Firebase.auth.addAuthStateListener(authStateListener)
+    }
+
+    override fun attachBaseContext(base: Context?) {
+        super.attachBaseContext(base)
+        SplitCompat.install(this)
     }
 
     override fun onTerminate() {
