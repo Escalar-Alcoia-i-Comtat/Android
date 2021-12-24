@@ -6,9 +6,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDi
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import org.json.JSONObject
 
 /**
  * Creates a new Area instance.
@@ -60,6 +62,7 @@ class Area internal constructor(
      * @since 20210411
      * @param data The object to get data from
      */
+    @Deprecated("Use data module")
     constructor(data: DocumentSnapshot) : this(
         data.id,
         data.getString("displayName")!!,
@@ -67,6 +70,23 @@ class Area internal constructor(
         data.getString("image")!!,
         data.getString("kmz")!!,
         documentPath = data.reference.path,
+        data.getString("webURL")
+    )
+
+    /**
+     * Creates a new [Area] from the data from the Data module.
+     * Note: This doesn't add children
+     * @author Arnau Mora
+     * @since 20210411
+     * @param data The object to get data from
+     */
+    constructor(data: JSONObject, path: String) : this(
+        path.split('/').last(),
+        data.getString("displayName"),
+        data.getDate("created")!!.time,
+        data.getString("image"),
+        data.getString("kmz"),
+        documentPath = path,
         data.getString("webURL")
     )
 

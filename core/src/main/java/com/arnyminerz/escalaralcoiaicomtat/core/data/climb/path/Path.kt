@@ -18,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSa
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.DocumentSnapshot
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
+import org.json.JSONObject
 import timber.log.Timber
 
 /**
@@ -63,6 +65,7 @@ class Path internal constructor(
      * @since 20210411
      * @param data The object to get data from
      */
+    @Deprecated("Use JSON from data module")
     constructor(data: DocumentSnapshot) : this(
         data.id,
         data.getDate("created")!!.time,
@@ -113,6 +116,70 @@ class Path internal constructor(
         Timber.d("Loading rebuilders...")
         val rebuilders = pathData?.get("rebuiltBy") as List<*>?
         val d = rebuilders?.joinToString(separator = ",")
+        rebuiltBy = d
+    }
+
+    /**
+     * Initializes the Path from the values gotten from the Data module.
+     * @author Arnau Mora
+     * @since 20211224
+     * @param data The JSON content to parse.
+     * @param path The path of the Path inside the data module.
+     * @param parentSectorId The ID of the Sector which the Path is contained in.
+     */
+    constructor(data: JSONObject, path: String, parentSectorId: String) : this(
+        path.split("/").last(),
+        data.getDate("created")!!.time,
+        data.getString("sketchId").toLongOrNull() ?: 0L,
+        data.getString("displayName"),
+        data.getString("grade"),
+        arrayListOf(),
+        arrayListOf(),
+        data.getString("ending_artifo"),
+        FixedSafesData(
+            data.getLong("stringCount"),
+            data.getLong("paraboltCount"),
+            data.getLong("spitCount"),
+            data.getLong("tensorCount"),
+            data.getLong("pitonCount"),
+            data.getLong("burilCount"),
+        ),
+        RequiredSafesData(
+            data.getBoolean("lanyardRequired"),
+            data.getBoolean("crackerRequired"),
+            data.getBoolean("friendRequired"),
+            data.getBoolean("stripsRequired"),
+            data.getBoolean("pitonRequired"),
+            data.getBoolean("nailRequired"),
+        ),
+        data.getString("description"),
+        data.getString("builtBy"),
+        "", // This gets initialized later
+        documentPath = path,
+        parentSectorId = parentSectorId
+    ) {
+        Timber.d("Loading heights for Path $objectId")
+        val heights = data.getJSONArray("height")
+        for (k in 0 until heights.length()) {
+            val height = heights[k]
+            height.toString().toLongOrNull()?.let {
+                this.heights.add(it)
+            }
+        }
+
+        Timber.d("Loading endings for Path $objectId")
+        val endingsList = data.getJSONArray("ending")
+        for (i in 0 until endingsList.length()) {
+            endings.add(endingsList.getString(i).lowercase())
+        }
+
+        Timber.d("Loading rebuilders...")
+        val reBuildersList = data.getJSONArray("rebuiltBy")
+        val rebuilders = arrayListOf<String>()
+        for (k in 0 until reBuildersList.length()) {
+            rebuilders.add(reBuildersList.getString(k))
+        }
+        val d = rebuilders.joinToString(separator = ",")
         rebuiltBy = d
     }
 

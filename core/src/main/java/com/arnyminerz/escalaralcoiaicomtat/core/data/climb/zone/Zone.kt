@@ -6,11 +6,14 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getLatLng
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toLatLng
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import org.json.JSONObject
 
 /**
  * Creates a new [Zone] instance.
@@ -58,6 +61,7 @@ class Zone internal constructor(
      * @since 20210411
      * @param data The object to get data from
      */
+    @Deprecated("Use data module")
     constructor(data: DocumentSnapshot) : this(
         data.id,
         data.getString("displayName")!!,
@@ -68,6 +72,25 @@ class Zone internal constructor(
         documentPath = data.reference.path,
         data.getString("webURL"),
         data.reference.parent.parent!!.id
+    )
+
+    /**
+     * Creates a new [Zone] from the data from the Data Module.
+     * Note: This doesn't add children
+     * @author Arnau Mora
+     * @since 20210411
+     * @param data The object to get data from
+     */
+    constructor(data: JSONObject, path: String) : this(
+        path.split('/').last(),
+        data.getString("displayName"),
+        data.getDate("created")!!.time,
+        data.getString("image"),
+        data.getString("kmz"),
+        data.getLatLng("location")!!,
+        documentPath = path,
+        data.getString("webURL"),
+        path.split("/").let { it[it.size - 3] }
     )
 
     @IgnoredOnParcel
