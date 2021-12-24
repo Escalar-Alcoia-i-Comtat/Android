@@ -5,7 +5,6 @@ import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.PutDocumentsRequest
 import androidx.appsearch.app.SetSchemaRequest
-import androidx.collection.arrayMapOf
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
@@ -21,12 +20,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
-import com.google.firebase.firestore.FirebaseFirestore
+import com.arnyminerz.escalaralcoiaicomtat.data.fetchData
 import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
-import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
@@ -42,7 +39,7 @@ import java.util.*
  * @return A collection of areas
  */
 @WorkerThread
-suspend fun FirebaseFirestore.loadAreas(
+suspend fun loadAreas(
     application: App,
     @UiThread progressCallback: ((progress: ValueMax<Int>) -> Unit)? = null
 ): List<Area> {
@@ -54,7 +51,7 @@ suspend fun FirebaseFirestore.loadAreas(
                 // If empty, reset the preference, and launch loadAreas again
                 Timber.w("Areas is empty, reseting search indexed pref and launching again.")
                 PREF_INDEXED_SEARCH.put(false)
-                this.loadAreas(application, progressCallback)
+                loadAreas(application, progressCallback)
             }
     }
 
@@ -63,174 +60,80 @@ suspend fun FirebaseFirestore.loadAreas(
 
     trace.start()
 
-    Timber.d("Fetching areas...")
+    Timber.d("Fetching data from data module...")
     try {
-        Timber.v("Getting paths...") // Around 3.8 seconds
-        val pathsSnapshot = collectionGroup("Paths")
-            .get()
-            .await()
+        val areas = arrayListOf<Area>()
+        val zones = arrayListOf<Zone>()
+        val sectors = arrayListOf<Sector>()
+        val paths = arrayListOf<Path>()
 
-        Timber.v("Getting sectors...") // Around .5 seconds
-        val sectorsSnapshot = collectionGroup("Sectors")
-            .orderBy("displayName", Query.Direction.ASCENDING)
-            .get()
-            .await()
-
-        Timber.v("Getting zones...") // Around .3 seconds
-        val zonesSnapshot = collectionGroup("Zones")
-            .orderBy("displayName", Query.Direction.ASCENDING)
-            .get()
-            .await()
-
-        val areasFetchTrace = performance.newTrace("areasFetchTrace")
-        areasFetchTrace.start()
-        Timber.v("Getting areas...") // Around .3 seconds
-        val areasSnapshot = collectionGroup("Areas")
-            .orderBy("displayName", Query.Direction.ASCENDING)
-            .get()
-            .await()
-        areasFetchTrace.stop()
-
-        Timber.v("Initializing zones cache...")
-        val zonesCache = arrayMapOf<String, Zone>()
-        Timber.v("Initializing areas cache...")
-        val areasCache = arrayMapOf<String, Area>()
-
-        Timber.v("Initializing search index list...")
         val areasIndex = arrayListOf<AreaData>()
         val zonesIndex = arrayListOf<ZoneData>()
         val sectorsIndex = arrayListOf<SectorData>()
         val pathsIndex = arrayListOf<PathData>()
 
-        Timber.v("Getting path documents...")
-        val pathDocuments = pathsSnapshot.documents
-            .sortedBy { snapshot -> snapshot.getString("sketchId")?.toInt() }
-        Timber.v("Getting sector documents...")
-        val sectorDocuments = sectorsSnapshot.documents
-            .sortedBy { snapshot -> snapshot.getString("weight") }
-        Timber.v("Getting zone documents...")
-        val zoneDocuments = zonesSnapshot.documents
-        Timber.v("Getting area documents...")
-        val areaDocuments = areasSnapshot.documents
+        val jsonData = fetchData(application)
 
-        // Count time is approx 0ms, so shouldn't bother about this taking a lot of time.
-        // Timber.v("Counting paths...")
-        // val pathsCount = pathDocuments.size
-        Timber.v("Counting sectors...")
-        val sectorsCount = sectorDocuments.size
-        Timber.v("Counting zones...")
-        val zonesCount = zoneDocuments.size
-        Timber.v("Counting areas...")
-        val areasCount = areaDocuments.size
+        val areaKeys = jsonData.keys()
+        for ((a, areaKey) in areaKeys.withIndex()) {
+            val areaJson = jsonData.getJSONObject(areaKey)
+            val areaPath = "/Areas/$areaKey"
 
-        var progressCounter = 0
-        val progressMax = areasCount + zonesCount + sectorsCount
+            // Process the Area data
+            val area = Area(areaJson, areaPath)
 
-        Timber.v("Creation relation with sector and path documents...")
-        // The key is the sector id, the value the snapshot of the path
-        // This is what takes the most of the time, more than 7 seconds.
-        val sectorIdPathDocument = arrayMapOf<String, ArrayList<Path>>()
-        // Notify 0 progress, 0 max, for telling the UI that paths are being processed
-        uiContext { progressCallback?.invoke(ValueMax(0, 0)) }
-        for (pathDocument in pathDocuments) {
-            val pathId = pathDocument.id
-            Timber.v("P/$pathId > Processing path...")
-            val pathInitTime = System.currentTimeMillis()
-            val path = Path(pathDocument)
-            Timber.i("Path init time: ${System.currentTimeMillis() - pathInitTime}")
-            val sectorId = pathDocument.reference.parent.parent!!.id
-            Timber.v("P/$pathId > Adding to sector S/$sectorId...")
-            sectorIdPathDocument[sectorId]?.add(path) ?: run {
-                sectorIdPathDocument[sectorId] = arrayListOf(path)
-            }
-        }
+            // Add the area to the list
+            areas.add(area)
+            areasIndex.add(area.data(a))
 
-        Timber.v("Iterating $sectorsCount sector documents...")
-        for ((i, sectorDocument) in sectorDocuments.withIndex()) {
-            uiContext { progressCallback?.invoke(ValueMax(++progressCounter, progressMax)) }
+            val zonesJson = areaJson
+                .getJSONObject("__collections__")
+                .getJSONObject("Zones")
+            val zoneKeys = zonesJson.keys()
+            for ((z, zoneKey) in zoneKeys.withIndex()) {
+                val zoneJson = zonesJson.getJSONObject(zoneKey)
+                val zonePath = "$areaPath/Zones/$zoneKey"
 
-            val sectorId = sectorDocument.id
-            Timber.v("S/$sectorId > Getting sector's reference...")
-            val sectorReference = sectorDocument.reference
-            Timber.v("S/$sectorId > Getting sector's parent zone.")
-            val sectorParentZone = sectorReference.parent.parent ?: run {
-                Timber.e("S/$sectorId > Could not find parent zone.")
-                return emptyList()
-            }
-            Timber.v("S/$sectorId > Getting sector's parent zone's id.")
-            val zoneId = sectorParentZone.id
-            if (!zonesCache.containsKey(zoneId)) {
-                uiContext { progressCallback?.invoke(ValueMax(++progressCounter, progressMax)) }
-                Timber.v("S/$sectorId > There's no cached version for Z/$zoneId.")
-                val zoneDocument = zoneDocuments.find { it.id == zoneId }
-                if (zoneDocument == null) {
-                    Timber.e("S/$sectorId > Could not find zone (Z/$zoneId) in documents.")
-                    return emptyList()
-                } else {
-                    Timber.v("S/$sectorId > Caching zone Z/$zoneId...")
-                    val zone = Zone(zoneDocument)
-                    zonesCache[zoneId] = zone
+                // Process the Zone data
+                val zone = Zone(zoneJson, zonePath)
+
+                // Add the zone to the list
+                zones.add(zone)
+                zonesIndex.add(zone.data(z))
+
+                val sectorsJson = zoneJson
+                    .getJSONObject("__collections__")
+                    .getJSONObject("Sectors")
+                val sectorKeys = sectorsJson.keys()
+                for ((s, sectorKey) in sectorKeys.withIndex()) {
+                    val sectorJson = sectorsJson.getJSONObject(sectorKey)
+                    val sectorPath = "$zonePath/Sectors/$sectorKey"
+
+                    // Process the Sector data
+                    val sector = Sector(sectorJson, sectorPath)
+
+                    // Add the sector to the list
+                    sectors.add(sector)
+                    sectorsIndex.add(sector.data(s))
+
+                    val pathsJson = sectorJson
+                        .getJSONObject("__collections__")
+                        .getJSONObject("Paths")
+                    val pathKeys = pathsJson.keys()
+                    for (pathKey in pathKeys) {
+                        val pathJson = pathsJson.getJSONObject(pathKey)
+                        val pathPath = "$sectorPath/Sectors/$pathKey"
+
+                        // Process the path data
+                        val path = Path(pathJson, pathPath, sectorKey)
+
+                        // Add the path to the list
+                        paths.add(path)
+                        pathsIndex.add(path.data())
+                    }
                 }
             }
-            Timber.v("S/$sectorId > Getting zone Z/$zoneId from cache...")
-            val zone = zonesCache[zoneId]
-            Timber.v("S/$sectorId > Processing sector data...")
-            val sector = Sector(sectorDocument)
-            Timber.v("S/$sectorId > Adding sector to the search index...")
-            sectorsIndex.add(sector.data(i))
-
-            Timber.v("S/$sectorId > Loading paths...")
-            val paths = sectorIdPathDocument[sectorId]
-            if (paths != null) {
-                for (path in paths) {
-                    Timber.v("$path > Adding to the search index...")
-                    pathsIndex.add(path.data())
-                }
-            } else
-                Timber.w("S/$sectorId > There isn't any path for the sector.")
         }
-
-        Timber.v("Iterating $zonesCount zone documents...")
-        for (zoneDocument in zoneDocuments) {
-            val zoneId = zoneDocument.id
-            Timber.v("Z/$zoneId > Getting Zone...")
-            val zone = zonesCache[zoneId] ?: run {
-                Timber.e("Z/$zoneId > Could not find zone in cache, maybe it doesn't have any sector?")
-                return emptyList()
-            }
-            Timber.v("Z/$zoneId > Getting Zone reference...")
-            val zoneReference = zoneDocument.reference
-            Timber.v("Z/$zoneId > Getting Zone's parent Area reference...")
-            val zoneParentAreaReference = zoneReference.parent.parent ?: run {
-                Timber.e("Z/$zoneId > Could not find parent area.")
-                return emptyList()
-            }
-            Timber.v("Z/$zoneId > Getting Zone's parent Area id...")
-            val zoneParentAreaId = zoneParentAreaReference.id
-            if (!areasCache.containsKey(zoneParentAreaId)) {
-                uiContext { progressCallback?.invoke(ValueMax(++progressCounter, progressMax)) }
-                Timber.v("Z/$zoneId > Could not find A/$zoneParentAreaId in cache...")
-                val areaDocument = areaDocuments.find { it.id == zoneParentAreaId }
-                if (areaDocument == null) {
-                    Timber.e("Z/$zoneId > Could not find area (A/$zoneParentAreaId) in documents.")
-                    return emptyList()
-                } else {
-                    Timber.v("Z/$zoneId > Caching area A/$zoneParentAreaId...")
-                    areasCache[zoneParentAreaId] = Area(areaDocument)
-                }
-            }
-            Timber.v("Z/$zoneId > Getting area A/$zoneParentAreaId from cache...")
-            val area = areasCache[zoneParentAreaId]
-        }
-
-        Timber.v("Adding zones to the search index...")
-        for ((i, zone) in zonesCache.values.sortedBy { it.displayName }.withIndex())
-            zonesIndex.add(zone.data(i))
-        Timber.v("Adding areas to the search index...")
-        for ((i, area) in areasCache.values.sortedBy { it.displayName }.withIndex())
-            areasIndex.add(area.data(i))
-
-        Timber.v("Finished iterating documents.")
 
         Timber.v("Search > Initializing session future...")
         val session = application.searchSession
@@ -275,7 +178,7 @@ suspend fun FirebaseFirestore.loadAreas(
 
         trace.stop()
 
-        return arrayListOf<Area>().apply { addAll(areasCache.values) }
+        return areas
     } catch (e: FirebaseFirestoreException) {
         Timber.e(e, "Could not load areas.")
         trace.putAttribute("error", "true")
