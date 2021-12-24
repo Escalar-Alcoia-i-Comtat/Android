@@ -119,7 +119,11 @@ class Sector internal constructor(
         data.getString("weight"),
         data.getString("image"),
         documentPath = path,
-        data.getString("webURL"),
+        try {
+            data.getString("webURL")
+        } catch (e: JSONException) {
+            null
+        },
         // ../Zones/<zoneId>/Sectors/<sectorId>
         //             .2.     .1.      .0.
         path.split("/").let { it[it.size - 3] }
