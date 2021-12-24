@@ -17,5 +17,6 @@ class NotificationChannelsInitializer : Initializer<Boolean> {
             false
         }
 
-    override fun dependencies(): List<Class<out Initializer<*>>> = emptyList()
+    override fun dependencies(): List<Class<out Initializer<*>>> =
+        listOf(TimberInitializer::class.java)
 }
