@@ -34,7 +34,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:vmSafeMode="true"
-        tools:ignore="GoogleAppIndexingWarning,UnusedAttribute,LockedOrientationActivity">
+        tools:ignore="GoogleAppIndexingWarning,UnusedAttribute,LockedOrientationActivity"
+        android:dataExtractionRules="@xml/data_extraction_rules">
         <activity
             android:name=".activity.profile.UserActivityActivity"
             android:exported="true" />
