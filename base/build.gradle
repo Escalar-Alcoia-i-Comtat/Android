@@ -85,7 +85,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    dynamicFeatures = []
+    dynamicFeatures = [':core:data']
 
     packagingOptions {
         resources {
@@ -172,4 +172,7 @@ dependencies {
 
     // Markdown rendering
     implementation 'io.noties.markwon:core:4.6.2'
+
+    // Kotlin reflect for using methods from Feature Modules
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.6.10"
 }

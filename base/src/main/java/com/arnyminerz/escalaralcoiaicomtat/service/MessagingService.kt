@@ -6,7 +6,6 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.ALERT_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ALERT_PREF
-import com.arnyminerz.escalaralcoiaicomtat.worker.UpdateWorker
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -14,13 +13,6 @@ import com.google.firebase.messaging.RemoteMessage
 class MessagingService : FirebaseMessagingService() {
     companion object {
         private const val TAG = "MessagingService"
-
-        /**
-         * This type is used when a new update is available.
-         * @author Arnau Mora
-         * @since 20210919
-         */
-        private const val MESSAGE_TYPE_UPDATE = "update"
     }
 
     init {
@@ -61,11 +53,6 @@ class MessagingService : FirebaseMessagingService() {
             else if (!shouldDisplay) {
                 Log.v(TAG, "Got hidden notification.")
                 when (val type = data["type"]) {
-                    MESSAGE_TYPE_UPDATE -> {
-                        Log.i(TAG, "There's a new version available.")
-
-                        UpdateWorker.schedule(this)
-                    }
                     else -> Log.w(TAG, "Got invalid hidden notification. Type: $type")
                 }
             } else Log.w(TAG, "Received notification without title nor body.")

@@ -12,6 +12,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDi
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getLatLng
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toLatLng
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toUri
 import com.arnyminerz.escalaralcoiaicomtat.core.view.BarChartHelper
@@ -26,6 +28,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import org.json.JSONException
+import org.json.JSONObject
 import timber.log.Timber
 
 /**
@@ -77,6 +81,7 @@ class Sector internal constructor(
      * @since 20210411
      * @param data The object to get data from
      */
+    @Deprecated("Use Data from the Data Module")
     constructor(data: DocumentSnapshot) : this(
         data.id,
         data.getString("displayName")!!,
@@ -88,8 +93,40 @@ class Sector internal constructor(
         data.getString("weight")!!,
         data.getString("image")!!,
         documentPath = data.reference.path,
-        data.getString("webURL"),
+        try {
+            data.getString("webURL")
+        } catch (e: JSONException) {
+            null
+        },
         data.reference.parent.parent!!.id
+    )
+
+    /**
+     * Creates a new [Sector] from the data of the Data Module.
+     * Note: This doesn't add children
+     * @author Arnau Mora
+     * @since 20210411
+     * @param data The object to get data from
+     */
+    constructor(data: JSONObject, path: String) : this(
+        path.split("/").last(),
+        data.getString("displayName"),
+        data.getDate("created")!!.time,
+        data.getLong("sunTime").toInt(),
+        data.getBoolean("kidsApt"),
+        data.getLong("walkingTime"),
+        data.getLatLng("location"),
+        data.getString("weight"),
+        data.getString("image"),
+        documentPath = path,
+        try {
+            data.getString("webURL")
+        } catch (e: JSONException) {
+            null
+        },
+        // ../Zones/<zoneId>/Sectors/<sectorId>
+        //             .2.     .1.      .0.
+        path.split("/").let { it[it.size - 3] }
     )
 
     @IgnoredOnParcel
