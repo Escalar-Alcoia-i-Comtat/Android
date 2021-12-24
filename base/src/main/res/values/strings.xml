@@ -290,4 +290,5 @@
     <string name="update_progress_internet_waiting">Waiting for Internet connection…</string>
     <string name="update_progress_downloading_new_cache">Downloading new data…</string>
     <string name="update_progress_error">Error!</string>
+    <string name="title_data">Data Module</string>
 </resources>

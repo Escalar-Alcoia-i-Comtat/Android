@@ -249,4 +249,5 @@
     <string name="dataclass_sector_children_count">%d vies</string>
     <string name="image_desc_enter">Entrar</string>
     <string name="dialog_sectors_title">Sectors</string>
+    <string name="title_data">Mòdul de Dades</string>
 </resources>

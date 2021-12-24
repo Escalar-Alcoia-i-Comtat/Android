@@ -251,4 +251,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="dataclass_sector_children_count">%d vías</string>
     <string name="image_desc_enter">Entrar</string>
     <string name="dialog_sectors_title">Sectores</string>
+    <string name="title_data">Módulo de Datos</string>
 </resources>
