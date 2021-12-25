@@ -16,12 +16,20 @@
     <string name="status_downloading">Downloading…</string>
     <string name="status_storing">Storing…</string>
     <string name="status_loading_progress">Loading %d/%d</string>
+    <string name="status_downloading_percent">Downloading %d%</string>
     <string name="status_processing_paths">Processing paths…</string>
     <string name="status_no_internet">No Internet Connection</string>
     <string name="status_loading_deep_link">Processing link…</string>
     <string name="status_not_running">Not running</string>
     <string name="status_running">Running</string>
     <string name="status_finished">Finished</string>
+    <string name="status_loading_checks">Running system checks…</string>
+    <string name="status_loading_config">Loading configuration…</string>
+    <string name="status_loading_noti_list">Adding notification listeners…</string>
+    <string name="status_loading_data_collection">Configuring data collection…</string>
+    <string name="status_loading_auth">Loading authentication system…</string>
+    <string name="status_loading_data">Loading data…</string>
+    <string name="status_loading_installing_data">Installing data…</string>
 
     <string name="data_type_area">Area</string>
     <string name="data_type_zone">Zone</string>
