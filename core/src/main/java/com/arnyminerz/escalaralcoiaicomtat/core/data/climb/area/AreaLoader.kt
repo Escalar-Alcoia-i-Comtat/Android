@@ -36,14 +36,12 @@ import java.util.*
  * @since 20210313
  * @param application The [Application] that owns the app execution.
  * @param jsonData The data loaded from the data module
- * @param progressCallback This will get called when the loading progress is updated.
  * @return A collection of areas
  */
 @WorkerThread
 suspend fun loadAreas(
     application: App,
-    jsonData: JSONObject,
-    @UiThread progressCallback: ((progress: ValueMax<Int>) -> Unit)? = null
+    jsonData: JSONObject
 ): List<Area> {
     val indexedSearch = PREF_INDEXED_SEARCH.get()
     if (indexedSearch) {
@@ -53,7 +51,7 @@ suspend fun loadAreas(
                 // If empty, reset the preference, and launch loadAreas again
                 Timber.w("Areas is empty, reseting search indexed pref and launching again.")
                 PREF_INDEXED_SEARCH.put(false)
-                loadAreas(application, jsonData, progressCallback)
+                loadAreas(application, jsonData)
             }
     }
 
