@@ -2,13 +2,12 @@ package com.arnyminerz.escalaralcoiaicomtat.view.model
 
 import android.app.Application
 import android.content.Context
-import android.widget.Toast
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.DataLoaderInterface
@@ -36,7 +35,6 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.perf.ktx.performance
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
-import com.google.rpc.context.AttributeContext
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -78,69 +76,66 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         messagingSubscribeTest(messaging)
         messagingTokenGet(messaging)
 
-        // TODO: Below does not load, maybe wrong threading?
-        uiContext {
-            progressMessageResource.value = R.string.status_loading_checks
-            checkGooglePlayServices(app)
-            checkMD5Support(analytics, app)
+        progressMessageResource.value = R.string.status_loading_checks
+        checkGooglePlayServices(app)
+        checkMD5Support(analytics, app)
 
-            progressMessageResource.value = R.string.status_loading_data_collection
-            dataCollectionSetUp()
+        progressMessageResource.value = R.string.status_loading_data_collection
+        dataCollectionSetUp()
 
-            progressMessageResource.value = R.string.status_loading_auth
-            authSetup(auth, app)
+        progressMessageResource.value = R.string.status_loading_auth
+        authSetup(auth, app)
 
-            progressMessageResource.value = R.string.status_loading_data
-            Timber.v("Installing data module...")
-            val splitInstallManager = SplitInstallManagerFactory.create(app)
-            val request = SplitInstallRequest.newBuilder()
-                .addModule("data")
-                .build()
-            Timber.v("Requesting installation of the data module...")
-            splitInstallManager.apply {
-                val listener = SplitInstallStateUpdatedListener { state ->
-                    Timber.v("Got split install update. State: $state")
-                    when (val status = state.status()) {
-                        SplitInstallSessionStatus.FAILED -> {
-                            Timber.e("Data module download status: Failed")
-                            // TODO: Display error
-                        }
-                        SplitInstallSessionStatus.DOWNLOADING -> {
-                            val current = state.bytesDownloaded()
-                            val max = state.totalBytesToDownload()
-                            val progress = ValueMax(current, max)
-                            Timber.e("Data module download status: Downloading $progress")
-                            progressMessageResource.value = R.string.status_downloading_percent
-                            progressMessageAttributes.value = listOf(progress.percentage)
-                        }
-                        SplitInstallSessionStatus.INSTALLING -> {
-                            Timber.i("Data module download status: Installing")
-                            progressMessageResource.value = R.string.status_loading_installing_data
-                        }
-                        SplitInstallSessionStatus.INSTALLED -> {
-                            Timber.i("Data module download status: Installed")
-                            progressMessageResource.value = R.string.status_loading_data
-                            doAsync {
-                                load(app, deepLinkPath) { stringResource ->
-                                    progressMessageResource.value = stringResource
-                                }
+        progressMessageResource.value = R.string.status_loading_data
+        Timber.v("Installing data module...")
+        val splitInstallManager = SplitInstallManagerFactory.create(app)
+        val request = SplitInstallRequest.newBuilder()
+            .addModule("data")
+            .build()
+        Timber.v("Requesting installation of the data module...")
+        splitInstallManager.apply {
+            val listener = SplitInstallStateUpdatedListener { state ->
+                Timber.v("Got split install update. State: $state")
+                when (val status = state.status()) {
+                    SplitInstallSessionStatus.FAILED -> {
+                        Timber.e("Data module download status: Failed")
+                        // TODO: Display error
+                    }
+                    SplitInstallSessionStatus.DOWNLOADING -> {
+                        val current = state.bytesDownloaded()
+                        val max = state.totalBytesToDownload()
+                        val progress = ValueMax(current, max)
+                        Timber.e("Data module download status: Downloading $progress")
+                        progressMessageResource.value = R.string.status_downloading_percent
+                        progressMessageAttributes.value = listOf(progress.percentage)
+                    }
+                    SplitInstallSessionStatus.INSTALLING -> {
+                        Timber.i("Data module download status: Installing")
+                        progressMessageResource.value = R.string.status_loading_installing_data
+                    }
+                    SplitInstallSessionStatus.INSTALLED -> {
+                        Timber.i("Data module download status: Installed")
+                        progressMessageResource.value = R.string.status_loading_data
+                        doAsync {
+                            load(app, deepLinkPath) { stringResource ->
+                                progressMessageResource.value = stringResource
                             }
                         }
-                        else -> Timber.v("Data module install status: $status")
                     }
+                    else -> Timber.v("Data module install status: $status")
                 }
-                Timber.v("Registering listener for data module installation..")
-                registerListener(listener)
-                Timber.v("Starting data module installation...")
-                startInstall(request)
-                    .addOnSuccessListener { sessionId ->
-                        Timber.i("Started install of the data module (sessionId=$sessionId)")
-                    }
-                    .addOnFailureListener { exception ->
-                        Timber.e(exception, "Could not install data module!")
-                        unregisterListener(listener)
-                    }
             }
+            Timber.v("Registering listener for data module installation..")
+            registerListener(listener)
+            Timber.v("Starting data module installation...")
+            startInstall(request)
+                .addOnSuccessListener { sessionId ->
+                    Timber.i("Started install of the data module (sessionId=$sessionId)")
+                }
+                .addOnFailureListener { exception ->
+                    Timber.e(exception, "Could not install data module!")
+                    unregisterListener(listener)
+                }
         }
     }
 
@@ -349,14 +344,20 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                 val intent = DataClass.getIntent(app, app.searchSession, deepLinkPath)
                 uiContext {
                     if (intent != null)
-                        app.startActivity(intent)
+                        app.launch(intent) {
+                            addFlags(FLAG_ACTIVITY_NEW_TASK)
+                        }
                     else
-                        app.launch(MainActivity::class.java)
+                        app.launch(MainActivity::class.java) {
+                            addFlags(FLAG_ACTIVITY_NEW_TASK)
+                        }
                 }
             } else
                 uiContext {
                     Timber.v("Launching MainActivity...")
-                    app.launch(MainActivity::class.java)
+                    app.launch(MainActivity::class.java) {
+                        addFlags(FLAG_ACTIVITY_NEW_TASK)
+                    }
                 }
         } else Timber.v("Areas is empty, but no handle was called.")
     }
