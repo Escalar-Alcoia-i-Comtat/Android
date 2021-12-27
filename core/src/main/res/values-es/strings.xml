@@ -180,4 +180,6 @@
     <string name="notification_block_status_error_log">No se ha podido obtener el estado de bloqueo de %d vías.<br />Elementos fallidos:<br />%s</string>
     <string name="action_view_map">Ver Mapa</string>
     <string name="fab_desc_finish">Finalizar</string>
+    <string name="action_uninstall_data">Desinstalar el módulo de datos</string>
+    <string name="toast_data_uninstalled">Solicitada la desinstalación de los datos</string>
 </resources>

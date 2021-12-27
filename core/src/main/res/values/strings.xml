@@ -17,6 +17,7 @@
     <string name="action_clear_settings">Clear Settings</string>
     <string name="action_launch_app">Launch App</string>
     <string name="action_clear_data">Clear Data</string>
+    <string name="action_uninstall_data">Uninstall Data Module</string>
     <string name="action_share_with">Share with</string>
     <string name="action_continue">Continue</string>
     <string name="action_send">Send</string>
@@ -121,6 +122,7 @@
     <string name="toast_stored_gpx">GPX stored!</string>
     <string name="toast_stored_kmz">KMZ stored!</string>
     <string name="toast_clear_ok">Cleared correctly</string>
+    <string name="toast_data_uninstalled">Requested data uninstall</string>
     <string name="toast_message_sent">Message sent!</string>
     <string name="toast_confirmation_sent">Confirmation sent!</string>
     <string name="toast_update_downloaded">An update has just been downloaded</string>
