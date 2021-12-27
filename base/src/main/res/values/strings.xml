@@ -30,6 +30,21 @@
     <string name="status_loading_auth">Loading authentication system…</string>
     <string name="status_loading_data">Loading data…</string>
     <string name="status_loading_installing_data">Installing data…</string>
+    <string name="status_data_install_access_denied" translatable="false">Data module installation not allowed!</string>
+    <string name="status_data_install_active_sessions_limit" translatable="false">Too many install requests!</string>
+    <string name="status_data_install_api_not_available" translatable="false">Data installation API not available!</string>
+    <string name="status_data_install_app_not_owned" translatable="false">You do not own the app!</string>
+    <string name="status_data_install_incompatible_session" translatable="false">Session not compatible with data installation!</string>
+    <string name="status_data_install_insufficient_storage" translatable="false">Not enough storage space available.</string>
+    <string name="status_data_install_internal_error" translatable="false">An internal error occurred while installing the data module.</string>
+    <string name="status_data_install_invalid_request" translatable="false">An error occurred while requesting the data module.</string>
+    <string name="status_data_install_module_unavailable" translatable="false">The data module is not available to be downloaded.</string>
+    <string name="status_data_install_network_error" translatable="false">Network is not available for downloading the data module.</string>
+    <string name="status_data_install_play_store_not_found" translatable="false">The Play Store is not available. Data module requires it.</string>
+    <string name="status_data_install_session_not_found" translatable="false">There has been an error on the data module installation session.</string>
+    <string name="status_data_install_split_copy_error" translatable="false">There has been an error with the SplitCompat copy.</string>
+    <string name="status_data_install_split_emu_error" translatable="false">There has been an error with the SplitCompat emulation.</string>
+    <string name="status_data_install_split_verif_error" translatable="false">There has been an error with the SplitCompat verification.</string>
 
     <string name="data_type_area">Area</string>
     <string name="data_type_zone">Zone</string>

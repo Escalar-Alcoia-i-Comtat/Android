@@ -250,4 +250,12 @@
     <string name="image_desc_enter">Entrar</string>
     <string name="dialog_sectors_title">Sectors</string>
     <string name="title_data">Mòdul de Dades</string>
+    <string name="status_downloading_percent">Baixant %d%</string>
+    <string name="status_loading_checks">Executant comprovacions del sistema…</string>
+    <string name="status_loading_config">Carregant configuració…</string>
+    <string name="status_loading_noti_list">Afegint detectors de notificacions…</string>
+    <string name="status_loading_data_collection">Configurant la recol·lecció de dades…</string>
+    <string name="status_loading_auth">Carregant el sistema d\'autentificació…</string>
+    <string name="status_loading_data">Carregant les dades…</string>
+    <string name="status_loading_installing_data">Instal·lant les dades…</string>
 </resources>
