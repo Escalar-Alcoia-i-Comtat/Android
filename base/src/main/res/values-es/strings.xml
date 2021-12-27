@@ -252,4 +252,12 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="image_desc_enter">Entrar</string>
     <string name="dialog_sectors_title">Sectores</string>
     <string name="title_data">Módulo de Datos</string>
+    <string name="status_downloading_percent">Descargando %d%</string>
+    <string name="status_loading_checks">Ejecutando comprobaciones del sistema…</string>
+    <string name="status_loading_config">Cargando configuración…</string>
+    <string name="status_loading_noti_list">Añadiendo detectores de notificaciones…</string>
+    <string name="status_loading_data_collection">Configurando la recolección de datos…</string>
+    <string name="status_loading_auth">Cargando el sistema de autentificación…</string>
+    <string name="status_loading_data">Cargando los datos…</string>
+    <string name="status_loading_installing_data">Instalando los datos…</string>
 </resources>

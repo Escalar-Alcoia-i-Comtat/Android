@@ -61,7 +61,7 @@ class IntroActivity : ComponentActivity() {
                 ) {
                     Timber.v("Finished showing intro pages. Loading LoadingActivity")
                     PREF_SHOWN_INTRO.put(true)
-                    context.startActivity(Intent(this, MainActivity::class.java))
+                    context.startActivity(Intent(this, LoadingActivity::class.java))
                 }
             }
         }

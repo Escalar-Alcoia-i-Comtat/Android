@@ -270,3 +270,10 @@ const val ACTIVITY_ZONE_META = "com.arnyminerz.escalaralcoiaicomtat.core.activit
  * @since 20210615
  */
 const val ACTIVITY_SECTOR_META = "com.arnyminerz.escalaralcoiaicomtat.core.activity.SectorActivity"
+
+/**
+ * The name of the data module, for requesting installs and uninstalls.
+ * @author Arnau Mora
+ * @since 20211227
+ */
+const val DATA_MODULE_NAME = "data"
