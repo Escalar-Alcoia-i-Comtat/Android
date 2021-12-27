@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.view.model
 import android.app.Application
 import android.content.Context
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,9 +21,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.play.core.splitinstall.SplitInstallException
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallRequest
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
+import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.google.firebase.FirebaseException
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -42,6 +45,9 @@ import timber.log.Timber
 class LoadingViewModel(application: Application) : AndroidViewModel(application) {
     var progressMessageResource = mutableStateOf(R.string.status_loading)
     var progressMessageAttributes = mutableStateOf(listOf<Any?>())
+
+    @get:StringRes
+    var errorMessage = mutableStateOf<Int?>(null)
 
     /**
      * Requests the view model to start loading
@@ -90,7 +96,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         Timber.v("Installing data module...")
         val splitInstallManager = SplitInstallManagerFactory.create(app)
         val request = SplitInstallRequest.newBuilder()
-            .addModule("data")
+            .addModule(DATA_MODULE_NAME)
             .build()
         Timber.v("Requesting installation of the data module...")
         splitInstallManager.apply {
@@ -171,10 +177,6 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                 .addOnSuccessListener { sessionId ->
                     Timber.i("Started install of the data module (sessionId=$sessionId)")
                 }
-                .addOnFailureListener { exception ->
-                    Timber.e(exception, "Could not install data module!")
-                    unregisterListener(listener)
-                }
         }
     }
 
@@ -233,17 +235,18 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * @author Arnau Mora
      * @since 20210919
      */
-    private suspend fun messagingSubscribeTest(messaging: FirebaseMessaging) {
-        if (BuildConfig.DEBUG)
-            try {
-                Timber.v("Subscribing to \"testing\" topic...")
-                messaging.subscribeToTopic("testing")
-                    .await()
-
-                Timber.i("Subscribed to topic \"testing\".")
-            } catch (e: FirebaseException) {
-                Timber.e(e, "Could not subscribe to testing topic.")
-            }
+    private fun messagingSubscribeTest(messaging: FirebaseMessaging) {
+        if (BuildConfig.DEBUG) {
+            Timber.v("Subscribing to \"testing\" topic...")
+            messaging
+                .subscribeToTopic("testing")
+                .addOnSuccessListener {
+                    Timber.i("Subscribed to topic \"testing\".")
+                }
+                .addOnFailureListener { e ->
+                    Timber.e(e, "Could not subscribe to testing topic.")
+                }
+        }
     }
 
     /**
@@ -254,6 +257,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      */
     @UiThread
     private fun checkGooglePlayServices(context: Context) {
+        Timber.i("Checking if Google Play Services are available...")
         val googleApiAvailability = GoogleApiAvailability.getInstance()
         val servicesAvailable = googleApiAvailability.isGooglePlayServicesAvailable(context)
         if (servicesAvailable != ConnectionResult.SUCCESS)
@@ -322,14 +326,15 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * @since 20210919
      */
     @WorkerThread
-    private suspend fun messagingTokenGet(messaging: FirebaseMessaging) {
+    private fun messagingTokenGet(messaging: FirebaseMessaging) {
         Timber.v("Getting Firebase Messaging token...")
-        try {
-            val token = messaging.token.await()
-            Timber.i("Firebase messaging token: $token")
-        } catch (e: FirebaseException) {
-            Timber.e(e, "Could not get messaging token.")
-        }
+        messaging.token
+            .addOnSuccessListener { token ->
+                Timber.i("Firebase messaging token: $token")
+            }
+            .addOnFailureListener { e ->
+                Timber.e(e, "Could not get messaging token.")
+            }
     }
 
     /**
