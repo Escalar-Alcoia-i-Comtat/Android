@@ -124,3 +124,18 @@ fun Context.launch(target: Class<*>, options: Bundle, properties: (Intent.() -> 
     startActivity(Intent(this, target).also {
         properties?.invoke(it)
     }, options)
+
+/**
+ * Launches an intent from the select context and adding some options and applying properties in a
+ * more Kotlin-like syntax.
+ * @author Arnau Mora
+ * @since 20210521
+ * @param intent The intent to launch.
+ * @param options Additional options for how the Intent should be launched.
+ * @param properties The setter for the properties of the Intent.
+ */
+@UiThread
+fun Context.launch(intent: Intent, options: Bundle? = null, properties: (Intent.() -> Unit)? = null) =
+    startActivity(intent.also {
+        properties?.invoke(it)
+    }, options)
