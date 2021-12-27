@@ -26,8 +26,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.view.model.LoadingViewModel
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -143,11 +145,14 @@ class LoadingActivity : ComponentActivity() {
             val progressMessageResource by loadingViewModel.progressMessageResource
             val progressMessageAttributes by loadingViewModel.progressMessageAttributes
 
-            val shouldShowErrorMessage by remember { mutableStateOf(false) }
-            val errorMessage by remember { mutableStateOf("This is a testing message") }
+            val errorMessageResource by loadingViewModel.errorMessage
 
             Scaffold {
-                LoadingWindow(stringResource(progressMessageResource, progressMessageAttributes), shouldShowErrorMessage, errorMessage)
+                LoadingWindow(
+                    stringResource(progressMessageResource, progressMessageAttributes),
+                    errorMessageResource != null,
+                    if (errorMessageResource != null) stringResource(errorMessageResource!!) else ""
+                )
             }
 
             loadingViewModel.startLoading(deepLinkPath, remoteConfig, messaging, analytics, auth)
