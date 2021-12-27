@@ -98,8 +98,8 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                 Timber.v("Got split install update. State: $state")
                 when (val status = state.status()) {
                     SplitInstallSessionStatus.FAILED -> {
-                        Timber.e("Data module download status: Failed")
-                        // TODO: Display error
+                        val errorCode = state.errorCode()
+                        Timber.e("Data module download status: Failed ($errorCode)")
                     }
                     SplitInstallSessionStatus.DOWNLOADING -> {
                         val current = state.bytesDownloaded()
@@ -129,6 +129,45 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
             registerListener(listener)
             Timber.v("Starting data module installation...")
             startInstall(request)
+                .addOnFailureListener { exception ->
+                    val errorCode = (exception as SplitInstallException).errorCode
+                    Timber.e(exception, "Could not install data module! Error: $errorCode")
+                    when (errorCode) {
+                        SplitInstallErrorCode.ACCESS_DENIED ->
+                            errorMessage.value = R.string.status_data_install_access_denied
+                        SplitInstallErrorCode.ACTIVE_SESSIONS_LIMIT_EXCEEDED ->
+                            errorMessage.value = R.string.status_data_install_active_sessions_limit
+                        SplitInstallErrorCode.API_NOT_AVAILABLE ->
+                            errorMessage.value = R.string.status_data_install_api_not_available
+                        SplitInstallErrorCode.APP_NOT_OWNED ->
+                            errorMessage.value = R.string.status_data_install_app_not_owned
+                        SplitInstallErrorCode.INCOMPATIBLE_WITH_EXISTING_SESSION ->
+                            errorMessage.value = R.string.status_data_install_incompatible_session
+                        SplitInstallErrorCode.INSUFFICIENT_STORAGE ->
+                            errorMessage.value = R.string.status_data_install_insufficient_storage
+                        SplitInstallErrorCode.INTERNAL_ERROR ->
+                            errorMessage.value = R.string.status_data_install_internal_error
+                        SplitInstallErrorCode.INVALID_REQUEST ->
+                            errorMessage.value = R.string.status_data_install_invalid_request
+                        SplitInstallErrorCode.MODULE_UNAVAILABLE ->
+                            errorMessage.value = R.string.status_data_install_module_unavailable
+                        SplitInstallErrorCode.NETWORK_ERROR ->
+                            errorMessage.value = R.string.status_data_install_network_error
+                        SplitInstallErrorCode.NO_ERROR -> return@addOnFailureListener
+                        SplitInstallErrorCode.PLAY_STORE_NOT_FOUND ->
+                            errorMessage.value = R.string.status_data_install_play_store_not_found
+                        SplitInstallErrorCode.SESSION_NOT_FOUND ->
+                            errorMessage.value = R.string.status_data_install_session_not_found
+                        SplitInstallErrorCode.SPLITCOMPAT_COPY_ERROR ->
+                            errorMessage.value = R.string.status_data_install_split_copy_error
+                        SplitInstallErrorCode.SPLITCOMPAT_EMULATION_ERROR ->
+                            errorMessage.value = R.string.status_data_install_split_emu_error
+                        SplitInstallErrorCode.SPLITCOMPAT_VERIFICATION_ERROR ->
+                            errorMessage.value = R.string.status_data_install_split_verif_error
+                        else -> return@addOnFailureListener
+                    }
+                    unregisterListener(listener)
+                }
                 .addOnSuccessListener { sessionId ->
                     Timber.i("Started install of the data module (sessionId=$sessionId)")
                 }
