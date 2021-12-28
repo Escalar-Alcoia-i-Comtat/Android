@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.coroutineScope
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.OldMainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LATITUDE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.map.DEFAULT_LONGITUDE
@@ -138,7 +138,7 @@ class MapFragment : NetworkChangeListenerFragment() {
                 markerWindow?.hide()
                 activity?.let {
                     Timber.v("There's an available activity")
-                    if (it is MainActivity) {
+                    if (it is OldMainActivity) {
                         it.binding.bottomAppBar.performHide()
                         it.binding.authFab.hide()
                     }
@@ -149,7 +149,7 @@ class MapFragment : NetworkChangeListenerFragment() {
                             .also { markerWindow ->
                                 markerWindow.show()
                                 markerWindow.listenHide {
-                                    if (it is MainActivity) {
+                                    if (it is OldMainActivity) {
                                         it.binding.bottomAppBar.performShow()
                                         if (ENABLE_AUTHENTICATION)
                                             it.binding.authFab.show()
