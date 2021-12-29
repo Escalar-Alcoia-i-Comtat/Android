@@ -133,8 +133,12 @@ class MainActivity : LanguageComponentActivity() {
                     )
                 }
             }
-        ) {
-            NavHost(homeNavController, Screen.Explore.route) {
+        ) { innerPadding ->
+            NavHost(
+                homeNavController,
+                Screen.Explore.route,
+                modifier = Modifier.padding(innerPadding)
+            ) {
                 composable(Screen.Explore.route) {
                     ExploreScreen()
                 }
