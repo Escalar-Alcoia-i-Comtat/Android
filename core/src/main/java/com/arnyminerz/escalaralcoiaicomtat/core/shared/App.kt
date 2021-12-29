@@ -12,8 +12,15 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.auth.loggedIn
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getAreas
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPath
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getSector
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZone
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
@@ -76,6 +83,9 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
 
         searchSession = runBlocking { createSearchSession(applicationContext) }
 
+        PreferencesModule.initWith(this)
+
+        // TODO: Shared preferences will be removed
         sharedPreferences =
             applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
 
