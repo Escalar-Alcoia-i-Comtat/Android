@@ -45,6 +45,7 @@ fun GeneralSettingsScreen(viewModel: SettingsViewModel) {
         SettingsItem(
             title = stringResource(R.string.pref_gene_nearby_distance_title),
             subtitle = stringResource(R.string.pref_gene_nearby_distance_sum),
+            enabled = nearbyZonesEnabled,
             stateInt = nearbyZonesDistance,
             setInt = { value ->
                 viewModel.setNearbyZonesDistance(value)
