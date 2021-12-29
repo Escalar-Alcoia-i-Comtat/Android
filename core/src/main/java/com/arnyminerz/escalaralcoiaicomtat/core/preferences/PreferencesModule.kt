@@ -7,18 +7,26 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.SystemPreferencesRepositoryImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.UserPreferencesRepositoryImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetIntroShown
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetAlertNotificationsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetDataCollection
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetErrorCollection
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetLanguage
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetMarkerCentering
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetMeteredDownloadsEnabled
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetMobileDownloadsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetNearbyZonesDistance
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetNearbyZonesEnabled
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetRoamingDownloadsEnabled
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetAlertNotificationsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetDataCollection
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetErrorCollection
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetLanguage
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetMarkerCentering
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetMeteredDownloadsEnabled
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetMobileDownloadsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetNearbyZonesDistance
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetNearbyZonesEnabled
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetRoamingDownloadsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREFERENCES_NAME
 
 /**
@@ -128,6 +136,34 @@ object PreferencesModule {
     val getDataCollection get() = GetDataCollection(userPreferencesRepository)
 
     /**
+     * Returns the alert notifications enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val getAlertNotificationsEnabled get() = GetAlertNotificationsEnabled(userPreferencesRepository)
+
+    /**
+     * Returns the mobile downloads enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val getMobileDownloadsEnabled get() = GetMobileDownloadsEnabled(userPreferencesRepository)
+
+    /**
+     * Returns the metered downloads enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val getMeteredDownloadsEnabled get() = GetMeteredDownloadsEnabled(userPreferencesRepository)
+
+    /**
+     * Returns the roaming downloads enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val getRoamingDownloadsEnabled get() = GetRoamingDownloadsEnabled(userPreferencesRepository)
+
+    /**
      * Used for updating the user's language preference.
      * @author Arnau Mora
      * @since 20211229
@@ -168,6 +204,34 @@ object PreferencesModule {
      * @since 20211229
      */
     val setDataCollection get() = SetDataCollection(userPreferencesRepository)
+
+    /**
+     * Used for updating the alert notifications enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val setAlertNotificationsEnabled get() = SetAlertNotificationsEnabled(userPreferencesRepository)
+
+    /**
+     * Used for updating the mobile data downloads enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val setMobileDownloadsEnabled get() = SetMobileDownloadsEnabled(userPreferencesRepository)
+
+    /**
+     * Used for updating the metered data downloads enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val setMeteredDownloadsEnabled get() = SetMeteredDownloadsEnabled(userPreferencesRepository)
+
+    /**
+     * Used for updating the roaming data downloads enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val setRoamingDownloadsEnabled get() = SetRoamingDownloadsEnabled(userPreferencesRepository)
 
     /**
      * Clears all the preferences from the system.

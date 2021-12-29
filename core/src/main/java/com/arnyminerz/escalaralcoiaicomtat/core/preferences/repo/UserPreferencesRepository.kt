@@ -145,4 +145,32 @@ interface UserPreferencesRepository {
      * @since 20211229
      */
     val dataCollectionEnabled: Flow<Boolean>
+
+    /**
+     * Should return whether or not the user has enabled alert notifications.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val alertNotificationsEnabled: Flow<Boolean>
+
+    /**
+     * Should return whether or not the user has chosen to run downloads while on mobile network.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val mobileDownloadsEnabled: Flow<Boolean>
+
+    /**
+     * Should return whether or not the user has chosen to run downloads while on roaming network.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val roamingDownloadsEnabled: Flow<Boolean>
+
+    /**
+     * Should return whether or not the user has chosen to run downloads while on metered network.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val meteredDownloadsEnabled: Flow<Boolean>
 }

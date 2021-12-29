@@ -168,16 +168,14 @@ fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: Settin
 @Composable
 fun NotificationsSettingsScreen(context: Context, viewModel: SettingsViewModel) {
     Column {
-        // TODO: Change from nearby zones to alerts enabled
-        val alertsEnabled by viewModel.nearbyZonesEnabled.collectAsState()
+        val alertsEnabled by viewModel.alertNotificationsEnabled.collectAsState()
 
         SettingsItem(
             title = stringResource(R.string.pref_noti_alert_title),
             subtitle = stringResource(R.string.pref_noti_alert_sum),
             stateBoolean = alertsEnabled,
             setBoolean = { value ->
-                // TODO: Change from nearby zones enabled to alerts
-                viewModel.setNearbyZonesEnabled(value)
+                viewModel.setAlertNotificationsEnabled(value)
             },
             switch = true
         )
@@ -203,9 +201,8 @@ fun NotificationsSettingsScreen(context: Context, viewModel: SettingsViewModel) 
 @Composable
 fun StorageSettingsScreen(viewModel: SettingsViewModel) {
     Column {
-        // TODO: Change from nearby zones to individual options
-        val mobileDataDownload by viewModel.nearbyZonesEnabled.collectAsState()
-        val roamingDownload by viewModel.nearbyZonesEnabled.collectAsState()
+        val mobileDataDownload by viewModel.mobileDownloadsEnabled.collectAsState()
+        val roamingDownload by viewModel.roamingDownloadsEnabled.collectAsState()
         // TODO: Add option for metered networks
         // val meteredDownload by viewModel.nearbyZonesEnabled.collectAsState()
 
@@ -217,8 +214,7 @@ fun StorageSettingsScreen(viewModel: SettingsViewModel) {
             subtitle = stringResource(R.string.pref_down_mobile_sum),
             stateBoolean = mobileDataDownload,
             setBoolean = { value ->
-                // TODO: Change from nearby zones enabled to mobile data
-                viewModel.setNearbyZonesEnabled(value)
+                viewModel.setMobileDownloadsEnabled(value)
             },
             switch = true
         )
@@ -227,8 +223,7 @@ fun StorageSettingsScreen(viewModel: SettingsViewModel) {
             subtitle = stringResource(R.string.pref_down_roaming_sum),
             stateBoolean = roamingDownload,
             setBoolean = { value ->
-                // TODO: Change from nearby zones enabled to roaming
-                viewModel.setNearbyZonesEnabled(value)
+                viewModel.setRoamingDownloadsEnabled(value)
             },
             switch = true
         )

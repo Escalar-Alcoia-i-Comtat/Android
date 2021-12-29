@@ -277,4 +277,76 @@ class UserPreferencesRepositoryImpl(
             it[Keys.dataCollection] ?: true
         }
         .distinctUntilChanged()
+
+    /**
+     * Returns the preference of the user on alert notifications.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    override val alertNotificationsEnabled: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.showAlerts] ?: true
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Returns the preference of the user on downloads on mobile data networks.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    override val mobileDownloadsEnabled: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.mobileDownload] ?: false
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Returns the preference of the user on downloads on metered networks.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    override val meteredDownloadsEnabled: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.meteredDownload] ?: false
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Returns the preference of the user on downloads on roaming networks.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    override val roamingDownloadsEnabled: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.roamingDownload] ?: false
+        }
+        .distinctUntilChanged()
 }
