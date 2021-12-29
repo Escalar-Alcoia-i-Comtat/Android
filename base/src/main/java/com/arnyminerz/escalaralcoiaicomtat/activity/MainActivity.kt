@@ -24,6 +24,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.GeneralSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.MainSettingsScreen
+import com.arnyminerz.escalaralcoiaicomtat.ui.settings.NotificationsSettingsScreen
+import com.arnyminerz.escalaralcoiaicomtat.ui.settings.StorageSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SettingsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.settingsViewModel
 
@@ -70,6 +72,15 @@ class MainActivity : LanguageComponentActivity() {
                 }
                 composable("general") {
                     GeneralSettingsScreen(this@MainActivity, settingsViewModel)
+                }
+                composable("notifications") {
+                    NotificationsSettingsScreen(this@MainActivity, settingsViewModel)
+                }
+                composable("storage") {
+                    StorageSettingsScreen(settingsViewModel)
+                }
+                composable("info") {
+                    // TODO: Create info screen
                 }
             }
         }
