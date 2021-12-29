@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.content.res.AppCompatResources
@@ -31,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
@@ -61,7 +61,7 @@ import timber.log.Timber
  * @author Arnau Mora
  * @since 20211225
  */
-class LoadingActivity : ComponentActivity() {
+class LoadingActivity : LanguageComponentActivity() {
     /**
      * The Firestore instance to use.
      * @author Arnau Mora

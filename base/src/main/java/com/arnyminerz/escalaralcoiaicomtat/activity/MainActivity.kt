@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
@@ -18,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
@@ -27,8 +27,8 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.settings.MainSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SettingsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.settingsViewModel
 
-class MainActivity : ComponentActivity() {
-    val settingsViewModel by viewModels<SettingsViewModel>(factoryProducer = { PreferencesModule.settingsViewModel })
+class MainActivity : LanguageComponentActivity() {
+    private val settingsViewModel by viewModels<SettingsViewModel>(factoryProducer = { PreferencesModule.settingsViewModel })
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
