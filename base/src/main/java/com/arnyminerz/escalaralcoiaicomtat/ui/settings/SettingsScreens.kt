@@ -1,10 +1,18 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.settings
 
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Doorbell
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -17,6 +25,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsCate
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsDataDialog
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsItem
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.context.LocaleHelper
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -29,6 +38,38 @@ fun MainSettingsScreen(settingsNavController: NavController) {
             settingsNavController.navigate("general")
         },
         icon = Icons.Default.Star
+    )
+    SettingsItem(
+        title = stringResource(R.string.pref_noti_title),
+        subtitle = stringResource(R.string.pref_noti_sum),
+        onClick = {
+            settingsNavController.navigate("notifications")
+        },
+        icon = Icons.Default.Doorbell
+    )
+    SettingsItem(
+        title = stringResource(R.string.pref_down_title),
+        subtitle = stringResource(R.string.pref_down_sum),
+        onClick = {
+            settingsNavController.navigate("storage")
+        },
+        icon = Icons.Default.Storage
+    )
+    SettingsItem(
+        title = stringResource(R.string.pref_info_title),
+        subtitle = stringResource(R.string.pref_info_sum),
+        onClick = {
+            settingsNavController.navigate("info")
+        },
+        icon = Icons.Default.Info
+    )
+    SettingsItem(
+        title = stringResource(R.string.pref_feedback_title),
+        subtitle = stringResource(R.string.pref_feedback_sum),
+        onClick = {
+            // TODO: Navigate to the send feedback activity
+        },
+        icon = Icons.Default.BugReport
     )
 }
 
@@ -115,6 +156,77 @@ fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: Settin
             setBoolean = { value ->
                 viewModel.setErrorCollection(value)
                 viewModel.setDataCollection(value)
+            },
+            switch = true
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun NotificationsSettingsScreen(context: Context, viewModel: SettingsViewModel) {
+    Column {
+        // TODO: Change from nearby zones to alerts enabled
+        val alertsEnabled by viewModel.nearbyZonesEnabled.collectAsState()
+
+        SettingsItem(
+            title = stringResource(R.string.pref_noti_alert_title),
+            subtitle = stringResource(R.string.pref_noti_alert_sum),
+            stateBoolean = alertsEnabled,
+            setBoolean = { value ->
+                // TODO: Change from nearby zones enabled to alerts
+                viewModel.setNearbyZonesEnabled(value)
+            },
+            switch = true
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            SettingsItem(
+                title = stringResource(R.string.pref_noti_alert_title),
+                subtitle = stringResource(R.string.pref_noti_alert_sum),
+                onClick = {
+                    context.launch(
+                        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    ) {
+                        putExtra(
+                            Settings.EXTRA_APP_PACKAGE,
+                            context.packageName
+                        )
+                    }
+                }
+            )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun StorageSettingsScreen(viewModel: SettingsViewModel) {
+    Column {
+        // TODO: Change from nearby zones to individual options
+        val mobileDataDownload by viewModel.nearbyZonesEnabled.collectAsState()
+        val roamingDownload by viewModel.nearbyZonesEnabled.collectAsState()
+        // TODO: Add option for metered networks
+        // val meteredDownload by viewModel.nearbyZonesEnabled.collectAsState()
+
+        SettingsCategory(
+            stringResource(R.string.pref_down_cat_downloads)
+        )
+        SettingsItem(
+            title = stringResource(R.string.pref_down_mobile_title),
+            subtitle = stringResource(R.string.pref_down_mobile_sum),
+            stateBoolean = mobileDataDownload,
+            setBoolean = { value ->
+                // TODO: Change from nearby zones enabled to mobile data
+                viewModel.setNearbyZonesEnabled(value)
+            },
+            switch = true
+        )
+        SettingsItem(
+            title = stringResource(R.string.pref_down_roaming_title),
+            subtitle = stringResource(R.string.pref_down_roaming_sum),
+            stateBoolean = roamingDownload,
+            setBoolean = { value ->
+                // TODO: Change from nearby zones enabled to roaming
+                viewModel.setNearbyZonesEnabled(value)
             },
             switch = true
         )
