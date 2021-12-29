@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import timber.log.Timber
 
-class LoadingActivityViewModel private constructor(
+class LoadingActivityViewModel(
     introShown: GetIntroShown
 ) : ViewModel() {
     init {
@@ -39,7 +39,7 @@ class LoadingActivityViewModel private constructor(
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(LoadingActivityViewModel::class.java)) {
-                LoadingActivityViewModel(introShown) as T
+                return LoadingActivityViewModel(introShown) as T
             }
             error("Unknown view model class: $modelClass")
         }
