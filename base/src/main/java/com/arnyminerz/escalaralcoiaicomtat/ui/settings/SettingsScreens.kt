@@ -3,6 +3,8 @@ package com.arnyminerz.escalaralcoiaicomtat.ui.settings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,7 +27,8 @@ fun MainSettingsScreen(settingsNavController: NavController) {
         subtitle = stringResource(R.string.pref_main_sum),
         onClick = {
             settingsNavController.navigate("general")
-        }
+        },
+        icon = Icons.Default.Star
     )
 }
 
