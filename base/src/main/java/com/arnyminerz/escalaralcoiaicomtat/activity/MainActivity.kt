@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -23,14 +24,20 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil.annotation.ExperimentalCoilApi
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen.ApplicationInfoWindow
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.GeneralSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.MainSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.NotificationsSettingsScreen
@@ -38,6 +45,8 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.settings.StorageSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.ExploreViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SettingsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.settingsViewModel
+import com.google.android.material.badge.ExperimentalBadgeUtils
+import timber.log.Timber
 
 class MainActivity : LanguageComponentActivity() {
     private val settingsViewModel by viewModels<SettingsViewModel>(factoryProducer = { PreferencesModule.settingsViewModel })
@@ -47,6 +56,7 @@ class MainActivity : LanguageComponentActivity() {
         )
     })
 
+    @ExperimentalBadgeUtils
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,6 +117,7 @@ class MainActivity : LanguageComponentActivity() {
         }
     }
 
+    @ExperimentalBadgeUtils
     @ExperimentalMaterial3Api
     @Composable
     private fun Home() {
@@ -140,21 +151,35 @@ class MainActivity : LanguageComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalCoilApi::class, ExperimentalMaterial3Api::class)
     @Composable
+    @ExperimentalBadgeUtils
     private fun ExploreScreen() {
-        Column {
-            val loadedAreas = exploreViewModel.loadedAreas
-            AnimatedVisibility(
-                visible = loadedAreas.value,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                CircularProgressIndicator()
-            }
-            LazyColumn {
-                items(exploreViewModel.areas) { area ->
+        val loadedAreas = exploreViewModel.loadedAreas
 
+        LazyColumn {
+            item {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    AnimatedVisibility(
+                        visible = !loadedAreas.value,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                }
+            }
+            items(exploreViewModel.areas) { area ->
+                Timber.d("Displaying $area...")
+                DataClassItem(area) {
+                    launch(AreaActivity::class.java) {
+                        putExtra(EXTRA_AREA, area.objectId)
+                    }
                 }
             }
         }
+        exploreViewModel.loadAreas()
     }
 }
