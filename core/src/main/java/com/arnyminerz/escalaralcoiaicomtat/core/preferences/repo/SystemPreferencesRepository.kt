@@ -67,4 +67,11 @@ interface SystemPreferencesRepository {
      * @since 20211229
      */
     suspend fun markMd5WarningShown()
+
+    /**
+     * Should return the value of the shown intro preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val shownIntro: Flow<Boolean>
 }

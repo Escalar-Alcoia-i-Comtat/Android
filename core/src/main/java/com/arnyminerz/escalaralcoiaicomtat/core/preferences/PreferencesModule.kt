@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.datastore.preferences.preferencesDataStore
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.SystemPreferencesRepositoryImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.UserPreferencesRepositoryImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetIntroShown
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREFERENCES_NAME
 
 /**
@@ -63,4 +64,11 @@ object PreferencesModule {
     val systemPreferencesRepository by lazy {
         SystemPreferencesRepositoryImpl(requireApplication.dataStore)
     }
+
+    /**
+     * Returns the intro shown preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val introShown get() = GetIntroShown(systemPreferencesRepository)
 }

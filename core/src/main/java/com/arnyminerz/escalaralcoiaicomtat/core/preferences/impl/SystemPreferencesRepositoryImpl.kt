@@ -144,4 +144,22 @@ class SystemPreferencesRepositoryImpl(
             it[Keys.shownMd5Warning] = true
         }
     }
+
+    /**
+     * Returns whether or not the intro has been shown.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    override val shownIntro: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.shownIntro] ?: false
+        }
+        .distinctUntilChanged()
 }
