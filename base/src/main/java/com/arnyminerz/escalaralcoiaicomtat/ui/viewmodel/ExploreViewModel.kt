@@ -30,6 +30,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             loadedAreas.value = false
             val areasList = app.getAreas()
+                .sortedBy { it.displayName }
             areas.clear()
             areas.addAll(areasList)
             loadedAreas.value = true
