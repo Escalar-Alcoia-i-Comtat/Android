@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.settings
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -61,6 +62,7 @@ fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: Settin
             )
         )
 
+        Divider()
         SettingsCategory(
             stringResource(R.string.pref_gene_section_nearby)
         )
@@ -89,6 +91,7 @@ fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: Settin
             )
         )
 
+        Divider()
         SettingsCategory(stringResource(R.string.pref_gene_section_map))
         SettingsItem(
             title = stringResource(R.string.pref_gene_map_move_marker_title),
@@ -100,6 +103,7 @@ fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: Settin
             switch = true
         )
 
+        Divider()
         SettingsCategory(stringResource(R.string.pref_gene_section_advanced))
         SettingsItem(
             title = stringResource(R.string.pref_gene_error_reporting_title),
