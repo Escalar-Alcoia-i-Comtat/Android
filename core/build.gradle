@@ -89,7 +89,6 @@ dependencies {
     api "androidx.compose.runtime:runtime-livedata:$compose_version"
     api "androidx.compose.runtime:runtime-rxjava2:$compose_version"
     api 'androidx.activity:activity-compose:1.4.0'
-    api 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0'
     api 'androidx.navigation:navigation-compose:2.4.0-rc01'
     api 'com.google.accompanist:accompanist-appcompat-theme:0.20.3'
     api "com.google.accompanist:accompanist-pager:0.22.0-rc"
@@ -102,8 +101,12 @@ dependencies {
     api 'io.coil-kt:coil:1.4.0'
     api 'io.coil-kt:coil-compose:1.4.0'
 
-    // Live Data
+    // Lifecycle
     api 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.0'
+    api 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0'
+    api 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0'
+    api 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
+    implementation 'androidx.lifecycle:lifecycle-common-java8:2.4.0'
 
     // Google Play Core
     api 'com.google.android.play:core:1.10.2'
