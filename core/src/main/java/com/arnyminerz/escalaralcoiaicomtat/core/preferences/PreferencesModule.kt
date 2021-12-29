@@ -79,6 +79,6 @@ object PreferencesModule {
      * @since 20211229
      */
     suspend fun clear() {
-        requireApplication.dataStore.edit { clear() }
+        requireApplication.dataStore.edit { it.clear() }
     }
 }
