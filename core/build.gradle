@@ -95,6 +95,9 @@ dependencies {
     api "com.google.accompanist:accompanist-pager:0.22.0-rc"
     androidTestApi "androidx.compose.ui:ui-test-junit4:$compose_version"
 
+    // Jetpack Compose utilities - Remember preferences
+    implementation 'dev.burnoo:compose-remember-preference:0.3.4'
+
     // Coil image loading
     api 'io.coil-kt:coil:1.4.0'
     api 'io.coil-kt:coil-compose:1.4.0'
