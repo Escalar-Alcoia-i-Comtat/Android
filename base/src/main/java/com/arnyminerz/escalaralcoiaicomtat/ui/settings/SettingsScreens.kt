@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.ListDialogOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsCategory
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsDataDialog
@@ -28,7 +29,7 @@ fun MainSettingsScreen(settingsNavController: NavController) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun GeneralSettingsScreen(viewModel: SettingsViewModel) {
+fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: SettingsViewModel) {
     Column {
         val language by viewModel.language.collectAsState()
         val nearbyZonesEnabled by viewModel.nearbyZonesEnabled.collectAsState()
@@ -38,6 +39,10 @@ fun GeneralSettingsScreen(viewModel: SettingsViewModel) {
             title = stringResource(R.string.pref_gene_language_title),
             subtitle = stringResource(R.string.pref_gene_language_sum),
             stateString = language,
+            setString = { lang ->
+                viewModel.setLanguage(lang)
+                activity.languageUpdate()
+            },
             dialog = SettingsDataDialog(
                 title = stringResource(R.string.pref_gene_language_title),
                 list = ListDialogOptions(
