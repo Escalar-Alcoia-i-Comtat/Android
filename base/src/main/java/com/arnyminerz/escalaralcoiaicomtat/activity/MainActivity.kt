@@ -69,7 +69,7 @@ class MainActivity : LanguageComponentActivity() {
                     MainSettingsScreen(settingsNavController)
                 }
                 composable("general") {
-                    GeneralSettingsScreen(settingsViewModel)
+                    GeneralSettingsScreen(this@MainActivity, settingsViewModel)
                 }
             }
         }
