@@ -105,6 +105,13 @@ interface UserPreferencesRepository {
     suspend fun setDownloadQuality(quality: Int)
 
     /**
+     * Should return the value of the language preference of the user.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val language: Flow<String>
+
+    /**
      * Should return the value of the nearby zones enabled preference.
      * @author Arnau Mora
      * @since 20211229

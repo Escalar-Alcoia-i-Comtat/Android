@@ -5,8 +5,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.NEARBY_DISTANCE_DEFAULT
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetLanguage
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetNearbyZonesDistance
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetNearbyZonesEnabled
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.SetLanguage
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.SetNearbyZonesDistance
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.SetNearbyZonesEnabled
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,10 +16,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.*
 
 class SettingsViewModel(
+    language: GetLanguage,
     nearbyZonesEnabled: GetNearbyZonesEnabled,
     nearbyZonesDistance: GetNearbyZonesDistance,
+    private val _setLanguage: SetLanguage,
     private val _setNearbyZonesEnabled: SetNearbyZonesEnabled,
     private val _setNearbyZonesDistance: SetNearbyZonesDistance,
 ) : ViewModel() {
@@ -29,6 +34,12 @@ class SettingsViewModel(
         super.onCleared()
         Timber.d("$this::onCleared")
     }
+
+    val language: StateFlow<String> = language().stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        Locale.getDefault().language
+    )
 
     val nearbyZonesEnabled: StateFlow<Boolean> = nearbyZonesEnabled().stateIn(
         viewModelScope,
@@ -42,6 +53,10 @@ class SettingsViewModel(
         NEARBY_DISTANCE_DEFAULT
     )
 
+    fun setLanguage(language: String) {
+        viewModelScope.launch { _setLanguage(language) }
+    }
+
     fun setNearbyZonesEnabled(enabled: Boolean) {
         viewModelScope.launch { _setNearbyZonesEnabled(enabled) }
     }
@@ -51,8 +66,10 @@ class SettingsViewModel(
     }
 
     class Factory(
+        private val getLanguage: GetLanguage,
         private val getNearbyZonesEnabled: GetNearbyZonesEnabled,
         private val getNearbyZonesDistance: GetNearbyZonesDistance,
+        private val setLanguage: SetLanguage,
         private val setNearbyZonesEnabled: SetNearbyZonesEnabled,
         private val setNearbyZonesDistance: SetNearbyZonesDistance,
     ) : ViewModelProvider.Factory {
@@ -60,8 +77,10 @@ class SettingsViewModel(
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(SettingsViewModel::class.java))
                 return SettingsViewModel(
+                    getLanguage,
                     getNearbyZonesEnabled,
                     getNearbyZonesDistance,
+                    setLanguage,
                     setNearbyZonesEnabled,
                     setNearbyZonesDistance
                 ) as T
@@ -77,8 +96,10 @@ class SettingsViewModel(
  */
 val PreferencesModule.settingsViewModel
     get() = SettingsViewModel.Factory(
+        this.getLanguage,
         this.getNearbyZonesEnabled,
         this.getNearbyZonesDistance,
+        this.setLanguage,
         this.setNearbyZonesEnabled,
         this.setNearbyZonesDistance,
     )

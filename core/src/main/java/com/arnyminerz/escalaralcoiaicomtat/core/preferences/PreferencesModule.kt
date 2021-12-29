@@ -7,8 +7,10 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.SystemPreferencesRepositoryImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.UserPreferencesRepositoryImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetIntroShown
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetLanguage
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetNearbyZonesDistance
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetNearbyZonesEnabled
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.SetLanguage
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.SetNearbyZonesDistance
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.SetNearbyZonesEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREFERENCES_NAME
@@ -78,6 +80,13 @@ object PreferencesModule {
     val introShown get() = GetIntroShown(systemPreferencesRepository)
 
     /**
+     * Returns the language preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val getLanguage get() = GetLanguage(userPreferencesRepository)
+
+    /**
      * Returns the nearby zones enabled preference.
      * @author Arnau Mora
      * @since 20211229
@@ -90,6 +99,13 @@ object PreferencesModule {
      * @since 20211229
      */
     val getNearbyZonesDistance get() = GetNearbyZonesDistance(userPreferencesRepository)
+
+    /**
+     * Used for updating the user's language preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val setLanguage get() = SetLanguage(userPreferencesRepository)
 
     /**
      * Used for updating the nearby zones enabled preference.

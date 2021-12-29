@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import java.io.IOException
+import java.util.*
 
 /**
  * The default value of the distance to consider as nearby for nearby zones.
@@ -63,7 +64,7 @@ class UserPreferencesRepositoryImpl(
         get() = this[Keys.showAlerts] ?: true
 
     private inline val Preferences.language
-        get() = this[Keys.language] ?: "en"
+        get() = this[Keys.language] ?: Locale.getDefault().language
 
     private inline val Preferences.centerMarkerOnClick
         get() = this[Keys.centerMarkerOnClick] ?: true
@@ -168,6 +169,24 @@ class UserPreferencesRepositoryImpl(
             it[Keys.downloadQuality] = quality
         }
     }
+
+    /**
+     * Returns the current user's language preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    override val language: Flow<String> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.language] ?: Locale.getDefault().language
+        }
+        .distinctUntilChanged()
 
     /**
      * Returns whether or not the nearby zones module is enabled.
