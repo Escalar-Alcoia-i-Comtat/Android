@@ -223,4 +223,58 @@ class UserPreferencesRepositoryImpl(
             it[Keys.nearbyZonesDistance] ?: NEARBY_DISTANCE_DEFAULT
         }
         .distinctUntilChanged()
+
+    /**
+     * Returns whether or not the map should be centered when clicking a marker.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    override val markerClickCenteringEnabled: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.centerMarkerOnClick] ?: true
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Returns the preference of the user on error collection.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    override val errorCollectionEnabled: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.errorCollection] ?: true
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Returns the preference of the user on data collection.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    override val dataCollectionEnabled: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.dataCollection] ?: true
+        }
+        .distinctUntilChanged()
 }

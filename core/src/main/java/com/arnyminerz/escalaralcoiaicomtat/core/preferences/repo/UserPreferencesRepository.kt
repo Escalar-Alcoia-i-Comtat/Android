@@ -124,4 +124,25 @@ interface UserPreferencesRepository {
      * @since 20211229
      */
     val nearbyZonesDistance: Flow<Int>
+
+    /**
+     * Should return the value of the center map marker on click preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val markerClickCenteringEnabled: Flow<Boolean>
+
+    /**
+     * Should return whether or not error collection is enabled.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val errorCollectionEnabled: Flow<Boolean>
+
+    /**
+     * Should return whether or not user data collection is enabled.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val dataCollectionEnabled: Flow<Boolean>
 }

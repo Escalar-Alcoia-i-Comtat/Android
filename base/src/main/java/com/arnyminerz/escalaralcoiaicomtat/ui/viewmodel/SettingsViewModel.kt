@@ -5,10 +5,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.NEARBY_DISTANCE_DEFAULT
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetDataCollection
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetErrorCollection
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetLanguage
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetMarkerCentering
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetNearbyZonesDistance
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetNearbyZonesEnabled
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetDataCollection
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetErrorCollection
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetLanguage
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetMarkerCentering
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetNearbyZonesDistance
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetNearbyZonesEnabled
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,9 +28,15 @@ class SettingsViewModel(
     language: GetLanguage,
     nearbyZonesEnabled: GetNearbyZonesEnabled,
     nearbyZonesDistance: GetNearbyZonesDistance,
+    markerCentering: GetMarkerCentering,
+    errorCollection: GetErrorCollection,
+    dataCollection: GetDataCollection,
     private val _setLanguage: SetLanguage,
     private val _setNearbyZonesEnabled: SetNearbyZonesEnabled,
     private val _setNearbyZonesDistance: SetNearbyZonesDistance,
+    private val _setMarkerCentering: SetMarkerCentering,
+    private val _setErrorCollection: SetErrorCollection,
+    private val _setDataCollection: SetDataCollection,
 ) : ViewModel() {
     init {
         Timber.d("$this::init")
@@ -53,6 +65,24 @@ class SettingsViewModel(
         NEARBY_DISTANCE_DEFAULT
     )
 
+    val markerCentering: StateFlow<Boolean> = markerCentering().stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        true
+    )
+
+    val errorCollection: StateFlow<Boolean> = errorCollection().stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        true
+    )
+
+    val dataCollection: StateFlow<Boolean> = dataCollection().stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        true
+    )
+
     fun setLanguage(language: String) {
         viewModelScope.launch { _setLanguage(language) }
     }
@@ -65,13 +95,31 @@ class SettingsViewModel(
         viewModelScope.launch { _setNearbyZonesDistance(distance) }
     }
 
+    fun setMarkerCentering(enabled: Boolean) {
+        viewModelScope.launch { _setMarkerCentering(enabled) }
+    }
+
+    fun setErrorCollection(enabled: Boolean) {
+        viewModelScope.launch { _setErrorCollection(enabled) }
+    }
+
+    fun setDataCollection(enabled: Boolean) {
+        viewModelScope.launch { _setDataCollection(enabled) }
+    }
+
     class Factory(
         private val getLanguage: GetLanguage,
         private val getNearbyZonesEnabled: GetNearbyZonesEnabled,
         private val getNearbyZonesDistance: GetNearbyZonesDistance,
+        private val getMarkerCentering: GetMarkerCentering,
+        private val getErrorCollection: GetErrorCollection,
+        private val getDataCollection: GetDataCollection,
         private val setLanguage: SetLanguage,
         private val setNearbyZonesEnabled: SetNearbyZonesEnabled,
         private val setNearbyZonesDistance: SetNearbyZonesDistance,
+        private val setMarkerCentering: SetMarkerCentering,
+        private val setErrorCollection: SetErrorCollection,
+        private val setDataCollection: SetDataCollection,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -80,9 +128,15 @@ class SettingsViewModel(
                     getLanguage,
                     getNearbyZonesEnabled,
                     getNearbyZonesDistance,
+                    getMarkerCentering,
+                    getErrorCollection,
+                    getDataCollection,
                     setLanguage,
                     setNearbyZonesEnabled,
-                    setNearbyZonesDistance
+                    setNearbyZonesDistance,
+                    setMarkerCentering,
+                    setErrorCollection,
+                    setDataCollection
                 ) as T
             error("Unknown view model class: $modelClass")
         }
@@ -99,7 +153,13 @@ val PreferencesModule.settingsViewModel
         this.getLanguage,
         this.getNearbyZonesEnabled,
         this.getNearbyZonesDistance,
+        this.getMarkerCentering,
+        this.getErrorCollection,
+        this.getDataCollection,
         this.setLanguage,
         this.setNearbyZonesEnabled,
         this.setNearbyZonesDistance,
+        this.setMarkerCentering,
+        this.setErrorCollection,
+        this.setDataCollection
     )

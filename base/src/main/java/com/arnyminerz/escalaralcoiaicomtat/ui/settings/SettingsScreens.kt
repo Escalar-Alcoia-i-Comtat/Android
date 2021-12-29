@@ -35,6 +35,10 @@ fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: Settin
         val language by viewModel.language.collectAsState()
         val nearbyZonesEnabled by viewModel.nearbyZonesEnabled.collectAsState()
         val nearbyZonesDistance by viewModel.nearbyZonesDistance.collectAsState()
+        val markerClickCenteringEnabled by viewModel.markerCentering.collectAsState()
+        val errorCollectionEnabled by viewModel.errorCollection.collectAsState()
+        // TODO: Add individual data collection enable switch
+        // val dataCollectionEnabled by viewModel.dataCollection.collectAsState()
 
         SettingsItem(
             title = stringResource(R.string.pref_gene_language_title),
@@ -83,6 +87,29 @@ fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: Settin
                 positiveButton = stringResource(R.string.action_ok),
                 negativeButton = stringResource(R.string.action_close)
             )
+        )
+
+        SettingsCategory(stringResource(R.string.pref_gene_section_map))
+        SettingsItem(
+            title = stringResource(R.string.pref_gene_map_move_marker_title),
+            subtitle = stringResource(R.string.pref_gene_map_move_marker_sum),
+            stateBoolean = markerClickCenteringEnabled,
+            setBoolean = { value ->
+                viewModel.setMarkerCentering(value)
+            },
+            switch = true
+        )
+
+        SettingsCategory(stringResource(R.string.pref_gene_section_advanced))
+        SettingsItem(
+            title = stringResource(R.string.pref_gene_error_reporting_title),
+            subtitle = stringResource(R.string.pref_gene_error_reporting_sum),
+            stateBoolean = errorCollectionEnabled,
+            setBoolean = { value ->
+                viewModel.setErrorCollection(value)
+                viewModel.setDataCollection(value)
+            },
+            switch = true
         )
     }
 }

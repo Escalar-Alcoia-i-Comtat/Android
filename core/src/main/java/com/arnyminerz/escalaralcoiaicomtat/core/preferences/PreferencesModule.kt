@@ -7,12 +7,18 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.SystemPreferencesRepositoryImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.UserPreferencesRepositoryImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetIntroShown
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetLanguage
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetNearbyZonesDistance
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetNearbyZonesEnabled
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.SetLanguage
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.SetNearbyZonesDistance
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.SetNearbyZonesEnabled
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetDataCollection
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetErrorCollection
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetLanguage
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetMarkerCentering
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetNearbyZonesDistance
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetNearbyZonesEnabled
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetDataCollection
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetErrorCollection
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetLanguage
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetMarkerCentering
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetNearbyZonesDistance
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetNearbyZonesEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREFERENCES_NAME
 
 /**
@@ -101,6 +107,27 @@ object PreferencesModule {
     val getNearbyZonesDistance get() = GetNearbyZonesDistance(userPreferencesRepository)
 
     /**
+     * Returns the center marker on click enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val getMarkerCentering get() = GetMarkerCentering(userPreferencesRepository)
+
+    /**
+     * Returns the error collection enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val getErrorCollection get() = GetErrorCollection(userPreferencesRepository)
+
+    /**
+     * Returns the data collection enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val getDataCollection get() = GetDataCollection(userPreferencesRepository)
+
+    /**
      * Used for updating the user's language preference.
      * @author Arnau Mora
      * @since 20211229
@@ -120,6 +147,27 @@ object PreferencesModule {
      * @since 20211229
      */
     val setNearbyZonesDistance get() = SetNearbyZonesDistance(userPreferencesRepository)
+
+    /**
+     * Used for updating the marker centering enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val setMarkerCentering get() = SetMarkerCentering(userPreferencesRepository)
+
+    /**
+     * Used for updating the error collection enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val setErrorCollection get() = SetErrorCollection(userPreferencesRepository)
+
+    /**
+     * Used for updating the data collection enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val setDataCollection get() = SetDataCollection(userPreferencesRepository)
 
     /**
      * Clears all the preferences from the system.
