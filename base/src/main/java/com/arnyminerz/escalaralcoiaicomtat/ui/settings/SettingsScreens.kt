@@ -13,6 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.ListDialogOp
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsCategory
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsDataDialog
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsItem
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.context.LocaleHelper
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -41,7 +42,8 @@ fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: Settin
             stateString = language,
             setString = { lang ->
                 viewModel.setLanguage(lang)
-                activity.languageUpdate()
+                LocaleHelper.setLocale(activity, lang)
+                activity.recreate()
             },
             dialog = SettingsDataDialog(
                 title = stringResource(R.string.pref_gene_language_title),
