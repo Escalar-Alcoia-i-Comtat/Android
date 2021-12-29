@@ -37,7 +37,7 @@ class LoadingActivityViewModel(
         private val introShown: GetIntroShown
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(LoadingActivityViewModel::class.java)) {
                 return LoadingActivityViewModel(introShown) as T
             }
