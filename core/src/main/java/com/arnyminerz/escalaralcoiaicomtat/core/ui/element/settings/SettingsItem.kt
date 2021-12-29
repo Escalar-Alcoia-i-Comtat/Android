@@ -152,6 +152,8 @@ fun SettingsItem(
             Text(
                 text = title,
                 modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 4.dp)
                     .alpha(if (enabled) 1f else ContentAlpha.disabled),
                 style = MaterialTheme.typography.labelLarge
             )
@@ -159,6 +161,8 @@ fun SettingsItem(
                 Text(
                     text = subtitle,
                     modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 4.dp)
                         .alpha(if (enabled) 1f else ContentAlpha.disabled),
                     style = MaterialTheme.typography.labelMedium
                 )
