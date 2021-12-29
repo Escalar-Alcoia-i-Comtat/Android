@@ -13,11 +13,6 @@ import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.wrapper.LocalizedContextWrapper
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import timber.log.Timber
 
 @UiThread
 fun Context.toast(text: String, duration: Int = Toast.LENGTH_SHORT) =
@@ -40,14 +35,6 @@ fun Fragment.toast(@StringRes text: Int) =
     context?.toast(text)
 
 class ContextUtils(base: Context) : ContextWrapper(base)
-
-fun loadLocale(context: Context): ContextWrapper {
-    Timber.v("Loading app language...")
-    val langPref = runBlocking { PreferencesModule.getLanguage().first() }
-
-    Timber.v("Set app locale to $langPref")
-    return LocalizedContextWrapper.wrap(context, langPref)
-}
 
 fun Activity?.finishActivityWithResult(resultCode: Int, data: Intent?) =
     this?.also {
