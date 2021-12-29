@@ -32,6 +32,12 @@
     <string name="action_clear_downloads">"Limpiar descargas"</string>
     <string name="action_launch_app">"Iniciar App"</string>
 
+    <string name="item_explore">Explorar</string>
+    <string name="item_map">Mapa</string>
+    <string name="item_downloads">Descargas</string>
+    <string name="item_settings">Configuración</string>
+    <string name="item_share">Compartir</string>
+
     <string name="path_ending_plate">"Placa"</string>
     <string name="path_ending_plate_ring">"Placa con argolla"</string>
     <string name="path_ending_plate_lanyard">"Placa y Cordino"</string>

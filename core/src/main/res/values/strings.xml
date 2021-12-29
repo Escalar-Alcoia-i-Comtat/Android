@@ -35,6 +35,12 @@
     <string name="action_restart">Restart</string>
     <string name="action_view_activity">View Activity</string>
 
+    <string name="item_explore">Explore</string>
+    <string name="item_map">Map</string>
+    <string name="item_downloads">Downloads</string>
+    <string name="item_settings">Settings</string>
+    <string name="item_share">Share</string>
+
     <string name="path_ending_plate">Plate</string>
     <string name="path_ending_plate_ring">Plate Ring</string>
     <string name="path_ending_plate_lanyard">Plate Lanyard</string>

@@ -221,12 +221,6 @@
     <string name="feedback_dont_contact">Don\'t contact me</string>
     <string name="feedback_error_empty_message">You have to set a message to send</string>
 
-    <string name="item_explore">Explore</string>
-    <string name="item_map">Map</string>
-    <string name="item_downloads">Downloads</string>
-    <string name="item_settings">Settings</string>
-    <string name="item_share">Share</string>
-
     <string name="message_already_downloading">Content already downloading</string>
 
     <string name="fab_desc_back">Go Back</string>

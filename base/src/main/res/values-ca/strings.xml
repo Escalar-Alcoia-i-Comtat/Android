@@ -80,9 +80,6 @@
     <string name="pref_down_mobile_sum">Fes ús de les dades mòbils per a les descàrregues</string>
     <string name="pref_down_roaming_title">Roaming</string>
     <string name="pref_down_roaming_sum">Fes ús de connexions d\'ús mesurat (Roaming) per a baixar</string>
-    <string name="item_map">Mapa</string>
-    <string name="item_downloads">Baixades</string>
-    <string name="item_settings">Configuració</string>
     <string name="notification_channel_task_completed_name">Tasca completada</string>
     <string name="notification_channel_task_completed_desc">Et notificarem en el moment s\'haja completat una tasca en segon pla.</string>
     <string name="dialog_description_description_title">Descripció</string>
@@ -97,7 +94,6 @@
     <string name="image_desc_warning">Alerta</string>
     <string name="share_text">Hola! T\'agradaria provar Escalar Alcoià i Comtat? És gratuïta! https://play.google.com/store/apps/details?id=com.arnyminerz.escalaralcoiaicomtat</string>
     <string name="path_warning_rope_length">Aquesta via és bastant llarga, així que ves amb compte amb la corda que utilitzes.</string>
-    <string name="item_share">Compartir</string>
     <string name="image_desc_maximize_minimize_img">Maximitzar o minimitzar imatge</string>
     <string name="dialog_uses_storage_msg">Ocupa: %s</string>
     <string name="update_progress_internet_waiting">Esperant a una connexió a Internet…</string>
@@ -134,7 +130,6 @@
     <string name="notification_gpx_stored_message">Toca per a obrir</string>
     <string name="notification_kmz_stored_title">KMZ Desat correctament</string>
     <string name="notification_kmz_stored_message">Toca per a obrir</string>
-    <string name="item_explore">Explorar</string>
     <string name="image_desc_nav_explore">Explorar àrees</string>
     <string name="image_desc_nav_map">Veure mapa d\'àrees</string>
     <string name="image_desc_nav_downloads">Veure baixades</string>
