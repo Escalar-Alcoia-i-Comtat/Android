@@ -3,14 +3,19 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,11 +35,17 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.settings.GeneralSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.MainSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.NotificationsSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.StorageSettingsScreen
+import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.ExploreViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SettingsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.settingsViewModel
 
 class MainActivity : LanguageComponentActivity() {
     private val settingsViewModel by viewModels<SettingsViewModel>(factoryProducer = { PreferencesModule.settingsViewModel })
+    private val exploreViewModel by viewModels<ExploreViewModel>(factoryProducer = {
+        ExploreViewModel.Factory(
+            application
+        )
+    })
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +74,7 @@ class MainActivity : LanguageComponentActivity() {
 
     @Preview(name = "Settings screen")
     @Composable
-    fun SettingsScreen() {
+    private fun SettingsScreen() {
         val settingsNavController = rememberNavController()
         Column(
             modifier = Modifier
@@ -98,7 +109,7 @@ class MainActivity : LanguageComponentActivity() {
 
     @ExperimentalMaterial3Api
     @Composable
-    fun Home() {
+    private fun Home() {
         val homeNavController = rememberNavController()
         Scaffold(
             bottomBar = {
@@ -114,7 +125,7 @@ class MainActivity : LanguageComponentActivity() {
         ) {
             NavHost(homeNavController, Screen.Explore.route) {
                 composable(Screen.Explore.route) {
-                    Text("Explore")
+                    ExploreScreen()
                 }
                 composable(Screen.Map.route) {
                     Text("Map")
@@ -124,6 +135,24 @@ class MainActivity : LanguageComponentActivity() {
                 }
                 composable(Screen.Settings.route) {
                     SettingsScreen()
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ExploreScreen() {
+        Column {
+            val loadedAreas = exploreViewModel.loadedAreas
+            AnimatedVisibility(
+                visible = loadedAreas.value,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                CircularProgressIndicator()
+            }
+            LazyColumn {
+                items(exploreViewModel.areas) { area ->
+
                 }
             }
         }
