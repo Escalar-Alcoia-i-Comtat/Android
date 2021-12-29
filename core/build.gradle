@@ -90,12 +90,18 @@ dependencies {
     api "androidx.compose.runtime:runtime-rxjava2:$compose_version"
     api 'androidx.activity:activity-compose:1.4.0'
     api 'androidx.navigation:navigation-compose:2.4.0-rc01'
-    api 'com.google.accompanist:accompanist-appcompat-theme:0.20.3'
-    api "com.google.accompanist:accompanist-pager:0.22.0-rc"
     androidTestApi "androidx.compose.ui:ui-test-junit4:$compose_version"
 
     // Jetpack Compose utilities - Remember preferences
     implementation 'dev.burnoo:compose-remember-preference:0.3.4'
+
+    // Jetpack Compose utilities - Accompanist libraries
+    api 'com.google.accompanist:accompanist-appcompat-theme:0.20.3'
+    api "com.google.accompanist:accompanist-pager:0.22.0-rc"
+    implementation 'com.google.accompanist:accompanist-drawablepainter:v0.22.0-rc'
+
+    // Jetpack Compose utilities - Icons
+    api 'br.com.devsrsouza.compose.icons.android:font-awesome:1.0.0'
 
     // Coil image loading
     api 'io.coil-kt:coil:1.4.0'
