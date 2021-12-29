@@ -12,15 +12,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
+import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen.ApplicationInfoWindow
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.GeneralSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.MainSettingsScreen
@@ -68,7 +72,7 @@ class MainActivity : LanguageComponentActivity() {
         ) {
             NavHost(settingsNavController, "default") {
                 composable("default") {
-                    MainSettingsScreen(settingsNavController)
+                    MainSettingsScreen(this@MainActivity, settingsNavController)
                 }
                 composable("general") {
                     GeneralSettingsScreen(this@MainActivity, settingsViewModel)
@@ -80,7 +84,13 @@ class MainActivity : LanguageComponentActivity() {
                     StorageSettingsScreen(settingsViewModel)
                 }
                 composable("info") {
-                    // TODO: Create info screen
+                    ApplicationInfoWindow(
+                        appIconResource = R.mipmap.ic_launcher_round,
+                        appName = stringResource(R.string.app_name),
+                        appBuild = BuildConfig.VERSION_CODE,
+                        appVersion = BuildConfig.VERSION_NAME,
+                        "https://github.com/Escalar-Alcoia-i-Comtat/Android"
+                    )
                 }
             }
         }
