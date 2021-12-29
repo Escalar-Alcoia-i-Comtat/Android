@@ -7,6 +7,10 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.SystemPreferencesRepositoryImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.UserPreferencesRepositoryImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetIntroShown
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetNearbyZonesDistance
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetNearbyZonesEnabled
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.SetNearbyZonesDistance
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.SetNearbyZonesEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREFERENCES_NAME
 
 /**
@@ -53,7 +57,7 @@ object PreferencesModule {
      * @author Arnau Mora
      * @since 20211229
      */
-    val userPreferencesRepository by lazy {
+    private val userPreferencesRepository by lazy {
         UserPreferencesRepositoryImpl(requireApplication.dataStore)
     }
 
@@ -72,6 +76,34 @@ object PreferencesModule {
      * @since 20211229
      */
     val introShown get() = GetIntroShown(systemPreferencesRepository)
+
+    /**
+     * Returns the nearby zones enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val getNearbyZonesEnabled get() = GetNearbyZonesEnabled(userPreferencesRepository)
+
+    /**
+     * Returns the nearby zones distance preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val getNearbyZonesDistance get() = GetNearbyZonesDistance(userPreferencesRepository)
+
+    /**
+     * Used for updating the nearby zones enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val setNearbyZonesEnabled get() = SetNearbyZonesEnabled(userPreferencesRepository)
+
+    /**
+     * Used for updating the nearby zones distance preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val setNearbyZonesDistance get() = SetNearbyZonesDistance(userPreferencesRepository)
 
     /**
      * Clears all the preferences from the system.

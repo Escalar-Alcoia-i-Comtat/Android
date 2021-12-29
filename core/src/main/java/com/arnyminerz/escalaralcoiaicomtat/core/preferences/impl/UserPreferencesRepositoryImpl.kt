@@ -20,7 +20,7 @@ import java.io.IOException
  * @author Arnau Mora
  * @since 20211229
  */
-private const val NEARBY_DISTANCE_DEFAULT = 1000
+const val NEARBY_DISTANCE_DEFAULT = 1000
 
 /**
  * The implementation of the user preferences repository so it can be used.
@@ -168,4 +168,40 @@ class UserPreferencesRepositoryImpl(
             it[Keys.downloadQuality] = quality
         }
     }
+
+    /**
+     * Returns whether or not the nearby zones module is enabled.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    override val nearbyZonesEnabled: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.nearbyZonesEnabled] ?: true
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Returns the distance until which a zone is considered as nearby.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    override val nearbyZonesDistance: Flow<Int> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.nearbyZonesDistance] ?: NEARBY_DISTANCE_DEFAULT
+        }
+        .distinctUntilChanged()
 }

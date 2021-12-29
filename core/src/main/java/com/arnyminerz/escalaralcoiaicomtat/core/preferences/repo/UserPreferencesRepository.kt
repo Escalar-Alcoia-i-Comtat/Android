@@ -103,4 +103,18 @@ interface UserPreferencesRepository {
      * @param quality The quality of the images downloaded in percentage.
      */
     suspend fun setDownloadQuality(quality: Int)
+
+    /**
+     * Should return the value of the nearby zones enabled preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val nearbyZonesEnabled: Flow<Boolean>
+
+    /**
+     * Should return the value of the nearby zones distance preference.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    val nearbyZonesDistance: Flow<Int>
 }
