@@ -206,3 +206,11 @@ val Activity.app: App
  */
 val AndroidViewModel.app: App
     get() = getApplication<App>()
+
+/**
+ * Returns the application's context attached to the view model.
+ * @author Arnau Mora
+ * @since 20211229
+ */
+val AndroidViewModel.context: Context
+    get() = getApplication()
