@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.preferences
 
 import android.app.Application
 import android.content.Context
+import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.SystemPreferencesRepositoryImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.UserPreferencesRepositoryImpl
@@ -71,4 +72,13 @@ object PreferencesModule {
      * @since 20211229
      */
     val introShown get() = GetIntroShown(systemPreferencesRepository)
+
+    /**
+     * Clears all the preferences from the system.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    suspend fun clear() {
+        requireApplication.dataStore.edit { clear() }
+    }
 }
