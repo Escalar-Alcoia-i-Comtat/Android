@@ -51,7 +51,7 @@ fun GeneralSettingsScreen(viewModel: SettingsViewModel) {
             },
             dialog = SettingsDataDialog(
                 title = stringResource(R.string.pref_gene_nearby_distance_dialog_title),
-                float = true,
+                integer = true,
                 positiveButton = stringResource(R.string.action_ok),
                 negativeButton = stringResource(R.string.action_close)
             )
