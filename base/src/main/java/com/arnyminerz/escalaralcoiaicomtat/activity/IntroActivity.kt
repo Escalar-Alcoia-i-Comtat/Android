@@ -17,25 +17,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.IntroViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.introViewModelFactory
 import com.google.accompanist.pager.ExperimentalPagerApi
-import kotlinx.coroutines.flow.single
 import timber.log.Timber
 
 @ExperimentalMaterial3Api
 class IntroActivity : ComponentActivity() {
-    companion object {
-        /**
-         * Tells whether or not the Intro page should be shown.
-         * @author Arnau Mora
-         * @since 20210811
-         */
-        suspend fun shouldShow(): Boolean =
-            PreferencesModule
-                .systemPreferencesRepository
-                .systemPreferences
-                .single()
-                .shownIntro
-    }
-
     /**
      * The view model for updating the preference.
      * @author Arnau Mora
