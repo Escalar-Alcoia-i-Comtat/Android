@@ -9,8 +9,8 @@ import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.Doorbell
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.runtime.Composable
@@ -46,7 +46,7 @@ fun MainSettingsScreen(settingsNavController: NavController) {
             onClick = {
                 settingsNavController.navigate("notifications")
             },
-            icon = Icons.Default.Doorbell
+            icon = Icons.Default.Notifications
         )
         SettingsItem(
             title = stringResource(R.string.pref_down_title),
