@@ -1,3 +1,5 @@
+@file:Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings
 
 import androidx.compose.foundation.Image
@@ -12,15 +14,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
 import androidx.compose.material.Switch
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.RadioButtonChecked
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +45,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+/**
+ * The options for setting a dialog as a list.
+ * @author Arnau Mora
+ * @since 20211229
+ * @param items The items to display in the dialog.
+ * @param dismissOnSelect If the dialog should be dismissed when selecting an option.
+ */
+data class ListDialogOptions(
+    val items: Map<String, String>,
+    val dismissOnSelect: Boolean = true
+)
 
 /**
  * The data for displaying a dialog when clicked the item.
@@ -55,7 +73,7 @@ data class SettingsDataDialog(
     val saveOnDismiss: Boolean = true,
     val integer: Boolean = false,
     val float: Boolean = false,
-    val items: Map<String, String>? = null
+    val list: ListDialogOptions? = null
 )
 
 @Composable
@@ -78,6 +96,7 @@ fun SettingsCategory(
 }
 
 @Composable
+@ExperimentalMaterialApi
 fun SettingsItem(
     title: String,
     enabled: Boolean = true,
@@ -86,9 +105,11 @@ fun SettingsItem(
     stateBoolean: Boolean? = null,
     stateInt: Int? = null,
     stateFloat: Float? = null,
+    stateString: String? = null,
     setBoolean: ((value: Boolean) -> Unit)? = null,
     setInt: ((value: Int) -> Unit)? = null,
     setFloat: ((value: Float) -> Unit)? = null,
+    setString: ((value: String) -> Unit)? = null,
     checkBox: Boolean = false,
     switch: Boolean = false,
     dialog: SettingsDataDialog? = null,
@@ -163,7 +184,7 @@ fun SettingsItem(
             }
     }
 
-    if (openDialog && dialog != null && (stateInt != null || stateFloat != null)) {
+    if (openDialog && dialog != null && (stateInt != null || stateFloat != null || dialog.list != null)) {
         var textFieldValue by remember {
             mutableStateOf(
                 when {
@@ -173,50 +194,88 @@ fun SettingsItem(
                 }
             )
         }
+
+        fun save() {
+            if (dialog.integer)
+                textFieldValue.toIntOrNull()
+                    ?.let { value -> setInt?.let { it(value) } }
+            else if (dialog.float)
+                textFieldValue.toFloatOrNull()
+                    ?.let { value -> setFloat?.let { it(value) } }
+            openDialog = false
+        }
+
         AlertDialog(
-            onDismissRequest = { openDialog = false },
+            onDismissRequest = {
+                if (dialog.saveOnDismiss)
+                    save()
+                else
+                    openDialog = false
+            },
             title = { Text(text = dialog.title) },
             text = {
-                TextField(
-                    value = textFieldValue,
-                    onValueChange = {
-                        textFieldValue = it.let {
-                            var str = it
-                            if (dialog.integer)
-                                str = str
-                                    .replace(".", "")
-                                    .replace(",", "")
-                                    .replace("-", "")
-                                    .replace(" ", "")
-                            str
-                        }
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = if (dialog.integer || dialog.float)
-                            KeyboardType.Number
-                        else KeyboardType.Text,
-                        imeAction = ImeAction.Done
-                    ),
-                    singleLine = true,
-                    colors = TextFieldDefaults.textFieldColors(
-                        textColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                        cursorColor = MaterialTheme.colorScheme.secondary,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.secondary
+                if (dialog.integer || dialog.float)
+                    TextField(
+                        value = textFieldValue,
+                        onValueChange = {
+                            textFieldValue = it.let {
+                                var str = it
+                                if (dialog.integer)
+                                    str = str
+                                        .replace(".", "")
+                                        .replace(",", "")
+                                        .replace("-", "")
+                                        .replace(" ", "")
+                                str
+                            }
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = if (dialog.integer || dialog.float)
+                                KeyboardType.Number
+                            else KeyboardType.Text,
+                            imeAction = ImeAction.Done
+                        ),
+                        singleLine = true,
+                        colors = TextFieldDefaults.textFieldColors(
+                            textColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                            cursorColor = MaterialTheme.colorScheme.secondary,
+                            focusedIndicatorColor = MaterialTheme.colorScheme.secondary
+                        )
                     )
-                )
+                else if (dialog.list != null)
+                    dialog.list.apply {
+                        Column {
+                            items.forEach { item ->
+                                ListItem(
+                                    icon = {
+                                        Icon(
+                                            if (stateString == item.key)
+                                                Icons.Default.RadioButtonChecked
+                                            else
+                                                Icons.Default.RadioButtonUnchecked,
+                                            contentDescription = item.value
+                                        )
+                                    },
+                                    modifier = Modifier
+                                        .clickable {
+                                            setString?.let { it(item.key) }
+
+                                            if (dismissOnSelect)
+                                                openDialog = false
+                                        }
+                                ) {
+                                    Text(text = item.value)
+                                }
+                            }
+                        }
+                    }
             },
             confirmButton = {
                 if (dialog.positiveButton != null)
                     Button(
                         colors = ButtonDefaults.textButtonColors(),
                         onClick = {
-                            if (dialog.integer)
-                                textFieldValue.toIntOrNull()
-                                    ?.let { value -> setInt?.let { it(value) } }
-                            else if (dialog.float)
-                                textFieldValue.toFloatOrNull()
-                                    ?.let { value -> setFloat?.let { it(value) } }
-                            openDialog = false
+                            save()
                         }
                     ) {
                         Text(text = dialog.positiveButton)
@@ -237,12 +296,14 @@ fun SettingsItem(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Preview(name = "Settings category")
 @Composable
 fun SettingsCategoryPreview() {
     SettingsCategory(text = "Settings category")
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Preview(name = "Preview no pref")
 @Composable
 fun SettingsItemPreview() {
@@ -253,6 +314,7 @@ fun SettingsItemPreview() {
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Preview(name = "Preview checkbox")
 @Composable
 fun SettingsItemPreviewCheckbox() {
@@ -266,6 +328,7 @@ fun SettingsItemPreviewCheckbox() {
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Preview(name = "Preview switch")
 @Composable
 fun SettingsItemPreviewSwitch() {
