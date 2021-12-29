@@ -183,8 +183,8 @@ fun NotificationsSettingsScreen(context: Context, viewModel: SettingsViewModel) 
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             SettingsItem(
-                title = stringResource(R.string.pref_noti_alert_title),
-                subtitle = stringResource(R.string.pref_noti_alert_sum),
+                title = stringResource(R.string.pref_noti_device_title),
+                subtitle = stringResource(R.string.pref_noti_device_sum),
                 onClick = {
                     context.launch(
                         Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
