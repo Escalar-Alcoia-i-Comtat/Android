@@ -141,7 +141,7 @@ fun SettingsItem(
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp)
+                        .padding(22.dp)
                 )
         }
         Column(
