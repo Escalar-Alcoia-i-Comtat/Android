@@ -1,17 +1,20 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.settings
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.ListDialogOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsCategory
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsDataDialog
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsItem
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SettingsViewModel
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainSettingsScreen(settingsNavController: NavController) {
     SettingsItem(
@@ -23,13 +26,30 @@ fun MainSettingsScreen(settingsNavController: NavController) {
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun GeneralSettingsScreen(viewModel: SettingsViewModel) {
     Column {
+        val language by viewModel.language.collectAsState()
         val nearbyZonesEnabled by viewModel.nearbyZonesEnabled.collectAsState()
         val nearbyZonesDistance by viewModel.nearbyZonesDistance.collectAsState()
 
-        // TODO: Language
+        SettingsItem(
+            title = stringResource(R.string.pref_gene_language_title),
+            subtitle = stringResource(R.string.pref_gene_language_sum),
+            stateString = language,
+            dialog = SettingsDataDialog(
+                title = stringResource(R.string.pref_gene_language_title),
+                list = ListDialogOptions(
+                    items = mapOf(
+                        "en" to "English",
+                        "ca" to "Català",
+                        "es" to "Castellano"
+                    )
+                )
+            )
+        )
+
         SettingsCategory(
             stringResource(R.string.pref_gene_section_nearby)
         )
