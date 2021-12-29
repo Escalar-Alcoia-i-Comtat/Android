@@ -31,46 +31,48 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SettingsViewModel
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainSettingsScreen(settingsNavController: NavController) {
-    SettingsItem(
-        title = stringResource(R.string.pref_main_title),
-        subtitle = stringResource(R.string.pref_main_sum),
-        onClick = {
-            settingsNavController.navigate("general")
-        },
-        icon = Icons.Default.Star
-    )
-    SettingsItem(
-        title = stringResource(R.string.pref_noti_title),
-        subtitle = stringResource(R.string.pref_noti_sum),
-        onClick = {
-            settingsNavController.navigate("notifications")
-        },
-        icon = Icons.Default.Doorbell
-    )
-    SettingsItem(
-        title = stringResource(R.string.pref_down_title),
-        subtitle = stringResource(R.string.pref_down_sum),
-        onClick = {
-            settingsNavController.navigate("storage")
-        },
-        icon = Icons.Default.Storage
-    )
-    SettingsItem(
-        title = stringResource(R.string.pref_info_title),
-        subtitle = stringResource(R.string.pref_info_sum),
-        onClick = {
-            settingsNavController.navigate("info")
-        },
-        icon = Icons.Default.Info
-    )
-    SettingsItem(
-        title = stringResource(R.string.pref_feedback_title),
-        subtitle = stringResource(R.string.pref_feedback_sum),
-        onClick = {
-            // TODO: Navigate to the send feedback activity
-        },
-        icon = Icons.Default.BugReport
-    )
+    Column {
+        SettingsItem(
+            title = stringResource(R.string.pref_main_title),
+            subtitle = stringResource(R.string.pref_main_sum),
+            onClick = {
+                settingsNavController.navigate("general")
+            },
+            icon = Icons.Default.Star
+        )
+        SettingsItem(
+            title = stringResource(R.string.pref_noti_title),
+            subtitle = stringResource(R.string.pref_noti_sum),
+            onClick = {
+                settingsNavController.navigate("notifications")
+            },
+            icon = Icons.Default.Doorbell
+        )
+        SettingsItem(
+            title = stringResource(R.string.pref_down_title),
+            subtitle = stringResource(R.string.pref_down_sum),
+            onClick = {
+                settingsNavController.navigate("storage")
+            },
+            icon = Icons.Default.Storage
+        )
+        SettingsItem(
+            title = stringResource(R.string.pref_info_title),
+            subtitle = stringResource(R.string.pref_info_sum),
+            onClick = {
+                settingsNavController.navigate("info")
+            },
+            icon = Icons.Default.Info
+        )
+        SettingsItem(
+            title = stringResource(R.string.pref_feedback_title),
+            subtitle = stringResource(R.string.pref_feedback_sum),
+            onClick = {
+                // TODO: Navigate to the send feedback activity
+            },
+            icon = Icons.Default.BugReport
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
