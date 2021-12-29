@@ -1,11 +1,10 @@
-package com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system
+package com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user
 
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.repo.SystemPreferencesRepository
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.repo.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Used for fetching the intro shown preference from the [SystemPreferencesRepository].
+ * Used for fetching the language preference from the [UserPreferencesRepository].
  * @author Arnau Mora
  * @since 20211229
  */

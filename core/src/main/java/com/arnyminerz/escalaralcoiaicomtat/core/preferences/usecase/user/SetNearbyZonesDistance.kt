@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system
+package com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user
 
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.repo.UserPreferencesRepository
 
