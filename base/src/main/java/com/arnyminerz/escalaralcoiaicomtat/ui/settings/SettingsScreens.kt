@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.FeedbackActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.ListDialogOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsCategory
@@ -30,7 +31,7 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun MainSettingsScreen(settingsNavController: NavController) {
+fun MainSettingsScreen(context: Context, settingsNavController: NavController) {
     Column {
         SettingsItem(
             title = stringResource(R.string.pref_main_title),
@@ -68,7 +69,7 @@ fun MainSettingsScreen(settingsNavController: NavController) {
             title = stringResource(R.string.pref_feedback_title),
             subtitle = stringResource(R.string.pref_feedback_sum),
             onClick = {
-                // TODO: Navigate to the send feedback activity
+                context.launch(FeedbackActivity::class.java)
             },
             icon = Icons.Default.BugReport
         )
