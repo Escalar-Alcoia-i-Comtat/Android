@@ -6,6 +6,7 @@
     <string name="action_enable_location">Enable Location</string>
     <string name="action_copy">Copy to clipboard</string>
     <string name="action_view_map">View Map</string>
+    <string name="action_view">View</string>
     <string name="action_download">Download</string>
     <string name="action_delete">Delete</string>
     <string name="action_ok">OK</string>

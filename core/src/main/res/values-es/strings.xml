@@ -4,6 +4,7 @@
     <string name="action_open_maps">"Abrir Google Maps"</string>
     <string name="action_enable_location">Habilitar Ubicación</string>
     <string name="action_cancel">"Cancelar"</string>
+    <string name="action_view">Veure</string>
     <string name="action_clear_data">Vaciar los datos</string>
     <string name="action_view_activity">Ver Actividad</string>
     <string name="action_restart">Reiniciar</string>
