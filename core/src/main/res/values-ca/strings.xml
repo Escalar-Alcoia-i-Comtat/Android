@@ -4,6 +4,7 @@
     <string name="action_cancel">Cancel·lar</string>
     <string name="action_open_maps">"Obrir Google Maps"</string>
     <string name="action_enable_location">Habilitar Ubicació</string>
+    <string name="action_view">Ver</string>
     <string name="action_download">"Descarregar"</string>
     <string name="action_delete">"Eliminar"</string>
     <string name="action_ok">"OK"</string>

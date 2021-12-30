@@ -27,14 +27,14 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     val loadedAreas = mutableStateOf(false)
 
     fun loadAreas() {
-        viewModelScope.launch {
-            loadedAreas.value = false
-            val areasList = app.getAreas()
-                .sortedBy { it.displayName }
-            areas.clear()
-            areas.addAll(areasList)
-            loadedAreas.value = true
-        }
+        if (!loadedAreas.value)
+            viewModelScope.launch {
+                val areasList = app.getAreas()
+                    .sortedBy { it.displayName }
+                areas.clear()
+                areas.addAll(areasList)
+                loadedAreas.value = true
+            }
     }
 
     class Factory(
