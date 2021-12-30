@@ -8,14 +8,17 @@ import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -43,6 +46,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen.ApplicationInfoWindow
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.GoogleMap
@@ -55,6 +59,7 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.settings.GeneralSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.MainSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.NotificationsSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.StorageSettingsScreen
+import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.DownloadsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.ExploreViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.MainMapViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SettingsViewModel
@@ -75,6 +80,9 @@ class MainActivity : LanguageComponentActivity() {
     })
     private val mapViewModel by viewModels<MainMapViewModel>(factoryProducer = {
         MainMapViewModel.Factory(application, PreferencesModule.getMarkerCentering)
+    })
+    private val downloadsViewModel by viewModels<DownloadsViewModel>(factoryProducer = {
+        DownloadsViewModel.Factory(application)
     })
 
     /**
@@ -174,7 +182,7 @@ class MainActivity : LanguageComponentActivity() {
                     MapScreen()
                 }
                 composable(Screen.Downloads.route) {
-                    Text("Downloads")
+                    DownloadsScreen()
                 }
                 composable(Screen.Settings.route) {
                     SettingsScreen()
@@ -300,5 +308,42 @@ class MainActivity : LanguageComponentActivity() {
             }
         }
         exploreViewModel.loadAreas()
+    }
+
+    @Composable
+    private fun DownloadsScreen() {
+        LazyColumn {
+            item {
+                Card(
+                    backgroundColor = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 12.dp, end = 12.dp, top = 8.dp)
+                ) {
+                    Text(
+                        text = "Downloads", // TODO: Localize string
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
+                    )
+                }
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .padding(start = 12.dp, end = 12.dp)
+                        .fillMaxWidth()
+                ) {
+                    Chip("Testing")
+                }
+            }
+            items(downloadsViewModel.downloads) { dataClass ->
+                Text(text = dataClass.displayName)
+            }
+            items(downloadsViewModel.downloading) { (dataClass, progress) ->
+                Text(text = "${dataClass.displayName} - $progress%")
+            }
+        }
+        downloadsViewModel.loadDownloads()
     }
 }
