@@ -24,6 +24,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -34,13 +38,21 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import timber.log.Timber
 
 @Composable
 fun BoxScope.MapBottomDialog(
     context: Context,
+    app: App,
     bottomDialogVisible: Boolean,
     bottomDialogTitle: String,
-    bottomDialogImage: Uri?
+    bottomDialogImage: Uri?,
+    elementWebUrl: String?
 ) {
     val density = LocalDensity.current
     AnimatedVisibility(
@@ -68,7 +80,7 @@ fun BoxScope.MapBottomDialog(
                             .error(R.drawable.ic_wide_placeholder)
                             .build()
                     ),
-                    contentDescription = "", // TODO: Set content description
+                    contentDescription = bottomDialogTitle,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
@@ -90,14 +102,32 @@ fun BoxScope.MapBottomDialog(
                     Column(
                         modifier = Modifier.align(Alignment.CenterVertically)
                     ) {
+                        var buttonEnabled by remember { mutableStateOf(true) }
                         Button(
-                            onClick = { /*TODO*/ }, // TODO: Click action
+                            enabled = buttonEnabled,
+                            onClick = {
+                                buttonEnabled = false
+                                doAsync {
+                                    DataClass.getIntent(
+                                        context,
+                                        app.searchSession,
+                                        "($bottomDialogTitle) OR ($elementWebUrl)"
+                                    )?.let { intent ->
+                                        uiContext {
+                                            buttonEnabled = true
+                                            context.launch(intent)
+                                        }
+                                    }
+                                        ?: Timber.e("Could not find intent for \"$bottomDialogTitle\"")
+                                    // TODO: Warn user if intent was not found
+                                }
+                            },
                             colors = ButtonDefaults.outlinedButtonColors()
                         ) {
                             Row {
                                 Image(
                                     Icons.Rounded.Login,
-                                    contentDescription = "", // TODO: Set content description
+                                    contentDescription = stringResource(R.string.action_view),
                                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                                     modifier = Modifier
                                         .size(20.dp)

@@ -40,6 +40,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
@@ -220,6 +221,7 @@ class MainActivity : LanguageComponentActivity() {
         Box(modifier = Modifier.fillMaxSize()) {
             var bottomDialogVisible by remember { mutableStateOf(false) }
             var bottomDialogTitle by remember { mutableStateOf("") }
+            var bottomDialogWebUrl by remember { mutableStateOf<String?>(null) }
             var bottomDialogImage by remember { mutableStateOf<Uri?>(null) }
 
             GoogleMap(
@@ -257,6 +259,14 @@ class MainActivity : LanguageComponentActivity() {
                         } ?: false
                         if (!loadedImageUrl)
                             bottomDialogImage = null
+
+                        bottomDialogWebUrl = marker.snippet?.let { snippet ->
+                            val index = snippet.indexOf("https://escalaralcoiaicomtat")
+                                .takeIf { it >= 0 }
+                                ?: return@let null
+                            snippet.substring(index)
+                        }
+
                         Timber.i("Marker snippet: ${marker.snippet}")
                     }
                     true
@@ -265,9 +275,11 @@ class MainActivity : LanguageComponentActivity() {
 
             MapBottomDialog(
                 this@MainActivity,
+                app,
                 bottomDialogVisible,
                 bottomDialogTitle,
-                bottomDialogImage
+                bottomDialogImage,
+                bottomDialogWebUrl
             )
 
             if (this@MainActivity::googleMap.isInitialized && exploreViewModel.loadedAreas.value) {
