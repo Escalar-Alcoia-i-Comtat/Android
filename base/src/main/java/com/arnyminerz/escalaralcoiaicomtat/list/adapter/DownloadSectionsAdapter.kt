@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.OldMainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
@@ -36,7 +36,7 @@ import timber.log.Timber
 @ExperimentalMaterial3Api
 class DownloadSectionsAdapter(
     private val downloadedSections: ArrayList<DownloadedSection>,
-    private val mainActivity: MainActivity
+    private val mainActivity: OldMainActivity
 ) : RecyclerView.Adapter<DownloadSectionViewHolder>() {
     private val storage: FirebaseStorage
         get() = mainActivity.storage

@@ -5,7 +5,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 
 class AreasViewModelFactory(private val app: App) : ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
         if (modelClass.isAssignableFrom(AreasViewModel::class.java))
             return AreasViewModel(app) as T
 

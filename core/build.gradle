@@ -89,18 +89,30 @@ dependencies {
     api "androidx.compose.runtime:runtime-livedata:$compose_version"
     api "androidx.compose.runtime:runtime-rxjava2:$compose_version"
     api 'androidx.activity:activity-compose:1.4.0'
-    api 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0'
     api 'androidx.navigation:navigation-compose:2.4.0-rc01'
+    androidTestApi "androidx.compose.ui:ui-test-junit4:$compose_version"
+
+    // Jetpack Compose utilities - Remember preferences
+    implementation 'dev.burnoo:compose-remember-preference:0.3.4'
+
+    // Jetpack Compose utilities - Accompanist libraries
     api 'com.google.accompanist:accompanist-appcompat-theme:0.20.3'
     api "com.google.accompanist:accompanist-pager:0.22.0-rc"
-    androidTestApi "androidx.compose.ui:ui-test-junit4:$compose_version"
+    implementation 'com.google.accompanist:accompanist-drawablepainter:v0.22.0-rc'
+
+    // Jetpack Compose utilities - Icons
+    api 'br.com.devsrsouza.compose.icons.android:font-awesome:1.0.0'
 
     // Coil image loading
     api 'io.coil-kt:coil:1.4.0'
     api 'io.coil-kt:coil-compose:1.4.0'
 
-    // Live Data
+    // Lifecycle
     api 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.0'
+    api 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0'
+    api 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0'
+    api 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
+    implementation 'androidx.lifecycle:lifecycle-common-java8:2.4.0'
 
     // Google Play Core
     api 'com.google.android.play:core:1.10.2'
@@ -138,6 +150,9 @@ dependencies {
     api 'com.google.maps.android:maps-ktx:3.3.0'
     api 'com.google.maps.android:android-maps-utils:2.3.0'
     api 'com.google.maps.android:maps-utils-ktx:3.3.0'
+
+    // AndroidX preferences
+    api 'androidx.datastore:datastore-preferences:1.0.0'
 
     // Timber
     api 'com.jakewharton.timber:timber:5.0.1'

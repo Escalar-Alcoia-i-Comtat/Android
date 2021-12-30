@@ -14,6 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
  * @see SharedPreferences
  * @see sharedPreferences
  */
+@Deprecated("Use datastore")
 class PreferenceData<T : Any> constructor(val key: String, val default: T) {
     /**
      * Gets the [PreferenceData]'s value

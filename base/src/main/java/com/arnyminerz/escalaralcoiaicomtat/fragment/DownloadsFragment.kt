@@ -9,6 +9,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.OldMainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
@@ -83,7 +84,7 @@ class DownloadsFragment : Fragment() {
 
                 binding.downloadsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
                 binding.downloadsRecyclerView.adapter =
-                    DownloadSectionsAdapter(sections, requireActivity() as MainActivity)
+                    DownloadSectionsAdapter(sections, requireActivity() as OldMainActivity)
                 visibility(binding.loadingDownloadsProgressBar, false)
                 visibility(binding.loadingDownloadsProgressIndicator, false)
             }

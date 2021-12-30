@@ -10,7 +10,8 @@ class DataClassListViewModelFactory(
     private val zoneId: String?,
     private val sectorId: String?
 ) : ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
         if (modelClass.isAssignableFrom(DataClassListViewModel::class.java))
             return DataClassListViewModel(app, areaId, zoneId, sectorId) as T
 

@@ -83,9 +83,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="pref_down_roaming_sum">Usar conexiones de uso medido para las descargas</string>
     <string name="notification_channel_task_completed_name">Tarea completada</string>
     <string name="notification_channel_task_completed_desc">Te notificaremos en el momento se complete una tarea en segundo plano</string>
-    <string name="item_map">Mapa</string>
-    <string name="item_downloads">Descargas</string>
-    <string name="item_settings">Configuración</string>
     <string name="dialog_description_description_title">Descripción</string>
     <string name="dialog_description_builder_title">Equipada por</string>
     <string name="dialog_description_rebuilder_title">Reequipada por</string>
@@ -98,7 +95,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="image_desc_warning">Alerta</string>
     <string name="share_text">Hola! Te gustaría probar Escalar Alcoià i Comtat? Es gratis! https://play.google.com/store/apps/details?id=com.arnyminerz.escalaralcoiaicomtat</string>
     <string name="path_warning_rope_length">Esta vía es bastante larga, ve con cuidado con la cuerta que usas.</string>
-    <string name="item_share">Compartir</string>
     <string name="image_desc_maximize_minimize_img">Maximizar o minimizar imagen</string>
     <string name="dialog_uses_storage_msg">Ocupa: %s</string>
     <string name="update_progress_internet_waiting">Esperando a una conexión a Internet…</string>
@@ -135,7 +131,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="notification_gpx_stored_message">Toca para abrir</string>
     <string name="notification_kmz_stored_title">KMZ Guardado correctamente</string>
     <string name="notification_kmz_stored_message">Toca para abrir</string>
-    <string name="item_explore">Explorar</string>
     <string name="image_desc_nav_explore">Explorar áreas</string>
     <string name="image_desc_nav_map">Ver mapa de áreas</string>
     <string name="image_desc_nav_downloads">Ver descargas</string>

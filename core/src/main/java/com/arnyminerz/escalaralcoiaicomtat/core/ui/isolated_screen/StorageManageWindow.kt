@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.annotation.StringRes
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchSpec
@@ -11,17 +10,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATA_MODULE_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.filesDir
@@ -107,18 +111,16 @@ private fun ClearDirectoryButton(
  * @author Arnau Mora
  * @since 20211214
  * @param buttonText The text of the button.
- * @param sharedPreferences The preferences to clear.
  */
 @Composable
 private fun ClearSettingsButton(
     @StringRes buttonText: Int,
-    sharedPreferences: SharedPreferences,
     modifier: Modifier = Modifier
 ) {
     ClearButton(
         buttonText,
         valueLoad = { true },
-        deleteAction = { sharedPreferences.edit().clear().apply() },
+        deleteAction = { PreferencesModule.clear() },
         modifier = modifier
     )
 }
@@ -230,7 +232,6 @@ fun StorageManagerWindow(launchApp: () -> Unit, sendFeedback: () -> Unit) {
             )
             ClearSettingsButton(
                 R.string.action_clear_settings,
-                sharedPreferences,
                 modifier = Modifier
                     .fillMaxWidth(1f)
                     .padding(start = 4.dp)
