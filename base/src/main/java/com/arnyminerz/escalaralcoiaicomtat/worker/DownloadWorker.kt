@@ -465,6 +465,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             var namespace: String? = null
             var downloadResult = try {
                 downloadData(downloadPath!!) { progress ->
+                    setProgress(workDataOf("progress" to progress.percentage))
                     notification = notification.update {
                         withProgress(progress.toInt())
                     }
