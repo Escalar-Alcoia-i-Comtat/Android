@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -52,6 +53,7 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SettingsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.settingsViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import timber.log.Timber
@@ -206,13 +208,29 @@ class MainActivity : LanguageComponentActivity() {
     }
 
     @Composable
+    @SuppressLint("PotentialBehaviorOverride")
     private fun MapScreen() {
         Column {
             GoogleMap(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
-            ) { googleMap -> this@MainActivity.googleMap = googleMap }
+            ) { googleMap ->
+                this@MainActivity.googleMap = googleMap
+                googleMap.setOnMarkerClickListener { marker ->
+                    val markerCenteringEnabled = mapViewModel.centerMarkerOnClick
+                    if (markerCenteringEnabled.value)
+                        googleMap.animateCamera(
+                            CameraUpdateFactory.newCameraPosition(
+                                CameraPosition.fromLatLngZoom(
+                                    marker.position,
+                                    googleMap.cameraPosition.zoom
+                                )
+                            )
+                        )
+                    true
+                }
+            }
 
             if (this@MainActivity::googleMap.isInitialized && exploreViewModel.loadedAreas.value) {
                 for (area in exploreViewModel.areas)
