@@ -20,6 +20,7 @@ import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
@@ -697,6 +698,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         for (child in children)
             if (child is DataClass<*, *>)
                 lst.add(child.delete(context, searchSession))
+
+        // Remove dataclass from index
+        searchSession.remove(
+            objectId,
+            SearchSpec.Builder()
+                .addFilterNamespaces(namespace)
+                .addFilterDocumentClasses(DownloadedData::class.java)
+                .build()
+        ).await()
 
         return lst.allTrue()
     }
