@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.appsearch.app.AppSearchSession
+import androidx.appsearch.app.PutDocumentsRequest
 import androidx.lifecycle.LiveData
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -13,11 +14,13 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import androidx.work.await
 import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
@@ -537,6 +540,19 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     .withText(text)
                     .withIntent(intent)
                     .buildAndShow()
+
+                if (namespace != null && downloadPath != null) {
+                    Timber.v("Indexing downloaded element...")
+                    val downloadedData = DownloadedData(
+                        downloadPath!!.split("/")[0],
+                        System.currentTimeMillis(),
+                        namespace!!
+                    )
+                    val request = PutDocumentsRequest.Builder()
+                        .addDocuments(downloadedData)
+                        .build()
+                    appSearchSession.put(request).await()
+                }
             } else {
                 Timber.v("Download failed! Result: $downloadResult. Showing notification.")
                 val text = applicationContext.getString(
