@@ -72,7 +72,7 @@ import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
-import java.util.Date
+import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -519,6 +519,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param progressListener A listener for the progress of the load.
      */
     @WorkerThread
+    @Deprecated("Should use Jetpack Compose")
     suspend fun downloadedSectionList(
         context: Context,
         searchSession: AppSearchSession,
