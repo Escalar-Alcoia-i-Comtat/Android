@@ -1,26 +1,50 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Login
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
@@ -28,6 +52,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
@@ -210,16 +236,21 @@ class MainActivity : LanguageComponentActivity() {
     @Composable
     @SuppressLint("PotentialBehaviorOverride")
     private fun MapScreen() {
-        Column {
+        Box(modifier = Modifier.fillMaxSize()) {
+            var bottomDialogVisible by remember { mutableStateOf(false) }
+            var bottomDialogTitle by remember { mutableStateOf("") }
+            var bottomDialogImage by remember { mutableStateOf<Uri?>(null) }
+
             GoogleMap(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
             ) { googleMap ->
                 this@MainActivity.googleMap = googleMap
+                googleMap.setOnMapClickListener { bottomDialogVisible = false }
                 googleMap.setOnMarkerClickListener { marker ->
                     val markerCenteringEnabled = mapViewModel.centerMarkerOnClick
-                    if (markerCenteringEnabled.value)
+                    if (markerCenteringEnabled.value) {
                         googleMap.animateCamera(
                             CameraUpdateFactory.newCameraPosition(
                                 CameraPosition.fromLatLngZoom(
@@ -228,7 +259,102 @@ class MainActivity : LanguageComponentActivity() {
                                 )
                             )
                         )
+                    }
+                    val markerTitle = marker.title
+                    if (markerTitle != null) {
+                        bottomDialogTitle = markerTitle
+                        bottomDialogVisible = true
+                        val loadedImageUrl = marker.snippet?.let { snippet ->
+                            val srcPos = snippet.indexOf("src=\"")
+                                .takeIf { it >= 0 } ?: return@let false
+                            val cutUrl = snippet.substring(srcPos + 5)
+                            val endPos = cutUrl.indexOf('"')
+                                .takeIf { it >= 0 } ?: return@let false
+                            val imageUrl = cutUrl.substring(0, endPos)
+                            bottomDialogImage = Uri.parse(imageUrl)
+                            true
+                        } ?: false
+                        if (!loadedImageUrl)
+                            bottomDialogImage = null
+                        Timber.i("Marker snippet: ${marker.snippet}")
+                    }
                     true
+                }
+            }
+
+            val density = LocalDensity.current
+            AnimatedVisibility(
+                visible = bottomDialogVisible,
+                enter = slideInVertically { with(density) { 40.dp.roundToPx() } } +
+                        fadeIn(initialAlpha = .3f),
+                exit = slideOutVertically() + fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
+            ) {
+                Card(
+                    backgroundColor = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column {
+                        Image(
+                            painter = rememberImagePainter(
+                                request = ImageRequest.Builder(this@MainActivity)
+                                    .data(bottomDialogImage)
+                                    .placeholder(R.drawable.ic_wide_placeholder)
+                                    .error(R.drawable.ic_wide_placeholder)
+                                    .build()
+                            ),
+                            contentDescription = "", // TODO: Set content description
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(180.dp)
+                        )
+                        Row {
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .align(Alignment.CenterVertically)
+                                    .padding(start = 8.dp)
+                            ) {
+                                Text(
+                                    text = bottomDialogTitle,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            Column(
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                            ) {
+                                Button(
+                                    onClick = { /*TODO*/ }, // TODO: Click action
+                                    colors = ButtonDefaults.outlinedButtonColors()
+                                ) {
+                                    Row {
+                                        Image(
+                                            Icons.Rounded.Login,
+                                            contentDescription = "", // TODO: Set content description
+                                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                                            modifier = Modifier
+                                                .size(20.dp)
+                                                .align(Alignment.CenterVertically)
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.action_view),
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier
+                                                .align(Alignment.CenterVertically)
+                                                .padding(start = 6.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
