@@ -9,16 +9,13 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetMarkerCentering
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.livedata.MutableListLiveData
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import com.google.maps.android.data.kml.KmlContainer
 import com.google.maps.android.data.kml.KmlLayer
-import com.google.maps.android.data.kml.KmlPlacemark
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -56,17 +53,6 @@ class MainMapViewModel(
             val kmzFile = dataClass.kmzFile(context, storage, false)
             val kmzStream = kmzFile.inputStream()
             val kmzLayer = KmlLayer(googleMap, kmzStream, context)
-            kmzLayer.setOnFeatureClickListener { genericFeature ->
-                val feature = genericFeature as KmlPlacemark
-                val position = feature.markerOptions.position
-                val markerCenteringEnabled = centerMarkerOnClick.value
-                if (markerCenteringEnabled)
-                    googleMap.moveCamera(
-                        CameraUpdateFactory.newCameraPosition(
-                            CameraPosition.fromLatLngZoom(position, googleMap.cameraPosition.zoom)
-                        )
-                    )
-            }
             kmzLayer.addLayerToMap()
 
             fun iterateContainers(
