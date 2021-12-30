@@ -42,6 +42,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import timber.log.Timber
 
@@ -117,9 +118,10 @@ fun BoxScope.MapBottomDialog(
                                             buttonEnabled = true
                                             context.launch(intent)
                                         }
+                                    } ?: run {
+                                        Timber.e("Could not find intent for \"$bottomDialogTitle\"")
+                                        context.toast(R.string.toast_error_internal)
                                     }
-                                        ?: Timber.e("Could not find intent for \"$bottomDialogTitle\"")
-                                    // TODO: Warn user if intent was not found
                                 }
                             },
                             colors = ButtonDefaults.outlinedButtonColors()
