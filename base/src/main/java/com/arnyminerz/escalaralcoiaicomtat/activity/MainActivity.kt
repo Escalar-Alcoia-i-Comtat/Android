@@ -6,6 +6,7 @@ import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -35,7 +37,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen.ApplicationInfoWindow
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.GoogleMap
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.includeAll
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.GeneralSettingsScreen
@@ -43,18 +47,32 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.settings.MainSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.NotificationsSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.StorageSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.ExploreViewModel
+import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.MainMapViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SettingsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.settingsViewModel
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import timber.log.Timber
 
 class MainActivity : LanguageComponentActivity() {
-    private val settingsViewModel by viewModels<SettingsViewModel>(factoryProducer = { PreferencesModule.settingsViewModel })
-    private val exploreViewModel by viewModels<ExploreViewModel>(factoryProducer = {
-        ExploreViewModel.Factory(
-            application
-        )
+    private val settingsViewModel by viewModels<SettingsViewModel>(factoryProducer = {
+        PreferencesModule.settingsViewModel
     })
+    private val exploreViewModel by viewModels<ExploreViewModel>(factoryProducer = {
+        ExploreViewModel.Factory(application)
+    })
+    private val mapViewModel by viewModels<MainMapViewModel>(factoryProducer = {
+        MainMapViewModel.Factory(application, PreferencesModule.getMarkerCentering)
+    })
+
+    /**
+     * The GoogleMap instance for adding and removing features to the map.
+     * @author Arnau Mora
+     * @since 20211230
+     */
+    private lateinit var googleMap: GoogleMap
 
     @ExperimentalBadgeUtils
     @OptIn(ExperimentalMaterial3Api::class)
@@ -143,7 +161,7 @@ class MainActivity : LanguageComponentActivity() {
                     ExploreScreen()
                 }
                 composable(Screen.Map.route) {
-                    Text("Map")
+                    MapScreen()
                 }
                 composable(Screen.Downloads.route) {
                     Text("Downloads")
@@ -182,6 +200,35 @@ class MainActivity : LanguageComponentActivity() {
                         putExtra(EXTRA_AREA, area.objectId)
                     }
                 }
+            }
+        }
+        exploreViewModel.loadAreas()
+    }
+
+    @Composable
+    private fun MapScreen() {
+        Column {
+            GoogleMap(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+            ) { googleMap -> this@MainActivity.googleMap = googleMap }
+
+            if (this@MainActivity::googleMap.isInitialized && exploreViewModel.loadedAreas.value) {
+                for (area in exploreViewModel.areas)
+                    mapViewModel.loadGoogleMap(googleMap, area)
+            }
+        }
+        mapViewModel.locations.observe(this as LifecycleOwner) { locations ->
+            try {
+                val bounds = LatLngBounds.builder()
+                    .includeAll(locations)
+                    .build()
+
+                Timber.i("Detected ${locations.size} locations in map.")
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 45))
+            } catch (e: IllegalStateException) {
+                Timber.e("No markers were loaded.")
             }
         }
         exploreViewModel.loadAreas()
