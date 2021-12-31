@@ -136,21 +136,19 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * Downloads the image file for the specified object.
      * @author Arnau Mora
      * @since 20210822
-     * @param imageReference The [FirebaseStorage] reference of the image to download.
-     * @param imageFile The [File] instance referencing where the object's image should be stored at.
-     * @param objectId The id of the object to download.
-     * @param namespace The namespace of the object to download.
-     * @param scale The scale with which to download the object.
+     * @param data The data class that sets what to download
      * @param progressListener A listener for observing the download progress.
      */
     private suspend fun downloadImageFile(
-        imageReference: StorageReference,
-        imageFile: File,
-        objectId: String,
-        namespace: String,
-        scale: Float,
+        data: ImageDownloadData,
         progressListener: suspend (progress: ValueMax<Long>) -> Unit
     ): Result = coroutineScope {
+        val imageReference: StorageReference = data.imageReference
+        val imageFile: File = data.imageFile
+        val objectId: String = data.objectId
+        val namespace: String = data.namespace
+        val scale: Float = data.scale
+
         val dataDir = imageFile.parentFile!!
 
         // Check that everything is ready for downloading the image file.
@@ -256,16 +254,17 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * Downloads the KMZ file from the server.
      * @author Arnau Mora
      * @since 20210926
-     * @param reference The [StorageReference] of the target kmz file to download.
-     * @param targetFile The [File] to store the KMZ data at.
+     * @param data The instance that sets what to download.
      * @param progressListener A callback function for observing the download progress.
      */
     @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun downloadKmz(
-        reference: StorageReference,
-        targetFile: File,
+        data: KMZDownloadData,
         progressListener: suspend (progress: ValueMax<Long>) -> Unit
     ) = coroutineScope {
+        val reference: StorageReference = data.kmzReference
+        val targetFile: File = data.kmzFile
+
         progressListener(ValueMax(0, -1))
 
         Timber.v("Getting the stream of the KMZ file ($reference)...")
@@ -417,7 +416,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
 
         // This total byte count is used for displaying the total progress, not individually on each
         // item.
-        Timber.v("Suming total byte count...")
+        Timber.v("Summing total byte count...")
         val imageTotalBytes = imageFiles.sumOf { it.imageReference.metadata.await().sizeBytes }
         val kmzTotalBytes = kmzFiles.sumOf { it.kmzReference.metadata.await().sizeBytes }
         val totalBytes = imageTotalBytes + kmzTotalBytes
@@ -432,31 +431,38 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         }
 
         Timber.v("Downloading image files...")
-        for (downloadRequest in imageFiles)
-            downloadRequest.run {
-                Timber.d("Downloading \"$imageReference\" to \"$imageFile\"...")
-                downloadImageFile(
-                    imageReference,
-                    imageFile,
-                    objectId,
-                    namespace,
-                    scale,
-                    downloadProgressListener
-                )
-                bytesCounter += lastElementByteCount
-            }
+        for (downloadRequest in imageFiles) {
+            Timber.d(
+                "Downloading \"%s\" to \"%s\"...",
+                downloadRequest.imageReference.toString(),
+                downloadRequest.imageFile.toString()
+            )
+            downloadImageFile(downloadRequest, downloadProgressListener)
+            bytesCounter += lastElementByteCount
+        }
 
         Timber.v("Downloading KMZ files...")
-        for (downloadRequest in kmzFiles)
-            downloadRequest.run {
-                Timber.d("Downloading \"$kmzReference\" to \"$kmzFile\"...")
-                downloadKmz(kmzReference, kmzFile, downloadProgressListener)
-                bytesCounter += lastElementByteCount
-            }
+        for (downloadRequest in kmzFiles) {
+            Timber.d(
+                "Downloading \"%s\" to \"%s\"...",
+                downloadRequest.kmzReference,
+                downloadRequest.kmzFile
+            )
+            downloadKmz(downloadRequest, downloadProgressListener)
+            bytesCounter += lastElementByteCount
+        }
 
         Timber.d("Getting parent size...")
-        val parentImageSize = imageFiles.firstOrNull()?.imageFile?.size() ?: 0
-        val parentKmzSize = kmzFiles.firstOrNull()?.kmzFile?.size() ?: 0
+        val parentImageSize = imageFiles.firstOrNull()?.imageFile?.size()
+            ?: run {
+                Timber.w("There are no image files downloaded to get size from.")
+                0
+            }
+        val parentKmzSize = kmzFiles.firstOrNull()?.kmzFile?.size()
+            ?: run {
+                Timber.w("There are no kmz files downloaded to get size from.")
+                0
+            }
         val parentSize = parentImageSize + parentKmzSize
         parentData.size = parentSize
 
