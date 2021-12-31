@@ -21,6 +21,7 @@ data class DownloadedData(
     @Document.StringProperty(indexingType = INDEXING_TYPE_EXACT_TERMS) var path: String,
     @Document.LongProperty var childrenCount: Long,
     @Document.StringProperty(indexingType = INDEXING_TYPE_EXACT_TERMS) var parentId: String,
+    @Document.LongProperty var sizeBytes: Long
 ) {
     /**
      * Converts the [DownloadedData] into a [DataClass].
