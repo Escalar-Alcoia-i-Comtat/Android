@@ -35,5 +35,7 @@ private fun rememberChipWithLifecycle(
 @Composable
 fun Chip(text: String, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     val chipState = rememberChipWithLifecycle(text, onClick)
-    AndroidView({ chipState }, modifier) { }
+    AndroidView(factory = { chipState }, modifier, update = {
+        it.text = text
+    })
 }
