@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.shared
 
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
@@ -74,6 +75,7 @@ val SEARCH_SCHEMAS = listOf<Class<*>>(
     SectorData::class.java,
     PathData::class.java,
     BlockingData::class.java,
+    DownloadedData::class.java,
 )
 
 const val ARGUMENT_AREA_ID = "area_id"
