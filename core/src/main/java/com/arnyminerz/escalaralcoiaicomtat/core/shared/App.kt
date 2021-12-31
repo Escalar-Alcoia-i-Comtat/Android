@@ -6,7 +6,9 @@ import android.app.Application
 import android.content.Context
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
+import androidx.appsearch.app.SetSchemaRequest
 import androidx.lifecycle.AndroidViewModel
+import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -15,6 +17,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvide
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.auth.loggedIn
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPath
@@ -82,6 +85,13 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         super.onCreate()
 
         searchSession = runBlocking { createSearchSession(applicationContext) }
+        doAsync {
+            Timber.v("Search > Adding document classes...")
+            val setSchemaRequest = SetSchemaRequest.Builder()
+                .addDocumentClasses(SEARCH_SCHEMAS)
+                .build()
+            searchSession.setSchema(setSchemaRequest).await()
+        }
 
         PreferencesModule.initWith(this)
 
