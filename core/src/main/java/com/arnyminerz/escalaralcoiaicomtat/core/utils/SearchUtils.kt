@@ -242,6 +242,59 @@ suspend fun AppSearchSession.getPaths(): List<Path> =
     getList<Path, PathData>("", Path.NAMESPACE)
 
 /**
+ * Fetches the children elements of a DataClass.
+ * @author Arnau Mora
+ * @since 20211231
+ * @param childrenNamespace The namespace of the children elements.
+ * @param objectId The id of the parent DataClass.
+ */
+@WorkerThread
+suspend fun <A : DataClassImpl> AppSearchSession.getChildren(
+    childrenNamespace: String,
+    objectId: String
+): List<A> {
+    Timber.v("$this > Building search spec...")
+    val searchSpec = SearchSpec.Builder()
+        .addFilterNamespaces(childrenNamespace)
+        .setResultCountPerPage(100)
+        .setOrder(SearchSpec.ORDER_ASCENDING)
+        .setRankingStrategy(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE)
+        .build()
+    Timber.v("$this > Performing search for \"$objectId\" with namespace \"$childrenNamespace\"...")
+    val searchResults = search(objectId, searchSpec)
+    Timber.v("$this > Awaiting for results...")
+    val nextPage = searchResults.nextPage.await()
+    val list = arrayListOf<A>()
+    Timber.v("$this > Building results list...")
+    for ((p, page) in nextPage.withIndex()) {
+        val genericDocument = page.genericDocument
+        val schemaType = genericDocument.schemaType
+        Timber.v("$this > [$p] Schema type: $schemaType")
+        val data = try {
+            when (schemaType) {
+                "AreaData" -> genericDocument.toDocumentClass(AreaData::class.java).data()
+                "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).data()
+                "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).data()
+                "PathData" -> genericDocument.toDocumentClass(PathData::class.java).data()
+                else -> {
+                    Timber.w("$this > [$p] Got unknown schema type.")
+                    continue
+                }
+            }
+        } catch (e: AppSearchException) {
+            Timber.e(e, "$this > [$p] Could not convert document class!")
+            continue
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        val a = data as? A ?: continue
+        Timber.v("$this > [$p] Adding to result list...")
+        list.add(a)
+    }
+    return list
+}
+
+/**
  * Fetches all the downloaded items.
  * @author Arnau Mora
  * @since 20211231
