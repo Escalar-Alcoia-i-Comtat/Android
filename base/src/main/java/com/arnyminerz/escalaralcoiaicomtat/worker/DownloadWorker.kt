@@ -530,8 +530,9 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             Timber.v("Finished downloading $displayName. Result: $downloadResult")
             notification.destroy()
 
+            val downloadResultData = downloadResult.outputData
             val intent: PendingIntent? =
-                if (downloadResult == Result.success()) {
+                if (downloadResultData.error == null) {
                     Timber.v("Getting intent...")
                     val downloadPathSplit = downloadPath!!.split('/')
                     when (namespace) {
@@ -564,7 +565,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     }
                 } else null
 
-            if (downloadResult == Result.success()) {
+            if (downloadResultData.error == null) {
                 Timber.v("Showing download finished notification")
                 val text = applicationContext.getString(
                     R.string.notification_download_complete_message,
@@ -578,7 +579,6 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     .withIntent(intent)
                     .buildAndShow()
 
-                val downloadResultData = downloadResult.outputData
                 if (namespace != null && downloadPath != null) {
                     // This is for making it easier to recover later on which DataClasses are downloaded
                     Timber.v("Indexing downloaded element...")
