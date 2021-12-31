@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,7 +53,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen.ApplicationIn
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.GoogleMap
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.MapBottomDialog
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.includeAll
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
@@ -313,7 +313,8 @@ class MainActivity : LanguageComponentActivity() {
 
     @Composable
     private fun DownloadsScreen() {
-        var size by remember { mutableStateOf(0L) }
+        val downloads by downloadsViewModel.downloads.observeAsState()
+        val sizeString by remember { downloadsViewModel.sizeString }
         LazyColumn {
             item {
                 Card(
@@ -336,14 +337,13 @@ class MainActivity : LanguageComponentActivity() {
                         .padding(start = 12.dp, end = 12.dp)
                         .fillMaxWidth()
                 ) {
-                    Chip(humanReadableByteCountBin(size))
+                    Timber.i("Size: $sizeString")
+                    Chip(sizeString)
                 }
             }
-            items(downloadsViewModel.downloads) { data ->
+            items(downloads ?: emptyList()) { data ->
                 Text(text = data.displayName)
-                size += data.sizeBytes
             }
         }
-        downloadsViewModel.loadDownloads()
     }
 }
