@@ -2,13 +2,10 @@ package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel
 
 import android.app.Application
 import androidx.annotation.WorkerThread
-import androidx.appsearch.app.SearchSpec
-import androidx.appsearch.exceptions.AppSearchException
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
@@ -38,25 +35,10 @@ class DownloadsViewModel(application: Application) : AndroidViewModel(applicatio
     fun loadDownloads() {
         Timber.i("Loading downloads...")
         viewModelScope.launch {
-            val searchSession = app.searchSession
-            val searchResults = searchSession.search(
-                "",
-                SearchSpec.Builder()
-                    .addFilterDocumentClasses(DownloadedData::class.java)
-                    .build()
-            )
-            var results = searchResults.nextPage.await()
-            while (results.isNotEmpty()) {
-                for (result in results) {
-                    val document = result.genericDocument
-                    try {
-                        val downloadedData = document.toDocumentClass(DownloadedData::class.java)
-                        downloads.add(downloadedData)
-                    } catch (e: AppSearchException) {
-                        Timber.e(e, "Could not convert data to DownloadedData.")
-                    }
-                }
-                results = searchResults.nextPage.await()
+            val downloadsFlow = app.getDownloads()
+            downloadsFlow.collect { data ->
+                Timber.i("Collected ${data.namespace}:${data.objectId}, adding.")
+                downloads.add(data)
             }
             // TODO: Add currently downloading tasks
         }
