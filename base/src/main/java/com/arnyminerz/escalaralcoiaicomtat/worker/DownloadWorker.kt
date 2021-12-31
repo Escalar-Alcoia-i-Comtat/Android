@@ -35,6 +35,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.progress
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.size
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toInt
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_DISPLAY_NAME
@@ -306,7 +307,9 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         val objectId: String,
         val childrenCount: Long? = null,
         val parentId: String? = null
-    )
+    ) {
+        var size: Long? = null
+    }
 
     /**
      * Fetches the data from [FirebaseFirestore] at the specified [path]. And downloads the image
@@ -451,6 +454,12 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 bytesCounter += lastElementByteCount
             }
 
+        Timber.d("Getting parent size...")
+        val parentImageSize = imageFiles.firstOrNull()?.imageFile?.size() ?: 0
+        val parentKmzSize = kmzFiles.firstOrNull()?.kmzFile?.size() ?: 0
+        val parentSize = parentImageSize + parentKmzSize
+        parentData.size = parentSize
+
         parentData
     }
 
@@ -510,6 +519,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                             "objectId" to downloadData.objectId,
                             "childrenCount" to downloadData.childrenCount,
                             "parentId" to downloadData.parentId,
+                            "parentSize" to downloadData.size,
                         )
                     )
                 }
@@ -587,6 +597,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                         ?: return failure(ERROR_DATA_TRANSFERENCE)
                     val parentId = downloadResultData.getString("parentId")
                         ?: return failure(ERROR_DATA_TRANSFERENCE)
+                    val parentSize = downloadResultData.getLong("parentSize", 0)
                     val childrenCount = downloadResultData.getLong("childrenCount", -1)
                     // Process the data, and index it into AppSearch
                     val downloadedData = DownloadedData(
@@ -596,7 +607,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                         displayName,
                         downloadPath!!,
                         childrenCount,
-                        parentId
+                        parentId,
+                        parentSize
                     )
                     Timber.d("DownloadedData: $downloadedData")
                     val request = PutDocumentsRequest.Builder()
