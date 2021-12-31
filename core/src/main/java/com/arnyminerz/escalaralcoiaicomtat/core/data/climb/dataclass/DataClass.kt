@@ -147,12 +147,55 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 ) {
     companion object {
         /**
+         * Generates a unique ID that represents a DataClass unequivocally.
+         * @author Arnau Mora
+         * @since 20211231
+         */
+        private fun generatePin(namespace: String, objectId: String) = "${namespace}_$objectId"
+
+        /**
          * Returns the correct image name for the desired [objectId] and [namespace].
          * @author Arnau Mora
          * @since 20210822
          */
         fun imageName(namespace: String, objectId: String, suffix: String?) =
             "$namespace-$objectId${suffix ?: ""}"
+
+        /**
+         * Returns the File that represents the image of the DataClass
+         * @author Arnau Mora
+         * @date 2020/09/10
+         * @param context The context to run from
+         * @param namespace The namespace of the DataClass
+         * @param objectId The id of the DataClass
+         * @return The path of the image file that can be downloaded
+         */
+        private fun imageFile(context: Context, namespace: String, objectId: String): File =
+            File(dataDir(context), imageName(namespace, objectId, null))
+
+        /**
+         * Returns the File that represents the image of the DataClass in cache.
+         * @author Arnau Mora
+         * @date 20210724
+         * @param context The context to run from
+         * @param namespace The namespace of the DataClass
+         * @param objectId The id of the DataClass
+         * @param suffix If not null, will be added to the end of the file name.
+         * @return The path of the image file that can be downloaded
+         */
+        private fun cacheImageFile(
+            context: Context,
+            namespace: String,
+            objectId: String,
+            suffix: String? = null
+        ): File =
+            File(context.cacheDir, imageName(namespace, objectId, suffix))
+
+        fun kmzFile(context: Context, permanent: Boolean, namespace: String, objectId: String) =
+            File(
+                if (permanent) dataDir(context) else context.cacheDir,
+                generatePin(namespace, objectId)
+            )
 
         /**
          * Gets the [Intent] used to launch the [Activity] of a [DataClass] using [query] as the
@@ -232,7 +275,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210724
      */
     val pin: String
-        get() = "${namespace}_$objectId"
+        get() = generatePin(namespace, objectId)
 
     /**
      * Returns the parent element of the [DataClass].
@@ -405,10 +448,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to run from.
      */
     private fun kmzFile(context: Context, permanent: Boolean): File =
-        File(
-            if (permanent) dataDir(context) else context.cacheDir,
-            pin
-        )
+        kmzFile(context, permanent, namespace, objectId)
 
     /**
      * Gets the KMZ file of the [Area] and stores it into [targetFile].
@@ -768,8 +808,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to run from
      * @return The path of the image file that can be downloaded
      */
-    fun imageFile(context: Context): File =
-        File(dataDir(context), imageName(namespace, objectId, null))
+    private fun imageFile(context: Context): File =
+        Companion.imageFile(context, namespace, objectId)
 
     /**
      * Returns the File that represents the image of the DataClass in cache.
@@ -779,8 +819,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param suffix If not null, will be added to the end of the file name.
      * @return The path of the image file that can be downloaded
      */
-    fun cacheImageFile(context: Context, suffix: String? = null): File =
-        File(context.cacheDir, imageName(namespace, objectId, suffix))
+    private fun cacheImageFile(context: Context, suffix: String? = null): File =
+        Companion.cacheImageFile(context, namespace, objectId, suffix)
 
     /**
      * Creates a dynamic link access for the DataClass
