@@ -544,14 +544,26 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 if (namespace != null && downloadPath != null) {
                     Timber.v("Indexing downloaded element...")
                     val downloadedData = DownloadedData(
-                        downloadPath!!.split("/")[0],
+                        downloadPath!!.split("/").last(),
                         System.currentTimeMillis(),
-                        namespace!!
+                        namespace!!,
+                        displayName,
+                        downloadPath!!
                     )
+                    Timber.d("DownloadedData: $downloadedData")
                     val request = PutDocumentsRequest.Builder()
                         .addDocuments(downloadedData)
                         .build()
-                    appSearchSession.put(request).await()
+                    val result = appSearchSession.put(request).await()
+                    if (result.isSuccess)
+                        Timber.i("Indexed download correctly.")
+                    else {
+                        Timber.i("Failures:")
+                        for (failure in result.failures) {
+                            val value = failure.value
+                            Timber.i("- ${value.resultCode} :: ${value.errorMessage}")
+                        }
+                    }
                 }
             } else {
                 Timber.v("Download failed! Result: $downloadResult. Showing notification.")
