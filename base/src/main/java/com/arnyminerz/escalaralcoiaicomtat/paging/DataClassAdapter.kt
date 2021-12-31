@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.paging
 
 import android.app.Activity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.DimenRes
 import androidx.annotation.UiThread
@@ -219,9 +218,8 @@ open class DataClassAdapter(
 
                     // Check download status
                     doAsync {
-                        val downloadStatus =
-                            dataClass.downloadStatus(context, app.searchSession)
-                            { binding.wideProgressBar.progress = it.percentage }
+                        val downloadStatus = dataClass.downloadStatus(context, app.searchSession)
+                        // TODO: Check if binding.wideProgressBar is showing state correctly
                         uiContext {
                             updateDownloadStatus(downloadStatus)
                         }
