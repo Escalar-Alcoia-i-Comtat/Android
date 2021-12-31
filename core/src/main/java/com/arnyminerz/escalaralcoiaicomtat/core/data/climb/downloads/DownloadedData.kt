@@ -18,7 +18,9 @@ data class DownloadedData(
     @Document.CreationTimestampMillis var timestamp: Long,
     @Document.Namespace var namespace: String,
     @Document.StringProperty(indexingType = INDEXING_TYPE_EXACT_TERMS) var displayName: String,
-    @Document.StringProperty(indexingType = INDEXING_TYPE_EXACT_TERMS) var path: String
+    @Document.StringProperty(indexingType = INDEXING_TYPE_EXACT_TERMS) var path: String,
+    @Document.LongProperty var childrenCount: Long,
+    @Document.StringProperty(indexingType = INDEXING_TYPE_EXACT_TERMS) var parentId: String,
 ) {
     /**
      * Converts the [DownloadedData] into a [DataClass].
