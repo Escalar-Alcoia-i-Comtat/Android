@@ -88,3 +88,11 @@ const val ERROR_UNKNOWN_NAMESPACE = "unknown_namespace"
  * @since 20210422
  */
 const val ERROR_UPDATE_IMAGE_REF = "update_image_ref"
+
+/**
+ * When there has been an error while transferring the downloaded data values from the download
+ * function into the conclusion function.
+ * @author Arnau Mora
+ * @since 20211231
+ */
+const val ERROR_DATA_TRANSFERENCE = "data_transference"
