@@ -337,11 +337,8 @@ class MainActivity : LanguageComponentActivity() {
                     Chip("Testing")
                 }
             }
-            items(downloadsViewModel.downloads) { dataClass ->
-                Text(text = dataClass.displayName)
-            }
-            items(downloadsViewModel.downloading) { (dataClass, progress) ->
-                Text(text = "${dataClass.displayName} - $progress%")
+            items(downloadsViewModel.downloads) { data ->
+                Text(text = data.displayName)
             }
         }
         downloadsViewModel.loadDownloads()
