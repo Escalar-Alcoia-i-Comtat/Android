@@ -13,7 +13,6 @@ import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
-import androidx.appsearch.exceptions.AppSearchException
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -22,7 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -45,6 +44,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getChildren
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getData
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
@@ -253,6 +253,72 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 }
             }
         }
+
+        /**
+         * Deletes a DataClass from the device.
+         * @author Arnau Mora
+         * @since 20211231
+         * @param A The type of the children of the DataClass
+         * @param context The [Context] that is requesting the deletion.
+         * @param searchSession The [AppSearchSession] for fetching children and un-indexing the
+         * download.
+         * @param namespace The namespace of the DataClass to delete.
+         * @param objectId The id of the DataClass to delete.
+         * @return True if the DataClass was deleted successfully.
+         */
+        suspend fun <A : DataClassImpl> delete(
+            context: Context,
+            searchSession: AppSearchSession,
+            namespace: String,
+            objectId: String
+        ): Boolean {
+            Timber.v("Deleting $objectId")
+            val lst = arrayListOf<Boolean>() // Stores all the delete success statuses
+
+            // KMZ should be deleted
+            val kmzFile = kmzFile(context, true, namespace, objectId)
+            if (kmzFile.exists()) {
+                Timber.v("$this > Deleting \"$kmzFile\"")
+                lst.add(kmzFile.deleteIfExists())
+            }
+
+            // Instead of deleting image, move to cache. System will manage it if necessary.
+            val imgFile = imageFile(context, namespace, objectId)
+            if (imgFile.exists()) {
+                val cacheImageFile = cacheImageFile(context, namespace, objectId)
+                Timber.v("$this > Copying \"$imgFile\" to \"$cacheImageFile\"...")
+                imgFile.copyTo(cacheImageFile, true)
+                Timber.v("$this > Deleting \"$imgFile\"")
+                lst.add(imgFile.delete())
+            }
+
+            // This may not be the best method, but for now it works
+            when (namespace) {
+                Area.NAMESPACE -> Zone.NAMESPACE
+                Zone.NAMESPACE -> Sector.NAMESPACE
+                Sector.NAMESPACE -> Path.NAMESPACE
+                else -> null
+            }?.let { childrenNamespace ->
+                Timber.d("Deleting children...")
+                val children = searchSession.getChildren<A>(childrenNamespace, objectId)
+                for (child in children)
+                    if (child is DataClass<*, *>)
+                        lst.add(child.delete(context, searchSession))
+            }
+
+            // Remove dataclass from index.
+            // Since Sectors that are children of a Zone also contain its ID this will also remove them
+            // from the index.
+            searchSession.remove(
+                objectId,
+                SearchSpec.Builder()
+                    .addFilterNamespaces(namespace)
+                    .addFilterDocumentClasses(DownloadedData::class.java)
+                    .build()
+            ).await()
+
+            return lst.allTrue()
+        }
     }
 
     /**
@@ -318,50 +384,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20210313
      * @param searchSession The session for performing searches.
+     * @throws IllegalStateException When no [DataClassMetadata.childNamespace] is set in
+     * [DataClass.metadata].
      */
     @WorkerThread
-    suspend fun getChildren(searchSession: AppSearchSession): List<A> {
-        val childNamespace = metadata.childNamespace
-        Timber.v("$this > Building search spec...")
-        val searchSpec = SearchSpec.Builder()
-            .addFilterNamespaces(childNamespace)
-            .setResultCountPerPage(100)
-            .setOrder(SearchSpec.ORDER_ASCENDING)
-            .setRankingStrategy(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE)
-            .build()
-        Timber.v("$this > Performing search for \"$objectId\" with namespace \"$childNamespace\"...")
-        val searchResults = searchSession.search(objectId, searchSpec)
-        Timber.v("$this > Awaiting for results...")
-        val nextPage = searchResults.nextPage.await()
-        val list = arrayListOf<A>()
-        Timber.v("$this > Building results list...")
-        for ((p, page) in nextPage.withIndex()) {
-            val genericDocument = page.genericDocument
-            val schemaType = genericDocument.schemaType
-            Timber.v("$this > [$p] Schema type: $schemaType")
-            val data = try {
-                when (schemaType) {
-                    "AreaData" -> genericDocument.toDocumentClass(AreaData::class.java).data()
-                    "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).data()
-                    "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).data()
-                    "PathData" -> genericDocument.toDocumentClass(PathData::class.java).data()
-                    else -> {
-                        Timber.w("$this > [$p] Got unknown schema type.")
-                        continue
-                    }
-                }
-            } catch (e: AppSearchException) {
-                Timber.e(e, "$this > [$p] Could not convert document class!")
-                continue
-            }
-
-            @Suppress("UNCHECKED_CAST")
-            val a = data as? A ?: continue
-            Timber.v("$this > [$p] Adding to result list...")
-            list.add(a)
-        }
-        return list
-    }
+    @Throws(IllegalStateException::class)
+    suspend fun getChildren(searchSession: AppSearchSession): List<A> =
+        metadata.childNamespace?.let { childNamespace ->
+            searchSession.getChildren(childNamespace, objectId)
+        } ?: throw IllegalStateException("If no child namespace is set in metadata.")
 
     /**
      * Gets the children element at [index].
@@ -721,43 +752,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @return If the content was deleted successfully. Note: returns true if not downloaded
      */
     @WorkerThread
-    suspend fun delete(context: Context, searchSession: AppSearchSession): Boolean {
-        Timber.v("Deleting $objectId")
-        val lst = arrayListOf<Boolean>() // Stores all the delection success statuses
-
-        // KMZ should be deleted
-        val kmzFile = kmzFile(context, true)
-        if (kmzFile.exists()) {
-            Timber.v("$this > Deleting \"$kmzFile\"")
-            lst.add(kmzFile.deleteIfExists())
-        }
-
-        // Instead of deleting image, move to cache. System will manage it if necessary.
-        val imgFile = imageFile(context)
-        if (imgFile.exists()) {
-            val cacheImageFile = cacheImageFile(context)
-            Timber.v("$this > Copying \"$imgFile\" to \"$cacheImageFile\"...")
-            imgFile.copyTo(cacheImageFile, true)
-            Timber.v("$this > Deleting \"$imgFile\"")
-            lst.add(imgFile.delete())
-        }
-
-        val children = getChildren(searchSession)
-        for (child in children)
-            if (child is DataClass<*, *>)
-                lst.add(child.delete(context, searchSession))
-
-        // Remove dataclass from index
-        searchSession.remove(
-            objectId,
-            SearchSpec.Builder()
-                .addFilterNamespaces(namespace)
-                .addFilterDocumentClasses(DownloadedData::class.java)
-                .build()
-        ).await()
-
-        return lst.allTrue()
-    }
+    suspend fun delete(context: Context, searchSession: AppSearchSession): Boolean =
+        Companion.delete<A>(context, searchSession, namespace, objectId)
 
     /**
      * Gets the space that is occupied by the data class' downloaded data in the system
