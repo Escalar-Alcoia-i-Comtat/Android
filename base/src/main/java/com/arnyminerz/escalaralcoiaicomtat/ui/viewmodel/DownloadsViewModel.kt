@@ -1,15 +1,15 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel
 
 import android.app.Application
+import androidx.appsearch.app.SearchSpec
+import androidx.appsearch.exceptions.AppSearchException
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.work.WorkInfo
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.livedata.MutableListLiveData
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -19,16 +19,12 @@ class DownloadsViewModel(application: Application) : AndroidViewModel(applicatio
         Timber.d("$this::init")
     }
 
-    private val downloadingObservers = arrayListOf<Observer<List<WorkInfo>>>()
-
     override fun onCleared() {
         super.onCleared()
         Timber.d("$this::onCleared")
     }
 
-    val downloads = MutableListLiveData<DataClass<*, *>>().apply { value = mutableListOf() }
-    val downloading =
-        MutableListLiveData<Pair<DataClass<*, *>, Int>>().apply { value = mutableListOf() }
+    val downloads = MutableListLiveData<DownloadedData>().apply { value = mutableListOf() }
 
     /**
      * Starts downloading all the dataclasses that have been downloaded.
@@ -38,55 +34,27 @@ class DownloadsViewModel(application: Application) : AndroidViewModel(applicatio
     fun loadDownloads() {
         Timber.i("Loading downloads...")
         viewModelScope.launch {
-            val areas = app.getAreas()
-            areas.forEach { area ->
-                Timber.d("Loading downloads for $area...")
-
-                suspend fun iterateChildStatus(items: List<DataClass<*, *>>) {
-                    items.forEach { item ->
-                        val downloadStatus = item.downloadStatus(context, app.searchSession)
-                        when {
-                            downloadStatus.downloaded -> {
-                                Timber.i("$item is downloaded")
-                                downloads.add(item)
-                            }
-                            downloadStatus.downloading -> {
-                                val workInfoLiveData = item.downloadWorkInfoLiveData(context)
-                                val downloadingIndex = downloading.size
-                                val observerIndex = downloadingObservers.size
-                                val observer = Observer<List<WorkInfo>> { workInfos ->
-                                    if (workInfos.isEmpty())
-                                        return@Observer
-                                    val workInfo = workInfos[0]
-                                    when {
-                                        workInfo.state.isFinished -> {
-                                            val selfObserver = downloadingObservers[observerIndex]
-                                            workInfoLiveData.removeObserver(selfObserver)
-                                            downloading.removeAt(downloadingIndex)
-                                            downloads.add(item)
-                                        }
-                                        workInfo.state == WorkInfo.State.RUNNING -> {
-                                            val progress = workInfo.progress.getInt("progress", -1)
-                                            downloading.set(downloadingIndex, item to progress)
-                                        }
-                                    }
-                                }
-                                downloadingObservers[observerIndex] = observer
-                                downloading.set(downloadingIndex, item to -1)
-                                workInfoLiveData.observeForever(observer)
-                            }
-                        }
+            val searchSession = app.searchSession
+            val searchResults = searchSession.search(
+                "",
+                SearchSpec.Builder()
+                    .addFilterDocumentClasses(DownloadedData::class.java)
+                    .build()
+            )
+            var results = searchResults.nextPage.await()
+            while (results.isNotEmpty()) {
+                for (result in results) {
+                    val document = result.genericDocument
+                    try {
+                        val downloadedData = document.toDocumentClass(DownloadedData::class.java)
+                        downloads.add(downloadedData)
+                    } catch (e: AppSearchException) {
+                        Timber.e(e, "Could not convert data to DownloadedData.")
                     }
                 }
-
-                val zones = area.getChildren(app.searchSession)
-                iterateChildStatus(zones)
-
-                zones.forEach { zone ->
-                    val sectors = zone.getChildren(app.searchSession)
-                    iterateChildStatus(sectors)
-                }
+                results = searchResults.nextPage.await()
             }
+            // TODO: Add currently downloading tasks
         }
     }
 
