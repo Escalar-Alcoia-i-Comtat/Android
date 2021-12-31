@@ -1,12 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel
 
 import android.app.Application
-import androidx.annotation.WorkerThread
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.livedata.MutableListLiveData
@@ -25,8 +23,6 @@ class DownloadsViewModel(application: Application) : AndroidViewModel(applicatio
 
     val downloads = MutableListLiveData<DownloadedData>().apply { value = mutableListOf() }
 
-    val dataClasses = MutableListLiveData<DataClass<*, *>>().apply { value = mutableListOf() }
-
     /**
      * Starts downloading all the dataclasses that have been downloaded.
      * @author Arnau Mora
@@ -41,25 +37,6 @@ class DownloadsViewModel(application: Application) : AndroidViewModel(applicatio
                 downloads.add(data)
             }
             // TODO: Add currently downloading tasks
-        }
-    }
-
-    /**
-     * Extracts the [DataClass] from the [data].
-     * @author Arnau Mora
-     * @since 20211231
-     * @param index The position in the list which the data class is at.
-     * @param data The data to extract from.
-     */
-    fun exportDataClass(
-        index: Int,
-        data: DownloadedData,
-        onExport: (@WorkerThread suspend (dataClass: DataClass<*, *>) -> Unit)? = null
-    ) {
-        viewModelScope.launch {
-            val dataClass = data.export(app)
-            dataClasses.set(index, dataClass)
-            onExport?.let { it(dataClass) }
         }
     }
 
