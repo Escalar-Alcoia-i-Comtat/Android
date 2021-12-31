@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,6 +53,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen.ApplicationIn
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.GoogleMap
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.MapBottomDialog
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.includeAll
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
@@ -312,6 +314,7 @@ class MainActivity : LanguageComponentActivity() {
 
     @Composable
     private fun DownloadsScreen() {
+        var size by remember { mutableStateOf(0L) }
         LazyColumn {
             item {
                 Card(
@@ -334,11 +337,15 @@ class MainActivity : LanguageComponentActivity() {
                         .padding(start = 12.dp, end = 12.dp)
                         .fillMaxWidth()
                 ) {
-                    Chip("Testing")
+                    Chip(humanReadableByteCountBin(size))
                 }
             }
-            items(downloadsViewModel.downloads) { data ->
+            itemsIndexed(downloadsViewModel.downloads) { index, data ->
                 Text(text = data.displayName)
+                downloadsViewModel.exportDataClass(index, data) {
+                    val dataClassSize = it.size(this@MainActivity, app.searchSession)
+                    size += dataClassSize
+                }
             }
         }
         downloadsViewModel.loadDownloads()
