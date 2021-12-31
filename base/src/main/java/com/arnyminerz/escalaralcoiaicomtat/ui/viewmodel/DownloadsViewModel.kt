@@ -4,11 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.liveData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.livedata.MutableListLiveData
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class DownloadsViewModel(application: Application) : AndroidViewModel(application) {
@@ -21,23 +19,15 @@ class DownloadsViewModel(application: Application) : AndroidViewModel(applicatio
         Timber.d("$this::onCleared")
     }
 
-    val downloads = MutableListLiveData<DownloadedData>().apply { value = mutableListOf() }
-
-    /**
-     * Starts downloading all the dataclasses that have been downloaded.
-     * @author Arnau Mora
-     * @since 20211230
-     */
-    fun loadDownloads() {
+    val downloads = liveData<List<DownloadedData>> {
         Timber.i("Loading downloads...")
-        viewModelScope.launch {
-            val downloadsFlow = app.getDownloads()
-            downloadsFlow.collect { data ->
-                Timber.i("Collected ${data.namespace}:${data.objectId}, adding.")
-                downloads.add(data)
-            }
-            // TODO: Add currently downloading tasks
+        val list = arrayListOf<DownloadedData>()
+        val downloadsFlow = app.getDownloads()
+        downloadsFlow.collect { data ->
+            Timber.i("Collected ${data.namespace}:${data.objectId}, adding.")
+            list.add(data)
         }
+        emit(list)
     }
 
     class Factory(
