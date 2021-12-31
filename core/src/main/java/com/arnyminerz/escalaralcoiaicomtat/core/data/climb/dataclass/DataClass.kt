@@ -11,6 +11,7 @@ import android.widget.ImageView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
+import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
 import androidx.appsearch.exceptions.AppSearchException
 import androidx.lifecycle.LiveData
@@ -310,6 +311,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 Timber.e(e, "$this > [$p] Could not convert document class!")
                 continue
             }
+
+            @Suppress("UNCHECKED_CAST")
             val a = data as? A ?: continue
             Timber.v("$this > [$p] Adding to result list...")
             list.add(a)
@@ -572,6 +575,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             String::class.java,
             DownloadData::class.java
         )
+        @Suppress("UNCHECKED_CAST")
         return schedule.invoke(null, context, pin, downloadData) as LiveData<WorkInfo>
     }
 
@@ -580,14 +584,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20210313
      * @param context The currently calling [Context].
-     * @param progressListener A progress updater.
      * @return a matching DownloadStatus representing the Data Class' download status
      */
     @WorkerThread
     suspend fun downloadStatus(
         context: Context,
-        searchSession: AppSearchSession,
-        progressListener: (@UiThread (progress: ValueMax<Int>) -> Unit)? = null
+        searchSession: AppSearchSession
     ): DownloadStatus {
         Timber.d("$pin Checking if downloaded")
 
@@ -595,46 +597,52 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val result = if (downloadWorkInfo != null)
             DownloadStatus.DOWNLOADING
         else {
-            val imageFile = imageFile(context)
-            Timber.v("Checking if image file exists...")
-            val imageFileExists = imageFile.exists()
-            if (!imageFileExists)
-                Timber.d("$pin Image file ($imageFile) doesn't exist")
+            Timber.d("Finding for element in indexed downloads...")
+            val searchResults = searchSession.search(
+                objectId,
+                SearchSpec.Builder()
+                    .addFilterDocumentClasses(DownloadedData::class.java)
+                    .build()
+            )
+            val searchResultsList = arrayListOf<SearchResult>()
+            var page = searchResults.nextPage.await()
+            while (page.isNotEmpty()) {
+                searchResultsList.addAll(page)
+                page = searchResults.nextPage.await()
+            }
+            Timber.d("Got ${searchResultsList.size} indexed downloads for $this")
 
-            // If image file exists:
+            var isDownloaded = false
+            var childrenCount = -1L
+            var downloadedChildrenCount = 0
+            if (searchResultsList.isNotEmpty()) {
+                for (result in searchResultsList) {
+                    val document = result.genericDocument
+                    val downloadedData = document.toDocumentClass(DownloadedData::class.java)
+                    val isChildren = downloadedData.parentId == objectId
+                    if (isChildren)
+                    // If it's a children, increase the counter
+                        downloadedChildrenCount++
+                    else {
+                        // If it's not a children, it means that the dataclass is downloaded
+                        isDownloaded = true
+                        childrenCount = downloadedData.childrenCount
+                    }
+                }
+            }
+            Timber.d("$this is downloaded: $isDownloaded. Has $downloadedChildrenCount/$childrenCount downloaded children.")
+
+            // If the Dataclass is downloaded:
+            // - There are not any downloaded children: PARTIALLY
             // - If all the children are downloaded: DOWNLOADED
             // - If there's a non-downloaded children: PARTIALLY
-            // If image file doesn't exist:
-            // - If there are not any downloaded children: NOT_DOWNLOADED
-            // - If there's at least one downloaded children: PARTIALLY
+            // If the DataClass is not downloaded:
+            // NOT_DOWNLOADED
 
-            Timber.v("$pin Getting children elements download status...")
-            val children = getChildren(searchSession)
-
-            Timber.v("$pin Finding for a downloaded children in ${children.size}...")
-            var allChildrenDownloaded = true
-            var atLeastOneChildrenDownloaded = false
-            for ((c, child) in children.withIndex()) {
-                if (child is DataClass<*, *>) {
-                    uiContext { progressListener?.invoke(ValueMax(c, children.size)) }
-                    val childDownloadStatus = child.downloadStatus(context, searchSession)
-                    if (!childDownloadStatus.downloaded) {
-                        // If at least one non-downloaded, that means that not all children are
-                        Timber.d("$pin has a non-downloaded children (${child.pin}): $childDownloadStatus")
-                        allChildrenDownloaded = false
-                    } else {
-                        // This means there's at least one children downloaded (or downloading?)
-                        Timber.v("$pin has a downloaded/downloading children (${child.pin}): $childDownloadStatus")
-                        atLeastOneChildrenDownloaded = true
-                        break
-                    }
-                } else Timber.d("$pin Child is not DataClass")
-            }
-
-            if (imageFileExists && allChildrenDownloaded)
-                DownloadStatus.DOWNLOADED
-            else if (!imageFileExists && !atLeastOneChildrenDownloaded)
+            if (!isDownloaded || childrenCount < 0)
                 DownloadStatus.NOT_DOWNLOADED
+            else if (downloadedChildrenCount >= childrenCount)
+                DownloadStatus.DOWNLOADED
             else DownloadStatus.PARTIALLY
         }
 
@@ -880,6 +888,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @see ImageLoadParameters
      */
     @WorkerThread
+    @Suppress("BlockingMethodInNonBlockingContext")
     @Throws(StorageException::class, IOException::class, ArithmeticException::class)
     suspend fun image(
         context: Context,
@@ -964,6 +973,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         IOException::class,
         ArithmeticException::class
     )
+    @Suppress("BlockingMethodInNonBlockingContext")
     fun loadImage(
         activity: Activity,
         storage: FirebaseStorage,
