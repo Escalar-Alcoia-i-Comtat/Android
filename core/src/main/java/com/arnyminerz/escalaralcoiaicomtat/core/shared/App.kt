@@ -10,6 +10,7 @@ import androidx.appsearch.app.SetSchemaRequest
 import androidx.lifecycle.AndroidViewModel
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -20,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getAreas
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDownloads
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPath
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getSector
@@ -32,6 +34,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -199,6 +202,15 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      */
     @WorkerThread
     suspend fun getPaths(zoneId: String): List<Path> = searchSession.getPaths(zoneId)
+
+    /**
+     * Fetches all the downloaded items.
+     * @author Arnau Mora
+     * @since 20211231
+     * @return A [Flow] that emits the downloaded items.
+     */
+    @WorkerThread
+    suspend fun getDownloads(): Flow<DownloadedData> = searchSession.getDownloads()
 }
 
 /**

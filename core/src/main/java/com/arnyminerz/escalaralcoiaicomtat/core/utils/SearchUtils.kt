@@ -12,6 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -19,6 +20,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 
 /**
@@ -237,3 +240,35 @@ suspend fun AppSearchSession.getPaths(sectorId: String): List<Path> =
 @WorkerThread
 suspend fun AppSearchSession.getPaths(): List<Path> =
     getList<Path, PathData>("", Path.NAMESPACE)
+
+/**
+ * Fetches all the downloaded items.
+ * @author Arnau Mora
+ * @since 20211231
+ * @return A [Flow] that emits the downloaded items.
+ */
+@WorkerThread
+suspend fun AppSearchSession.getDownloads(): Flow<DownloadedData> = flow {
+    Timber.d("Searching for downloaded classes...")
+    val searchResults = search(
+        "",
+        SearchSpec.Builder()
+            .addFilterDocumentClasses(DownloadedData::class.java)
+            .build()
+    )
+    var results = searchResults.nextPage.await()
+    Timber.d("Finished searching.")
+    while (results.isNotEmpty()) {
+        Timber.d("Got ${results.size} downloads. Exploring...")
+        for (result in results) {
+            val document = result.genericDocument
+            try {
+                val downloadedData = document.toDocumentClass(DownloadedData::class.java)
+                emit(downloadedData)
+            } catch (e: AppSearchException) {
+                Timber.e(e, "Could not convert data to DownloadedData.")
+            }
+        }
+        results = searchResults.nextPage.await()
+    }
+}
