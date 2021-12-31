@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -340,12 +339,9 @@ class MainActivity : LanguageComponentActivity() {
                     Chip(humanReadableByteCountBin(size))
                 }
             }
-            itemsIndexed(downloadsViewModel.downloads) { index, data ->
+            items(downloadsViewModel.downloads) { data ->
                 Text(text = data.displayName)
-                downloadsViewModel.exportDataClass(index, data) {
-                    val dataClassSize = it.size(this@MainActivity, app.searchSession)
-                    size += dataClassSize
-                }
+                size += data.sizeBytes
             }
         }
         downloadsViewModel.loadDownloads()
