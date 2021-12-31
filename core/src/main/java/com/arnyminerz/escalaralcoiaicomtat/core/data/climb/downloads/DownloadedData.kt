@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads
 
 import androidx.appsearch.annotation.Document
+import androidx.appsearch.app.AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -16,6 +17,8 @@ data class DownloadedData(
     @Document.Id var objectId: String,
     @Document.CreationTimestampMillis var timestamp: Long,
     @Document.Namespace var namespace: String,
+    @Document.StringProperty(indexingType = INDEXING_TYPE_EXACT_TERMS) var displayName: String,
+    @Document.StringProperty(indexingType = INDEXING_TYPE_EXACT_TERMS) var path: String
 ) {
     /**
      * Converts the [DownloadedData] into a [DataClass].
