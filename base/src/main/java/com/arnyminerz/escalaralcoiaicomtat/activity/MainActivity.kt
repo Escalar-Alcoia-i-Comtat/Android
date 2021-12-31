@@ -49,6 +49,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DownloadedDataItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen.ApplicationInfoWindow
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.GoogleMap
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.MapBottomDialog
@@ -318,7 +319,7 @@ class MainActivity : LanguageComponentActivity() {
         LazyColumn {
             item {
                 Card(
-                    backgroundColor = MaterialTheme.colorScheme.surface,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 12.dp, end = 12.dp, top = 8.dp)
@@ -326,7 +327,7 @@ class MainActivity : LanguageComponentActivity() {
                     Text(
                         text = stringResource(R.string.downloads_title),
                         style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
                     )
                 }
@@ -342,7 +343,7 @@ class MainActivity : LanguageComponentActivity() {
                 }
             }
             items(downloads ?: emptyList()) { data ->
-                Text(text = data.displayName)
+                DownloadedDataItem(data)
             }
         }
     }
