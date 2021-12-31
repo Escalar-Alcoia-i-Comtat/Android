@@ -523,7 +523,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param progressListener A listener for the progress of the load.
      */
     @WorkerThread
-    @Deprecated("Should use Jetpack Compose")
+    @Deprecated("Should use Jetpack Compose", level = DeprecationLevel.WARNING)
     suspend fun downloadedSectionList(
         context: Context,
         searchSession: AppSearchSession,
