@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.ui.settings
+package com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings
 
 import android.content.Context
 import android.content.Intent
