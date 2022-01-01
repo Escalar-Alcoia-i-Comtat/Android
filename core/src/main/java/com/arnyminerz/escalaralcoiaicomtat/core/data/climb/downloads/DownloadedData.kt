@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads
 
 import androidx.appsearch.annotation.Document
 import androidx.appsearch.app.AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -14,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
  */
 @Document
 data class DownloadedData(
+    @ObjectId
     @Document.Id var objectId: String,
     @Document.CreationTimestampMillis var timestamp: Long,
     @Document.Namespace var namespace: String,

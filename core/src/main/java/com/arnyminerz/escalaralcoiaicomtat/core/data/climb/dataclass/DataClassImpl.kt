@@ -1,11 +1,13 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass
 
 import android.os.Parcelable
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import kotlinx.parcelize.Parcelize
-import java.util.Date
+import java.util.*
 
 @Parcelize
 open class DataClassImpl(
+    @ObjectId
     open val objectId: String,
     val namespace: String,
     open val timestampMillis: Long,
