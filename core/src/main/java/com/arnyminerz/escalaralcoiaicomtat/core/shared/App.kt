@@ -9,6 +9,7 @@ import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SetSchemaRequest
 import androidx.lifecycle.AndroidViewModel
 import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
@@ -161,7 +162,7 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      * @see AppSearchSession.getZone
      */
     @WorkerThread
-    suspend fun getArea(areaId: String): Area? = searchSession.getArea(areaId)
+    suspend fun getArea(@ObjectId areaId: String): Area? = searchSession.getArea(areaId)
 
     /**
      * Searches for the specified [Zone] in [searchSession].
@@ -171,7 +172,7 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      * @see AppSearchSession.getZone
      */
     @WorkerThread
-    suspend fun getZone(zoneId: String): Zone? = searchSession.getZone(zoneId)
+    suspend fun getZone(@ObjectId zoneId: String): Zone? = searchSession.getZone(zoneId)
 
     /**
      * Searches for the specified [Sector] in [searchSession].
@@ -181,7 +182,7 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      * @see AppSearchSession.getSector
      */
     @WorkerThread
-    suspend fun getSector(sectorId: String): Sector? = searchSession.getSector(sectorId)
+    suspend fun getSector(@ObjectId sectorId: String): Sector? = searchSession.getSector(sectorId)
 
     /**
      * Searches for the specified [Path] in [searchSession].
@@ -191,7 +192,7 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      * @see AppSearchSession.getSector
      */
     @WorkerThread
-    suspend fun getPath(pathId: String): Path? = searchSession.getPath(pathId)
+    suspend fun getPath(@ObjectId pathId: String): Path? = searchSession.getPath(pathId)
 
     /**
      * Searches for the specified [Path]s in [searchSession].
@@ -201,7 +202,7 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      * @see AppSearchSession.getSector
      */
     @WorkerThread
-    suspend fun getPaths(zoneId: String): List<Path> = searchSession.getPaths(zoneId)
+    suspend fun getPaths(@ObjectId zoneId: String): List<Path> = searchSession.getPaths(zoneId)
 
     /**
      * Fetches all the downloaded items.

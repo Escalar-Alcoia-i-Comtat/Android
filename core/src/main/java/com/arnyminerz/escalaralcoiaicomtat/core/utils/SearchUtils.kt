@@ -8,6 +8,7 @@ import androidx.appsearch.exceptions.AppSearchException
 import androidx.appsearch.localstorage.LocalStorage
 import androidx.collection.arrayMapOf
 import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
@@ -160,7 +161,7 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
  * @return The [Area], or null if not found.
  */
 @WorkerThread
-suspend fun AppSearchSession.getArea(areaId: String): Area? =
+suspend fun AppSearchSession.getArea(@ObjectId areaId: String): Area? =
     getData<Area, AreaData>(areaId, Area.NAMESPACE)
 
 /**
@@ -171,7 +172,7 @@ suspend fun AppSearchSession.getArea(areaId: String): Area? =
  * @return The [Zone], or null if not found.
  */
 @WorkerThread
-suspend fun AppSearchSession.getZone(zoneId: String): Zone? =
+suspend fun AppSearchSession.getZone(@ObjectId zoneId: String): Zone? =
     getData<Zone, ZoneData>(zoneId, Zone.NAMESPACE)
 
 /**
@@ -182,7 +183,7 @@ suspend fun AppSearchSession.getZone(zoneId: String): Zone? =
  * @return The [Sector], or null if not found.
  */
 @WorkerThread
-suspend fun AppSearchSession.getSector(sectorId: String): Sector? =
+suspend fun AppSearchSession.getSector(@ObjectId sectorId: String): Sector? =
     getData<Sector, SectorData>(sectorId, Sector.NAMESPACE)
 
 /**
@@ -193,7 +194,7 @@ suspend fun AppSearchSession.getSector(sectorId: String): Sector? =
  * @return The [Path], or null if not found.
  */
 @WorkerThread
-suspend fun AppSearchSession.getPath(pathId: String): Path? =
+suspend fun AppSearchSession.getPath(@ObjectId pathId: String): Path? =
     getData<Path, PathData>(pathId, Path.NAMESPACE)
 
 /**
@@ -204,7 +205,7 @@ suspend fun AppSearchSession.getPath(pathId: String): Path? =
  * @return A [List] with the found [Zone]s.
  */
 @WorkerThread
-suspend fun AppSearchSession.getZones(areaId: String): List<Zone> =
+suspend fun AppSearchSession.getZones(@ObjectId areaId: String): List<Zone> =
     getList<Zone, ZoneData>(areaId, Zone.NAMESPACE)
 
 /**
@@ -216,7 +217,7 @@ suspend fun AppSearchSession.getZones(areaId: String): List<Zone> =
  * @return A [List] with the found [Sector]s.
  */
 @WorkerThread
-suspend fun AppSearchSession.getSectors(zoneId: String): List<Sector> =
+suspend fun AppSearchSession.getSectors(@ObjectId zoneId: String): List<Sector> =
     getList<Sector, SectorData>(zoneId, Sector.NAMESPACE)
 
 /**
@@ -228,7 +229,7 @@ suspend fun AppSearchSession.getSectors(zoneId: String): List<Sector> =
  * @return A [List] with the found [Path]s.
  */
 @WorkerThread
-suspend fun AppSearchSession.getPaths(sectorId: String): List<Path> =
+suspend fun AppSearchSession.getPaths(@ObjectId sectorId: String): List<Path> =
     getList<Path, PathData>(sectorId, Path.NAMESPACE)
 
 /**
