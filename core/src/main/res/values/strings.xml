@@ -184,6 +184,8 @@
 
     <string name="image_desc_nearby_zones">Nearby Zones</string>
     <string name="image_desc_marker_image">Marker image</string>
+    <string name="image_desc_downloaded_marker">Downloaded Marker</string>
+
     <string name="fab_desc_next">Next</string>
     <string name="fab_desc_finish">Finish</string>
 

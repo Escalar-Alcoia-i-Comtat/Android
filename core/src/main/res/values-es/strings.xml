@@ -197,4 +197,5 @@
     <string name="zone_title">Zona</string>
     <string name="downloads_sector_dialog_title">Sectores</string>
     <string name="downloads_sectors_title">%d Sectores</string>
+    <string name="image_desc_downloaded_marker">Marcador de Descarga</string>
 </resources>
