@@ -147,7 +147,7 @@ private fun DownloadedDataItemRaw(
                 }
                 Button(
                     onClick = { /*TODO*/ },
-                    colors = ButtonDefaults.textButtonColors(),
+                    colors = ButtonDefaults.outlinedButtonColors(),
                 ) {
                     Text(
                         text = stringResource(R.string.action_view),
