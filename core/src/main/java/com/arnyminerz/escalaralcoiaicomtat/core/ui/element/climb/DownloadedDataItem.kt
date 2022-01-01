@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.icons.Icons
@@ -32,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.getChildren
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -62,6 +65,7 @@ fun DownloadedDataItem(
     data.objectId,
     data.sizeBytes,
     data.namespace,
+    data.childrenCount,
     searchSession,
     onDelete
 )
@@ -69,16 +73,19 @@ fun DownloadedDataItem(
 @Composable
 private fun DownloadedDataItemRaw(
     displayName: String,
-    @ObjectId
-    objectId: String,
+    @ObjectId objectId: String,
     size: Long,
     namespace: String,
+    childrenCount: Long,
     searchSession: AppSearchSession?,
     onDelete: (() -> Unit)?
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showChildrenDialog by remember { mutableStateOf(false) }
+    var childrenSectors by remember { mutableStateOf(listOf<Sector>()) }
+    var loadingChildren by remember { mutableStateOf(false) }
 
     Card(
         shape = RoundedCornerShape(8.dp),
@@ -130,6 +137,20 @@ private fun DownloadedDataItemRaw(
                     text = humanReadableByteCountBin(size),
                     modifier = Modifier.padding(4.dp),
                 )
+                // Children chip
+                if (childrenCount > 0 && searchSession != null)
+                    Chip(
+                        text = stringResource(R.string.downloads_sectors_title, childrenCount),
+                        enabled = !loadingChildren,
+                        modifier = Modifier.padding(4.dp),
+                    ) {
+                        loadingChildren = true
+                        doAsync {
+                            childrenSectors = objectId.getChildren(searchSession, Sector.NAMESPACE)
+                            loadingChildren = false
+                            showChildrenDialog = true
+                        }
+                    }
             }
             Row(
                 horizontalArrangement = Arrangement.End,
@@ -213,6 +234,31 @@ private fun DownloadedDataItemRaw(
                 }
             }
         )
+
+    if (showChildrenDialog)
+        AlertDialog(
+            onDismissRequest = {
+                showChildrenDialog = false
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showChildrenDialog = false },
+                    colors = ButtonDefaults.textButtonColors(),
+                ) {
+                    Text(text = stringResource(R.string.action_close))
+                }
+            },
+            title = {
+                Text(stringResource(R.string.downloads_sector_dialog_title))
+            },
+            text = {
+                LazyColumn {
+                    items(childrenSectors) { item ->
+                        CompressedDownloadedDataItem(item.displayName)
+                    }
+                }
+            }
+        )
 }
 
 @Preview(name = "DownloadedDataItem Preview")
@@ -223,6 +269,7 @@ fun DownloadedDataItemPreview() {
         "object",
         12 * MEGABYTE,
         Zone.NAMESPACE,
+        7,
         null,
         null
     )
