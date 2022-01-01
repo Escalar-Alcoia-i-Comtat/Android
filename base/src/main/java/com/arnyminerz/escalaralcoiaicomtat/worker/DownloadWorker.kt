@@ -363,6 +363,11 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             // Get all the fields from the document
             Timber.v("Getting fields...")
             val objectId = document.id
+            val displayName = document.getString("displayName") ?: run {
+                // All documents should contain a display name, if not set, throw an exception.
+                Timber.w("Object at \"$path\" doesn't have a display name.")
+                throw IllegalStateException("Object at \"$path\" doesn't have a display name.")
+            }
             val imageReferenceUrl = document.getString("image") ?: run {
                 // All documents should contain an image, if not set, throw an exception.
                 Timber.w("Object at \"$path\" doesn't have an image field.")
