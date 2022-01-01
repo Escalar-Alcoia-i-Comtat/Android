@@ -43,6 +43,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.MEGABYTE
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.then
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import kotlinx.coroutines.launch
@@ -82,6 +83,7 @@ private fun DownloadedDataItemRaw(
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
+    var viewButtonEnabled by remember { mutableStateOf(true) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showChildrenDialog by remember { mutableStateOf(false) }
     var childrenSectors by remember { mutableStateOf(listOf<Sector>()) }
@@ -166,14 +168,28 @@ private fun DownloadedDataItemRaw(
                         text = stringResource(R.string.action_delete),
                     )
                 }
-                Button(
-                    onClick = { /*TODO*/ },
-                    colors = ButtonDefaults.outlinedButtonColors(),
-                ) {
-                    Text(
-                        text = stringResource(R.string.action_view),
-                    )
-                }
+                if (searchSession != null)
+                    Button(
+                        enabled = viewButtonEnabled,
+                        onClick = {
+                            viewButtonEnabled = false
+                            doAsync {
+                                val intent = DataClass.getIntent(context, searchSession, objectId)
+                                uiScope.launch {
+                                    viewButtonEnabled = true
+                                    if (intent != null)
+                                        context.launch(intent)
+                                    else
+                                        toast(context, R.string.toast_error_internal)
+                                }
+                            }
+                        },
+                        colors = ButtonDefaults.outlinedButtonColors(),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.action_view),
+                        )
+                    }
             }
         }
     }
@@ -235,7 +251,7 @@ private fun DownloadedDataItemRaw(
             }
         )
 
-    if (showChildrenDialog)
+    if (showChildrenDialog && searchSession != null)
         AlertDialog(
             onDismissRequest = {
                 showChildrenDialog = false
@@ -254,7 +270,11 @@ private fun DownloadedDataItemRaw(
             text = {
                 LazyColumn {
                     items(childrenSectors) { item ->
-                        CompressedDownloadedDataItem(item.displayName)
+                        CompressedDownloadedDataItem(
+                            item.displayName,
+                            item.objectId,
+                            searchSession,
+                        )
                     }
                 }
             }
