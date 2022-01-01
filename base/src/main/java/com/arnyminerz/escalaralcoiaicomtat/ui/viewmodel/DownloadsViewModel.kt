@@ -3,12 +3,14 @@ package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class DownloadsViewModel(application: Application) : AndroidViewModel(application) {
@@ -21,21 +23,30 @@ class DownloadsViewModel(application: Application) : AndroidViewModel(applicatio
         Timber.d("$this::onCleared")
     }
 
-    val downloads = liveData<List<DownloadedData>> {
-        Timber.i("Loading downloads...")
-        var size = 0L
-        val list = arrayListOf<DownloadedData>()
-        val downloadsFlow = app.getDownloads()
-        downloadsFlow.collect { data ->
-            Timber.i("Collected ${data.namespace}:${data.objectId}, adding.")
-            list.add(data)
-            size += data.sizeBytes
-        }
-        Timber.i("Size: $size")
-        this@DownloadsViewModel.sizeString.value = humanReadableByteCountBin(size)
-        emit(list)
-    }
+    val downloads: MutableLiveData<List<DownloadedData>> = MutableLiveData()
     val sizeString = mutableStateOf(humanReadableByteCountBin(0))
+
+    /**
+     * Loads the downloaded DataClasses and adds them to [downloads]. [sizeString] will be updated.
+     * @author Arnau Mora
+     * @since 20220101
+     */
+    fun loadDownloads() {
+        viewModelScope.launch {
+            Timber.i("Loading downloads...")
+            var size = 0L
+            val list = arrayListOf<DownloadedData>()
+            val downloadsFlow = app.getDownloads()
+            downloadsFlow.collect { data ->
+                Timber.i("Collected ${data.namespace}:${data.objectId}, adding.")
+                list.add(data)
+                size += data.sizeBytes
+            }
+            Timber.i("Size: $size")
+            this@DownloadsViewModel.sizeString.value = humanReadableByteCountBin(size)
+            downloads.postValue(list)
+        }
+    }
 
     class Factory(
         private val application: Application
