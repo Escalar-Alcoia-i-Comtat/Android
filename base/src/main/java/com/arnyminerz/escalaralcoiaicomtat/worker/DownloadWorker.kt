@@ -76,6 +76,7 @@ import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
+import java.util.*
 
 /**
  * The [CoroutineWorker] for scheduling [DataClass] downloads.
@@ -308,7 +309,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         @ObjectId
         val objectId: String,
         val displayName: String,
-        val childrenCount: Long? = null,
+        val childrenCount: Long = 0,
         val parentId: String? = null
     ) {
         var size: Long? = null
@@ -392,7 +393,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
 
             // Download the children if it's a zone
             val childrenData = mutableListOf<DownloadData>()
-            var childrenCount: Long? = null
+            var childrenCount: Long = 0
             var parentId: String? = null
             if (namespace == Zone.NAMESPACE) {
                 // Get all the documents inside the "Sectors" collection in the Zone document.
@@ -406,7 +407,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     val data = scheduleDownload(documentPath)
                     // data should not have children. Add the data to the zone's children list
                     childrenData.add(data.first)
-                    childrenCount?.plus(1L) ?: run { childrenCount = 1 }
+                    childrenCount += 1L
                 }
             } else if (namespace == Sector.NAMESPACE) {
                 // If it's a sector, parentId should be loaded.
@@ -418,7 +419,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             return DownloadData(
                 namespace,
                 // It's important to add the downloaded prefix, or the stored data will be overridden
-                "D/$objectId",
+                objectId,
                 displayName,
                 childrenCount,
                 parentId
@@ -661,6 +662,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     // Process the data
                     val timestamp = System.currentTimeMillis()
                     val downloadedData = DownloadedData(
+                        UUID.randomUUID().toString(),
                         objectId,
                         timestamp,
                         namespace!!,
@@ -678,6 +680,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     for (i in childrenIds.indices)
                         indexData.add(
                             DownloadedData(
+                                UUID.randomUUID().toString(),
                                 childrenIds[i],
                                 timestamp,
                                 Sector.NAMESPACE,
