@@ -17,6 +17,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -61,6 +65,7 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.settings.GeneralSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.MainSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.NotificationsSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.StorageSettingsScreen
+import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.DeveloperViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.DownloadsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.ExploreViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.MainMapViewModel
@@ -85,6 +90,9 @@ class MainActivity : LanguageComponentActivity() {
     })
     private val downloadsViewModel by viewModels<DownloadsViewModel>(factoryProducer = {
         DownloadsViewModel.Factory(application)
+    })
+    private val developerViewModel by viewModels<DeveloperViewModel>(factoryProducer = {
+        DeveloperViewModel.Factory(application)
     })
 
     /**
@@ -165,9 +173,13 @@ class MainActivity : LanguageComponentActivity() {
                 NavigationBar {
                     NavItems(
                         homeNavController,
-                        listOf(
+                        mutableListOf(
                             Screen.Explore, Screen.Map, Screen.Downloads, Screen.Settings
-                        )
+                        ).apply {
+                            // If in debug mode, add the developer screen
+                            if (BuildConfig.DEBUG)
+                                add(Screen.Developer)
+                        }
                     )
                 }
             }
@@ -188,6 +200,9 @@ class MainActivity : LanguageComponentActivity() {
                 }
                 composable(Screen.Settings.route) {
                     SettingsScreen()
+                }
+                composable(Screen.Developer.route) {
+                    DeveloperScreen()
                 }
             }
         }
@@ -354,5 +369,29 @@ class MainActivity : LanguageComponentActivity() {
             }
         }
         downloadsViewModel.loadDownloads()
+    }
+
+    @Composable
+    @OptIn(ExperimentalMaterialApi::class)
+    private fun DeveloperScreen() {
+        val indexedDownloads by developerViewModel.indexedDownloads.observeAsState()
+        Column {
+            Button(
+                onClick = {
+                    // This should be moved somewhere else
+                    developerViewModel.loadIndexedDownloads()
+                }
+            ) {
+                Text(text = "Load")
+            }
+            LazyColumn {
+                items(indexedDownloads ?: listOf()) { item ->
+                    ListItem {
+                        Text(text = item)
+                    }
+                    Divider()
+                }
+            }
+        }
     }
 }
