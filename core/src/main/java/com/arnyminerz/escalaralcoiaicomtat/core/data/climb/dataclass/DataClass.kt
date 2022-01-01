@@ -1127,3 +1127,15 @@ fun <D : DataClass<*, *>> Iterable<D>.has(objectId: String): Boolean {
  */
 suspend fun @receiver:ObjectId String.isDownloadIndexed(searchSession: AppSearchSession) =
     DataClass.isDownloadIndexed(searchSession, this)
+
+/**
+ * Fetches all the children of the DataClass with the specified object id.
+ * @author Arnau Mora
+ * @since 20220101
+ * @param A The children object type.
+ * @param searchSession The search session where to search for the data.
+ * @param namespace The namespace of [A].
+ */
+suspend fun <A : DataClassImpl> @receiver:ObjectId
+String.getChildren(searchSession: AppSearchSession, namespace: String) =
+    searchSession.getChildren<A>(namespace, this)
