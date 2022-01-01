@@ -631,7 +631,6 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
 
                 if (namespace != null && downloadPath != null) {
                     // This is for making it easier to recover later on which DataClasses are downloaded
-                    // TODO: Children should also be indexed
                     Timber.v("Indexing downloaded element...")
                     // First get all the data from the downloaded result
                     val objectId = downloadResultData.getString("objectId") ?: run {
