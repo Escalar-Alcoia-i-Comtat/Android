@@ -91,7 +91,7 @@ private fun DownloadedDataItemRaw(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(start = 8.dp, end = 8.dp, top = 8.dp),
         backgroundColor = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column(
