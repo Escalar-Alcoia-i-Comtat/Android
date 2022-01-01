@@ -107,7 +107,7 @@ private fun DownloadedDataItemRaw(
             ) {
                 Image(
                     Icons.Rounded.Download,
-                    contentDescription = "", // TODO: Content description
+                    contentDescription = stringResource(R.string.image_desc_downloaded_marker),
                     modifier = Modifier
                         .align(Alignment.CenterVertically),
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
