@@ -1,26 +1,37 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,7 +54,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DownloadedDataItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen.ApplicationInfoWindow
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.GoogleMap
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.MapBottomDialog
@@ -55,6 +68,8 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.settings.GeneralSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.MainSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.NotificationsSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.settings.StorageSettingsScreen
+import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.DeveloperViewModel
+import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.DownloadsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.ExploreViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.MainMapViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SettingsViewModel
@@ -66,6 +81,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import timber.log.Timber
 
+
 class MainActivity : LanguageComponentActivity() {
     private val settingsViewModel by viewModels<SettingsViewModel>(factoryProducer = {
         PreferencesModule.settingsViewModel
@@ -75,6 +91,12 @@ class MainActivity : LanguageComponentActivity() {
     })
     private val mapViewModel by viewModels<MainMapViewModel>(factoryProducer = {
         MainMapViewModel.Factory(application, PreferencesModule.getMarkerCentering)
+    })
+    private val downloadsViewModel by viewModels<DownloadsViewModel>(factoryProducer = {
+        DownloadsViewModel.Factory(application)
+    })
+    private val developerViewModel by viewModels<DeveloperViewModel>(factoryProducer = {
+        DeveloperViewModel.Factory(application)
     })
 
     /**
@@ -155,9 +177,13 @@ class MainActivity : LanguageComponentActivity() {
                 NavigationBar {
                     NavItems(
                         homeNavController,
-                        listOf(
+                        mutableListOf(
                             Screen.Explore, Screen.Map, Screen.Downloads, Screen.Settings
-                        )
+                        ).apply {
+                            // If in debug mode, add the developer screen
+                            if (BuildConfig.DEBUG)
+                                add(Screen.Developer)
+                        }
                     )
                 }
             }
@@ -174,10 +200,13 @@ class MainActivity : LanguageComponentActivity() {
                     MapScreen()
                 }
                 composable(Screen.Downloads.route) {
-                    Text("Downloads")
+                    DownloadsScreen()
                 }
                 composable(Screen.Settings.route) {
                     SettingsScreen()
+                }
+                composable(Screen.Developer.route) {
+                    DeveloperScreen()
                 }
             }
         }
@@ -300,5 +329,102 @@ class MainActivity : LanguageComponentActivity() {
             }
         }
         exploreViewModel.loadAreas()
+    }
+
+    @Composable
+    private fun DownloadsScreen() {
+        val downloads by downloadsViewModel.downloads.observeAsState()
+        val sizeString by remember { downloadsViewModel.sizeString }
+        LazyColumn {
+            item {
+                Card(
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = stringResource(R.string.downloads_title),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .padding(start = 12.dp, end = 12.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Timber.i("Size: $sizeString")
+                            Chip(stringResource(R.string.downloads_size, sizeString))
+                        }
+                    }
+                }
+            }
+            items(downloads ?: emptyList()) { data ->
+                val isParentDownloaded = data.second
+                if (!isParentDownloaded)
+                    DownloadedDataItem(data.first, app.searchSession) {
+                        // This gets called when data gets deleted
+                        downloadsViewModel.loadDownloads()
+                    }
+            }
+        }
+        downloadsViewModel.loadDownloads()
+    }
+
+    @Composable
+    @OptIn(ExperimentalMaterialApi::class)
+    private fun DeveloperScreen() {
+        val indexedDownloads by developerViewModel.indexedDownloads.observeAsState()
+        val indexTree by developerViewModel.indexTree.observeAsState()
+        Column {
+            Row {
+                Button(
+                    onClick = {
+                        // This should be moved somewhere else
+                        developerViewModel.loadIndexedDownloads()
+                    }
+                ) {
+                    Text(text = "Load")
+                }
+                Button(
+                    onClick = {
+                        // This should be moved somewhere else
+                        developerViewModel.loadIndexTree()
+                    }
+                ) {
+                    Text(text = "Index tree")
+                }
+            }
+            LazyColumn {
+                items(indexedDownloads ?: listOf()) { item ->
+                    ListItem {
+                        Text(text = item)
+                    }
+                    Divider()
+                }
+            }
+            Text(
+                text = indexTree ?: "Index tree not generated",
+                modifier = Modifier.clickable {
+                    launch(
+                        Intent.createChooser(
+                            Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_SUBJECT, "Index tree")
+                                putExtra(Intent.EXTRA_TEXT, indexTree)
+                            },
+                            "Index tree"
+                        )
+                    )
+                }
+            )
+        }
     }
 }

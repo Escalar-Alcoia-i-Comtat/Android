@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.appsearch.app.AppSearchSession
+import androidx.appsearch.app.PutDocumentsRequest
 import androidx.lifecycle.LiveData
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -13,11 +14,14 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import androidx.work.await
 import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
@@ -32,6 +36,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.progress
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.size
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toInt
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_DISPLAY_NAME
@@ -46,6 +51,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_COMPRESS_I
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_CREATE_PARENT
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DATA_FETCH
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DATA_FRAGMENTED
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DATA_TRANSFERENCE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DATA_TYPE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_FETCH_IMAGE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_MISSING_DATA
@@ -131,21 +137,19 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * Downloads the image file for the specified object.
      * @author Arnau Mora
      * @since 20210822
-     * @param imageReference The [FirebaseStorage] reference of the image to download.
-     * @param imageFile The [File] instance referencing where the object's image should be stored at.
-     * @param objectId The id of the object to download.
-     * @param namespace The namespace of the object to download.
-     * @param scale The scale with which to download the object.
+     * @param data The data class that sets what to download
      * @param progressListener A listener for observing the download progress.
      */
     private suspend fun downloadImageFile(
-        imageReference: StorageReference,
-        imageFile: File,
-        objectId: String,
-        namespace: String,
-        scale: Float,
+        data: ImageDownloadData,
         progressListener: suspend (progress: ValueMax<Long>) -> Unit
     ): Result = coroutineScope {
+        val imageReference: StorageReference = data.imageReference
+        val imageFile: File = data.imageFile
+        val objectId: String = data.objectId
+        val namespace: String = data.namespace
+        val scale: Float = data.scale
+
         val dataDir = imageFile.parentFile!!
 
         // Check that everything is ready for downloading the image file.
@@ -251,15 +255,17 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * Downloads the KMZ file from the server.
      * @author Arnau Mora
      * @since 20210926
-     * @param reference The [StorageReference] of the target kmz file to download.
-     * @param targetFile The [File] to store the KMZ data at.
+     * @param data The instance that sets what to download.
      * @param progressListener A callback function for observing the download progress.
      */
+    @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun downloadKmz(
-        reference: StorageReference,
-        targetFile: File,
+        data: KMZDownloadData,
         progressListener: suspend (progress: ValueMax<Long>) -> Unit
     ) = coroutineScope {
+        val reference: StorageReference = data.kmzReference
+        val targetFile: File = data.kmzFile
+
         progressListener(ValueMax(0, -1))
 
         Timber.v("Getting the stream of the KMZ file ($reference)...")
@@ -285,15 +291,41 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
     }
 
     /**
+     * A class used for transferring data between the download function and the conclusion function.
+     * This is used then into the [Result.success] if the download was successful to index the
+     * downloaded data, and display it to the user.
+     * @author Arnau Mora
+     * @since 20211231
+     * @param namespace The namespace of the DataClass.
+     * @param objectId The id of the DataClass.
+     * @param displayName The display name of the item.
+     * @param childrenCount The amount of children the DataClass has. It's null if the DataClass is
+     * a Sector.
+     * @param parentId The id of the parent DataClass. It's null for Zones since it's not used.
+     */
+    internal data class DownloadData(
+        val namespace: String,
+        @ObjectId
+        val objectId: String,
+        val displayName: String,
+        val childrenCount: Long = 0,
+        val parentId: String? = null
+    ) {
+        var size: Long? = null
+    }
+
+    /**
      * Fetches the data from [FirebaseFirestore] at the specified [path]. And downloads the image
      * file.
      * @author Arnau Mora
      * @since 20210926
      * @param path The path where the data is stored at.
      * @param progressListener A callback function for observing the download progress. When the
-     * data is being fetched from the server, an undeterminate state will be returned. Once files
+     * data is being fetched from the server, an undetermined state will be returned. Once files
      * start getting downloaded, an overall progress will be passed.
-     * @return A [Pair] of two strings, the downloaded object namespace and objectId.
+     * @return A pair with a [DownloadData] and a list of [DownloadData]. The first is the parent's
+     * data instance. The second is a list of the children's download data. If downloading a sector
+     * the list should be empty.
      * @throws FirebaseFirestoreException If there happens an exception while fetching the data
      * from the server.
      * @throws RuntimeException When there is an unexpected type exception in the data from the server.
@@ -303,7 +335,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
     private suspend fun downloadData(
         path: String,
         progressListener: suspend (progress: ValueMax<Long>) -> Unit
-    ): Pair<String, String> = coroutineScope {
+    ): Pair<DownloadData, List<DownloadData>> = coroutineScope {
         val imageFiles = arrayListOf<ImageDownloadData>()
         val kmzFiles = arrayListOf<KMZDownloadData>()
 
@@ -313,9 +345,10 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
          * @author Arnau Mora
          * @since 20210928
          * @param path The path inside [firestore] where to download the data from.
-         * @return A [Pair] of two strings, the downloaded object namespace and objectId.
+         * @return An instance of the [DownloadData] class. If it's zone, [DownloadData.childrenCount]
+         * should match the amount of sectors inside the zone. If it's sector, it should be -1.
          */
-        suspend fun scheduleDownload(path: String): Pair<String, String> {
+        suspend fun scheduleDownload(path: String): Pair<DownloadData, List<DownloadData>> {
             // Get the document data from Firestore
             Timber.v("Getting document ($path)...")
             val document = firestore.document(path).get().await()
@@ -329,6 +362,11 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             // Get all the fields from the document
             Timber.v("Getting fields...")
             val objectId = document.id
+            val displayName = document.getString("displayName") ?: run {
+                // All documents should contain a display name, if not set, throw an exception.
+                Timber.w("Object at \"$path\" doesn't have a display name.")
+                throw IllegalStateException("Object at \"$path\" doesn't have a display name.")
+            }
             val imageReferenceUrl = document.getString("image") ?: run {
                 // All documents should contain an image, if not set, throw an exception.
                 Timber.w("Object at \"$path\" doesn't have an image field.")
@@ -358,6 +396,9 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             }
 
             // Download the children if it's a zone
+            val childrenData = mutableListOf<DownloadData>()
+            var childrenCount: Long = 0
+            var parentId: String? = null
             if (namespace == Zone.NAMESPACE) {
                 // Get all the documents inside the "Sectors" collection in the Zone document.
                 Timber.v("Getting children sectors...")
@@ -367,21 +408,38 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 Timber.v("Got ${documents.size} sector documents...")
                 for (sectorDocument in documents) {
                     val documentPath: String = sectorDocument.reference.path
-                    scheduleDownload(documentPath)
+                    val data = scheduleDownload(documentPath)
+                    // data should not have children. Add the data to the zone's children list
+                    childrenData.add(data.first)
+                    childrenCount += 1L
                 }
+            } else if (namespace == Sector.NAMESPACE) {
+                // If it's a sector, parentId should be loaded.
+                // First split the path, and get the zone id
+                val splitPath = path.split('/')
+                parentId = splitPath[splitPath.size - 3]
             }
 
-            return namespace to objectId
+            return DownloadData(
+                namespace,
+                // It's important to add the downloaded prefix, or the stored data will be overridden
+                objectId,
+                displayName,
+                childrenCount,
+                parentId
+            ) to childrenData
         }
 
         Timber.v("Calling progress listener...")
         progressListener(ValueMax(0, -1)) // Set to -1 for indeterminate
         Timber.v("Initializing data fetch...")
-        val parentData = scheduleDownload(path)
+        val scheduledDownloadData = scheduleDownload(path)
+        val parentData = scheduledDownloadData.first
+        val childrenData = scheduledDownloadData.second
 
         // This total byte count is used for displaying the total progress, not individually on each
         // item.
-        Timber.v("Suming total byte count...")
+        Timber.v("Summing total byte count...")
         val imageTotalBytes = imageFiles.sumOf { it.imageReference.metadata.await().sizeBytes }
         val kmzTotalBytes = kmzFiles.sumOf { it.kmzReference.metadata.await().sizeBytes }
         val totalBytes = imageTotalBytes + kmzTotalBytes
@@ -396,29 +454,42 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         }
 
         Timber.v("Downloading image files...")
-        for (downloadRequest in imageFiles)
-            downloadRequest.run {
-                Timber.d("Downloading \"$imageReference\" to \"$imageFile\"...")
-                downloadImageFile(
-                    imageReference,
-                    imageFile,
-                    objectId,
-                    namespace,
-                    scale,
-                    downloadProgressListener
-                )
-                bytesCounter += lastElementByteCount
-            }
+        for (downloadRequest in imageFiles) {
+            Timber.d(
+                "Downloading \"%s\" to \"%s\"...",
+                downloadRequest.imageReference.toString(),
+                downloadRequest.imageFile.toString()
+            )
+            downloadImageFile(downloadRequest, downloadProgressListener)
+            bytesCounter += lastElementByteCount
+        }
 
         Timber.v("Downloading KMZ files...")
-        for (downloadRequest in kmzFiles)
-            downloadRequest.run {
-                Timber.d("Downloading \"$kmzReference\" to \"$kmzFile\"...")
-                downloadKmz(kmzReference, kmzFile, downloadProgressListener)
-                bytesCounter += lastElementByteCount
-            }
+        for (downloadRequest in kmzFiles) {
+            Timber.d(
+                "Downloading \"%s\" to \"%s\"...",
+                downloadRequest.kmzReference,
+                downloadRequest.kmzFile
+            )
+            downloadKmz(downloadRequest, downloadProgressListener)
+            bytesCounter += lastElementByteCount
+        }
 
-        parentData
+        Timber.d("Getting parent size...")
+        val parentImageSize = imageFiles.firstOrNull()?.imageFile?.size()
+            ?: run {
+                Timber.w("There are no image files downloaded to get size from.")
+                0
+            }
+        val parentKmzSize = kmzFiles.firstOrNull()?.kmzFile?.size()
+            ?: run {
+                Timber.w("There are no kmz files downloaded to get size from.")
+                0
+            }
+        val parentSize = parentImageSize + parentKmzSize
+        parentData.size = parentSize
+
+        parentData to childrenData
     }
 
     override suspend fun doWork(): Result {
@@ -465,13 +536,39 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             var namespace: String? = null
             var downloadResult = try {
                 downloadData(downloadPath!!) { progress ->
+                    setProgress(workDataOf("progress" to progress.percentage))
                     notification = notification.update {
                         withProgress(progress.toInt())
                     }
-                }.let {
-                    namespace = it.first
+                }.let { downloadData ->
+                    val parentData = downloadData.first
+                    val childrenData = downloadData.second
+                    namespace = parentData.namespace
+                    if (childrenData.size.toLong() != parentData.childrenCount)
+                        Timber.w("Loaded children data and theoretical children do not match.")
+
+                    val childrenObjectIds = arrayListOf<String>()
+                    val childrenNames = arrayListOf<String>()
+                    val childrenSizes = arrayListOf<Long>()
+                    for (data in childrenData) {
+                        childrenObjectIds.add(data.objectId)
+                        childrenNames.add(data.displayName)
+                        childrenSizes.add(data.size ?: 0)
+                    }
+
+                    Result.success(
+                        workDataOf(
+                            "namespace" to parentData.namespace,
+                            "objectId" to parentData.objectId,
+                            "childrenCount" to parentData.childrenCount,
+                            "parentId" to parentData.parentId,
+                            "size" to parentData.size,
+                            "childrenIds" to childrenObjectIds.toTypedArray(),
+                            "childrenNames" to childrenNames.toTypedArray(),
+                            "childrenSizes" to childrenSizes.toTypedArray(),
+                        )
+                    )
                 }
-                Result.success()
             } catch (e: FirebaseFirestoreException) {
                 Timber.e(e, "There was an error while fetching data from the database.")
                 Timber.v("Destroying the progress notification...")
@@ -489,8 +586,9 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             Timber.v("Finished downloading $displayName. Result: $downloadResult")
             notification.destroy()
 
+            val downloadResultData = downloadResult.outputData
             val intent: PendingIntent? =
-                if (downloadResult == Result.success()) {
+                if (downloadResultData.error == null) {
                     Timber.v("Getting intent...")
                     val downloadPathSplit = downloadPath!!.split('/')
                     when (namespace) {
@@ -523,7 +621,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     }
                 } else null
 
-            if (downloadResult == Result.success()) {
+            if (downloadResultData.error == null) {
                 Timber.v("Showing download finished notification")
                 val text = applicationContext.getString(
                     R.string.notification_download_complete_message,
@@ -536,6 +634,83 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     .withText(text)
                     .withIntent(intent)
                     .buildAndShow()
+
+                if (namespace != null && downloadPath != null) {
+                    // This is for making it easier to recover later on which DataClasses are downloaded
+                    Timber.v("Indexing downloaded element...")
+                    // First get all the data from the downloaded result
+                    val objectId = downloadResultData.getString("objectId") ?: run {
+                        Timber.w("Could not get \"objectId\". Data: $downloadResultData")
+                        return failure(ERROR_DATA_TRANSFERENCE)
+                    }
+                    val parentId = downloadResultData.getString("parentId") ?: run {
+                        // Zones won't have any parentId since Areas are not downloadable, so
+                        // if the downloaded item is a zone, skip parentId check and return
+                        // an empty string
+                        if (namespace == Zone.NAMESPACE)
+                            ""
+                        else {
+                            Timber.w("Could not get \"parentId\". Data: $downloadResultData")
+                            return failure(ERROR_DATA_TRANSFERENCE)
+                        }
+                    }
+                    val size = downloadResultData.getLong("size", 0)
+                    val childrenCount = downloadResultData.getLong("childrenCount", -1)
+
+                    val childrenIds = downloadResultData.getStringArray("childrenIds") ?: arrayOf()
+                    val childrenDisplayNames =
+                        downloadResultData.getStringArray("childrenNames") ?: arrayOf()
+                    val childrenSizes =
+                        downloadResultData.getLongArray("childrenSizes") ?: longArrayOf()
+
+                    // Process the data
+                    val timestamp = System.currentTimeMillis()
+                    val downloadedData = DownloadedData(
+                        "D/$objectId",
+                        objectId,
+                        timestamp,
+                        namespace!!,
+                        displayName,
+                        downloadPath!!,
+                        childrenCount,
+                        parentId,
+                        size,
+                    )
+                    Timber.d("DownloadedData: $downloadedData")
+                    // Add the data of all the children
+                    val indexData = arrayListOf(downloadedData)
+                    if (childrenIds.size.toLong() != childrenCount)
+                        Timber.w("Children id count does not match childrenCount.")
+                    for (i in childrenIds.indices)
+                        indexData.add(
+                            DownloadedData(
+                                "D/${childrenIds[i]}",
+                                childrenIds[i],
+                                timestamp,
+                                Sector.NAMESPACE,
+                                childrenDisplayNames[i],
+                                "${downloadPath!!}/Sectors/${childrenIds[i]}",
+                                0,
+                                objectId,
+                                childrenSizes[i],
+                            )
+                        )
+
+                    // Index it into AppSearch
+                    val request = PutDocumentsRequest.Builder()
+                        .addDocuments(indexData)
+                        .build()
+                    val result = appSearchSession.put(request).await()
+                    if (result.isSuccess)
+                        Timber.i("Indexed download correctly.")
+                    else {
+                        Timber.i("Failures:")
+                        for (failure in result.failures) {
+                            val value = failure.value
+                            Timber.i("- ${value.resultCode} :: ${value.errorMessage}")
+                        }
+                    }
+                }
             } else {
                 Timber.v("Download failed! Result: $downloadResult. Showing notification.")
                 val text = applicationContext.getString(
@@ -579,7 +754,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         override fun schedule(
             context: Context,
             tag: String,
-            data: DownloadData
+            data: com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
         ): LiveData<WorkInfo> {
             Timber.v("Scheduling new download...")
             Timber.v("Building download constraints...")

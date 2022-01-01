@@ -122,6 +122,9 @@ class LoadingActivity : LanguageComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // TODO: Detect if there's a sharedPreference for intro shown set to true. This means the
+        // user has already been using the app, and it should be informed that the behaviour has
+        // been changed, and that it should download everything again. Or create a migration dialog.
         val shownIntro = viewModel.introShown.value
         if (!shownIntro) {
             Timber.w("Showing intro!")

@@ -8,10 +8,12 @@ import androidx.appsearch.exceptions.AppSearchException
 import androidx.appsearch.localstorage.LocalStorage
 import androidx.collection.arrayMapOf
 import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -19,6 +21,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 
 /**
@@ -157,7 +161,7 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
  * @return The [Area], or null if not found.
  */
 @WorkerThread
-suspend fun AppSearchSession.getArea(areaId: String): Area? =
+suspend fun AppSearchSession.getArea(@ObjectId areaId: String): Area? =
     getData<Area, AreaData>(areaId, Area.NAMESPACE)
 
 /**
@@ -168,7 +172,7 @@ suspend fun AppSearchSession.getArea(areaId: String): Area? =
  * @return The [Zone], or null if not found.
  */
 @WorkerThread
-suspend fun AppSearchSession.getZone(zoneId: String): Zone? =
+suspend fun AppSearchSession.getZone(@ObjectId zoneId: String): Zone? =
     getData<Zone, ZoneData>(zoneId, Zone.NAMESPACE)
 
 /**
@@ -179,7 +183,7 @@ suspend fun AppSearchSession.getZone(zoneId: String): Zone? =
  * @return The [Sector], or null if not found.
  */
 @WorkerThread
-suspend fun AppSearchSession.getSector(sectorId: String): Sector? =
+suspend fun AppSearchSession.getSector(@ObjectId sectorId: String): Sector? =
     getData<Sector, SectorData>(sectorId, Sector.NAMESPACE)
 
 /**
@@ -190,7 +194,7 @@ suspend fun AppSearchSession.getSector(sectorId: String): Sector? =
  * @return The [Path], or null if not found.
  */
 @WorkerThread
-suspend fun AppSearchSession.getPath(pathId: String): Path? =
+suspend fun AppSearchSession.getPath(@ObjectId pathId: String): Path? =
     getData<Path, PathData>(pathId, Path.NAMESPACE)
 
 /**
@@ -201,7 +205,7 @@ suspend fun AppSearchSession.getPath(pathId: String): Path? =
  * @return A [List] with the found [Zone]s.
  */
 @WorkerThread
-suspend fun AppSearchSession.getZones(areaId: String): List<Zone> =
+suspend fun AppSearchSession.getZones(@ObjectId areaId: String): List<Zone> =
     getList<Zone, ZoneData>(areaId, Zone.NAMESPACE)
 
 /**
@@ -213,7 +217,7 @@ suspend fun AppSearchSession.getZones(areaId: String): List<Zone> =
  * @return A [List] with the found [Sector]s.
  */
 @WorkerThread
-suspend fun AppSearchSession.getSectors(zoneId: String): List<Sector> =
+suspend fun AppSearchSession.getSectors(@ObjectId zoneId: String): List<Sector> =
     getList<Sector, SectorData>(zoneId, Sector.NAMESPACE)
 
 /**
@@ -225,7 +229,7 @@ suspend fun AppSearchSession.getSectors(zoneId: String): List<Sector> =
  * @return A [List] with the found [Path]s.
  */
 @WorkerThread
-suspend fun AppSearchSession.getPaths(sectorId: String): List<Path> =
+suspend fun AppSearchSession.getPaths(@ObjectId sectorId: String): List<Path> =
     getList<Path, PathData>(sectorId, Path.NAMESPACE)
 
 /**
@@ -237,3 +241,88 @@ suspend fun AppSearchSession.getPaths(sectorId: String): List<Path> =
 @WorkerThread
 suspend fun AppSearchSession.getPaths(): List<Path> =
     getList<Path, PathData>("", Path.NAMESPACE)
+
+/**
+ * Fetches the children elements of a DataClass.
+ * @author Arnau Mora
+ * @since 20211231
+ * @param childrenNamespace The namespace of the children elements.
+ * @param objectId The id of the parent DataClass.
+ */
+@WorkerThread
+suspend fun <A : DataClassImpl> AppSearchSession.getChildren(
+    childrenNamespace: String,
+    objectId: String
+): List<A> {
+    Timber.v("$this > Building search spec...")
+    val searchSpec = SearchSpec.Builder()
+        .addFilterNamespaces(childrenNamespace)
+        .setResultCountPerPage(100)
+        .setOrder(SearchSpec.ORDER_ASCENDING)
+        .setRankingStrategy(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE)
+        .build()
+    Timber.v("$this > Performing search for \"$objectId\" with namespace \"$childrenNamespace\"...")
+    val searchResults = search(objectId, searchSpec)
+    Timber.v("$this > Awaiting for results...")
+    val nextPage = searchResults.nextPage.await()
+    val list = arrayListOf<A>()
+    Timber.v("$this > Building results list...")
+    for ((p, page) in nextPage.withIndex()) {
+        val genericDocument = page.genericDocument
+        val schemaType = genericDocument.schemaType
+        Timber.v("$this > [$p] Schema type: $schemaType")
+        val data = try {
+            when (schemaType) {
+                "AreaData" -> genericDocument.toDocumentClass(AreaData::class.java).data()
+                "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).data()
+                "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).data()
+                "PathData" -> genericDocument.toDocumentClass(PathData::class.java).data()
+                else -> {
+                    Timber.w("$this > [$p] Got unknown schema type.")
+                    continue
+                }
+            }
+        } catch (e: AppSearchException) {
+            Timber.e(e, "$this > [$p] Could not convert document class!")
+            continue
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        val a = data as? A ?: continue
+        Timber.v("$this > [$p] Adding to result list...")
+        list.add(a)
+    }
+    return list
+}
+
+/**
+ * Fetches all the downloaded items.
+ * @author Arnau Mora
+ * @since 20211231
+ * @return A [Flow] that emits the downloaded items.
+ */
+@WorkerThread
+suspend fun AppSearchSession.getDownloads(): Flow<DownloadedData> = flow {
+    Timber.d("Searching for downloaded classes...")
+    val searchResults = search(
+        "",
+        SearchSpec.Builder()
+            .addFilterDocumentClasses(DownloadedData::class.java)
+            .build()
+    )
+    var results = searchResults.nextPage.await()
+    Timber.d("Finished searching.")
+    while (results.isNotEmpty()) {
+        Timber.d("Got ${results.size} downloads. Exploring...")
+        for (result in results) {
+            val document = result.genericDocument
+            try {
+                val downloadedData = document.toDocumentClass(DownloadedData::class.java)
+                emit(downloadedData)
+            } catch (e: AppSearchException) {
+                Timber.e(e, "Could not convert data to DownloadedData.")
+            }
+        }
+        results = searchResults.nextPage.await()
+    }
+}

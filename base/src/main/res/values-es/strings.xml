@@ -43,10 +43,8 @@
     <string name="notification_channel_people_group_name">"Gente"</string>
     <string name="no_internet_title">"Sin acceso a Internet"</string>
     <string name="no_internet_message">"Puedes acceder al contenido descargado o volverlo a intentar"</string>
-    <string name="downloads_size">"Tamaño de las descargas:"</string>
+    <string name="downloads_size">"Tamaño: %s"</string>
     <string name="downloads_size_value">"%sMB"</string>
-    <string name="downloads_delete_dialog_title">"¿Estás seguro?"</string>
-    <string name="downloads_delete_dialog_msg">"Esto borrará %s de tu dispositivo PARA SIEMPRE. Tendrás que volver a descargarlo."</string>
     <string name="path_warning_dry">"En esta ruta hay algunos seguros secándose, posiblemente porque se ha utilizado algún tipo de producto químico para asegurarlos. Debería volver a estar activa en aproximadamente dos días"</string>
     <string name="path_warning_build">"Esta ruta está bajo revisión.Esto puede llevar de dos días hasta una semana, por favor, sé paciente. Puedes habilitar la notificación de alertas en los ajustes y te avisaremos cuando esté lista"</string>
     <string name="path_warning_bird">"En esta ruta hay un nido, y por tanto está prohibido escalar.
@@ -255,4 +253,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="status_loading_auth">Cargando el sistema de autentificación…</string>
     <string name="status_loading_data">Cargando los datos…</string>
     <string name="status_loading_installing_data">Instalando los datos…</string>
+    <string name="downloads_title">Descargas</string>
 </resources>

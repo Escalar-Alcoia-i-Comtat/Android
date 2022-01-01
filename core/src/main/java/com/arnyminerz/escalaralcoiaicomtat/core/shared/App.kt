@@ -6,8 +6,12 @@ import android.app.Application
 import android.content.Context
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
+import androidx.appsearch.app.SetSchemaRequest
 import androidx.lifecycle.AndroidViewModel
+import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -15,8 +19,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvide
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.auth.loggedIn
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getAreas
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDownloads
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPath
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getSector
@@ -29,6 +35,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -82,6 +89,13 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         super.onCreate()
 
         searchSession = runBlocking { createSearchSession(applicationContext) }
+        doAsync {
+            Timber.v("Search > Adding document classes...")
+            val setSchemaRequest = SetSchemaRequest.Builder()
+                .addDocumentClasses(SEARCH_SCHEMAS)
+                .build()
+            searchSession.setSchema(setSchemaRequest).await()
+        }
 
         PreferencesModule.initWith(this)
 
@@ -148,7 +162,7 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      * @see AppSearchSession.getZone
      */
     @WorkerThread
-    suspend fun getArea(areaId: String): Area? = searchSession.getArea(areaId)
+    suspend fun getArea(@ObjectId areaId: String): Area? = searchSession.getArea(areaId)
 
     /**
      * Searches for the specified [Zone] in [searchSession].
@@ -158,7 +172,7 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      * @see AppSearchSession.getZone
      */
     @WorkerThread
-    suspend fun getZone(zoneId: String): Zone? = searchSession.getZone(zoneId)
+    suspend fun getZone(@ObjectId zoneId: String): Zone? = searchSession.getZone(zoneId)
 
     /**
      * Searches for the specified [Sector] in [searchSession].
@@ -168,7 +182,7 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      * @see AppSearchSession.getSector
      */
     @WorkerThread
-    suspend fun getSector(sectorId: String): Sector? = searchSession.getSector(sectorId)
+    suspend fun getSector(@ObjectId sectorId: String): Sector? = searchSession.getSector(sectorId)
 
     /**
      * Searches for the specified [Path] in [searchSession].
@@ -178,7 +192,7 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      * @see AppSearchSession.getSector
      */
     @WorkerThread
-    suspend fun getPath(pathId: String): Path? = searchSession.getPath(pathId)
+    suspend fun getPath(@ObjectId pathId: String): Path? = searchSession.getPath(pathId)
 
     /**
      * Searches for the specified [Path]s in [searchSession].
@@ -188,7 +202,16 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      * @see AppSearchSession.getSector
      */
     @WorkerThread
-    suspend fun getPaths(zoneId: String): List<Path> = searchSession.getPaths(zoneId)
+    suspend fun getPaths(@ObjectId zoneId: String): List<Path> = searchSession.getPaths(zoneId)
+
+    /**
+     * Fetches all the downloaded items.
+     * @author Arnau Mora
+     * @since 20211231
+     * @return A [Flow] that emits the downloaded items.
+     */
+    @WorkerThread
+    suspend fun getDownloads(): Flow<DownloadedData> = searchSession.getDownloads()
 }
 
 /**

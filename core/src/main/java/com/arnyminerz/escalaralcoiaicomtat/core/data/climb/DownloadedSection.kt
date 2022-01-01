@@ -19,6 +19,10 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 
+@Deprecated(
+    "Uses slow methods. Now downloads are indexed so they can be fetched quicker.",
+    level = DeprecationLevel.WARNING
+)
 data class DownloadedSection(val section: DataClass<*, *>) {
     /**
      * toggled -> true : Content hidden

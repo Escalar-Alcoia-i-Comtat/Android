@@ -40,6 +40,7 @@
     <string name="item_map">Map</string>
     <string name="item_downloads">Downloads</string>
     <string name="item_settings">Settings</string>
+    <string name="item_developer" translatable="false">Developer</string>
     <string name="item_share">Share</string>
 
     <string name="path_ending_plate">Plate</string>
@@ -134,6 +135,7 @@
     <string name="toast_confirmation_sent">Confirmation sent!</string>
     <string name="toast_update_downloaded">An update has just been downloaded</string>
     <string name="toast_downloaded">The data is stored in the device and can be accessed while offline</string>
+    <string name="toast_deleted">Data deleted from device</string>
 
     <string name="notification_download_progress_title">Downloading…</string>
     <string name="notification_download_progress_message">Downloading %s</string>
@@ -169,11 +171,21 @@
     <string name="dialog_gps_disabled_title">GPS disabled</string>
     <string name="dialog_gps_disabled_message">You have the device\'s location provider turned off.</string>
 
+    <string name="downloads_sector_dialog_title">Sectors</string>
+    <string name="downloads_delete_dialog_title">Are you sure?</string>
+    <string name="downloads_delete_dialog_msg">This will delete %s from your device FOREVER. You will have to download it again.</string>
+
+    <string name="sector_title">Sector</string>
+    <string name="zone_title">Zone</string>
+    <string name="downloads_sectors_title">%d Sectors</string>
+
     <string name="fab_desc_map">Open Google Maps</string>
     <string name="fab_desc_enter">Enter</string>
 
     <string name="image_desc_nearby_zones">Nearby Zones</string>
     <string name="image_desc_marker_image">Marker image</string>
+    <string name="image_desc_downloaded_marker">Downloaded Marker</string>
+
     <string name="fab_desc_next">Next</string>
     <string name="fab_desc_finish">Finish</string>
 

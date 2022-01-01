@@ -11,16 +11,18 @@ import android.widget.ImageView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
+import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
-import androidx.appsearch.exceptions.AppSearchException
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -43,6 +45,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getChildren
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getData
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
@@ -72,7 +75,7 @@ import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
-import java.util.Date
+import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -145,12 +148,55 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 ) {
     companion object {
         /**
+         * Generates a unique ID that represents a DataClass unequivocally.
+         * @author Arnau Mora
+         * @since 20211231
+         */
+        private fun generatePin(namespace: String, objectId: String) = "${namespace}_$objectId"
+
+        /**
          * Returns the correct image name for the desired [objectId] and [namespace].
          * @author Arnau Mora
          * @since 20210822
          */
         fun imageName(namespace: String, objectId: String, suffix: String?) =
             "$namespace-$objectId${suffix ?: ""}"
+
+        /**
+         * Returns the File that represents the image of the DataClass
+         * @author Arnau Mora
+         * @date 2020/09/10
+         * @param context The context to run from
+         * @param namespace The namespace of the DataClass
+         * @param objectId The id of the DataClass
+         * @return The path of the image file that can be downloaded
+         */
+        private fun imageFile(context: Context, namespace: String, objectId: String): File =
+            File(dataDir(context), imageName(namespace, objectId, null))
+
+        /**
+         * Returns the File that represents the image of the DataClass in cache.
+         * @author Arnau Mora
+         * @date 20210724
+         * @param context The context to run from
+         * @param namespace The namespace of the DataClass
+         * @param objectId The id of the DataClass
+         * @param suffix If not null, will be added to the end of the file name.
+         * @return The path of the image file that can be downloaded
+         */
+        private fun cacheImageFile(
+            context: Context,
+            namespace: String,
+            objectId: String,
+            suffix: String? = null
+        ): File =
+            File(context.cacheDir, imageName(namespace, objectId, suffix))
+
+        fun kmzFile(context: Context, permanent: Boolean, namespace: String, objectId: String) =
+            File(
+                if (permanent) dataDir(context) else context.cacheDir,
+                generatePin(namespace, objectId)
+            )
 
         /**
          * Gets the [Intent] used to launch the [Activity] of a [DataClass] using [query] as the
@@ -208,6 +254,132 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 }
             }
         }
+
+        /**
+         * Deletes a DataClass from the device.
+         * @author Arnau Mora
+         * @since 20211231
+         * @param A The type of the children of the DataClass
+         * @param context The [Context] that is requesting the deletion.
+         * @param searchSession The [AppSearchSession] for fetching children and un-indexing the
+         * download.
+         * @param namespace The namespace of the DataClass to delete.
+         * @param objectId The id of the DataClass to delete.
+         * @return True if the DataClass was deleted successfully.
+         */
+        suspend fun <A : DataClassImpl> delete(
+            context: Context,
+            searchSession: AppSearchSession,
+            namespace: String,
+            objectId: String
+        ): Boolean {
+            Timber.v("Deleting $objectId")
+            val lst = arrayListOf<Boolean>() // Stores all the delete success statuses
+
+            // KMZ should be deleted
+            val kmzFile = kmzFile(context, true, namespace, objectId)
+            if (kmzFile.exists()) {
+                Timber.v("$this > Deleting \"$kmzFile\"")
+                lst.add(kmzFile.deleteIfExists())
+            }
+
+            // Instead of deleting image, move to cache. System will manage it if necessary.
+            val imgFile = imageFile(context, namespace, objectId)
+            if (imgFile.exists()) {
+                val cacheImageFile = cacheImageFile(context, namespace, objectId)
+                Timber.v("$this > Copying \"$imgFile\" to \"$cacheImageFile\"...")
+                imgFile.copyTo(cacheImageFile, true)
+                Timber.v("$this > Deleting \"$imgFile\"")
+                lst.add(imgFile.delete())
+            }
+
+            // This may not be the best method, but for now it works
+            when (namespace) {
+                Area.NAMESPACE -> Zone.NAMESPACE
+                Zone.NAMESPACE -> Sector.NAMESPACE
+                Sector.NAMESPACE -> Path.NAMESPACE
+                else -> null
+            }?.let { childrenNamespace ->
+                Timber.d("Deleting children...")
+                val children = searchSession.getChildren<A>(childrenNamespace, objectId)
+                for (child in children)
+                    if (child is DataClass<*, *>)
+                        lst.add(child.delete(context, searchSession))
+            }
+
+            // Remove dataclass from index.
+            // Since Sectors that are children of a Zone also contain its ID this will also remove them
+            // from the index.
+            searchSession.remove(
+                objectId,
+                SearchSpec.Builder()
+                    .addFilterNamespaces(namespace)
+                    .addFilterDocumentClasses(DownloadedData::class.java)
+                    .build()
+            ).await()
+
+            return lst.allTrue()
+        }
+
+        /**
+         * Checks if the DataClass with id [objectId] is indexed as a download.
+         * @author Arnau Mora
+         * @since 20220101
+         * @param searchSession The search session to fetch the data from.
+         * @param objectId The id of the DataClass to search for.
+         */
+        suspend fun isDownloadIndexed(
+            searchSession: AppSearchSession,
+            objectId: String
+        ): DownloadStatus {
+            Timber.d("Finding for element in indexed downloads...")
+            val searchResults = searchSession.search(
+                objectId,
+                SearchSpec.Builder()
+                    .addFilterDocumentClasses(DownloadedData::class.java)
+                    .build()
+            )
+            val searchResultsList = arrayListOf<SearchResult>()
+            var page = searchResults.nextPage.await()
+            while (page.isNotEmpty()) {
+                searchResultsList.addAll(page)
+                page = searchResults.nextPage.await()
+            }
+            Timber.d("Got ${searchResultsList.size} indexed downloads for $this")
+
+            var isDownloaded = false
+            var childrenCount = -1L
+            var downloadedChildrenCount = 0
+            if (searchResultsList.isNotEmpty()) {
+                for (result in searchResultsList) {
+                    val document = result.genericDocument
+                    val downloadedData = document.toDocumentClass(DownloadedData::class.java)
+                    val isChildren = downloadedData.parentId == objectId
+                    if (isChildren)
+                    // If it's a children, increase the counter
+                        downloadedChildrenCount++
+                    else {
+                        // If it's not a children, it means that the dataclass is downloaded
+                        isDownloaded = true
+                        childrenCount = downloadedData.childrenCount
+                    }
+                }
+            }
+            Timber.d("$this is downloaded: $isDownloaded. Has $downloadedChildrenCount/$childrenCount downloaded children.")
+
+            // If the Dataclass is downloaded:
+            // - There are not any downloaded children: PARTIALLY
+            // - If all the children are downloaded: DOWNLOADED
+            // - If there's a non-downloaded children: PARTIALLY
+            // If the DataClass is not downloaded:
+            // NOT_DOWNLOADED
+
+            return if (!isDownloaded || childrenCount < 0)
+                DownloadStatus.NOT_DOWNLOADED
+            else if (downloadedChildrenCount >= childrenCount)
+                DownloadStatus.DOWNLOADED
+            else DownloadStatus.PARTIALLY
+        }
     }
 
     /**
@@ -230,7 +402,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210724
      */
     val pin: String
-        get() = "${namespace}_$objectId"
+        get() = generatePin(namespace, objectId)
 
     /**
      * Returns the parent element of the [DataClass].
@@ -273,48 +445,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20210313
      * @param searchSession The session for performing searches.
+     * @throws IllegalStateException When no [DataClassMetadata.childNamespace] is set in
+     * [DataClass.metadata].
      */
     @WorkerThread
-    suspend fun getChildren(searchSession: AppSearchSession): List<A> {
-        val childNamespace = metadata.childNamespace
-        Timber.v("$this > Building search spec...")
-        val searchSpec = SearchSpec.Builder()
-            .addFilterNamespaces(childNamespace)
-            .setResultCountPerPage(100)
-            .setOrder(SearchSpec.ORDER_ASCENDING)
-            .setRankingStrategy(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE)
-            .build()
-        Timber.v("$this > Performing search for \"$objectId\" with namespace \"$childNamespace\"...")
-        val searchResults = searchSession.search(objectId, searchSpec)
-        Timber.v("$this > Awaiting for results...")
-        val nextPage = searchResults.nextPage.await()
-        val list = arrayListOf<A>()
-        Timber.v("$this > Building results list...")
-        for ((p, page) in nextPage.withIndex()) {
-            val genericDocument = page.genericDocument
-            val schemaType = genericDocument.schemaType
-            Timber.v("$this > [$p] Schema type: $schemaType")
-            val data = try {
-                when (schemaType) {
-                    "AreaData" -> genericDocument.toDocumentClass(AreaData::class.java).data()
-                    "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).data()
-                    "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).data()
-                    "PathData" -> genericDocument.toDocumentClass(PathData::class.java).data()
-                    else -> {
-                        Timber.w("$this > [$p] Got unknown schema type.")
-                        continue
-                    }
-                }
-            } catch (e: AppSearchException) {
-                Timber.e(e, "$this > [$p] Could not convert document class!")
-                continue
-            }
-            val a = data as? A ?: continue
-            Timber.v("$this > [$p] Adding to result list...")
-            list.add(a)
-        }
-        return list
-    }
+    @Throws(IllegalStateException::class)
+    suspend fun getChildren(searchSession: AppSearchSession): List<A> =
+        metadata.childNamespace?.let { childNamespace ->
+            searchSession.getChildren(childNamespace, objectId)
+        } ?: throw IllegalStateException("If no child namespace is set in metadata.")
 
     /**
      * Gets the children element at [index].
@@ -401,10 +540,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to run from.
      */
     private fun kmzFile(context: Context, permanent: Boolean): File =
-        File(
-            if (permanent) dataDir(context) else context.cacheDir,
-            pin
-        )
+        kmzFile(context, permanent, namespace, objectId)
 
     /**
      * Gets the KMZ file of the [Area] and stores it into [targetFile].
@@ -519,6 +655,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param progressListener A listener for the progress of the load.
      */
     @WorkerThread
+    @Deprecated("Should use Jetpack Compose", level = DeprecationLevel.WARNING)
     suspend fun downloadedSectionList(
         context: Context,
         searchSession: AppSearchSession,
@@ -570,6 +707,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             String::class.java,
             DownloadData::class.java
         )
+        @Suppress("UNCHECKED_CAST")
         return schedule.invoke(null, context, pin, downloadData) as LiveData<WorkInfo>
     }
 
@@ -578,63 +716,19 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20210313
      * @param context The currently calling [Context].
-     * @param progressListener A progress updater.
      * @return a matching DownloadStatus representing the Data Class' download status
      */
     @WorkerThread
     suspend fun downloadStatus(
         context: Context,
-        searchSession: AppSearchSession,
-        progressListener: (@UiThread (progress: ValueMax<Int>) -> Unit)? = null
+        searchSession: AppSearchSession
     ): DownloadStatus {
         Timber.d("$pin Checking if downloaded")
 
         val downloadWorkInfo = downloadWorkInfo(context)
         val result = if (downloadWorkInfo != null)
             DownloadStatus.DOWNLOADING
-        else {
-            val imageFile = imageFile(context)
-            Timber.v("Checking if image file exists...")
-            val imageFileExists = imageFile.exists()
-            if (!imageFileExists)
-                Timber.d("$pin Image file ($imageFile) doesn't exist")
-
-            // If image file exists:
-            // - If all the children are downloaded: DOWNLOADED
-            // - If there's a non-downloaded children: PARTIALLY
-            // If image file doesn't exist:
-            // - If there are not any downloaded children: NOT_DOWNLOADED
-            // - If there's at least one downloaded children: PARTIALLY
-
-            Timber.v("$pin Getting children elements download status...")
-            val children = getChildren(searchSession)
-
-            Timber.v("$pin Finding for a downloaded children in ${children.size}...")
-            var allChildrenDownloaded = true
-            var atLeastOneChildrenDownloaded = false
-            for ((c, child) in children.withIndex()) {
-                if (child is DataClass<*, *>) {
-                    uiContext { progressListener?.invoke(ValueMax(c, children.size)) }
-                    val childDownloadStatus = child.downloadStatus(context, searchSession)
-                    if (!childDownloadStatus.downloaded) {
-                        // If at least one non-downloaded, that means that not all children are
-                        Timber.d("$pin has a non-downloaded children (${child.pin}): $childDownloadStatus")
-                        allChildrenDownloaded = false
-                    } else {
-                        // This means there's at least one children downloaded (or downloading?)
-                        Timber.v("$pin has a downloaded/downloading children (${child.pin}): $childDownloadStatus")
-                        atLeastOneChildrenDownloaded = true
-                        break
-                    }
-                } else Timber.d("$pin Child is not DataClass")
-            }
-
-            if (imageFileExists && allChildrenDownloaded)
-                DownloadStatus.DOWNLOADED
-            else if (!imageFileExists && !atLeastOneChildrenDownloaded)
-                DownloadStatus.NOT_DOWNLOADED
-            else DownloadStatus.PARTIALLY
-        }
+        else isDownloadIndexed(searchSession, objectId)
 
         Timber.d("$pin Finished checking download status. Result: $result")
         return result
@@ -671,34 +765,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @return If the content was deleted successfully. Note: returns true if not downloaded
      */
     @WorkerThread
-    suspend fun delete(context: Context, searchSession: AppSearchSession): Boolean {
-        Timber.v("Deleting $objectId")
-        val lst = arrayListOf<Boolean>() // Stores all the delection success statuses
-
-        // KMZ should be deleted
-        val kmzFile = kmzFile(context, true)
-        if (kmzFile.exists()) {
-            Timber.v("$this > Deleting \"$kmzFile\"")
-            lst.add(kmzFile.deleteIfExists())
-        }
-
-        // Instead of deleting image, move to cache. System will manage it if necessary.
-        val imgFile = imageFile(context)
-        if (imgFile.exists()) {
-            val cacheImageFile = cacheImageFile(context)
-            Timber.v("$this > Copying \"$imgFile\" to \"$cacheImageFile\"...")
-            imgFile.copyTo(cacheImageFile, true)
-            Timber.v("$this > Deleting \"$imgFile\"")
-            lst.add(imgFile.delete())
-        }
-
-        val children = getChildren(searchSession)
-        for (child in children)
-            if (child is DataClass<*, *>)
-                lst.add(child.delete(context, searchSession))
-
-        return lst.allTrue()
-    }
+    suspend fun delete(context: Context, searchSession: AppSearchSession): Boolean =
+        Companion.delete<A>(context, searchSession, namespace, objectId)
 
     /**
      * Gets the space that is occupied by the data class' downloaded data in the system
@@ -749,8 +817,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to run from
      * @return The path of the image file that can be downloaded
      */
-    fun imageFile(context: Context): File =
-        File(dataDir(context), imageName(namespace, objectId, null))
+    private fun imageFile(context: Context): File =
+        Companion.imageFile(context, namespace, objectId)
 
     /**
      * Returns the File that represents the image of the DataClass in cache.
@@ -760,8 +828,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param suffix If not null, will be added to the end of the file name.
      * @return The path of the image file that can be downloaded
      */
-    fun cacheImageFile(context: Context, suffix: String? = null): File =
-        File(context.cacheDir, imageName(namespace, objectId, suffix))
+    private fun cacheImageFile(context: Context, suffix: String? = null): File =
+        Companion.cacheImageFile(context, namespace, objectId, suffix)
 
     /**
      * Creates a dynamic link access for the DataClass
@@ -869,6 +937,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @see ImageLoadParameters
      */
     @WorkerThread
+    @Suppress("BlockingMethodInNonBlockingContext")
     @Throws(StorageException::class, IOException::class, ArithmeticException::class)
     suspend fun image(
         context: Context,
@@ -953,6 +1022,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         IOException::class,
         ArithmeticException::class
     )
+    @Suppress("BlockingMethodInNonBlockingContext")
     fun loadImage(
         activity: Activity,
         storage: FirebaseStorage,
@@ -1048,3 +1118,24 @@ fun <D : DataClass<*, *>> Iterable<D>.has(objectId: String): Boolean {
             return true
     return false
 }
+
+/**
+ * Checks if the DataClass with the specified object id is indexed in the downloads.
+ * @author Arnau Mora
+ * @since 20220101
+ * @param searchSession The search session where to search for the DataClass.
+ */
+suspend fun @receiver:ObjectId String.isDownloadIndexed(searchSession: AppSearchSession) =
+    DataClass.isDownloadIndexed(searchSession, this)
+
+/**
+ * Fetches all the children of the DataClass with the specified object id.
+ * @author Arnau Mora
+ * @since 20220101
+ * @param A The children object type.
+ * @param searchSession The search session where to search for the data.
+ * @param namespace The namespace of [A].
+ */
+suspend fun <A : DataClassImpl> @receiver:ObjectId
+String.getChildren(searchSession: AppSearchSession, namespace: String) =
+    searchSession.getChildren<A>(namespace, this)
