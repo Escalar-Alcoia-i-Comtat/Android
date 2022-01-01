@@ -324,22 +324,26 @@ class MainActivity : LanguageComponentActivity() {
                         .fillMaxWidth()
                         .padding(start = 12.dp, end = 12.dp, top = 8.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.downloads_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
-                    )
-                }
-            }
-            item {
-                Row(
-                    modifier = Modifier
-                        .padding(start = 12.dp, end = 12.dp)
-                        .fillMaxWidth()
-                ) {
-                    Timber.i("Size: $sizeString")
-                    Chip(sizeString)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = stringResource(R.string.downloads_title),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .padding(start = 12.dp, end = 12.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Timber.i("Size: $sizeString")
+                            Chip(stringResource(R.string.downloads_size, sizeString))
+                        }
+                    }
                 }
             }
             items(downloads ?: emptyList()) { data ->
