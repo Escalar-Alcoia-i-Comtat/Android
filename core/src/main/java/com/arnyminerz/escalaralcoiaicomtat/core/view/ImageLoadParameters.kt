@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.view
 
 import android.widget.ImageView
 
+@Suppress("unused")
 class ImageLoadParameters {
     internal var showPlaceholder: Boolean = true
     var resultImageScale: Float? = null

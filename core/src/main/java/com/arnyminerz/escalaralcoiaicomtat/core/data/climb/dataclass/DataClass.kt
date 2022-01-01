@@ -1062,21 +1062,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 }
 
 /**
- * Checks if the all the items in the iterable have a loaded [DataClass.downloadUrl].
- * @author Arnau Mora
- * @since 20210722
- * @return true if all the items have an stored download url, false otherwise.
- * @see DataClass.downloadUrl
- * @see DataClass.hasStorageUrl
- */
-fun <D : DataClass<*, *>> Iterable<D>.hasStorageUrls(): Boolean {
-    for (i in this)
-        if (!i.hasStorageUrl())
-            return false
-    return true
-}
-
-/**
  * Gets the children from all the [DataClass]es in the [Iterator].
  * @author Arnau Mora
  * @since 20210724

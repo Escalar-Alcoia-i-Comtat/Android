@@ -20,12 +20,6 @@ const val WORKER_TAG_DOWNLOAD = "DataDownload"
 const val ERROR_MISSING_DATA = "missing_data"
 
 /**
- * When the target download could not be found
- * @since 20210313
- */
-const val ERROR_NOT_FOUND = "not_found"
-
-/**
  * When the target download has already been downloaded and overwrite is false
  * @since 20210313
  */
@@ -82,12 +76,6 @@ const val ERROR_FETCH_IMAGE = "fetch_image"
  * @since 20210412
  */
 const val ERROR_UNKNOWN_NAMESPACE = "unknown_namespace"
-
-/**
- * When the image reference could not be updated.
- * @since 20210422
- */
-const val ERROR_UPDATE_IMAGE_REF = "update_image_ref"
 
 /**
  * When there has been an error while transferring the downloaded data values from the download
