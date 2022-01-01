@@ -19,6 +19,7 @@ import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -303,6 +304,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      */
     internal data class DownloadData(
         val namespace: String,
+        @ObjectId
         val objectId: String,
         val childrenCount: Long? = null,
         val parentId: String? = null
@@ -597,12 +599,24 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
 
                 if (namespace != null && downloadPath != null) {
                     // This is for making it easier to recover later on which DataClasses are downloaded
+                    // TODO: Children should also be indexed
                     Timber.v("Indexing downloaded element...")
                     // First get all the data from the downloaded result
-                    val objectId = downloadResultData.getString("objectId")
-                        ?: return failure(ERROR_DATA_TRANSFERENCE)
-                    val parentId = downloadResultData.getString("parentId")
-                        ?: return failure(ERROR_DATA_TRANSFERENCE)
+                    val objectId = downloadResultData.getString("objectId") ?: run {
+                        Timber.w("Could not get \"objectId\". Data: $downloadResultData")
+                        return failure(ERROR_DATA_TRANSFERENCE)
+                    }
+                    val parentId = downloadResultData.getString("parentId") ?: run {
+                        // Zones won't have any parentId since Areas are not downloadable, so
+                        // if the downloaded item is a zone, skip parentId check and return
+                        // an empty string
+                        if (namespace == Zone.NAMESPACE)
+                            ""
+                        else {
+                            Timber.w("Could not get \"parentId\". Data: $downloadResultData")
+                            return failure(ERROR_DATA_TRANSFERENCE)
+                        }
+                    }
                     val parentSize = downloadResultData.getLong("parentSize", 0)
                     val childrenCount = downloadResultData.getLong("childrenCount", -1)
                     // Process the data, and index it into AppSearch
