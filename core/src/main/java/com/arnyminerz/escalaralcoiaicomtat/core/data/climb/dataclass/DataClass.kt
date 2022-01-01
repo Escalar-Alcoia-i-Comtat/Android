@@ -17,6 +17,7 @@ import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
@@ -1117,3 +1118,12 @@ fun <D : DataClass<*, *>> Iterable<D>.has(objectId: String): Boolean {
             return true
     return false
 }
+
+/**
+ * Checks if the DataClass with the specified object id is indexed in the downloads.
+ * @author Arnau Mora
+ * @since 20220101
+ * @param searchSession The search session where to search for the DataClass.
+ */
+suspend fun @receiver:ObjectId String.isDownloadIndexed(searchSession: AppSearchSession) =
+    DataClass.isDownloadIndexed(searchSession, this)
