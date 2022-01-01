@@ -298,6 +298,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @since 20211231
      * @param namespace The namespace of the DataClass.
      * @param objectId The id of the DataClass.
+     * @param displayName The display name of the item.
      * @param childrenCount The amount of children the DataClass has. It's null if the DataClass is
      * a Sector.
      * @param parentId The id of the parent DataClass. It's null for Zones since it's not used.
@@ -306,6 +307,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         val namespace: String,
         @ObjectId
         val objectId: String,
+        val displayName: String,
         val childrenCount: Long? = null,
         val parentId: String? = null
     ) {
@@ -321,7 +323,9 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @param progressListener A callback function for observing the download progress. When the
      * data is being fetched from the server, an undetermined state will be returned. Once files
      * start getting downloaded, an overall progress will be passed.
-     * @return A [DownloadData] object with the data of the downloaded object.
+     * @return A pair with a [DownloadData] and a list of [DownloadData]. The first is the parent's
+     * data instance. The second is a list of the children's download data. If downloading a sector
+     * the list should be empty.
      * @throws FirebaseFirestoreException If there happens an exception while fetching the data
      * from the server.
      * @throws RuntimeException When there is an unexpected type exception in the data from the server.
@@ -331,7 +335,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
     private suspend fun downloadData(
         path: String,
         progressListener: suspend (progress: ValueMax<Long>) -> Unit
-    ): DownloadData = coroutineScope {
+    ): Pair<DownloadData, List<DownloadData>> = coroutineScope {
         val imageFiles = arrayListOf<ImageDownloadData>()
         val kmzFiles = arrayListOf<KMZDownloadData>()
 
@@ -344,7 +348,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
          * @return An instance of the [DownloadData] class. If it's zone, [DownloadData.childrenCount]
          * should match the amount of sectors inside the zone. If it's sector, it should be -1.
          */
-        suspend fun scheduleDownload(path: String): DownloadData {
+        suspend fun scheduleDownload(path: String): Pair<DownloadData, List<DownloadData>> {
             // Get the document data from Firestore
             Timber.v("Getting document ($path)...")
             val document = firestore.document(path).get().await()
@@ -387,6 +391,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             }
 
             // Download the children if it's a zone
+            val childrenData = mutableListOf<DownloadData>()
             var childrenCount: Long? = null
             var parentId: String? = null
             if (namespace == Zone.NAMESPACE) {
@@ -398,7 +403,9 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 Timber.v("Got ${documents.size} sector documents...")
                 for (sectorDocument in documents) {
                     val documentPath: String = sectorDocument.reference.path
-                    scheduleDownload(documentPath)
+                    val data = scheduleDownload(documentPath)
+                    // data should not have children. Add the data to the zone's children list
+                    childrenData.add(data.first)
                     childrenCount?.plus(1L) ?: run { childrenCount = 1 }
                 }
             } else if (namespace == Sector.NAMESPACE) {
@@ -408,13 +415,21 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 parentId = splitPath[splitPath.size - 3]
             }
 
-            return DownloadData(namespace, objectId, childrenCount, parentId)
+            return DownloadData(
+                namespace,
+                objectId,
+                displayName,
+                childrenCount,
+                parentId
+            ) to childrenData
         }
 
         Timber.v("Calling progress listener...")
         progressListener(ValueMax(0, -1)) // Set to -1 for indeterminate
         Timber.v("Initializing data fetch...")
-        val parentData = scheduleDownload(path)
+        val scheduledDownloadData = scheduleDownload(path)
+        val parentData = scheduledDownloadData.first
+        val childrenData = scheduledDownloadData.second
 
         // This total byte count is used for displaying the total progress, not individually on each
         // item.
@@ -468,7 +483,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         val parentSize = parentImageSize + parentKmzSize
         parentData.size = parentSize
 
-        parentData
+        parentData to childrenData
     }
 
     override suspend fun doWork(): Result {
@@ -520,14 +535,31 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                         withProgress(progress.toInt())
                     }
                 }.let { downloadData ->
-                    namespace = downloadData.namespace
+                    val parentData = downloadData.first
+                    val childrenData = downloadData.second
+                    namespace = parentData.namespace
+                    if (childrenData.size.toLong() != parentData.childrenCount)
+                        Timber.w("Loaded children data and theoretical children do not match.")
+
+                    val childrenObjectIds = arrayListOf<String>()
+                    val childrenNames = arrayListOf<String>()
+                    val childrenSizes = arrayListOf<Long>()
+                    for (data in childrenData) {
+                        childrenObjectIds.add(data.objectId)
+                        childrenNames.add(data.displayName)
+                        childrenSizes.add(data.size ?: 0)
+                    }
+
                     Result.success(
                         workDataOf(
-                            "namespace" to downloadData.namespace,
-                            "objectId" to downloadData.objectId,
-                            "childrenCount" to downloadData.childrenCount,
-                            "parentId" to downloadData.parentId,
-                            "parentSize" to downloadData.size,
+                            "namespace" to parentData.namespace,
+                            "objectId" to parentData.objectId,
+                            "childrenCount" to parentData.childrenCount,
+                            "parentId" to parentData.parentId,
+                            "size" to parentData.size,
+                            "childrenIds" to childrenObjectIds.toTypedArray(),
+                            "childrenNames" to childrenNames.toTypedArray(),
+                            "childrenSizes" to childrenSizes.toTypedArray(),
                         )
                     )
                 }
@@ -617,22 +649,49 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                             return failure(ERROR_DATA_TRANSFERENCE)
                         }
                     }
-                    val parentSize = downloadResultData.getLong("parentSize", 0)
+                    val size = downloadResultData.getLong("size", 0)
                     val childrenCount = downloadResultData.getLong("childrenCount", -1)
-                    // Process the data, and index it into AppSearch
+
+                    val childrenIds = downloadResultData.getStringArray("childrenIds") ?: arrayOf()
+                    val childrenDisplayNames =
+                        downloadResultData.getStringArray("childrenNames") ?: arrayOf()
+                    val childrenSizes =
+                        downloadResultData.getLongArray("childrenSizes") ?: longArrayOf()
+
+                    // Process the data
+                    val timestamp = System.currentTimeMillis()
                     val downloadedData = DownloadedData(
                         objectId,
-                        System.currentTimeMillis(),
+                        timestamp,
                         namespace!!,
                         displayName,
                         downloadPath!!,
                         childrenCount,
                         parentId,
-                        parentSize
+                        size,
                     )
                     Timber.d("DownloadedData: $downloadedData")
+                    // Add the data of all the children
+                    val indexData = arrayListOf(downloadedData)
+                    if (childrenIds.size.toLong() != childrenCount)
+                        Timber.w("Children id count does not match childrenCount.")
+                    for (i in childrenIds.indices)
+                        indexData.add(
+                            DownloadedData(
+                                childrenIds[i],
+                                timestamp,
+                                Sector.NAMESPACE,
+                                childrenDisplayNames[i],
+                                "${downloadPath!!}/Sectors/${childrenIds[i]}",
+                                0,
+                                objectId,
+                                childrenSizes[i],
+                            )
+                        )
+
+                    // Index it into AppSearch
                     val request = PutDocumentsRequest.Builder()
-                        .addDocuments(downloadedData)
+                        .addDocuments(indexData)
                         .build()
                     val result = appSearchSession.put(request).await()
                     if (result.isSuccess)
