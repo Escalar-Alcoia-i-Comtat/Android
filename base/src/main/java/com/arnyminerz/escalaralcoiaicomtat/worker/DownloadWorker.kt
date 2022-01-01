@@ -76,7 +76,6 @@ import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
-import java.util.*
 
 /**
  * The [CoroutineWorker] for scheduling [DataClass] downloads.
@@ -667,7 +666,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     // Process the data
                     val timestamp = System.currentTimeMillis()
                     val downloadedData = DownloadedData(
-                        UUID.randomUUID().toString(),
+                        "D/$objectId",
                         objectId,
                         timestamp,
                         namespace!!,
@@ -685,7 +684,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     for (i in childrenIds.indices)
                         indexData.add(
                             DownloadedData(
-                                UUID.randomUUID().toString(),
+                                "D/${childrenIds[i]}",
                                 childrenIds[i],
                                 timestamp,
                                 Sector.NAMESPACE,
