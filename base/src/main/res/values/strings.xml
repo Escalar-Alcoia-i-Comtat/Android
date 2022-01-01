@@ -185,10 +185,9 @@
     <string name="no_internet_title">You have no Internet access</string>
     <string name="no_internet_message">You can access the downloaded content, or try again.</string>
 
-    <string name="downloads_size">Downloads Size:</string>
+    <string name="downloads_title">Downloads</string>
+    <string name="downloads_size">Size: %s</string>
     <string name="downloads_size_value">%sMB</string>
-    <string name="downloads_delete_dialog_title">Are you sure?</string>
-    <string name="downloads_delete_dialog_msg">This will delete %s from your device FOREVER. You will have to download it again.</string>
     <string name="downloads_no_download">There\'s nothing downloaded</string>
 
     <string name="dataclass_area_children_count">%d zones</string>

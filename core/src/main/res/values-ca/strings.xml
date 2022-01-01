@@ -4,7 +4,7 @@
     <string name="action_cancel">Cancel·lar</string>
     <string name="action_open_maps">"Obrir Google Maps"</string>
     <string name="action_enable_location">Habilitar Ubicació</string>
-    <string name="action_view">Ver</string>
+    <string name="action_view">Veure</string>
     <string name="action_download">"Descarregar"</string>
     <string name="action_delete">"Eliminar"</string>
     <string name="action_ok">"OK"</string>
@@ -163,6 +163,9 @@
     <string name="fab_desc_enter">Accedir</string>
     <string name="fab_desc_next">"Següent"</string>
 
+    <string name="downloads_delete_dialog_title">"N'estàs segur?"</string>
+    <string name="downloads_delete_dialog_msg">"Açò eliminarà %s del teu dispositiu PERMANENTMENT. Ho hauràs de tornar a descarregar si ho desitges."</string>
+
     <string name="image_desc_nearby_zones">Zones Properes</string>
     <string name="image_desc_marker_image">Imatge del marcador</string>
 
@@ -189,4 +192,7 @@
     <string name="fab_desc_finish">Finalitzar</string>
     <string name="action_uninstall_data">Desinstal·lar el mòdul de dades</string>
     <string name="toast_data_uninstalled">Sol·licitada la desinstal·lació de les dades</string>
+    <string name="toast_deleted">Dades eliminades del dispositiu</string>
+    <string name="sector_title">Sector</string>
+    <string name="zone_title">Zona</string>
 </resources>

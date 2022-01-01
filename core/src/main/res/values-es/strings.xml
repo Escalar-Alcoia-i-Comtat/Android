@@ -159,6 +159,9 @@
     <string name="dialog_gps_disabled_title">GPS deshabilitado</string>
     <string name="dialog_gps_disabled_message">Tienes el proveedor de ubicación desconectado.</string>
 
+    <string name="downloads_delete_dialog_title">"¿Estás seguro?"</string>
+    <string name="downloads_delete_dialog_msg">"Esto borrará %s de tu dispositivo PARA SIEMPRE. Tendrás que volver a descargarlo."</string>
+
     <string name="fab_desc_map">"Abrir Google Maps"</string>
     <string name="fab_desc_enter">Entrar</string>
     <string name="fab_desc_next">"Siguiente"</string>
@@ -189,4 +192,7 @@
     <string name="fab_desc_finish">Finalizar</string>
     <string name="action_uninstall_data">Desinstalar el módulo de datos</string>
     <string name="toast_data_uninstalled">Solicitada la desinstalación de los datos</string>
+    <string name="toast_deleted">Datos eliminados del dispositivo</string>
+    <string name="sector_title">Sector</string>
+    <string name="zone_title">Zona</string>
 </resources>
