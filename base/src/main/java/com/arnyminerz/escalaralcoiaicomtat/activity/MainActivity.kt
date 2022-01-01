@@ -365,10 +365,12 @@ class MainActivity : LanguageComponentActivity() {
                 }
             }
             items(downloads ?: emptyList()) { data ->
-                DownloadedDataItem(data, app.searchSession) {
-                    // This gets called when data gets deleted
-                    downloadsViewModel.loadDownloads()
-                }
+                val isParentDownloaded = data.second
+                if (!isParentDownloaded)
+                    DownloadedDataItem(data.first, app.searchSession) {
+                        // This gets called when data gets deleted
+                        downloadsViewModel.loadDownloads()
+                    }
             }
         }
         downloadsViewModel.loadDownloads()
