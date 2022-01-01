@@ -1,11 +1,13 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -77,6 +79,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import timber.log.Timber
+
 
 class MainActivity : LanguageComponentActivity() {
     private val settingsViewModel by viewModels<SettingsViewModel>(factoryProducer = {
@@ -375,14 +378,25 @@ class MainActivity : LanguageComponentActivity() {
     @OptIn(ExperimentalMaterialApi::class)
     private fun DeveloperScreen() {
         val indexedDownloads by developerViewModel.indexedDownloads.observeAsState()
+        val indexTree by developerViewModel.indexTree.observeAsState()
         Column {
-            Button(
-                onClick = {
-                    // This should be moved somewhere else
-                    developerViewModel.loadIndexedDownloads()
+            Row {
+                Button(
+                    onClick = {
+                        // This should be moved somewhere else
+                        developerViewModel.loadIndexedDownloads()
+                    }
+                ) {
+                    Text(text = "Load")
                 }
-            ) {
-                Text(text = "Load")
+                Button(
+                    onClick = {
+                        // This should be moved somewhere else
+                        developerViewModel.loadIndexTree()
+                    }
+                ) {
+                    Text(text = "Index tree")
+                }
             }
             LazyColumn {
                 items(indexedDownloads ?: listOf()) { item ->
@@ -392,6 +406,21 @@ class MainActivity : LanguageComponentActivity() {
                     Divider()
                 }
             }
+            Text(
+                text = indexTree ?: "Index tree not generated",
+                modifier = Modifier.clickable {
+                    launch(
+                        Intent.createChooser(
+                            Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_SUBJECT, "Index tree")
+                                putExtra(Intent.EXTRA_TEXT, indexTree)
+                            },
+                            "Index tree"
+                        )
+                    )
+                }
+            )
         }
     }
 }
