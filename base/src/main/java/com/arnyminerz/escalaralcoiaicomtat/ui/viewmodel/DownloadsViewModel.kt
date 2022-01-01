@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.isDownloadIndexed
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
@@ -23,7 +24,7 @@ class DownloadsViewModel(application: Application) : AndroidViewModel(applicatio
         Timber.d("$this::onCleared")
     }
 
-    val downloads: MutableLiveData<List<DownloadedData>> = MutableLiveData()
+    val downloads: MutableLiveData<List<Pair<DownloadedData, Boolean>>> = MutableLiveData()
     val sizeString = mutableStateOf(humanReadableByteCountBin(0))
 
     /**
@@ -35,11 +36,13 @@ class DownloadsViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             Timber.i("Loading downloads...")
             var size = 0L
-            val list = arrayListOf<DownloadedData>()
+            val list = arrayListOf<Pair<DownloadedData, Boolean>>()
             val downloadsFlow = app.getDownloads()
             downloadsFlow.collect { data ->
-                Timber.i("Collected ${data.namespace}:${data.objectId}, adding.")
-                list.add(data)
+                val parentIndexed =
+                    data.parentId.ifEmpty { null }?.isDownloadIndexed(app.searchSession)
+                Timber.i("Collected ${data.namespace}:${data.objectId}, adding. Parent (${data.parentId}) indexed: $parentIndexed")
+                list.add(data to (parentIndexed?.downloaded ?: false))
                 size += data.sizeBytes
             }
             Timber.i("Size: $size")
