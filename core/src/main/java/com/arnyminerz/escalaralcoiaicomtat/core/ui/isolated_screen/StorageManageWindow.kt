@@ -22,6 +22,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATA_MODULE_NAME
@@ -145,6 +149,12 @@ private fun ClearSearchSessionButton(
             val searchSpec = SearchSpec.Builder()
                 .addFilterPackageNames("com.arnyminerz.escalaralcoiaicomtat")
                 .setResultCountPerPage(10000)
+                .addFilterDocumentClasses(
+                    AreaData::class.java,
+                    ZoneData::class.java,
+                    SectorData::class.java,
+                    PathData::class.java,
+                )
                 .build()
             searchSession.remove("", searchSpec).await()
             PREF_INDEXED_SEARCH.put(false)
