@@ -319,6 +319,66 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
             return lst.allTrue()
         }
+
+        /**
+         * Checks if the DataClass with id [objectId] is indexed as a download.
+         * @author Arnau Mora
+         * @since 20220101
+         * @param searchSession The search session to fetch the data from.
+         * @param objectId The id of the DataClass to search for.
+         */
+        suspend fun isDownloadIndexed(
+            searchSession: AppSearchSession,
+            objectId: String
+        ): DownloadStatus {
+            Timber.d("Finding for element in indexed downloads...")
+            val searchResults = searchSession.search(
+                objectId,
+                SearchSpec.Builder()
+                    .addFilterDocumentClasses(DownloadedData::class.java)
+                    .build()
+            )
+            val searchResultsList = arrayListOf<SearchResult>()
+            var page = searchResults.nextPage.await()
+            while (page.isNotEmpty()) {
+                searchResultsList.addAll(page)
+                page = searchResults.nextPage.await()
+            }
+            Timber.d("Got ${searchResultsList.size} indexed downloads for $this")
+
+            var isDownloaded = false
+            var childrenCount = -1L
+            var downloadedChildrenCount = 0
+            if (searchResultsList.isNotEmpty()) {
+                for (result in searchResultsList) {
+                    val document = result.genericDocument
+                    val downloadedData = document.toDocumentClass(DownloadedData::class.java)
+                    val isChildren = downloadedData.parentId == objectId
+                    if (isChildren)
+                    // If it's a children, increase the counter
+                        downloadedChildrenCount++
+                    else {
+                        // If it's not a children, it means that the dataclass is downloaded
+                        isDownloaded = true
+                        childrenCount = downloadedData.childrenCount
+                    }
+                }
+            }
+            Timber.d("$this is downloaded: $isDownloaded. Has $downloadedChildrenCount/$childrenCount downloaded children.")
+
+            // If the Dataclass is downloaded:
+            // - There are not any downloaded children: PARTIALLY
+            // - If all the children are downloaded: DOWNLOADED
+            // - If there's a non-downloaded children: PARTIALLY
+            // If the DataClass is not downloaded:
+            // NOT_DOWNLOADED
+
+            return if (!isDownloaded || childrenCount < 0)
+                DownloadStatus.NOT_DOWNLOADED
+            else if (downloadedChildrenCount >= childrenCount)
+                DownloadStatus.DOWNLOADED
+            else DownloadStatus.PARTIALLY
+        }
     }
 
     /**
@@ -667,55 +727,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val downloadWorkInfo = downloadWorkInfo(context)
         val result = if (downloadWorkInfo != null)
             DownloadStatus.DOWNLOADING
-        else {
-            Timber.d("Finding for element in indexed downloads...")
-            val searchResults = searchSession.search(
-                objectId,
-                SearchSpec.Builder()
-                    .addFilterDocumentClasses(DownloadedData::class.java)
-                    .build()
-            )
-            val searchResultsList = arrayListOf<SearchResult>()
-            var page = searchResults.nextPage.await()
-            while (page.isNotEmpty()) {
-                searchResultsList.addAll(page)
-                page = searchResults.nextPage.await()
-            }
-            Timber.d("Got ${searchResultsList.size} indexed downloads for $this")
-
-            var isDownloaded = false
-            var childrenCount = -1L
-            var downloadedChildrenCount = 0
-            if (searchResultsList.isNotEmpty()) {
-                for (result in searchResultsList) {
-                    val document = result.genericDocument
-                    val downloadedData = document.toDocumentClass(DownloadedData::class.java)
-                    val isChildren = downloadedData.parentId == objectId
-                    if (isChildren)
-                    // If it's a children, increase the counter
-                        downloadedChildrenCount++
-                    else {
-                        // If it's not a children, it means that the dataclass is downloaded
-                        isDownloaded = true
-                        childrenCount = downloadedData.childrenCount
-                    }
-                }
-            }
-            Timber.d("$this is downloaded: $isDownloaded. Has $downloadedChildrenCount/$childrenCount downloaded children.")
-
-            // If the Dataclass is downloaded:
-            // - There are not any downloaded children: PARTIALLY
-            // - If all the children are downloaded: DOWNLOADED
-            // - If there's a non-downloaded children: PARTIALLY
-            // If the DataClass is not downloaded:
-            // NOT_DOWNLOADED
-
-            if (!isDownloaded || childrenCount < 0)
-                DownloadStatus.NOT_DOWNLOADED
-            else if (downloadedChildrenCount >= childrenCount)
-                DownloadStatus.DOWNLOADED
-            else DownloadStatus.PARTIALLY
-        }
+        else isDownloadIndexed(searchSession, objectId)
 
         Timber.d("$pin Finished checking download status. Result: $result")
         return result
