@@ -11,6 +11,7 @@ import com.google.android.material.chip.Chip
 @Composable
 private fun rememberChipWithLifecycle(
     text: String,
+    enabled: Boolean = true,
     onClick: (() -> Unit)? = null
 ): Chip {
     val context = LocalContext.current
@@ -18,6 +19,7 @@ private fun rememberChipWithLifecycle(
         Chip(context).apply {
             id = R.id.chip
             this.text = text
+            this.isEnabled = enabled
             this.setOnClickListener { onClick?.let { it() } }
         }
     }
@@ -30,12 +32,19 @@ private fun rememberChipWithLifecycle(
  * @since 20211230
  * @param text The text of the chip.
  * @param modifier Modifiers to apply to the view.
+ * @param enabled Whether or not the chip should be displayed as enabled.
  * @param onClick A callback for when the chip is clicked.
  */
 @Composable
-fun Chip(text: String, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
-    val chipState = rememberChipWithLifecycle(text, onClick)
+fun Chip(
+    text: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    onClick: (() -> Unit)? = null
+) {
+    val chipState = rememberChipWithLifecycle(text, enabled, onClick)
     AndroidView(factory = { chipState }, modifier, update = {
         it.text = text
+        it.isEnabled = enabled
     })
 }
