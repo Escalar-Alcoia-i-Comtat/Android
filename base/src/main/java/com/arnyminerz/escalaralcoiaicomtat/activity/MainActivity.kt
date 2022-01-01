@@ -353,5 +353,6 @@ class MainActivity : LanguageComponentActivity() {
                 }
             }
         }
+        downloadsViewModel.loadDownloads()
     }
 }
