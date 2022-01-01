@@ -195,4 +195,6 @@
     <string name="toast_deleted">Dades eliminades del dispositiu</string>
     <string name="sector_title">Sector</string>
     <string name="zone_title">Zona</string>
+    <string name="downloads_sector_dialog_title">Sectors</string>
+    <string name="downloads_sectors_title">%d Sectors</string>
 </resources>

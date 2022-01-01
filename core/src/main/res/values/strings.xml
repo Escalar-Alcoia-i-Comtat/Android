@@ -171,11 +171,13 @@
     <string name="dialog_gps_disabled_title">GPS disabled</string>
     <string name="dialog_gps_disabled_message">You have the device\'s location provider turned off.</string>
 
+    <string name="downloads_sector_dialog_title">Sectors</string>
     <string name="downloads_delete_dialog_title">Are you sure?</string>
     <string name="downloads_delete_dialog_msg">This will delete %s from your device FOREVER. You will have to download it again.</string>
 
     <string name="sector_title">Sector</string>
     <string name="zone_title">Zone</string>
+    <string name="downloads_sectors_title">%d Sectors</string>
 
     <string name="fab_desc_map">Open Google Maps</string>
     <string name="fab_desc_enter">Enter</string>
