@@ -1,16 +1,11 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
-import android.webkit.MimeTypeMap
 import java.io.File
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.math.BigInteger
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 import java.text.CharacterIterator
 import java.text.StringCharacterIterator
 import java.util.*
@@ -103,35 +98,6 @@ fun humanReadableByteCountBin(bytes: Long, locale: Locale = Locale.getDefault())
 
 fun File.size(): Long = if (isDirectory) dirSize(this) else length()
 
-fun File.sizeString(): String = humanReadableByteCountBin(size())
-
-/**
- * Gets the MD5 file hash from the instance.
- * @author Arnau Mora
- * @since 20210926
- * @throws NoSuchAlgorithmException When the MD5 algorithm is not available in the device.
- * @throws IOException When there's an exception while processing the file.
- */
-@Throws(NoSuchAlgorithmException::class, IOException::class)
-fun File.md5Hash(): String {
-    val digest = MessageDigest.getInstance("MD5")
-
-    if (!exists())
-        throw FileNotFoundException("The file at \"$path\" doesn't exist.")
-
-    val stream = inputStream()
-    val buffer = ByteArray(8192)
-    var read = stream.read(buffer)
-    while (read > 0) {
-        digest.update(buffer, 0, read)
-        read = stream.read(buffer)
-    }
-    val md5sum = digest.digest()
-    val bigInt = BigInteger(1, md5sum)
-    val output = bigInt.toString(16)
-    return output.format("%32s").replace(' ', '0')
-}
-
 /**
  * Gets the file name from an Uri
  * @author Arnau Mora
@@ -139,6 +105,7 @@ fun File.md5Hash(): String {
  * @param context The context to call from
  * @return The file name, or null if it could not be gotten
  */
+@SuppressLint("Range")
 fun Uri.fileName(context: Context): String? {
     if (scheme.equals("file")) {
         return lastPathSegment
@@ -158,19 +125,6 @@ fun Uri.fileName(context: Context): String? {
         }
     }
     return null
-}
-
-/**
- * Gets the extension of the uri, based on its mime type
- * @author Arnau Mora
- * @since 20210318
- * @param context The context to call from
- * @return The file extension for the uri
- */
-fun Uri.extension(context: Context): String? {
-    val cr = context.contentResolver
-    val mime = MimeTypeMap.getSingleton()
-    return mime.getExtensionFromMimeType(cr.getType(this))
 }
 
 /**

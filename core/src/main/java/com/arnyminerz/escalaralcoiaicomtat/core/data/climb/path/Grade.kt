@@ -15,8 +15,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 
-private const val PATH_GRADE_SPAN_PADDING = 3
-
 /**
  * Contains a list of all the possible grades there are.
  * @author Arnau Mora
@@ -154,22 +152,6 @@ class Grade(val displayName: String) : Parcelable {
             Pair('L', gradeLColor)
         )
     }
-}
-
-fun Iterable<Grade>.gradeNames(): ArrayList<String> {
-    val list = arrayListOf<String>()
-    for (grade in this)
-        list.add(grade.displayName)
-    return list
-}
-
-fun Iterable<Grade>.toJSONStringArray(): String {
-    val array = JSONArray()
-
-    for (u in this)
-        array.put(u.toJSON())
-
-    return array.toString()
 }
 
 fun Iterable<Grade>?.string(): String {

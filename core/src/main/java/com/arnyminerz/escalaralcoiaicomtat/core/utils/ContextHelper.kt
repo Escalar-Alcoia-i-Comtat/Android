@@ -4,13 +4,11 @@ import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 
@@ -34,8 +32,6 @@ fun toast(context: Context?, text: String) =
 fun Fragment.toast(@StringRes text: Int) =
     context?.toast(text)
 
-class ContextUtils(base: Context) : ContextWrapper(base)
-
 fun Activity?.finishActivityWithResult(resultCode: Int, data: Intent?) =
     this?.also {
         if (data == null)
@@ -50,22 +46,3 @@ fun Context?.isLocationPermissionGranted(): Boolean =
         false
     else ContextCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED ||
             ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
-
-/**
- * Returns the fragment's [Activity] as an [AppCompatActivity] and makes sure it's non-null.
- * @author Arnau Mora
- * @since 20211121
- * @throws IllegalStateException If not currently associated with an activity or if associated only
- * with a context.
- * @throws ClassCastException If the holding activity is not an [AppCompatActivity].
- */
-@Throws(IllegalStateException::class, ClassCastException::class)
-fun Fragment.requireActivityCompat() = requireActivity() as AppCompatActivity
-
-/**
- * Returns the fragment's [Activity] as an [AppCompatActivity] with null-check.
- * @author Arnau Mora
- * @since 20211121
- */
-val Fragment.activityCompat: AppCompatActivity?
-    get() = activity as? AppCompatActivity?

@@ -1,7 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes
 
-import android.os.Parcel
-import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import kotlinx.parcelize.IgnoredOnParcel

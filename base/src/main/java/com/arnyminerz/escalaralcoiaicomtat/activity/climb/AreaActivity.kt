@@ -56,13 +56,6 @@ class AreaActivity : DataClassListActivity<Zone, DataClassImpl, Area>(2, R.dimen
     }
 
     /**
-     * If the contents of the [Area] are being loaded.
-     * @author Arnau Mora
-     * @since 20210719
-     */
-    private var loading = false
-
-    /**
      * The id of the loaded [Area].
      * @author Arnau Mora
      * @since 20210719

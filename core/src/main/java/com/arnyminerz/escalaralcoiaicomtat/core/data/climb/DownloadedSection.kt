@@ -84,19 +84,4 @@ data class DownloadedSection(val section: DataClass<*, *>) {
 
         visibility(recyclerView, !toggled)
     }
-
-    /**
-     * Changes the status of [toggled] to the opposite one, and updates the UI.
-     * @author Arnau Mora
-     * @since 20210413
-     * @param view The root view of the card
-     * @param toggleButton The button that toggles the card
-     * @param recyclerView The recycler view for the children.
-     */
-    @UiThread
-    fun toggle(view: ViewGroup, toggleButton: ImageButton, recyclerView: RecyclerView) {
-        toggled = !toggled
-
-        updateView(view, toggleButton, recyclerView)
-    }
 }
