@@ -3,10 +3,12 @@ package com.arnyminerz.escalaralcoiaicomtat.core.ui
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.icons.rounded.Map
@@ -69,6 +71,14 @@ sealed class Screen(
         Icons.Outlined.Settings,
         Icons.Rounded.Settings,
         R.string.item_settings
+    )
+
+    object Developer : Screen(
+        "developer",
+        R.string.item_developer,
+        Icons.Outlined.BugReport,
+        Icons.Rounded.BugReport,
+        R.string.item_developer
     )
 }
 
