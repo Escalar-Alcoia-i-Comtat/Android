@@ -24,6 +24,7 @@ class DeveloperViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     val indexedDownloads: MutableLiveData<List<String>> = MutableLiveData()
+    val indexTree: MutableLiveData<String> = MutableLiveData()
 
     /**
      * Loads all the downloads that have been indexed into [indexedDownloads].
@@ -49,6 +50,25 @@ class DeveloperViewModel(application: Application) : AndroidViewModel(applicatio
                 page = searchResults.nextPage.await()
             }
             indexedDownloads.postValue(items)
+        }
+    }
+
+    fun loadIndexTree() {
+        viewModelScope.launch {
+            val tree = StringBuilder()
+            val areas = app.getAreas()
+            for (area in areas) {
+                tree.appendLine("- ${area.displayName} ($area)")
+                for (zone in area.getChildren(app.searchSession)) {
+                    tree.appendLine("  - ${zone.displayName} ($zone)")
+                    for (sector in zone.getChildren(app.searchSession)) {
+                        tree.appendLine("  - ${sector.displayName} ($sector)")
+                        for (path in sector.getChildren(app.searchSession))
+                            tree.appendLine("  - ${path.displayName} ($path)")
+                    }
+                }
+            }
+            indexTree.postValue(tree.toString())
         }
     }
 
