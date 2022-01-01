@@ -417,7 +417,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
 
             return DownloadData(
                 namespace,
-                objectId,
+                // It's important to add the downloaded prefix, or the stored data will be overridden
+                "D/$objectId",
                 displayName,
                 childrenCount,
                 parentId
