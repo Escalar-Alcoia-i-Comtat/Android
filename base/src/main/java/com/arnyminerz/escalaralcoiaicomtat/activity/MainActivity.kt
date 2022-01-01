@@ -347,7 +347,10 @@ class MainActivity : LanguageComponentActivity() {
                 }
             }
             items(downloads ?: emptyList()) { data ->
-                DownloadedDataItem(data)
+                DownloadedDataItem(data, app.searchSession) {
+                    // This gets called when data gets deleted
+                    downloadsViewModel.loadDownloads()
+                }
             }
         }
     }
