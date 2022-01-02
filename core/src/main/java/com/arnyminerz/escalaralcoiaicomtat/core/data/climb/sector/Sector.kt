@@ -6,6 +6,7 @@ import android.content.Intent
 import android.widget.TextView
 import androidx.annotation.UiThread
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
@@ -228,6 +229,7 @@ class Sector internal constructor(
     }
 
     companion object {
+        @Namespace
         const val NAMESPACE = "Sector"
 
         const val IMAGE_QUALITY = 100

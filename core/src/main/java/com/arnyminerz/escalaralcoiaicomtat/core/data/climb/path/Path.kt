@@ -8,6 +8,7 @@ import androidx.appsearch.app.SearchSpec
 import androidx.appsearch.exceptions.AppSearchException
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.BlockingTypeParceler
@@ -424,6 +425,7 @@ class Path internal constructor(
     }
 
     companion object {
+        @Namespace
         const val NAMESPACE = "Path"
     }
 }
