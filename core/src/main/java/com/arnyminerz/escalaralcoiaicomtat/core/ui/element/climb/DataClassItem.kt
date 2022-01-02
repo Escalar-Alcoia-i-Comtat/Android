@@ -29,15 +29,30 @@ import coil.request.ImageRequest
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.DataClassItemViewModel
 
 @Composable
 @ExperimentalCoilApi
-fun DataClassItem(item: DataClass<*, *>, onClick: (() -> Unit)? = null) {
-    if (item.displayOptions.downloadable)
-        DownloadableDataClassItem(item)
+fun DataClassItem(item: DataClassImpl, onClick: (() -> Unit)? = null) {
+    if (item is DataClass<*, *>)
+        if (item.displayOptions.downloadable)
+            DownloadableDataClassItem(item)
+        else
+            NonDownloadableDataClassItem(item, onClick)
     else
-        NonDownloadableDataClassItem(item, onClick)
+        PathDataClassItem(item)
+}
+
+/**
+ * Displays a data class object as a path.
+ * @author Arnau Mora
+ * @since 20220102
+ * @param dataClassImpl The data of the path
+ */
+@Composable
+fun PathDataClassItem(dataClassImpl: DataClassImpl) {
+    // TODO
 }
 
 /**
