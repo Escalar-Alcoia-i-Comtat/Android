@@ -9,13 +9,14 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
@@ -35,8 +36,7 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.settingsViewModel
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.material.badge.ExperimentalBadgeUtils
 
-
-class MainActivity : LanguageComponentActivity() {
+class MainActivity : NetworkAwareComponentActivity() {
     internal val exploreViewModel by viewModels<ExploreViewModel>(factoryProducer = {
         ExploreViewModel.Factory(application)
     })
