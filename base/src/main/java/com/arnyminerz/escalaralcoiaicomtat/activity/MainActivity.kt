@@ -76,7 +76,7 @@ class MainActivity : NetworkAwareComponentActivity() {
                             navArgument("areaId") { type = NavType.StringType },
                         )
                     ) { entry ->
-                        DataClassExplorer(entry.arguments ?: Bundle())
+                        DataClassExplorer(navController, entry.arguments ?: Bundle())
                     }
                     composable(
                         "/Areas/{areaId}/Zones/{zoneId}",
@@ -85,7 +85,7 @@ class MainActivity : NetworkAwareComponentActivity() {
                             navArgument("zoneId") { type = NavType.StringType },
                         )
                     ) { entry ->
-                        DataClassExplorer(entry.arguments ?: Bundle())
+                        DataClassExplorer(navController, entry.arguments ?: Bundle())
                     }
                     composable(
                         "/Areas/{areaId}/Zones/{zoneId}/Sectors/{sectorId}",
@@ -95,11 +95,11 @@ class MainActivity : NetworkAwareComponentActivity() {
                             navArgument("sectorId") { type = NavType.StringType },
                         )
                     ) { entry ->
-                        DataClassExplorer(entry.arguments ?: Bundle())
+                        DataClassExplorer(navController, entry.arguments ?: Bundle())
                     }
 
                     composable("/") {
-                        Home()
+                        Home(navController)
                     }
                 }
             }
@@ -109,7 +109,7 @@ class MainActivity : NetworkAwareComponentActivity() {
     @ExperimentalBadgeUtils
     @ExperimentalMaterial3Api
     @Composable
-    private fun Home() {
+    private fun Home(rootNavController: NavController) {
         val homeNavController = rememberNavController()
         Scaffold(
             bottomBar = {
@@ -133,7 +133,7 @@ class MainActivity : NetworkAwareComponentActivity() {
                 modifier = Modifier.padding(innerPadding)
             ) {
                 composable(Screen.Explore.route) {
-                    ExploreScreen()
+                    ExploreScreen(rootNavController)
                 }
                 composable(Screen.Map.route) {
                     MapScreen()
