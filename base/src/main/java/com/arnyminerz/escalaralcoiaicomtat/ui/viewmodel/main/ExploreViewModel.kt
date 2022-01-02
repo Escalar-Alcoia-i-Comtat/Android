@@ -4,11 +4,13 @@ import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -34,6 +36,13 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
      * @since 20220102
      */
     val dataClasses = mutableStateListOf<DataClassImpl>()
+
+    /**
+     * The DataClass where [dataClasses] are stored.
+     * @author Arnau Mora
+     * @since 20220102
+     */
+    val parentDataClass = MutableLiveData<DataClass<*, *>?>()
 
     /**
      * Tells whether or not [dataClasses] are being loaded.
@@ -76,6 +85,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             } ?: run {
                 throw ClassNotFoundException("The dataclass $namespace::$objectId could not be found.")
             }
+            parentDataClass.postValue(dataClass)
             val children = dataClass.getChildren(app.searchSession)
             dataClasses.addAll(children)
             loadingDataClasses.value = false
