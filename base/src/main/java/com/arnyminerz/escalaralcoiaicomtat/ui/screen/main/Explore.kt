@@ -24,6 +24,7 @@ import timber.log.Timber
 @ExperimentalBadgeUtils
 @OptIn(ExperimentalCoilApi::class, ExperimentalMaterial3Api::class)
 fun MainActivity.ExploreScreen() {
+    // TODO: Map and search bar
     val loadedAreas = exploreViewModel.loadedAreas
 
     LazyColumn {
