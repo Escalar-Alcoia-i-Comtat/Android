@@ -3,10 +3,11 @@ package com.arnyminerz.escalaralcoiaicomtat.core.utils
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.app.Activity
+import android.content.ContentResolver
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.net.Uri
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
@@ -33,8 +34,6 @@ fun toast(context: Context?, text: String) =
 @UiThread
 fun Fragment.toast(@StringRes text: Int) =
     context?.toast(text)
-
-class ContextUtils(base: Context) : ContextWrapper(base)
 
 fun Activity?.finishActivityWithResult(resultCode: Int, data: Intent?) =
     this?.also {
@@ -69,3 +68,19 @@ fun Fragment.requireActivityCompat() = requireActivity() as AppCompatActivity
  */
 val Fragment.activityCompat: AppCompatActivity?
     get() = activity as? AppCompatActivity?
+
+/**
+ * Gets a resource's [Uri].
+ * @author Arnau Mora
+ * @since 20220102
+ * @param resourceId
+ */
+fun Context.resourceUri(resourceId: Int): Uri =
+    with(resources) {
+        Uri.Builder()
+            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+            .authority(getResourcePackageName(resourceId))
+            .appendPath(getResourceTypeName(resourceId))
+            .appendPath(getResourceEntryName(resourceId))
+            .build()
+    }
