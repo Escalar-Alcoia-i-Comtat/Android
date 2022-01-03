@@ -119,7 +119,6 @@
     <string name="pref_info_git_sum">Veure el repositori de Github</string>
     <string name="image_desc_ending_type">Tipus de reunió</string>
     <string name="image_desc_rappel">Rappel</string>
-    <string name="status_downloading">Baixant…</string>
     <string name="status_storing">Desant…</string>
     <string name="status_loading_progress">Carregant %d/%d</string>
     <string name="status_downloaded">Baixat</string>

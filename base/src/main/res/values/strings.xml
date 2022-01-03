@@ -13,7 +13,6 @@
     <string name="status_null_double" translatable="false">--</string>
     <string name="status_not_downloaded">Not downloaded</string>
     <string name="status_downloaded">Downloaded</string>
-    <string name="status_downloading">Downloading…</string>
     <string name="status_storing">Storing…</string>
     <string name="status_loading_progress">Loading %d/%d</string>
     <string name="status_downloading_percent">Downloading %d%</string>

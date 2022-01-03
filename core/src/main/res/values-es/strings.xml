@@ -33,6 +33,8 @@
     <string name="action_clear_downloads">"Limpiar descargas"</string>
     <string name="action_launch_app">"Iniciar App"</string>
 
+    <string name="status_downloading">Descargando…</string>
+
     <string name="item_explore">Explorar</string>
     <string name="item_map">Mapa</string>
     <string name="item_downloads">Descargas</string>

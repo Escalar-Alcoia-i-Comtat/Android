@@ -39,6 +39,8 @@
     <string name="item_settings">Configuració</string>
     <string name="item_share">Compartir</string>
 
+    <string name="status_downloading">Baixant…</string>
+
     <string name="path_ending_plate">"Placa"</string>
     <string name="path_ending_plate_ring">"Placa amb Argolla"</string>
     <string name="path_ending_plate_lanyard">"Placa i Cordí"</string>

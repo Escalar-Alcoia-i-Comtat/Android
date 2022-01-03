@@ -120,7 +120,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="pref_info_git_sum">Ver el repositorio de Github</string>
     <string name="image_desc_ending_type">Tipo de reunión</string>
     <string name="image_desc_rappel">Rappel</string>
-    <string name="status_downloading">Descargando…</string>
     <string name="status_storing">Guardando…</string>
     <string name="status_loading_progress">Cargando %d/%d</string>
     <string name="status_downloaded">Descargado</string>

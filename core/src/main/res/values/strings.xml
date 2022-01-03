@@ -36,6 +36,8 @@
     <string name="action_restart">Restart</string>
     <string name="action_view_activity">View Activity</string>
 
+    <string name="status_downloading">Downloading…</string>
+
     <string name="item_explore">Explore</string>
     <string name="item_map">Map</string>
     <string name="item_downloads">Downloads</string>
