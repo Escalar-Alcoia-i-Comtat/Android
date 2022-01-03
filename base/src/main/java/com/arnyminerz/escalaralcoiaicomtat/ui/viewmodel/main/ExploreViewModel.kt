@@ -49,7 +49,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
      * @author Arnau Mora
      * @since 20220102
      */
-    val loadingDataClasses = mutableStateOf(false)
+    val loadingDataClasses = MutableLiveData<Boolean>()
 
     val loadedAreas = mutableStateOf(false)
 
@@ -90,6 +90,17 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             dataClasses.addAll(children)
             loadingDataClasses.value = false
         }
+    }
+
+    /**
+     * Tells the UI that the user has navigated somewhere else, and should refresh.
+     * @author Arnau Mora
+     * @since 20220103
+     */
+    fun notifyNavigation() {
+        loadingDataClasses.value = true
+        parentDataClass.value = null
+        dataClasses.clear()
     }
 
     class Factory(
