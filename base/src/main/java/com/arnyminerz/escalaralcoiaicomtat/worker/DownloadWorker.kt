@@ -776,8 +776,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 .setInputData(
                     with(data) {
                         workDataOf(
-                            DOWNLOAD_PATH to dataClass.metadata.documentPath,
-                            DOWNLOAD_DISPLAY_NAME to dataClass.displayName,
+                            DOWNLOAD_PATH to path,
+                            DOWNLOAD_DISPLAY_NAME to displayName,
                             DOWNLOAD_OVERWRITE to overwrite,
                             DOWNLOAD_QUALITY to quality
                         )
