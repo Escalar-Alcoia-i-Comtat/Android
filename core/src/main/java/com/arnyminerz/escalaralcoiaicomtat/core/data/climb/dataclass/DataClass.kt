@@ -380,6 +380,45 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 DownloadStatus.DOWNLOADED
             else DownloadStatus.PARTIALLY
         }
+
+        /**
+         * Downloads the image data of the DataClass.
+         * @author Arnau Mora
+         * @since 20210313
+         * @param context The context to run from.
+         * @param overwrite If the new data should overwrite the old one
+         * @param quality The quality in which do the codification
+         * @return A LiveData object with the download work info
+         *
+         * @throws IllegalArgumentException If the specified quality is out of bounds
+         */
+        @Throws(IllegalArgumentException::class)
+        inline fun <reified W : DownloadWorkerModel> scheduleDownload(
+            context: Context,
+            pin: String,
+            path: String,
+            displayName: String,
+            overwrite: Boolean = true,
+            quality: Int = 100
+        ): LiveData<WorkInfo> {
+            if (quality < DOWNLOAD_QUALITY_MIN || quality > DOWNLOAD_QUALITY_MAX)
+                throw IllegalArgumentException(
+                    "Quality must be between $DOWNLOAD_QUALITY_MIN and $DOWNLOAD_QUALITY_MAX"
+                )
+            Timber.v("Downloading $pin...")
+            Timber.v("Preparing DownloadData...")
+            val downloadData = DownloadData(path, displayName, overwrite, quality)
+            Timber.v("Scheduling download...")
+            val workerClass = W::class.java
+            val schedule = workerClass.getMethod(
+                "schedule",
+                Context::class.java,
+                String::class.java,
+                DownloadData::class.java
+            )
+            @Suppress("UNCHECKED_CAST")
+            return schedule.invoke(null, context, pin, downloadData) as LiveData<WorkInfo>
+        }
     }
 
     /**
@@ -691,25 +730,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         context: Context,
         overwrite: Boolean = true,
         quality: Int = 100
-    ): LiveData<WorkInfo> {
-        if (quality < DOWNLOAD_QUALITY_MIN || quality > DOWNLOAD_QUALITY_MAX)
-            throw IllegalArgumentException(
-                "Quality must be between $DOWNLOAD_QUALITY_MIN and $DOWNLOAD_QUALITY_MAX"
-            )
-        Timber.v("Downloading $namespace \"$displayName\"...")
-        Timber.v("Preparing DownloadData...")
-        val downloadData = DownloadData(this, overwrite, quality)
-        Timber.v("Scheduling download...")
-        val workerClass = W::class.java
-        val schedule = workerClass.getMethod(
-            "schedule",
-            Context::class.java,
-            String::class.java,
-            DownloadData::class.java
-        )
-        @Suppress("UNCHECKED_CAST")
-        return schedule.invoke(null, context, pin, downloadData) as LiveData<WorkInfo>
-    }
+    ): LiveData<WorkInfo> =
+        scheduleDownload<W>(context, pin, documentPath, displayName, overwrite, quality)
 
     /**
      * Gets the DownloadStatus of the DataClass
@@ -899,6 +921,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param storage The [FirebaseStorage] reference for loading the image file.
      * @return The [StorageReference] that corresponds to the [DataClass]' image.
      */
+    @Throws(StorageException::class)
     fun storageReference(storage: FirebaseStorage): StorageReference =
         storage.getReferenceFromUrl(imageReferenceUrl)
 
@@ -909,6 +932,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param storage The [FirebaseStorage] reference for loading the image file.
      * @return The [DataClass]' download url.
      */
+    @Throws(StorageException::class)
     suspend fun storageUrl(storage: FirebaseStorage): Uri {
         if (downloadUrl == null)
             downloadUrl = storageReference(storage).downloadUrl.await()
