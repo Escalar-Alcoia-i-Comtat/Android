@@ -42,23 +42,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
-import coil.request.CachePolicy
-import coil.request.ImageRequest
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATACLASS_PREVIEW_SCALE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.PoppinsFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.DataClassItemViewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
+import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 
 @Composable
 @ExperimentalCoilApi
-fun DataClassItem(item: DataClassImpl, onClick: () -> Unit) {
+fun DataClassItem(
+    item: DataClassImpl,
+    storage: FirebaseStorage,
+    onClick: () -> Unit
+) {
     if (item is DataClass<*, *>)
         if (item.displayOptions.downloadable) {
             val context = LocalContext.current
@@ -71,18 +75,6 @@ fun DataClassItem(item: DataClassImpl, onClick: () -> Unit) {
             val downloadStatus = viewModel.addDownloadListener(item.pin) { _, _ ->
                 // TODO: Download progress should be notified
             }
-
-            val imagePainter = /*if (viewModel.imageUrls.containsKey(pin))
-            rememberImagePainter(
-                request = ImageRequest.Builder(context)
-                    .diskCachePolicy(CachePolicy.ENABLED)
-                    .data(viewModel.imageUrls[pin])
-                    .placeholder(R.drawable.ic_tall_placeholder)
-                    .error(R.drawable.ic_tall_placeholder)
-                    .build(),
-                onExecute = { _, _ -> true }
-            )
-            else*/ painterResource(R.drawable.ic_tall_placeholder)
 
             val downloadState by downloadStatus.observeAsState()
             var showDownloadInfoDialog by remember { mutableStateOf(false) }
@@ -97,18 +89,21 @@ fun DataClassItem(item: DataClassImpl, onClick: () -> Unit) {
                 )
             }
 
-            downloadState?.let { status ->
-                DownloadableDataClassItem(
-                    item.displayName,
-                    // TODO: Load children count
-                    item.displayName,
-                    imagePainter,
-                    status,
-                    downloadItem,
-                    { showDownloadInfoDialog = true },
-                    onClick,
-                )
-            }
+            DownloadableDataClassItem(
+                item.displayName,
+                // TODO: Load children count
+                item.displayName,
+                item.rememberImagePainter(
+                    context,
+                    storage,
+                    ImageLoadParameters()
+                        .withResultImageScale(DATACLASS_PREVIEW_SCALE)
+                ),
+                downloadState ?: DownloadStatus.UNKNOWN,
+                downloadItem,
+                { showDownloadInfoDialog = true },
+                onClick,
+            )
 
             if (showDownloadInfoDialog)
                 AlertDialog(
@@ -117,7 +112,7 @@ fun DataClassItem(item: DataClassImpl, onClick: () -> Unit) {
                         Text(text = item.displayName)
                     },
                     text = {
-                        val downloadInfo by viewModel.downloadInfo(context, item).observeAsState()
+                        val downloadInfo by viewModel.downloadInfo(item).observeAsState()
                         Column {
                             val format = SimpleDateFormat.getDateTimeInstance()
                             Text(
@@ -150,6 +145,10 @@ fun DataClassItem(item: DataClassImpl, onClick: () -> Unit) {
                             Button(onClick = { downloadItem() }) {
                                 Text(text = stringResource(R.string.action_download))
                             }
+                        else
+                            Button(onClick = { viewModel.deleteDataClass(item) }) {
+                                Text(text = stringResource(R.string.action_delete))
+                            }
                     },
                     confirmButton = {
                         Button(
@@ -163,7 +162,7 @@ fun DataClassItem(item: DataClassImpl, onClick: () -> Unit) {
                     },
                 )
         } else
-            NonDownloadableDataClassItem(item, onClick)
+            NonDownloadableDataClassItem(item, storage, onClick)
     else
         PathDataClassItem(item)
 }
@@ -224,11 +223,15 @@ private fun DownloadableDataClassItem(
                     Image(
                         painter = image,
                         contentDescription = displayName,
-                        modifier = Modifier,
+                        modifier = Modifier
+                            .height(160.dp)
+                            .fillMaxWidth(),
+                        contentScale = ContentScale.Crop,
                     )
                 }
                 Column(
                     modifier = Modifier
+                        .padding(start = 4.dp)
                         .weight(1f)
                 ) {
                     Text(
@@ -338,14 +341,10 @@ private fun DownloadableDataClassItem(
 @Composable
 private fun NonDownloadableDataClassItem(
     dataClass: DataClass<*, *>,
+    storage: FirebaseStorage,
     onClick: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
-    val viewModel: DataClassItemViewModel = viewModel(
-        factory = DataClassItemViewModel.Factory(
-            context.applicationContext as Application
-        )
-    )
 
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -353,20 +352,14 @@ private fun NonDownloadableDataClassItem(
             .padding(8.dp)
             .fillMaxWidth()
     ) {
-        val imagePainter = if (viewModel.imageUrls.containsKey(dataClass.pin))
-            rememberImagePainter(
-                request = ImageRequest.Builder(context)
-                    .diskCachePolicy(CachePolicy.ENABLED)
-                    .data(viewModel.imageUrls[dataClass.pin])
-                    .placeholder(R.drawable.ic_wide_placeholder)
-                    .error(R.drawable.ic_wide_placeholder)
-                    .build(),
-                onExecute = { _, _ -> true }
-            )
-        else painterResource(R.drawable.ic_wide_placeholder)
         Column {
             Image(
-                painter = imagePainter,
+                painter = dataClass.rememberImagePainter(
+                    context,
+                    storage,
+                    ImageLoadParameters()
+                        .withResultImageScale(DATACLASS_PREVIEW_SCALE)
+                ),
                 contentDescription = "",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -399,7 +392,6 @@ private fun NonDownloadableDataClassItem(
                 )
             }
         }
-        viewModel.loadImage(dataClass)
     }
 }
 
