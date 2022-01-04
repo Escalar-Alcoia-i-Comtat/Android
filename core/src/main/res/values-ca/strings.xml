@@ -162,6 +162,9 @@
 
     <string name="dialog_gps_disabled_title">GPS deshabilitat</string>
     <string name="dialog_gps_disabled_message">Tens el proveïdor d\'ubiació desconnectat.</string>
+    <string name="dialog_downloaded_msg">"Descarregat al: %s"</string>
+    <string name="dialog_downloaded_partially_msg">Alguns elements s\'han baixat, però no %s sencera. Vols descarregar-la sencera?</string>
+    <string name="dialog_uses_storage_msg">Ocupa: %s</string>
 
     <string name="fab_desc_map">"Obrir Google Maps"</string>
     <string name="fab_desc_enter">Accedir</string>
