@@ -40,6 +40,9 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.material.badge.ExperimentalBadgeUtils
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
 class MainActivity : NetworkAwareComponentActivity() {
@@ -73,6 +76,8 @@ class MainActivity : NetworkAwareComponentActivity() {
      */
     internal val hasInternet = MutableLiveData<Boolean>()
 
+    val storage: FirebaseStorage = Firebase.storage
+
     @ExperimentalBadgeUtils
     @OptIn(
         ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
@@ -92,7 +97,7 @@ class MainActivity : NetworkAwareComponentActivity() {
                             navArgument("areaId") { type = NavType.StringType },
                         )
                     ) { entry ->
-                        DataClassExplorer(navController, entry.arguments ?: Bundle())
+                        DataClassExplorer(navController, storage, entry.arguments ?: Bundle())
                     }
                     composable(
                         "/Areas/{areaId}/Zones/{zoneId}",
@@ -101,7 +106,7 @@ class MainActivity : NetworkAwareComponentActivity() {
                             navArgument("zoneId") { type = NavType.StringType },
                         )
                     ) { entry ->
-                        DataClassExplorer(navController, entry.arguments ?: Bundle())
+                        DataClassExplorer(navController, storage, entry.arguments ?: Bundle())
                     }
                     composable(
                         "/Areas/{areaId}/Zones/{zoneId}/Sectors/{sectorId}",
@@ -111,7 +116,7 @@ class MainActivity : NetworkAwareComponentActivity() {
                             navArgument("sectorId") { type = NavType.StringType },
                         )
                     ) { entry ->
-                        DataClassExplorer(navController, entry.arguments ?: Bundle())
+                        DataClassExplorer(navController, storage, entry.arguments ?: Bundle())
                     }
 
                     composable("/") {
@@ -156,7 +161,7 @@ class MainActivity : NetworkAwareComponentActivity() {
                 modifier = Modifier.padding(innerPadding),
             ) { index ->
                 when (index) {
-                    0 -> ExploreScreen(rootNavController)
+                    0 -> ExploreScreen(rootNavController, storage)
                     1 -> MapScreen()
                     2 -> DownloadsScreen()
                     3 -> SettingsScreen()

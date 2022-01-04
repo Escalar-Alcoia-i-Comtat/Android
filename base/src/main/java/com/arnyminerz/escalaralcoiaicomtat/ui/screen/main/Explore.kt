@@ -15,12 +15,13 @@ import coil.annotation.ExperimentalCoilApi
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.google.android.material.badge.ExperimentalBadgeUtils
+import com.google.firebase.storage.FirebaseStorage
 import timber.log.Timber
 
 @Composable
 @ExperimentalBadgeUtils
 @OptIn(ExperimentalCoilApi::class, ExperimentalMaterial3Api::class)
-fun MainActivity.ExploreScreen(rootNavController: NavController) {
+fun MainActivity.ExploreScreen(rootNavController: NavController, storage: FirebaseStorage) {
     // TODO: Map and search bar
     val loadedAreas = exploreViewModel.loadedAreas
 
@@ -40,7 +41,7 @@ fun MainActivity.ExploreScreen(rootNavController: NavController) {
         }
         items(exploreViewModel.areas) { area ->
             Timber.d("Displaying $area...")
-            DataClassItem(area) {
+            DataClassItem(area, storage) {
                 rootNavController.navigate(area.documentPath)
             }
         }

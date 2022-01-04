@@ -47,6 +47,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.tooltip.Tooltip
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
+import com.google.firebase.storage.FirebaseStorage
 import timber.log.Timber
 
 @ExperimentalFoundationApi
@@ -55,6 +56,7 @@ import timber.log.Timber
 @ExperimentalMaterial3Api
 fun MainActivity.DataClassExplorer(
     rootNavigator: NavController,
+    storage: FirebaseStorage,
     arguments: Bundle,
 ) {
     val context = LocalContext.current
@@ -147,7 +149,7 @@ fun MainActivity.DataClassExplorer(
             ) {
                 LazyColumn {
                     items(exploreViewModel.dataClasses) { dataClass ->
-                        DataClassItem(dataClass) {
+                        DataClassItem(dataClass, storage) {
                             exploreViewModel.notifyNavigation()
                             rootNavigator.navigate(dataClass.documentPath)
                         }
