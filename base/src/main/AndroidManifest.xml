@@ -104,12 +104,6 @@
                 android:value=".activity.SearchableActivity" />
         </activity>
         <activity
-            android:name=".activity.climb.AreaActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.climb.ZoneActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activity.climb.SectorActivity"
             android:screenOrientation="portrait" />
         <activity
