@@ -25,6 +25,7 @@ import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.*
 
 class DataClassItemViewModel(
     application: Application
@@ -100,6 +101,18 @@ class DataClassItemViewModel(
         }
         return mutableLiveData
     }
+
+    fun downloadInfo(
+        context: Context,
+        dataClass: DataClass<*, *>
+    ): MutableLiveData<Pair<Date, Long>?> =
+        MutableLiveData<Pair<Date, Long>?>().apply {
+            viewModelScope.launch {
+                val downloadDate = dataClass.downloadDate(context)!!
+                val size = dataClass.size(context, app.searchSession)
+                postValue(downloadDate to size)
+            }
+        }
 
     class Factory(
         private val application: Application
