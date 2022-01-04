@@ -16,6 +16,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.rounded.Map
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -24,6 +25,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -47,6 +51,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassIm
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.PoppinsFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.DataClassItemViewModel
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import java.text.SimpleDateFormat
 
 @Composable
 @ExperimentalCoilApi
@@ -77,6 +84,7 @@ fun DataClassItem(item: DataClassImpl, onClick: () -> Unit) {
             else*/ painterResource(R.drawable.ic_tall_placeholder)
 
             val downloadState by downloadStatus.observeAsState()
+            var showDownloadInfoDialog by remember { mutableStateOf(false) }
 
             downloadState?.let { status ->
                 DownloadableDataClassItem(
@@ -85,9 +93,66 @@ fun DataClassItem(item: DataClassImpl, onClick: () -> Unit) {
                     item.displayName,
                     imagePainter,
                     status,
+                    {
+                        // TODO: Start download
+                    },
+                    { showDownloadInfoDialog = true },
                     onClick,
                 )
             }
+
+            if (showDownloadInfoDialog)
+                AlertDialog(
+                    onDismissRequest = { showDownloadInfoDialog = false },
+                    title = {
+                        Text(text = item.displayName)
+                    },
+                    text = {
+                        val downloadInfo by viewModel.downloadInfo(context, item).observeAsState()
+                        Column {
+                            val format = SimpleDateFormat.getDateTimeInstance()
+                            Text(
+                                text = stringResource(
+                                    R.string.dialog_downloaded_msg,
+                                    downloadInfo?.let {
+                                        format.format(it.first)
+                                    } ?: stringResource(R.string.status_loading)
+                                )
+                            )
+                            Text(
+                                text = stringResource(
+                                    R.string.dialog_uses_storage_msg,
+                                    downloadInfo?.let {
+                                        humanReadableByteCountBin(it.second)
+                                    } ?: stringResource(R.string.status_loading)
+                                )
+                            )
+                            if (downloadState == DownloadStatus.PARTIALLY)
+                                Text(
+                                    text = stringResource(
+                                        R.string.dialog_downloaded_partially_msg,
+                                        item.displayName,
+                                    )
+                                )
+                        }
+                    },
+                    dismissButton = {
+                        Button(
+                            onClick = { showDownloadInfoDialog = false },
+                            colors = ButtonDefaults.textButtonColors(),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.action_close),
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        if (downloadState == DownloadStatus.PARTIALLY)
+                            Button(onClick = { /* TODO  */ }) {
+                                Text(text = stringResource(R.string.action_download))
+                            }
+                    },
+                )
         } else
             NonDownloadableDataClassItem(item, onClick)
     else
@@ -118,6 +183,8 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
  * "5 paths", or "3 sectors"
  * @param image The image to display for the DataClass.
  * @param downloadStatus The download status of the DataClass, for updating the download button.
+ * @param onDownload When the user requests to download the DataClass.
+ * @param onDownloadInfo When the user requests info about the downloaded DataClass.
  * @param onClick Will get called when the user requests to "navigate" into the DataClass.
  */
 @Composable
@@ -126,8 +193,12 @@ private fun DownloadableDataClassItem(
     childrenCountLabel: String,
     image: Painter,
     downloadStatus: DownloadStatus,
+    onDownload: () -> Unit,
+    onDownloadInfo: () -> Unit,
     onClick: () -> Unit,
 ) {
+    val context = LocalContext.current
+
     Card(
         backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(8.dp),
@@ -201,7 +272,18 @@ private fun DownloadableDataClassItem(
                             .padding(start = 8.dp, end = 4.dp)
                             .fillMaxWidth(),
                         colors = ButtonDefaults.outlinedButtonColors(),
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            when (downloadStatus) {
+                                DownloadStatus.DOWNLOADED ->
+                                    onDownloadInfo()
+                                DownloadStatus.NOT_DOWNLOADED, DownloadStatus.PARTIALLY ->
+                                    onDownload()
+                                else -> toast(
+                                    context,
+                                    R.string.toast_error_internal
+                                )
+                            }
+                        },
                     ) {
                         Icon(
                             downloadStatus.getActionIcon(),
@@ -320,5 +402,8 @@ fun DownloadableDataClassItemPreview() {
         "3 sectors",
         painterResource(R.drawable.ic_tall_placeholder),
         DownloadStatus.NOT_DOWNLOADED,
-    ) { }
+        {},
+        {},
+        {},
+    )
 }
