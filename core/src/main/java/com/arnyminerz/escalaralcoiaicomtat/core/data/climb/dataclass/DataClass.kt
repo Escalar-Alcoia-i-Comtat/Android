@@ -419,6 +419,65 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             @Suppress("UNCHECKED_CAST")
             return schedule.invoke(null, context, pin, downloadData) as LiveData<WorkInfo>
         }
+
+        /**
+         * Gets the [WorkInfo] if the DataClass is being downloaded, or null otherwise.
+         * @author Arnau Mora
+         * @since 20210417
+         * @param context The context to check from
+         * @param pin The [DataClass.pin] to check the state for.
+         */
+        @WorkerThread
+        fun downloadWorkInfo(context: Context, pin: String): WorkInfo? {
+            val workManager = WorkManager.getInstance(context)
+            val workInfos = workManager.getWorkInfosByTag(pin).get()
+            var result: WorkInfo? = null
+            if (workInfos.isNotEmpty())
+                for (workInfo in workInfos)
+                    if (!workInfo.state.isFinished) {
+                        result = workInfos[0]
+                        break
+                    }
+            return result
+        }
+
+        /**
+         * Gets a [LiveData] of the [WorkInfo] for all works for the current [DataClass].
+         * @author Arnau Mora
+         * @since 20210417
+         * @param context The context to check from.
+         * @param pin The [DataClass.pin] to get the download work info for.
+         */
+        @WorkerThread
+        fun downloadWorkInfoLiveData(context: Context, pin: String): LiveData<List<WorkInfo>> {
+            val workManager = WorkManager.getInstance(context)
+            return workManager.getWorkInfosByTagLiveData(pin)
+        }
+
+        /**
+         * Gets the DownloadStatus of the DataClass
+         * @author Arnau Mora
+         * @since 20210313
+         * @param context The currently calling [Context].
+         * @return a matching DownloadStatus representing the Data Class' download status
+         */
+        @WorkerThread
+        suspend fun downloadStatus(
+            context: Context,
+            searchSession: AppSearchSession,
+            pin: String,
+        ): Pair<DownloadStatus, WorkInfo?> {
+            Timber.d("$pin Checking if downloaded")
+
+            val objectId = pin.substring(pin.indexOf('_') + 1)
+            val downloadWorkInfo = downloadWorkInfo(context, pin)
+            val result = if (downloadWorkInfo != null)
+                DownloadStatus.DOWNLOADING
+            else isDownloadIndexed(searchSession, objectId)
+
+            Timber.d("$pin Finished checking download status. Result: $result")
+            return result to downloadWorkInfo
+        }
     }
 
     /**
@@ -659,18 +718,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to check from
      */
     @WorkerThread
-    fun downloadWorkInfo(context: Context): WorkInfo? {
-        val workManager = WorkManager.getInstance(context)
-        val workInfos = workManager.getWorkInfosByTag(pin).get()
-        var result: WorkInfo? = null
-        if (workInfos.isNotEmpty())
-            for (workInfo in workInfos)
-                if (!workInfo.state.isFinished) {
-                    result = workInfos[0]
-                    break
-                }
-        return result
-    }
+    fun downloadWorkInfo(context: Context): WorkInfo? = downloadWorkInfo(context, pin)
 
     /**
      * Gets a [LiveData] of the [WorkInfo] for all works for the current [DataClass].
@@ -679,10 +727,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to check from
      */
     @WorkerThread
-    fun downloadWorkInfoLiveData(context: Context): LiveData<List<WorkInfo>> {
-        val workManager = WorkManager.getInstance(context)
-        return workManager.getWorkInfosByTagLiveData(pin)
-    }
+    fun downloadWorkInfoLiveData(context: Context): LiveData<List<WorkInfo>> =
+        downloadWorkInfoLiveData(context, pin)
 
     /**
      * Generates a list of [DownloadedSection].
@@ -706,7 +752,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val children = getChildren(searchSession)
         for ((c, child) in children.withIndex())
             (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
-                val downloadStatus = dataClass.downloadStatus(context, searchSession)
+                val downloadState = dataClass.downloadStatus(context, searchSession)
+                val downloadStatus = downloadState.first
                 progressListener?.invoke(c, children.size)
                 if (showNonDownloaded || downloadStatus.downloaded || downloadStatus.partialDownload)
                     emit(DownloadedSection(dataClass))
@@ -744,17 +791,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     suspend fun downloadStatus(
         context: Context,
         searchSession: AppSearchSession
-    ): DownloadStatus {
-        Timber.d("$pin Checking if downloaded")
-
-        val downloadWorkInfo = downloadWorkInfo(context)
-        val result = if (downloadWorkInfo != null)
-            DownloadStatus.DOWNLOADING
-        else isDownloadIndexed(searchSession, objectId)
-
-        Timber.d("$pin Finished checking download status. Result: $result")
-        return result
-    }
+    ): Pair<DownloadStatus, WorkInfo?> = Companion.downloadStatus(context, searchSession, pin)
 
     /**
      * Checks if the data class has any children that has been downloaded
@@ -772,9 +809,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val children = getChildren(searchSession)
         for (child in children)
             if (child is DataClass<*, *> &&
-                child.downloadStatus(context, searchSession) == DownloadStatus.DOWNLOADED
-            )
-                return true
+                child.downloadStatus(context, searchSession).first == DownloadStatus.DOWNLOADED
+            ) return true
         return false
     }
 
