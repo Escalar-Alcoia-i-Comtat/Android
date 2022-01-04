@@ -5,12 +5,10 @@
     <string name="sector_height">"%1$sm"</string>
     <string name="sector_kids_apt">"Apte xiquets"</string>
     <string name="status_updating">"Actualitzant…"</string>
-    <string name="status_loading">"Carregant…"</string>
     <string name="status_not_downloaded">"No descarregat"</string>
     <string name="dialog_permission_title">"Permís Necessari!"</string>
     <string name="dialog_permission_message">"La funcionalitat que intentes utilitzar requereix l'accés a %s. Per favor, cedeix-lo, o no podràs utilitzar eixa funció."</string>
     <string name="dialog_permission_my_location_message">"Per a mostrar la teua posició actual, l'aplicació necessita tenir accés al GPS del dispositiu. Per favor, dona-li accès, o no podràs fer ús d'eixa funcionalitat."</string>
-    <string name="dialog_downloaded_msg">"Descarregat al: %s"</string>
     <string name="pref_main_title">"General"</string>
     <string name="pref_main_sum">"Els aspectes generals de l'aplicació"</string>
     <string name="pref_noti_title">"Notificacions"</string>
@@ -93,7 +91,6 @@
     <string name="share_text">Hola! T\'agradaria provar Escalar Alcoià i Comtat? És gratuïta! https://play.google.com/store/apps/details?id=com.arnyminerz.escalaralcoiaicomtat</string>
     <string name="path_warning_rope_length">Aquesta via és bastant llarga, així que ves amb compte amb la corda que utilitzes.</string>
     <string name="image_desc_maximize_minimize_img">Maximitzar o minimitzar imatge</string>
-    <string name="dialog_uses_storage_msg">Ocupa: %s</string>
     <string name="update_progress_internet_waiting">Esperant a una connexió a Internet…</string>
     <string name="update_progress_downloading_new_cache">Baixant les dades noves…</string>
     <string name="update_progress_error">Error!</string>
@@ -119,10 +116,8 @@
     <string name="pref_info_git_sum">Veure el repositori de Github</string>
     <string name="image_desc_ending_type">Tipus de reunió</string>
     <string name="image_desc_rappel">Rappel</string>
-    <string name="status_downloading">Baixant…</string>
     <string name="status_storing">Desant…</string>
     <string name="status_loading_progress">Carregant %d/%d</string>
-    <string name="status_downloaded">Baixat</string>
     <string name="status_no_internet">Sense Connexió a Internet</string>
     <string name="notification_gpx_stored_title">GPX desat correctament</string>
     <string name="notification_gpx_stored_message">Toca per a obrir</string>
@@ -135,7 +130,7 @@
     <string name="feedback_error_empty_message">Has d\'escriure el missatge a enviar</string>
     <string name="pref_gene_error_reporting_title">Habilitar reports d\'error</string>
     <string name="pref_gene_error_reporting_sum">Si està habilitat, cada vegada que l\'app es tanque de manera sobtada, o hi haja algun error, s\'enviarà un report anònim als desenvolupadors per a que l\'arreglen el més prompte possible. Et demanem que mantingues aquesta opció activada, però eres lliure de deshabilitar-la si vols.</string>
-   <string name="downloads_no_download">No hi ha res baixat</string><string name="dialog_downloaded_partially_msg">Alguns elements s\'han baixat, però no %s sencera. Vols descarregar-la sencera?</string>
+    <string name="downloads_no_download">No hi ha res baixat</string>
     <string name="image_desc_logo_cea">Logo del Centre Excursionista d\'Alcoi</string>
     <string name="image_desc_authenticate">Autenticar-se</string>
     <string name="image_desc_profile_image">Imatge de perfil</string>

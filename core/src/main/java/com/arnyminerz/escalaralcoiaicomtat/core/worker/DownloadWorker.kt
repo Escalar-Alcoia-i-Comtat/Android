@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.worker
+package com.arnyminerz.escalaralcoiaicomtat.core.worker
 
 import android.app.PendingIntent
 import android.content.Context
@@ -16,8 +16,6 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.await
 import androidx.work.workDataOf
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
@@ -43,7 +41,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_DISPLAY
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_OVERWRITE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_QUALITY
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerFactory
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_ALREADY_DOWNLOADED
@@ -56,10 +53,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_DATA_TYPE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_FETCH_IMAGE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_MISSING_DATA
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_STORE_IMAGE
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_UNKNOWN_NAMESPACE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.WORKER_TAG_DOWNLOAD
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.error
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.failure
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -591,7 +585,10 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 if (downloadResultData.error == null) {
                     Timber.v("Getting intent...")
                     val downloadPathSplit = downloadPath!!.split('/')
-                    when (namespace) {
+                    //DataClass.getIntent(context, appSearchSession, downloadPath)
+                    // TODO: Fix the launching intent
+                    null
+                    /*when (namespace) {
                         // Area Skipped since not-downloadable
                         Zone.NAMESPACE -> {
                             // Example: Areas/<Area ID>/Zones/<Zone ID>
@@ -618,7 +615,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
                         )
                         pendingIntent
-                    }
+                    }*/
                 } else null
 
             if (downloadResultData.error == null) {
@@ -776,8 +773,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 .setInputData(
                     with(data) {
                         workDataOf(
-                            DOWNLOAD_PATH to dataClass.metadata.documentPath,
-                            DOWNLOAD_DISPLAY_NAME to dataClass.displayName,
+                            DOWNLOAD_PATH to path,
+                            DOWNLOAD_DISPLAY_NAME to displayName,
                             DOWNLOAD_OVERWRITE to overwrite,
                             DOWNLOAD_QUALITY to quality
                         )

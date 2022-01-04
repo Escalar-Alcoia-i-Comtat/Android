@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel
+package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

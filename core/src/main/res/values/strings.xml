@@ -36,6 +36,10 @@
     <string name="action_restart">Restart</string>
     <string name="action_view_activity">View Activity</string>
 
+    <string name="status_downloading">Downloading…</string>
+    <string name="status_loading">Loading…</string>
+    <string name="status_downloaded">Downloaded</string>
+
     <string name="item_explore">Explore</string>
     <string name="item_map">Map</string>
     <string name="item_downloads">Downloads</string>
@@ -170,6 +174,9 @@
 
     <string name="dialog_gps_disabled_title">GPS disabled</string>
     <string name="dialog_gps_disabled_message">You have the device\'s location provider turned off.</string>
+    <string name="dialog_downloaded_msg">Downloaded on: %s</string>
+    <string name="dialog_downloaded_partially_msg">Some children have been downloaded, but not "%s" completely. Do you want to download it complete?</string>
+    <string name="dialog_uses_storage_msg">Uses: %s</string>
 
     <string name="downloads_sector_dialog_title">Sectors</string>
     <string name="downloads_delete_dialog_title">Are you sure?</string>

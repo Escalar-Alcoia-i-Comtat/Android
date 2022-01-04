@@ -215,7 +215,7 @@ const val DATACLASS_WAIT_BLOCK_STATUS_DELAY = 10L
  * @author Arnau Mora
  * @since 20210822
  */
-const val DATACLASS_PREVIEW_SCALE = .5f
+const val DATACLASS_PREVIEW_SCALE = .3f
 
 /**
  * Specifies the redirect url for the confirmation mails

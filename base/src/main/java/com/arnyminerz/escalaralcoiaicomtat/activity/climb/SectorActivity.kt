@@ -12,12 +12,19 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity.Companion.errorNotStored
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageAppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_POSITION
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR_TRANSITION_NAME
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkState
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.hide
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.databinding.ActivitySectorBinding
@@ -33,6 +40,7 @@ import org.json.JSONObject
 import timber.log.Timber
 
 @ExperimentalBadgeUtils
+@Deprecated("Should be converted to Jetpack Compose")
 class SectorActivity : LanguageAppCompatActivity() {
     companion object {
         /**
@@ -250,14 +258,6 @@ class SectorActivity : LanguageAppCompatActivity() {
         super.onSaveInstanceState(outState)
     }
 
-    override fun onBackPressed() {
-        if (getExtra(EXTRA_STATIC, false))
-            launch(ZoneActivity::class.java) {
-                putExtra(EXTRA_ZONE, zoneId)
-            }
-        else super.onBackPressed()
-    }
-
     /**
      * Provides context for improving the user experience.
      * @author Arnau Mora
@@ -304,7 +304,8 @@ class SectorActivity : LanguageAppCompatActivity() {
             val sectorIdBothInvalid = sectorIdInstanceState == null && sectorIdExtra == null
             if (zoneIdBothInvalid || sectorIdBothInvalid) {
                 Timber.e("No loaded data for activity")
-                errorNotStored = true
+                // TODO: Should be transferred using intent result
+                //errorNotStored = true
                 onBackPressed()
                 false
             } else {

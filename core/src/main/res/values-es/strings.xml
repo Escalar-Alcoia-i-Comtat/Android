@@ -33,6 +33,10 @@
     <string name="action_clear_downloads">"Limpiar descargas"</string>
     <string name="action_launch_app">"Iniciar App"</string>
 
+    <string name="status_downloading">Descargando…</string>
+    <string name="status_downloaded">Descargado</string>
+    <string name="status_loading">"Cargando…"</string>
+
     <string name="item_explore">Explorar</string>
     <string name="item_map">Mapa</string>
     <string name="item_downloads">Descargas</string>
@@ -158,6 +162,9 @@
 
     <string name="dialog_gps_disabled_title">GPS deshabilitado</string>
     <string name="dialog_gps_disabled_message">Tienes el proveedor de ubicación desconectado.</string>
+    <string name="dialog_downloaded_partially_msg">Algunos elementos se han descargado, pero no %s completamente. Quieres descargarla entera?</string>
+    <string name="dialog_downloaded_msg">"Descargado el: %s"</string>
+    <string name="dialog_uses_storage_msg">Ocupa: %s</string>
 
     <string name="downloads_delete_dialog_title">"¿Estás seguro?"</string>
     <string name="downloads_delete_dialog_msg">"Esto borrará %s de tu dispositivo PARA SIEMPRE. Tendrás que volver a descargarlo."</string>

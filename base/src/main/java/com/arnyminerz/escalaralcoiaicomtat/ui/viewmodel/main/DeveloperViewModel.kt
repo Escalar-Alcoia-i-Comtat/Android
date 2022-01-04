@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel
+package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main
 
 import android.app.Application
 import androidx.appsearch.app.SearchSpec

@@ -3,15 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 import android.app.Activity
 import androidx.annotation.WorkerThread
 import androidx.compose.material3.ExperimentalMaterial3Api
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import timber.log.Timber
 
@@ -31,7 +23,7 @@ suspend fun DataClassImpl.launch(activity: Activity) {
     // 1 -> Area ID
     // 3 -> Zone ID
     // 5 -> Sector ID
-    val intent = when (namespace) {
+    /*val intent = when (namespace) {
         Area.NAMESPACE ->
             AreaActivity.intent(activity, pathPieces[1]) // area ID
         Zone.NAMESPACE ->
@@ -40,6 +32,7 @@ suspend fun DataClassImpl.launch(activity: Activity) {
             SectorActivity.intent(activity, pathPieces[3], pathPieces[5])
         else ->
             throw IllegalArgumentException("Cannot launch activity since $namespace is not a valid namespace.")
-    }
-    uiContext { activity.startActivity(intent) }
+    }*/
+    TODO("Should be using Jetpack compose navigation")
+    // uiContext { activity.startActivity(intent) }
 }

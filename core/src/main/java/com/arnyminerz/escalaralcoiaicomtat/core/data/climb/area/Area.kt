@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
@@ -99,6 +100,7 @@ class Area internal constructor(
     override val imageQuality: Int = IMAGE_QUALITY
 
     companion object {
+        @Namespace
         const val NAMESPACE = "Area"
 
         const val IMAGE_QUALITY = 65

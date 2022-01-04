@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.ui.settings
+package com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings
 
 import android.content.Context
 import android.content.Intent
@@ -27,7 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsData
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsItem
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.context.LocaleHelper
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
-import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.SettingsViewModel
+import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.SettingsViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

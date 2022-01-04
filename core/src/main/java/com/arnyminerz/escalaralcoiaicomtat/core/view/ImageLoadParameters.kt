@@ -9,6 +9,17 @@ class ImageLoadParameters {
     var scaleType: ImageView.ScaleType = ImageView.ScaleType.CENTER_CROP
 
     /**
+     * Returns [resultImageScale] as an int, this is, for example, if [resultImageScale] is 0.5,
+     * which means the image should be half the resolution, this will return 2.
+     * @author Arnau Mora
+     * @since 20220104
+     */
+    val resultImageSampleSize: Int
+        get() = resultImageScale?.let {
+            (1 / it).toInt()
+        } ?: 1
+
+    /**
      * Sets the image scale once the load has been completed
      * @author Arnau Mora
      * @since 20210323

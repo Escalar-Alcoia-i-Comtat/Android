@@ -7,16 +7,23 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Looper
 import android.widget.ImageView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.await
+import coil.ImageLoader
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.ImagePainter
+import coil.request.ImageRequest
+import coil.transform.RoundedCornersTransformation
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
@@ -29,6 +36,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.CouldNotCreateDynamicLinkException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
+import com.arnyminerz.escalaralcoiaicomtat.core.loader.StorageMapper
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_AREA_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_SECTOR_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_ZONE_META
@@ -49,7 +57,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getChildren
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getData
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.readBitmap
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.ensureBitmapRead
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
@@ -380,6 +388,104 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 DownloadStatus.DOWNLOADED
             else DownloadStatus.PARTIALLY
         }
+
+        /**
+         * Downloads the image data of the DataClass.
+         * @author Arnau Mora
+         * @since 20210313
+         * @param context The context to run from.
+         * @param overwrite If the new data should overwrite the old one
+         * @param quality The quality in which do the codification
+         * @return A LiveData object with the download work info
+         *
+         * @throws IllegalArgumentException If the specified quality is out of bounds
+         */
+        @Throws(IllegalArgumentException::class)
+        inline fun <reified W : DownloadWorkerModel> scheduleDownload(
+            context: Context,
+            pin: String,
+            path: String,
+            displayName: String,
+            overwrite: Boolean = true,
+            quality: Int = 100
+        ): LiveData<WorkInfo> {
+            if (quality < DOWNLOAD_QUALITY_MIN || quality > DOWNLOAD_QUALITY_MAX)
+                throw IllegalArgumentException(
+                    "Quality must be between $DOWNLOAD_QUALITY_MIN and $DOWNLOAD_QUALITY_MAX"
+                )
+            Timber.v("Downloading $pin...")
+            Timber.v("Preparing DownloadData...")
+            val downloadData = DownloadData(path, displayName, overwrite, quality)
+            Timber.v("Scheduling download...")
+            val workerClass = W::class.java
+            val schedule = workerClass.getMethod(
+                "schedule",
+                Context::class.java,
+                String::class.java,
+                DownloadData::class.java
+            )
+            @Suppress("UNCHECKED_CAST")
+            return schedule.invoke(null, context, pin, downloadData) as LiveData<WorkInfo>
+        }
+
+        /**
+         * Gets the [WorkInfo] if the DataClass is being downloaded, or null otherwise.
+         * @author Arnau Mora
+         * @since 20210417
+         * @param context The context to check from
+         * @param pin The [DataClass.pin] to check the state for.
+         */
+        @WorkerThread
+        fun downloadWorkInfo(context: Context, pin: String): WorkInfo? {
+            val workManager = WorkManager.getInstance(context)
+            val workInfos = workManager.getWorkInfosByTag(pin).get()
+            var result: WorkInfo? = null
+            if (workInfos.isNotEmpty())
+                for (workInfo in workInfos)
+                    if (!workInfo.state.isFinished) {
+                        result = workInfos[0]
+                        break
+                    }
+            return result
+        }
+
+        /**
+         * Gets a [LiveData] of the [WorkInfo] for all works for the current [DataClass].
+         * @author Arnau Mora
+         * @since 20210417
+         * @param context The context to check from.
+         * @param pin The [DataClass.pin] to get the download work info for.
+         */
+        @WorkerThread
+        fun downloadWorkInfoLiveData(context: Context, pin: String): LiveData<List<WorkInfo>> {
+            val workManager = WorkManager.getInstance(context)
+            return workManager.getWorkInfosByTagLiveData(pin)
+        }
+
+        /**
+         * Gets the DownloadStatus of the DataClass
+         * @author Arnau Mora
+         * @since 20210313
+         * @param context The currently calling [Context].
+         * @return a matching DownloadStatus representing the Data Class' download status
+         */
+        @WorkerThread
+        suspend fun downloadStatus(
+            context: Context,
+            searchSession: AppSearchSession,
+            pin: String,
+        ): Pair<DownloadStatus, WorkInfo?> {
+            Timber.d("$pin Checking if downloaded")
+
+            val objectId = pin.substring(pin.indexOf('_') + 1)
+            val downloadWorkInfo = downloadWorkInfo(context, pin)
+            val result = if (downloadWorkInfo != null)
+                DownloadStatus.DOWNLOADING
+            else isDownloadIndexed(searchSession, objectId)
+
+            Timber.d("$pin Finished checking download status. Result: $result")
+            return result to downloadWorkInfo
+        }
     }
 
     /**
@@ -620,18 +726,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to check from
      */
     @WorkerThread
-    fun downloadWorkInfo(context: Context): WorkInfo? {
-        val workManager = WorkManager.getInstance(context)
-        val workInfos = workManager.getWorkInfosByTag(pin).get()
-        var result: WorkInfo? = null
-        if (workInfos.isNotEmpty())
-            for (workInfo in workInfos)
-                if (!workInfo.state.isFinished) {
-                    result = workInfos[0]
-                    break
-                }
-        return result
-    }
+    fun downloadWorkInfo(context: Context): WorkInfo? = downloadWorkInfo(context, pin)
 
     /**
      * Gets a [LiveData] of the [WorkInfo] for all works for the current [DataClass].
@@ -640,10 +735,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param context The context to check from
      */
     @WorkerThread
-    fun downloadWorkInfoLiveData(context: Context): LiveData<List<WorkInfo>> {
-        val workManager = WorkManager.getInstance(context)
-        return workManager.getWorkInfosByTagLiveData(pin)
-    }
+    fun downloadWorkInfoLiveData(context: Context): LiveData<List<WorkInfo>> =
+        downloadWorkInfoLiveData(context, pin)
 
     /**
      * Generates a list of [DownloadedSection].
@@ -667,7 +760,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val children = getChildren(searchSession)
         for ((c, child) in children.withIndex())
             (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
-                val downloadStatus = dataClass.downloadStatus(context, searchSession)
+                val downloadState = dataClass.downloadStatus(context, searchSession)
+                val downloadStatus = downloadState.first
                 progressListener?.invoke(c, children.size)
                 if (showNonDownloaded || downloadStatus.downloaded || downloadStatus.partialDownload)
                     emit(DownloadedSection(dataClass))
@@ -691,25 +785,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         context: Context,
         overwrite: Boolean = true,
         quality: Int = 100
-    ): LiveData<WorkInfo> {
-        if (quality < DOWNLOAD_QUALITY_MIN || quality > DOWNLOAD_QUALITY_MAX)
-            throw IllegalArgumentException(
-                "Quality must be between $DOWNLOAD_QUALITY_MIN and $DOWNLOAD_QUALITY_MAX"
-            )
-        Timber.v("Downloading $namespace \"$displayName\"...")
-        Timber.v("Preparing DownloadData...")
-        val downloadData = DownloadData(this, overwrite, quality)
-        Timber.v("Scheduling download...")
-        val workerClass = W::class.java
-        val schedule = workerClass.getMethod(
-            "schedule",
-            Context::class.java,
-            String::class.java,
-            DownloadData::class.java
-        )
-        @Suppress("UNCHECKED_CAST")
-        return schedule.invoke(null, context, pin, downloadData) as LiveData<WorkInfo>
-    }
+    ): LiveData<WorkInfo> =
+        scheduleDownload<W>(context, pin, documentPath, displayName, overwrite, quality)
 
     /**
      * Gets the DownloadStatus of the DataClass
@@ -722,17 +799,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     suspend fun downloadStatus(
         context: Context,
         searchSession: AppSearchSession
-    ): DownloadStatus {
-        Timber.d("$pin Checking if downloaded")
-
-        val downloadWorkInfo = downloadWorkInfo(context)
-        val result = if (downloadWorkInfo != null)
-            DownloadStatus.DOWNLOADING
-        else isDownloadIndexed(searchSession, objectId)
-
-        Timber.d("$pin Finished checking download status. Result: $result")
-        return result
-    }
+    ): Pair<DownloadStatus, WorkInfo?> = Companion.downloadStatus(context, searchSession, pin)
 
     /**
      * Checks if the data class has any children that has been downloaded
@@ -750,9 +817,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val children = getChildren(searchSession)
         for (child in children)
             if (child is DataClass<*, *> &&
-                child.downloadStatus(context, searchSession) == DownloadStatus.DOWNLOADED
-            )
-                return true
+                child.downloadStatus(context, searchSession).first == DownloadStatus.DOWNLOADED
+            ) return true
         return false
     }
 
@@ -899,6 +965,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param storage The [FirebaseStorage] reference for loading the image file.
      * @return The [StorageReference] that corresponds to the [DataClass]' image.
      */
+    @Throws(StorageException::class)
     fun storageReference(storage: FirebaseStorage): StorageReference =
         storage.getReferenceFromUrl(imageReferenceUrl)
 
@@ -909,6 +976,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param storage The [FirebaseStorage] reference for loading the image file.
      * @return The [DataClass]' download url.
      */
+    @Throws(StorageException::class)
     suspend fun storageUrl(storage: FirebaseStorage): Uri {
         if (downloadUrl == null)
             downloadUrl = storageReference(storage).downloadUrl.await()
@@ -922,6 +990,78 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     fun hasStorageUrl() = downloadUrl != null
 
+    @Composable
+    @ExperimentalCoilApi
+    fun rememberImagePainter(
+        context: Context,
+        storage: FirebaseStorage,
+        imageLoadParameters: ImageLoadParameters? = null,
+    ): ImagePainter {
+        val downloadedImageFile = imageFile(context)
+        val scale = imageLoadParameters?.resultImageScale ?: 1f
+        val cacheImage = cacheImageFile(context, "scale$scale")
+
+        // If image is downloaded, load it
+        val image = when {
+            downloadedImageFile.exists() -> downloadedImageFile
+            cacheImage.exists() -> cacheImage
+            // TODO: No internet connection errors should be caught
+            else -> storage.getReferenceFromUrl(imageReferenceUrl)
+        }
+
+        return coil.compose.rememberImagePainter(
+            request = ImageRequest.Builder(context)
+                .data(image)
+                .transformations(
+                    RoundedCornersTransformation(4f),
+                )
+                .placeholder(displayOptions.placeholderDrawable)
+                .error(displayOptions.errorPlaceholderDrawable)
+                .build(),
+            imageLoader = ImageLoader.Builder(context)
+                .componentRegistry {
+                    add(StorageMapper())
+                }
+                .build(),
+            onExecute = { _, _ ->
+                if (!cacheImage.exists())
+                    doAsync {
+                        Timber.i("$this > Storing $pin into cache...")
+                        Timber.v("$this > Getting stream...")
+                        val snapshot = storage.getReferenceFromUrl(imageReferenceUrl)
+                            .stream
+                            .await()
+                        Timber.v("$this > Stream loaded. Decoding...")
+                        val stream = snapshot.stream
+                        val bitmap: Bitmap? = BitmapFactory.decodeStream(
+                            stream,
+                            null,
+                            BitmapFactory.Options().apply {
+                                inSampleSize = (1 / scale).toInt()
+                            }
+                        )
+                        if (bitmap != null) {
+                            Timber.v("$this > Compressing image...")
+                            val baos = ByteArrayOutputStream()
+                            val compressedBitmap: Boolean =
+                                bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
+                            if (!compressedBitmap) {
+                                Timber.e("$this > Could not compress image!")
+                                throw ArithmeticException("Could not compress image for $this.")
+                            } else {
+                                Timber.v("$this > Storing image...")
+                                baos.writeTo(cacheImage.outputStream())
+                                Timber.v("$this > Image stored.")
+                            }
+                        }
+                    }
+                else
+                    Timber.d("Won't cache image since it's already stored.")
+                true
+            }
+        )
+    }
+
     /**
      * Fetches the image [Bitmap] from the DataClass.
      * @author Arnau Mora
@@ -933,22 +1073,36 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @throws StorageException When there's an issue while downloading the image from the server.
      * @throws IOException When there's an issue while reading or writing the image from the fs.
      * @throws ArithmeticException When there's been an error while compressing the image.
+     * @throws RuntimeException If there's any error while decoding the image into [Bitmap].
+     * @throws IllegalStateException When the function is called from the main thread.
      * @see ValueMax
      * @see ImageLoadParameters
      */
     @WorkerThread
     @Suppress("BlockingMethodInNonBlockingContext")
-    @Throws(StorageException::class, IOException::class, ArithmeticException::class)
+    @Throws(
+        StorageException::class,
+        IOException::class,
+        ArithmeticException::class,
+        RuntimeException::class,
+        IllegalStateException::class,
+    )
     suspend fun image(
         context: Context,
         storage: FirebaseStorage,
         imageLoadParameters: ImageLoadParameters? = null,
         progress: (@UiThread (progress: ValueMax<Long>) -> Unit)? = null
-    ): Bitmap? {
+    ): Bitmap {
+        if (Looper.myLooper() == Looper.getMainLooper())
+            throw IllegalStateException("Image cannot be loaded on main thread.")
+
         val downloadedImageFile = imageFile(context)
         return if (downloadedImageFile.exists()) {
             Timber.d("Loading image from storage: ${downloadedImageFile.path}")
-            readBitmap(downloadedImageFile)
+            ensureBitmapRead(
+                downloadedImageFile,
+                scale = imageLoadParameters?.resultImageSampleSize
+            )
         } else {
             val scale = imageLoadParameters?.resultImageScale ?: 1f
             val cacheImage = cacheImageFile(context, "scale$scale")
@@ -997,7 +1151,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 }
 
             Timber.v("$this > Reading cache image ($cacheImage)...")
-            readBitmap(cacheImage)
+            ensureBitmapRead(cacheImage, scale = imageLoadParameters?.resultImageSampleSize)
         }
     }
 
@@ -1023,6 +1177,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         ArithmeticException::class
     )
     @Suppress("BlockingMethodInNonBlockingContext")
+    @Deprecated("Use Jetpack Compose methods.")
     fun loadImage(
         activity: Activity,
         storage: FirebaseStorage,

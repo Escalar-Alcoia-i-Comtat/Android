@@ -5,12 +5,10 @@
     <string name="sector_height">"%1$sm"</string>
     <string name="sector_kids_apt">"Apto niños"</string>
     <string name="status_updating">"Actualizando…"</string>
-    <string name="status_loading">"Cargando…"</string>
     <string name="status_not_downloaded">"No descargado"</string>
     <string name="dialog_permission_title">"Permiso necesario!"</string>
     <string name="dialog_permission_message">"La función que estás intentando usar requiere %s permiso. Por favor, permítelo o no podrás usarla."</string>
     <string name="dialog_permission_my_location_message">"Para mostrar tu posición actual la aplicación debe tener acceso a la localización de tu dispositivo. Permítelo o no podrás usar esta función"</string>
-    <string name="dialog_downloaded_msg">"Descargado el: %s"</string>
     <string name="pref_main_title">"General"</string>
     <string name="pref_main_sum">"Ajustes generales de la aplicación"</string>
     <string name="pref_noti_title">"Notificaciones"</string>
@@ -94,7 +92,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="share_text">Hola! Te gustaría probar Escalar Alcoià i Comtat? Es gratis! https://play.google.com/store/apps/details?id=com.arnyminerz.escalaralcoiaicomtat</string>
     <string name="path_warning_rope_length">Esta vía es bastante larga, ve con cuidado con la cuerta que usas.</string>
     <string name="image_desc_maximize_minimize_img">Maximizar o minimizar imagen</string>
-    <string name="dialog_uses_storage_msg">Ocupa: %s</string>
     <string name="update_progress_internet_waiting">Esperando a una conexión a Internet…</string>
     <string name="update_progress_downloading_new_cache">Descargando los datos nuevos</string>
     <string name="update_progress_error">Error!</string>
@@ -120,10 +117,8 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="pref_info_git_sum">Ver el repositorio de Github</string>
     <string name="image_desc_ending_type">Tipo de reunión</string>
     <string name="image_desc_rappel">Rappel</string>
-    <string name="status_downloading">Descargando…</string>
     <string name="status_storing">Guardando…</string>
     <string name="status_loading_progress">Cargando %d/%d</string>
-    <string name="status_downloaded">Descargado</string>
     <string name="status_no_internet">Sin conexión a Internet</string>
     <string name="notification_gpx_stored_title">GPX guardado correctamente</string>
     <string name="notification_gpx_stored_message">Toca para abrir</string>
@@ -137,7 +132,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="pref_gene_error_reporting_title">Habilitar reportes de error</string>
     <string name="pref_gene_error_reporting_sum">Si está activado, cada vez que la app se cierre inesperadamente o haya un error, se mandará un reporte anónimo a los desarrolladores para que pueda ser reparado lo más pronto posible. Por favor, te pedimos que mantengas esta opción activada, aunque eres libre que desactivarla si lo deseas.</string>
     <string name="downloads_no_download">No hay nada descargado</string>
-    <string name="dialog_downloaded_partially_msg">Algunos elementos se han descargado, pero no %s completamente. Quieres descargarla entera?</string>
     <string name="image_desc_logo_cea">Logo del Centre Excursionista d\'Alcoi</string>
     <string name="image_desc_authenticate">Autenticarse</string>
     <string name="image_desc_profile_image">Imagen de perfil</string>
