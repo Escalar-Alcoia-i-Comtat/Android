@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Looper
 import android.widget.ImageView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -994,6 +995,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @throws IOException When there's an issue while reading or writing the image from the fs.
      * @throws ArithmeticException When there's been an error while compressing the image.
      * @throws RuntimeException If there's any error while decoding the image into [Bitmap].
+     * @throws IllegalStateException When the function is called from the main thread.
      * @see ValueMax
      * @see ImageLoadParameters
      */
@@ -1003,7 +1005,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         StorageException::class,
         IOException::class,
         ArithmeticException::class,
-        RuntimeException::class
+        RuntimeException::class,
+        IllegalStateException::class,
     )
     suspend fun image(
         context: Context,
@@ -1011,6 +1014,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         imageLoadParameters: ImageLoadParameters? = null,
         progress: (@UiThread (progress: ValueMax<Long>) -> Unit)? = null
     ): Bitmap {
+        if (Looper.myLooper() == Looper.getMainLooper())
+            throw IllegalStateException("Image cannot be loaded on main thread.")
+
         val downloadedImageFile = imageFile(context)
         return if (downloadedImageFile.exists()) {
             Timber.d("Loading image from storage: ${downloadedImageFile.path}")
