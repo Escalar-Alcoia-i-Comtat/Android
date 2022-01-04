@@ -14,10 +14,16 @@ import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.await
+import coil.ImageLoader
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.ImagePainter
+import coil.request.ImageRequest
+import coil.transform.RoundedCornersTransformation
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
@@ -30,6 +36,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.CouldNotCreateDynamicLinkException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
+import com.arnyminerz.escalaralcoiaicomtat.core.loader.StorageMapper
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_AREA_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_SECTOR_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_ZONE_META
@@ -982,6 +989,78 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210722
      */
     fun hasStorageUrl() = downloadUrl != null
+
+    @Composable
+    @ExperimentalCoilApi
+    fun rememberImagePainter(
+        context: Context,
+        storage: FirebaseStorage,
+        imageLoadParameters: ImageLoadParameters? = null,
+    ): ImagePainter {
+        val downloadedImageFile = imageFile(context)
+        val scale = imageLoadParameters?.resultImageScale ?: 1f
+        val cacheImage = cacheImageFile(context, "scale$scale")
+
+        // If image is downloaded, load it
+        val image = when {
+            downloadedImageFile.exists() -> downloadedImageFile
+            cacheImage.exists() -> cacheImage
+            // TODO: No internet connection errors should be caught
+            else -> storage.getReferenceFromUrl(imageReferenceUrl)
+        }
+
+        return coil.compose.rememberImagePainter(
+            request = ImageRequest.Builder(context)
+                .data(image)
+                .transformations(
+                    RoundedCornersTransformation(4f),
+                )
+                .placeholder(displayOptions.placeholderDrawable)
+                .error(displayOptions.errorPlaceholderDrawable)
+                .build(),
+            imageLoader = ImageLoader.Builder(context)
+                .componentRegistry {
+                    add(StorageMapper())
+                }
+                .build(),
+            onExecute = { _, _ ->
+                if (!cacheImage.exists())
+                    doAsync {
+                        Timber.i("$this > Storing $pin into cache...")
+                        Timber.v("$this > Getting stream...")
+                        val snapshot = storage.getReferenceFromUrl(imageReferenceUrl)
+                            .stream
+                            .await()
+                        Timber.v("$this > Stream loaded. Decoding...")
+                        val stream = snapshot.stream
+                        val bitmap: Bitmap? = BitmapFactory.decodeStream(
+                            stream,
+                            null,
+                            BitmapFactory.Options().apply {
+                                inSampleSize = (1 / scale).toInt()
+                            }
+                        )
+                        if (bitmap != null) {
+                            Timber.v("$this > Compressing image...")
+                            val baos = ByteArrayOutputStream()
+                            val compressedBitmap: Boolean =
+                                bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
+                            if (!compressedBitmap) {
+                                Timber.e("$this > Could not compress image!")
+                                throw ArithmeticException("Could not compress image for $this.")
+                            } else {
+                                Timber.v("$this > Storing image...")
+                                baos.writeTo(cacheImage.outputStream())
+                                Timber.v("$this > Image stored.")
+                            }
+                        }
+                    }
+                else
+                    Timber.d("Won't cache image since it's already stored.")
+                true
+            }
+        )
+    }
 
     /**
      * Fetches the image [Bitmap] from the DataClass.
