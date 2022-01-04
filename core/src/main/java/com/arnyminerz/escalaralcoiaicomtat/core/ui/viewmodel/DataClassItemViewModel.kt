@@ -113,6 +113,14 @@ class DataClassItemViewModel(
         return result
     }
 
+    fun childrenCounter(dataClass: DataClass<*, *>): MutableLiveData<Int> =
+        MutableLiveData<Int>().apply {
+            viewModelScope.launch {
+                val childrenCount = dataClass.getSize(app.searchSession)
+                postValue(childrenCount)
+            }
+        }
+
     class Factory(
         private val application: Application
     ) : ViewModelProvider.Factory {
