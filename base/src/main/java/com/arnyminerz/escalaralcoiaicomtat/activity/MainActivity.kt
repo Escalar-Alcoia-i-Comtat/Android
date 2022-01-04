@@ -25,7 +25,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore.DataClassExplorer
-import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.DeveloperScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.DownloadsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.ExploreScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.MapScreen
@@ -36,6 +35,9 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.DownloadsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.SettingsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.settingsViewModel
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import timber.log.Timber
@@ -72,7 +74,10 @@ class MainActivity : NetworkAwareComponentActivity() {
     internal val hasInternet = MutableLiveData<Boolean>()
 
     @ExperimentalBadgeUtils
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+    @OptIn(
+        ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+        ExperimentalPagerApi::class,
+    )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -125,14 +130,15 @@ class MainActivity : NetworkAwareComponentActivity() {
 
     @ExperimentalBadgeUtils
     @ExperimentalMaterial3Api
+    @ExperimentalPagerApi
     @Composable
     private fun Home(rootNavController: NavController) {
-        val homeNavController = rememberNavController()
+        val pagerState = rememberPagerState()
         Scaffold(
             bottomBar = {
                 NavigationBar {
                     NavItems(
-                        homeNavController,
+                        pagerState,
                         mutableListOf(
                             Screen.Explore, Screen.Map, Screen.Downloads, Screen.Settings
                         ).apply {
@@ -144,25 +150,16 @@ class MainActivity : NetworkAwareComponentActivity() {
                 }
             }
         ) { innerPadding ->
-            NavHost(
-                homeNavController,
-                Screen.Explore.route,
-                modifier = Modifier.padding(innerPadding)
-            ) {
-                composable(Screen.Explore.route) {
-                    ExploreScreen(rootNavController)
-                }
-                composable(Screen.Map.route) {
-                    MapScreen()
-                }
-                composable(Screen.Downloads.route) {
-                    DownloadsScreen()
-                }
-                composable(Screen.Settings.route) {
-                    SettingsScreen()
-                }
-                composable(Screen.Developer.route) {
-                    DeveloperScreen()
+            HorizontalPager(
+                count = 5,
+                state = pagerState,
+                modifier = Modifier.padding(innerPadding),
+            ) { index ->
+                when (index) {
+                    0 -> ExploreScreen(rootNavController)
+                    1 -> MapScreen()
+                    2 -> DownloadsScreen()
+                    3 -> SettingsScreen()
                 }
             }
         }
