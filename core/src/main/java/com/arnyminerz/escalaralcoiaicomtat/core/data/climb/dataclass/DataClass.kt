@@ -49,7 +49,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getChildren
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getData
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.readBitmap
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.ensureBitmapRead
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
@@ -993,22 +993,31 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @throws StorageException When there's an issue while downloading the image from the server.
      * @throws IOException When there's an issue while reading or writing the image from the fs.
      * @throws ArithmeticException When there's been an error while compressing the image.
+     * @throws RuntimeException If there's any error while decoding the image into [Bitmap].
      * @see ValueMax
      * @see ImageLoadParameters
      */
     @WorkerThread
     @Suppress("BlockingMethodInNonBlockingContext")
-    @Throws(StorageException::class, IOException::class, ArithmeticException::class)
+    @Throws(
+        StorageException::class,
+        IOException::class,
+        ArithmeticException::class,
+        RuntimeException::class
+    )
     suspend fun image(
         context: Context,
         storage: FirebaseStorage,
         imageLoadParameters: ImageLoadParameters? = null,
         progress: (@UiThread (progress: ValueMax<Long>) -> Unit)? = null
-    ): Bitmap? {
+    ): Bitmap {
         val downloadedImageFile = imageFile(context)
         return if (downloadedImageFile.exists()) {
             Timber.d("Loading image from storage: ${downloadedImageFile.path}")
-            readBitmap(downloadedImageFile)
+            ensureBitmapRead(
+                downloadedImageFile,
+                scale = imageLoadParameters?.resultImageSampleSize
+            )
         } else {
             val scale = imageLoadParameters?.resultImageScale ?: 1f
             val cacheImage = cacheImageFile(context, "scale$scale")
@@ -1057,7 +1066,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 }
 
             Timber.v("$this > Reading cache image ($cacheImage)...")
-            readBitmap(cacheImage)
+            ensureBitmapRead(cacheImage, scale = imageLoadParameters?.resultImageSampleSize)
         }
     }
 
@@ -1083,6 +1092,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         ArithmeticException::class
     )
     @Suppress("BlockingMethodInNonBlockingContext")
+    @Deprecated("Use Jetpack Compose methods.")
     fun loadImage(
         activity: Activity,
         storage: FirebaseStorage,
