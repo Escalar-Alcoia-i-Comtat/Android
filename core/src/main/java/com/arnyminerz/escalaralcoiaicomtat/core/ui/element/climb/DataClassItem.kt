@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,9 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -62,6 +59,11 @@ fun DataClassItem(item: DataClassImpl, onClick: () -> Unit) {
                     context.applicationContext as Application
                 )
             )
+
+            val downloadStatus = viewModel.addDownloadListener(item.pin) { _, _ ->
+                // TODO: Download progress should be notified
+            }
+
             val imagePainter = /*if (viewModel.imageUrls.containsKey(pin))
             rememberImagePainter(
                 request = ImageRequest.Builder(context)
@@ -74,22 +76,18 @@ fun DataClassItem(item: DataClassImpl, onClick: () -> Unit) {
             )
             else*/ painterResource(R.drawable.ic_tall_placeholder)
 
-            var downloadStatus by remember { mutableStateOf(DownloadStatus.NOT_DOWNLOADED) }
-            viewModel.addDownloadListener(item.pin) {
-                val state = it.state
-                // TODO: This check should be more exhaustive
-                downloadStatus =
-                    if (state.isFinished) DownloadStatus.DOWNLOADED else DownloadStatus.DOWNLOADING
-            }
+            val downloadState by downloadStatus.observeAsState()
 
-            // TODO: Load children count
-            DownloadableDataClassItem(
-                item.displayName,
-                item.displayName,
-                imagePainter,
-                downloadStatus,
-                onClick,
-            )
+            downloadState?.let { status ->
+                DownloadableDataClassItem(
+                    item.displayName,
+                    // TODO: Load children count
+                    item.displayName,
+                    imagePainter,
+                    status,
+                    onClick,
+                )
+            }
         } else
             NonDownloadableDataClassItem(item, onClick)
     else
@@ -197,7 +195,8 @@ private fun DownloadableDataClassItem(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Button(
-                        enabled = !downloadStatus.downloading,
+                        // Enable button when not downloaded, but download status is known
+                        enabled = !downloadStatus.downloading && downloadStatus != DownloadStatus.UNKNOWN,
                         modifier = Modifier
                             .padding(start = 8.dp, end = 4.dp)
                             .fillMaxWidth(),
@@ -205,18 +204,13 @@ private fun DownloadableDataClassItem(
                         onClick = { /*TODO*/ },
                     ) {
                         Icon(
-                            Icons.Rounded.Download,
+                            downloadStatus.getActionIcon(),
                             contentDescription = stringResource(R.string.action_download),
                             modifier = Modifier.size(ButtonDefaults.IconSize)
                         )
                         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                         Text(
-                            text = stringResource(
-                                if (downloadStatus.downloading)
-                                    R.string.status_downloading
-                                else
-                                    R.string.action_download
-                            )
+                            text = downloadStatus.getText()
                         )
                     }
                 }
