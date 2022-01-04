@@ -8,13 +8,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.resourceUri
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
 import com.google.firebase.ktx.Firebase
@@ -30,7 +33,8 @@ class DataClassItemViewModel(
 
     var imageUrls by mutableStateOf<Map<String, Uri>>(mapOf())
 
-    private val downloadingStatusListeners = mutableMapOf<String, (workInfo: WorkInfo) -> Unit>()
+    private val downloadingStatusListeners =
+        mutableMapOf<String, (status: DownloadStatus, workInfo: WorkInfo?) -> Unit>()
 
     fun loadImage(dataClass: DataClass<*, *>) {
         @Suppress("BlockingMethodInNonBlockingContext")
@@ -73,14 +77,28 @@ class DataClassItemViewModel(
         workerInfo.observe(context as LifecycleOwner) { workInfo ->
             for (listener in downloadingStatusListeners)
                 if (listener.key == pin)
-                    listener.value(workInfo)
+                    listener.value(DownloadStatus.DOWNLOADING, workInfo)
             if (workInfo.state.isFinished)
                 workerInfo.removeObservers(context as LifecycleOwner)
         }
     }
 
-    fun addDownloadListener(pin: String, callback: (workInfo: WorkInfo) -> Unit) {
-        downloadingStatusListeners[pin] = callback
+    fun addDownloadListener(
+        pin: String,
+        callback: (status: DownloadStatus, workInfo: WorkInfo?) -> Unit
+    ): MutableLiveData<DownloadStatus> {
+        val mutableLiveData = MutableLiveData<DownloadStatus>()
+        downloadingStatusListeners[pin] = { status, workInfo ->
+            mutableLiveData.postValue(status)
+            callback(status, workInfo)
+        }
+        viewModelScope.launch {
+            val state = DataClass.downloadStatus(context, app.searchSession, pin)
+            val status = state.first
+            val workInfo = state.second
+            downloadingStatusListeners[pin]?.invoke(status, workInfo)
+        }
+        return mutableLiveData
     }
 
     class Factory(
