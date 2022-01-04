@@ -5,7 +5,6 @@
     <string name="sector_height">"%1$sm"</string>
     <string name="sector_kids_apt">"Apte xiquets"</string>
     <string name="status_updating">"Actualitzant…"</string>
-    <string name="status_loading">"Carregant…"</string>
     <string name="status_not_downloaded">"No descarregat"</string>
     <string name="dialog_permission_title">"Permís Necessari!"</string>
     <string name="dialog_permission_message">"La funcionalitat que intentes utilitzar requereix l'accés a %s. Per favor, cedeix-lo, o no podràs utilitzar eixa funció."</string>
@@ -121,7 +120,6 @@
     <string name="image_desc_rappel">Rappel</string>
     <string name="status_storing">Desant…</string>
     <string name="status_loading_progress">Carregant %d/%d</string>
-    <string name="status_downloaded">Baixat</string>
     <string name="status_no_internet">Sense Connexió a Internet</string>
     <string name="notification_gpx_stored_title">GPX desat correctament</string>
     <string name="notification_gpx_stored_message">Toca per a obrir</string>

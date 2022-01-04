@@ -40,6 +40,8 @@
     <string name="item_share">Compartir</string>
 
     <string name="status_downloading">Baixant…</string>
+    <string name="status_loading">"Carregant…"</string>
+    <string name="status_downloaded">Baixat</string>
 
     <string name="path_ending_plate">"Placa"</string>
     <string name="path_ending_plate_ring">"Placa amb Argolla"</string>

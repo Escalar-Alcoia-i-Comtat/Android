@@ -5,7 +5,6 @@
     <string name="sector_height">"%1$sm"</string>
     <string name="sector_kids_apt">"Apto niños"</string>
     <string name="status_updating">"Actualizando…"</string>
-    <string name="status_loading">"Cargando…"</string>
     <string name="status_not_downloaded">"No descargado"</string>
     <string name="dialog_permission_title">"Permiso necesario!"</string>
     <string name="dialog_permission_message">"La función que estás intentando usar requiere %s permiso. Por favor, permítelo o no podrás usarla."</string>
@@ -122,7 +121,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="image_desc_rappel">Rappel</string>
     <string name="status_storing">Guardando…</string>
     <string name="status_loading_progress">Cargando %d/%d</string>
-    <string name="status_downloaded">Descargado</string>
     <string name="status_no_internet">Sin conexión a Internet</string>
     <string name="notification_gpx_stored_title">GPX guardado correctamente</string>
     <string name="notification_gpx_stored_message">Toca para abrir</string>

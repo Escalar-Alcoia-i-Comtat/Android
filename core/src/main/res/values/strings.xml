@@ -37,6 +37,8 @@
     <string name="action_view_activity">View Activity</string>
 
     <string name="status_downloading">Downloading…</string>
+    <string name="status_loading">Loading…</string>
+    <string name="status_downloaded">Downloaded</string>
 
     <string name="item_explore">Explore</string>
     <string name="item_map">Map</string>
