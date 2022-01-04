@@ -19,7 +19,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvide
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ARGUMENT_SECTOR_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PATH_DOCUMENT
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDisplaySize
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.view.show
 import com.arnyminerz.escalaralcoiaicomtat.core.view.visibility
@@ -41,6 +45,7 @@ import timber.log.Timber
  * @since 20211006
  */
 @ExperimentalBadgeUtils
+@Deprecated("Should be migrated to Jetpack Compose")
 class SectorFragment : NetworkChangeListenerFragment() {
     companion object {
         /**
@@ -322,7 +327,8 @@ class SectorFragment : NetworkChangeListenerFragment() {
             (activity as? SectorActivity?)?.setTitle(sector.displayName)
         }
 
-        isDownloaded = sector.downloadStatus(app, app.searchSession).downloaded
+        val downloadStatus = sector.downloadStatus(app, app.searchSession)
+        isDownloaded = downloadStatus.first.downloaded
 
         if (!sectorActivity.isDestroyed) {
             Timber.v("Calculating sector image size...")

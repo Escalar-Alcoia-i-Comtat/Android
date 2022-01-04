@@ -3,9 +3,16 @@ package com.arnyminerz.escalaralcoiaicomtat.core.shared
 import android.os.Parcelable
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.DataExtra
 
+@Deprecated("Jetpack navigation should be used")
 val EXTRA_AREA = DataExtra<String>("area")
+
+@Deprecated("Jetpack navigation should be used")
 val EXTRA_ZONE = DataExtra<String>("zone")
+
+@Deprecated("Jetpack navigation should be used")
 val EXTRA_SECTOR = DataExtra<String>("sector")
+
+@Deprecated("Jetpack navigation should be used")
 val EXTRA_PATH = DataExtra<String>("path")
 val EXTRA_PATH_DOCUMENT = DataExtra<String>("path_document")
 
