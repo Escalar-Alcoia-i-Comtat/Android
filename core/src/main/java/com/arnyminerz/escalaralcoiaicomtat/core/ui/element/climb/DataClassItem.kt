@@ -66,15 +66,22 @@ fun DataClassItem(
     storage: FirebaseStorage,
     onClick: () -> Unit
 ) {
-    if (item is DataClass<*, *>)
-        if (item.displayOptions.downloadable) {
-            val context = LocalContext.current
-            val viewModel: DataClassItemViewModel = viewModel(
-                factory = DataClassItemViewModel.Factory(
-                    context.applicationContext as Application
-                )
+    if (item is DataClass<*, *>) {
+        val context = LocalContext.current
+        val viewModel: DataClassItemViewModel = viewModel(
+            factory = DataClassItemViewModel.Factory(
+                context.applicationContext as Application
             )
+        )
+        val childrenCount by viewModel.childrenCounter(item).observeAsState()
+        val painter = item.rememberImagePainter(
+            context,
+            storage,
+            ImageLoadParameters()
+                .withResultImageScale(DATACLASS_PREVIEW_SCALE)
+        )
 
+        if (item.displayOptions.downloadable) {
             val downloadStatus = viewModel.addDownloadListener(item.pin) { _, _ ->
                 // TODO: Download progress should be notified
             }
@@ -94,14 +101,10 @@ fun DataClassItem(
 
             DownloadableDataClassItem(
                 item.displayName,
-                // TODO: Load children count
-                item.displayName,
-                item.rememberImagePainter(
-                    context,
-                    storage,
-                    ImageLoadParameters()
-                        .withResultImageScale(DATACLASS_PREVIEW_SCALE)
-                ),
+                childrenCount?.let {
+                    stringResource(R.string.downloads_sectors_title, it)
+                } ?: stringResource(R.string.status_loading),
+                painter,
                 downloadState ?: DownloadStatus.UNKNOWN,
                 item.location,
                 downloadItem,
@@ -166,8 +169,15 @@ fun DataClassItem(
                     },
                 )
         } else
-            NonDownloadableDataClassItem(item, storage, onClick)
-    else
+            NonDownloadableDataClassItem(
+                item.displayName,
+                childrenCount?.let {
+                    stringResource(R.string.downloads_sectors_title, it)
+                } ?: stringResource(R.string.status_loading),
+                painter,
+                onClick,
+            )
+    } else
         PathDataClassItem(item)
 }
 
@@ -339,18 +349,20 @@ private fun DownloadableDataClassItem(
  * Displays a data class object that can't be downloaded. The UI is simpler, just image and name.
  * @author Arnau Mora
  * @since 20211229
- * @param dataClass The data class to display.
+ * @param displayName The display name of the data class.
+ * @param childrenCountLabel The content to display under [displayName]. Should be something like
+ * "5 paths", or "3 sectors"
+ * @param image The image to display for the DataClass.
  * @param onClick What to do when clicked.
  */
 @ExperimentalCoilApi
 @Composable
 private fun NonDownloadableDataClassItem(
-    dataClass: DataClass<*, *>,
-    storage: FirebaseStorage,
+    displayName: String,
+    childrenCountLabel: String,
+    image: Painter,
     onClick: (() -> Unit)? = null
 ) {
-    val context = LocalContext.current
-
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
@@ -359,12 +371,7 @@ private fun NonDownloadableDataClassItem(
     ) {
         Column {
             Image(
-                painter = dataClass.rememberImagePainter(
-                    context,
-                    storage,
-                    ImageLoadParameters()
-                        .withResultImageScale(DATACLASS_PREVIEW_SCALE)
-                ),
+                painter = image,
                 contentDescription = "",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -380,7 +387,7 @@ private fun NonDownloadableDataClassItem(
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Text(
-                    text = dataClass.displayName,
+                    text = displayName,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Light,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -389,11 +396,12 @@ private fun NonDownloadableDataClassItem(
                         .fillMaxWidth()
                 )
                 Text(
-                    text = dataClass.displayName,
+                    text = childrenCountLabel,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier
                         .padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
                 )
             }
         }
