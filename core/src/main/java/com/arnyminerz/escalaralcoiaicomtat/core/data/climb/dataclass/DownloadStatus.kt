@@ -10,6 +10,13 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
  */
 enum class DownloadStatus {
     /**
+     * The status of the [DataClass] is not known.
+     * @author Arnau Mora
+     * @since 20220104
+     */
+    UNKNOWN,
+
+    /**
      * The [DataClass] is not downloaded.
      * @author Arnau Mora
      * @since 20210413
