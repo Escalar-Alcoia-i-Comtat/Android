@@ -586,7 +586,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     Timber.v("Getting intent...")
                     val downloadPathSplit = downloadPath!!.split('/')
                     //DataClass.getIntent(context, appSearchSession, downloadPath)
-                    TODO("Fix the launching intent")
+                    // TODO: Fix the launching intent
+                    null
                     /*when (namespace) {
                         // Area Skipped since not-downloadable
                         Zone.NAMESPACE -> {
