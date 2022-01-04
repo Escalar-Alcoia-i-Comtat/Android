@@ -42,22 +42,6 @@ fun java.util.ArrayList<String>.split(delimiter: String): java.util.ArrayList<St
     return list
 }
 
-fun Collection<String>.join(glue: String): String {
-    val builder = StringBuilder()
-    for (item in this)
-        if (last() == item)
-            builder.append(item)
-        else
-            builder.append(item + glue)
-    return builder.toString()
-}
-
-fun <A, B> ArrayMap<A, B>.toArrayList(): ArrayList<Pair<A, B>> =
-    arrayListOf<Pair<A, B>>().apply {
-        for (e in this@toArrayList)
-            add(e.key to e.value)
-    }
-
 fun ArrayMap<String, Any?>.toWorkData(): Data =
     Data.Builder().apply {
         this.putAll(this@toWorkData as Map<String, Any?>)

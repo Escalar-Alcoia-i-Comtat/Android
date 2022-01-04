@@ -7,12 +7,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.ParcelFileDescriptor
-import com.arnyminerz.escalaralcoiaicomtat.core.exception.CouldNotCreateNewFileException
-import com.arnyminerz.escalaralcoiaicomtat.core.exception.CouldNotDeleteFileException
-import java.io.ByteArrayOutputStream
-import java.io.File
 import java.io.FileDescriptor
-import java.io.FileOutputStream
 import java.io.IOException
 
 /**
@@ -40,52 +35,6 @@ val WEBP_LOSSY_LEGACY: CompressFormat
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
         CompressFormat.WEBP_LOSSY
     else CompressFormat.WEBP
-
-/**
- * Stores a bitmap into a file
- * @param file The file to store at
- * @param overwrite If there's already a file, it should be deleted
- * @param mkdirs If the parent dirs of the file should be created
- * @param format The format to write with
- * @param quality The quality to use
- *
- * @throws FileAlreadyExistsException When the file already exists and overwrite is set to false
- * @throws CouldNotDeleteFileException If an error occurs while deleting the file if it exists
- * @throws CouldNotCreateNewFileException If an error occurs while trying to create the image file
- */
-@Throws(
-    FileAlreadyExistsException::class,
-    CouldNotDeleteFileException::class,
-    CouldNotCreateNewFileException::class
-)
-fun Bitmap.storeToFile(
-    file: File,
-    overwrite: Boolean = true,
-    mkdirs: Boolean = true,
-    format: CompressFormat = CompressFormat.JPEG,
-    quality: Int = 100
-) {
-    if (file.exists())
-        if (overwrite) {
-            if (!file.delete())
-                throw CouldNotDeleteFileException(file)
-        } else throw FileAlreadyExistsException(file)
-
-    if (mkdirs)
-        file.parentFile?.mkdirs()
-
-    if (!file.createNewFile())
-        throw CouldNotCreateNewFileException(file)
-
-    val bos = ByteArrayOutputStream()
-    compress(format, quality, bos)
-    val bitmapData = bos.toByteArray()
-
-    val fos = FileOutputStream(file)
-    fos.write(bitmapData)
-    fos.flush()
-    fos.close()
-}
 
 /**
  * Crops the Bitmap into a square image.
@@ -122,15 +71,6 @@ fun getBitmapFromUri(contentResolver: ContentResolver, uri: Uri): Bitmap? {
     parcelFileDescriptor.close()
     return image
 }
-
-/**
- * Resizes the Bitmap to the selected size. Note that this will set all the sides to the same size.
- * @author Arnau Mora
- * @since 20210604
- * @param size The desired width and height for the new image.
- * @return The resized [Bitmap].
- */
-fun Bitmap.resize(size: Int): Bitmap = resize(size, size)
 
 /**
  * Resizes the Bitmap to the selected size.

@@ -5,6 +5,7 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.net.Uri
@@ -34,6 +35,8 @@ fun toast(context: Context?, text: String) =
 @UiThread
 fun Fragment.toast(@StringRes text: Int) =
     context?.toast(text)
+
+class ContextUtils(base: Context) : ContextWrapper(base)
 
 fun Activity?.finishActivityWithResult(resultCode: Int, data: Intent?) =
     this?.also {

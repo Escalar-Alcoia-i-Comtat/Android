@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
 import android.app.Application
-import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.PutDocumentsRequest
 import androidx.appsearch.app.SetSchemaRequest
@@ -16,8 +15,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.data
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.data
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_DATA_DATE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_DATA_VERSION
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_SCHEMAS
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.firestore.FirebaseFirestoreException

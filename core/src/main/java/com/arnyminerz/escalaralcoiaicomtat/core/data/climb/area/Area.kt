@@ -124,16 +124,5 @@ class Area internal constructor(
             documentPath = SAMPLE_AREA_DOC_PATH,
             webUrl = SAMPLE_AREA_WEB_URL,
         )
-
-        /**
-         * Checks if [data] contains the valid data for creating an instance of [Area].
-         * @author Arnau Mora
-         * @since 20210422
-         * @param data The data to check.
-         * @return True if the [data] contents are valid, false otherwise.
-         */
-        fun validate(data: DocumentSnapshot): Boolean =
-            data.contains("displayName") && data.contains("created") && data.contains("image") &&
-                    data.contains("kmz")
     }
 }
