@@ -51,8 +51,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.PoppinsFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.DataClassItemViewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 
@@ -100,6 +103,7 @@ fun DataClassItem(
                         .withResultImageScale(DATACLASS_PREVIEW_SCALE)
                 ),
                 downloadState ?: DownloadStatus.UNKNOWN,
+                item.location,
                 downloadItem,
                 { showDownloadInfoDialog = true },
                 onClick,
@@ -201,6 +205,7 @@ private fun DownloadableDataClassItem(
     childrenCountLabel: String,
     image: Painter,
     downloadStatus: DownloadStatus,
+    location: LatLng?,
     onDownload: () -> Unit,
     onDownloadInfo: () -> Unit,
     onClick: () -> Unit,
@@ -290,10 +295,7 @@ private fun DownloadableDataClassItem(
                                     onDownloadInfo()
                                 DownloadStatus.NOT_DOWNLOADED, DownloadStatus.PARTIALLY ->
                                     onDownload()
-                                else -> toast(
-                                    context,
-                                    R.string.toast_error_internal
-                                )
+                                else -> toast(context, R.string.toast_error_internal)
                             }
                         },
                     ) {
@@ -308,23 +310,28 @@ private fun DownloadableDataClassItem(
                         )
                     }
                 }
-                Column(modifier = Modifier.weight(1f)) {
-                    Button(
-                        modifier = Modifier
-                            .padding(end = 8.dp, start = 4.dp)
-                            .fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(),
-                        onClick = { /*TODO*/ },
-                    ) {
-                        Icon(
-                            Icons.Rounded.Map,
-                            contentDescription = stringResource(R.string.action_view_map),
-                            modifier = Modifier.size(ButtonDefaults.IconSize)
-                        )
-                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                        Text(text = stringResource(R.string.action_view_map))
+                if (location != null)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Button(
+                            modifier = Modifier
+                                .padding(end = 8.dp, start = 4.dp)
+                                .fillMaxWidth(),
+                            colors = ButtonDefaults.outlinedButtonColors(),
+                            onClick = {
+                                location?.mapsIntent(markerTitle = displayName)?.let {
+                                    context.launch(it)
+                                }
+                            },
+                        ) {
+                            Icon(
+                                Icons.Rounded.Map,
+                                contentDescription = stringResource(R.string.action_view_map),
+                                modifier = Modifier.size(ButtonDefaults.IconSize)
+                            )
+                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                            Text(text = stringResource(R.string.action_view_map))
+                        }
                     }
-                }
             }
         }
     }
@@ -403,6 +410,7 @@ fun DownloadableDataClassItemPreview() {
         "3 sectors",
         painterResource(R.drawable.ic_tall_placeholder),
         DownloadStatus.NOT_DOWNLOADED,
+        null,
         {},
         {},
         {},
