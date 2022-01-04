@@ -318,9 +318,7 @@ private fun DownloadableDataClassItem(
                                 .fillMaxWidth(),
                             colors = ButtonDefaults.outlinedButtonColors(),
                             onClick = {
-                                location?.mapsIntent(markerTitle = displayName)?.let {
-                                    context.launch(it)
-                                }
+                                context.launch(location.mapsIntent(markerTitle = displayName))
                             },
                         ) {
                             Icon(
