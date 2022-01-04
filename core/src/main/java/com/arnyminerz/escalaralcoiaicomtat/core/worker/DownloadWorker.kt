@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.worker
+package com.arnyminerz.escalaralcoiaicomtat.core.worker
 
 import android.app.PendingIntent
 import android.content.Context
@@ -54,8 +54,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_FETCH_IMAG
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_MISSING_DATA
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.ERROR_STORE_IMAGE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.WORKER_TAG_DOWNLOAD
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.error
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.failure
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
