@@ -49,6 +49,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.PoppinsFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.DataClassItemViewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
@@ -86,6 +87,16 @@ fun DataClassItem(item: DataClassImpl, onClick: () -> Unit) {
             val downloadState by downloadStatus.observeAsState()
             var showDownloadInfoDialog by remember { mutableStateOf(false) }
 
+            val downloadItem: () -> Unit = {
+                viewModel.startDownloading(
+                    context,
+                    item.pin,
+                    item.documentPath,
+                    item.displayName,
+                    quality = DOWNLOAD_QUALITY_DEFAULT
+                )
+            }
+
             downloadState?.let { status ->
                 DownloadableDataClassItem(
                     item.displayName,
@@ -93,9 +104,7 @@ fun DataClassItem(item: DataClassImpl, onClick: () -> Unit) {
                     item.displayName,
                     imagePainter,
                     status,
-                    {
-                        // TODO: Start download
-                    },
+                    downloadItem,
                     { showDownloadInfoDialog = true },
                     onClick,
                 )
@@ -137,6 +146,12 @@ fun DataClassItem(item: DataClassImpl, onClick: () -> Unit) {
                         }
                     },
                     dismissButton = {
+                        if (downloadState == DownloadStatus.PARTIALLY)
+                            Button(onClick = { downloadItem() }) {
+                                Text(text = stringResource(R.string.action_download))
+                            }
+                    },
+                    confirmButton = {
                         Button(
                             onClick = { showDownloadInfoDialog = false },
                             colors = ButtonDefaults.textButtonColors(),
@@ -145,12 +160,6 @@ fun DataClassItem(item: DataClassImpl, onClick: () -> Unit) {
                                 text = stringResource(R.string.action_close),
                             )
                         }
-                    },
-                    confirmButton = {
-                        if (downloadState == DownloadStatus.PARTIALLY)
-                            Button(onClick = { /* TODO  */ }) {
-                                Text(text = stringResource(R.string.action_download))
-                            }
                     },
                 )
         } else
