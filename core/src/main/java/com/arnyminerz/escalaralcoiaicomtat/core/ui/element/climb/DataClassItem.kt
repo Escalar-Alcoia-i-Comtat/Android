@@ -117,12 +117,11 @@ private fun DownloadableDataClassItem(
     onClick: () -> Unit,
 ) {
     val context = LocalContext.current
-    val childrenCount by viewModel.childrenCounter(item).observeAsState()
 
     val downloadStatus = viewModel.addDownloadListener(item.pin) { _, _ ->
         // TODO: Download progress should be notified
     }
-    val downloadState by downloadStatus.observeAsState()
+    var isPartiallyDownloaded by remember { mutableStateOf(false) }
 
     var showDownloadInfoDialog by remember { mutableStateOf(false) }
 
@@ -162,6 +161,7 @@ private fun DownloadableDataClassItem(
                         .padding(start = 4.dp)
                         .weight(1f)
                 ) {
+                    val childrenCount by viewModel.childrenCounter(item).observeAsState()
                     Text(
                         text = item.displayName,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -208,6 +208,8 @@ private fun DownloadableDataClassItem(
                 verticalAlignment = Alignment.Bottom
             ) {
                 Column(modifier = Modifier.weight(1f)) {
+                    val downloadState by downloadStatus.observeAsState()
+                    isPartiallyDownloaded = downloadState?.partialDownload == true
                     Button(
                         // Enable button when not downloaded, but download status is known
                         enabled = downloadState != null && downloadState?.downloading != true && downloadState != DownloadStatus.UNKNOWN,
@@ -287,7 +289,7 @@ private fun DownloadableDataClassItem(
                             } ?: stringResource(R.string.status_loading)
                         )
                     )
-                    if (downloadState == DownloadStatus.PARTIALLY)
+                    if (isPartiallyDownloaded)
                         Text(
                             text = stringResource(
                                 R.string.dialog_downloaded_partially_msg,
@@ -297,7 +299,7 @@ private fun DownloadableDataClassItem(
                 }
             },
             dismissButton = {
-                if (downloadState == DownloadStatus.PARTIALLY)
+                if (isPartiallyDownloaded)
                     Button(onClick = { downloadItem() }) {
                         Text(text = stringResource(R.string.action_download))
                     }
@@ -328,7 +330,6 @@ private fun DownloadableDataClassItem(
  * @param viewModel The View Model for doing async tasks.
  * @param onClick What to do when clicked.
  */
-@ExperimentalCoilApi
 @Composable
 private fun NonDownloadableDataClassItem(
     item: DataClass<*, *>,
