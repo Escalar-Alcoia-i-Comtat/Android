@@ -38,7 +38,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.annotation.ExperimentalCoilApi
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
@@ -53,7 +52,6 @@ import timber.log.Timber
 
 @ExperimentalFoundationApi
 @Composable
-@OptIn(ExperimentalCoilApi::class)
 @ExperimentalMaterial3Api
 fun MainActivity.DataClassExplorer(
     rootNavigator: NavController,

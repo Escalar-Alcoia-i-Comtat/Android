@@ -39,7 +39,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.annotation.ExperimentalCoilApi
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
@@ -55,7 +54,6 @@ import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 
 @Composable
-@ExperimentalCoilApi
 fun DataClassItem(
     item: DataClassImpl,
     storage: FirebaseStorage,
