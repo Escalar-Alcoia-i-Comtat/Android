@@ -3,7 +3,9 @@ package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
@@ -27,6 +29,8 @@ class DataClassItemViewModel(
 
     private val downloadingStatusListeners =
         mutableMapOf<String, (status: DownloadStatus, workInfo: WorkInfo?) -> Unit>()
+
+    val downloadStatuses = mutableMapOf<String, MutableState<DownloadStatus>>()
 
     fun startDownloading(
         context: Context,
@@ -61,10 +65,12 @@ class DataClassItemViewModel(
     fun addDownloadListener(
         pin: String,
         callback: (status: DownloadStatus, workInfo: WorkInfo?) -> Unit
-    ): MutableLiveData<DownloadStatus> {
-        val mutableLiveData = MutableLiveData<DownloadStatus>()
+    ) {
+        val downloadStatus = downloadStatuses.getOrPut(pin) {
+            mutableStateOf(DownloadStatus.UNKNOWN)
+        }
         downloadingStatusListeners[pin] = { status, workInfo ->
-            mutableLiveData.postValue(status)
+            downloadStatus.value = status
             callback(status, workInfo)
         }
         viewModelScope.launch {
@@ -88,7 +94,6 @@ class DataClassItemViewModel(
 
             downloadingStatusListeners[pin]?.invoke(status, workInfo)
         }
-        return mutableLiveData
     }
 
     fun downloadInfo(
