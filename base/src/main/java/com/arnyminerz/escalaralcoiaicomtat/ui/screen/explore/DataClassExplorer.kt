@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -60,9 +61,7 @@ fun MainActivity.DataClassExplorer(
     arguments: Bundle,
 ) {
     val context = LocalContext.current
-    val loading by exploreViewModel.loadingDataClasses.observeAsState()
-    val parentDataClass by exploreViewModel.parentDataClass.observeAsState()
-    val hasInternet by this.hasInternet.observeAsState()
+    var showErrorCard by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -85,6 +84,7 @@ fun MainActivity.DataClassExplorer(
                     }
                 },
                 actions = {
+                    val hasInternet by hasInternet.observeAsState()
                     if (hasInternet == false)
                         IconButton(
                             onClick = { showNetworkTooltip.value = true },
@@ -116,6 +116,7 @@ fun MainActivity.DataClassExplorer(
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 title = {
+                    val parentDataClass by exploreViewModel.parentDataClass.observeAsState()
                     Text(
                         text = parentDataClass?.displayName
                             ?: stringResource(R.string.status_loading),
@@ -125,35 +126,47 @@ fun MainActivity.DataClassExplorer(
             )
         }
     ) { padding ->
-        Column(
+        val items by exploreViewModel.dataClasses.observeAsState()
+        LazyColumn(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxWidth()
         ) {
             // The loading indicator
-            AnimatedVisibility(
-                visible = loading != false,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally),
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                )
-            }
-
-            // The items
-            AnimatedVisibility(
-                visible = loading == false,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                LazyColumn {
-                    items(exploreViewModel.dataClasses) { dataClass ->
-                        DataClassItem(dataClass, storage) {
-                            exploreViewModel.notifyNavigation()
-                            rootNavigator.navigate(dataClass.documentPath)
-                        }
+            item {
+                AnimatedVisibility(visible = items?.isNotEmpty() != true) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                        )
                     }
+                }
+            }
+            // The error card, just in case something goes wrong
+            item {
+                AnimatedVisibility(visible = showErrorCard) {
+                    Card(
+                        backgroundColor = MaterialTheme.colorScheme.errorContainer,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = stringResource(R.string.toast_error_internal),
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                }
+            }
+            // The items
+            items(items ?: emptyList()) { dataClass ->
+                DataClassItem(dataClass, storage) {
+                    exploreViewModel.notifyNavigation()
+                    rootNavigator.navigate(dataClass.documentPath)
                 }
             }
         }
@@ -179,17 +192,6 @@ fun MainActivity.DataClassExplorer(
     else {
         // Throw an error, invalid arguments passed
         Timber.e("Invalid arguments passed: $arguments")
-        Card(
-            backgroundColor = MaterialTheme.colorScheme.errorContainer,
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = stringResource(R.string.toast_error_internal),
-                color = MaterialTheme.colorScheme.onErrorContainer,
-                modifier = Modifier.padding(8.dp)
-            )
-        }
+        showErrorCard = true
     }
 }
