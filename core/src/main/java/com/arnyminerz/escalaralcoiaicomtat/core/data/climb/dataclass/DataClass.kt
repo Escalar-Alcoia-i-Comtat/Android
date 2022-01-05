@@ -32,7 +32,6 @@ import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
@@ -83,8 +82,6 @@ import com.google.firebase.storage.StorageReference
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -745,37 +742,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     @WorkerThread
     fun downloadWorkInfoLiveData(context: Context): LiveData<List<WorkInfo>> =
         downloadWorkInfoLiveData(context, pin)
-
-    /**
-     * Generates a list of [DownloadedSection].
-     * @author Arnau Mora
-     * @since 20210412
-     * @param context The currently calling [Context].
-     * @param searchSession The search session for fetching data.
-     * @param showNonDownloaded If the non-downloaded sections should be added.
-     * @param progressListener A listener for the progress of the load.
-     */
-    @WorkerThread
-    @Deprecated("Should use Jetpack Compose", level = DeprecationLevel.WARNING)
-    suspend fun downloadedSectionList(
-        context: Context,
-        searchSession: AppSearchSession,
-        showNonDownloaded: Boolean,
-        progressListener: (suspend (current: Int, max: Int) -> Unit)? = null
-    ): Flow<DownloadedSection> = flow {
-        Timber.v("Getting downloaded sections...")
-        val downloadedSectionsList = arrayListOf<DownloadedSection>()
-        val children = getChildren(searchSession)
-        for ((c, child) in children.withIndex())
-            (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
-                val downloadState = dataClass.downloadStatus(context, searchSession)
-                val downloadStatus = downloadState.first
-                progressListener?.invoke(c, children.size)
-                if (showNonDownloaded || downloadStatus.downloaded || downloadStatus.partialDownload)
-                    emit(DownloadedSection(dataClass))
-            }
-        Timber.v("Got ${downloadedSectionsList.size} sections.")
-    }
 
     /**
      * Downloads the image data of the DataClass.
