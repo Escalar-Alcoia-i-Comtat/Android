@@ -14,23 +14,15 @@ import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.await
-import coil.ImageLoader
-import coil.request.ImageRequest
-import coil.transform.RoundedCornersTransformation
-import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
@@ -42,7 +34,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.CouldNotCreateDynamicLinkException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
-import com.arnyminerz.escalaralcoiaicomtat.core.loader.StorageMapper
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_AREA_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_SECTOR_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_ZONE_META
@@ -68,6 +59,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
+import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
+import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
@@ -79,7 +72,7 @@ import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.StorageReference
-import com.skydoves.landscapist.coil.CoilImage
+import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -983,36 +976,19 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             else -> storage.getReferenceFromUrl(imageReferenceUrl)
         }
 
-        CoilImage(
-            imageRequest = ImageRequest.Builder(context)
-                .data(image)
-                .transformations(
-                    RoundedCornersTransformation(4f),
-                )
-                .placeholder(displayOptions.placeholderDrawable)
-                .error(displayOptions.errorPlaceholderDrawable)
-                .build(),
-            imageLoader = {
-                ImageLoader.Builder(context)
-                    .componentRegistry {
-                        add(StorageMapper())
-                    }
-                    .build()
+        GlideImage(
+            imageModel = image,
+            requestOptions = {
+                RequestOptions
+                    .placeholderOf(displayOptions.placeholderDrawable)
+                    .error(displayOptions.placeholderDrawable)
+                    .downsample(DownsampleStrategy.CENTER_OUTSIDE)
+                    .encodeQuality(imageQuality)
+                    .sizeMultiplier(imageLoadParameters?.resultImageScale ?: 1f)
             },
             contentScale = ContentScale.Crop,
             alignment = Alignment.Center,
             modifier = modifier,
-            loading = {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            },
-            failure = {
-                Text(
-                    text = stringResource(R.string.toast_error_load_image),
-                    color = MaterialTheme.colorScheme.onErrorContainer
-                )
-            },
         )
     }
 
