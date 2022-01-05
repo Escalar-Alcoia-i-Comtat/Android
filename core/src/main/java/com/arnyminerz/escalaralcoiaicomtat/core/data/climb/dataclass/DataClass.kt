@@ -14,6 +14,7 @@ import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,6 +73,7 @@ import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.StorageReference
+import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -976,6 +978,38 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             else -> storage.getReferenceFromUrl(imageReferenceUrl)
         }
 
+        if (image is StorageReference)
+            doAsync {
+                Timber.i("$this > Caching image...")
+                Timber.v("$this > Getting stream...")
+                val snapshot = storage.getReferenceFromUrl(imageReferenceUrl)
+                    .stream
+                    .await()
+                Timber.v("$this > Stream loaded. Decoding...")
+                val stream = snapshot.stream
+                val bitmap: Bitmap? = BitmapFactory.decodeStream(
+                    stream,
+                    null,
+                    BitmapFactory.Options().apply {
+                        inSampleSize = (1 / scale).toInt()
+                    }
+                )
+                if (bitmap != null) {
+                    Timber.v("$this > Compressing image...")
+                    val baos = ByteArrayOutputStream()
+                    val compressedBitmap: Boolean =
+                        bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
+                    if (!compressedBitmap) {
+                        Timber.e("$this > Could not compress image!")
+                        throw ArithmeticException("Could not compress image for $this.")
+                    } else {
+                        Timber.v("$this > Storing image...")
+                        baos.writeTo(cacheImage.outputStream())
+                        Timber.v("$this > Image stored.")
+                    }
+                }
+            }
+
         GlideImage(
             imageModel = image,
             requestOptions = {
@@ -986,6 +1020,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     .encodeQuality(imageQuality)
                     .sizeMultiplier(imageLoadParameters?.resultImageScale ?: 1f)
             },
+            shimmerParams = ShimmerParams(
+                baseColor = MaterialTheme.colorScheme.surfaceVariant,
+                highlightColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                durationMillis = 350,
+                dropOff = 0.65f,
+                tilt = 20f
+            ),
             contentScale = ContentScale.Crop,
             alignment = Alignment.Center,
             modifier = modifier,
