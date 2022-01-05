@@ -23,10 +23,21 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
+/**
+ * An Activity for displaying the contents of a Data Class.
+ * Requires [EXTRA_NAMESPACE] and [EXTRA_OBJECT_ID].
+ * @author Arnau Mora
+ * @since 20220105
+ */
 class DataClassActivity : NetworkAwareComponentActivity() {
-    internal val exploreViewModel by viewModels<ExploreViewModel>(factoryProducer = {
-        ExploreViewModel.Factory(application)
-    })
+    /**
+     * The View Model for doing async tasks.
+     * @author Arnau Mora
+     * @since 20220105
+     */
+    internal val exploreViewModel by viewModels<ExploreViewModel>(
+        factoryProducer = { ExploreViewModel.Factory(application) }
+    )
 
     /**
      * Tells whether or not the device is connected to the Internet.
@@ -35,6 +46,11 @@ class DataClassActivity : NetworkAwareComponentActivity() {
      */
     internal val hasInternet = MutableLiveData<Boolean>()
 
+    /**
+     * The Firebase Storage instance to fetch files from the server.
+     * @author Arnau Mora
+     * @since 20220105
+     */
     val storage: FirebaseStorage = Firebase.storage
 
     /**
