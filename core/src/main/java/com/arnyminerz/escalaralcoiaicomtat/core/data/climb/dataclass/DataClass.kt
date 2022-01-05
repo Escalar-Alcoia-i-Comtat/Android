@@ -14,7 +14,15 @@ import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -24,6 +32,7 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
+import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
@@ -73,6 +82,7 @@ import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.StorageReference
+import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -991,7 +1001,60 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     fun hasStorageUrl() = downloadUrl != null
 
     @Composable
+    fun Image(
+        storage: FirebaseStorage,
+        modifier: Modifier = Modifier,
+        imageLoadParameters: ImageLoadParameters? = null
+    ) {
+        val context = LocalContext.current
+        val downloadedImageFile = imageFile(context)
+        val scale = imageLoadParameters?.resultImageScale ?: 1f
+        val cacheImage = cacheImageFile(context, "scale$scale")
+
+        // If image is downloaded, load it
+        val image = when {
+            downloadedImageFile.exists() -> downloadedImageFile
+            cacheImage.exists() -> cacheImage
+            // TODO: No internet connection errors should be caught
+            else -> storage.getReferenceFromUrl(imageReferenceUrl)
+        }
+
+        CoilImage(
+            imageRequest = ImageRequest.Builder(context)
+                .data(image)
+                .transformations(
+                    RoundedCornersTransformation(4f),
+                )
+                .placeholder(displayOptions.placeholderDrawable)
+                .error(displayOptions.errorPlaceholderDrawable)
+                .build(),
+            imageLoader = {
+                ImageLoader.Builder(context)
+                    .componentRegistry {
+                        add(StorageMapper())
+                    }
+                    .build()
+            },
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.Center,
+            modifier = modifier,
+            loading = {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            },
+            failure = {
+                Text(
+                    text = stringResource(R.string.toast_error_load_image),
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+            },
+        )
+    }
+
+    @Composable
     @ExperimentalCoilApi
+    @Deprecated("Use Image.")
     fun rememberImagePainter(
         context: Context,
         storage: FirebaseStorage,
