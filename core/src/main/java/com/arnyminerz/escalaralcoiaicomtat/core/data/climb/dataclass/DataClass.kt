@@ -28,8 +28,6 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.await
 import coil.ImageLoader
-import coil.annotation.ExperimentalCoilApi
-import coil.compose.ImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.arnyminerz.escalaralcoiaicomtat.core.R
@@ -1049,79 +1047,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
             },
-        )
-    }
-
-    @Composable
-    @ExperimentalCoilApi
-    @Deprecated("Use Image.")
-    fun rememberImagePainter(
-        context: Context,
-        storage: FirebaseStorage,
-        imageLoadParameters: ImageLoadParameters? = null,
-    ): ImagePainter {
-        val downloadedImageFile = imageFile(context)
-        val scale = imageLoadParameters?.resultImageScale ?: 1f
-        val cacheImage = cacheImageFile(context, "scale$scale")
-
-        // If image is downloaded, load it
-        val image = when {
-            downloadedImageFile.exists() -> downloadedImageFile
-            cacheImage.exists() -> cacheImage
-            // TODO: No internet connection errors should be caught
-            else -> storage.getReferenceFromUrl(imageReferenceUrl)
-        }
-
-        return coil.compose.rememberImagePainter(
-            request = ImageRequest.Builder(context)
-                .data(image)
-                .transformations(
-                    RoundedCornersTransformation(4f),
-                )
-                .placeholder(displayOptions.placeholderDrawable)
-                .error(displayOptions.errorPlaceholderDrawable)
-                .build(),
-            imageLoader = ImageLoader.Builder(context)
-                .componentRegistry {
-                    add(StorageMapper())
-                }
-                .build(),
-            onExecute = { _, _ ->
-                if (!cacheImage.exists())
-                    doAsync {
-                        Timber.i("$this > Storing $pin into cache...")
-                        Timber.v("$this > Getting stream...")
-                        val snapshot = storage.getReferenceFromUrl(imageReferenceUrl)
-                            .stream
-                            .await()
-                        Timber.v("$this > Stream loaded. Decoding...")
-                        val stream = snapshot.stream
-                        val bitmap: Bitmap? = BitmapFactory.decodeStream(
-                            stream,
-                            null,
-                            BitmapFactory.Options().apply {
-                                inSampleSize = (1 / scale).toInt()
-                            }
-                        )
-                        if (bitmap != null) {
-                            Timber.v("$this > Compressing image...")
-                            val baos = ByteArrayOutputStream()
-                            val compressedBitmap: Boolean =
-                                bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
-                            if (!compressedBitmap) {
-                                Timber.e("$this > Could not compress image!")
-                                throw ArithmeticException("Could not compress image for $this.")
-                            } else {
-                                Timber.v("$this > Storing image...")
-                                baos.writeTo(cacheImage.outputStream())
-                                Timber.v("$this > Image stored.")
-                            }
-                        }
-                    }
-                else
-                    Timber.d("Won't cache image since it's already stored.")
-                true
-            }
         )
     }
 
