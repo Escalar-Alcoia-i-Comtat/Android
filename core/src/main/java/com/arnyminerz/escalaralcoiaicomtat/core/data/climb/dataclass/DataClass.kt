@@ -1068,6 +1068,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     @WorkerThread
     @Suppress("BlockingMethodInNonBlockingContext")
+    @Deprecated("Use Jetpack Compose methods.")
     @Throws(
         StorageException::class,
         IOException::class,
