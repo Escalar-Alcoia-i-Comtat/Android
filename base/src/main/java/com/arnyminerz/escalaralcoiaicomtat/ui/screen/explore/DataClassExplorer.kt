@@ -55,8 +55,6 @@ import com.google.firebase.storage.FirebaseStorage
 @ExperimentalBadgeUtils
 fun DataClassActivity.DataClassExplorer(
     storage: FirebaseStorage,
-    namespace: String,
-    objectId: String,
 ) {
     val context = LocalContext.current
 
@@ -67,11 +65,7 @@ fun DataClassActivity.DataClassExplorer(
             CenterAlignedTopAppBar(
                 navigationIcon = {
                     IconButton(
-                        onClick = {
-                            // TODO: Check if this works
-                            exploreViewModel.notifyNavigation()
-                            onBackPressed()
-                        }
+                        onClick = { onBackPressed() }
                     ) {
                         Image(
                             Icons.Rounded.ChevronLeft,

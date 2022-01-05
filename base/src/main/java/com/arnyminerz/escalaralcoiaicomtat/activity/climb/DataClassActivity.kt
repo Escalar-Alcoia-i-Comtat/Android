@@ -36,23 +36,37 @@ class DataClassActivity : NetworkAwareComponentActivity() {
 
     val storage: FirebaseStorage = Firebase.storage
 
+    /**
+     * The namespace of the displaying Data Class.
+     * @author Arnau Mora
+     * @since 20220105
+     */
+    internal lateinit var namespace: String
+
+    /**
+     * The object id of the displaying Data Class.
+     * @author Arnau Mora
+     * @since 20220105
+     */
+    internal lateinit var objectId: String
+
     @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
     @ExperimentalBadgeUtils
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val namespace = intent.getExtra(EXTRA_NAMESPACE) ?: run {
+        namespace = intent.getExtra(EXTRA_NAMESPACE) ?: run {
             finishActivity(REQUEST_CODE_ERROR_NO_NAMESPACE)
             return
         }
-        val objectId = intent.getExtra(EXTRA_OBJECT_ID) ?: run {
+        objectId = intent.getExtra(EXTRA_OBJECT_ID) ?: run {
             finishActivity(REQUEST_CODE_ERROR_NO_OBJECT_ID)
             return
         }
 
         setContent {
             AppTheme {
-                DataClassExplorer(storage, namespace, objectId)
+                DataClassExplorer(storage)
             }
         }
     }
