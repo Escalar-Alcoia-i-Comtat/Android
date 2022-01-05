@@ -50,7 +50,9 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         }
 
         setContent {
-            DataClassExplorer(storage, namespace, objectId)
+            AppTheme {
+                DataClassExplorer(storage, namespace, objectId)
+            }
         }
     }
 
