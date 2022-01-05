@@ -114,7 +114,7 @@ fun MainActivity.DataClassExplorer(
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 title = {
-                    val parentDataClass by exploreViewModel.parentDataClass.observeAsState()
+                    val parentDataClass by remember { exploreViewModel.parentDataClass }
                     Text(
                         text = parentDataClass?.displayName
                             ?: stringResource(R.string.status_loading),
@@ -124,7 +124,7 @@ fun MainActivity.DataClassExplorer(
             )
         }
     ) { padding ->
-        val items by exploreViewModel.dataClasses.observeAsState()
+        val items by remember { exploreViewModel.dataClasses }
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
@@ -132,7 +132,7 @@ fun MainActivity.DataClassExplorer(
         ) {
             // The loading indicator
             item {
-                AnimatedVisibility(visible = items?.isNotEmpty() != true) {
+                AnimatedVisibility(visible = items.isEmpty()) {
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -161,7 +161,7 @@ fun MainActivity.DataClassExplorer(
                 }
             }
             // The items
-            items(items ?: emptyList()) { dataClass ->
+            items(items) { dataClass ->
                 DataClassItem(dataClass, storage) {
                     exploreViewModel.notifyNavigation()
                     rootNavigator.navigate(dataClass.documentPath)

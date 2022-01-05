@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main
 
 import android.app.Application
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -31,14 +32,14 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
      * @author Arnau Mora
      * @since 20220102
      */
-    val dataClasses = MutableLiveData<List<DataClassImpl>>()
+    val dataClasses = mutableStateOf<List<DataClassImpl>>(emptyList())
 
     /**
      * The DataClass where [dataClasses] are stored.
      * @author Arnau Mora
      * @since 20220102
      */
-    val parentDataClass = MutableLiveData<DataClass<*, *>?>()
+    val parentDataClass = mutableStateOf<DataClass<*, *>?>(null)
 
     /**
      * Serves as a cache of the loaded areas so the map screen can access them.
@@ -82,10 +83,10 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             } ?: run {
                 throw ClassNotFoundException("The dataclass $namespace::$objectId could not be found.")
             }
-            parentDataClass.postValue(dataClass)
+            parentDataClass.value = dataClass
             val children = dataClass.getChildren(app.searchSession)
             newDataClasses.addAll(children)
-            dataClasses.postValue(newDataClasses)
+            dataClasses.value = newDataClasses
         }
     }
 
@@ -96,7 +97,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
      */
     fun notifyNavigation() {
         parentDataClass.value = null
-        dataClasses.postValue(listOf())
+        dataClasses.value = emptyList()
     }
 
     class Factory(
