@@ -12,9 +12,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_NAMESPACE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_OBJECT_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.storage.FirebaseStorage
 import timber.log.Timber
@@ -22,7 +26,7 @@ import timber.log.Timber
 @Composable
 @ExperimentalBadgeUtils
 @OptIn(ExperimentalMaterial3Api::class)
-fun MainActivity.ExploreScreen(rootNavController: NavController, storage: FirebaseStorage) {
+fun MainActivity.ExploreScreen(storage: FirebaseStorage) {
     // TODO: Map and search bar
     val areas by exploreViewModel.loadAreas().observeAsState()
 
@@ -43,7 +47,10 @@ fun MainActivity.ExploreScreen(rootNavController: NavController, storage: Fireba
         items(areas ?: listOf()) { area ->
             Timber.d("Displaying $area...")
             DataClassItem(area, storage) {
-                rootNavController.navigate(area.documentPath)
+                launch(DataClassActivity::class.java) {
+                    putExtra(EXTRA_OBJECT_ID, area.objectId)
+                    putExtra(EXTRA_NAMESPACE, area.namespace)
+                }
             }
         }
     }
