@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -118,9 +117,6 @@ private fun DownloadableDataClassItem(
 ) {
     val context = LocalContext.current
 
-    val downloadStatus = viewModel.addDownloadListener(item.pin) { _, _ ->
-        // TODO: Download progress should be notified
-    }
     var isPartiallyDownloaded by remember { mutableStateOf(false) }
 
     var showDownloadInfoDialog by remember { mutableStateOf(false) }
@@ -208,11 +204,15 @@ private fun DownloadableDataClassItem(
                 verticalAlignment = Alignment.Bottom
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    val downloadState by downloadStatus.observeAsState()
-                    isPartiallyDownloaded = downloadState?.partialDownload == true
+                    viewModel.addDownloadListener(item.pin) { _, _ ->
+                        // TODO: Download progress should be notified
+                    }
+
+                    val downloadState by remember { viewModel.downloadStatuses[item.pin]!! }
+                    isPartiallyDownloaded = downloadState.partialDownload == true
                     Button(
                         // Enable button when not downloaded, but download status is known
-                        enabled = downloadState != null && downloadState?.downloading != true && downloadState != DownloadStatus.UNKNOWN,
+                        enabled = !downloadState.downloading && downloadState != DownloadStatus.UNKNOWN,
                         modifier = Modifier
                             .padding(start = 8.dp, end = 4.dp)
                             .fillMaxWidth(),
@@ -226,14 +226,13 @@ private fun DownloadableDataClassItem(
                         },
                     ) {
                         Icon(
-                            downloadState?.getActionIcon() ?: Icons.Rounded.Close,
+                            downloadState.getActionIcon(),
                             contentDescription = stringResource(R.string.action_download),
                             modifier = Modifier.size(ButtonDefaults.IconSize)
                         )
                         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                         Text(
-                            text = downloadState?.getText()
-                                ?: stringResource(R.string.status_loading)
+                            text = downloadState.getText()
                         )
                     }
                 }
