@@ -12,6 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_NAMESPACE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_OBJECT_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_NAMESPACE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_OBJECT_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore.DataClassExplorer
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
