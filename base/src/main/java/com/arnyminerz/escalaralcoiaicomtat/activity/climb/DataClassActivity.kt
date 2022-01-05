@@ -14,6 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_NAM
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_OBJECT_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.put
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore.DataClassExplorer
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
 import com.google.android.material.badge.ExperimentalBadgeUtils
@@ -55,20 +56,29 @@ class DataClassActivity : NetworkAwareComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        namespace = intent.getExtra(EXTRA_NAMESPACE) ?: run {
-            finishActivity(REQUEST_CODE_ERROR_NO_NAMESPACE)
-            return
-        }
-        objectId = intent.getExtra(EXTRA_OBJECT_ID) ?: run {
-            finishActivity(REQUEST_CODE_ERROR_NO_OBJECT_ID)
-            return
-        }
+        namespace = intent.getExtra(EXTRA_NAMESPACE)
+            ?: savedInstanceState?.getExtra(EXTRA_NAMESPACE) ?: run {
+                finishActivity(REQUEST_CODE_ERROR_NO_NAMESPACE)
+                return
+            }
+        objectId = intent.getExtra(EXTRA_OBJECT_ID)
+            ?: savedInstanceState?.getExtra(EXTRA_OBJECT_ID) ?: run {
+                finishActivity(REQUEST_CODE_ERROR_NO_OBJECT_ID)
+                return
+            }
 
         setContent {
             AppTheme {
                 DataClassExplorer(storage)
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.put(EXTRA_NAMESPACE, namespace)
+        outState.put(EXTRA_OBJECT_ID, objectId)
+
+        super.onSaveInstanceState(outState)
     }
 
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
