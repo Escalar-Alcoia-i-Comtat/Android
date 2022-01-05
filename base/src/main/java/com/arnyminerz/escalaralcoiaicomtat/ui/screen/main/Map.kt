@@ -90,10 +90,9 @@ fun MainActivity.MapScreen() {
             bottomDialogWebUrl
         )
 
-        if (googleMap != null && exploreViewModel.loadedAreas.value) {
-            for (area in exploreViewModel.areas)
+        if (googleMap != null && exploreViewModel.lastAreas.isNotEmpty())
+            for (area in exploreViewModel.lastAreas)
                 mapViewModel.loadGoogleMap(googleMap!!, area)
-        }
     }
     mapViewModel.locations.observe(this as LifecycleOwner) { locations ->
         try {

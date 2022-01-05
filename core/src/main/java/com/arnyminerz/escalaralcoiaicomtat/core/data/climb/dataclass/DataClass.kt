@@ -14,18 +14,17 @@ import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.await
-import coil.ImageLoader
-import coil.annotation.ExperimentalCoilApi
-import coil.compose.ImagePainter
-import coil.request.ImageRequest
-import coil.transform.RoundedCornersTransformation
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DownloadedSection
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
@@ -36,7 +35,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.CouldNotCreateDynamicLinkException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
-import com.arnyminerz.escalaralcoiaicomtat.core.loader.StorageMapper
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_AREA_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_SECTOR_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_ZONE_META
@@ -62,6 +60,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
+import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
+import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
@@ -73,10 +73,10 @@ import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.StorageReference
+import com.skydoves.landscapist.ShimmerParams
+import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -739,37 +739,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         downloadWorkInfoLiveData(context, pin)
 
     /**
-     * Generates a list of [DownloadedSection].
-     * @author Arnau Mora
-     * @since 20210412
-     * @param context The currently calling [Context].
-     * @param searchSession The search session for fetching data.
-     * @param showNonDownloaded If the non-downloaded sections should be added.
-     * @param progressListener A listener for the progress of the load.
-     */
-    @WorkerThread
-    @Deprecated("Should use Jetpack Compose", level = DeprecationLevel.WARNING)
-    suspend fun downloadedSectionList(
-        context: Context,
-        searchSession: AppSearchSession,
-        showNonDownloaded: Boolean,
-        progressListener: (suspend (current: Int, max: Int) -> Unit)? = null
-    ): Flow<DownloadedSection> = flow {
-        Timber.v("Getting downloaded sections...")
-        val downloadedSectionsList = arrayListOf<DownloadedSection>()
-        val children = getChildren(searchSession)
-        for ((c, child) in children.withIndex())
-            (child as? DataClass<*, *>)?.let { dataClass -> // Paths shouldn't be included
-                val downloadState = dataClass.downloadStatus(context, searchSession)
-                val downloadStatus = downloadState.first
-                progressListener?.invoke(c, children.size)
-                if (showNonDownloaded || downloadStatus.downloaded || downloadStatus.partialDownload)
-                    emit(DownloadedSection(dataClass))
-            }
-        Timber.v("Got ${downloadedSectionsList.size} sections.")
-    }
-
-    /**
      * Downloads the image data of the DataClass.
      * @author Arnau Mora
      * @since 20210313
@@ -991,12 +960,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     fun hasStorageUrl() = downloadUrl != null
 
     @Composable
-    @ExperimentalCoilApi
-    fun rememberImagePainter(
-        context: Context,
+    fun Image(
         storage: FirebaseStorage,
-        imageLoadParameters: ImageLoadParameters? = null,
-    ): ImagePainter {
+        modifier: Modifier = Modifier,
+        imageLoadParameters: ImageLoadParameters? = null
+    ) {
+        val context = LocalContext.current
         val downloadedImageFile = imageFile(context)
         val scale = imageLoadParameters?.resultImageScale ?: 1f
         val cacheImage = cacheImageFile(context, "scale$scale")
@@ -1009,56 +978,58 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             else -> storage.getReferenceFromUrl(imageReferenceUrl)
         }
 
-        return coil.compose.rememberImagePainter(
-            request = ImageRequest.Builder(context)
-                .data(image)
-                .transformations(
-                    RoundedCornersTransformation(4f),
-                )
-                .placeholder(displayOptions.placeholderDrawable)
-                .error(displayOptions.errorPlaceholderDrawable)
-                .build(),
-            imageLoader = ImageLoader.Builder(context)
-                .componentRegistry {
-                    add(StorageMapper())
-                }
-                .build(),
-            onExecute = { _, _ ->
-                if (!cacheImage.exists())
-                    doAsync {
-                        Timber.i("$this > Storing $pin into cache...")
-                        Timber.v("$this > Getting stream...")
-                        val snapshot = storage.getReferenceFromUrl(imageReferenceUrl)
-                            .stream
-                            .await()
-                        Timber.v("$this > Stream loaded. Decoding...")
-                        val stream = snapshot.stream
-                        val bitmap: Bitmap? = BitmapFactory.decodeStream(
-                            stream,
-                            null,
-                            BitmapFactory.Options().apply {
-                                inSampleSize = (1 / scale).toInt()
-                            }
-                        )
-                        if (bitmap != null) {
-                            Timber.v("$this > Compressing image...")
-                            val baos = ByteArrayOutputStream()
-                            val compressedBitmap: Boolean =
-                                bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
-                            if (!compressedBitmap) {
-                                Timber.e("$this > Could not compress image!")
-                                throw ArithmeticException("Could not compress image for $this.")
-                            } else {
-                                Timber.v("$this > Storing image...")
-                                baos.writeTo(cacheImage.outputStream())
-                                Timber.v("$this > Image stored.")
-                            }
-                        }
+        if (image is StorageReference)
+            doAsync {
+                Timber.i("$this > Caching image...")
+                Timber.v("$this > Getting stream...")
+                val snapshot = storage.getReferenceFromUrl(imageReferenceUrl)
+                    .stream
+                    .await()
+                Timber.v("$this > Stream loaded. Decoding...")
+                val stream = snapshot.stream
+                val bitmap: Bitmap? = BitmapFactory.decodeStream(
+                    stream,
+                    null,
+                    BitmapFactory.Options().apply {
+                        inSampleSize = (1 / scale).toInt()
                     }
-                else
-                    Timber.d("Won't cache image since it's already stored.")
-                true
+                )
+                if (bitmap != null) {
+                    Timber.v("$this > Compressing image...")
+                    val baos = ByteArrayOutputStream()
+                    val compressedBitmap: Boolean =
+                        bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
+                    if (!compressedBitmap) {
+                        Timber.e("$this > Could not compress image!")
+                        throw ArithmeticException("Could not compress image for $this.")
+                    } else {
+                        Timber.v("$this > Storing image...")
+                        baos.writeTo(cacheImage.outputStream())
+                        Timber.v("$this > Image stored.")
+                    }
+                }
             }
+
+        GlideImage(
+            imageModel = image,
+            requestOptions = {
+                RequestOptions
+                    .placeholderOf(displayOptions.placeholderDrawable)
+                    .error(displayOptions.placeholderDrawable)
+                    .downsample(DownsampleStrategy.CENTER_OUTSIDE)
+                    .encodeQuality(imageQuality)
+                    .sizeMultiplier(imageLoadParameters?.resultImageScale ?: 1f)
+            },
+            shimmerParams = ShimmerParams(
+                baseColor = MaterialTheme.colorScheme.surfaceVariant,
+                highlightColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                durationMillis = 350,
+                dropOff = 0.65f,
+                tilt = 20f
+            ),
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.Center,
+            modifier = modifier,
         )
     }
 
@@ -1080,6 +1051,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     @WorkerThread
     @Suppress("BlockingMethodInNonBlockingContext")
+    @Deprecated("Use Jetpack Compose methods.")
     @Throws(
         StorageException::class,
         IOException::class,

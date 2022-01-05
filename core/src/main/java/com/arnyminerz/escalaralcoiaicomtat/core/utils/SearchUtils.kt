@@ -72,7 +72,7 @@ suspend fun AppSearchSession.getAreas(): List<Area> {
                 val area = areaData.data()
                 add(area)
             }
-        }
+        }.sortedBy { it.displayName }
     }
     return areas
 }

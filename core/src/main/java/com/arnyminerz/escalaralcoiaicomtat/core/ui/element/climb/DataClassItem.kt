@@ -31,22 +31,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.annotation.ExperimentalCoilApi
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATACLASS_PREVIEW_SCALE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.PoppinsFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.DataClassItemViewModel
@@ -54,13 +49,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
-import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 
 @Composable
-@ExperimentalCoilApi
 fun DataClassItem(
     item: DataClassImpl,
     storage: FirebaseStorage,
@@ -73,108 +65,19 @@ fun DataClassItem(
                 context.applicationContext as Application
             )
         )
-        val childrenCount by viewModel.childrenCounter(item).observeAsState()
-        val painter = item.rememberImagePainter(
-            context,
-            storage,
-            ImageLoadParameters()
-                .withResultImageScale(DATACLASS_PREVIEW_SCALE)
-        )
 
-        if (item.displayOptions.downloadable) {
-            val downloadStatus = viewModel.addDownloadListener(item.pin) { _, _ ->
-                // TODO: Download progress should be notified
-            }
-
-            val downloadState by downloadStatus.observeAsState()
-            var showDownloadInfoDialog by remember { mutableStateOf(false) }
-
-            val downloadItem: () -> Unit = {
-                viewModel.startDownloading(
-                    context,
-                    item.pin,
-                    item.documentPath,
-                    item.displayName,
-                    quality = DOWNLOAD_QUALITY_DEFAULT
-                )
-            }
-
+        if (item.displayOptions.downloadable)
             DownloadableDataClassItem(
-                item.displayName,
-                childrenCount?.let {
-                    stringResource(R.string.downloads_sectors_title, it)
-                } ?: stringResource(R.string.status_loading),
-                painter,
-                downloadState ?: DownloadStatus.UNKNOWN,
-                item.location,
-                downloadItem,
-                { showDownloadInfoDialog = true },
+                item,
+                storage,
+                viewModel,
                 onClick,
             )
-
-            if (showDownloadInfoDialog)
-                AlertDialog(
-                    onDismissRequest = { showDownloadInfoDialog = false },
-                    title = {
-                        Text(text = item.displayName)
-                    },
-                    text = {
-                        val downloadInfo by viewModel.downloadInfo(item).observeAsState()
-                        Column {
-                            val format = SimpleDateFormat.getDateTimeInstance()
-                            Text(
-                                text = stringResource(
-                                    R.string.dialog_downloaded_msg,
-                                    downloadInfo?.let {
-                                        format.format(it.first)
-                                    } ?: stringResource(R.string.status_loading)
-                                )
-                            )
-                            Text(
-                                text = stringResource(
-                                    R.string.dialog_uses_storage_msg,
-                                    downloadInfo?.let {
-                                        humanReadableByteCountBin(it.second)
-                                    } ?: stringResource(R.string.status_loading)
-                                )
-                            )
-                            if (downloadState == DownloadStatus.PARTIALLY)
-                                Text(
-                                    text = stringResource(
-                                        R.string.dialog_downloaded_partially_msg,
-                                        item.displayName,
-                                    )
-                                )
-                        }
-                    },
-                    dismissButton = {
-                        if (downloadState == DownloadStatus.PARTIALLY)
-                            Button(onClick = { downloadItem() }) {
-                                Text(text = stringResource(R.string.action_download))
-                            }
-                        else
-                            Button(onClick = { viewModel.deleteDataClass(item) }) {
-                                Text(text = stringResource(R.string.action_delete))
-                            }
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = { showDownloadInfoDialog = false },
-                            colors = ButtonDefaults.textButtonColors(),
-                        ) {
-                            Text(
-                                text = stringResource(R.string.action_close),
-                            )
-                        }
-                    },
-                )
-        } else
+        else
             NonDownloadableDataClassItem(
-                item.displayName,
-                childrenCount?.let {
-                    stringResource(R.string.downloads_sectors_title, it)
-                } ?: stringResource(R.string.status_loading),
-                painter,
+                item,
+                storage,
+                viewModel,
                 onClick,
             )
     } else
@@ -200,27 +103,33 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
  * Displays a data class object that can be downloaded. The UI is a little more complex.
  * @author Arnau Mora
  * @since 20211229
- * @param displayName The display name of the data class.
- * @param childrenCountLabel The content to display under [displayName]. Should be something like
- * "5 paths", or "3 sectors"
- * @param image The image to display for the DataClass.
- * @param downloadStatus The download status of the DataClass, for updating the download button.
- * @param onDownload When the user requests to download the DataClass.
- * @param onDownloadInfo When the user requests info about the downloaded DataClass.
+ * @param item The DataClass to display.
+ * @param storage The Firebase Storage reference for loading images.
+ * @param viewModel The View Model for doing async tasks.
  * @param onClick Will get called when the user requests to "navigate" into the DataClass.
  */
 @Composable
 private fun DownloadableDataClassItem(
-    displayName: String,
-    childrenCountLabel: String,
-    image: Painter,
-    downloadStatus: DownloadStatus,
-    location: LatLng?,
-    onDownload: () -> Unit,
-    onDownloadInfo: () -> Unit,
+    item: DataClass<*, *>,
+    storage: FirebaseStorage,
+    viewModel: DataClassItemViewModel,
     onClick: () -> Unit,
 ) {
     val context = LocalContext.current
+
+    var isPartiallyDownloaded by remember { mutableStateOf(false) }
+
+    var showDownloadInfoDialog by remember { mutableStateOf(false) }
+
+    val downloadItem: () -> Unit = {
+        viewModel.startDownloading(
+            context,
+            item.pin,
+            item.documentPath,
+            item.displayName,
+            quality = DOWNLOAD_QUALITY_DEFAULT
+        )
+    }
 
     Card(
         backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -235,13 +144,12 @@ private fun DownloadableDataClassItem(
                     modifier = Modifier
                         .fillMaxWidth(.3f)
                 ) {
-                    Image(
-                        painter = image,
-                        contentDescription = displayName,
+                    item.Image(
+                        storage,
                         modifier = Modifier
+                            .fillMaxWidth()
                             .height(160.dp)
-                            .fillMaxWidth(),
-                        contentScale = ContentScale.Crop,
+                            .clickable(enabled = true, role = Role.Image, onClick = onClick)
                     )
                 }
                 Column(
@@ -249,8 +157,9 @@ private fun DownloadableDataClassItem(
                         .padding(start = 4.dp)
                         .weight(1f)
                 ) {
+                    val childrenCount by viewModel.childrenCounter(item).observeAsState()
                     Text(
-                        text = displayName,
+                        text = item.displayName,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.titleMedium,
                         fontFamily = PoppinsFamily,
@@ -260,7 +169,10 @@ private fun DownloadableDataClassItem(
                             .fillMaxWidth(),
                     )
                     Text(
-                        text = childrenCountLabel,
+                        text = childrenCount?.let {
+                            // TODO: Change between sectors and paths
+                            stringResource(R.string.downloads_sectors_title, it)
+                        } ?: stringResource(R.string.status_loading),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
@@ -292,34 +204,40 @@ private fun DownloadableDataClassItem(
                 verticalAlignment = Alignment.Bottom
             ) {
                 Column(modifier = Modifier.weight(1f)) {
+                    viewModel.addDownloadListener(item.pin) { _, _ ->
+                        // TODO: Download progress should be notified
+                    }
+
+                    val downloadState by remember { viewModel.downloadStatuses[item.pin]!! }
+                    isPartiallyDownloaded = downloadState.partialDownload == true
                     Button(
                         // Enable button when not downloaded, but download status is known
-                        enabled = !downloadStatus.downloading && downloadStatus != DownloadStatus.UNKNOWN,
+                        enabled = !downloadState.downloading && downloadState != DownloadStatus.UNKNOWN,
                         modifier = Modifier
                             .padding(start = 8.dp, end = 4.dp)
                             .fillMaxWidth(),
                         colors = ButtonDefaults.outlinedButtonColors(),
                         onClick = {
-                            when (downloadStatus) {
-                                DownloadStatus.DOWNLOADED ->
-                                    onDownloadInfo()
-                                DownloadStatus.NOT_DOWNLOADED, DownloadStatus.PARTIALLY ->
-                                    onDownload()
+                            when (downloadState) {
+                                DownloadStatus.DOWNLOADED -> showDownloadInfoDialog = true
+                                DownloadStatus.NOT_DOWNLOADED, DownloadStatus.PARTIALLY -> downloadItem()
                                 else -> toast(context, R.string.toast_error_internal)
                             }
                         },
                     ) {
                         Icon(
-                            downloadStatus.getActionIcon(),
+                            downloadState.getActionIcon(),
                             contentDescription = stringResource(R.string.action_download),
                             modifier = Modifier.size(ButtonDefaults.IconSize)
                         )
                         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                         Text(
-                            text = downloadStatus.getText()
+                            text = downloadState.getText()
                         )
                     }
                 }
+
+                val location = item.location
                 if (location != null)
                     Column(modifier = Modifier.weight(1f)) {
                         Button(
@@ -328,7 +246,7 @@ private fun DownloadableDataClassItem(
                                 .fillMaxWidth(),
                             colors = ButtonDefaults.outlinedButtonColors(),
                             onClick = {
-                                context.launch(location.mapsIntent(markerTitle = displayName))
+                                context.launch(location.mapsIntent(markerTitle = item.displayName))
                             },
                         ) {
                             Icon(
@@ -343,26 +261,83 @@ private fun DownloadableDataClassItem(
             }
         }
     }
+
+    if (showDownloadInfoDialog)
+        AlertDialog(
+            onDismissRequest = { showDownloadInfoDialog = false },
+            title = {
+                Text(text = item.displayName)
+            },
+            text = {
+                val downloadInfo by viewModel.downloadInfo(item).observeAsState()
+                Column {
+                    val format = SimpleDateFormat.getDateTimeInstance()
+                    Text(
+                        text = stringResource(
+                            R.string.dialog_downloaded_msg,
+                            downloadInfo?.let {
+                                format.format(it.first)
+                            } ?: stringResource(R.string.status_loading)
+                        )
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.dialog_uses_storage_msg,
+                            downloadInfo?.let {
+                                humanReadableByteCountBin(it.second)
+                            } ?: stringResource(R.string.status_loading)
+                        )
+                    )
+                    if (isPartiallyDownloaded)
+                        Text(
+                            text = stringResource(
+                                R.string.dialog_downloaded_partially_msg,
+                                item.displayName,
+                            )
+                        )
+                }
+            },
+            dismissButton = {
+                if (isPartiallyDownloaded)
+                    Button(onClick = { downloadItem() }) {
+                        Text(text = stringResource(R.string.action_download))
+                    }
+                else
+                    Button(onClick = { viewModel.deleteDataClass(item) }) {
+                        Text(text = stringResource(R.string.action_delete))
+                    }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showDownloadInfoDialog = false },
+                    colors = ButtonDefaults.textButtonColors(),
+                ) {
+                    Text(
+                        text = stringResource(R.string.action_close),
+                    )
+                }
+            },
+        )
 }
 
 /**
  * Displays a data class object that can't be downloaded. The UI is simpler, just image and name.
  * @author Arnau Mora
  * @since 20211229
- * @param displayName The display name of the data class.
- * @param childrenCountLabel The content to display under [displayName]. Should be something like
- * "5 paths", or "3 sectors"
- * @param image The image to display for the DataClass.
+ * @param item The DataClass to display.
+ * @param storage The Firebase Storage instance to load the images from.
+ * @param viewModel The View Model for doing async tasks.
  * @param onClick What to do when clicked.
  */
-@ExperimentalCoilApi
 @Composable
 private fun NonDownloadableDataClassItem(
-    displayName: String,
-    childrenCountLabel: String,
-    image: Painter,
+    item: DataClass<*, *>,
+    storage: FirebaseStorage,
+    viewModel: DataClassItemViewModel,
     onClick: (() -> Unit)? = null
 ) {
+    val childrenCount by viewModel.childrenCounter(item).observeAsState()
+
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
@@ -370,10 +345,8 @@ private fun NonDownloadableDataClassItem(
             .fillMaxWidth()
     ) {
         Column {
-            Image(
-                painter = image,
-                contentDescription = "",
-                contentScale = ContentScale.Crop,
+            item.Image(
+                storage,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(160.dp)
@@ -387,7 +360,7 @@ private fun NonDownloadableDataClassItem(
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Text(
-                    text = displayName,
+                    text = item.displayName,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Light,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -396,7 +369,9 @@ private fun NonDownloadableDataClassItem(
                         .fillMaxWidth()
                 )
                 Text(
-                    text = childrenCountLabel,
+                    text = childrenCount?.let {
+                        stringResource(R.string.downloads_zones_title, it)
+                    } ?: stringResource(R.string.status_loading),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier
@@ -406,19 +381,4 @@ private fun NonDownloadableDataClassItem(
             }
         }
     }
-}
-
-@Composable
-@Preview
-fun DownloadableDataClassItemPreview() {
-    DownloadableDataClassItem(
-        "Demo Zone",
-        "3 sectors",
-        painterResource(R.drawable.ic_tall_placeholder),
-        DownloadStatus.NOT_DOWNLOADED,
-        null,
-        {},
-        {},
-        {},
-    )
 }

@@ -184,7 +184,9 @@
 
     <string name="sector_title">Sector</string>
     <string name="zone_title">Zone</string>
+    <string name="downloads_zones_title">%d Zones</string>
     <string name="downloads_sectors_title">%d Sectors</string>
+    <string name="downloads_paths_title">%d Paths</string>
 
     <string name="fab_desc_map">Open Google Maps</string>
     <string name="fab_desc_enter">Enter</string>

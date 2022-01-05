@@ -205,4 +205,6 @@
     <string name="downloads_sector_dialog_title">Sectores</string>
     <string name="downloads_sectors_title">%d Sectores</string>
     <string name="image_desc_downloaded_marker">Marcador de Descarga</string>
+    <string name="downloads_zones_title">%d Zonas</string>
+    <string name="downloads_paths_title">%d Vías</string>
 </resources>

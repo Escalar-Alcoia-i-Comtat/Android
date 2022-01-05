@@ -8,10 +8,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import coil.annotation.ExperimentalCoilApi
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.google.android.material.badge.ExperimentalBadgeUtils
@@ -20,16 +21,16 @@ import timber.log.Timber
 
 @Composable
 @ExperimentalBadgeUtils
-@OptIn(ExperimentalCoilApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 fun MainActivity.ExploreScreen(rootNavController: NavController, storage: FirebaseStorage) {
     // TODO: Map and search bar
-    val loadedAreas = exploreViewModel.loadedAreas
+    val areas by exploreViewModel.loadAreas().observeAsState()
 
     LazyColumn {
         item {
             Box(modifier = Modifier.fillMaxWidth()) {
                 AnimatedVisibility(
-                    visible = !loadedAreas.value,
+                    visible = areas == null,
                     modifier = Modifier
                         .align(Alignment.Center)
                 ) {
@@ -39,12 +40,11 @@ fun MainActivity.ExploreScreen(rootNavController: NavController, storage: Fireba
                 }
             }
         }
-        items(exploreViewModel.areas) { area ->
+        items(areas ?: listOf()) { area ->
             Timber.d("Displaying $area...")
             DataClassItem(area, storage) {
                 rootNavController.navigate(area.documentPath)
             }
         }
     }
-    exploreViewModel.loadAreas()
 }

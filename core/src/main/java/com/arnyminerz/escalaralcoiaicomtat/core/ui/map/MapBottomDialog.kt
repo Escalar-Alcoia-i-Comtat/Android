@@ -35,8 +35,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
-import coil.request.ImageRequest
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
@@ -44,6 +42,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.bumptech.glide.request.RequestOptions
+import com.skydoves.landscapist.glide.GlideImage
 import timber.log.Timber
 
 @Composable
@@ -73,14 +73,13 @@ fun BoxScope.MapBottomDialog(
             shape = RoundedCornerShape(16.dp)
         ) {
             Column {
-                Image(
-                    painter = rememberImagePainter(
-                        request = ImageRequest.Builder(context)
-                            .data(bottomDialogImage)
-                            .placeholder(R.drawable.ic_wide_placeholder)
+                GlideImage(
+                    imageModel = bottomDialogImage,
+                    requestOptions = {
+                        RequestOptions
+                            .placeholderOf(R.drawable.ic_wide_placeholder)
                             .error(R.drawable.ic_wide_placeholder)
-                            .build()
-                    ),
+                    },
                     contentDescription = bottomDialogTitle,
                     modifier = Modifier
                         .fillMaxWidth()

@@ -175,7 +175,4 @@ dependencies {
 
     // Kotlin reflect for using methods from Feature Modules
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.6.10"
-
-    // Accompanist libraries
-    implementation 'com.google.accompanist:accompanist-drawablepainter:v0.22.0-rc'
 }
