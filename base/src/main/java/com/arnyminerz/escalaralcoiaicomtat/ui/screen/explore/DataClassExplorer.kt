@@ -57,6 +57,7 @@ fun DataClassActivity.DataClassExplorer(
     storage: FirebaseStorage,
 ) {
     val context = LocalContext.current
+    val childrenLoader = exploreViewModel.childrenLoader(namespace, objectId)
 
     Scaffold(
         topBar = {
@@ -107,7 +108,7 @@ fun DataClassActivity.DataClassExplorer(
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 title = {
-                    val parentDataClass by remember { exploreViewModel.parentDataClass }
+                    val parentDataClass by remember { childrenLoader.first }
                     Text(
                         text = parentDataClass?.displayName
                             ?: stringResource(R.string.status_loading),
@@ -117,7 +118,7 @@ fun DataClassActivity.DataClassExplorer(
             )
         }
     ) { padding ->
-        val items by remember { exploreViewModel.dataClasses }
+        val items by remember { childrenLoader.second }
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
@@ -139,7 +140,6 @@ fun DataClassActivity.DataClassExplorer(
             // The items
             items(items) { dataClass ->
                 DataClassItem(dataClass, storage) {
-                    exploreViewModel.notifyNavigation()
                     when (namespace) {
                         Sector.NAMESPACE ->
                             // TODO: Eventually SectorActivity will be moved to DataClassActivity
@@ -155,6 +155,4 @@ fun DataClassActivity.DataClassExplorer(
             }
         }
     }
-
-    exploreViewModel.loadChildren(namespace, objectId)
 }

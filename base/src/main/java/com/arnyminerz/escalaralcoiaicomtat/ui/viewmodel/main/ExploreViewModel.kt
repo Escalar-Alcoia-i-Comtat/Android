@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main
 
 import android.app.Application
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
@@ -8,8 +9,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -26,20 +27,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         super.onCleared()
         Timber.d("$this::onCleared")
     }
-
-    /**
-     * Used in DataClassExplorer for loading items during navigation. This list is dynamic.
-     * @author Arnau Mora
-     * @since 20220102
-     */
-    val dataClasses = mutableStateOf<List<DataClassImpl>>(emptyList())
-
-    /**
-     * The DataClass where [dataClasses] are stored.
-     * @author Arnau Mora
-     * @since 20220102
-     */
-    val parentDataClass = mutableStateOf<DataClass<*, *>?>(null)
 
     /**
      * Serves as a cache of the loaded areas so the map screen can access them.
@@ -64,7 +51,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     }
 
     /**
-     * Loads the children of a set DataClass, and stores them into [dataClasses].
+     * Loads the children of a set DataClass.
      * @author Arnau Mora
      * @since 20220102
      * @param namespace The namespace of the DataClass.
@@ -72,8 +59,10 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
      * @throws IllegalArgumentException If [namespace] is not valid.
      */
     @Throws(IllegalArgumentException::class)
-    fun loadChildren(@Namespace namespace: String, objectId: String) {
-        val newDataClasses = mutableListOf<DataClassImpl>()
+    fun childrenLoader(@Namespace namespace: String, @ObjectId objectId: String):
+            Pair<MutableState<DataClassImpl?>, MutableState<List<DataClassImpl>>> {
+        val parentState = mutableStateOf<DataClassImpl?>(null)
+        val childrenState = mutableStateOf<List<DataClassImpl>>(emptyList())
         viewModelScope.launch {
             val dataClass = when (namespace) {
                 Area.NAMESPACE -> app.getArea(objectId)
@@ -83,21 +72,10 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             } ?: run {
                 throw ClassNotFoundException("The dataclass $namespace::$objectId could not be found.")
             }
-            parentDataClass.value = dataClass
-            val children = dataClass.getChildren(app.searchSession)
-            newDataClasses.addAll(children)
-            dataClasses.value = newDataClasses
+            parentState.value = dataClass
+            childrenState.value = dataClass.getChildren(app.searchSession)
         }
-    }
-
-    /**
-     * Tells the UI that the user has navigated somewhere else, and should refresh.
-     * @author Arnau Mora
-     * @since 20220103
-     */
-    fun notifyNavigation() {
-        parentDataClass.value = null
-        dataClasses.value = emptyList()
+        return parentState to childrenState
     }
 
     class Factory(
