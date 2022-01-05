@@ -147,8 +147,8 @@ fun DataClassActivity.DataClassExplorer(
                                 putExtra(EXTRA_SECTOR, objectId)
                             }
                         else -> launch(DataClassActivity::class.java) {
-                            putExtra(EXTRA_OBJECT_ID, objectId)
-                            putExtra(EXTRA_NAMESPACE, namespace)
+                            putExtra(EXTRA_OBJECT_ID, dataClass.objectId)
+                            putExtra(EXTRA_NAMESPACE, dataClass.namespace)
                         }
                     }
                 }
