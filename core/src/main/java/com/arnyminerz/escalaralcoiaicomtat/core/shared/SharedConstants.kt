@@ -140,6 +140,20 @@ const val REQUEST_CODE_LOGIN = 5
  */
 const val REQUEST_CODE_SELECT_PROFILE_IMAGE = 3
 
+/**
+ * Returned by [DataClassActivity] when no [EXTRA_NAMESPACE] is passed through the [Activity.Intent].
+ * @author Arnau Mora
+ * @since 20220105
+ */
+const val REQUEST_CODE_ERROR_NO_NAMESPACE = 1
+
+/**
+ * Returned by [DataClassActivity] when no [EXTRA_OBJECT_ID] is passed through the [Activity.Intent].
+ * @author Arnau Mora
+ * @since 20220105
+ */
+const val REQUEST_CODE_ERROR_NO_OBJECT_ID = 2
+
 const val PERMISSION_DIALOG_TAG = "PERM_TAG"
 
 const val MIME_TYPE_KML = "application/vnd.google-earth.kml+xml"
