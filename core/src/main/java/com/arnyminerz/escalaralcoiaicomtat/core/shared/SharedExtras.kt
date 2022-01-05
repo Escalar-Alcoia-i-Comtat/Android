@@ -14,6 +14,21 @@ val EXTRA_SECTOR = DataExtra<String>("sector")
 
 @Deprecated("Jetpack navigation should be used")
 val EXTRA_PATH = DataExtra<String>("path")
+
+/**
+ * Used in DataClass activities for knowing which is the id of the DataClass to load.
+ * @author Arnau Mora
+ * @since 20220105
+ */
+val EXTRA_OBJECT_ID = DataExtra<String>("object_id")
+
+/**
+ * Used in DataClass activities for knowing which is the namespace of the DataClass to load.
+ * @author Arnau Mora
+ * @since 20220105
+ */
+val EXTRA_NAMESPACE = DataExtra<String>("namespace")
+
 val EXTRA_PATH_DOCUMENT = DataExtra<String>("path_document")
 
 /**

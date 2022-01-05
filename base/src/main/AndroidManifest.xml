@@ -107,6 +107,9 @@
             android:name=".activity.climb.SectorActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".activity.climb.DataClassActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".activity.isolated.StorageActivity"
             android:screenOrientation="portrait" />
         <activity

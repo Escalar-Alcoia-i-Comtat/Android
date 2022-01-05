@@ -10,21 +10,12 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.MutableLiveData
-import androidx.navigation.NavController
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareComponentActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
-import com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore.DataClassExplorer
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.DownloadsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.ExploreScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.MapScreen
@@ -43,9 +34,8 @@ import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
-import timber.log.Timber
 
-class MainActivity : NetworkAwareComponentActivity() {
+class MainActivity : LanguageComponentActivity() {
     internal val exploreViewModel by viewModels<ExploreViewModel>(factoryProducer = {
         ExploreViewModel.Factory(application)
     })
@@ -69,13 +59,6 @@ class MainActivity : NetworkAwareComponentActivity() {
      */
     internal var googleMap: GoogleMap? = null
 
-    /**
-     * Tells whether or not the device is connected to the Internet.
-     * @author Arnau Mora
-     * @since 20220102
-     */
-    internal val hasInternet = MutableLiveData<Boolean>()
-
     val storage: FirebaseStorage = Firebase.storage
 
     @ExperimentalBadgeUtils
@@ -88,56 +71,16 @@ class MainActivity : NetworkAwareComponentActivity() {
 
         setContent {
             AppTheme {
-                val navController = rememberNavController()
-
-                NavHost(navController, startDestination = "/") {
-                    composable(
-                        "/Areas/{areaId}",
-                        arguments = listOf(
-                            navArgument("areaId") { type = NavType.StringType },
-                        )
-                    ) { entry ->
-                        DataClassExplorer(navController, storage, entry.arguments ?: Bundle())
-                    }
-                    composable(
-                        "/Areas/{areaId}/Zones/{zoneId}",
-                        arguments = listOf(
-                            navArgument("areaId") { type = NavType.StringType },
-                            navArgument("zoneId") { type = NavType.StringType },
-                        )
-                    ) { entry ->
-                        DataClassExplorer(navController, storage, entry.arguments ?: Bundle())
-                    }
-                    composable(
-                        "/Areas/{areaId}/Zones/{zoneId}/Sectors/{sectorId}",
-                        arguments = listOf(
-                            navArgument("areaId") { type = NavType.StringType },
-                            navArgument("zoneId") { type = NavType.StringType },
-                            navArgument("sectorId") { type = NavType.StringType },
-                        )
-                    ) { entry ->
-                        DataClassExplorer(navController, storage, entry.arguments ?: Bundle())
-                    }
-
-                    composable("/") {
-                        Home(navController)
-                    }
-                }
+                Home()
             }
         }
-    }
-
-    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        super.onStateChange(state)
-        Timber.i("Updated network state. Internet: ${state.hasInternet}")
-        hasInternet.postValue(state.hasInternet)
     }
 
     @ExperimentalBadgeUtils
     @ExperimentalMaterial3Api
     @ExperimentalPagerApi
     @Composable
-    private fun Home(rootNavController: NavController) {
+    private fun Home() {
         val pagerState = rememberPagerState()
         Scaffold(
             bottomBar = {
@@ -161,7 +104,7 @@ class MainActivity : NetworkAwareComponentActivity() {
                 modifier = Modifier.padding(innerPadding),
             ) { index ->
                 when (index) {
-                    0 -> ExploreScreen(rootNavController, storage)
+                    0 -> ExploreScreen(storage)
                     1 -> MapScreen()
                     2 -> DownloadsScreen()
                     3 -> SettingsScreen()
