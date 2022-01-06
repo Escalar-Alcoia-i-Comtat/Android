@@ -37,6 +37,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.annotations.drawable
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.text
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 
 @Composable
 fun PathItem(path: Path) {
@@ -157,45 +158,51 @@ fun PathItem(path: Path) {
                     val requiredSafesData = path.requiredSafesData
                     if (requiredSafesData.crackerRequired)
                         Chip(
-                            text = stringResource(R.string.safe_cracker),
+                            text = stringResource(R.string.safe_required_cracker),
                             icon = ContextCompat.getDrawable(context, R.drawable.ic_cracker),
                             modifier = Modifier
                                 .padding(start = 4.dp, end = 4.dp),
+                            onClick = { context.toast(R.string.toast_material_required) },
                         )
                     if (requiredSafesData.friendRequired)
                         Chip(
-                            text = stringResource(R.string.safe_friend),
+                            text = stringResource(R.string.safe_required_friend),
                             icon = ContextCompat.getDrawable(context, R.drawable.ic_friend),
                             modifier = Modifier
                                 .padding(start = 4.dp, end = 4.dp),
+                            onClick = { context.toast(R.string.toast_material_required) },
                         )
                     if (requiredSafesData.lanyardRequired)
                         Chip(
-                            text = stringResource(R.string.safe_lanyard),
+                            text = stringResource(R.string.safe_required_lanyard),
                             icon = ContextCompat.getDrawable(context, R.drawable.ic_lanyard),
                             modifier = Modifier
                                 .padding(start = 4.dp, end = 4.dp),
+                            onClick = { context.toast(R.string.toast_material_required) },
                         )
                     if (requiredSafesData.nailRequired)
                         Chip(
-                            text = stringResource(R.string.safe_nail),
+                            text = stringResource(R.string.safe_required_nail),
                             icon = ContextCompat.getDrawable(context, R.drawable.ic_reunio_clau),
                             modifier = Modifier
                                 .padding(start = 4.dp, end = 4.dp),
+                            onClick = { context.toast(R.string.toast_material_required) },
                         )
                     if (requiredSafesData.pitonRequired)
                         Chip(
-                            text = stringResource(R.string.safe_piton),
+                            text = stringResource(R.string.safe_required_piton),
                             icon = ContextCompat.getDrawable(context, R.drawable.ic_reunio_clau),
                             modifier = Modifier
                                 .padding(start = 4.dp, end = 4.dp),
+                            onClick = { context.toast(R.string.toast_material_required) },
                         )
                     if (requiredSafesData.stripsRequired)
                         Chip(
-                            text = stringResource(R.string.safe_strips),
+                            text = stringResource(R.string.safe_required_strips),
                             icon = ContextCompat.getDrawable(context, R.drawable.ic_strips),
                             modifier = Modifier
                                 .padding(start = 4.dp, end = 4.dp),
+                            onClick = { context.toast(R.string.toast_material_required) },
                         )
                 }
             }
