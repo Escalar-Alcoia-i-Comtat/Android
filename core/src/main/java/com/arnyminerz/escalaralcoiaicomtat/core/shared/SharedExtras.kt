@@ -16,25 +16,19 @@ val EXTRA_SECTOR = DataExtra<String>("sector")
 val EXTRA_PATH = DataExtra<String>("path")
 
 /**
- * Used in DataClass activities for knowing which is the id of the DataClass to load.
+ * Used in DataClass activities for knowing which is the DataClass to load.
  * @author Arnau Mora
- * @since 20220105
+ * @since 20220106
  */
-val EXTRA_OBJECT_ID = DataExtra<String>("object_id")
+val EXTRA_DATACLASS = DataExtra<Parcelable>("dataclass")
 
 /**
- * Used in DataClass activities that load multiple groups of children to know what the parent is.
+ * Used in DataClass activities that load multiple groups of children to know which is the currently
+ * selected one.
  * @author Arnau Mora
- * @since 20220105
+ * @since 20220106
  */
-val EXTRA_PARENT_ID = DataExtra<String>("parent_id")
-
-/**
- * Used in DataClass activities for knowing which is the namespace of the DataClass to load.
- * @author Arnau Mora
- * @since 20220105
- */
-val EXTRA_NAMESPACE = DataExtra<String>("namespace")
+val EXTRA_INDEX = DataExtra<Int>("index")
 
 val EXTRA_PATH_DOCUMENT = DataExtra<String>("path_document")
 
