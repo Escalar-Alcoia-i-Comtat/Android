@@ -16,15 +16,6 @@ interface SectorPageViewModel {
     fun getBarChartData(objectId: String): MutableState<BarChartData?>
 
     /**
-     * Gets the parent zone of a [sector].
-     * @author Arnau Mora
-     * @since 20220106
-     * @return A [MutableState] that contains the parent [Zone] of [sector] or null if it's still
-     * loading.
-     */
-    fun loadZone(sector: Sector): MutableState<Zone?>
-
-    /**
      * Gets the sectors that are contained inside a [Zone].
      * @author Arnau Mora
      * @since 20220106
