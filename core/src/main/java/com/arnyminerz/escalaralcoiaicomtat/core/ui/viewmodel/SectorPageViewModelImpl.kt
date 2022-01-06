@@ -49,6 +49,14 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
             }
         }
 
+    override fun loadSectors(zone: Zone): MutableState<List<Sector>> =
+        mutableStateOf<List<Sector>>(emptyList()).apply {
+            viewModelScope.launch {
+                val sectors = zone.getChildren(app.searchSession)
+                value = sectors
+            }
+        }
+
     class Factory(
         private val application: Application,
     ) : ViewModelProvider.Factory {

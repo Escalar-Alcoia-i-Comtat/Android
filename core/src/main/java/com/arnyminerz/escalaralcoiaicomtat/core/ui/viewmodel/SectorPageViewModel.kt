@@ -23,4 +23,13 @@ interface SectorPageViewModel {
      * loading.
      */
     fun loadZone(sector: Sector): MutableState<Zone?>
+
+    /**
+     * Gets the sectors that are contained inside a [Zone].
+     * @author Arnau Mora
+     * @since 20220106
+     * @return A [MutableState] that contains the [List] of children [Sector]s. May be empty while
+     * loading.
+     */
+    fun loadSectors(zone: Zone): MutableState<List<Sector>>
 }
