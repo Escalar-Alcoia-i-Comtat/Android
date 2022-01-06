@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.screen.main
 
+import android.os.Parcelable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,7 +48,7 @@ fun MainActivity.ExploreScreen(storage: FirebaseStorage) {
             Timber.d("Displaying $area...")
             DataClassItem(area, storage) {
                 launch(DataClassActivity::class.java) {
-                    putExtra(EXTRA_DATACLASS, area)
+                    putExtra(EXTRA_DATACLASS, area as Parcelable)
                 }
             }
         }
