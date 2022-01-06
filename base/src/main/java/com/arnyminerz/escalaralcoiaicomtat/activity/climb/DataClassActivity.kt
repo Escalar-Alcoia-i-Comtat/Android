@@ -127,6 +127,7 @@ class DataClassActivity : NetworkAwareComponentActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         outState.put(EXTRA_NAMESPACE, namespace)
         outState.put(EXTRA_OBJECT_ID, objectId)
+        parentId?.let { outState.put(EXTRA_PARENT_ID, it) }
 
         super.onSaveInstanceState(outState)
     }
