@@ -142,7 +142,7 @@ fun DataClassActivity.DataClassExplorer(
                     launch(DataClassActivity::class.java) {
                         putExtra(EXTRA_NAMESPACE, dataClass.namespace)
                         putExtra(EXTRA_OBJECT_ID, dataClass.objectId)
-                        if (namespace == Sector.NAMESPACE)
+                        if (dataClass.namespace == Sector.NAMESPACE)
                             putExtra(EXTRA_PARENT_ID, objectId)
                     }
                 }
