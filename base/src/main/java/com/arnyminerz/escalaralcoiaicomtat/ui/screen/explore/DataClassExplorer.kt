@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore
 
 import android.app.Activity
+import android.os.Parcelable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -40,6 +41,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PARENT
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.tooltip.Tooltip
@@ -143,7 +145,8 @@ fun Activity.DataClassExplorer(
             itemsIndexed(items) { i, item ->
                 DataClassItem(item, storage) {
                     launch(DataClassActivity::class.java) {
-                        putExtra(EXTRA_DATACLASS, item)
+                        putExtra(EXTRA_DATACLASS, item as Parcelable)
+                        putExtra(EXTRA_PARENT, dataClass as Parcelable)
                         putExtra(EXTRA_INDEX, i)
                     }
                 }
