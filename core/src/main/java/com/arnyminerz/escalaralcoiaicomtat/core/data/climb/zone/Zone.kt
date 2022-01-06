@@ -102,6 +102,9 @@ class Zone internal constructor(
     @IgnoredOnParcel
     override val imageQuality: Int = IMAGE_QUALITY
 
+    @IgnoredOnParcel
+    override val hasParents: Boolean = true
+
     companion object {
         @Namespace
         const val NAMESPACE = "Zone"

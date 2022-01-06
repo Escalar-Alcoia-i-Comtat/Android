@@ -133,6 +133,9 @@ class Sector internal constructor(
     @IgnoredOnParcel
     override val imageQuality: Int = IMAGE_QUALITY
 
+    @IgnoredOnParcel
+    override val hasParents: Boolean = true
+
     /**
      * Sets the content for the chip as a kids apt chip.
      * @author Arnau Mora
