@@ -7,16 +7,22 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.MutableLiveData
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareComponentActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_NAMESPACE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_OBJECT_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PARENT_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_NAMESPACE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_OBJECT_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_PARENT_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModelImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.put
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore.DataClassExplorer
+import com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore.SectorViewScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
+import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
@@ -31,12 +37,21 @@ import timber.log.Timber
  */
 class DataClassActivity : NetworkAwareComponentActivity() {
     /**
-     * The View Model for doing async tasks.
+     * The View Model for doing async tasks in DataClassExplorer.
      * @author Arnau Mora
      * @since 20220105
      */
     internal val exploreViewModel by viewModels<ExploreViewModel>(
         factoryProducer = { ExploreViewModel.Factory(application) }
+    )
+
+    /**
+     * The View Model for doing async tasks.
+     * @author Arnau Mora
+     * @since 20220105
+     */
+    internal val sectorPageViewModel by viewModels<SectorPageViewModelImpl>(
+        factoryProducer = { SectorPageViewModelImpl.Factory(application) }
     )
 
     /**
@@ -67,7 +82,19 @@ class DataClassActivity : NetworkAwareComponentActivity() {
      */
     internal lateinit var objectId: String
 
-    @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+    /**
+     * The object id of the parent of the DataClasses to display if displaying multiple groups of
+     * children, such as for Sectors display.
+     * @author Arnau Mora
+     * @since 20220105
+     */
+    private var parentId: String? = null
+
+    @OptIn(
+        ExperimentalFoundationApi::class,
+        ExperimentalMaterial3Api::class,
+        ExperimentalPagerApi::class,
+    )
     @ExperimentalBadgeUtils
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,10 +109,16 @@ class DataClassActivity : NetworkAwareComponentActivity() {
                 finishActivity(REQUEST_CODE_ERROR_NO_OBJECT_ID)
                 return
             }
+        parentId = intent.getExtra(EXTRA_PARENT_ID) ?: savedInstanceState?.getExtra(EXTRA_PARENT_ID)
 
         setContent {
             AppTheme {
-                DataClassExplorer(storage)
+                if (namespace == Sector.NAMESPACE)
+                    parentId?.let {
+                        SectorViewScreen(sectorPageViewModel, it, objectId)
+                    } ?: finishActivity(REQUEST_CODE_ERROR_NO_PARENT_ID)
+                else
+                    DataClassExplorer(storage)
             }
         }
     }
