@@ -143,7 +143,7 @@ dependencies {
     api 'com.google.firebase:firebase-messaging-directboot:23.0.0'
 
     // Google Firebase Auth Google Sign-In
-    api 'com.google.android.gms:play-services-auth:20.0.0'
+    api 'com.google.android.gms:play-services-auth:20.0.1'
 
     // Gson for JSON parsing
     implementation 'com.google.code.gson:gson:2.8.9'
