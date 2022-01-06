@@ -35,11 +35,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_NAMESPACE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_OBJECT_ID
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PARENT_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.tooltip.Tooltip
@@ -140,16 +139,11 @@ fun DataClassActivity.DataClassExplorer(
             // The items
             items(items) { dataClass ->
                 DataClassItem(dataClass, storage) {
-                    when (namespace) {
-                        Sector.NAMESPACE ->
-                            // TODO: Eventually SectorActivity will be moved to DataClassActivity
-                            launch(SectorActivity::class.java) {
-                                putExtra(EXTRA_SECTOR, objectId)
-                            }
-                        else -> launch(DataClassActivity::class.java) {
-                            putExtra(EXTRA_OBJECT_ID, dataClass.objectId)
-                            putExtra(EXTRA_NAMESPACE, dataClass.namespace)
-                        }
+                    launch(DataClassActivity::class.java) {
+                        putExtra(EXTRA_NAMESPACE, dataClass.namespace)
+                        putExtra(EXTRA_OBJECT_ID, dataClass.objectId)
+                        if (namespace == Sector.NAMESPACE)
+                            putExtra(EXTRA_PARENT_ID, objectId)
                     }
                 }
             }
