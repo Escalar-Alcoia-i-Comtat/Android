@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -84,7 +85,7 @@ class DataClassActivity : NetworkAwareComponentActivity() {
      * @author Arnau Mora
      * @since 20220105
      */
-    private lateinit var parentDataClass: DataClass<*, *>
+    private var parentDataClass: DataClass<*, *>? = null
 
     /**
      * Used for Sector display, to remember which is the position of the currently showing sector.
@@ -98,7 +99,7 @@ class DataClassActivity : NetworkAwareComponentActivity() {
      * @author Arnau Mora
      * @since 20220106
      */
-    private var childrenCount: Int = 0
+    private var childrenCount: Int? = null
 
     @OptIn(
         ExperimentalFoundationApi::class,
@@ -113,9 +114,9 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         Timber.v("Loaded DataClassActivity with extras (${extras?.sizeInBytes()}): ${extras?.toMap()}")
 
         // Load the value of dataClass or return
-        loadDataClassExtra(savedInstanceState).takeIf { it } ?: return
+        loadDataClassExtra(extras, savedInstanceState).takeIf { it } ?: return
         // Load the value of parentDataClass
-        loadParentDataClassExtra(savedInstanceState)
+        loadParentDataClassExtra(extras, savedInstanceState)
         // Load index
         index = savedInstanceState?.getExtra(EXTRA_INDEX) ?: index
         // Load childrenCount
@@ -125,23 +126,22 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         setContent {
             AppTheme {
                 if (dataClass is Sector)
-                    if (this::parentDataClass.isInitialized && parentDataClass is Zone && childrenCount >= 0) {
+                    if (parentDataClass is Zone && childrenCount != null) {
                         Timber.d("Rendering Sector...")
                         // If dataClass is a sector, load the sector view screen
                         SectorViewScreen(
                             sectorPageViewModel,
                             parentDataClass as Zone,
                             dataClass as Sector,
-                            childrenCount,
+                            childrenCount!!,
                             index
                         )
-                    } else if (!this::parentDataClass.isInitialized) {
-                        // TODO: Throw error of null parent data class
-                    } else if (childrenCount < 0) {
-                        // TODO: Throw error of null childrenCount
-                    } else {
-                        // TODO: Throw error of wrong parent data type
-                    }
+                    } else if (parentDataClass == null)
+                        Timber.e("parentDataClass has not been initialized")
+                    else if (childrenCount == null)
+                        Timber.e("childrenCount has not been initialized")
+                    else
+                        Timber.e("dataClass is required to be zone. Type: ${dataClass::class.java.name}")
                 else {
                     Timber.d("Rendering Area/Zone...")
                     // If not, load the DataClassExplorer
@@ -159,9 +159,8 @@ class DataClassActivity : NetworkAwareComponentActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         outState.put(EXTRA_DATACLASS, dataClass)
         outState.put(EXTRA_INDEX, index)
-        outState.put(EXTRA_CHILDREN_COUNT, childrenCount)
-        if (this::parentDataClass.isInitialized)
-            outState.put(EXTRA_PARENT, parentDataClass)
+        childrenCount?.let { outState.put(EXTRA_CHILDREN_COUNT, it) }
+        parentDataClass?.let { outState.put(EXTRA_PARENT, it) }
 
         super.onSaveInstanceState(outState)
     }
@@ -180,10 +179,14 @@ class DataClassActivity : NetworkAwareComponentActivity() {
      * Loads the value of [dataClass] from the Activity extras.
      * @author Arnau Mora
      * @since 20220106
+     * @param extras The intent extras.
      * @param savedInstanceState The instance state of the Activity, for recovering saved data.
      */
-    private fun loadDataClassExtra(savedInstanceState: Bundle?): Boolean {
-        val dataClassExtra = (intent.getExtra(EXTRA_DATACLASS)
+    private fun loadDataClassExtra(
+        extras: Bundle?,
+        savedInstanceState: Bundle?,
+    ): Boolean {
+        val dataClassExtra: Parcelable = (extras?.getExtra(EXTRA_DATACLASS)
             ?: savedInstanceState?.getExtra(EXTRA_DATACLASS) ?: run {
                 Timber.e("Finishing DataClassActivity since no DataClass was passed.")
                 finishActivity(REQUEST_CODE_ERROR_NO_DATACLASS)
@@ -198,10 +201,14 @@ class DataClassActivity : NetworkAwareComponentActivity() {
      * Loads the value of [parentDataClass] from the Activity extras.
      * @author Arnau Mora
      * @since 20220106
+     * @param extras The intent extras.
      * @param savedInstanceState The instance state of the Activity, for recovering saved data.
      */
-    private fun loadParentDataClassExtra(savedInstanceState: Bundle?): Boolean {
-        val parentExtra = intent.getExtra(EXTRA_PARENT)
+    private fun loadParentDataClassExtra(
+        extras: Bundle?,
+        savedInstanceState: Bundle?,
+    ): Boolean {
+        val parentExtra = extras?.getExtra(EXTRA_PARENT)
             ?: savedInstanceState?.getExtra(EXTRA_PARENT)
             ?: return false
         Timber.v("EXTRA_PARENT is present in intent extras. Type: ${parentExtra::class.java}")
