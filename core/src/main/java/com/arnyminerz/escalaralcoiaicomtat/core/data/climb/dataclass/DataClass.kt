@@ -82,6 +82,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.parcelize.IgnoredOnParcel
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -496,6 +497,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20210724
      */
+    @IgnoredOnParcel
     protected abstract val imageQuality: Int
 
     /**
@@ -504,6 +506,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20220106
      */
+    @IgnoredOnParcel
     protected abstract val hasParents: Boolean
 
     /**
