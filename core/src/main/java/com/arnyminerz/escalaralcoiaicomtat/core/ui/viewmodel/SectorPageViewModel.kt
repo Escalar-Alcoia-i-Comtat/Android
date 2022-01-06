@@ -16,11 +16,12 @@ interface SectorPageViewModel {
     fun getBarChartData(objectId: String): MutableState<BarChartData?>
 
     /**
-     * Gets the sectors that are contained inside a [Zone].
+     * Loads a [Sector] contained in [Zone].
      * @author Arnau Mora
      * @since 20220106
-     * @return A [MutableState] that contains the [List] of children [Sector]s. May be empty while
-     * loading.
+     * @param zone The [Zone] to load the [Sector] from.
+     * @param index The position of the [Sector] inside of the [Zone].
+     * @return A [MutableState] that contains a [Sector]. Is null while loading.
      */
-    fun loadSectors(zone: Zone): MutableState<List<Sector>>
+    fun loadSector(zone: Zone, index: Int): MutableState<Sector?>
 }
