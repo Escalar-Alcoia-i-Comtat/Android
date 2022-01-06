@@ -1,20 +1,19 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.AnimationVector2D
+import androidx.compose.animation.core.TwoWayConverter
+import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.DirectionsWalk
@@ -33,45 +32,35 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.core.R
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.icon
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.textResource
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
-import com.google.android.gms.maps.model.LatLng
-import me.bytebeats.views.charts.bar.BarChar
-import me.bytebeats.views.charts.bar.BarChartData
-import me.bytebeats.views.charts.bar.render.bar.SimpleBarDrawer
-import me.bytebeats.views.charts.bar.render.label.SimpleLabelDrawer
-import me.bytebeats.views.charts.bar.render.xaxis.SimpleXAxisDrawer
-import me.bytebeats.views.charts.bar.render.yaxis.SimpleYAxisDrawer
-import me.bytebeats.views.charts.simpleChartAnimation
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+
+// TODO: Move this somewhere else
+val Float.Companion.DegreeConverter
+    get() = TwoWayConverter<Float, AnimationVector2D>({
+        val rad = (it * Math.PI / 180f).toFloat()
+        AnimationVector2D(sin(rad), cos(rad))
+    }, {
+        ((atan2(it.v1, it.v2) * 180f / Math.PI).toFloat() + 360) % 360
+    })
 
 @Composable
 fun SectorPage(
     viewModel: SectorPageViewModel,
-    objectId: String,
-    displayName: String,
-    @SunTime sun: Int,
-    kidsApt: Boolean,
-    walkingTime: Long,
-    location: LatLng?,
+    sector: Sector,
 ) {
     val context = LocalContext.current
-
-    var chartVisible by remember { mutableStateOf(true) }
-    val chartButtonIconRotation by animateFloatAsState(
-        if (chartVisible) -180f else -90f,
-        animationSpec = tween(
-            durationMillis = 100, // rotation is retrieved with this frequency
-            easing = LinearEasing
-        ),
-    )
+    viewModel.loadPaths(sector)
 
     // TODO: Sector image
     LazyColumn {
@@ -95,11 +84,11 @@ fun SectorPage(
                         ) {
                             // Chips
                             Chip(
-                                text = stringResource(sun.textResource),
-                                icon = ContextCompat.getDrawable(context, sun.icon),
+                                text = stringResource(sector.sunTime.textResource),
+                                icon = ContextCompat.getDrawable(context, sector.sunTime.icon),
                                 modifier = Modifier.padding(start = 8.dp, end = 4.dp),
                             )
-                            if (kidsApt)
+                            if (sector.kidsApt)
                                 Chip(
                                     text = stringResource(R.string.sector_kids_apt),
                                     icon = ContextCompat.getDrawable(
@@ -114,9 +103,9 @@ fun SectorPage(
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
                                 .padding(4.dp)
-                                .clickable(enabled = location != null) {
-                                    location
-                                        ?.mapsIntent(true, displayName)
+                                .clickable(enabled = sector.location != null) {
+                                    sector.location
+                                        ?.mapsIntent(true, sector.displayName)
                                         ?.let {
                                             context.launch(it)
                                         }
@@ -130,7 +119,7 @@ fun SectorPage(
                             Text(
                                 stringResource(
                                     R.string.sector_walking_time,
-                                    walkingTime.toString()
+                                    sector.walkingTime.toString()
                                 ),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -148,7 +137,14 @@ fun SectorPage(
                     backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        val barChartData by viewModel.getBarChartData(objectId)
+                        var chartVisible by remember { mutableStateOf(false) }
+                        val chartButtonIconRotation by animateValueAsState(
+                            targetValue = if (chartVisible) -180f else -90f,
+                            typeConverter = Float.DegreeConverter,
+                        )
+
+                        // Load the chart data
+                        //viewModel.loadBarChartData(sector)
 
                         // Heading
                         Row(
@@ -164,13 +160,7 @@ fun SectorPage(
                                     .weight(1f),
                                 style = MaterialTheme.typography.titleMedium,
                             )
-                            AnimatedVisibility(visible = barChartData == null) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(35.dp)
-                                )
-                            }
                             IconButton(
-                                enabled = barChartData != null,
                                 onClick = { chartVisible = !chartVisible }
                             ) {
                                 Icon(
@@ -181,35 +171,34 @@ fun SectorPage(
                             }
                         }
                         // Chart
-                        AnimatedVisibility(visible = chartVisible && barChartData != null) {
-                            Row(
+                        AnimatedVisibility(visible = chartVisible) {
+                            Text(text = "Hello, this doesn't work, but hey, here's a pig 🐷")
+                            /*BarChar(
+                                barChartData = viewModel.barChartData,
                                 modifier = Modifier
+                                    .height(120.dp)
                                     .fillMaxWidth()
-                            ) {
-                                BarChar(
-                                    barChartData = barChartData ?: BarChartData(emptyList()),
-                                    modifier = Modifier
-                                        .height(120.dp)
-                                        .fillMaxWidth()
-                                        .padding(bottom = 8.dp, start = 4.dp, end = 4.dp),
-                                    animation = simpleChartAnimation(),
-                                    barDrawer = SimpleBarDrawer(),
-                                    xAxisDrawer = SimpleXAxisDrawer(),
-                                    yAxisDrawer = SimpleYAxisDrawer(
-                                        axisLineThickness = 0.dp,
-                                        axisLineColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        labelTextSize = 0.sp,
-                                        labelValueFormatter = { "" } // Disables values for the y axis
-                                    ),
-                                    labelDrawer = SimpleLabelDrawer(
-                                        drawLocation = SimpleLabelDrawer.DrawLocation.Inside,
-                                    )
+                                    .padding(bottom = 8.dp, start = 4.dp, end = 4.dp),
+                                animation = simpleChartAnimation(),
+                                barDrawer = SimpleBarDrawer(),
+                                xAxisDrawer = SimpleXAxisDrawer(),
+                                yAxisDrawer = SimpleYAxisDrawer(
+                                    axisLineThickness = 0.dp,
+                                    axisLineColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    labelTextSize = 0.sp,
+                                    labelValueFormatter = { "" } // Disables values for the y axis
+                                ),
+                                labelDrawer = SimpleLabelDrawer(
+                                    drawLocation = SimpleLabelDrawer.DrawLocation.XAxis,
                                 )
-                            }
+                            )*/
                         }
                     }
                 }
             }
+        }
+        items(viewModel.paths) { item ->
+            Text(text = item.displayName)
         }
     }
 }
