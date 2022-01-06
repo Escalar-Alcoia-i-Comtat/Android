@@ -69,7 +69,7 @@ fun Activity.DataClassExplorer(
     val childrenLoader = if (dataClass is Area)
         exploreViewModel.childrenLoader(dataClass) { it.displayName }
     else
-        exploreViewModel.childrenLoader(dataClass as Zone) { it.displayName }
+        exploreViewModel.childrenLoader(dataClass as Zone) { it.weight }
 
     Scaffold(
         topBar = {
