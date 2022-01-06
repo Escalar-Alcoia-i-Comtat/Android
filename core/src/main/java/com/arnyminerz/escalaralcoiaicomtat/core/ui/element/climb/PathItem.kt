@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.drawable
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.text
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 
@@ -141,15 +142,58 @@ fun PathItem(path: Path) {
                         .fillMaxWidth(),
                 ) {
                     Chip(
-                        text = "Strings",
+                        text = stringResource(R.string.safe_strings, path.fixedSafesData.count()),
                         icon = ContextCompat.getDrawable(context, R.drawable.ic_icona_express),
                         modifier = Modifier
                             .padding(start = 4.dp, end = 4.dp),
                     )
                     if (path.endings.size > 0)
                         Chip(
-                            text = "Ending type",
+                            text = stringResource(path.endings[0].text),
                             icon = ContextCompat.getDrawable(context, path.endings[0].drawable),
+                            modifier = Modifier
+                                .padding(start = 4.dp, end = 4.dp),
+                        )
+                    val requiredSafesData = path.requiredSafesData
+                    if (requiredSafesData.crackerRequired)
+                        Chip(
+                            text = stringResource(R.string.safe_cracker),
+                            icon = ContextCompat.getDrawable(context, R.drawable.ic_cracker),
+                            modifier = Modifier
+                                .padding(start = 4.dp, end = 4.dp),
+                        )
+                    if (requiredSafesData.friendRequired)
+                        Chip(
+                            text = stringResource(R.string.safe_friend),
+                            icon = ContextCompat.getDrawable(context, R.drawable.ic_friend),
+                            modifier = Modifier
+                                .padding(start = 4.dp, end = 4.dp),
+                        )
+                    if (requiredSafesData.lanyardRequired)
+                        Chip(
+                            text = stringResource(R.string.safe_lanyard),
+                            icon = ContextCompat.getDrawable(context, R.drawable.ic_lanyard),
+                            modifier = Modifier
+                                .padding(start = 4.dp, end = 4.dp),
+                        )
+                    if (requiredSafesData.nailRequired)
+                        Chip(
+                            text = stringResource(R.string.safe_nail),
+                            icon = ContextCompat.getDrawable(context, R.drawable.ic_reunio_clau),
+                            modifier = Modifier
+                                .padding(start = 4.dp, end = 4.dp),
+                        )
+                    if (requiredSafesData.pitonRequired)
+                        Chip(
+                            text = stringResource(R.string.safe_piton),
+                            icon = ContextCompat.getDrawable(context, R.drawable.ic_reunio_clau),
+                            modifier = Modifier
+                                .padding(start = 4.dp, end = 4.dp),
+                        )
+                    if (requiredSafesData.stripsRequired)
+                        Chip(
+                            text = stringResource(R.string.safe_strips),
+                            icon = ContextCompat.getDrawable(context, R.drawable.ic_strips),
                             modifier = Modifier
                                 .padding(start = 4.dp, end = 4.dp),
                         )
