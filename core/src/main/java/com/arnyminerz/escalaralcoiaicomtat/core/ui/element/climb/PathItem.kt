@@ -142,19 +142,26 @@ fun PathItem(path: Path) {
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    Chip(
-                        text = stringResource(R.string.safe_strings, path.fixedSafesData.count()),
-                        icon = ContextCompat.getDrawable(context, R.drawable.ic_icona_express),
-                        modifier = Modifier
-                            .padding(start = 4.dp, end = 4.dp),
-                    )
                     if (path.endings.size > 0)
                         Chip(
                             text = stringResource(path.endings[0].text),
                             icon = ContextCompat.getDrawable(context, path.endings[0].drawable),
                             modifier = Modifier
                                 .padding(start = 4.dp, end = 4.dp),
+                            onClick = { context.toast(R.string.toast_ending_info) },
                         )
+
+                    val fixedSafesData = path.fixedSafesData
+                    for (chip in fixedSafesData.list())
+                        if (chip.count > 0)
+                            Chip(
+                                text = stringResource(chip.displayName, chip.count),
+                                icon = ContextCompat.getDrawable(context, chip.image),
+                                modifier = Modifier
+                                    .padding(start = 4.dp, end = 4.dp),
+                                onClick = { context.toast(R.string.toast_material_fixed) }
+                            )
+
                     val requiredSafesData = path.requiredSafesData
                     if (requiredSafesData.crackerRequired)
                         Chip(
