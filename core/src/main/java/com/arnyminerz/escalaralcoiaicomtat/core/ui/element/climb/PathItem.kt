@@ -24,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -146,7 +145,6 @@ fun PathItem(path: Path) {
                         icon = ContextCompat.getDrawable(context, R.drawable.ic_icona_express),
                         modifier = Modifier
                             .padding(start = 4.dp, end = 4.dp),
-                        iconTint = MaterialTheme.colorScheme.onSurfaceVariant.toArgb(),
                     )
                     if (path.endings.size > 0)
                         Chip(
@@ -154,7 +152,6 @@ fun PathItem(path: Path) {
                             icon = ContextCompat.getDrawable(context, path.endings[0].drawable),
                             modifier = Modifier
                                 .padding(start = 4.dp, end = 4.dp),
-                            iconTint = MaterialTheme.colorScheme.onSurfaceVariant.toArgb(),
                         )
                 }
             }
