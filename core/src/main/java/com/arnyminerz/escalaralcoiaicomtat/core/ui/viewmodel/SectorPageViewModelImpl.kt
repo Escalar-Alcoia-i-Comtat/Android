@@ -46,12 +46,14 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
 
         viewModelScope.launch {
             // First get the parent zone
+            Timber.d("Loading zone $zoneId...")
             val zone = app.getZone(zoneId) ?: run {
                 // If the zone was not found
                 Timber.e("Zone with id $zoneId could not be found!")
                 return@launch
             }
             // Then get the children sectors
+            Timber.d("Loading children sectors of zone $zoneId...")
             val sectors = zone.getChildren(app.searchSession)
             // And pass them to the state
             state.value = sectors
