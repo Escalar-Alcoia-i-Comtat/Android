@@ -7,8 +7,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.graphics.drawable.DrawableCompat
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.tint
 import com.google.android.material.chip.Chip
 
 @Composable
@@ -26,12 +26,7 @@ private fun rememberChipWithLifecycle(
             this.text = text
             this.isEnabled = enabled
             if (icon != null)
-                this.chipIcon = if (iconTint != null)
-                    DrawableCompat.wrap(icon).apply {
-                        DrawableCompat.setTint(this, iconTint)
-                    }
-                else
-                    icon
+                this.chipIcon = icon.tint(iconTint)
             this.setOnClickListener { onClick?.let { it() } }
         }
     }
@@ -60,11 +55,6 @@ fun Chip(
     AndroidView(factory = { chipState }, modifier, update = {
         it.text = text
         it.isEnabled = enabled
-        it.chipIcon = if (icon != null && iconTint != null)
-            DrawableCompat.wrap(icon).apply {
-                DrawableCompat.setTint(this, iconTint)
-            }
-        else
-            icon
+        it.chipIcon = icon?.tint(iconTint)
     })
 }
