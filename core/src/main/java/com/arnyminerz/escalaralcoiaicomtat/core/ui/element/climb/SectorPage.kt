@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.DirectionsWalk
@@ -43,6 +45,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
 import com.google.android.gms.maps.model.LatLng
 import me.bytebeats.views.charts.bar.BarChar
+import me.bytebeats.views.charts.bar.BarChartData
 import me.bytebeats.views.charts.bar.render.bar.SimpleBarDrawer
 import me.bytebeats.views.charts.bar.render.label.SimpleLabelDrawer
 import me.bytebeats.views.charts.bar.render.xaxis.SimpleXAxisDrawer
@@ -56,7 +59,7 @@ fun SectorPage(
     displayName: String,
     @SunTime sun: Int,
     kidsApt: Boolean,
-    walkingTime: Int,
+    walkingTime: Long,
     location: LatLng?,
 ) {
     val context = LocalContext.current
@@ -145,6 +148,8 @@ fun SectorPage(
                     backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
+                        val barChartData by viewModel.getBarChartData(objectId)
+
                         // Heading
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -159,7 +164,15 @@ fun SectorPage(
                                     .weight(1f),
                                 style = MaterialTheme.typography.titleMedium,
                             )
-                            IconButton(onClick = { chartVisible = !chartVisible }) {
+                            AnimatedVisibility(visible = barChartData == null) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(35.dp)
+                                )
+                            }
+                            IconButton(
+                                enabled = barChartData != null,
+                                onClick = { chartVisible = !chartVisible }
+                            ) {
                                 Icon(
                                     Icons.Rounded.ChevronLeft,
                                     contentDescription = stringResource(R.string.sector_info_chart_button_desc),
@@ -168,14 +181,13 @@ fun SectorPage(
                             }
                         }
                         // Chart
-                        AnimatedVisibility(visible = chartVisible) {
+                        AnimatedVisibility(visible = chartVisible && barChartData != null) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                             ) {
-                                val barChartData by viewModel.getBarChartData(objectId)
                                 BarChar(
-                                    barChartData = barChartData,
+                                    barChartData = barChartData ?: BarChartData(emptyList()),
                                     modifier = Modifier
                                         .height(120.dp)
                                         .fillMaxWidth()
@@ -189,7 +201,9 @@ fun SectorPage(
                                         labelTextSize = 0.sp,
                                         labelValueFormatter = { "" } // Disables values for the y axis
                                     ),
-                                    labelDrawer = SimpleLabelDrawer(drawLocation = SimpleLabelDrawer.DrawLocation.Inside)
+                                    labelDrawer = SimpleLabelDrawer(
+                                        drawLocation = SimpleLabelDrawer.DrawLocation.Inside,
+                                    )
                                 )
                             }
                         }
