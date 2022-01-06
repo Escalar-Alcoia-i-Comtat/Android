@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.element
 
+import android.graphics.drawable.Drawable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -12,6 +13,7 @@ import com.google.android.material.chip.Chip
 private fun rememberChipWithLifecycle(
     text: String,
     enabled: Boolean = true,
+    icon: Drawable? = null,
     onClick: (() -> Unit)? = null
 ): Chip {
     val context = LocalContext.current
@@ -20,6 +22,8 @@ private fun rememberChipWithLifecycle(
             id = R.id.chip
             this.text = text
             this.isEnabled = enabled
+            if (icon != null)
+                this.chipIcon = icon
             this.setOnClickListener { onClick?.let { it() } }
         }
     }
@@ -40,11 +44,13 @@ fun Chip(
     text: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    icon: Drawable? = null,
     onClick: (() -> Unit)? = null
 ) {
-    val chipState = rememberChipWithLifecycle(text, enabled, onClick)
+    val chipState = rememberChipWithLifecycle(text, enabled, icon, onClick)
     AndroidView(factory = { chipState }, modifier, update = {
         it.text = text
         it.isEnabled = enabled
+        it.chipIcon = icon
     })
 }
