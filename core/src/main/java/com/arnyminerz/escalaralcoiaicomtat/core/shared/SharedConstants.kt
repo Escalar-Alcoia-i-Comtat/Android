@@ -149,25 +149,11 @@ const val REQUEST_CODE_SELECT_PROFILE_IMAGE = 3
 const val REQUEST_CODE_REQUESTED_BACK = 0
 
 /**
- * Returned by [DataClassActivity] when no [EXTRA_NAMESPACE] is passed through the [Activity.Intent].
+ * Returned by [DataClassActivity] when no [EXTRA_DATACLASS] is passed through the [Activity.Intent].
  * @author Arnau Mora
  * @since 20220105
  */
-const val REQUEST_CODE_ERROR_NO_NAMESPACE = 1
-
-/**
- * Returned by [DataClassActivity] when no [EXTRA_OBJECT_ID] is passed through the [Activity.Intent].
- * @author Arnau Mora
- * @since 20220105
- */
-const val REQUEST_CODE_ERROR_NO_OBJECT_ID = 2
-
-/**
- * Returned by [DataClassActivity] when no [EXTRA_PARENT_ID] is passed through the [Activity.Intent].
- * @author Arnau Mora
- * @since 20220106
- */
-const val REQUEST_CODE_ERROR_NO_PARENT_ID = 3
+const val REQUEST_CODE_ERROR_NO_DATACLASS = 1
 
 const val PERMISSION_DIALOG_TAG = "PERM_TAG"
 
