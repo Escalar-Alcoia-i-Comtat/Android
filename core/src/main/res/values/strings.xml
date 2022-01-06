@@ -77,6 +77,13 @@
     <string name="safe_strips">Strips</string>
     <string name="safe_nail">Nails</string>
 
+    <string name="safe_required_cracker">Cracker</string>
+    <string name="safe_required_friend">Friend</string>
+    <string name="safe_required_lanyard">Lanyard</string>
+    <string name="safe_required_nail">Nail</string>
+    <string name="safe_required_piton">Piton</string>
+    <string name="safe_required_strips">Strips</string>
+
     <!-- NC is for No Count -->
     <string name="safe_strings_plural">Strings</string>
 
@@ -92,6 +99,8 @@
     <string name="sector_info_dialog_sun_no_msg">This sector doesn\'t receive sun in the whole day! Bring a jacket.</string>
     <string name="sector_info_dialog_kids_title">Kids Apt</string>
     <string name="sector_info_dialog_kids_msg">This sector has good places to sit nearby. Bringing young children may not be that bad, but please, have caution.</string>
+    <string name="sector_info_chart_title">Grades</string>
+    <string name="sector_info_chart_button_desc">View chart</string>
 
     <string name="sector_sun_morning">Morning Sun</string>
     <string name="sector_sun_afternoon">Afternoon Sun</string>

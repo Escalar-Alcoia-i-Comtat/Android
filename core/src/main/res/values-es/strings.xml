@@ -453,4 +453,13 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="status_loading_data">Cargando los datos…</string>
     <string name="status_loading_installing_data">Instalando los datos…</string>
     <string name="downloads_title">Descargas</string>
+    <string name="sector_info_chart_title">Grados</string>
+    <string name="sector_info_chart_button_desc">Ver grafico</string>
+    <string name="image_desc_walking_time">Tiempo andando desde el parking</string>
+    <string name="safe_required_cracker">Empotrador</string>
+    <string name="safe_required_friend">Friend</string>
+    <string name="safe_required_lanyard">Cordino</string>
+    <string name="safe_required_nail">Clavo</string>
+    <string name="safe_required_piton">Piton</string>
+    <string name="safe_required_strips">Strips</string>
 </resources>
