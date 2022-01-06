@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.annotations
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringDef
+import androidx.annotation.StringRes
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_CHAIN_CARABINER
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_CHAIN_RING
@@ -45,4 +46,25 @@ val @receiver:EndingType String.drawable: Int
         ENDING_TYPE_WALKING -> R.drawable.ic_descens_caminant
         ENDING_TYPE_RAPPEL -> R.drawable.ic_via_rappelable
         else -> R.drawable.round_close_24
+    }
+
+/**
+ * Gets the display text the the ending.
+ * @author Arnau Mora
+ * @since 20220106
+ */
+val @receiver:EndingType String.text: Int
+    @StringRes
+    get() = when (this) {
+        ENDING_TYPE_PLATE -> R.string.path_ending_plate
+        ENDING_TYPE_PLATE_RING -> R.string.path_ending_plate_ring
+        ENDING_TYPE_PLATE_LANYARD -> R.string.path_ending_plate_lanyard
+        ENDING_TYPE_LANYARD -> R.string.path_ending_lanyard
+        ENDING_TYPE_CHAIN_RING -> R.string.path_ending_chain_ring
+        ENDING_TYPE_CHAIN_CARABINER -> R.string.path_ending_chain_carabiner
+        ENDING_TYPE_PITON -> R.string.path_ending_piton
+        ENDING_TYPE_WALKING -> R.string.path_ending_walking
+        ENDING_TYPE_RAPPEL -> R.string.path_ending_rappel
+        ENDING_TYPE_UNKNOWN -> R.string.path_ending_unknown
+        else -> R.string.path_ending_none
     }
