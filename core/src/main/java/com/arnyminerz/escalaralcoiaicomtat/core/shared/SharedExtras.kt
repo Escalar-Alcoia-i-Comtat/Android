@@ -23,6 +23,14 @@ val EXTRA_PATH = DataExtra<String>("path")
 val EXTRA_DATACLASS = DataExtra<Parcelable>("dataclass")
 
 /**
+ * Used in DataClass activities for knowing which is the parent of the loaded DataClass. Makes the
+ * application more agile, since it doesn't need to be loading the same contents again and again.
+ * @author Arnau Mora
+ * @since 20220106
+ */
+val EXTRA_PARENT = DataExtra<Parcelable>("parent")
+
+/**
  * Used in DataClass activities that load multiple groups of children to know which is the currently
  * selected one.
  * @author Arnau Mora
