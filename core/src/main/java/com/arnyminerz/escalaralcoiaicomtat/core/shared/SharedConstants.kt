@@ -154,6 +154,13 @@ const val REQUEST_CODE_ERROR_NO_NAMESPACE = 1
  */
 const val REQUEST_CODE_ERROR_NO_OBJECT_ID = 2
 
+/**
+ * Returned by [DataClassActivity] when no [EXTRA_PARENT_ID] is passed through the [Activity.Intent].
+ * @author Arnau Mora
+ * @since 20220106
+ */
+const val REQUEST_CODE_ERROR_NO_PARENT_ID = 3
+
 const val PERMISSION_DIALOG_TAG = "PERM_TAG"
 
 const val MIME_TYPE_KML = "application/vnd.google-earth.kml+xml"
