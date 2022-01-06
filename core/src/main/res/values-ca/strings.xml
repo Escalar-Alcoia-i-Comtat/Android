@@ -461,4 +461,7 @@
     <string name="safe_required_nail">Clau</string>
     <string name="safe_required_piton">Piton</string>
     <string name="safe_required_strips">Strips</string>
+    <string name="toast_material_required">Cal aquest material per a escalar la via</string>
+    <string name="toast_ending_info">Aquest és el tipus de reunió que té la via</string>
+    <string name="toast_material_fixed">Aquest material ja està instal·lat a la via</string>
 </resources>
