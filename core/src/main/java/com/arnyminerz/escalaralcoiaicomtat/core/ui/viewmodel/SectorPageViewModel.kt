@@ -31,36 +31,34 @@ interface SectorPageViewModel {
                 return colors.removeAt(idx)
             }
 
-            override fun getBarChartData(
-                namespace: String,
-                objectId: String
-            ): MutableState<BarChartData> = mutableStateOf(
-                BarChartData(
-                    bars = listOf(
-                        randomValue().let {
-                            BarChartData.Bar(
-                                label = it.toString(),
-                                value = it,
-                                color = randomColor(),
-                            )
-                        },
-                        randomValue().let {
-                            BarChartData.Bar(
-                                label = it.toString(),
-                                value = it,
-                                color = randomColor(),
-                            )
-                        },
-                        randomValue().let {
-                            BarChartData.Bar(
-                                label = it.toString(),
-                                value = it,
-                                color = randomColor(),
-                            )
-                        },
+            override fun getBarChartData(objectId: String): MutableState<BarChartData> =
+                mutableStateOf(
+                    BarChartData(
+                        bars = listOf(
+                            randomValue().let {
+                                BarChartData.Bar(
+                                    label = it.toString(),
+                                    value = it,
+                                    color = randomColor(),
+                                )
+                            },
+                            randomValue().let {
+                                BarChartData.Bar(
+                                    label = it.toString(),
+                                    value = it,
+                                    color = randomColor(),
+                                )
+                            },
+                            randomValue().let {
+                                BarChartData.Bar(
+                                    label = it.toString(),
+                                    value = it,
+                                    color = randomColor(),
+                                )
+                            },
+                        )
                     )
                 )
-            )
         }
     }
 
@@ -71,5 +69,5 @@ interface SectorPageViewModel {
      * @return A [MutableState] that contains the [BarChartData] and gets updated with the correct
      * data once loaded.
      */
-    fun getBarChartData(namespace: String, objectId: String): MutableState<BarChartData>
+    fun getBarChartData(objectId: String): MutableState<BarChartData>
 }
