@@ -198,7 +198,7 @@ fun SectorPage(
             }
         }
         items(viewModel.paths) { item ->
-            Text(text = item.displayName)
+            PathItem(item)
         }
     }
 }
