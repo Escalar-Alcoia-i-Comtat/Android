@@ -250,9 +250,10 @@ suspend fun AppSearchSession.getPaths(): List<Path> =
  * @param objectId The id of the parent DataClass.
  */
 @WorkerThread
-suspend fun <A : DataClassImpl> AppSearchSession.getChildren(
+suspend inline fun <A : DataClassImpl, R : Comparable<R>> AppSearchSession.getChildren(
     childrenNamespace: String,
-    objectId: String
+    objectId: String,
+    crossinline sortBy: (A) -> R?
 ): List<A> {
     // The list for the resulting items
     val list = arrayListOf<A>()
@@ -299,6 +300,8 @@ suspend fun <A : DataClassImpl> AppSearchSession.getChildren(
 
         nextPage = searchResults.nextPage.await()
     }
+
+    list.sortBy(sortBy)
 
     Timber.v("$this > Finished iterating results. Returning built list...")
     return list

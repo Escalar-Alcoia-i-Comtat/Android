@@ -102,7 +102,8 @@ class DownloadDialog<T : DataClass<*, *>>(
                                     doAsync {
                                         val app = activity.app
                                         val searchSession = app.searchSession
-                                        val children = data.getChildren(searchSession)
+                                        val children =
+                                            data.getChildren(searchSession) { it.objectId }
                                         for (child in children)
                                             if (child is DataClass<*, *>)
                                                 child.delete(app, searchSession)

@@ -148,7 +148,10 @@ private fun DownloadedDataItemRaw(
                     ) {
                         loadingChildren = true
                         doAsync {
-                            childrenSectors = objectId.getChildren(searchSession, Sector.NAMESPACE)
+                            childrenSectors =
+                                objectId.getChildren(searchSession, Sector.NAMESPACE) {
+                                    it.displayName
+                                }
                             loadingChildren = false
                             showChildrenDialog = true
                         }

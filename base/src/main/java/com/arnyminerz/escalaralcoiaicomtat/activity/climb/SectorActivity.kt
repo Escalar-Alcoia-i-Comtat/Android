@@ -170,7 +170,7 @@ class SectorActivity : LanguageAppCompatActivity() {
                 return@doAsync
             }
             Timber.v("Loading sectors from $zone...")
-            sectors = zone.getChildren(app.searchSession)
+            sectors = zone.getChildren(app.searchSession) { it.weight }
             val sectorCount = sectors.size
 
             Timber.v("Getting position extra...")

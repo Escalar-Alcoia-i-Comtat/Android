@@ -38,7 +38,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.lifecycle.MutableLiveData
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
@@ -64,7 +66,10 @@ fun Activity.DataClassExplorer(
     hasInternet: MutableLiveData<Boolean>,
 ) {
     val context = LocalContext.current
-    val childrenLoader = exploreViewModel.childrenLoader(dataClass)
+    val childrenLoader = if (dataClass is Area)
+        exploreViewModel.childrenLoader(dataClass) { it.displayName }
+    else
+        exploreViewModel.childrenLoader(dataClass as Zone) { it.displayName }
 
     Scaffold(
         topBar = {
