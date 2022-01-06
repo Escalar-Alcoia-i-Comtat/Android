@@ -3,6 +3,8 @@ package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import me.bytebeats.views.charts.bar.BarChartData
 import kotlin.random.Random
 
@@ -31,7 +33,7 @@ interface SectorPageViewModel {
                 return colors.removeAt(idx)
             }
 
-            override fun getBarChartData(objectId: String): MutableState<BarChartData> =
+            override fun getBarChartData(objectId: String): MutableState<BarChartData?> =
                 mutableStateOf(
                     BarChartData(
                         bars = listOf(
@@ -59,6 +61,9 @@ interface SectorPageViewModel {
                         )
                     )
                 )
+
+            override fun loadSectors(zoneId: String): MutableState<List<Sector>> =
+                mutableStateOf(listOf(Sector.SAMPLE_SECTOR))
         }
     }
 
@@ -67,7 +72,16 @@ interface SectorPageViewModel {
      * @author Arnau Mora
      * @since 20220106
      * @return A [MutableState] that contains the [BarChartData] and gets updated with the correct
-     * data once loaded.
+     * data once loaded. May be null when still not loaded.
      */
-    fun getBarChartData(objectId: String): MutableState<BarChartData>
+    fun getBarChartData(objectId: String): MutableState<BarChartData?>
+
+    /**
+     * Loads the [Sector]s contained inside the [Zone] with [Zone.objectId] [zoneId].
+     * @author Arnau Mora
+     * @since 20220106
+     * @param zoneId The [Zone.objectId] of the [Zone] to get the [Sector]s from.
+     */
+    fun loadSectors(zoneId: String): MutableState<List<Sector>>
+
 }
