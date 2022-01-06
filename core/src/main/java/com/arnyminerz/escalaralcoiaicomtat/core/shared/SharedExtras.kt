@@ -23,6 +23,13 @@ val EXTRA_PATH = DataExtra<String>("path")
 val EXTRA_OBJECT_ID = DataExtra<String>("object_id")
 
 /**
+ * Used in DataClass activities that load multiple groups of children to know what the parent is.
+ * @author Arnau Mora
+ * @since 20220105
+ */
+val EXTRA_PARENT_ID = DataExtra<String>("parent_id")
+
+/**
  * Used in DataClass activities for knowing which is the namespace of the DataClass to load.
  * @author Arnau Mora
  * @since 20220105
