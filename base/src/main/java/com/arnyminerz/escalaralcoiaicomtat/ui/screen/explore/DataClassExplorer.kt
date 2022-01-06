@@ -39,6 +39,7 @@ import androidx.lifecycle.MutableLiveData
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PARENT
@@ -147,6 +148,7 @@ fun Activity.DataClassExplorer(
                     launch(DataClassActivity::class.java) {
                         putExtra(EXTRA_DATACLASS, item as Parcelable)
                         putExtra(EXTRA_PARENT, dataClass as Parcelable)
+                        putExtra(EXTRA_CHILDREN_COUNT, items.size)
                         putExtra(EXTRA_INDEX, i)
                     }
                 }

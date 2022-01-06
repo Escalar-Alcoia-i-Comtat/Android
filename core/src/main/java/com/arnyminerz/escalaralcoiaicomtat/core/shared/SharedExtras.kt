@@ -31,6 +31,14 @@ val EXTRA_DATACLASS = DataExtra<Parcelable>("dataclass")
 val EXTRA_PARENT = DataExtra<Parcelable>("parent")
 
 /**
+ * Used in DataClass activities that load multiple groups of children to know how many children
+ * there are in the parent DataClass.
+ * @author Arnau Mora
+ * @since 20220106
+ */
+val EXTRA_CHILDREN_COUNT = DataExtra<Int>("children_count")
+
+/**
  * Used in DataClass activities that load multiple groups of children to know which is the currently
  * selected one.
  * @author Arnau Mora
