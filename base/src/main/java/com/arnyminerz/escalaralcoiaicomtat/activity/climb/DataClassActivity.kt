@@ -15,6 +15,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PARENT_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_NAMESPACE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_OBJECT_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_PARENT_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_REQUESTED_BACK
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModelImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
@@ -134,5 +135,9 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         super.onStateChange(state)
         Timber.i("Updated network state. Internet: ${state.hasInternet}")
         hasInternet.postValue(state.hasInternet)
+    }
+
+    override fun onBackPressed() {
+        finishActivity(REQUEST_CODE_REQUESTED_BACK)
     }
 }
