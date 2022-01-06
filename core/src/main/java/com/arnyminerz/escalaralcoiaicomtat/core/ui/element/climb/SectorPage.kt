@@ -69,6 +69,16 @@ fun SectorPage(
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
+                // Image
+                Column(
+                    modifier = Modifier.height(450.dp)
+                ) {
+                    Text(
+                        text = "This is the image",
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
+
                 // Info Card
                 Card(
                     modifier = Modifier
