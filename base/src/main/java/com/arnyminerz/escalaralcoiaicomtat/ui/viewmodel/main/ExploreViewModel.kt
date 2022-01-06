@@ -8,12 +8,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -54,29 +51,16 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
      * Loads the children of a set DataClass.
      * @author Arnau Mora
      * @since 20220102
-     * @param namespace The namespace of the DataClass.
-     * @param objectId The id of the DataClass to load.
-     * @throws IllegalArgumentException If [namespace] is not valid.
+     * @param dataClass The DataClass to load the children from.
+     * @return A [MutableState] that contains a list of children. May be empty while loading.
      */
-    @Throws(IllegalArgumentException::class)
-    fun childrenLoader(@Namespace namespace: String, @ObjectId objectId: String):
-            Pair<MutableState<DataClassImpl?>, MutableState<List<DataClassImpl>>> {
-        val parentState = mutableStateOf<DataClassImpl?>(null)
-        val childrenState = mutableStateOf<List<DataClassImpl>>(emptyList())
-        viewModelScope.launch {
-            val dataClass = when (namespace) {
-                Area.NAMESPACE -> app.getArea(objectId)
-                Zone.NAMESPACE -> app.getZone(objectId)
-                Sector.NAMESPACE -> app.getSector(objectId)
-                else -> throw IllegalArgumentException("The namespace introduced is not valid.")
-            } ?: run {
-                throw ClassNotFoundException("The dataclass $namespace::$objectId could not be found.")
+    fun childrenLoader(dataClass: DataClass<*, *>): MutableState<List<DataClassImpl>> =
+        mutableStateOf<List<DataClassImpl>>(emptyList()).apply {
+            viewModelScope.launch {
+                val children = dataClass.getChildren(app.searchSession)
+                value = children
             }
-            parentState.value = dataClass
-            childrenState.value = dataClass.getChildren(app.searchSession)
         }
-        return parentState to childrenState
-    }
 
     class Factory(
         private val application: Application

@@ -7,14 +7,12 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.MutableLiveData
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareComponentActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_NAMESPACE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_OBJECT_ID
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PARENT_ID
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_NAMESPACE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_OBJECT_ID
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_PARENT_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_REQUESTED_BACK
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModelImpl
@@ -33,7 +31,7 @@ import timber.log.Timber
 
 /**
  * An Activity for displaying the contents of a Data Class.
- * Requires [EXTRA_NAMESPACE] and [EXTRA_OBJECT_ID].
+ * Requires [EXTRA_DATACLASS] which will be the DataClass that gets loaded.
  * @author Arnau Mora
  * @since 20220105
  */
@@ -71,26 +69,18 @@ class DataClassActivity : NetworkAwareComponentActivity() {
     val storage: FirebaseStorage = Firebase.storage
 
     /**
-     * The namespace of the displaying Data Class.
+     * The Data Class to display.
      * @author Arnau Mora
      * @since 20220105
      */
-    internal lateinit var namespace: String
+    internal lateinit var dataClass: DataClass<*, *>
 
     /**
-     * The object id of the displaying Data Class.
+     * Used for Sector display, to remember which is the position of the currently showing sector.
      * @author Arnau Mora
-     * @since 20220105
+     * @since 20220106
      */
-    internal lateinit var objectId: String
-
-    /**
-     * The object id of the parent of the DataClasses to display if displaying multiple groups of
-     * children, such as for Sectors display.
-     * @author Arnau Mora
-     * @since 20220105
-     */
-    private var parentId: String? = null
+    private var index: Int = 0
 
     @OptIn(
         ExperimentalFoundationApi::class,
@@ -103,39 +93,29 @@ class DataClassActivity : NetworkAwareComponentActivity() {
 
         Timber.v("Loaded DataClassActivity with extras: ${intent.extras?.toMap()}")
 
-        namespace = intent.getExtra(EXTRA_NAMESPACE)
-            ?: savedInstanceState?.getExtra(EXTRA_NAMESPACE) ?: run {
-                Timber.e("Finishing DataClassActivity since no namespace was passed.")
-                finishActivity(REQUEST_CODE_ERROR_NO_NAMESPACE)
+        dataClass = (intent.getExtra(EXTRA_DATACLASS)
+            ?: savedInstanceState?.getExtra(EXTRA_DATACLASS) ?: run {
+                Timber.e("Finishing DataClassActivity since no DataClass was passed.")
+                finishActivity(REQUEST_CODE_ERROR_NO_DATACLASS)
                 return
-            }
-        objectId = intent.getExtra(EXTRA_OBJECT_ID)
-            ?: savedInstanceState?.getExtra(EXTRA_OBJECT_ID) ?: run {
-                Timber.e("Finishing DataClassActivity since no objectId was passed.")
-                finishActivity(REQUEST_CODE_ERROR_NO_OBJECT_ID)
-                return
-            }
-        parentId = intent.getExtra(EXTRA_PARENT_ID) ?: savedInstanceState?.getExtra(EXTRA_PARENT_ID)
+            }) as DataClass<*, *>
+        index = savedInstanceState?.getExtra(EXTRA_INDEX) ?: index
 
         setContent {
             AppTheme {
-                if (namespace == Sector.NAMESPACE)
-                    parentId?.let { zoneId ->
-                        SectorViewScreen(sectorPageViewModel, zoneId, objectId)
-                    } ?: run {
-                        Timber.e("Finishing DataClassActivity since no parentId was passed.")
-                        finishActivity(REQUEST_CODE_ERROR_NO_PARENT_ID)
-                    }
-                else
-                    DataClassExplorer(storage)
+                (dataClass as? Sector)?.let { sector ->
+                    // If dataClass is a sector, load the sector view screen
+                    SectorViewScreen(sectorPageViewModel, sector)
+                } ?:
+                // If not, load the DataClassExplorer
+                DataClassExplorer(exploreViewModel, storage, dataClass, hasInternet)
             }
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.put(EXTRA_NAMESPACE, namespace)
-        outState.put(EXTRA_OBJECT_ID, objectId)
-        parentId?.let { outState.put(EXTRA_PARENT_ID, it) }
+        outState.put(EXTRA_DATACLASS, dataClass)
+        outState.put(EXTRA_INDEX, index)
 
         super.onSaveInstanceState(outState)
     }
