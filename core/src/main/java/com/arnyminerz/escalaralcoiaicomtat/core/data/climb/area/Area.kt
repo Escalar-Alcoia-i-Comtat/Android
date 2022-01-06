@@ -99,6 +99,9 @@ class Area internal constructor(
     @IgnoredOnParcel
     override val imageQuality: Int = IMAGE_QUALITY
 
+    @IgnoredOnParcel
+    override val hasParents: Boolean = false
+
     companion object {
         @Namespace
         const val NAMESPACE = "Area"

@@ -452,4 +452,16 @@
     <string name="status_loading_data">Carregant les dades…</string>
     <string name="status_loading_installing_data">Instal·lant les dades…</string>
     <string name="downloads_title">Descàrregues</string>
+    <string name="sector_info_chart_title">Graus</string>
+    <string name="sector_info_chart_button_desc">Veure gràfica</string>
+    <string name="image_desc_walking_time">Temps caminant des de l\'aparcament</string>
+    <string name="safe_required_cracker">Empotrador</string>
+    <string name="safe_required_friend">Friend</string>
+    <string name="safe_required_lanyard">Cordí</string>
+    <string name="safe_required_nail">Clau</string>
+    <string name="safe_required_piton">Piton</string>
+    <string name="safe_required_strips">Strips</string>
+    <string name="toast_material_required">Cal aquest material per a escalar la via</string>
+    <string name="toast_ending_info">Aquest és el tipus de reunió que té la via</string>
+    <string name="toast_material_fixed">Aquest material ja està instal·lat a la via</string>
 </resources>

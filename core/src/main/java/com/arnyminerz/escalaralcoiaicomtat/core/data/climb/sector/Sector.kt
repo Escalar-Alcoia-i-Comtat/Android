@@ -133,6 +133,9 @@ class Sector internal constructor(
     @IgnoredOnParcel
     override val imageQuality: Int = IMAGE_QUALITY
 
+    @IgnoredOnParcel
+    override val hasParents: Boolean = true
+
     /**
      * Sets the content for the chip as a kids apt chip.
      * @author Arnau Mora
@@ -233,5 +236,25 @@ class Sector internal constructor(
         const val NAMESPACE = "Sector"
 
         const val IMAGE_QUALITY = 100
+
+        /**
+         * A sample sector for debugging and placeholder.
+         * @author Arnau Mora
+         * @since 20220106
+         */
+        val SAMPLE_SECTOR = Sector(
+            objectId = "B9zNqbw6REYVxGZxlYwh",
+            displayName = "Mas de la Penya 3",
+            timestampMillis = 1618153404000L,
+            sunTime = 1,
+            kidsApt = false,
+            walkingTime = 12,
+            location = LatLng(38.741649, -0.466173),
+            weight = "aac",
+            imageReferenceUrl = "gs://escalaralcoiaicomtat.appspot.com/images/sectors/mas-de-la-penya-sector-3_croquis.jpg",
+            documentPath = "/Areas/PL5j43cBRP7F24ecXGOR/Zones/3DmHnKBlDRwqlH1KK85C/Sectors/B9zNqbw6REYVxGZxlYwh",
+            webUrl = null,
+            parentZoneId = "3DmHnKBlDRwqlH1KK85C"
+        )
     }
 }

@@ -51,8 +51,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getChildren
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getData
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getSector
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZone
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.ensureBitmapRead
@@ -79,6 +82,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.parcelize.IgnoredOnParcel
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -309,7 +313,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 else -> null
             }?.let { childrenNamespace ->
                 Timber.d("Deleting children...")
-                val children = searchSession.getChildren<A>(childrenNamespace, objectId)
+                val children = searchSession.getChildren<A, String>(childrenNamespace, objectId)
+                { it.objectId }
                 for (child in children)
                     if (child is DataClass<*, *>)
                         lst.add(child.delete(context, searchSession))
@@ -493,7 +498,17 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20210724
      */
+    @IgnoredOnParcel
     protected abstract val imageQuality: Int
+
+    /**
+     * Tells whether or not the DataClass has parent elements, or if it's root.
+     * Used in functions such as [getParent] to be quicker.
+     * @author Arnau Mora
+     * @since 20220106
+     */
+    @IgnoredOnParcel
+    protected abstract val hasParents: Boolean
 
     /**
      * The download url from Firebase Storage for the [DataClass]' image.
@@ -511,6 +526,33 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         get() = generatePin(namespace, objectId)
 
     /**
+     * Gets the parent element of the [DataClass].
+     * @author Arnau Mora
+     * @since 20220106
+     * @param D The parent type of the DataClass.
+     * @param searchSession The [AppSearchSession] to get the data from.
+     */
+    suspend fun <D : DataClass<*, *>> getParent(searchSession: AppSearchSession): D? {
+        // If the DataClass is root, return null
+        if (!hasParents)
+            return null
+
+        // Get the parentId, if it's null, return null
+        val parentId: String = metadata.parentId ?: return null
+        // Get the parent's namespace, it null, return null
+        val parentNamespace: String = metadata.parentNamespace ?: return null
+
+        // From the different possibilities for the namespace, fetch from searchSession
+        @Suppress("UNCHECKED_CAST")
+        return when (parentNamespace) {
+            Area.NAMESPACE -> searchSession.getArea(parentId) as D?
+            Zone.NAMESPACE -> searchSession.getZone(parentId) as D?
+            Sector.NAMESPACE -> searchSession.getSector(parentId) as D?
+            else -> null
+        }
+    }
+
+    /**
      * Returns the parent element of the [DataClass].
      * @author Arnau Mora
      * @since 20210817
@@ -518,6 +560,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @return The correct [DataClass] that is the parent of the current one. Or null if [metadata]'s
      * [DataClassMetadata.parentId] is null.
      */
+    @Deprecated(
+        "Use AppSearch-based getParent.",
+        replaceWith = ReplaceWith("getParent(application.searchSession)")
+    )
     suspend fun getParent(application: App): DataClass<*, *>? {
         // Assert non null metadata's parentId and parentNamespace.
         val parentId: String = metadata.parentId ?: return null
@@ -556,9 +602,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     @WorkerThread
     @Throws(IllegalStateException::class)
-    suspend fun getChildren(searchSession: AppSearchSession): List<A> =
+    suspend inline fun <R : Comparable<R>> getChildren(
+        searchSession: AppSearchSession,
+        crossinline sortBy: (A) -> R?
+    ): List<A> =
         metadata.childNamespace?.let { childNamespace ->
-            searchSession.getChildren(childNamespace, objectId)
+            searchSession.getChildren(childNamespace, objectId, sortBy)
         } ?: throw IllegalStateException("If no child namespace is set in metadata.")
 
     /**
@@ -571,7 +620,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     @Throws(IndexOutOfBoundsException::class)
     @WorkerThread
     suspend fun get(searchSession: AppSearchSession, index: Int): A =
-        getChildren(searchSession)[index]
+        getChildren(searchSession) { it.objectId }[index]
 
     /**
      * Finds an [DataClass] inside a list with an specific id. If it's not found, null is returned.
@@ -581,7 +630,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     @WorkerThread
     suspend fun get(searchSession: AppSearchSession, objectId: String): A? {
-        for (o in getChildren(searchSession))
+        for (o in getChildren(searchSession) { it.objectId })
             if (o.objectId == objectId)
                 return o
         return null
@@ -589,7 +638,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
     @WorkerThread
     suspend fun has(searchSession: AppSearchSession, objectId: String): Boolean {
-        for (o in getChildren(searchSession))
+        for (o in getChildren(searchSession) { it.displayName })
             if (o.objectId == objectId)
                 return true
         return false
@@ -618,7 +667,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210724
      */
     @WorkerThread
-    suspend fun getSize(searchSession: AppSearchSession): Int = getChildren(searchSession).size
+    suspend fun getSize(searchSession: AppSearchSession): Int =
+        getChildren(searchSession) { it.objectId }.size
 
     /**
      * Checks if the [DataClass] is the same as another one.
@@ -783,7 +833,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         context: Context,
         searchSession: AppSearchSession
     ): Boolean {
-        val children = getChildren(searchSession)
+        val children = getChildren(searchSession) { it.objectId }
         for (child in children)
             if (child is DataClass<*, *> &&
                 child.downloadStatus(context, searchSession).first == DownloadStatus.DOWNLOADED
@@ -822,7 +872,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
         var size = imgFile.length()
 
-        val children = getChildren(searchSession)
+        val children = getChildren(searchSession) { it.objectId }
         for (child in children)
             if (child is DataClass<*, *>)
                 size += child.size(context, searchSession)
@@ -1189,21 +1239,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 }
 
 /**
- * Gets the children from all the [DataClass]es in the [Iterator].
- * @author Arnau Mora
- * @since 20210724
- * @param searchSession The search session for fetching data
- */
-suspend fun <A : DataClassImpl, B : DataClassImpl, D : DataClass<A, B>> Iterable<D>.getChildren(
-    searchSession: AppSearchSession
-): List<A> {
-    val items = arrayListOf<A>()
-    for (i in this)
-        items.addAll(i.getChildren(searchSession))
-    return items
-}
-
-/**
  * Gets an element from the [Iterable].
  * @author Arnau Mora
  * @since 20210724
@@ -1248,6 +1283,10 @@ suspend fun @receiver:ObjectId String.isDownloadIndexed(searchSession: AppSearch
  * @param searchSession The search session where to search for the data.
  * @param namespace The namespace of [A].
  */
-suspend fun <A : DataClassImpl> @receiver:ObjectId
-String.getChildren(searchSession: AppSearchSession, namespace: String) =
-    searchSession.getChildren<A>(namespace, this)
+suspend inline fun <A : DataClassImpl, R : Comparable<R>> @receiver:ObjectId
+String.getChildren(
+    searchSession: AppSearchSession,
+    namespace: String,
+    crossinline sortBy: (A) -> R?
+) =
+    searchSession.getChildren(namespace, this, sortBy)

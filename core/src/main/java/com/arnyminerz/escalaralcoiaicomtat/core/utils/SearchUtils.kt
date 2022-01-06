@@ -250,10 +250,14 @@ suspend fun AppSearchSession.getPaths(): List<Path> =
  * @param objectId The id of the parent DataClass.
  */
 @WorkerThread
-suspend fun <A : DataClassImpl> AppSearchSession.getChildren(
+suspend inline fun <A : DataClassImpl, R : Comparable<R>> AppSearchSession.getChildren(
     childrenNamespace: String,
-    objectId: String
+    objectId: String,
+    crossinline sortBy: (A) -> R?
 ): List<A> {
+    // The list for the resulting items
+    val list = arrayListOf<A>()
+
     Timber.v("$this > Building search spec...")
     val searchSpec = SearchSpec.Builder()
         .addFilterNamespaces(childrenNamespace)
@@ -263,35 +267,43 @@ suspend fun <A : DataClassImpl> AppSearchSession.getChildren(
         .build()
     Timber.v("$this > Performing search for \"$objectId\" with namespace \"$childrenNamespace\"...")
     val searchResults = search(objectId, searchSpec)
+
     Timber.v("$this > Awaiting for results...")
-    val nextPage = searchResults.nextPage.await()
-    val list = arrayListOf<A>()
-    Timber.v("$this > Building results list...")
-    for ((p, page) in nextPage.withIndex()) {
-        val genericDocument = page.genericDocument
-        val schemaType = genericDocument.schemaType
-        Timber.v("$this > [$p] Schema type: $schemaType")
-        val data = try {
-            when (schemaType) {
-                "AreaData" -> genericDocument.toDocumentClass(AreaData::class.java).data()
-                "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).data()
-                "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).data()
-                "PathData" -> genericDocument.toDocumentClass(PathData::class.java).data()
-                else -> {
-                    Timber.w("$this > [$p] Got unknown schema type.")
-                    continue
+    var nextPage = searchResults.nextPage.await()
+    while (nextPage.isNotEmpty()) {
+        Timber.v("$this > Got new page, building results list...")
+        for ((p, page) in nextPage.withIndex()) {
+            val genericDocument = page.genericDocument
+            val schemaType = genericDocument.schemaType
+            Timber.v("$this > [$p] Schema type: $schemaType")
+            val data = try {
+                when (schemaType) {
+                    "AreaData" -> genericDocument.toDocumentClass(AreaData::class.java).data()
+                    "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).data()
+                    "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).data()
+                    "PathData" -> genericDocument.toDocumentClass(PathData::class.java).data()
+                    else -> {
+                        Timber.w("$this > [$p] Got unknown schema type.")
+                        continue
+                    }
                 }
+            } catch (e: AppSearchException) {
+                Timber.e(e, "$this > [$p] Could not convert document class!")
+                continue
             }
-        } catch (e: AppSearchException) {
-            Timber.e(e, "$this > [$p] Could not convert document class!")
-            continue
+
+            @Suppress("UNCHECKED_CAST")
+            val a = data as? A ?: continue
+            Timber.v("$this > [$p] Adding to result list...")
+            list.add(a)
         }
 
-        @Suppress("UNCHECKED_CAST")
-        val a = data as? A ?: continue
-        Timber.v("$this > [$p] Adding to result list...")
-        list.add(a)
+        nextPage = searchResults.nextPage.await()
     }
+
+    list.sortBy(sortBy)
+
+    Timber.v("$this > Finished iterating results. Returning built list...")
     return list
 }
 

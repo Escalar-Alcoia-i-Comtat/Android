@@ -59,11 +59,11 @@ class DeveloperViewModel(application: Application) : AndroidViewModel(applicatio
             val areas = app.getAreas()
             for (area in areas) {
                 tree.appendLine("- ${area.displayName} ($area)")
-                for (zone in area.getChildren(app.searchSession)) {
+                for (zone in area.getChildren(app.searchSession) { it.objectId }) {
                     tree.appendLine("  - ${zone.displayName} ($zone)")
-                    for (sector in zone.getChildren(app.searchSession)) {
+                    for (sector in zone.getChildren(app.searchSession) { it.objectId }) {
                         tree.appendLine("  - ${sector.displayName} ($sector)")
-                        for (path in sector.getChildren(app.searchSession))
+                        for (path in sector.getChildren(app.searchSession) { it.objectId })
                             tree.appendLine("  - ${path.displayName} ($path)")
                     }
                 }

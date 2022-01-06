@@ -427,5 +427,32 @@ class Path internal constructor(
     companion object {
         @Namespace
         const val NAMESPACE = "Path"
+
+        val SAMPLE_PATH = Path(
+            objectId = "04BXQMNxFV4cjLILJk3p",
+            timestampMillis = 1618153406000,
+            sketchId = 52,
+            displayName = "Regall Impenetrable",
+            rawGrades = "7c+",
+            heights = arrayListOf(),
+            endings = arrayListOf("chain_carabiner"),
+            rawPitches = null,
+            fixedSafesData = FixedSafesData(
+                0, 1, 0, 0, 0, 0,
+            ),
+            requiredSafesData = RequiredSafesData(
+                lanyardRequired = false,
+                crackerRequired = false,
+                friendRequired = false,
+                stripsRequired = false,
+                pitonRequired = false,
+                nailRequired = false,
+            ),
+            description = null,
+            builtBy = "",
+            rebuiltBy = "",
+            documentPath = "/Areas/PL5j43cBRP7F24ecXGOR/Zones/3DmHnKBlDRwqlH1KK85C/Sectors/B9zNqbw6REYVxGZxlYwh/Paths/04BXQMNxFV4cjLILJk3p",
+            parentSectorId = "B9zNqbw6REYVxGZxlYwh",
+        )
     }
 }

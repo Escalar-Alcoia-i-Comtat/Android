@@ -342,8 +342,7 @@ class SectorFragment : NetworkChangeListenerFragment() {
 
             Timber.v("Loading paths...")
             val paths = sector
-                .getChildren(app.searchSession)
-                .sortedBy { it.sketchId }
+                .getChildren(app.searchSession) { it.sketchId }
             Timber.v("Finished loading children sectors")
 
             uiContext {

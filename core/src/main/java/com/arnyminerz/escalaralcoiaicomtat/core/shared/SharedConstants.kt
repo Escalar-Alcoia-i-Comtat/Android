@@ -141,18 +141,19 @@ const val REQUEST_CODE_LOGIN = 5
 const val REQUEST_CODE_SELECT_PROFILE_IMAGE = 3
 
 /**
- * Returned by [DataClassActivity] when no [EXTRA_NAMESPACE] is passed through the [Activity.Intent].
+ * Used as a "non-error" answer for the cases where the user is who requested the activity to get
+ * closed, such as when tapping the back button.
  * @author Arnau Mora
- * @since 20220105
+ * @since 20220106
  */
-const val REQUEST_CODE_ERROR_NO_NAMESPACE = 1
+const val REQUEST_CODE_REQUESTED_BACK = 0
 
 /**
- * Returned by [DataClassActivity] when no [EXTRA_OBJECT_ID] is passed through the [Activity.Intent].
+ * Returned by [DataClassActivity] when no [EXTRA_DATACLASS] is passed through the [Activity.Intent].
  * @author Arnau Mora
  * @since 20220105
  */
-const val REQUEST_CODE_ERROR_NO_OBJECT_ID = 2
+const val REQUEST_CODE_ERROR_NO_DATACLASS = 1
 
 const val PERMISSION_DIALOG_TAG = "PERM_TAG"
 

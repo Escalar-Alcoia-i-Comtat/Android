@@ -1,5 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore
 
+import android.app.Activity
+import android.os.Parcelable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -9,7 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
@@ -33,19 +35,23 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.lifecycle.MutableLiveData
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_NAMESPACE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_OBJECT_ID
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PARENT
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.tooltip.Tooltip
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
+import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.storage.FirebaseStorage
 
@@ -53,11 +59,17 @@ import com.google.firebase.storage.FirebaseStorage
 @ExperimentalFoundationApi
 @ExperimentalMaterial3Api
 @ExperimentalBadgeUtils
-fun DataClassActivity.DataClassExplorer(
+fun Activity.DataClassExplorer(
+    exploreViewModel: ExploreViewModel,
     storage: FirebaseStorage,
+    dataClass: DataClass<*, *>,
+    hasInternet: MutableLiveData<Boolean>,
 ) {
     val context = LocalContext.current
-    val childrenLoader = exploreViewModel.childrenLoader(namespace, objectId)
+    val childrenLoader = if (dataClass is Area)
+        exploreViewModel.childrenLoader(dataClass) { it.displayName }
+    else
+        exploreViewModel.childrenLoader(dataClass as Zone) { it.weight }
 
     Scaffold(
         topBar = {
@@ -108,17 +120,15 @@ fun DataClassActivity.DataClassExplorer(
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 title = {
-                    val parentDataClass by remember { childrenLoader.first }
                     Text(
-                        text = parentDataClass?.displayName
-                            ?: stringResource(R.string.status_loading),
+                        text = dataClass.displayName,
                         fontFamily = CabinFamily
                     )
                 }
             )
         }
     ) { padding ->
-        val items by remember { childrenLoader.second }
+        val items by remember { childrenLoader }
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
@@ -138,18 +148,13 @@ fun DataClassActivity.DataClassExplorer(
                 }
             }
             // The items
-            items(items) { dataClass ->
-                DataClassItem(dataClass, storage) {
-                    when (namespace) {
-                        Sector.NAMESPACE ->
-                            // TODO: Eventually SectorActivity will be moved to DataClassActivity
-                            launch(SectorActivity::class.java) {
-                                putExtra(EXTRA_SECTOR, objectId)
-                            }
-                        else -> launch(DataClassActivity::class.java) {
-                            putExtra(EXTRA_OBJECT_ID, dataClass.objectId)
-                            putExtra(EXTRA_NAMESPACE, dataClass.namespace)
-                        }
+            itemsIndexed(items) { i, item ->
+                DataClassItem(item, storage) {
+                    launch(DataClassActivity::class.java) {
+                        putExtra(EXTRA_DATACLASS, item as Parcelable)
+                        putExtra(EXTRA_PARENT, dataClass as Parcelable)
+                        putExtra(EXTRA_CHILDREN_COUNT, items.size)
+                        putExtra(EXTRA_INDEX, i)
                     }
                 }
             }

@@ -56,3 +56,10 @@ val md_theme_dark_inverseSurface = Color(0xFFe4e2db)
 
 val seed = Color(0xFF506602)
 val error = Color(0xFFba1b1b)
+
+val grade_red = Color(0xffe53935)
+val grade_green = Color(0xff43a047)
+val grade_blue = Color(0xff1565c0)
+val grade_black = Color(0xFF000000)
+val grade_yellow = Color(0xffffeb3b)
+val grade_purple = Color(0xff7b1fa2)

@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.screen.main
 
+import android.os.Parcelable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,8 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_NAMESPACE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_OBJECT_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
@@ -48,8 +48,7 @@ fun MainActivity.ExploreScreen(storage: FirebaseStorage) {
             Timber.d("Displaying $area...")
             DataClassItem(area, storage) {
                 launch(DataClassActivity::class.java) {
-                    putExtra(EXTRA_OBJECT_ID, area.objectId)
-                    putExtra(EXTRA_NAMESPACE, area.namespace)
+                    putExtra(EXTRA_DATACLASS, area as Parcelable)
                 }
             }
         }
