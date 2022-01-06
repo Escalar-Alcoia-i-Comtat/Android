@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -87,6 +88,7 @@ fun SectorPage(
                                 text = stringResource(sector.sunTime.textResource),
                                 icon = ContextCompat.getDrawable(context, sector.sunTime.icon),
                                 modifier = Modifier.padding(start = 8.dp, end = 4.dp),
+                                iconTint = MaterialTheme.colorScheme.onSurfaceVariant.toArgb(),
                             )
                             if (sector.kidsApt)
                                 Chip(
@@ -96,6 +98,7 @@ fun SectorPage(
                                         R.drawable.ic_round_child_care_24
                                     ),
                                     modifier = Modifier.padding(start = 4.dp),
+                                    iconTint = MaterialTheme.colorScheme.onSurfaceVariant.toArgb(),
                                 )
                         }
                         Column(
