@@ -51,8 +51,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getChildren
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getData
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getSector
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZone
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.ensureBitmapRead
@@ -496,6 +499,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     protected abstract val imageQuality: Int
 
     /**
+     * Tells whether or not the DataClass has parent elements, or if it's root.
+     * Used in functions such as [getParent] to be quicker.
+     * @author Arnau Mora
+     * @since 20220106
+     */
+    protected abstract val hasParents: Boolean
+
+    /**
      * The download url from Firebase Storage for the [DataClass]' image.
      * @author Arnau Mora
      * @since 20210721
@@ -511,6 +522,33 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         get() = generatePin(namespace, objectId)
 
     /**
+     * Gets the parent element of the [DataClass].
+     * @author Arnau Mora
+     * @since 20220106
+     * @param D The parent type of the DataClass.
+     * @param searchSession The [AppSearchSession] to get the data from.
+     */
+    suspend fun <D : DataClass<*, *>> getParent(searchSession: AppSearchSession): D? {
+        // If the DataClass is root, return null
+        if (!hasParents)
+            return null
+
+        // Get the parentId, if it's null, return null
+        val parentId: String = metadata.parentId ?: return null
+        // Get the parent's namespace, it null, return null
+        val parentNamespace: String = metadata.parentNamespace ?: return null
+
+        // From the different possibilities for the namespace, fetch from searchSession
+        @Suppress("UNCHECKED_CAST")
+        return when (parentNamespace) {
+            Area.NAMESPACE -> searchSession.getArea(parentId) as D?
+            Zone.NAMESPACE -> searchSession.getZone(parentId) as D?
+            Sector.NAMESPACE -> searchSession.getSector(parentId) as D?
+            else -> null
+        }
+    }
+
+    /**
      * Returns the parent element of the [DataClass].
      * @author Arnau Mora
      * @since 20210817
@@ -518,6 +556,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @return The correct [DataClass] that is the parent of the current one. Or null if [metadata]'s
      * [DataClassMetadata.parentId] is null.
      */
+    @Deprecated(
+        "Use AppSearch-based getParent.",
+        replaceWith = ReplaceWith("getParent(application.searchSession)")
+    )
     suspend fun getParent(application: App): DataClass<*, *>? {
         // Assert non null metadata's parentId and parentNamespace.
         val parentId: String = metadata.parentId ?: return null
