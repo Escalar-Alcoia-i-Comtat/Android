@@ -20,6 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModelImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.put
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toMap
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore.DataClassExplorer
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore.SectorViewScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
@@ -51,7 +52,7 @@ class DataClassActivity : NetworkAwareComponentActivity() {
      * @author Arnau Mora
      * @since 20220105
      */
-    internal val sectorPageViewModel by viewModels<SectorPageViewModelImpl>(
+    private val sectorPageViewModel by viewModels<SectorPageViewModelImpl>(
         factoryProducer = { SectorPageViewModelImpl.Factory(application) }
     )
 
@@ -100,13 +101,17 @@ class DataClassActivity : NetworkAwareComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        Timber.v("Loaded DataClassActivity with extras: ${intent.extras?.toMap()}")
+
         namespace = intent.getExtra(EXTRA_NAMESPACE)
             ?: savedInstanceState?.getExtra(EXTRA_NAMESPACE) ?: run {
+                Timber.e("Finishing DataClassActivity since no namespace was passed.")
                 finishActivity(REQUEST_CODE_ERROR_NO_NAMESPACE)
                 return
             }
         objectId = intent.getExtra(EXTRA_OBJECT_ID)
             ?: savedInstanceState?.getExtra(EXTRA_OBJECT_ID) ?: run {
+                Timber.e("Finishing DataClassActivity since no objectId was passed.")
                 finishActivity(REQUEST_CODE_ERROR_NO_OBJECT_ID)
                 return
             }
@@ -115,9 +120,12 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         setContent {
             AppTheme {
                 if (namespace == Sector.NAMESPACE)
-                    parentId?.let {
-                        SectorViewScreen(sectorPageViewModel, it, objectId)
-                    } ?: finishActivity(REQUEST_CODE_ERROR_NO_PARENT_ID)
+                    parentId?.let { zoneId ->
+                        SectorViewScreen(sectorPageViewModel, zoneId, objectId)
+                    } ?: run {
+                        Timber.e("Finishing DataClassActivity since no parentId was passed.")
+                        finishActivity(REQUEST_CODE_ERROR_NO_PARENT_ID)
+                    }
                 else
                     DataClassExplorer(storage)
             }
