@@ -54,10 +54,13 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
      * @param dataClass The DataClass to load the children from.
      * @return A [MutableState] that contains a list of children. May be empty while loading.
      */
-    fun childrenLoader(dataClass: DataClass<*, *>): MutableState<List<DataClassImpl>> =
+    inline fun <A : DataClassImpl, T : DataClass<A, *>, R : Comparable<R>> childrenLoader(
+        dataClass: T,
+        crossinline sortBy: (A) -> R?,
+    ): MutableState<List<DataClassImpl>> =
         mutableStateOf<List<DataClassImpl>>(emptyList()).apply {
             viewModelScope.launch {
-                val children = dataClass.getChildren(app.searchSession)
+                val children = dataClass.getChildren(app.searchSession, sortBy)
                 value = children
             }
         }
