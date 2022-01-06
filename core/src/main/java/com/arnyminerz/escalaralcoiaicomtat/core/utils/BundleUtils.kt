@@ -9,5 +9,5 @@ import android.os.Bundle
  */
 fun Bundle.toMap(): Map<String, Any?> = mutableMapOf<String, Any?>().apply {
     for (key in keySet())
-        put(key, get(key))
+        put(key, this@toMap.get(key))
 }
