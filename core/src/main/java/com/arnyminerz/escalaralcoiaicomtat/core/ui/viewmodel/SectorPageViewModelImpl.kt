@@ -10,12 +10,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.color
 import kotlinx.coroutines.launch
 import me.bytebeats.views.charts.bar.BarChartData
-import timber.log.Timber
 
 class SectorPageViewModelImpl(application: Application) : AndroidViewModel(application),
     SectorPageViewModel {
@@ -41,26 +41,13 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
         return data
     }
 
-    override fun loadSectors(zoneId: String): MutableState<List<Sector>> {
-        val state = mutableStateOf<List<Sector>>(emptyList())
-
-        viewModelScope.launch {
-            // First get the parent zone
-            Timber.d("Loading zone $zoneId...")
-            val zone = app.getZone(zoneId) ?: run {
-                // If the zone was not found
-                Timber.e("Zone with id $zoneId could not be found!")
-                return@launch
+    override fun loadZone(sector: Sector): MutableState<Zone?> =
+        mutableStateOf<Zone?>(null).apply {
+            viewModelScope.launch {
+                val zone = sector.getParent<Zone>(app.searchSession)
+                value = zone
             }
-            // Then get the children sectors
-            Timber.d("Loading children sectors of zone $zoneId...")
-            val sectors = zone.getChildren(app.searchSession)
-            // And pass them to the state
-            state.value = sectors
         }
-
-        return state
-    }
 
     class Factory(
         private val application: Application,
