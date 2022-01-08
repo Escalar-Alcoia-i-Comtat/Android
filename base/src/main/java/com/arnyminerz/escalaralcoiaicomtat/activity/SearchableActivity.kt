@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.SearchManager
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.WorkerThread
@@ -21,15 +22,16 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -62,6 +64,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
@@ -71,12 +74,14 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone.Companion.SAMPLE_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.SearchItemTypeColor
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.LoadingIndicator
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import kotlinx.coroutines.Dispatchers
@@ -107,7 +112,7 @@ class SearchableActivity : ComponentActivity() {
         setContent {
             AppTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colors.background) {
+                Surface(color = MaterialTheme.colorScheme.background) {
                     val searchQuery = if (intent.action == Intent.ACTION_SEARCH)
                         intent.getStringExtra(SearchManager.QUERY)
                     else null
@@ -130,7 +135,10 @@ class SearchableActivity : ComponentActivity() {
                         }
                         Timber.v("Search results: $list")
                         if (list.isEmpty())
-                            Text(stringResource(R.string.search_no_results))
+                            Text(
+                                stringResource(R.string.search_no_results),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         else
                             SearchResultsView(list)
                     }
@@ -176,6 +184,11 @@ class SearchableActivity : ComponentActivity() {
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(focusRequester),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                trailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                leadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
             maxLines = 1,
             keyboardActions = KeyboardActions(
                 onSearch = {
@@ -230,6 +243,7 @@ class SearchableActivity : ComponentActivity() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
+            backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
             elevation = 10.dp
         ) {
             Column(
@@ -243,7 +257,8 @@ class SearchableActivity : ComponentActivity() {
                     fontSize = 26.sp,
                     fontFamily = CabinFamily,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
                     text = buildAnnotatedString {
@@ -275,12 +290,22 @@ class SearchableActivity : ComponentActivity() {
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 4.dp)
+                        .padding(start = 4.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 IconButton(
                     modifier = Modifier.align(Alignment.End),
-                    onClick = { doAsync { dataClassImpl.launch(this@SearchableActivity) } }) {
-                    Icon(Icons.Rounded.ChevronRight, contentDescription = "Enter element")
+                    onClick = {
+                        launch(DataClassActivity::class.java) {
+                            putExtra(EXTRA_DATACLASS, dataClassImpl as Parcelable)
+                        }
+                    }
+                ) {
+                    Icon(
+                        Icons.Rounded.ChevronRight,
+                        contentDescription = "Enter element",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         }
