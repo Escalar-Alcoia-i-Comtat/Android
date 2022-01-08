@@ -17,6 +17,7 @@ import timber.log.Timber
 @ExperimentalBadgeUtils
 @ExperimentalMaterial3Api
 @Throws(IllegalArgumentException::class)
+@Deprecated("Use Jetpack compose")
 suspend fun DataClassImpl.launch(activity: Activity) {
     val pathPieces = documentPath.split("/")
     Timber.v("Launching activity with path $documentPath")
