@@ -14,9 +14,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,6 +32,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -49,8 +54,9 @@ import timber.log.Timber
 @ExperimentalBadgeUtils
 @OptIn(ExperimentalMaterial3Api::class)
 fun MainActivity.ExploreScreen(storage: FirebaseStorage) {
-    // TODO: Map and search bar
     val areas by exploreViewModel.loadAreas().observeAsState()
+    val focusRequester = remember { FocusRequester() }
+    var isFocused by remember { mutableStateOf(false) }
     var searchTextField by remember { mutableStateOf("") }
 
     LazyColumn {
@@ -65,17 +71,33 @@ fun MainActivity.ExploreScreen(storage: FirebaseStorage) {
                 OutlinedTextField(
                     value = searchTextField,
                     onValueChange = { searchTextField = it },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged { isFocused = it.isFocused }
+                        .focusRequester(focusRequester),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         textColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         trailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        leadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     ),
                     shape = RoundedCornerShape(32.dp),
-                    trailingIcon = {
+                    leadingIcon = {
                         Icon(
                             imageVector = Icons.Rounded.Search,
                             contentDescription = stringResource(R.string.search_hint),
                         )
+                    },
+                    trailingIcon = {
+                        AnimatedVisibility(visible = isFocused) {
+                            IconButton(
+                                onClick = {
+                                    searchTextField = ""
+                                    focusRequester.requestFocus()
+                                },
+                            ) {
+                                Icon(Icons.Rounded.Close, "Clear text")
+                            }
+                        }
                     },
                     placeholder = {
                         Text(text = stringResource(R.string.search_hint))
@@ -92,6 +114,8 @@ fun MainActivity.ExploreScreen(storage: FirebaseStorage) {
                     )
                 )
             }
+
+            // TODO: Nearby zones map
 
             Box(modifier = Modifier.fillMaxWidth()) {
                 AnimatedVisibility(
