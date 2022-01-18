@@ -441,6 +441,7 @@
     <string name="image_desc_no_internet">No Internet</string>
     <string name="image_desc_app_icon">Escalar Alcoià i Comtat</string>
     <string name="image_desc_logo_cea">Centre Excursionista d\'Alcoi\'s Logo</string>
+    <string name="image_desc_sector_image">Sector image</string>
     <string name="image_desc_zone_image">Zone image</string>
     <string name="image_desc_area_image">Area image</string>
     <string name="image_desc_fixed_equipment">Fixed Equipment</string>

@@ -465,4 +465,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="toast_material_required">Este material es necesario para escalar la vía</string>
     <string name="toast_ending_info">Este es el tipo de reunión que tiene la vía</string>
     <string name="toast_material_fixed">Este material ya está instalado en la vía</string>
+    <string name="image_desc_sector_image">Imagen del sector</string>
 </resources>

@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.grade_black
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.grade_blue
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.grade_green
@@ -113,6 +114,8 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
             paths = pathsList
         }
     }
+
+    override fun loadImage(sector: Sector) = sector.imageData(context, storage)
 
     class Factory(
         private val application: Application,
