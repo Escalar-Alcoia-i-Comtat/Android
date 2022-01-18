@@ -748,7 +748,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
          * @see DownloadWorker
          */
         @JvmStatic
-        override fun schedule(
+        @WorkerThread
+        override suspend fun schedule(
             context: Context,
             tag: String,
             data: com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
