@@ -6,9 +6,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.LoadingActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.CONFIRMATION_EMAIL_DYNAMIC
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.CONFIRMATION_EMAIL_URL
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
@@ -61,23 +61,31 @@ class EmailConfirmationActivity : AppCompatActivity() {
             try {
                 user?.reload()?.await()
             } catch (_: FirebaseAuthInvalidUserException) {
+                Timber.w("The user has been removed, loading app...")
+                PreferencesModule
+                    .systemPreferencesRepository
+                    .setWaitingForEmailConfirmation(false)
                 uiContext {
-                    Timber.w("The user has been removed, loading app...")
-                    PREF_WAITING_EMAIL_CONFIRMATION.put(false)
                     launch(LoadingActivity::class.java)
                 }
             }
-            uiContext {
-                if (user == null) {
-                    Timber.v("There's no logged in user, loading app...")
-                    PREF_WAITING_EMAIL_CONFIRMATION.put(false)
+            if (user == null) {
+                Timber.v("There's no logged in user, loading app...")
+                PreferencesModule
+                    .systemPreferencesRepository
+                    .setWaitingForEmailConfirmation(false)
+                uiContext {
                     launch(LoadingActivity::class.java)
-                } else {
-                    Timber.v("Checking if verified")
-                    val verified = user.isEmailVerified
-                    if (verified) {
-                        Timber.v("The user's email has been verified, loading app...")
-                        PREF_WAITING_EMAIL_CONFIRMATION.put(false)
+                }
+            } else {
+                Timber.v("Checking if verified")
+                val verified = user.isEmailVerified
+                if (verified) {
+                    Timber.v("The user's email has been verified, loading app...")
+                    PreferencesModule
+                        .systemPreferencesRepository
+                        .setWaitingForEmailConfirmation(false)
+                    uiContext {
                         launch(LoadingActivity::class.java)
                     }
                 }

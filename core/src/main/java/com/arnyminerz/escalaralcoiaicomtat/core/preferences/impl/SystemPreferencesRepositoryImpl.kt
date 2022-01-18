@@ -180,4 +180,22 @@ class SystemPreferencesRepositoryImpl(
             it[Keys.shownMd5Warning] ?: false
         }
         .distinctUntilChanged()
+
+    /**
+     * Returns whether or not the system is waiting for the user to confirm its email address.
+     * @author Arnau Mora
+     * @since 20220118
+     */
+    override val waitingForEmailConfirmation: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.waitingForEmailConfirmation] ?: false
+        }
+        .distinctUntilChanged()
 }

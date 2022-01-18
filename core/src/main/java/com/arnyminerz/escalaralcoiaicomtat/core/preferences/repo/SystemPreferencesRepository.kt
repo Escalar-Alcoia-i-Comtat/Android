@@ -81,4 +81,11 @@ interface SystemPreferencesRepository {
      * @since 20220118
      */
     val shownMd5Warning: Flow<Boolean>
+
+    /**
+     * Should return the value of the waiting for email confirmation preference.
+     * @author Arnau Mora
+     * @since 20220118
+     */
+    val waitingForEmailConfirmation: Flow<Boolean>
 }

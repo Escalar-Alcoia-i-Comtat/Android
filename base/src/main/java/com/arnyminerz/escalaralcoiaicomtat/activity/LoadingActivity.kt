@@ -33,7 +33,6 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationAc
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
@@ -54,6 +53,8 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 /**
@@ -134,8 +135,9 @@ class LoadingActivity : LanguageComponentActivity() {
         } else
             Timber.v("Won't show intro.")
 
-        val waitingForEmailConfirmation = PREF_WAITING_EMAIL_CONFIRMATION.get()
-        if (waitingForEmailConfirmation) {
+        val waitingForEmailConfirmation = PreferencesModule.waitingForEmailConfirmation()
+        // TODO: This check is a bit dirty, should be cleaned up somehow.
+        if (runBlocking { waitingForEmailConfirmation.first() }) {
             Timber.i("Launching email confirmation activity.")
             finish()
             launch(EmailConfirmationActivity::class.java)

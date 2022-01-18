@@ -13,9 +13,9 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.profile.AuthActivity
 import com.arnyminerz.escalaralcoiaicomtat.auth.createFirestoreUserReference
 import com.arnyminerz.escalaralcoiaicomtat.auth.setDefaultProfileImage
 import com.arnyminerz.escalaralcoiaicomtat.auth.updateDisplayName
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.CONFIRMATION_EMAIL_DYNAMIC
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.CONFIRMATION_EMAIL_URL
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.exception_handler.handleStorageException
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.finishActivityWithResult
@@ -279,8 +279,17 @@ class RegisterFragment private constructor() : Fragment() {
                 fields.enable()
             }
             ?.addOnSuccessListener {
-                PREF_WAITING_EMAIL_CONFIRMATION.put(true)
-                activity.finishActivityWithResult(RESULT_CODE_WAITING_EMAIL_CONFIRMATION, null)
+                doAsync {
+                    PreferencesModule
+                        .systemPreferencesRepository
+                        .setWaitingForEmailConfirmation(true)
+                    uiContext {
+                        activity.finishActivityWithResult(
+                            RESULT_CODE_WAITING_EMAIL_CONFIRMATION,
+                            null
+                        )
+                    }
+                }
             }
     }
 
