@@ -5,7 +5,6 @@ import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -42,6 +41,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.annotations.icon
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.textResource
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.ZoomableImage
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
@@ -68,16 +68,13 @@ fun SectorPage(
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Image
-        Box(
+        ZoomableImage(
+            imageModel = viewModel.loadImage(sector),
+            contentDescription = "TODO",
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(.7f)
-        ) {
-            Text(
-                text = "This is the image",
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
+        )
 
         // TODO: Sector image
         LazyColumn {
