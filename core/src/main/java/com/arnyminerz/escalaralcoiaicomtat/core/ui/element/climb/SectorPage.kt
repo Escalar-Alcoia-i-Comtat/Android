@@ -70,9 +70,10 @@ fun SectorPage(
         // Image
         ZoomableImage(
             imageModel = viewModel.loadImage(sector),
-            contentDescription = "TODO",
+            contentDescription = stringResource(R.string.image_desc_sector_image),
             modifier = Modifier
                 .fillMaxWidth()
+                // TODO: Height fraction should be adjustable from settings
                 .fillMaxHeight(.7f)
         )
 
