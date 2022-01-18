@@ -116,9 +116,6 @@
             android:name=".activity.IntroActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.MapsActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activity.SearchableActivity"
             android:exported="true"
             android:launchMode="singleTop">
