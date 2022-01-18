@@ -5,9 +5,11 @@ import android.util.Log
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.ALERT_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ALERT_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 @SuppressLint("LogNotTimber")
 class MessagingService : FirebaseMessagingService() {
@@ -24,7 +26,9 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        if (SETTINGS_ALERT_PREF.get().not()) {
+        val getAlertNotificationsEnabled = PreferencesModule.getAlertNotificationsEnabled
+        val alertNotificationsEnabled = runBlocking { getAlertNotificationsEnabled().first() }
+        if (!alertNotificationsEnabled) {
             Log.w(TAG, "Will not show notification since they are disabled.")
             return
         }
