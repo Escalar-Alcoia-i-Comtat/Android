@@ -251,6 +251,14 @@ class SearchableActivity : ComponentActivity() {
                     .padding(8.dp)
                     .fillMaxWidth()
             ) {
+                val dataClassType = when (val type = dataClassImpl::class.java.simpleName) {
+                    "Area" -> stringResource(R.string.data_type_area)
+                    "Zone" -> stringResource(R.string.data_type_zone)
+                    "Sector" -> stringResource(R.string.data_type_sector)
+                    "Path" -> stringResource(R.string.data_type_path)
+                    else -> type
+                }
+
                 Text(
                     text = dataClassImpl.displayName,
                     modifier = Modifier.fillMaxWidth(),
@@ -269,15 +277,7 @@ class SearchableActivity : ComponentActivity() {
                                 fontWeight = FontWeight.Bold
                             )
                         ) {
-                            append(
-                                when (val type = dataClassImpl::class.java.simpleName) {
-                                    "Area" -> stringResource(R.string.data_type_area)
-                                    "Zone" -> stringResource(R.string.data_type_zone)
-                                    "Sector" -> stringResource(R.string.data_type_sector)
-                                    "Path" -> stringResource(R.string.data_type_path)
-                                    else -> type
-                                }
-                            )
+                            append(dataClassType)
                         }
                         val app = application as App
                         val parent = runBlocking {
