@@ -88,4 +88,11 @@ interface SystemPreferencesRepository {
      * @since 20220118
      */
     val waitingForEmailConfirmation: Flow<Boolean>
+
+    /**
+     * Should return the value of the indexed data preference.
+     * @author Arnau Mora
+     * @since 20220118
+     */
+    val indexedData: Flow<Boolean>
 }

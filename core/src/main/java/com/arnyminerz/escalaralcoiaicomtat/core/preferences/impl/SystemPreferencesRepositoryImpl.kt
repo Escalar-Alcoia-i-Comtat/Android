@@ -198,4 +198,22 @@ class SystemPreferencesRepositoryImpl(
             it[Keys.waitingForEmailConfirmation] ?: false
         }
         .distinctUntilChanged()
+
+    /**
+     * Returns whether or not the system has indexed all the data from the data module.
+     * @author Arnau Mora
+     * @since 20220118
+     */
+    override val indexedData: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.indexedData] ?: false
+        }
+        .distinctUntilChanged()
 }
