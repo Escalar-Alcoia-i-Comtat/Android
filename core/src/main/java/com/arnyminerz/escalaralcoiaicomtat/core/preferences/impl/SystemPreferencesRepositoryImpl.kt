@@ -162,4 +162,22 @@ class SystemPreferencesRepositoryImpl(
             it[Keys.shownIntro] ?: false
         }
         .distinctUntilChanged()
+
+    /**
+     * Returns whether or not the MD5 warning has been shown.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    override val shownMd5Warning: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.shownMd5Warning] ?: false
+        }
+        .distinctUntilChanged()
 }

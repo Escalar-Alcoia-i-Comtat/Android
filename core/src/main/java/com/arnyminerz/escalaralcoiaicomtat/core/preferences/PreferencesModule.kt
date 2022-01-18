@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.SystemPreferencesRepositoryImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.UserPreferencesRepositoryImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetIntroShown
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetShownMd5Warning
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetAlertNotificationsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetDataCollection
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetErrorCollection
@@ -92,6 +93,13 @@ object PreferencesModule {
      * @since 20211229
      */
     val introShown get() = GetIntroShown(systemPreferencesRepository)
+
+    /**
+     * Returns the shown MD5 warning preference.
+     * @author Arnau Mora
+     * @since 20220118
+     */
+    val shownMd5Warning get() = GetShownMd5Warning(systemPreferencesRepository)
 
     /**
      * Returns the language preference.

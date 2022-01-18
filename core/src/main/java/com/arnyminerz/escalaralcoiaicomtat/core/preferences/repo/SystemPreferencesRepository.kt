@@ -74,4 +74,11 @@ interface SystemPreferencesRepository {
      * @since 20211229
      */
     val shownIntro: Flow<Boolean>
+
+    /**
+     * Should return the value of the shown MD5 warning preference.
+     * @author Arnau Mora
+     * @since 20220118
+     */
+    val shownMd5Warning: Flow<Boolean>
 }

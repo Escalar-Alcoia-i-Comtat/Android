@@ -16,8 +16,26 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS_KEY
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATA_MODULE_NAME
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION_KEY
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE_KEY
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_DEFAULTS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED_KEY
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.md5Compatible
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -38,8 +56,11 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.perf.ktx.performance
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class LoadingViewModel(application: Application) : AndroidViewModel(application) {
@@ -66,6 +87,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    @UiThread
     private suspend fun loadingRoutine(
         deepLinkPath: String?,
         remoteConfig: FirebaseRemoteConfig,
@@ -80,14 +102,20 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
 
         progressMessageResource.value = R.string.status_loading_noti_list
         messagingSubscribeTest(messaging)
-        messagingTokenGet(messaging)
+        withContext(Dispatchers.IO) {
+            messagingTokenGet(messaging)
+        }
 
         progressMessageResource.value = R.string.status_loading_checks
         checkGooglePlayServices(app)
-        checkMD5Support(analytics, app)
+        withContext(Dispatchers.IO) {
+            checkMD5Support(analytics, app)
+        }
 
         progressMessageResource.value = R.string.status_loading_data_collection
-        dataCollectionSetUp()
+        withContext(Dispatchers.IO) {
+            dataCollectionSetUp()
+        }
 
         progressMessageResource.value = R.string.status_loading_auth
         authSetup(auth, app)
@@ -279,23 +307,30 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * @author Arnau Mora
      * @since 20210929
      */
-    private fun checkMD5Support(analytics: FirebaseAnalytics, context: Context) {
+    @WorkerThread
+    private suspend fun checkMD5Support(analytics: FirebaseAnalytics, context: Context) {
         val md5Supported = md5Compatible()
         Timber.i("Is MD5 hashing supported: $md5Supported")
         if (!md5Supported) {
             Timber.w("MD5 hashing is not compatible")
             analytics.logEvent("MD5NotSupported") { }
-            if (!PREF_SHOWN_MD5_WARNING.get()) {
-                Timber.i("Showing MD5 hashing warning dialog")
-                MaterialAlertDialogBuilder(context, R.style.MaterialAlertDialog_App)
-                    .setTitle(R.string.dialog_md5_incompatible_title)
-                    .setMessage(R.string.dialog_md5_incompatible_message)
-                    .setPositiveButton(R.string.action_ok) { dialog, _ ->
-                        PREF_SHOWN_MD5_WARNING.put(true)
-                        dialog.dismiss()
-                    }
-                    .show()
-            }
+            val systemPrefRepo = PreferencesModule.systemPreferencesRepository
+            val getWarnedMd5 = PreferencesModule.shownMd5Warning
+            val shownMd5Warning = getWarnedMd5().first()
+            if (!shownMd5Warning)
+                uiContext {
+                    Timber.i("Showing MD5 hashing warning dialog")
+                    MaterialAlertDialogBuilder(context, R.style.MaterialAlertDialog_App)
+                        .setTitle(R.string.dialog_md5_incompatible_title)
+                        .setMessage(R.string.dialog_md5_incompatible_message)
+                        .setPositiveButton(R.string.action_ok) { dialog, _ ->
+                            doAsync {
+                                systemPrefRepo.markMd5WarningShown()
+                            }
+                            dialog.dismiss()
+                        }
+                        .show()
+                }
         }
     }
 
@@ -306,18 +341,21 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * @since 20210617
      * @see SETTINGS_ERROR_REPORTING_PREF
      */
-    @UiThread
-    private fun dataCollectionSetUp() {
-        val enableErrorReporting = SETTINGS_ERROR_REPORTING_PREF.get()
+    @WorkerThread
+    private suspend fun dataCollectionSetUp() {
+        val getDataCollection = PreferencesModule.getDataCollection
+        val getErrorCollection = PreferencesModule.getErrorCollection
+        val dataCollection = getDataCollection().first()
+        val errorCollection = getErrorCollection().first()
 
-        Firebase.crashlytics.setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
-        Timber.v("Set Crashlytics collection enabled to $enableErrorReporting")
+        Firebase.crashlytics.setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG && errorCollection)
+        Timber.v("Set Crashlytics collection enabled to $errorCollection")
 
-        Firebase.analytics.setAnalyticsCollectionEnabled(!BuildConfig.DEBUG && enableErrorReporting)
-        Timber.v("Set Analytics collection enabled to $enableErrorReporting")
+        Firebase.analytics.setAnalyticsCollectionEnabled(!BuildConfig.DEBUG && dataCollection)
+        Timber.v("Set Analytics collection enabled to $dataCollection")
 
-        Firebase.performance.isPerformanceCollectionEnabled = enableErrorReporting
-        Timber.v("Set Performance collection enabled to $enableErrorReporting")
+        Firebase.performance.isPerformanceCollectionEnabled = dataCollection
+        Timber.v("Set Performance collection enabled to $dataCollection")
     }
 
     /**
