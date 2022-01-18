@@ -27,7 +27,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_DEFAULTS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ERROR_REPORTING_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
@@ -339,7 +338,6 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * If debugging, data collection will always be disabled.
      * @author Arnau Mora
      * @since 20210617
-     * @see SETTINGS_ERROR_REPORTING_PREF
      */
     @WorkerThread
     private suspend fun dataCollectionSetUp() {
