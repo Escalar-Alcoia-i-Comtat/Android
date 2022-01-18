@@ -25,7 +25,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // Sets the supported languages
-        resConfigs "en", "US", "ca", "es"
+        resConfigs 'en', 'US', 'ca', 'es'
 
         vectorDrawables {
             useSupportLibrary true
