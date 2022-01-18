@@ -1009,13 +1009,19 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     fun hasStorageUrl() = downloadUrl != null
 
-    @Composable
-    fun Image(
+    /**
+     * Gets the data of the image that should be loaded for representing the [DataClass].
+     * @author Arnau Mora
+     * @since 20220118
+     * @param context The [Context] that is requesting to load the image.
+     * @param storage The [FirebaseStorage] instance to load resources from the server.
+     * @param imageLoadParameters The parameters for loading the image.
+     */
+    fun imageData(
+        context: Context,
         storage: FirebaseStorage,
-        modifier: Modifier = Modifier,
         imageLoadParameters: ImageLoadParameters? = null
-    ) {
-        val context = LocalContext.current
+    ): Any {
         val downloadedImageFile = imageFile(context)
         val scale = imageLoadParameters?.resultImageScale ?: 1f
         val cacheImage = cacheImageFile(context, "scale$scale")
@@ -1027,7 +1033,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             // TODO: No internet connection errors should be caught
             else -> storage.getReferenceFromUrl(imageReferenceUrl)
         }
-
         if (image is StorageReference)
             doAsync {
                 Timber.i("$this > Caching image...")
@@ -1059,6 +1064,18 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     }
                 }
             }
+
+        return image
+    }
+
+    @Composable
+    fun Image(
+        storage: FirebaseStorage,
+        modifier: Modifier = Modifier,
+        imageLoadParameters: ImageLoadParameters? = null
+    ) {
+        val context = LocalContext.current
+        val image = imageData(context, storage, imageLoadParameters)
 
         GlideImage(
             imageModel = image,
