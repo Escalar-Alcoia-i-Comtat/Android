@@ -58,7 +58,7 @@ interface SystemPreferencesRepository {
      * @author Arnau Mora
      * @since 20211229
      */
-    suspend fun setDataVersion(version: Int)
+    suspend fun setDataVersion(version: Long)
 
     /**
      * Tells the system that the incompatible MD5 warning has already been shown, and should not
@@ -95,4 +95,11 @@ interface SystemPreferencesRepository {
      * @since 20220118
      */
     val indexedData: Flow<Boolean>
+
+    /**
+     * Should return the value of the stored data version preference.
+     * @author Arnau Mora
+     * @since 20220118
+     */
+    val dataVersion: Flow<Int>
 }

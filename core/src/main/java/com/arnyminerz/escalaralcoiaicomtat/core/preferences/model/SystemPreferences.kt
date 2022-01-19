@@ -18,6 +18,6 @@ data class SystemPreferences(
     val waitingForEmailConfirmation: Boolean,
     val shownBatteryOptimizationWarning: Boolean,
     val indexedData: Boolean,
-    val dataVersion: Int,
+    val dataVersion: Long,
     val shownMd5Warning: Boolean
 )
