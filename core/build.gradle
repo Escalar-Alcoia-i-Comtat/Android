@@ -57,7 +57,7 @@ dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.10'
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'com.google.android.material:material:1.6.0-alpha01'
+    implementation 'com.google.android.material:material:1.6.0-alpha02'
     implementation 'androidx.preference:preference-ktx:1.1.1'
 
     // Testing
@@ -98,7 +98,7 @@ dependencies {
 
     // Jetpack Compose utilities - Accompanist libraries
     api 'com.google.accompanist:accompanist-appcompat-theme:0.20.3'
-    api "com.google.accompanist:accompanist-pager:0.22.0-rc"
+    api "com.google.accompanist:accompanist-pager:0.24.0-alpha"
     api 'com.google.accompanist:accompanist-drawablepainter:0.24.0-alpha'
 
     // Jetpack Compose utilities - Icons
