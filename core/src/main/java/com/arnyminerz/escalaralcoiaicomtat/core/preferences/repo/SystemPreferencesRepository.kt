@@ -101,5 +101,5 @@ interface SystemPreferencesRepository {
      * @author Arnau Mora
      * @since 20220118
      */
-    val dataVersion: Flow<Int>
+    val dataVersion: Flow<Long>
 }
