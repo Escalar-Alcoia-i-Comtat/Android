@@ -17,7 +17,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PARENT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_DATACLASS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_REQUESTED_BACK
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModelImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
@@ -172,7 +171,8 @@ class DataClassActivity : NetworkAwareComponentActivity() {
     }
 
     override fun onBackPressed() {
-        finishActivity(REQUEST_CODE_REQUESTED_BACK)
+        super.onBackPressed()
+        // finishActivity(REQUEST_CODE_REQUESTED_BACK)
     }
 
     /**
