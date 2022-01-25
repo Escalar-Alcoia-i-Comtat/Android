@@ -29,7 +29,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATA_MODULE_NAME
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.filesDir
@@ -156,8 +155,12 @@ private fun ClearSearchSessionButton(
                     PathData::class.java,
                 )
                 .build()
-            searchSession.remove("", searchSpec).await()
-            PREF_INDEXED_SEARCH.put(false)
+            searchSession
+                .remove("", searchSpec)
+                .await()
+            PreferencesModule
+                .systemPreferencesRepository
+                .voidData()
         },
         modifier = modifier
     )
