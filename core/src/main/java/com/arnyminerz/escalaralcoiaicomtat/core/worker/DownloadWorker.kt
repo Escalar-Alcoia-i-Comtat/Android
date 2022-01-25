@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.PutDocumentsRequest
 import androidx.lifecycle.LiveData
@@ -25,11 +26,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATACLASS_PREVIEW_SCALE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_OVERWRITE_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_DEFAULT
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_MOBILE_DOWNLOAD_PREF
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SETTINGS_ROAMING_DOWNLOAD_PREF
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
@@ -65,6 +65,7 @@ import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -748,7 +749,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
          * @see DownloadWorker
          */
         @JvmStatic
-        override fun schedule(
+        @WorkerThread
+        override suspend fun schedule(
             context: Context,
             tag: String,
             data: com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
@@ -757,9 +759,12 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             Timber.v("Building download constraints...")
             val constraints = Constraints.Builder()
                 .apply {
-                    if (SETTINGS_MOBILE_DOWNLOAD_PREF.get())
+                    val getMobileDownloadsEnabled = PreferencesModule.getMobileDownloadsEnabled()
+                    val getRoamingDownloadsEnabled = PreferencesModule.getRoamingDownloadsEnabled()
+                    val getMeteredDownloadsEnabled = PreferencesModule.getMeteredDownloadsEnabled()
+                    if (getMobileDownloadsEnabled.first() && getMeteredDownloadsEnabled.first())
                         setRequiredNetworkType(NetworkType.UNMETERED)
-                    else if (!SETTINGS_ROAMING_DOWNLOAD_PREF.get())
+                    else if (!getRoamingDownloadsEnabled.first())
                         setRequiredNetworkType(NetworkType.NOT_ROAMING)
                     else
                         setRequiredNetworkType(NetworkType.CONNECTED)

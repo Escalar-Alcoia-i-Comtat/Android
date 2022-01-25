@@ -85,8 +85,7 @@ fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: Settin
         val nearbyZonesDistance by viewModel.nearbyZonesDistance.collectAsState()
         val markerClickCenteringEnabled by viewModel.markerCentering.collectAsState()
         val errorCollectionEnabled by viewModel.errorCollection.collectAsState()
-        // TODO: Add individual data collection enable switch
-        // val dataCollectionEnabled by viewModel.dataCollection.collectAsState()
+        val dataCollectionEnabled by viewModel.dataCollection.collectAsState()
 
         SettingsItem(
             title = stringResource(R.string.pref_gene_language_title),
@@ -158,6 +157,14 @@ fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: Settin
             stateBoolean = errorCollectionEnabled,
             setBoolean = { value ->
                 viewModel.setErrorCollection(value)
+            },
+            switch = true
+        )
+        SettingsItem(
+            title = stringResource(R.string.pref_gene_data_collection_title),
+            subtitle = stringResource(R.string.pref_gene_data_collection_sum),
+            stateBoolean = dataCollectionEnabled,
+            setBoolean = { value ->
                 viewModel.setDataCollection(value)
             },
             switch = true

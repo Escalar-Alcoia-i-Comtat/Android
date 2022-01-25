@@ -465,4 +465,6 @@
     <string name="toast_ending_info">Aquest és el tipus de reunió que té la via</string>
     <string name="toast_material_fixed">Aquest material ja està instal·lat a la via</string>
     <string name="image_desc_sector_image">Imatge del sector</string>
+    <string name="pref_gene_data_collection_title">Habilitar recol·lecció de dades</string>
+    <string name="pref_gene_data_collection_sum">El dispositiu enviarà dades d\'ús i de rendiment anònimes al servidor, per a que les diferents funcions puguen ser millorades, i es supervisarà la navegació a través de l\'app per a tenir un registre dels sectors més visitats.</string>
 </resources>

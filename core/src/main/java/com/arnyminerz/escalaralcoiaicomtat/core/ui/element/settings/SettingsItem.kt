@@ -6,12 +6,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
@@ -120,7 +118,6 @@ fun SettingsItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp)
             .clickable(
                 enabled = (onClick != null || dialog != null) && enabled,
                 onClick = {
@@ -131,8 +128,7 @@ fun SettingsItem(
     ) {
         Column(
             modifier = Modifier
-                .width(64.dp)
-                .fillMaxHeight()
+                .size(64.dp)
         ) {
             if (icon != null)
                 Image(
@@ -153,7 +149,7 @@ fun SettingsItem(
                 text = title,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = 4.dp)
+                    .padding(end = 4.dp, top = 4.dp)
                     .alpha(if (enabled) 1f else ContentAlpha.disabled),
                 style = MaterialTheme.typography.labelLarge
             )
@@ -162,7 +158,7 @@ fun SettingsItem(
                     text = subtitle,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(end = 4.dp)
+                        .padding(end = 4.dp, bottom = 4.dp)
                         .alpha(if (enabled) 1f else ContentAlpha.disabled),
                     style = MaterialTheme.typography.labelMedium
                 )
@@ -314,6 +310,17 @@ fun SettingsItemPreview() {
     SettingsItem(
         "Preference title",
         subtitle = "This is subtitle",
+        icon = Icons.Default.Star
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Preview(name = "Preview long text")
+@Composable
+fun SettingsItemPreviewLong() {
+    SettingsItem(
+        "Preference title",
+        subtitle = "This is subtitle that has a really long text. This shouldn't be used very much, since it's long and heavy to read for the user, but hey, there are exceptions, and this should be fine.",
         icon = Icons.Default.Star
     )
 }

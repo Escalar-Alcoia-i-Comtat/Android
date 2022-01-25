@@ -58,7 +58,7 @@ interface SystemPreferencesRepository {
      * @author Arnau Mora
      * @since 20211229
      */
-    suspend fun setDataVersion(version: Int)
+    suspend fun setDataVersion(version: Long)
 
     /**
      * Tells the system that the incompatible MD5 warning has already been shown, and should not
@@ -74,4 +74,32 @@ interface SystemPreferencesRepository {
      * @since 20211229
      */
     val shownIntro: Flow<Boolean>
+
+    /**
+     * Should return the value of the shown MD5 warning preference.
+     * @author Arnau Mora
+     * @since 20220118
+     */
+    val shownMd5Warning: Flow<Boolean>
+
+    /**
+     * Should return the value of the waiting for email confirmation preference.
+     * @author Arnau Mora
+     * @since 20220118
+     */
+    val waitingForEmailConfirmation: Flow<Boolean>
+
+    /**
+     * Should return the value of the indexed data preference.
+     * @author Arnau Mora
+     * @since 20220118
+     */
+    val indexedData: Flow<Boolean>
+
+    /**
+     * Should return the value of the stored data version preference.
+     * @author Arnau Mora
+     * @since 20220118
+     */
+    val dataVersion: Flow<Long>
 }

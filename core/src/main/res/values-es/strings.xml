@@ -466,4 +466,6 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="toast_ending_info">Este es el tipo de reunión que tiene la vía</string>
     <string name="toast_material_fixed">Este material ya está instalado en la vía</string>
     <string name="image_desc_sector_image">Imagen del sector</string>
+    <string name="pref_gene_data_collection_title">Habilitar recolección de datos</string>
+    <string name="pref_gene_data_collection_sum">El dispositivo enviará datos de uso y de rendimiento anónimos al servidor, de modo que las diferentes funciones puedan mejorarse, y la navegación se monitoreará a través de la aplicación para tener un registro de los sectores más visitados.</string>
 </resources>

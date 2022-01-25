@@ -338,6 +338,8 @@
     <string name="pref_gene_section_advanced">Advanced</string>
     <string name="pref_gene_error_reporting_title">Enable error reporting</string>
     <string name="pref_gene_error_reporting_sum">This will send an anonymous error report to the developers when the app crashes or there\'s an error, so it can be fixed as soon as possible. Please, we kindly ask you to keep this enabled, but you are free to disable it.</string>
+    <string name="pref_gene_data_collection_title">Enable data collection</string>
+    <string name="pref_gene_data_collection_sum">This will send anonymous usage and performance data, so functionalities of the app can be further improved, and user navigation can be supervised, and take into account the amount of users use which sectors more often.</string>
     <string name="pref_gene_download_data_title">Update device\'s data</string>
     <string name="pref_gene_download_data_sum">This will re-download all the data from the server for getting the latest version. Take into account that this might use a bunch of data.</string>
 

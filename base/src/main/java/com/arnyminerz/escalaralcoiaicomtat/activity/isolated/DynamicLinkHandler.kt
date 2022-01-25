@@ -6,12 +6,14 @@ import android.os.Bundle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.LoadingActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ESCALAR_ALCOIA_I_COMTAT_HOSTNAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_WAITING_EMAIL_CONFIRMATION
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.dynamiclinks.ktx.dynamicLinks
 import com.google.firebase.ktx.Firebase
@@ -42,9 +44,16 @@ class DynamicLinkHandler : Activity() {
                     Timber.i("Applying email verification code...")
                     Firebase.auth.applyActionCode(actionCode)
                         .addOnSuccessListener {
-                            Timber.i("Verified email successfully.")
-                            PREF_WAITING_EMAIL_CONFIRMATION.put(false)
-                            launch(LoadingActivity::class.java)
+                            doAsync {
+                                Timber.i("Verified email successfully.")
+                                PreferencesModule
+                                    .systemPreferencesRepository
+                                    .setWaitingForEmailConfirmation(false)
+
+                                uiContext {
+                                    launch(LoadingActivity::class.java)
+                                }
+                            }
                         }
                         .addOnFailureListener {
                             Timber.e(it, "Could not verify account.")

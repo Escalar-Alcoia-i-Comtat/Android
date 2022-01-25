@@ -15,16 +15,15 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.data
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.data
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_DATA_DATE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_DATA_VERSION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PREF_INDEXED_SEARCH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_SCHEMAS
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
+import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import timber.log.Timber
 import java.text.SimpleDateFormat
@@ -45,14 +44,19 @@ suspend fun loadAreas(
     application: App,
     jsonData: JSONObject
 ): List<Area> {
-    val indexedSearch = PREF_INDEXED_SEARCH.get()
+    val indexedDataFlow = PreferencesModule
+        .systemPreferencesRepository
+        .indexedData
+    val indexedSearch = indexedDataFlow.first()
     if (indexedSearch) {
         Timber.v("Search results already indexed. Fetching from application...")
         return application.getAreas() // If not empty, return areas
             .ifEmpty {
                 // If empty, reset the preference, and launch loadAreas again
-                Timber.w("Areas is empty, reseting search indexed pref and launching again.")
-                PREF_INDEXED_SEARCH.put(false)
+                Timber.w("Areas is empty, resetting search indexed pref and launching again.")
+                PreferencesModule
+                    .systemPreferencesRepository
+                    .markDataIndexed()
                 loadAreas(application, jsonData)
             }
     }
@@ -169,7 +173,9 @@ suspend fun loadAreas(
         session.requestFlush().await()
 
         Timber.v("Search > Storing to preferences...")
-        PREF_INDEXED_SEARCH.put(true)
+        PreferencesModule
+            .systemPreferencesRepository
+            .markDataIndexed()
 
         Timber.v("Storing version and update date...")
         val calendar = Calendar.getInstance()
@@ -177,8 +183,9 @@ suspend fun loadAreas(
         val versionDateFormatting = SimpleDateFormat("yyyyMMddHHmm", Locale.getDefault())
         val version = versionDateFormatting.format(now)
         Timber.v("New version: $version")
-        PREF_DATA_VERSION.put(version)
-        PREF_DATA_DATE.put(now.time)
+        PreferencesModule
+            .systemPreferencesRepository
+            .setDataVersion(now.time)
 
         trace.stop()
 

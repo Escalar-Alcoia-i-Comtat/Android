@@ -5,7 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
-import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.model.SystemPreferences
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.repo.SystemPreferencesRepository
 import kotlinx.coroutines.flow.Flow
@@ -57,7 +57,7 @@ class SystemPreferencesRepositoryImpl(
          * @author Arnau Mora
          * @since 20211229
          */
-        val dataVersion = intPreferencesKey("data_version")
+        val dataVersion = longPreferencesKey("data_version")
 
         /**
          * Whether or not the incompatible MD5 encryption warning has been shown.
@@ -133,7 +133,7 @@ class SystemPreferencesRepositoryImpl(
         }
     }
 
-    override suspend fun setDataVersion(version: Int) {
+    override suspend fun setDataVersion(version: Long) {
         dataStore.edit {
             it[Keys.dataVersion] = version
         }
@@ -160,6 +160,78 @@ class SystemPreferencesRepositoryImpl(
         }
         .map {
             it[Keys.shownIntro] ?: false
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Returns whether or not the MD5 warning has been shown.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    override val shownMd5Warning: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.shownMd5Warning] ?: false
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Returns whether or not the system is waiting for the user to confirm its email address.
+     * @author Arnau Mora
+     * @since 20220118
+     */
+    override val waitingForEmailConfirmation: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.waitingForEmailConfirmation] ?: false
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Returns whether or not the system has indexed all the data from the data module.
+     * @author Arnau Mora
+     * @since 20220118
+     */
+    override val indexedData: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.indexedData] ?: false
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Returns the version of the currently stored data.
+     * @author Arnau Mora
+     * @since 20220118
+     */
+    override val dataVersion: Flow<Long> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.dataVersion] ?: -1L
         }
         .distinctUntilChanged()
 }
