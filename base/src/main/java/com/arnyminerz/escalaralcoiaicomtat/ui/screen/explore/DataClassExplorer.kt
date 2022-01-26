@@ -63,7 +63,7 @@ fun Activity.DataClassExplorer(
     exploreViewModel: ExploreViewModel,
     storage: FirebaseStorage,
     dataClass: DataClass<*, *>,
-    hasInternet: MutableLiveData<Boolean>,
+    hasInternetLiveData: MutableLiveData<Boolean>,
 ) {
     val context = LocalContext.current
     val childrenLoader = if (dataClass is Area)
@@ -88,7 +88,7 @@ fun Activity.DataClassExplorer(
                     }
                 },
                 actions = {
-                    val hasInternet by hasInternet.observeAsState()
+                    val hasInternet by hasInternetLiveData.observeAsState()
                     if (hasInternet == false)
                         IconButton(
                             onClick = { showNetworkTooltip.value = true },
