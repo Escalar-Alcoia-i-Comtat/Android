@@ -35,7 +35,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.CouldNotCreateDynamicLinkException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APPLICATION_ID
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DYNAMIC_LINKS_DOMAIN
@@ -517,46 +516,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             Zone.NAMESPACE -> searchSession.getZone(parentId) as D?
             Sector.NAMESPACE -> searchSession.getSector(parentId) as D?
             else -> null
-        }
-    }
-
-    /**
-     * Returns the parent element of the [DataClass].
-     * @author Arnau Mora
-     * @since 20210817
-     * @param application The [App] class for fetching areas.
-     * @return The correct [DataClass] that is the parent of the current one. Or null if [metadata]'s
-     * [DataClassMetadata.parentId] is null.
-     */
-    @Deprecated(
-        "Use AppSearch-based getParent.",
-        replaceWith = ReplaceWith("getParent(application.searchSession)")
-    )
-    suspend fun getParent(application: App): DataClass<*, *>? {
-        // Assert non null metadata's parentId and parentNamespace.
-        val parentId: String = metadata.parentId ?: return null
-        val parentNamespace: String = metadata.parentNamespace ?: return null
-        // Get the search session from the App.
-        val searchSession = application.searchSession
-        // Set up the search spec with just one result.
-        val searchSpec = SearchSpec.Builder()
-            .addFilterNamespaces(parentNamespace)
-            .setResultCountPerPage(1)
-            .build()
-        // Perform the search
-        val searchResults = searchSession.search(parentId, searchSpec)
-        // Get the page
-        val nextPage = searchResults.nextPage.await()
-        // If no results found, return null
-        if (nextPage.isEmpty()) return null
-        // Get the only result that is available
-        val searchResult = nextPage[0]
-        val genericDocument = searchResult.genericDocument
-        return when (genericDocument.schemaType) {
-            "AreaData" -> null // Areas do not have parent
-            "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).data()
-            "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).data()
-            else -> null // Just in case
         }
     }
 
