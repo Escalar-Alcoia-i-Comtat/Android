@@ -19,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.FeedbackActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.ListDialogOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsCategory
@@ -69,7 +68,8 @@ fun MainSettingsScreen(context: Context, settingsNavController: NavController) {
             title = stringResource(R.string.pref_feedback_title),
             subtitle = stringResource(R.string.pref_feedback_sum),
             onClick = {
-                context.launch(FeedbackActivity::class.java)
+                // TODO: Feedback Activity
+                // context.launch(FeedbackActivity::class.java)
             },
             icon = Icons.Default.BugReport
         )

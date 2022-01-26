@@ -29,7 +29,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.EmailConfirmationActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
@@ -53,8 +52,6 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 /**
@@ -63,6 +60,15 @@ import timber.log.Timber
  * @since 20211225
  */
 class LoadingActivity : LanguageComponentActivity() {
+    companion object {
+        /**
+         * The key used in shared preferences for checking if data has been indexed before v83.
+         * @author Arnau Mora
+         * @since 20220125
+         */
+        private const val LegacyIndexedSearchKey = "SearchIndexed"
+    }
+
     /**
      * The Firestore instance to use.
      * @author Arnau Mora
@@ -134,15 +140,6 @@ class LoadingActivity : LanguageComponentActivity() {
             return
         } else
             Timber.v("Won't show intro.")
-
-        val waitingForEmailConfirmation = PreferencesModule.waitingForEmailConfirmation()
-        // TODO: This check is a bit dirty, should be cleaned up somehow.
-        if (runBlocking { waitingForEmailConfirmation.first() }) {
-            Timber.i("Launching email confirmation activity.")
-            finish()
-            launch(EmailConfirmationActivity::class.java)
-            return
-        }
 
         Timber.i("Getting deep link...")
         deepLinkPath = getExtra(EXTRA_LINK_PATH)
