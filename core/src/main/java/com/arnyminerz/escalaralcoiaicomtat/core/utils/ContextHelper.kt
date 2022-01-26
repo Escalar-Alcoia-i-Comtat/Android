@@ -15,6 +15,7 @@ import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import java.util.*
 
 @UiThread
 fun Context.toast(text: String, duration: Int = Toast.LENGTH_SHORT) =
@@ -27,6 +28,10 @@ fun Context.toast(@StringRes text: Int, duration: Int = Toast.LENGTH_SHORT) =
 @UiThread
 fun toast(context: Context?, @StringRes text: Int) =
     context?.toast(text)
+
+@UiThread
+fun toast(context: Context?, @StringRes text: Int, vararg args: Any) =
+    context?.toast(context.getString(text).format(Locale.getDefault(), args))
 
 @UiThread
 fun toast(context: Context?, text: String) =
