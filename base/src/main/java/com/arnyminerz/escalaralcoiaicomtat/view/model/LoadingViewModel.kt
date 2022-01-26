@@ -14,6 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.DataLoaderInterface
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
@@ -421,7 +422,12 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                     progressUpdater(R.string.status_loading_deep_link)
                 }
 
-                val intent = DataClass.getIntent(app, app.searchSession, deepLinkPath)
+                val intent = DataClass.getIntent(
+                    app,
+                    DataClassActivity::class.java,
+                    app.searchSession,
+                    deepLinkPath
+                )
                 uiContext {
                     if (intent != null)
                         app.launch(intent) {

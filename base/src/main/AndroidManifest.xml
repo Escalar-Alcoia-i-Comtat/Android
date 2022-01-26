@@ -115,15 +115,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="${GOOGLE_AUTH_CLIENT_ID}" />
         <meta-data
-            android:name="com.arnyminerz.escalaralcoiaicomtat.core.activity.AreaActivity"
-            android:value="com.arnyminerz.escalaralcoiaicomtat.activity.climb.AreaActivity" />
-        <meta-data
-            android:name="com.arnyminerz.escalaralcoiaicomtat.core.activity.ZoneActivity"
-            android:value="com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity" />
-        <meta-data
-            android:name="com.arnyminerz.escalaralcoiaicomtat.core.activity.SectorActivity"
-            android:value="com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity" /> <!-- Firebase Messaging default values -->
-        <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_notifications" />
         <meta-data
