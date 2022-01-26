@@ -3,7 +3,6 @@
     <string name="action_cancel">Cancel</string>
     <string name="action_open_maps">Open Google Maps</string>
     <string name="action_close">Close</string>
-    <string name="action_enable_location">Enable Location</string>
     <string name="action_copy">Copy to clipboard</string>
     <string name="action_view_map">View Map</string>
     <string name="action_view">View</string>
@@ -19,21 +18,14 @@
     <string name="action_launch_app">Launch App</string>
     <string name="action_clear_data">Clear Data</string>
     <string name="action_uninstall_data">Uninstall Data Module</string>
-    <string name="action_share_with">Share with</string>
     <string name="action_continue">Continue</string>
     <string name="action_send">Send</string>
     <string name="action_send_feedback">Send feedback</string>
-    <string name="action_export_kmz">Export KMZ</string>
-    <string name="action_export_gpx">Export GPX</string>
     <string name="action_register">Register</string>
     <string name="action_login">Login</string>
-    <string name="action_logout">Log out</string>
     <string name="action_google_auth">Login with Google</string>
     <string name="action_resend_email">Resend confirmation email</string>
-    <string name="action_open_settings">Open Settings</string>
-    <string name="action_do_not_remind">Do not remind</string>
     <string name="action_mark_completed">Mark</string>
-    <string name="action_restart">Restart</string>
     <string name="action_view_activity">View Activity</string>
 
     <string name="status_downloading">Downloading…</string>
@@ -45,7 +37,6 @@
     <string name="item_downloads">Downloads</string>
     <string name="item_settings">Settings</string>
     <string name="item_developer" translatable="false">Developer</string>
-    <string name="item_share">Share</string>
 
     <string name="path_ending_plate">Plate</string>
     <string name="path_ending_plate_ring">Plate Ring</string>
@@ -115,15 +106,6 @@
     <string name="toast_error_storage_corrupt">The downloaded file is corrupt, contact an administrator</string>
     <string name="toast_error_storage_authentication">Could not access private file</string>
     <string name="toast_error_load_areas">Could not load areas</string>
-    <string name="toast_error_load_image">Could not load image</string>
-    <string name="toast_error_load_image_compression">Could not compress image</string>
-    <string name="toast_error_load_image_sector">Could not load sector image: %s</string>
-    <string name="toast_error_io_access_denied">Access denied</string>
-    <string name="toast_error_no_internet">No Internet Access detected</string>
-    <string name="toast_error_language">Cannot change language</string>
-    <string name="toast_error_no_kmz">Could not find KMZ file</string>
-    <string name="toast_error_kmz_corrupt">The stored KMZ file is corrupt, will be downloaded again</string>
-    <string name="toast_error_kmz_corrupt_again">The stored KMZ file is corrupt, try again later</string>
     <string name="toast_error_confirmation_send">Could not send confirmation mail</string>
     <string name="toast_error_confirmation">Could not verify email!</string>
     <string name="toast_error_profile_image_update">Could not update profile image</string>
@@ -133,21 +115,13 @@
     <string name="toast_error_login_one_tap">Could not launch One-Tap login</string>
     <string name="toast_error_like">Could not like comment</string>
     <string name="toast_error_account_manager_store">Could not store account data</string>
-    <string name="toast_error_map_load">Could not load map</string>
     <string name="toast_error_delete_post">Could not delete post</string>
-    <string name="toast_error_gps_disabled">The GPS is disabled</string>
-    <string name="toast_error_not_found">Could not find element</string>
     <string name="toast_error_google_play">Escalar Alcoià i Comtat requires Google Play Services</string>
     <string name="toast_profile_image_updated">Updated profile image successfully</string>
-    <string name="toast_location_not_shown">Current location won\'t be shown</string>
-    <string name="toast_stored_gpx">GPX stored!</string>
-    <string name="toast_stored_kmz">KMZ stored!</string>
     <string name="toast_clear_ok">Cleared correctly</string>
     <string name="toast_data_uninstalled">Requested data uninstall</string>
     <string name="toast_message_sent">Message sent!</string>
     <string name="toast_confirmation_sent">Confirmation sent!</string>
-    <string name="toast_update_downloaded">An update has just been downloaded</string>
-    <string name="toast_downloaded">The data is stored in the device and can be accessed while offline</string>
     <string name="toast_deleted">Data deleted from device</string>
     <string name="toast_material_fixed">This material is already installed on the path</string>
     <string name="toast_material_required">This material is required to climb the path</string>
@@ -162,11 +136,8 @@
     <string name="notification_download_failed_message_long">There was an error while downloading %1$s. Error code: %2$s</string>
     <string name="notification_download_progress_info_fetching">Downloading data…</string>
     <string name="notification_download_progress_info_downloading_image">Downloading image…</string>
-    <string name="notification_download_progress_info_downloading_map">Downloading map…</string>
     <string name="notification_mark_completed_waiting_title">Mark as completed scheduled</string>
     <string name="notification_mark_completed_waiting_message">Waiting to have internet connection to send the comment and mark the path as complete.</string>
-    <string name="notification_mark_completed_marking_complete_title">Marking as complete</string>
-    <string name="notification_mark_completed_marking_complete_message">Marking %1$s as complete.</string>
     <string name="notification_mark_completed_marking_project_title">Marking as project</string>
     <string name="notification_mark_completed_marking_project_message">Marking %1$s as project.</string>
     <string name="notification_mark_completed_error_title">Could not mark as completed</string>
@@ -178,14 +149,10 @@
     <string name="notification_block_status_error_title">Could not fetch block status</string>
     <string name="notification_block_status_error_store_short">Could not store block statuses.</string>
     <string name="notification_block_status_error_store">Could not store block statuses.<br />Stored correctly %1$d items.<br />Could not store %2$d items.</string>
-    <string name="notification_block_status_error_persist">Could not write block statuses to disk.</string>
     <string name="notification_block_status_error_schema">Could not update schema for storing block statuses.</string>
     <string name="notification_block_status_error_count">Could not get block status of %d paths.</string>
-    <string name="notification_block_status_error_count_long">Could not get block status of %d paths. Please, be cautious while climbing since some warnings may not be updated.</string>
     <string name="notification_block_status_error_log">Could not fetch %d paths\' block status from server.<br />Failed elements:<br />%s</string>
 
-    <string name="dialog_gps_disabled_title">GPS disabled</string>
-    <string name="dialog_gps_disabled_message">You have the device\'s location provider turned off.</string>
     <string name="dialog_downloaded_msg">Downloaded on: %s</string>
     <string name="dialog_downloaded_partially_msg">Some children have been downloaded, but not "%s" completely. Do you want to download it complete?</string>
     <string name="dialog_uses_storage_msg">Uses: %s</string>
@@ -198,20 +165,15 @@
     <string name="zone_title">Zone</string>
     <string name="downloads_zones_title">%d Zones</string>
     <string name="downloads_sectors_title">%d Sectors</string>
-    <string name="downloads_paths_title">%d Paths</string>
 
     <string name="fab_desc_map">Open Google Maps</string>
     <string name="fab_desc_enter">Enter</string>
 
-    <string name="image_desc_nearby_zones">Nearby Zones</string>
     <string name="image_desc_marker_image">Marker image</string>
     <string name="image_desc_downloaded_marker">Downloaded Marker</string>
 
     <string name="fab_desc_next">Next</string>
     <string name="fab_desc_finish">Finish</string>
-
-    <string name="message_nearby_zones">Nearby zones</string>
-    <string name="message_nearby_zones_no_perm">You have not granted access to the location of the device, so this functionality is not usable. Press once to ask for permission, or press and hold to disable.</string>
 
     <string name="intro_main_title">Welcome to %s</string>
     <string name="intro_main_message">We are going to walk you through a tiny configuration process. Don\'t worry it\'s fast and easy.</string>
@@ -224,19 +186,11 @@
     <string name="sector_height">%1$sm</string>
     <string name="sector_kids_apt">Kids Apt</string>
 
-    <string name="status_updating">Updating…</string>
     <string name="status_null" translatable="false">-</string>
     <string name="status_null_double" translatable="false">--</string>
-    <string name="status_not_downloaded">Not downloaded</string>
-    <string name="status_storing">Storing…</string>
-    <string name="status_loading_progress">Loading %d/%d</string>
     <string name="status_downloading_percent">Downloading %d%</string>
-    <string name="status_processing_paths">Processing paths…</string>
     <string name="status_no_internet">No Internet Connection</string>
     <string name="status_loading_deep_link">Processing link…</string>
-    <string name="status_not_running">Not running</string>
-    <string name="status_running">Running</string>
-    <string name="status_finished">Finished</string>
     <string name="status_loading_checks">Running system checks…</string>
     <string name="status_loading_config">Loading configuration…</string>
     <string name="status_loading_noti_list">Adding notification listeners…</string>
@@ -267,20 +221,12 @@
 
     <string name="dialog_permission_title">Permission Required!</string>
     <string name="dialog_permission_message">The functionality you are trying to use requires the %s permission. Please grant it, or refuse to use that.</string>
-    <string name="dialog_permission_my_location_message">For showing your current position, the app must have access to the location of your device. Please, grant it, or refuse to use this functionality.</string>
     <string name="dialog_description_description_title">Description</string>
     <string name="dialog_description_builder_title">Built By</string>
     <string name="dialog_description_rebuilder_title">Rebuilt By</string>
     <string name="dialog_description_reference">Reference: <br />%s</string>
-    <string name="dialog_high_data_usage_title">High data usage Alert</string>
-    <string name="dialog_high_data_usage_message">You are about to do something that usually requires a high amount of Internet communication, and we have detected that you don\'t have a WiFi connection, are you sure that you want to continue?</string>
-    <string name="dialog_logout_title">Log out</string>
-    <string name="dialog_logout_message">Are you sure that you want to get logged out?</string>
-    <string name="dialog_background_restricted_title">Background restricted</string>
-    <string name="dialog_background_restricted_message">You, or your system have blocked the application for being executed in the background, so you may not be able to receive alert notifications. Please, go to your system\'s settings and disable battery optimization for Escalar Alcoià i Comtat, or you can disable the alerts system completely.</string>
     <string name="dialog_md5_incompatible_title">MD5 hashing not supported</string>
     <string name="dialog_md5_incompatible_message">Your device does not support MD5 hashing. You will have issues while receiveing data updates.</string>
-    <string name="dialog_sectors_title">Sectors</string>
 
     <string name="mark_completed_title">Mark Path</string>
     <string name="mark_completed_name">Path Name</string>
@@ -330,7 +276,6 @@
     <string name="pref_gene_nearby_distance_title">Nearby Distance</string>
     <string name="pref_gene_nearby_distance_sum">At what distance will a zone be considered as nearby</string>
     <string name="pref_gene_nearby_distance_dialog_title">Nearby Zones Distance (m)</string>
-    <string name="pref_gene_nearby_distance_dialog_message">Enter the maximum distance to consider as nearby zone in meters.</string>
     <string name="pref_gene_map_move_marker_title">Center marker on click</string>
     <string name="pref_gene_map_move_marker_sum">If a marker should me centered in the screen when clicked on it</string>
     <string name="pref_gene_section_nearby">Nearby Zones</string>
@@ -340,25 +285,12 @@
     <string name="pref_gene_error_reporting_sum">This will send an anonymous error report to the developers when the app crashes or there\'s an error, so it can be fixed as soon as possible. Please, we kindly ask you to keep this enabled, but you are free to disable it.</string>
     <string name="pref_gene_data_collection_title">Enable data collection</string>
     <string name="pref_gene_data_collection_sum">This will send anonymous usage and performance data, so functionalities of the app can be further improved, and user navigation can be supervised, and take into account the amount of users use which sectors more often.</string>
-    <string name="pref_gene_download_data_title">Update device\'s data</string>
-    <string name="pref_gene_download_data_sum">This will re-download all the data from the server for getting the latest version. Take into account that this might use a bunch of data.</string>
 
     <string name="pref_down_cat_downloads">Downloads</string>
     <string name="pref_down_mobile_title">Mobile Data</string>
     <string name="pref_down_mobile_sum">Use mobile data for downloads</string>
     <string name="pref_down_roaming_title">Roaming</string>
     <string name="pref_down_roaming_sum">Use roaming for downloads</string>
-
-    <string name="pref_info_cat_services">Services</string>
-    <string name="pref_info_cat_app">Application</string>
-    <string name="pref_info_cat_source">Source</string>
-    <string name="pref_info_service_block_status_title">Block Status checker</string>
-    <string name="pref_info_service_block_status_summary">The service for updating the path\'s block status is currently: %s</string>
-    <string name="pref_info_version_title">Version</string>
-    <string name="pref_info_build_title">Build Number</string>
-    <string name="pref_info_data_version_title">Data Version</string>
-    <string name="pref_info_git_title">Github</string>
-    <string name="pref_info_git_sum">View the Github repository</string>
 
     <string name="notification_channel_downloads_group_name">Downloads</string>
     <string name="notification_channel_download_progress_name">Download Progress</string>
@@ -378,34 +310,8 @@
     <string name="notification_channel_new_update_name">New update available</string>
     <string name="notification_channel_new_update_desc">This will tell you when a new update is available, and will help you downloading it.</string>
 
-    <string name="notification_gpx_stored_title">GPX Stored correctly</string>
-    <string name="notification_gpx_stored_message">Press to open</string>
-    <string name="notification_kmz_stored_title">KMZ Stored correctly</string>
-    <string name="notification_kmz_stored_message">Press to open</string>
-
-    <string name="notification_new_version_waiting_title">New version available</string>
-    <string name="notification_new_version_waiting_short">There\'s a new version available of the app\'s data.</string>
-    <string name="notification_new_version_waiting_message">We have released a new version of the app\'s data. We will download the update as soon as possible. Everything will happen automatically.</string>
-    <string name="notification_new_version_downloading_title">Downloading new version</string>
-    <string name="notification_new_version_downloading_short">Downloading new version of the app data.</string>
-    <string name="notification_new_version_downloading_message">Downloading new version of the app data. <br />Progress: %d/%d</string>
-    <string name="notification_new_version_image_files_message">Searching for image files… <br />Progress: %d/%d</string>
-    <string name="notification_new_version_cache_clear_message">Removing obsolete image files… <br />Progress: %d/%d</string>
-    <string name="notification_new_version_referencing_message">Fetching files from the server… <br />Progress: %d/%d</string>
-    <string name="notification_new_version_image_check_message">Checking for updates on the images… <br />Progress: %d/%d</string>
-    <string name="notification_new_version_downloading_images_message">Downloading images from server… <br />Image: %d/%d. Progress: %d\%</string>
-
-    <string name="no_internet_title">You have no Internet access</string>
-    <string name="no_internet_message">You can access the downloaded content, or try again.</string>
-
     <string name="downloads_title">Downloads</string>
     <string name="downloads_size">Size: %s</string>
-    <string name="downloads_size_value">%sMB</string>
-    <string name="downloads_no_download">There\'s nothing downloaded</string>
-
-    <string name="dataclass_area_children_count">%d zones</string>
-    <string name="dataclass_zone_children_count">%d sectors</string>
-    <string name="dataclass_sector_children_count">%d paths</string>
 
     <string name="path_warning_dry">This path has some safes getting dry. This may be because some kind of chemical safe has been using for the safes. This should be active for 2 days more or less.</string>
     <string name="path_warning_build">This path is under construction or revision. This may take from days to weeks. Please, be patient. You can enable alert notifications on settings, and we will alert you when this is ready.</string>
@@ -433,40 +339,24 @@
     <string name="feedback_dont_contact">Don\'t contact me</string>
     <string name="feedback_error_empty_message">You have to set a message to send</string>
 
-    <string name="message_already_downloading">Content already downloading</string>
-
     <string name="fab_desc_back">Go Back</string>
-    <string name="fab_desc_position">Current Location</string>
-    <string name="fab_desc_download">Download</string>
 
-    <string name="image_desc_downloaded">Downloaded</string>
     <string name="image_desc_no_internet">No Internet</string>
     <string name="image_desc_app_icon">Escalar Alcoià i Comtat</string>
     <string name="image_desc_logo_cea">Centre Excursionista d\'Alcoi\'s Logo</string>
     <string name="image_desc_sector_image">Sector image</string>
-    <string name="image_desc_zone_image">Zone image</string>
-    <string name="image_desc_area_image">Area image</string>
     <string name="image_desc_fixed_equipment">Fixed Equipment</string>
-    <string name="image_desc_download">Download</string>
-    <string name="image_desc_view_map">View in map</string>
     <string name="image_desc_go_back">Go Back</string>
     <string name="image_desc_warning">Warning</string>
     <string name="image_desc_view_more">View More</string>
     <string name="image_desc_path_info">Path Info</string>
     <string name="image_desc_path_completed">Path Completed</string>
-    <string name="image_desc_maximize_minimize_img">Maximize or minimize image</string>
     <string name="image_desc_ending_type">Ending type</string>
     <string name="image_desc_rappel">Rappel</string>
-    <string name="image_desc_nav_explore">Explore areas</string>
-    <string name="image_desc_nav_map">View areas map</string>
-    <string name="image_desc_nav_downloads">View downloads</string>
-    <string name="image_desc_nav_extra">Extra options</string>
-    <string name="image_desc_authenticate">Authenticate</string>
     <string name="image_desc_profile_image">Profile Image</string>
     <string name="image_desc_check_inbox">Check inbox icon</string>
     <string name="image_desc_change_profile_image">Change profile image indicator</string>
     <string name="image_desc_comments">Comments</string>
-    <string name="image_desc_enter">Enter</string>
     <string name="image_desc_walking_time">Walking time from parking</string>
 
     <string name="login_email">Email</string>
@@ -492,11 +382,6 @@
     <string name="register_result_inbox_title">Check your inbox</string>
     <string name="register_result_inbox_message">We have sent you a confirmation email, please, follow the instructions there. Also check your spam folder.</string>
 
-    <string name="button_desc_view_download">View Download</string>
-    <string name="button_desc_download">Download</string>
-    <string name="button_desc_toggle">Toggle</string>
-    <string name="button_desc_delete">Delete</string>
-
     <string name="search_hint">Search…</string>
     <string name="search_no_results">No results</string>
 
@@ -507,8 +392,6 @@
 
     <string name="date_format">yyyy-MM-dd hh:mm:ss a</string>
 
-    <string name="share_text">Hey! Would you try Escalar Alcoià i Comtat? It\'s free! https://play.google.com/store/apps/details?id=com.arnyminerz.escalaralcoiaicomtat</string>
-
     <string name="profile_last_activity_title">Last Activity</string>
     <string name="profile_last_activity_none">The user has not completed any path</string>
     <string name="profile_last_activity_summary">Completed %1$d paths. Projected %2$d paths.</string>
@@ -518,9 +401,6 @@
     <string name="activity_summary_completions">%d completed paths.</string>
     <string name="activity_summary_grades">Grades</string>
 
-    <string name="update_progress_internet_waiting">Waiting for Internet connection…</string>
-    <string name="update_progress_downloading_new_cache">Downloading new data…</string>
-    <string name="update_progress_error">Error!</string>
     <string name="title_data">Data Module</string>
 
     <string name="attr_gpx">This GPX has been providen by Escalar Alcoià i Comtat. Download the app from https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
