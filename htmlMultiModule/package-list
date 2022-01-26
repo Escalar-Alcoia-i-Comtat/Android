@@ -7,17 +7,11 @@ com.arnyminerz.escalaralcoiaicomtat.activity
 com.arnyminerz.escalaralcoiaicomtat.activity.climb
 com.arnyminerz.escalaralcoiaicomtat.activity.isolated
 com.arnyminerz.escalaralcoiaicomtat.activity.model
-com.arnyminerz.escalaralcoiaicomtat.activity.profile
-com.arnyminerz.escalaralcoiaicomtat.auth
 com.arnyminerz.escalaralcoiaicomtat.device
-com.arnyminerz.escalaralcoiaicomtat.fragment.activity
-com.arnyminerz.escalaralcoiaicomtat.fragment.auth
-com.arnyminerz.escalaralcoiaicomtat.fragment.climb
 com.arnyminerz.escalaralcoiaicomtat.fragment.dialog
 com.arnyminerz.escalaralcoiaicomtat.fragment.model
 com.arnyminerz.escalaralcoiaicomtat.intent
 com.arnyminerz.escalaralcoiaicomtat.list.adapter
-com.arnyminerz.escalaralcoiaicomtat.list.completions.adapter
 com.arnyminerz.escalaralcoiaicomtat.list.completions.holder
 com.arnyminerz.escalaralcoiaicomtat.list.holder
 com.arnyminerz.escalaralcoiaicomtat.paging
