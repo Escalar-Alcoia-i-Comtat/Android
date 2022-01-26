@@ -3,13 +3,13 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Looper
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
@@ -34,17 +34,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.CouldNotCreateDynamicLinkException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_AREA_META
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_SECTOR_META
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ACTIVITY_ZONE_META
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APPLICATION_ID
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DYNAMIC_LINKS_DOMAIN
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_AREA
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_SECTOR
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PARENT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
@@ -220,49 +215,24 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         @WorkerThread
         suspend fun getIntent(
             context: Context,
+            activity: Class<*>,
             searchSession: AppSearchSession,
             query: String
-        ): Intent? {
-            Timber.v("Getting Activities...")
-            val appInfo = context.packageManager.getApplicationInfo(
-                context.packageName,
-                PackageManager.GET_META_DATA
-            )
-            val appBundle = appInfo.metaData
-            val areaActivityPackage = appBundle.getString(ACTIVITY_AREA_META)
-            val zoneActivityPackage = appBundle.getString(ACTIVITY_ZONE_META)
-            val sectorActivityPackage = appBundle.getString(ACTIVITY_SECTOR_META)
-            if (areaActivityPackage == null)
-                throw IllegalArgumentException("$ACTIVITY_AREA_META was not specified in manifest")
-            if (zoneActivityPackage == null)
-                throw IllegalArgumentException("$ACTIVITY_ZONE_META was not specified in manifest")
-            if (sectorActivityPackage == null)
-                throw IllegalArgumentException("$ACTIVITY_SECTOR_META was not specified in manifest")
-            val areaActivityClass = Class.forName(areaActivityPackage)
-            val zoneActivityClass = Class.forName(zoneActivityPackage)
-            val sectorActivityClass = Class.forName(sectorActivityPackage)
-
-            return searchSession.getData<Area, AreaData>(query, Area.NAMESPACE)?.let {
-                Intent(context, areaActivityClass).apply {
-                    putExtra(EXTRA_AREA, it.objectId)
-                }
-            } ?: run {
-                searchSession.getData<Zone, ZoneData>(query, Zone.NAMESPACE)?.let {
-                    Intent(context, zoneActivityClass).apply {
-                        putExtra(EXTRA_ZONE, it.objectId)
+        ): Intent? = (searchSession.getData<Area, AreaData>(query, Area.NAMESPACE)
+            ?: searchSession.getData<Zone, ZoneData>(query, Zone.NAMESPACE)
+            ?: searchSession.getData<Sector, SectorData>(query, Sector.NAMESPACE))
+            ?.let { dataClass ->
+                Intent(context, activity)
+                    .putExtra(EXTRA_DATACLASS, dataClass)
+                    .apply {
+                        dataClass
+                            .takeIf { it.hasParents }
+                            ?.getParent<DataClass<*, *>>(searchSession)
+                            ?.let {
+                                putExtra(EXTRA_PARENT, it)
+                            }
                     }
-                } ?: run {
-                    searchSession.getData<Sector, SectorData>(query, Sector.NAMESPACE)?.let {
-                        Intent(context, sectorActivityClass).apply {
-                            val sectorPath = it.documentPath
-                            val splittedPath = sectorPath.split("/")
-                            putExtra(EXTRA_ZONE, splittedPath[3])
-                            putExtra(EXTRA_SECTOR, it.objectId)
-                        }
-                    }
-                }
             }
-        }
 
         /**
          * Deletes a DataClass from the device.
@@ -546,46 +516,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
             Zone.NAMESPACE -> searchSession.getZone(parentId) as D?
             Sector.NAMESPACE -> searchSession.getSector(parentId) as D?
             else -> null
-        }
-    }
-
-    /**
-     * Returns the parent element of the [DataClass].
-     * @author Arnau Mora
-     * @since 20210817
-     * @param application The [App] class for fetching areas.
-     * @return The correct [DataClass] that is the parent of the current one. Or null if [metadata]'s
-     * [DataClassMetadata.parentId] is null.
-     */
-    @Deprecated(
-        "Use AppSearch-based getParent.",
-        replaceWith = ReplaceWith("getParent(application.searchSession)")
-    )
-    suspend fun getParent(application: App): DataClass<*, *>? {
-        // Assert non null metadata's parentId and parentNamespace.
-        val parentId: String = metadata.parentId ?: return null
-        val parentNamespace: String = metadata.parentNamespace ?: return null
-        // Get the search session from the App.
-        val searchSession = application.searchSession
-        // Set up the search spec with just one result.
-        val searchSpec = SearchSpec.Builder()
-            .addFilterNamespaces(parentNamespace)
-            .setResultCountPerPage(1)
-            .build()
-        // Perform the search
-        val searchResults = searchSession.search(parentId, searchSpec)
-        // Get the page
-        val nextPage = searchResults.nextPage.await()
-        // If no results found, return null
-        if (nextPage.isEmpty()) return null
-        // Get the only result that is available
-        val searchResult = nextPage[0]
-        val genericDocument = searchResult.genericDocument
-        return when (genericDocument.schemaType) {
-            "AreaData" -> null // Areas do not have parent
-            "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java).data()
-            "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java).data()
-            else -> null // Just in case
         }
     }
 
@@ -1027,8 +957,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val image = when {
             downloadedImageFile.exists() -> downloadedImageFile
             cacheImage.exists() -> cacheImage
-            // TODO: No internet connection errors should be caught
-            else -> storage.getReferenceFromUrl(imageReferenceUrl)
+            else -> try {
+                storage.getReferenceFromUrl(imageReferenceUrl)
+            } catch (e: StorageException) {
+                Timber.e(e, "Could not get reference from URL.")
+                AppCompatResources.getDrawable(context, displayOptions.errorPlaceholderDrawable)!!
+            }
         }
         if (image is StorageReference)
             doAsync {

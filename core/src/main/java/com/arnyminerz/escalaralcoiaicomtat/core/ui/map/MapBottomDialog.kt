@@ -50,6 +50,7 @@ import timber.log.Timber
 fun BoxScope.MapBottomDialog(
     context: Context,
     app: App,
+    dataClassActivity: Class<*>,
     bottomDialogVisible: Boolean,
     bottomDialogTitle: String,
     bottomDialogImage: Uri?,
@@ -110,6 +111,7 @@ fun BoxScope.MapBottomDialog(
                                 doAsync {
                                     DataClass.getIntent(
                                         context,
+                                        dataClassActivity,
                                         app.searchSession,
                                         "($bottomDialogTitle) OR ($elementWebUrl)"
                                     )?.let { intent ->

@@ -39,6 +39,7 @@ fun CompressedDownloadedDataItem(
     displayName: String,
     objectId: String,
     searchSession: AppSearchSession,
+    dataClassActivity: Class<*>
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -73,7 +74,12 @@ fun CompressedDownloadedDataItem(
                     onClick = {
                         viewButtonEnabled = false
                         doAsync {
-                            val intent = DataClass.getIntent(context, searchSession, objectId)
+                            val intent = DataClass.getIntent(
+                                context,
+                                dataClassActivity,
+                                searchSession,
+                                objectId
+                            )
                             uiScope.launch {
                                 viewButtonEnabled = true
                                 if (intent != null)

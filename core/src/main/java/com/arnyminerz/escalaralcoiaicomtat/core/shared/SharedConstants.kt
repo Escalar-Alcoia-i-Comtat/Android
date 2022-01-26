@@ -275,27 +275,6 @@ const val DYNAMIC_LINKS_DOMAIN = "https://escalaralcoiaicomtat.page.link"
 const val ESCALAR_ALCOIA_I_COMTAT_HOSTNAME = "escalaralcoiaicomtat.centrexcursionistalcoi.org"
 
 /**
- * The meta name from the Manifest for specifying the AreaActivity package name.
- * @author Arnau Mora
- * @since 20210615
- */
-const val ACTIVITY_AREA_META = "com.arnyminerz.escalaralcoiaicomtat.core.activity.AreaActivity"
-
-/**
- * The meta name from the Manifest for specifying the ZoneActivity package name.
- * @author Arnau Mora
- * @since 20210615
- */
-const val ACTIVITY_ZONE_META = "com.arnyminerz.escalaralcoiaicomtat.core.activity.ZoneActivity"
-
-/**
- * The meta name from the Manifest for specifying the SectorActivity package name.
- * @author Arnau Mora
- * @since 20210615
- */
-const val ACTIVITY_SECTOR_META = "com.arnyminerz.escalaralcoiaicomtat.core.activity.SectorActivity"
-
-/**
  * The name of the data module, for requesting installs and uninstalls.
  * @author Arnau Mora
  * @since 20211227

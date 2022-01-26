@@ -1,7 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
-import android.app.Activity
-import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchSpec
@@ -13,20 +11,14 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassIm
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.BlockingTypeParceler
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.PitchParceler
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.completion.storage.MarkedDataInt
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
-import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
@@ -296,72 +288,6 @@ class Path internal constructor(
      */
     @Throws(NoSuchElementException::class)
     fun grade(): Grade = grades.first()
-
-    /**
-     * Fetches all the completions that have been requested by the users.
-     * @author Arnau Mora
-     * @since 20210430
-     * @param firestore The [FirebaseFirestore] instance from where to load the data.
-     * @throws FirebaseAuthException When there was an exception while loading an user from Firebase.
-     * @throws FirebaseFirestoreException When there was an exception while loading data from Firestore.
-     */
-    @Throws(FirebaseAuthException::class, FirebaseFirestoreException::class)
-    suspend fun getCompletions(
-        firestore: FirebaseFirestore
-    ): Flow<MarkedDataInt> = flow {
-        val completionsData = firestore
-            .document(documentPath)
-            .collection("Completions")
-            .get()
-            .await()
-        if (completionsData != null) {
-            val documents = completionsData.documents
-            Timber.v("$objectId > Got ${documents.size} completions.")
-            for (document in documents) {
-                Timber.v("$objectId > Creating new MarkedDataInt instance...")
-                val result = MarkedDataInt.newInstance(document)
-
-                Timber.v("$objectId > Processed result. Emitting...")
-                if (result != null)
-                    emit(result)
-                else
-                    Timber.w("$objectId > Won't emit since result is null.")
-            }
-        }
-    }
-
-    /**
-     * Gets updates for when a completion is added to the [Path].
-     * @author Arnau Mora
-     * @since 20210719
-     * @param firestore The [FirebaseFirestore] reference for fetching updates.
-     * @param activity The [Activity] to attach the listener to. When the activity is destroyed,
-     * the observer will also be removed.
-     * @param listener This will get called when a new completed path is added.
-     * @return The listener registration for cancelling the listener when needed.
-     */
-    fun observeCompletions(
-        firestore: FirebaseFirestore,
-        activity: Activity,
-        @UiThread listener: (data: MarkedDataInt) -> Unit
-    ) =
-        firestore.document(documentPath)
-            .collection("Completions")
-            .addSnapshotListener(activity) { value, error ->
-                if (error != null)
-                    Timber.e(error, "An error occurred while adding a new snapshot.")
-                else if (value != null) {
-                    val documentChanges = value.documentChanges
-                    doAsync {
-                        for (documentChange in documentChanges) {
-                            val document = documentChange.document
-                            val markedDataInt = MarkedDataInt.newInstance(document)
-                            if (markedDataInt != null)
-                                uiContext { listener(markedDataInt) }
-                        }
-                    }
-                }
-            }
 
     /**
      * Fetches the [BlockingType] of the [Path] from the server.

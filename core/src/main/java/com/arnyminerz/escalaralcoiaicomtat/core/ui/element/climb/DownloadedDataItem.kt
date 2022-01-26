@@ -60,6 +60,7 @@ import kotlinx.coroutines.launch
 fun DownloadedDataItem(
     data: DownloadedData,
     searchSession: AppSearchSession,
+    dataClassActivity: Class<*>,
     onDelete: (() -> Unit)?
 ) = DownloadedDataItemRaw(
     data.displayName,
@@ -68,6 +69,7 @@ fun DownloadedDataItem(
     data.namespace,
     data.childrenCount,
     searchSession,
+    dataClassActivity,
     onDelete
 )
 
@@ -79,6 +81,7 @@ private fun DownloadedDataItemRaw(
     namespace: String,
     childrenCount: Long,
     searchSession: AppSearchSession?,
+    dataClassActivity: Class<*>,
     onDelete: (() -> Unit)?
 ) {
     val context = LocalContext.current
@@ -177,7 +180,12 @@ private fun DownloadedDataItemRaw(
                         onClick = {
                             viewButtonEnabled = false
                             doAsync {
-                                val intent = DataClass.getIntent(context, searchSession, objectId)
+                                val intent = DataClass.getIntent(
+                                    context,
+                                    dataClassActivity,
+                                    searchSession,
+                                    objectId
+                                )
                                 uiScope.launch {
                                     viewButtonEnabled = true
                                     if (intent != null)
@@ -277,6 +285,7 @@ private fun DownloadedDataItemRaw(
                             item.displayName,
                             item.objectId,
                             searchSession,
+                            dataClassActivity,
                         )
                     }
                 }
@@ -294,6 +303,7 @@ fun DownloadedDataItemPreview() {
         Zone.NAMESPACE,
         7,
         null,
+        Void::class.java,
         null
     )
 }

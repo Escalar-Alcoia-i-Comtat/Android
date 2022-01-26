@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DownloadedDataItem
@@ -62,7 +63,7 @@ fun MainActivity.DownloadsScreen() {
         items(downloads ?: emptyList()) { data ->
             val isParentDownloaded = data.second
             if (!isParentDownloaded)
-                DownloadedDataItem(data.first, app.searchSession) {
+                DownloadedDataItem(data.first, app.searchSession, DataClassActivity::class.java) {
                     // This gets called when data gets deleted
                     downloadsViewModel.loadDownloads()
                 }
