@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Looper
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
@@ -1027,8 +1028,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val image = when {
             downloadedImageFile.exists() -> downloadedImageFile
             cacheImage.exists() -> cacheImage
-            // TODO: No internet connection errors should be caught
-            else -> storage.getReferenceFromUrl(imageReferenceUrl)
+            else -> try {
+                storage.getReferenceFromUrl(imageReferenceUrl)
+            } catch (e: StorageException) {
+                Timber.e(e, "Could not get reference from URL.")
+                AppCompatResources.getDrawable(context, displayOptions.errorPlaceholderDrawable)!!
+            }
         }
         if (image is StorageReference)
             doAsync {
