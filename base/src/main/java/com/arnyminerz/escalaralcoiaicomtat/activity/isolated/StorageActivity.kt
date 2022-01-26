@@ -21,8 +21,7 @@ class StorageActivity : ComponentActivity() {
                     StorageManagerWindow({
                         startActivity(Intent(this, LoadingActivity::class.java))
                     }) {
-                        // TODO: Feedback Activity
-                        // startActivity(Intent(this, FeedbackActivity::class.java))
+                        startActivity(Intent(this, FeedbackActivity::class.java))
                     }
                 }
             }
