@@ -28,6 +28,8 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore.SectorViewScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.android.material.badge.ExperimentalBadgeUtils
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
@@ -121,6 +123,16 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         // Load childrenCount
         childrenCount = extras?.getExtra(EXTRA_CHILDREN_COUNT)
             ?: savedInstanceState?.getExtra(EXTRA_CHILDREN_COUNT) ?: -1
+
+        Firebase.analytics
+            .logEvent(
+                FirebaseAnalytics.Event.SELECT_CONTENT,
+                Bundle().apply {
+                    putString(FirebaseAnalytics.Param.ITEM_ID, dataClass.objectId)
+                    putString(FirebaseAnalytics.Param.ITEM_NAME, dataClass.displayName)
+                    putString(FirebaseAnalytics.Param.CONTENT_TYPE, dataClass.namespace)
+                },
+            )
 
         setContent {
             AppTheme {
