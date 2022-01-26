@@ -35,8 +35,4 @@
         <item name="artifo_ending_badge_color">@color/artifo_ending_badge_color_light</item>
     </style>
 
-    <style name="AppTheme.AppBar" parent="@style/TextAppearance.Material3.TitleLarge">
-        <item name="android:textColor">?attr/colorOnPrimary</item>
-        <item name="fontFamily">@font/tektonpro_bold</item>
-    </style>
 </resources>

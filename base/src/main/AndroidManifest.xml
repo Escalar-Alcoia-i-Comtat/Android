@@ -37,18 +37,6 @@
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute,LockedOrientationActivity"
         android:dataExtractionRules="@xml/data_extraction_rules">
         <activity
-            android:name=".activity.profile.UserActivityActivity"
-            android:exported="true" />
-        <activity
-            android:name=".activity.profile.CommentsActivity"
-            android:exported="true" />
-        <activity
-            android:name=".activity.profile.MarkCompletedActivity"
-            android:exported="true" />
-        <activity
-            android:name=".activity.profile.ProfileActivity"
-            android:exported="true" />
-        <activity
             android:name=".activity.isolated.DynamicLinkHandler"
             android:exported="true">
             <intent-filter>
@@ -76,12 +64,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.isolated.EmailConfirmationActivity"
-            android:exported="true" />
-        <activity
-            android:name=".activity.profile.AuthActivity"
-            android:exported="true" />
-        <activity
             android:name=".activity.LoadingActivity"
             android:enabled="true"
             android:exported="true">
@@ -92,9 +74,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.isolated.FeedbackActivity"
-            android:exported="true" />
-        <activity
             android:name=".activity.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
@@ -103,9 +82,6 @@
                 android:name="android.app.default_searchable"
                 android:value=".activity.SearchableActivity" />
         </activity>
-        <activity
-            android:name=".activity.climb.SectorActivity"
-            android:screenOrientation="portrait" />
         <activity
             android:name=".activity.climb.DataClassActivity"
             android:screenOrientation="portrait" />
@@ -180,17 +156,6 @@
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
-        </service>
-        <service
-            android:name=".auth.AuthenticatorService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator" />
         </service>
     </application>
 
