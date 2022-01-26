@@ -22,6 +22,7 @@
         android:name=".core.shared.App"
         android:allowBackup="true"
         android:allowClearUserData="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:directBootAware="true"
         android:fullBackupContent="true"
         android:hardwareAccelerated="true"
@@ -34,8 +35,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:vmSafeMode="true"
-        tools:ignore="GoogleAppIndexingWarning,UnusedAttribute,LockedOrientationActivity"
-        android:dataExtractionRules="@xml/data_extraction_rules">
+        tools:ignore="GoogleAppIndexingWarning,UnusedAttribute,LockedOrientationActivity">
+        <activity
+            android:name=".activity.isolated.FeedbackActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".activity.isolated.DynamicLinkHandler"
             android:exported="true">
@@ -118,8 +122,7 @@
             android:value="com.arnyminerz.escalaralcoiaicomtat.activity.climb.ZoneActivity" />
         <meta-data
             android:name="com.arnyminerz.escalaralcoiaicomtat.core.activity.SectorActivity"
-            android:value="com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity" />
-        <!-- Firebase Messaging default values -->
+            android:value="com.arnyminerz.escalaralcoiaicomtat.activity.climb.SectorActivity" /> <!-- Firebase Messaging default values -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_notifications" />
