@@ -114,6 +114,8 @@
     <string name="toast_material_fixed">Aquest material ja està instal·lat a la via</string>
     <string name="toast_material_required">Cal aquest material per a escalar la via</string>
     <string name="toast_ending_info">Aquest és el tipus de reunió que té la via</string>
+    <string name="toast_error_send_message">The message could not be sent! %s</string>
+    <string name="snackbar_feedback_alert">Please, check all the fields</string>
     <string name="notification_download_progress_title">Baixant…</string>
     <string name="notification_download_progress_message">Baixant %s</string>
     <string name="notification_download_complete_title">Baixada completa!</string>
@@ -279,14 +281,16 @@
     <string name="path_pitch_id">R%s:</string>
     <string name="path_builder">Equipador: %s</string>
     <string name="path_rebuilder">Últim reequipador: %s</string>
+    <string name="feedback_anonymouse">Anonymous</string>
     <string name="feedback_title">Enviar comentaris</string>
     <string name="feedback_name">Nom</string>
     <string name="feedback_name_help">Açò és confidencial, i no serà compartit amb ningú. Sols serà utilitzat per a registrar usuaris, i per a referir-se a tu en cas de que et contactem.</string>
     <string name="feedback_email">Correu electrònic</string>
     <string name="feedback_email_help">Açò és confidencial, i no serà compartit amb ningú. Sols serà utilitzat per a registrar usuaris, i si vols, per a contactar-te sobre el teu informe.</string>
     <string name="feedback_message">Missatge</string>
-    <string name="feedback_dont_contact">No em contacteu</string>
     <string name="feedback_error_empty_message">Has d\'escriure el missatge a enviar</string>
+    <string name="feedback_error_empty_email">You have to set an email</string>
+    <string name="feedback_error_invalid_email">The email is not valid</string>
     <string name="fab_desc_back">Tornar</string>
     <string name="image_desc_no_internet">Sense Internet</string>
     <string name="image_desc_app_icon">Escalar Alcoià i Comtat</string>
@@ -305,6 +309,7 @@
     <string name="image_desc_change_profile_image">Indicador de canvi d\'imatge de perfil</string>
     <string name="image_desc_comments">Comentaris</string>
     <string name="image_desc_walking_time">Temps caminant des de l\'aparcament</string>
+    <string name="image_desc_send_feedback_fab">Send feedback button</string>
     <string name="login_email">Correu electrònic</string>
     <string name="login_password">Contrassenya</string>
     <string name="login_condition">Al fer clic a Iniciar sessió estàs acceptant els nostres <a href="https://escalaralcoiaicomtat.centrexcursionistalcoi.org">Termes d\'ús i condicions</a>.</string>
