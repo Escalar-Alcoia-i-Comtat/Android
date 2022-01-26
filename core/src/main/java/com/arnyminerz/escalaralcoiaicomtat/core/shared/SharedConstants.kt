@@ -10,6 +10,13 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.MEGABYTE
 
 const val APPLICATION_ID = "com.arnyminerz.escalaralcoiaicomtat"
 
+/**
+ * The email used for contacting.
+ * @author Arnau Mora
+ * @since 20220126
+ */
+const val CONTACT_EMAIL = "arnyminer.z@gmail.com"
+
 const val APP_UPDATE_MAX_TIME_DAYS_KEY = "APP_UPDATE_MAX_TIME_DAYS"
 const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7L
 
