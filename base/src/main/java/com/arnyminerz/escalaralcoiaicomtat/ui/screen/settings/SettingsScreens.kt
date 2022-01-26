@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,7 +30,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.context.LocaleHelper
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.SettingsViewModel
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MainSettingsScreen(context: Context, settingsNavController: NavController) {
     Column {
@@ -76,7 +77,7 @@ fun MainSettingsScreen(context: Context, settingsNavController: NavController) {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: SettingsViewModel) {
     Column {
@@ -172,7 +173,7 @@ fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: Settin
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationsSettingsScreen(context: Context, viewModel: SettingsViewModel) {
     Column {
@@ -205,7 +206,7 @@ fun NotificationsSettingsScreen(context: Context, viewModel: SettingsViewModel) 
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun StorageSettingsScreen(viewModel: SettingsViewModel) {
     Column {
