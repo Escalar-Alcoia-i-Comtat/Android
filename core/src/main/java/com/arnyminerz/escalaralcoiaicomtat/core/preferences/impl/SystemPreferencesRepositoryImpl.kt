@@ -32,13 +32,6 @@ class SystemPreferencesRepositoryImpl(
         val shownIntro = booleanPreferencesKey("shown_intro")
 
         /**
-         * Whether or not the device is waiting for the user to confirm their email address.
-         * @author Arnau Mora
-         * @since 20211229
-         */
-        val waitingForEmailConfirmation = booleanPreferencesKey("waiting_email")
-
-        /**
          * Whether or not the battery optimization enabled warning has been shown.
          * @author Arnau Mora
          * @since 20211229
@@ -70,9 +63,6 @@ class SystemPreferencesRepositoryImpl(
     private inline val Preferences.shownIntro
         get() = this[Keys.shownIntro] ?: false
 
-    private inline val Preferences.waitingForEmailConfirmation
-        get() = this[Keys.waitingForEmailConfirmation] ?: false
-
     private inline val Preferences.shownBatteryOptimizationWarning
         get() = this[Keys.shownBatteryOptimizationWarning] ?: false
 
@@ -94,7 +84,6 @@ class SystemPreferencesRepositoryImpl(
         .map { preferences ->
             SystemPreferences(
                 preferences.shownIntro,
-                preferences.waitingForEmailConfirmation,
                 preferences.shownBatteryOptimizationWarning,
                 preferences.indexedData,
                 preferences.dataVersion,
@@ -106,12 +95,6 @@ class SystemPreferencesRepositoryImpl(
     override suspend fun markIntroAsShown() {
         dataStore.edit {
             it[Keys.shownIntro] = true
-        }
-    }
-
-    override suspend fun setWaitingForEmailConfirmation(waiting: Boolean) {
-        dataStore.edit {
-            it[Keys.waitingForEmailConfirmation] = waiting
         }
     }
 
@@ -178,24 +161,6 @@ class SystemPreferencesRepositoryImpl(
         }
         .map {
             it[Keys.shownMd5Warning] ?: false
-        }
-        .distinctUntilChanged()
-
-    /**
-     * Returns whether or not the system is waiting for the user to confirm its email address.
-     * @author Arnau Mora
-     * @since 20220118
-     */
-    override val waitingForEmailConfirmation: Flow<Boolean> = dataStore.data
-        .catch {
-            if (it is IOException) {
-                emit(emptyPreferences())
-            } else {
-                throw it
-            }
-        }
-        .map {
-            it[Keys.waitingForEmailConfirmation] ?: false
         }
         .distinctUntilChanged()
 

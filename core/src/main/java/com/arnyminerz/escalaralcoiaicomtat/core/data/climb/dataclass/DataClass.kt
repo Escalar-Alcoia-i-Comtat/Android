@@ -8,7 +8,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Looper
-import android.widget.ImageView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
@@ -59,14 +58,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZone
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.ensureBitmapRead
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.google.firebase.dynamiclinks.ShortDynamicLink
 import com.google.firebase.dynamiclinks.ktx.androidParameters
@@ -1191,56 +1188,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
             Timber.v("$this > Reading cache image ($cacheImage)...")
             ensureBitmapRead(cacheImage, scale = imageLoadParameters?.resultImageSampleSize)
-        }
-    }
-
-    /**
-     * Loads the image of the Data Class
-     * @author Arnau Mora
-     * @date 2020/09/11
-     * @patch 2020/09/12 - Arnau Mora: Added function loadImage into this
-     * @param activity The [Activity] that is showing the image
-     * @param imageView The Image View for loading the image into
-     * @param imageLoadParameters The parameters to use for loading the image
-     * @throws StorageException When there was an error while loading from [storage].
-     * @throws IllegalArgumentException When the stored reference url ([imageReferenceUrl]) is not well formatted.
-     * @throws IOException When there's an issue while reading or writing the image from the fs.
-     * @throws ArithmeticException When there's been an error while compressing the image.
-     * @see imageReferenceUrl
-     */
-    @UiThread
-    @Throws(
-        StorageException::class,
-        IllegalArgumentException::class,
-        IOException::class,
-        ArithmeticException::class
-    )
-    @Suppress("BlockingMethodInNonBlockingContext")
-    @Deprecated("Use Jetpack Compose methods.")
-    fun loadImage(
-        activity: Activity,
-        storage: FirebaseStorage,
-        imageView: ImageView,
-        progressBar: LinearProgressIndicator?,
-        imageLoadParameters: ImageLoadParameters? = null
-    ) {
-        if (activity.isDestroyed) {
-            Timber.e("The activity is destroyed, won't load image.")
-            return
-        }
-
-        imageView.scaleType = imageLoadParameters?.scaleType ?: ImageView.ScaleType.CENTER_CROP
-
-        val showPlaceholder = imageLoadParameters?.showPlaceholder ?: true
-        if (showPlaceholder)
-            imageView.setImageResource(displayOptions.placeholderDrawable)
-
-        doAsync {
-            // TODO: Add error handlers
-            val bmp = image(activity, storage, imageLoadParameters) { progress ->
-                progressBar?.progress = progress.percentage
-            }
-            uiContext { imageView.setImageBitmap(bmp) }
         }
     }
 

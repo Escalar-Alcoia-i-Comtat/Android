@@ -5,8 +5,6 @@ package com.arnyminerz.escalaralcoiaicomtat.core.preferences.model
  * @author Arnau Mora
  * @since 20211229
  * @param shownIntro Whether or not the intro has been shown to the user.
- * @param waitingForEmailConfirmation Whether or not the device is waiting for the user to confirm
- * their email address.
  * @param shownBatteryOptimizationWarning Whether or not the battery optimization enabled warning
  * has been shown.
  * @param indexedData Whether or not the data has been indexed.
@@ -15,7 +13,6 @@ package com.arnyminerz.escalaralcoiaicomtat.core.preferences.model
  */
 data class SystemPreferences(
     val shownIntro: Boolean,
-    val waitingForEmailConfirmation: Boolean,
     val shownBatteryOptimizationWarning: Boolean,
     val indexedData: Boolean,
     val dataVersion: Long,

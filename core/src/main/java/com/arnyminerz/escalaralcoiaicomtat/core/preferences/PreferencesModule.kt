@@ -8,7 +8,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.SystemPreferenc
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.UserPreferencesRepositoryImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetIntroShown
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetShownMd5Warning
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetWaitingForEmailConfirmation
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetAlertNotificationsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetDataCollection
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetErrorCollection
@@ -101,16 +100,6 @@ object PreferencesModule {
      * @since 20220118
      */
     val shownMd5Warning get() = GetShownMd5Warning(systemPreferencesRepository)
-
-    /**
-     * Returns the waiting for email confirmation preference.
-     * @author Arnau Mora
-     * @since 20220118
-     */
-    val waitingForEmailConfirmation
-        get() = GetWaitingForEmailConfirmation(
-            systemPreferencesRepository
-        )
 
     /**
      * Returns the language preference.

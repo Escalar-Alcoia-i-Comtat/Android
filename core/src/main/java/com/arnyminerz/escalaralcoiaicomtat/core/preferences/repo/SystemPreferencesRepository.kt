@@ -24,14 +24,6 @@ interface SystemPreferencesRepository {
     suspend fun markIntroAsShown()
 
     /**
-     * Sets whether or not the device is waiting for email confirmation.
-     * @author Arnau Mora
-     * @since 20211229
-     * @param waiting If true, the device is waiting for email confirmation, false otherwise.
-     */
-    suspend fun setWaitingForEmailConfirmation(waiting: Boolean)
-
-    /**
      * Tells the system the battery optimization warning has been shown and should not be displayed
      * again.
      * @author Arnau Mora
@@ -81,13 +73,6 @@ interface SystemPreferencesRepository {
      * @since 20220118
      */
     val shownMd5Warning: Flow<Boolean>
-
-    /**
-     * Should return the value of the waiting for email confirmation preference.
-     * @author Arnau Mora
-     * @since 20220118
-     */
-    val waitingForEmailConfirmation: Flow<Boolean>
 
     /**
      * Should return the value of the indexed data preference.

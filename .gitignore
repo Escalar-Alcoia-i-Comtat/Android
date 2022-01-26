@@ -12,3 +12,4 @@ google-services.json
 base/cred.gradle
 secure.gradle
 sentry.properties
+crowdin.properties

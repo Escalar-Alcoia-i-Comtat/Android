@@ -22,14 +22,4 @@
         <item>@string/path_ending_lanyard</item>
         <item>@string/path_ending_none</item>
     </string-array>
-    <string-array name="app_languages" translatable="false">
-        <item>English</item>
-        <item>Català</item>
-        <item>Castellano</item>
-    </string-array>
-    <string-array name="app_languages_values" translatable="false">
-        <item>en</item>
-        <item>ca</item>
-        <item>es</item>
-    </string-array>
 </resources>
