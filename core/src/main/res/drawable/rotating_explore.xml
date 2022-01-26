@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<animated-rotate android:drawable="@drawable/round_explore_24"
-    android:duration="500"
-    android:fromDegrees="0"
-    android:pivotX="50%"
-    android:pivotY="50%"
-    android:repeatCount="infinite"
-    android:toDegrees="360"
-    xmlns:android="http://schemas.android.com/apk/res/android" />
