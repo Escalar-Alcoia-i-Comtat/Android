@@ -250,7 +250,6 @@
     <string name="feedback_email">Correu electrònic</string>
     <string name="feedback_email_help">Açò és confidencial, i no serà compartit amb ningú. Sols serà utilitzat per a registrar usuaris, i si vols, per a contactar-te sobre el teu informe.</string>
     <string name="feedback_message">Missatge</string>
-    <string name="feedback_dont_contact">No em contacteu</string>
     <string name="image_desc_ending_type">Tipus de reunió</string>
     <string name="image_desc_rappel">Rappel</string>
     <string name="status_no_internet">Sense Connexió a Internet</string>
@@ -355,4 +354,10 @@
     <string name="image_desc_sector_image">Imatge del sector</string>
     <string name="pref_gene_data_collection_title">Habilitar recol·lecció de dades</string>
     <string name="pref_gene_data_collection_sum">El dispositiu enviarà dades d\'ús i de rendiment anònimes al servidor, per a que les diferents funcions puguen ser millorades, i es supervisarà la navegació a través de l\'app per a tenir un registre dels sectors més visitats.</string>
+    <string name="toast_error_send_message">El missatge no s\'ha pogut enviar! %s</string>
+    <string name="snackbar_feedback_alert">Per favor, comprova tots els camps</string>
+    <string name="feedback_anonymouse">Anònim</string>
+    <string name="feedback_error_empty_email">Has d\'establir un correu electrònic</string>
+    <string name="feedback_error_invalid_email">El correu electrònic no és vàlid</string>
+    <string name="image_desc_send_feedback_fab">Botó d\'enviar sugeriments</string>
 </resources>

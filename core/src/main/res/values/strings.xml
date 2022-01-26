@@ -126,6 +126,9 @@
     <string name="toast_material_fixed">This material is already installed on the path</string>
     <string name="toast_material_required">This material is required to climb the path</string>
     <string name="toast_ending_info">This is the ending type of the path</string>
+    <string name="toast_error_send_message">The message could not be sent! %s</string>
+
+    <string name="snackbar_feedback_alert">Please, check all the fields</string>
 
     <string name="notification_download_progress_title">Downloading…</string>
     <string name="notification_download_progress_message">Downloading %s</string>
@@ -330,14 +333,16 @@
     <string name="path_builder">Builder: %s</string>
     <string name="path_rebuilder">Last rebuilder: %s</string>
 
+    <string name="feedback_anonymouse">Anonymous</string>
     <string name="feedback_title">Send feedback</string>
     <string name="feedback_name">Name</string>
     <string name="feedback_name_help">This is confidential, and won\'t be shared with anyone. It will be used only for user registration, and for referring to you, in case we contact you.</string>
     <string name="feedback_email">Email</string>
     <string name="feedback_email_help">This is confidential, and won\'t be shared with anyone. It will be used only for user registration, and if you want, to contact you about your report.</string>
     <string name="feedback_message">Message</string>
-    <string name="feedback_dont_contact">Don\'t contact me</string>
     <string name="feedback_error_empty_message">You have to set a message to send</string>
+    <string name="feedback_error_empty_email">You have to set an email</string>
+    <string name="feedback_error_invalid_email">The email is not valid</string>
 
     <string name="fab_desc_back">Go Back</string>
 
@@ -358,6 +363,7 @@
     <string name="image_desc_change_profile_image">Change profile image indicator</string>
     <string name="image_desc_comments">Comments</string>
     <string name="image_desc_walking_time">Walking time from parking</string>
+    <string name="image_desc_send_feedback_fab">Send feedback button</string>
 
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>
