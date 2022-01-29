@@ -109,6 +109,9 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
     } catch (e: AppSearchException) {
         Timber.e("Could not convert GenericDocument to ${T::class.java.simpleName}!")
         return null
+    } catch (e: NullPointerException) {
+        Timber.e(e, "A parameter in the document was supposed to be non-null, and it's null.")
+        return null
     }
     return data.data()
 }
