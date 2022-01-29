@@ -16,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
+import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.DeveloperScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.DownloadsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.ExploreScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.MapScreen
@@ -108,6 +109,7 @@ class MainActivity : LanguageComponentActivity() {
                     1 -> MapScreen()
                     2 -> DownloadsScreen()
                     3 -> SettingsScreen()
+                    4 -> if (BuildConfig.DEBUG) DeveloperScreen()
                 }
             }
         }
