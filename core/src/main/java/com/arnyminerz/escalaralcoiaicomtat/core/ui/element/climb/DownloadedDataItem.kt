@@ -32,13 +32,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.getChildren
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.MEGABYTE
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
@@ -55,34 +59,50 @@ import kotlinx.coroutines.launch
  * @param data The [DownloadedData] to display.
  * @param searchSession For requesting deletions.
  * @param onDelete Will get called when the data is deleted.
+ * @throws IllegalArgumentException When the [data] is not a [Zone] or [Sector].
  */
 @Composable
+@Throws(IllegalArgumentException::class)
 fun DownloadedDataItem(
     data: DownloadedData,
     searchSession: AppSearchSession,
     dataClassActivity: Class<*>,
     onDelete: (() -> Unit)?
-) = DownloadedDataItemRaw(
-    data.displayName,
-    data.objectId,
-    data.sizeBytes,
-    data.namespace,
-    data.childrenCount,
-    searchSession,
-    dataClassActivity,
-    onDelete
-)
+) = when (data.namespace) {
+    // Area is not downloadable
+    Zone.NAMESPACE -> DownloadedDataItemRaw<Zone, ZoneData>(
+        data.displayName,
+        data.objectId,
+        data.sizeBytes,
+        data.namespace,
+        data.childrenCount,
+        searchSession,
+        dataClassActivity,
+        onDelete
+    )
+    Sector.NAMESPACE -> DownloadedDataItemRaw<Sector, SectorData>(
+        data.displayName,
+        data.objectId,
+        data.sizeBytes,
+        data.namespace,
+        data.childrenCount,
+        searchSession,
+        dataClassActivity,
+        onDelete
+    )
+    else -> throw IllegalArgumentException("Only Zones and Sectors can be displayed as downloaded.")
+}
 
 @Composable
-private fun DownloadedDataItemRaw(
+private inline fun <A : DataClass<*, *>, reified B : DataRoot<A>> DownloadedDataItemRaw(
     displayName: String,
     @ObjectId objectId: String,
     size: Long,
-    namespace: String,
+    @Namespace namespace: String,
     childrenCount: Long,
     searchSession: AppSearchSession?,
     dataClassActivity: Class<*>,
-    onDelete: (() -> Unit)?
+    noinline onDelete: (() -> Unit)?
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -180,10 +200,11 @@ private fun DownloadedDataItemRaw(
                         onClick = {
                             viewButtonEnabled = false
                             doAsync {
-                                val intent = DataClass.getIntent(
+                                val intent = DataClass.getIntent<A, B>(
                                     context,
                                     dataClassActivity,
                                     searchSession,
+                                    namespace,
                                     objectId
                                 )
                                 uiScope.launch {
@@ -205,7 +226,7 @@ private fun DownloadedDataItemRaw(
         }
     }
 
-    suspend fun delete() {
+    val delete: suspend () -> Unit = {
         val deleted = if (namespace == Zone.NAMESPACE)
             DataClass
                 .delete<Sector>(context, searchSession!!, namespace, objectId)
@@ -296,7 +317,7 @@ private fun DownloadedDataItemRaw(
 @Preview(name = "DownloadedDataItem Preview")
 @Composable
 fun DownloadedDataItemPreview() {
-    DownloadedDataItemRaw(
+    DownloadedDataItemRaw<Zone, ZoneData>(
         "Zone Placeholder",
         "object",
         12 * MEGABYTE,
