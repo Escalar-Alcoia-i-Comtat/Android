@@ -42,6 +42,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.PoppinsFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.DataClassItemViewModel
@@ -170,8 +171,10 @@ private fun DownloadableDataClassItem(
                     )
                     Text(
                         text = childrenCount?.let {
-                            // TODO: Change between sectors and paths
-                            stringResource(R.string.downloads_sectors_title, it)
+                            if (item.namespace == Zone.NAMESPACE)
+                                stringResource(R.string.downloads_zones_title, it)
+                            else
+                                stringResource(R.string.downloads_sectors_title, it)
                         } ?: stringResource(R.string.status_loading),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.labelLarge,

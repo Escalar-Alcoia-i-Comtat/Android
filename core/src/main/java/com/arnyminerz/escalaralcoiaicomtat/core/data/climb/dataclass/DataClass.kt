@@ -23,7 +23,9 @@ import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
@@ -221,6 +223,37 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         ): Intent? = (searchSession.getData<Area, AreaData>(query, Area.NAMESPACE)
             ?: searchSession.getData<Zone, ZoneData>(query, Zone.NAMESPACE)
             ?: searchSession.getData<Sector, SectorData>(query, Sector.NAMESPACE))
+            ?.let { dataClass ->
+                Intent(context, activity)
+                    .putExtra(EXTRA_DATACLASS, dataClass)
+                    .apply {
+                        dataClass
+                            .takeIf { it.hasParents }
+                            ?.getParent<DataClass<*, *>>(searchSession)
+                            ?.let {
+                                putExtra(EXTRA_PARENT, it)
+                            }
+                    }
+            }
+
+        /**
+         * Gets the [Intent] used to launch the [Activity] of a [DataClass] with [namespace] and if
+         * [objectId].
+         * @author Arnau Mora
+         * @since 20220128
+         * @param context The [Context] that is requesting the [Intent].
+         * @param searchSession The [AppSearchSession] that has all the data stored.
+         * @param namespace The [DataClass.namespace] of the [objectId].
+         * @param objectId The [DataClass.objectId] to search for.
+         * @return An [Intent] if the [DataClass] was found, or null.
+         */
+        suspend inline fun <A : DataClass<*, *>, reified B : DataRoot<A>> getIntent(
+            context: Context,
+            activity: Class<*>,
+            searchSession: AppSearchSession,
+            @Namespace namespace: String,
+            @ObjectId objectId: String
+        ): Intent? = searchSession.getData<A, B>(objectId, namespace)
             ?.let { dataClass ->
                 Intent(context, activity)
                     .putExtra(EXTRA_DATACLASS, dataClass)
@@ -475,7 +508,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20220106
      */
     @IgnoredOnParcel
-    protected abstract val hasParents: Boolean
+    abstract val hasParents: Boolean
 
     /**
      * The download url from Firebase Storage for the [DataClass]' image.
@@ -944,6 +977,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param storage The [FirebaseStorage] instance to load resources from the server.
      * @param imageLoadParameters The parameters for loading the image.
      */
+    @Suppress("BlockingMethodInNonBlockingContext")
     fun imageData(
         context: Context,
         storage: FirebaseStorage,
