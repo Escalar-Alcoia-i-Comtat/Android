@@ -92,9 +92,9 @@ class SystemPreferencesRepositoryImpl(
         }
         .distinctUntilChanged()
 
-    override suspend fun markIntroAsShown() {
+    override suspend fun markIntroAsShown(shown: Boolean) {
         dataStore.edit {
-            it[Keys.shownIntro] = true
+            it[Keys.shownIntro] = shown
         }
     }
 
