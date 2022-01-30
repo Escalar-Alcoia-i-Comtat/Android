@@ -31,4 +31,11 @@ sealed class IntroActionType<R> {
      * @since 20220130
      */
     object BUTTON : IntroActionType<Any?>()
+
+    /**
+     * When no action is wanted to be displayed.
+     * @author Arnau Mora
+     * @since 20220130
+     */
+    object NONE : IntroActionType<Any?>()
 }

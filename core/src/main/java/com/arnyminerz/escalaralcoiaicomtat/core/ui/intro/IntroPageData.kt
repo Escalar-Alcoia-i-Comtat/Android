@@ -12,5 +12,5 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroAction
 data class IntroPageData<R>(
     val title: String,
     val content: String,
-    val action: IntroAction<R>? = null
+    val action: IntroAction<R> = IntroAction.None
 )
