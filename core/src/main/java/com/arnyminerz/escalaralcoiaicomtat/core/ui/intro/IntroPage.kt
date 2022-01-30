@@ -88,7 +88,11 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                     }
                 }
                 IntroActionType.SWITCH -> {
-                    var checked by remember { mutableStateOf(false) }
+                    var checked by remember {
+                        mutableStateOf(
+                            action.currentValue as? Boolean ?: false
+                        )
+                    }
                     val context: IntroActionContext<R> =
                         object : IntroActionContext<R>() {
                             override fun setState(state: R) {
@@ -111,7 +115,11 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                     )
                 }
                 IntroActionType.CHECKBOX -> {
-                    var checked by remember { mutableStateOf(false) }
+                    var checked by remember {
+                        mutableStateOf(
+                            action.currentValue as? Boolean ?: false
+                        )
+                    }
                     val context: IntroActionContext<R> =
                         object : IntroActionContext<R>() {
                             override fun setState(state: R) {
@@ -168,6 +176,7 @@ fun IntroPagePreviewSwitch() {
                     "This can be switched"
                 else
                     "This has been switched",
+                switchStatus,
                 IntroActionType.SWITCH,
                 callback = { switched ->
                     switchStatus = switched

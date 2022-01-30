@@ -7,6 +7,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action
  */
 data class IntroAction<in R : Any?>(
     val text: String,
+    val currentValue: @UnsafeVariance R,
     val type: IntroActionType<@UnsafeVariance R>,
     val callback: IntroActionContext<@UnsafeVariance R>.(value: R) -> Unit,
     val enabled: Boolean = true,
@@ -17,6 +18,6 @@ data class IntroAction<in R : Any?>(
          * @author Arnau Mora
          * @since 20220130
          */
-        val None = IntroAction("", IntroActionType.NONE, {})
+        val None = IntroAction("", null, IntroActionType.NONE, {})
     }
 }
