@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 @Composable
 @ExperimentalMaterial3Api
 @ExperimentalPagerApi
-fun IntroWindow(pages: List<IntroPageData>, finishListener: () -> Unit) {
+fun IntroWindow(pages: List<IntroPageData<Any>>, finishListener: () -> Unit) {
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
 

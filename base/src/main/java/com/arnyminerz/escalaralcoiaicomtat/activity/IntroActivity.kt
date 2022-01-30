@@ -48,13 +48,17 @@ class IntroActivity : ComponentActivity() {
         setContent {
             AppTheme {
                 val introPages = mutableListOf(
-                    IntroPageData(
+                    IntroPageData<Any>(
                         stringResource(R.string.intro_main_title, "Escalar Alcoià i Comtat"),
                         stringResource(R.string.intro_main_message)
                     ),
-                    IntroPageData(
+                    IntroPageData<Any>(
                         stringResource(R.string.intro_warning_title),
                         stringResource(R.string.intro_warning_message)
+                    ),
+                    IntroPageData<Any>(
+                        stringResource(R.string.intro_nearbyzones_title),
+                        stringResource(R.string.intro_nearbyzones_message)
                     )
                 ).apply {
                     if (BuildConfig.DEBUG)
