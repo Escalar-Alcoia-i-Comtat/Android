@@ -62,56 +62,61 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
             textAlign = TextAlign.Center,
             text = data.content
         )
-        data.action?.let { action ->
-            @Suppress("UNCHECKED_CAST")
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                when (action.type) {
-                    IntroActionType.BUTTON -> {
-                        Button(
-                            enabled = action.enabled,
-                            onClick = {
-                                action.callback.invoke(null as R)
-                            },
-                        ) {
-                            Text(text = action.text)
-                        }
-                    }
-                    IntroActionType.SWITCH -> {
-                        var checked by remember { mutableStateOf(false) }
-                        Switch(
-                            checked = checked,
-                            onCheckedChange = {
-                                checked = it
-                                action.callback.invoke(it as R)
-                            },
-                        )
-                        Text(
-                            text = action.text,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer,
-                        )
-                    }
-                    IntroActionType.CHECKBOX -> {
-                        var checked by remember { mutableStateOf(false) }
-                        Checkbox(
-                            checked = checked,
-                            onCheckedChange = {
-                                checked = it
-                                action.callback.invoke(it as R)
-                            }
-                        )
-                        Text(
-                            text = action.text,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer,
-                        )
+
+        val action = data.action
+        @Suppress("UNCHECKED_CAST")
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            when (action.type) {
+                IntroActionType.BUTTON -> {
+                    Button(
+                        enabled = action.enabled,
+                        onClick = {
+                            action.callback.invoke(null as R)
+                        },
+                    ) {
+                        Text(text = action.text)
                     }
                 }
+                IntroActionType.SWITCH -> {
+                    var checked by remember { mutableStateOf(false) }
+                    Switch(
+                        checked = checked,
+                        enabled = action.enabled,
+                        onCheckedChange = {
+                            checked = it
+                            action.callback.invoke(it as R)
+                        },
+                    )
+                    Text(
+                        text = action.text,
+                        fontSize = 17.sp,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                    )
+                }
+                IntroActionType.CHECKBOX -> {
+                    var checked by remember { mutableStateOf(false) }
+                    Checkbox(
+                        checked = checked,
+                        enabled = action.enabled,
+                        onCheckedChange = {
+                            checked = it
+                            action.callback.invoke(it as R)
+                        }
+                    )
+                    Text(
+                        text = action.text,
+                        fontSize = 17.sp,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                    )
+                }
+                else -> {}
             }
         }
     }
