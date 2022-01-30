@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroAction
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroActionContext
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroActionType
 
 /**
@@ -73,10 +74,14 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
         ) {
             when (action.type) {
                 IntroActionType.BUTTON -> {
+                    val context: IntroActionContext<R> =
+                        object : IntroActionContext<R>() {
+                            override fun setState(state: R) {}
+                        }
                     Button(
                         enabled = action.enabled,
                         onClick = {
-                            action.callback.invoke(null as R)
+                            action.callback.invoke(context, null as R)
                         },
                     ) {
                         Text(text = action.text)
@@ -84,12 +89,18 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                 }
                 IntroActionType.SWITCH -> {
                     var checked by remember { mutableStateOf(false) }
+                    val context: IntroActionContext<R> =
+                        object : IntroActionContext<R>() {
+                            override fun setState(state: R) {
+                                (state as? Boolean)?.let { checked = it }
+                            }
+                        }
                     Switch(
                         checked = checked,
                         enabled = action.enabled,
                         onCheckedChange = {
                             checked = it
-                            action.callback.invoke(it as R)
+                            action.callback.invoke(context, it as R)
                         },
                     )
                     Text(
@@ -101,12 +112,18 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                 }
                 IntroActionType.CHECKBOX -> {
                     var checked by remember { mutableStateOf(false) }
+                    val context: IntroActionContext<R> =
+                        object : IntroActionContext<R>() {
+                            override fun setState(state: R) {
+                                (state as? Boolean)?.let { checked = it }
+                            }
+                        }
                     Checkbox(
                         checked = checked,
                         enabled = action.enabled,
                         onCheckedChange = {
                             checked = it
-                            action.callback.invoke(it as R)
+                            action.callback.invoke(context, it as R)
                         }
                     )
                     Text(
