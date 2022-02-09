@@ -77,7 +77,7 @@ dependencies {
     api "androidx.work:work-runtime-ktx:$jetpack_work_version"
     api "androidx.work:work-gcm:$jetpack_work_version"
     androidTestApi "androidx.work:work-testing:$jetpack_work_version"
-    api "androidx.startup:startup-runtime:1.1.0"
+    api "androidx.startup:startup-runtime:1.1.1"
 
     // Jetpack compose
     api "androidx.compose.ui:ui:$compose_version"
