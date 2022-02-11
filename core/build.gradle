@@ -151,7 +151,7 @@ dependencies {
     api 'com.google.android.gms:play-services-auth:20.1.0'
 
     // Gson for JSON parsing
-    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'com.google.code.gson:gson:2.9.0'
 
     // Maps SDK
     api 'com.google.android.gms:play-services-maps:18.0.2'
