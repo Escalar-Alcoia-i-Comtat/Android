@@ -42,6 +42,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.SearchableActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.NearbyZones
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
@@ -115,7 +116,7 @@ fun MainActivity.ExploreScreen(storage: FirebaseStorage) {
                 )
             }
 
-            // TODO: Nearby zones map
+            NearbyZones()
 
             Box(modifier = Modifier.fillMaxWidth()) {
                 AnimatedVisibility(
