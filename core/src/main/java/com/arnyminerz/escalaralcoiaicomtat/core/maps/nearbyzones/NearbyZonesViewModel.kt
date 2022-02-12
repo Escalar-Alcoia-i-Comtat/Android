@@ -23,7 +23,7 @@ class NearbyZonesViewModel(application: Application) : AndroidViewModel(applicat
      * @author Arnau Mora
      * @since 20220130
      */
-    val zones = MutableListLiveData<Zone>()
+    val zones = MutableListLiveData<Zone>().apply { setValue(mutableListOf()) }
 
     /**
      * Starts loading the zones that are indexed into [loadZones]. Updates the result at [zones].
