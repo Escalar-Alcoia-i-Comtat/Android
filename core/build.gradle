@@ -98,7 +98,7 @@ dependencies {
     implementation 'dev.burnoo:compose-remember-preference:0.3.4'
 
     // Jetpack Compose utilities - Accompanist libraries
-    api 'com.google.accompanist:accompanist-appcompat-theme:0.20.3'
+    api 'com.google.accompanist:accompanist-appcompat-theme:0.23.0'
     api "com.google.accompanist:accompanist-pager:0.24.2-alpha"
     api 'com.google.accompanist:accompanist-drawablepainter:0.24.2-alpha'
 
