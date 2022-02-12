@@ -1,29 +1,44 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.intro
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroAction
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroActionContext
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroActionType
 
 /**
- * The data required to display an [IntroPage].
+ * Allows to display a page that can be used in the intro of the app to introduce the app
+ * functionality to the user.
  * @author Arnau Mora
- * @since 20211214
- * @param title The string resource of the title of the page
- * @param content The string resource of the content description of the page
+ * @since 20220130
+ * @param R The return type of [IntroPageData.action] if set. Otherwise can be [Any].
+ * @param data The [IntroPageData] to display.
  */
-data class IntroPageData(val title: String, val content: String)
-
 @Composable
-fun IntroPage(data: IntroPageData) {
+@ExperimentalMaterial3Api
+fun <R : Any?> IntroPage(data: IntroPageData<R>) {
     Column(
         modifier = Modifier
             .fillMaxHeight(1f)
@@ -48,5 +63,125 @@ fun IntroPage(data: IntroPageData) {
             textAlign = TextAlign.Center,
             text = data.content
         )
+
+        val action = data.action
+        @Suppress("UNCHECKED_CAST")
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            when (action.type) {
+                IntroActionType.BUTTON -> {
+                    val context: IntroActionContext<R> =
+                        object : IntroActionContext<R>() {
+                            override fun setState(state: R) {}
+                        }
+                    Button(
+                        enabled = action.enabled,
+                        onClick = {
+                            action.callback.invoke(context, null as R)
+                        },
+                    ) {
+                        Text(text = action.text)
+                    }
+                }
+                IntroActionType.SWITCH -> {
+                    var checked by remember {
+                        mutableStateOf(
+                            action.currentValue as? Boolean ?: false
+                        )
+                    }
+                    val context: IntroActionContext<R> =
+                        object : IntroActionContext<R>() {
+                            override fun setState(state: R) {
+                                (state as? Boolean)?.let { checked = it }
+                            }
+                        }
+                    Switch(
+                        checked = checked,
+                        enabled = action.enabled,
+                        onCheckedChange = {
+                            checked = it
+                            action.callback.invoke(context, it as R)
+                        },
+                    )
+                    Text(
+                        text = action.text,
+                        fontSize = 17.sp,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                    )
+                }
+                IntroActionType.CHECKBOX -> {
+                    var checked by remember {
+                        mutableStateOf(
+                            action.currentValue as? Boolean ?: false
+                        )
+                    }
+                    val context: IntroActionContext<R> =
+                        object : IntroActionContext<R>() {
+                            override fun setState(state: R) {
+                                (state as? Boolean)?.let { checked = it }
+                            }
+                        }
+                    Checkbox(
+                        checked = checked,
+                        enabled = action.enabled,
+                        onCheckedChange = {
+                            checked = it
+                            action.callback.invoke(context, it as R)
+                        }
+                    )
+                    Text(
+                        text = action.text,
+                        fontSize = 17.sp,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                    )
+                }
+                else -> {}
+            }
+        }
     }
+}
+
+@Composable
+@Preview(name = "IntroPage Preview")
+@OptIn(ExperimentalMaterial3Api::class)
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+fun IntroPagePreview() {
+    IntroPage<Any>(
+        data = IntroPageData(
+            "This is title",
+            "This is the content of the slide. The text can be modified for each slide."
+        )
+    )
+}
+
+@Composable
+@Preview(name = "IntroPage Preview with switch")
+@OptIn(ExperimentalMaterial3Api::class)
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+fun IntroPagePreviewSwitch() {
+    var switchStatus by remember { mutableStateOf(false) }
+
+    IntroPage(
+        data = IntroPageData(
+            "This is title",
+            "This is the content of the slide. The text can be modified for each slide.",
+            action = IntroAction(
+                if (switchStatus)
+                    "This can be switched"
+                else
+                    "This has been switched",
+                switchStatus,
+                IntroActionType.SWITCH,
+                callback = { switched ->
+                    switchStatus = switched
+                }
+            )
+        )
+    )
 }

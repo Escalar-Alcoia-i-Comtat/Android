@@ -20,8 +20,10 @@ interface SystemPreferencesRepository {
      * Sets the intro shown preference as true.
      * @author Arnau Mora
      * @since 20211229
+     * @param shown Whether or not the intro has been shown. Usually will be true, but can be false
+     * for showing intro again.
      */
-    suspend fun markIntroAsShown()
+    suspend fun markIntroAsShown(shown: Boolean = true)
 
     /**
      * Tells the system the battery optimization warning has been shown and should not be displayed

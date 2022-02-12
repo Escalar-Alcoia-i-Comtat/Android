@@ -144,6 +144,14 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
         for (page in searchPage) {
             val genericDocument = page.genericDocument
             Timber.v("Got generic document ${genericDocument.namespace}: ${genericDocument.id}")
+            if (!listOf(
+                    "AreaData",
+                    "ZoneData",
+                    "SectorData",
+                    "PathData"
+                ).contains(genericDocument.schemaType)
+            ) continue
+
             val data: T = try {
                 genericDocument.toDocumentClass(T::class.java)
             } catch (e: AppSearchException) {
@@ -210,6 +218,16 @@ suspend fun AppSearchSession.getPath(@ObjectId pathId: String): Path? =
 @WorkerThread
 suspend fun AppSearchSession.getZones(@ObjectId areaId: String): List<Zone> =
     getList<Zone, ZoneData>(areaId, Zone.NAMESPACE)
+
+/**
+ * Searches for all the [AppSearchSession] indexed [Zone]s.
+ * @author Arnau Mora
+ * @since 20210820
+ * @return A [List] with the found [Zone]s.
+ */
+@WorkerThread
+suspend fun AppSearchSession.getZones(): List<Zone> =
+    getList<Zone, ZoneData>("", Zone.NAMESPACE)
 
 /**
  * Searches for all the [AppSearchSession] indexed [Sector]s that have as a parent a zone with id

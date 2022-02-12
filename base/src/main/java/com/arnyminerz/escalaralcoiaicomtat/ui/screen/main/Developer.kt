@@ -14,18 +14,27 @@ import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 
 @Composable
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(
+    ExperimentalMaterialApi::class,
+    ExperimentalFoundationApi::class,
+    ExperimentalMaterial3Api::class
+)
 fun MainActivity.DeveloperScreen() {
     val indexedDownloads by developerViewModel.indexedDownloads.observeAsState()
     val indexTree by developerViewModel.indexTree.observeAsState()
@@ -65,6 +74,19 @@ fun MainActivity.DeveloperScreen() {
                 )
             ) {
                 Text(text = "Index tree")
+            }
+            Button(
+                onClick = {
+                    doAsync {
+                        PreferencesModule.systemPreferencesRepository
+                            .markIntroAsShown(false)
+                        uiContext {
+                            launch(IntroActivity::class.java)
+                        }
+                    }
+                }
+            ) {
+                Text(text = "Show Intro")
             }
         }
         LazyColumn {
