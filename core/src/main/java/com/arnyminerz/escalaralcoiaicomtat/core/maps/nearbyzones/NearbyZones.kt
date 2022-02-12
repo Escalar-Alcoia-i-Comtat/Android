@@ -1,7 +1,11 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.location.Location
+import androidx.activity.ComponentActivity
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
@@ -29,14 +33,62 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.NearbyZonesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.GoogleMap
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.distanceTo
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toLatLng
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import timber.log.Timber
 
+/**
+ * All the markers that have been added to the GoogleMap by the nearby zones module.
+ * @author Arnau Mora
+ * @since 20220212
+ */
+private val markers = arrayListOf<Marker>()
+
+/**
+ * Will get called when there's an update on the location of the device, therefore, nearby zones
+ * should be updated.
+ * @author Arnau Mora
+ * @since 20220212
+ */
+private suspend fun locationCallback(
+    model: NearbyZonesViewModel,
+    map: GoogleMap,
+    location: Location
+) {
+    for (marker in markers)
+        marker.remove()
+    markers.clear()
+
+    PreferencesModule
+        .getNearbyZonesDistance()
+        .collect { nearbyZonesDistance ->
+            for (zone in model.zones)
+                zone.location
+                    ?.distanceTo(location.toLatLng())
+                    ?.takeIf { it <= nearbyZonesDistance }
+                    ?.run {
+                        map.addMarker(
+                            MarkerOptions()
+                                .title(zone.displayName)
+                        )?.let { markers.add(it) }
+                    }
+        }
+}
+
+@SuppressLint("MissingPermission")
 @Composable
-fun NearbyZones() {
+fun ComponentActivity.NearbyZones() {
     val context = LocalContext.current
+    val model: NearbyZonesViewModel by viewModels()
+
+    model.loadZones()
 
     Card(
         modifier = Modifier
@@ -98,6 +150,7 @@ fun NearbyZones() {
                     }
                     googleMap.setLocationSource(
                         NearbyZonesModule(context) { location ->
+                            doAsync { locationCallback(model, googleMap, location) }
                             googleMap.moveCamera(
                                 CameraUpdateFactory.newLatLng(location.toLatLng())
                             )
