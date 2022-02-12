@@ -40,6 +40,8 @@ com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone
 com.arnyminerz.escalaralcoiaicomtat.core.exception
 com.arnyminerz.escalaralcoiaicomtat.core.exception.notification
 com.arnyminerz.escalaralcoiaicomtat.core.loader
+com.arnyminerz.escalaralcoiaicomtat.core.maps
+com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones
 com.arnyminerz.escalaralcoiaicomtat.core.network
 com.arnyminerz.escalaralcoiaicomtat.core.network.base
 com.arnyminerz.escalaralcoiaicomtat.core.notification
@@ -57,6 +59,7 @@ com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings
 com.arnyminerz.escalaralcoiaicomtat.core.ui.element.tooltip
 com.arnyminerz.escalaralcoiaicomtat.core.ui.intro
+com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action
 com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen
 com.arnyminerz.escalaralcoiaicomtat.core.ui.map
 com.arnyminerz.escalaralcoiaicomtat.core.ui.theme
