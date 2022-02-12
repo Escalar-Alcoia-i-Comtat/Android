@@ -144,6 +144,14 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
         for (page in searchPage) {
             val genericDocument = page.genericDocument
             Timber.v("Got generic document ${genericDocument.namespace}: ${genericDocument.id}")
+            if (!listOf(
+                    "AreaData",
+                    "ZoneData",
+                    "SectorData",
+                    "PathData"
+                ).contains(genericDocument.schemaType)
+            ) continue
+
             val data: T = try {
                 genericDocument.toDocumentClass(T::class.java)
             } catch (e: AppSearchException) {
