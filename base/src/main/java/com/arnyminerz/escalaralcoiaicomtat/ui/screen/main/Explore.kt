@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -57,6 +58,8 @@ import timber.log.Timber
 @ExperimentalBadgeUtils
 @OptIn(ExperimentalMaterial3Api::class)
 fun MainActivity.ExploreScreen(storage: FirebaseStorage) {
+    val focusManager = LocalFocusManager.current
+
     val areas by exploreViewModel.loadAreas().observeAsState()
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
@@ -94,8 +97,11 @@ fun MainActivity.ExploreScreen(storage: FirebaseStorage) {
                         AnimatedVisibility(visible = isFocused) {
                             IconButton(
                                 onClick = {
+                                    if (searchTextField.isEmpty())
+                                        focusManager.clearFocus()
+                                    else
+                                        focusRequester.requestFocus()
                                     searchTextField = ""
-                                    focusRequester.requestFocus()
                                 },
                             ) {
                                 Icon(Icons.Rounded.Close, "Clear text")
