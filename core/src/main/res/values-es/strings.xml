@@ -72,7 +72,7 @@
     <string name="safe_strings_plural">Express</string>
     <string name="path_stats_chart_title">Grados</string>
     <string name="nearby_zones_title">Zonas Cercanas</string>
-    <string name="nearby_zones_permission">The location permission is required and not granted. Tap to request.</string>
+    <string name="nearby_zones_permission">El acceso a la ubicación es necesario y no está dado. Pulsa para solicitar.</string>
     <string name="sector_info_dialog_sun_morning_title">Sol por la mañana</string>
     <string name="sector_info_dialog_sun_morning_msg">Al sector le da el sol por la mañana y la sombra por la tarde.</string>
     <string name="sector_info_dialog_sun_afternoon_title">Sol por la tarde</string>
@@ -107,7 +107,7 @@
     <string name="toast_error_account_manager_store">No se han podido guardar los datos de la cuenta</string>
     <string name="toast_error_delete_post">No se ha podido eliminar el post</string>
     <string name="toast_error_google_play">Escalar Alcoià i Comtat necesita los servicios de Google Play</string>
-    <string name="toast_error_permission">The permission is required</string>
+    <string name="toast_error_permission">El permiso es necesario</string>
     <string name="toast_profile_image_updated">Imagen de perfil actualizada!</string>
     <string name="toast_clear_ok">Limpiado correctamente</string>
     <string name="toast_data_uninstalled">Solicitada la desinstalación de los datos</string>
@@ -118,7 +118,7 @@
     <string name="toast_material_required">Este material es necesario para escalar la vía</string>
     <string name="toast_ending_info">Este es el tipo de reunión que tiene la vía</string>
     <string name="toast_error_send_message">El mensaje no ha podido ser enviado! %s</string>
-    <string name="toast_nearby_zones_enabled">Nearby Zones enabled</string>
+    <string name="toast_nearby_zones_enabled">Zonas Cercanas habilitadas</string>
     <string name="snackbar_feedback_alert">Por favor, rellena todos los campos</string>
     <string name="notification_download_progress_title">Descargando…</string>
     <string name="notification_download_progress_message">Descargando %s</string>
@@ -161,16 +161,16 @@
     <string name="image_desc_downloaded_marker">Marcador de Descarga</string>
     <string name="fab_desc_next">Siguiente</string>
     <string name="fab_desc_finish">Finalizar</string>
-    <string name="fab_desc_grant">Grant Permission</string>
+    <string name="fab_desc_grant">Dar permiso</string>
     <string name="intro_main_title">Bienvenido a %s</string>
     <string name="intro_main_message">Te vamos a guiar por un proceso de configuración breve. No te preocupes, es rápido y sencillo.</string>
     <string name="intro_beta_title">Prueba Beta</string>
     <string name="intro_beta_message">Hola usuario! Has escojido usar una versión de prueba de la aplicación i eso te convierte en una persona genial! Muchas gracias! Però, todo sea dicho, es posible que esta versión tenga errores, ya que aún se encuentra en desarrollo, incluso puede que te topes con funcionalidades no finalizadas, o que la aplicación se cierre de manera forzosa. Es triste para nosotros que puedas tener problemas, pero todos los errores que te ocurran a ti, serán errores que no habrán en la versión final, y te lo agradecemos mucho!</string>
     <string name="intro_warning_title">Atención</string>
     <string name="intro_warning_message">La escalada es un deporte considerado de riesgo, todo lo que lo practico tiene que preocuparse de su conocimiento y correcta ejecución. La información de esta aplicación es puramente informativa y puede ser errónea. Ten cuidado, el material en buen estado, y vigila\'t no sólo a ti mismo, sino también a tus compañeros, y sobre todo, disfruta.</string>
-    <string name="intro_nearbyzones_title">Nearby Zones Functionality</string>
-    <string name="intro_nearbyzones_message">Escalar Alcoià i Comtat has a functionality that we call \"Nearby Zones\", which takes the location of your device and shows you which climbing zones are at a set radius. You can choose to enable or disable this, but if you enable it, keep in mind that the location permission should be always enabled.</string>
-    <string name="intro_nearbyzones_enable">Enable Nearby Zones</string>
+    <string name="intro_nearbyzones_title">Funcionalidad de Zonas Cercanas</string>
+    <string name="intro_nearbyzones_message">Escalar Alcoià i Comtat tiene una función a la que llamamos \"Zonas Cercanas\", que toma la ubicación en tiempo real de tu dispositivo y muestra las zonas que tienes a tu alrededor en un radio personalizado. Puedes escoger si habilitar o no esta función, pero debes tener en cuenta que si la quieres activa, para que funcione, tienes que mantener activo el acceso a la ubicación del dispositivo por esta aplicación.</string>
+    <string name="intro_nearbyzones_enable">Habilitar Zonas Cercanas</string>
     <string name="sector_walking_time">%1$smin</string>
     <string name="sector_height">%1$sm</string>
     <string name="sector_kids_apt">Apto niños</string>
