@@ -71,7 +71,7 @@
     <!-- NC is for No Count -->
     <string name="safe_strings_plural">Express</string>
     <string name="path_stats_chart_title">Grados</string>
-    <string name="nearby_zones_title">Nearby Zones</string>
+    <string name="nearby_zones_title">Zonas Cercanas</string>
     <string name="nearby_zones_permission">The location permission is required and not granted. Tap to request.</string>
     <string name="sector_info_dialog_sun_morning_title">Sol por la mañana</string>
     <string name="sector_info_dialog_sun_morning_msg">Al sector le da el sol por la mañana y la sombra por la tarde.</string>
