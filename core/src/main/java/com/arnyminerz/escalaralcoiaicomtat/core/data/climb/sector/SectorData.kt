@@ -18,7 +18,7 @@ data class SectorData(
     @Document.DoubleProperty var longitude: Double?,
     @Document.StringProperty var weight: String,
     @Document.StringProperty var image: String,
-    @Document.StringProperty var kmzReferenceUrl: String,
+    @Document.StringProperty var kmzPath: String?,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var webUrl: String,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var parentObjectId: String,
 ) : DataRoot<Sector> {

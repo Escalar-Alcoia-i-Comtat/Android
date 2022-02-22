@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.shared
 
-import android.accounts.AccountManager
 import android.app.Activity
 import android.app.Application
 import android.content.Context
@@ -17,7 +16,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.auth.loggedIn
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
@@ -30,14 +28,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZone
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -46,36 +39,11 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         get() = appNetworkProvider
 
     /**
-     * The [FirebaseFirestore] instance reference for requesting data to the server.
-     * @author Arnau Mora
-     * @since 20210617
-     */
-    private lateinit var firestore: FirebaseFirestore
-
-    /**
      * The [FirebaseAnalytics] instance reference for analyzing the user actions.
      * @author Arnau Mora
      * @since 20210826
      */
     private lateinit var analytics: FirebaseAnalytics
-
-    val authStateListener: FirebaseAuth.AuthStateListener = FirebaseAuth.AuthStateListener {
-        val loggedIn = it.loggedIn
-        Timber.v("Auth State updated. Logged in: $loggedIn. Anonymous: ${it.currentUser?.isAnonymous ?: "N/A"}")
-        if (!loggedIn) {
-            val am = AccountManager.get(this)
-            for (account in am.accounts) {
-                Timber.v("Removing account \"${account.name}\"...")
-                try {
-                    am.removeAccountExplicitly(account)
-                } catch (e: SecurityException) {
-                    Timber.w(e, "Could not remove account.")
-                }
-            }
-        } else it.currentUser?.let { user ->
-            analytics.setUserId(user.uid)
-        }
-    }
 
     /**
      * The session for doing search-related operations.
@@ -103,8 +71,6 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         sharedPreferences =
             applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
 
-        Timber.v("Getting Firestore instance...")
-        firestore = Firebase.firestore
         Timber.v("Getting Analytics instance...")
         analytics = Firebase.analytics
 
@@ -112,9 +78,6 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         appNetworkProvider = ConnectivityProvider.createProvider(this)
         Timber.v("Adding network listener...")
         provider.addListener(this)
-
-        Timber.v("Adding auth state listener...")
-        Firebase.auth.addAuthStateListener(authStateListener)
     }
 
     override fun attachBaseContext(base: Context?) {
@@ -137,14 +100,7 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         appNetworkState = state
     }
 
-    override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {
-        Timber.v("Network state updated asyncronously: $state")
-        Timber.v("Updating Firestore's network status according to new state.")
-        if (state.hasInternet)
-            firestore.enableNetwork().await()
-        else
-            firestore.disableNetwork().await()
-    }
+    override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {}
 
     /**
      * Gets all the [Area]s available in [searchSession].

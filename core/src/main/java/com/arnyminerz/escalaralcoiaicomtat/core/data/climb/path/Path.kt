@@ -15,9 +15,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafes
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_BLOCKING_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
-import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
 import org.json.JSONException
@@ -48,8 +48,7 @@ class Path internal constructor(
     var rebuiltBy: String?,
     val downloaded: Boolean = false,
     val parentSectorId: String,
-) : DataClassImpl(objectId, NAMESPACE, timestampMillis, displayName),
-    Comparable<Path> {
+) : DataClassImpl(objectId, NAMESPACE, timestampMillis, displayName), Comparable<Path> {
     /**
      * Initializes the Path from the values gotten from the Data module.
      * @author Arnau Mora
@@ -216,14 +215,12 @@ class Path internal constructor(
      * @author Arnau Mora
      * @since 20210824
      * @throws RuntimeException If the blocked parameter of the found item is not a string.
-     * @throws FirebaseFirestoreException When there was an error while fetching the data from the
-     * server.
      */
     @WorkerThread
-    @Throws(RuntimeException::class, FirebaseFirestoreException::class)
+    @Throws(RuntimeException::class)
     suspend fun singleBlockStatusFetch(): BlockingType {
         Timber.v("$this > Getting path blocking from the server...")
-        val fetchResult = getJson("http://arnyminerz.com:3000/api/info/blocking/$objectId")
+        val fetchResult = getJson("$REST_API_BLOCKING_ENDPOINT/$objectId")
         Timber.v("$this > Extracting blocked from document...")
         return if (fetchResult.has("result")) {
             val blocked = fetchResult.getBoolean("blocked")

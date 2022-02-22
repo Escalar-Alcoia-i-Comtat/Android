@@ -6,10 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.Looper
-import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
@@ -24,8 +21,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.await
 import com.android.volley.Request
-import com.android.volley.toolbox.HurlStack
-import com.android.volley.toolbox.Volley
+import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
@@ -38,17 +34,16 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
+import com.arnyminerz.escalaralcoiaicomtat.core.network.VolleySingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PARENT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DOWNLOAD_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.InputStreamVolleyRequest
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getChildren
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getData
@@ -56,7 +51,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getSector
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZone
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.ensureBitmapRead
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
@@ -65,15 +59,10 @@ import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.maps.model.LatLng
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.glide.GlideImage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.parcelize.IgnoredOnParcel
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.IOException
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -482,18 +471,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
             Timber.d("$pin Finished checking download status. Result: $result")
             return result to downloadWorkInfo
         }
-
-        /**
-         * Checks the checksum of the file and compares it with the one on the server. If they are
-         * not equal, it means that the file must be downloaded again.
-         * @author Arnau Mora
-         * @since 20220221
-         * @param file The file to check for.
-         */
-        @WorkerThread
-        fun isFileUpdated(file: File) {
-
-        }
     }
 
     /**
@@ -653,15 +630,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
     override fun toString(): String = namespace[0] + "/" + objectId
 
     /**
-     * Gets the KMZ file path.
-     * @author Arnau Mora
-     * @since 20210416
-     * @param context The context to run from.
-     */
-    private fun kmzFile(context: Context, permanent: Boolean): File =
-        kmzFile(context, permanent, namespace, objectId)
-
-    /**
      * Gets the KMZ file of the [DataClass] and stores it into [targetFile].
      * @author Arnau Mora
      * @since 20210416
@@ -688,40 +656,37 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
                     cont.resumeWithException(error)
                 }, mapOf(), mapOf()
             )
-            val requestQueue = Volley.newRequestQueue(context, HurlStack())
-            requestQueue.add(request)
+            VolleySingleton.getInstance(context).addToRequestQueue(request)
         }
     }
 
     /**
      * Gets the KMZ file path.
-     * If it has never been loaded, it gets loaded from [storage]. Otherwise, it gets loaded from
+     * If it has never been loaded, it gets loaded from the server. Otherwise, it gets loaded from
      * cache.
      * @author Arnau Mora
      * @since 20210416
      * @param context The context to run from.
-     * @param storage The [FirebaseStorage] instance.
      * @param permanent If true, the KMZ will get stored in the data directory, if false, it will
      * be cached.
-     * @param progressListener This will get called for updating the progress.
-     * @throws IllegalStateException When [kmzReferenceUrl] is null, so a [File] can't be retrieved.
-     * @throws StorageException When there's an error while downloading the KMZ file from the server.
+     * @throws IllegalStateException When [kmzPath] is null, so a [File] can't be retrieved.
      */
-    @Throws(IllegalStateException::class, StorageException::class)
+    @Throws(IllegalStateException::class)
     @WorkerThread
     suspend fun kmzFile(
         context: Context,
         permanent: Boolean,
     ): File {
-        val kmzFile = kmzFile(context, permanent)
+        val kmzFile = kmzFile(context, permanent, namespace, objectId)
 
         if (!kmzFile.exists()) {
             Timber.v("Storing KMZ file...")
-            val kmzTaskSnapshot = storeKmz(storage, kmzFile)
-            if (kmzTaskSnapshot == null)
-                Timber.e("Could not store KMZ File ($kmzReferenceUrl).")
-            else
-                Timber.e(kmzTaskSnapshot.error, "Could not store KMZ File ($kmzReferenceUrl).")
+            try {
+                storeKmz(context, kmzFile)
+                Timber.v("KMZ stored successfully.")
+            } catch (e: Exception) {
+                Timber.e(e, "Could not store KMZ File ($kmzPath).")
+            }
         }
 
         return kmzFile
@@ -897,6 +862,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @param imageLoadParameters The parameters for loading the image.
      */
     @Suppress("BlockingMethodInNonBlockingContext")
+    @Throws(VolleyError::class, ArithmeticException::class)
     fun imageData(
         context: Context,
         imageLoadParameters: ImageLoadParameters? = null
@@ -909,29 +875,22 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         val image = when {
             downloadedImageFile.exists() -> downloadedImageFile
             cacheImage.exists() -> cacheImage
-            else -> "$REST_API_DOWNLOAD_ENDPOINT$imageReferenceUrl"
-            else -> try {
-                storage.getReferenceFromUrl(imageReferenceUrl)
-            } catch (e: StorageException) {
-                Timber.e(e, "Could not get reference from URL.")
-                AppCompatResources.getDrawable(context, displayOptions.errorPlaceholderDrawable)!!
-            }
+            else -> "$REST_API_DOWNLOAD_ENDPOINT$imagePath"
         }
-        if (image is StorageReference)
-            doAsync {
-                Timber.i("$this > Caching image...")
-                Timber.v("$this > Getting stream...")
-                val snapshot = storage.getReferenceFromUrl(imageReferenceUrl)
-                    .stream
-                    .await()
-                Timber.v("$this > Stream loaded. Decoding...")
-                val stream = snapshot.stream
-                val bitmap: Bitmap? = BitmapFactory.decodeStream(
-                    stream,
-                    null,
-                    BitmapFactory.Options().apply {
-                        inSampleSize = (1 / scale).toInt()
-                    }
+
+        val request = InputStreamVolleyRequest(
+            Request.Method.GET,
+            "$REST_API_DOWNLOAD_ENDPOINT$kmzPath",
+            { bytes ->
+                val bitmap: Bitmap? = BitmapFactory.decodeByteArray(
+                    bytes,
+                    0,
+                    bytes.size,
+                    BitmapFactory
+                        .Options()
+                        .apply {
+                            inSampleSize = (1 / scale).toInt()
+                        }
                 )
                 if (bitmap != null) {
                     Timber.v("$this > Compressing image...")
@@ -943,23 +902,27 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
                         throw ArithmeticException("Could not compress image for $this.")
                     } else {
                         Timber.v("$this > Storing image...")
-                        baos.writeTo(cacheImage.outputStream())
+                        cacheImage
+                            .outputStream()
+                            .use { baos.writeTo(it) }
                         Timber.v("$this > Image stored.")
                     }
                 }
-            }
+            },
+            { error -> throw error }, mapOf(), mapOf()
+        )
+        VolleySingleton.getInstance(context).addToRequestQueue(request)
 
         return image
     }
 
     @Composable
     fun Image(
-        storage: FirebaseStorage,
         modifier: Modifier = Modifier,
         imageLoadParameters: ImageLoadParameters? = null
     ) {
         val context = LocalContext.current
-        val image = imageData(context, storage, imageLoadParameters)
+        val image = imageData(context, imageLoadParameters)
 
         GlideImage(
             imageModel = image,
@@ -984,105 +947,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         )
     }
 
-    /**
-     * Fetches the image [Bitmap] from the DataClass.
-     * @author Arnau Mora
-     * @since 20210721
-     * @param context The context the app is running on.
-     * @param storage The [FirebaseStorage] reference for loading the image file.
-     * @param imageLoadParameters The parameters desired to load the image.
-     * @param progress The progress listener, for supervising loading.
-     * @throws StorageException When there's an issue while downloading the image from the server.
-     * @throws IOException When there's an issue while reading or writing the image from the fs.
-     * @throws ArithmeticException When there's been an error while compressing the image.
-     * @throws RuntimeException If there's any error while decoding the image into [Bitmap].
-     * @throws IllegalStateException When the function is called from the main thread.
-     * @see ValueMax
-     * @see ImageLoadParameters
-     */
-    @WorkerThread
-    @Suppress("BlockingMethodInNonBlockingContext")
-    @Deprecated("Use Jetpack Compose methods.")
-    @Throws(
-        StorageException::class,
-        IOException::class,
-        ArithmeticException::class,
-        RuntimeException::class,
-        IllegalStateException::class,
-    )
-    suspend fun image(
-        context: Context,
-        storage: FirebaseStorage,
-        imageLoadParameters: ImageLoadParameters? = null,
-        progress: (@UiThread (progress: ValueMax<Long>) -> Unit)? = null
-    ): Bitmap {
-        if (Looper.myLooper() == Looper.getMainLooper())
-            throw IllegalStateException("Image cannot be loaded on main thread.")
-
-        val downloadedImageFile = imageFile(context)
-        return if (downloadedImageFile.exists()) {
-            Timber.d("Loading image from storage: ${downloadedImageFile.path}")
-            ensureBitmapRead(
-                downloadedImageFile,
-                scale = imageLoadParameters?.resultImageSampleSize
-            )
-        } else {
-            val scale = imageLoadParameters?.resultImageScale ?: 1f
-            val cacheImage = cacheImageFile(context, "scale$scale")
-
-            if (!cacheImage.exists())
-                try {
-                    Timber.v("$this > Getting stream...")
-                    val snapshot = storage.getReferenceFromUrl(imageReferenceUrl)
-                        .stream
-                        .addOnProgressListener { snapshot ->
-                            if (progress != null) {
-                                val bytesCount = snapshot.bytesTransferred
-                                val totalBytes = snapshot.totalByteCount
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    progress(ValueMax(bytesCount, totalBytes))
-                                }
-                            }
-                        }
-                        .await()
-                    Timber.v("$this > Stream loaded. Decoding...")
-                    val stream = snapshot.stream
-                    val bitmap: Bitmap? = BitmapFactory.decodeStream(
-                        stream,
-                        null,
-                        BitmapFactory.Options().apply {
-                            inSampleSize = (1 / scale).toInt()
-                        }
-                    )
-                    if (bitmap != null) {
-                        Timber.v("$this > Compressing image...")
-                        val baos = ByteArrayOutputStream()
-                        val compressedBitmap: Boolean =
-                            bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
-                        if (!compressedBitmap) {
-                            Timber.e("$this > Could not compress image!")
-                            throw ArithmeticException("Could not compress image for $this.")
-                        } else {
-                            Timber.v("$this > Storing image...")
-                            baos.writeTo(cacheImage.outputStream())
-                            Timber.v("$this > Image stored.")
-                        }
-                    }
-                } catch (e: Exception) {
-                    Timber.e(e, "$this > Could not load DataClass ($objectId) image.")
-                    throw e
-                }
-
-            Timber.v("$this > Reading cache image ($cacheImage)...")
-            ensureBitmapRead(cacheImage, scale = imageLoadParameters?.resultImageSampleSize)
-        }
-    }
-
     override fun hashCode(): Int {
         var result = objectId.hashCode()
         result = 31 * result + displayName.hashCode()
         result = 31 * result + timestamp.hashCode()
-        result = 31 * result + imageReferenceUrl.hashCode()
+        result = 31 * result + imagePath.hashCode()
+        result = 31 * result + kmzPath.hashCode()
         result = 31 * result + displayOptions.hashCode()
         result = 31 * result + namespace.hashCode()
         return result

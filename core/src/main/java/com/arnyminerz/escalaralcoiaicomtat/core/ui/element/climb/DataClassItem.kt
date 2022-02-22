@@ -50,13 +50,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 
 @Composable
 fun DataClassItem(
     item: DataClassImpl,
-    storage: FirebaseStorage,
     onClick: () -> Unit
 ) {
     if (item is DataClass<*, *, *>) {
@@ -70,14 +68,12 @@ fun DataClassItem(
         if (item.displayOptions.downloadable)
             DownloadableDataClassItem(
                 item,
-                storage,
                 viewModel,
                 onClick,
             )
         else
             NonDownloadableDataClassItem(
                 item,
-                storage,
                 viewModel,
                 onClick,
             )
@@ -112,7 +108,6 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
 @Composable
 private fun DownloadableDataClassItem(
     item: DataClass<*, *, *>,
-    storage: FirebaseStorage,
     viewModel: DataClassItemViewModel,
     onClick: () -> Unit,
 ) {
@@ -145,8 +140,7 @@ private fun DownloadableDataClassItem(
                         .fillMaxWidth(.3f)
                 ) {
                     item.Image(
-                        storage,
-                        modifier = Modifier
+                        Modifier
                             .fillMaxWidth()
                             .height(160.dp)
                             .clickable(enabled = true, role = Role.Image, onClick = onClick)
@@ -334,7 +328,6 @@ private fun DownloadableDataClassItem(
 @Composable
 private fun NonDownloadableDataClassItem(
     item: DataClass<*, *, *>,
-    storage: FirebaseStorage,
     viewModel: DataClassItemViewModel,
     onClick: (() -> Unit)? = null
 ) {
@@ -348,7 +341,6 @@ private fun NonDownloadableDataClassItem(
     ) {
         Column {
             item.Image(
-                storage,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(160.dp)

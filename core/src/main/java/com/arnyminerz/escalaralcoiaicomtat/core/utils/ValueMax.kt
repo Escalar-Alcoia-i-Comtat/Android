@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.utils
 
 import androidx.annotation.FloatRange
-import com.google.firebase.storage.StreamDownloadTask
 
 data class ValueMax<T : Number>
 /**
@@ -42,11 +41,3 @@ constructor(val value: T, val max: T) {
  * @return A new instance of [ValueMax] that uses the percentage as value and 100 as the max.
  */
 fun ValueMax<Long>.toInt(): ValueMax<Int> = ValueMax(percentage, 100)
-
-/**
- * Gets a [ValueMax] instance from the current progress of the task.
- * @author Arnau Mora
- * @since 20210926
- */
-fun StreamDownloadTask.TaskSnapshot.progress(): ValueMax<Long> =
-    ValueMax(bytesTransferred, totalByteCount)

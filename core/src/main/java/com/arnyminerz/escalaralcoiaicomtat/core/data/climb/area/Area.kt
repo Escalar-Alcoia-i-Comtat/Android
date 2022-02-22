@@ -19,7 +19,9 @@ import org.json.JSONObject
  * @param objectId The id of the object
  * @param displayName The Area's display name
  * @param timestampMillis The update date of the Area
- * @param kmzReferenceUrl The reference url from Firebase Storage for the Area's KMZ file
+ * @param imagePath The path of the Area's image on the server.
+ * @param kmzPath The path of the Area's KMZ file on the server.
+ * May be null if not applicable or non-existing.
  * @param webUrl The url for the Area on the website
  */
 @Parcelize
@@ -27,14 +29,14 @@ class Area internal constructor(
     override val objectId: String,
     override val displayName: String,
     override val timestampMillis: Long,
-    override val imageReferenceUrl: String,
-    override val kmzReferenceUrl: String,
+    override val imagePath: String,
+    override val kmzPath: String?,
     val webUrl: String?,
 ) : DataClass<Zone, DataClassImpl, AreaData>(
     displayName,
     timestampMillis,
-    imageReferenceUrl,
-    kmzReferenceUrl,
+    imagePath,
+    kmzPath,
     null,
     DataClassMetadata(
         objectId,
@@ -79,8 +81,8 @@ class Area internal constructor(
         objectId,
         displayName,
         timestampMillis,
-        imageReferenceUrl,
-        kmzReferenceUrl,
+        imagePath,
+        kmzPath,
         metadata.webURL ?: ""
     )
 
@@ -104,8 +106,8 @@ class Area internal constructor(
             objectId = SAMPLE_AREA_OBJECT_ID,
             displayName = SAMPLE_AREA_DISPLAY_NAME,
             timestampMillis = SAMPLE_AREA_TIMESTAMP,
-            imageReferenceUrl = SAMPLE_AREA_IMAGE_REF,
-            kmzReferenceUrl = SAMPLE_AREA_KMZ_REF,
+            imagePath = SAMPLE_AREA_IMAGE_REF,
+            kmzPath = SAMPLE_AREA_KMZ_REF,
             webUrl = SAMPLE_AREA_WEB_URL,
         )
     }

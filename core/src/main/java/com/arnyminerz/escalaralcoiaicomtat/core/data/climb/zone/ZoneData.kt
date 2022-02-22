@@ -12,7 +12,7 @@ data class ZoneData(
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var displayName: String,
     @Document.CreationTimestampMillis var timestamp: Long,
     @Document.StringProperty var image: String,
-    @Document.StringProperty var kmzReferenceUrl: String,
+    @Document.StringProperty var kmzPath: String?,
     @Document.DoubleProperty var latitude: Double,
     @Document.DoubleProperty var longitude: Double,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var webUrl: String,
@@ -26,7 +26,7 @@ data class ZoneData(
         displayName,
         timestamp,
         image,
-        kmzReferenceUrl,
+        kmzPath,
         LatLng(latitude, longitude),
         webUrl.ifEmpty { null },
         parentObjectId

@@ -33,13 +33,13 @@ class Sector internal constructor(
     val walkingTime: Long,
     override val location: LatLng?,
     val weight: String,
-    override val imageReferenceUrl: String,
+    override val imagePath: String,
     val webUrl: String?,
-    val parentZoneId: String,
+    private val parentZoneId: String,
 ) : DataClass<Path, Zone, SectorData>(
     displayName,
     timestampMillis,
-    imageReferenceUrl,
+    imagePath,
     null,
     location,
     DataClassMetadata(
@@ -103,8 +103,8 @@ class Sector internal constructor(
             location?.latitude,
             location?.longitude,
             weight,
-            imageReferenceUrl,
-            kmzReferenceUrl ?: "",
+            imagePath,
+            kmzPath ?: "",
             metadata.webURL ?: "",
             parentZoneId
         )
@@ -130,7 +130,7 @@ class Sector internal constructor(
             walkingTime = 12,
             location = LatLng(38.741649, -0.466173),
             weight = "aac",
-            imageReferenceUrl = "gs://escalaralcoiaicomtat.appspot.com/images/sectors/mas-de-la-penya-sector-3_croquis.jpg",
+            imagePath = "gs://escalaralcoiaicomtat.appspot.com/images/sectors/mas-de-la-penya-sector-3_croquis.jpg",
             webUrl = null,
             parentZoneId = "3DmHnKBlDRwqlH1KK85C"
         )

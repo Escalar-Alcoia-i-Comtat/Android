@@ -21,6 +21,20 @@ const val WORKER_TAG_DOWNLOAD = "DataDownload"
 const val ERROR_MISSING_DATA = "missing_data"
 
 /**
+ * When the ID of the object to download is not set.
+ * @author Arnau Mora
+ * @since 20220222
+ */
+const val ERROR_OBJECT_ID_NOT_SET = "object_id_not_set"
+
+/**
+ * When the namespace of the object to download is not set.
+ * @author Arnau Mora
+ * @since 20220222
+ */
+const val ERROR_NAMESPACE_NOT_SET = "namespace_not_set"
+
+/**
  * When the target download has already been downloaded and overwrite is false
  * @since 20210313
  */

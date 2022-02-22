@@ -24,9 +24,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.clipboard
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.copy
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
-import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -35,9 +32,6 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
     override suspend fun doWork(): Result {
         Timber.v("Getting search session...")
         val searchSession = createSearchSession(applicationContext)
-
-        Timber.v("Getting Firestore reference...")
-        val firestore = Firebase.firestore
 
         Timber.v("Getting paths from search session...")
         val paths = searchSession.getPaths()
@@ -99,9 +93,6 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     )
                 } catch (e: RuntimeException) {
                     Timber.e(e, "Could not fetch block status of ${path.displayName}")
-                    failedBlockStatus.add(path.displayName)
-                } catch (e: FirebaseFirestoreException) {
-                    Timber.e(e, "Could not process block status of ${path.displayName}")
                     failedBlockStatus.add(path.displayName)
                 }
             }

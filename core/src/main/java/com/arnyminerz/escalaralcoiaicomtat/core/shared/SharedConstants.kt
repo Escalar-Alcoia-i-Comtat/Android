@@ -39,6 +39,23 @@ const val REST_API_BLOCKING_ENDPOINT = "$REST_API_URL/api/info/blocking"
  */
 const val REST_API_DOWNLOAD_ENDPOINT = "$REST_API_URL/api/files/download?path="
 
+/**
+ * The REST API endpoint for fetching data from the server. At the end, the type of data should be
+ * added (/Areas, /Zones, /Sectors or /Paths). Also, after this, an slash and an object id can be
+ * added. The answer will contain the data type selected, that has as parent the set objectId.
+ * @author Arnau Mora
+ * @since 20220222
+ */
+const val REST_API_DATA_LIST = "$REST_API_URL/api/list"
+
+/**
+ * The REST API endpoint for fetching data of a select object from server. At the end, the type of
+ * data should be added (/Areas, /Zones, /Sectors or /Paths), and then, the id of the element.
+ * @author Arnau Mora
+ * @since 20220222
+ */
+const val REST_API_DATA_FETCH = "$REST_API_URL/api/data/"
+
 const val APP_UPDATE_MAX_TIME_DAYS_KEY = "APP_UPDATE_MAX_TIME_DAYS"
 const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7L
 
