@@ -45,7 +45,7 @@ jobs:
           touch index.html
           echo '<html><head><meta http-equiv="refresh" content="0; URL=https://escalar-alcoia-i-comtat.github.io/Android/html/index.html" /></head><body><p>Redirecting...</p></body></html>' > index.html
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.2.3
+        uses: JamesIves/github-pages-deploy-action@v4.2.5
         with:
           BRANCH: gh-pages
           FOLDER: build/dokka/
