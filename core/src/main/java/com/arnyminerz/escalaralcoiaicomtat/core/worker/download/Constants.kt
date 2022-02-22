@@ -2,6 +2,8 @@ package com.arnyminerz.escalaralcoiaicomtat.core.worker.download
 
 
 const val DOWNLOAD_DISPLAY_NAME = "display_name"
+const val DOWNLOAD_OBJECT_ID = "object_id"
+const val DOWNLOAD_NAMESPACE = "namespace"
 const val DOWNLOAD_OVERWRITE = "overwrite"
 const val DOWNLOAD_QUALITY = "quality"
 
@@ -51,7 +53,7 @@ const val ERROR_DATA_TYPE = "data_type"
 const val ERROR_DATA_FRAGMENTED = "data_fragmented"
 
 /**
- * When there's an unkown error while storing the image.
+ * When there's an unknown error while storing the image.
  * @since 20210411
  */
 const val ERROR_STORE_IMAGE = "store_image"
@@ -72,9 +74,9 @@ const val ERROR_FETCH_IMAGE = "fetch_image"
 
 /**
  * When the specified namespace is not downloadable.
- * @since 20210412
+ * @since 20220222
  */
-const val ERROR_UNKNOWN_NAMESPACE = "unknown_namespace"
+const val ERROR_INVALID_NAMESPACE = "invalid_namespace"
 
 /**
  * When there has been an error while transferring the downloaded data values from the download
