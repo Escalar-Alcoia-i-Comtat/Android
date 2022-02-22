@@ -93,7 +93,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                         .withInfoText("${i + 1}/$pathsCount")
                         .withProgress(i, pathsCount)
                         .buildAndShow()
-                    val blockStatus = path.singleBlockStatusFetch(firestore)
+                    val blockStatus = path.singleBlockStatusFetch()
                     blockingStatuses.add(
                         BlockingData(path.objectId, blockStatus.idName)
                     )

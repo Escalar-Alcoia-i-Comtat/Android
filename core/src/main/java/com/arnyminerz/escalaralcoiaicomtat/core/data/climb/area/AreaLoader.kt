@@ -6,21 +6,20 @@ import androidx.appsearch.app.PutDocumentsRequest
 import androidx.appsearch.app.SetSchemaRequest
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.data
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.data
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.data
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_SCHEMAS
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
-import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
 import kotlinx.coroutines.flow.first
@@ -28,6 +27,64 @@ import org.json.JSONObject
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
+
+/**
+ * Decodes the data from a json object retrieved from the server.
+ * @author Arnau Mora
+ * @since 20220219
+ * @param D The [DataClass] type to decode.
+ * @param I The [DataRoot] class to store in search indexation.
+ * @param jsonData The data to decode.
+ * @param namespace The namespace of [D].
+ * @param constructor The constructor for building [D] from [JSONObject].
+ * @return A pair of lists. The first is the objects in [jsonData], the second one is for indexing
+ * search.
+ */
+private fun <D : DataClass<*, *, I>, I : DataRoot<D>> decode(
+    jsonData: JSONObject,
+    @Namespace namespace: String,
+    constructor: (data: JSONObject, id: String) -> D
+): List<I> {
+    val index = arrayListOf<I>()
+    val jsonObject = jsonData.getJSONObject(namespace)
+    val keys = jsonObject.keys()
+    for ((i, id) in keys.withIndex()) {
+        val json = jsonObject.getJSONObject(id)
+
+        // Process the DataClass data
+        val dataClass = constructor(json, id)
+
+        // Add the DataClass to the list
+        index.add(dataClass.data(i))
+    }
+    return index
+}
+
+/**
+ * Does the same than [decode] but for [Path]s.
+ * @author Arnau Mora
+ * @since 20220219
+ * @param jsonData The data to decode.
+ * @return A pair of lists. The first is the objects in [jsonData], the second one is for indexing
+ * search.
+ */
+private fun decode(
+    jsonData: JSONObject
+): List<PathData> {
+    val index = arrayListOf<PathData>()
+    val jsonObject = jsonData.getJSONObject(Path.NAMESPACE)
+    val keys = jsonObject.keys()
+    for (id in keys) {
+        val json = jsonObject.getJSONObject(id)
+
+        // Process the Path data
+        val path = Path(json, id)
+
+        // Add the path to the list
+        index.add(path.data())
+    }
+    return index
+}
 
 /**
  * Loads all the areas available in the server.
@@ -50,7 +107,8 @@ suspend fun loadAreas(
     val indexedSearch = indexedDataFlow.first()
     if (indexedSearch) {
         Timber.v("Search results already indexed. Fetching from application...")
-        return application.getAreas() // If not empty, return areas
+        return application
+            .getAreas() // If not empty, return areas
             .ifEmpty {
                 // If empty, reset the preference, and launch loadAreas again
                 Timber.w("Areas is empty, resetting search indexed pref and launching again.")
@@ -68,80 +126,14 @@ suspend fun loadAreas(
 
     Timber.d("Fetching data from data module...")
     try {
-        val areas = arrayListOf<Area>()
-        val zones = arrayListOf<Zone>()
-        val sectors = arrayListOf<Sector>()
-        val paths = arrayListOf<Path>()
-
-        val areasIndex = arrayListOf<AreaData>()
-        val zonesIndex = arrayListOf<ZoneData>()
-        val sectorsIndex = arrayListOf<SectorData>()
-        val pathsIndex = arrayListOf<PathData>()
-
-        val areaKeys = jsonData.keys()
-        for ((a, areaKey) in areaKeys.withIndex()) {
-            val areaJson = jsonData.getJSONObject(areaKey)
-            val areaPath = "/Areas/$areaKey"
-
-            // Process the Area data
-            val area = Area(areaJson, areaPath)
-
-            // Add the area to the list
-            areas.add(area)
-            areasIndex.add(area.data(a))
-
-            val zonesJson = areaJson
-                .getJSONObject("__collections__")
-                .getJSONObject("Zones")
-            val zoneKeys = zonesJson.keys()
-            for ((z, zoneKey) in zoneKeys.withIndex()) {
-                val zoneJson = zonesJson.getJSONObject(zoneKey)
-                val zonePath = "$areaPath/Zones/$zoneKey"
-
-                // Process the Zone data
-                val zone = Zone(zoneJson, zonePath)
-
-                // Add the zone to the list
-                zones.add(zone)
-                zonesIndex.add(zone.data(z))
-
-                val sectorsJson = zoneJson
-                    .getJSONObject("__collections__")
-                    .getJSONObject("Sectors")
-                val sectorKeys = sectorsJson.keys()
-                for ((s, sectorKey) in sectorKeys.withIndex()) {
-                    val sectorJson = sectorsJson.getJSONObject(sectorKey)
-                    val sectorPath = "$zonePath/Sectors/$sectorKey"
-
-                    // Process the Sector data
-                    val sector = Sector(sectorJson, sectorPath)
-
-                    // Add the sector to the list
-                    sectors.add(sector)
-                    sectorsIndex.add(sector.data(s))
-
-                    val pathsJson = sectorJson
-                        .getJSONObject("__collections__")
-                        .getJSONObject("Paths")
-                    val pathKeys = pathsJson.keys()
-                    for (pathKey in pathKeys) {
-                        val pathJson = pathsJson.getJSONObject(pathKey)
-                        val pathPath = "$sectorPath/Sectors/$pathKey"
-
-                        // Process the path data
-                        val path = Path(pathJson, pathPath, sectorKey)
-
-                        // Add the path to the list
-                        paths.add(path)
-                        pathsIndex.add(path.data())
-                    }
-                }
-            }
-        }
+        val decodedAreas =
+            decode(jsonData, Area.NAMESPACE) { json, id -> Area(json, id) }.toMutableList()
+        val decodedZones = decode(jsonData, Zone.NAMESPACE) { json, id -> Zone(json, id) }
+        val decodedSectors = decode(jsonData, Sector.NAMESPACE) { json, id -> Sector(json, id) }
+        val decodedPaths = decode(jsonData)
 
         Timber.v("Sorting areas...")
-        areas.sortBy { it.displayName }
-        areasIndex.sortBy { it.displayName }
+        decodedAreas.sortBy { it.displayName }
 
         Timber.v("Search > Initializing session future...")
         val session = application.searchSession
@@ -155,10 +147,10 @@ suspend fun loadAreas(
 
         Timber.v("Search > Adding documents...")
         val putRequest = PutDocumentsRequest.Builder()
-            .addDocuments(areasIndex)
-            .addDocuments(zonesIndex)
-            .addDocuments(sectorsIndex)
-            .addDocuments(pathsIndex)
+            .addDocuments(decodedAreas)
+            .addDocuments(decodedZones)
+            .addDocuments(decodedSectors)
+            .addDocuments(decodedPaths)
             .build()
         val putResponse = session.put(putRequest).await()
         val successfulResults = putResponse?.successes
@@ -189,8 +181,8 @@ suspend fun loadAreas(
 
         trace.stop()
 
-        return areas
-    } catch (e: FirebaseFirestoreException) {
+        return session.getAreas()
+    } catch (e: Exception) {
         Timber.e(e, "Could not load areas.")
         trace.putAttribute("error", "true")
         trace.stop()

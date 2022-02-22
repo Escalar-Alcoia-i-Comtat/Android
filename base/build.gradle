@@ -162,7 +162,6 @@ dependencies {
 
     // GUI libraries
     implementation 'com.google.android.material:material:1.6.0-alpha02'
-    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 
     // Core Module
     implementation project(":core")
@@ -170,9 +169,6 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-
-    // Markdown rendering
-    implementation 'io.noties.markwon:core:4.6.2'
 
     // Kotlin reflect for using methods from Feature Modules
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.6.10"

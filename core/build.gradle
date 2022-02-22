@@ -115,6 +115,9 @@ dependencies {
     // Jetpack Compose utilities - Charts
     implementation 'io.github.bytebeats:compose-charts:0.1.0'
 
+    // Volley
+    api 'com.android.volley:volley:1.2.1'
+
     // Lifecycle
     api 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
     api 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
@@ -137,19 +140,12 @@ dependencies {
     // Google Firebase
     api platform('com.google.firebase:firebase-bom:29.1.0')
     api 'com.google.firebase:firebase-analytics-ktx'
-    api 'com.google.firebase:firebase-firestore-ktx'
-    api 'com.google.firebase:firebase-storage-ktx'
     api 'com.google.firebase:firebase-crashlytics-ktx'
     api 'com.google.firebase:firebase-config-ktx'
     api 'com.google.firebase:firebase-perf-ktx'
     api 'com.google.firebase:firebase-dynamic-links-ktx'
-    api 'com.google.firebase:firebase-functions-ktx'
-    api 'com.google.firebase:firebase-auth-ktx'
     api 'com.google.firebase:firebase-messaging-ktx'
     api 'com.google.firebase:firebase-messaging-directboot:23.0.0'
-
-    // Google Firebase Auth Google Sign-In
-    api 'com.google.android.gms:play-services-auth:20.1.0'
 
     // Gson for JSON parsing
     implementation 'com.google.code.gson:gson:2.9.0'
@@ -165,7 +161,4 @@ dependencies {
 
     // Timber
     api 'com.jakewharton.timber:timber:5.0.1'
-
-    // Custom Views
-    api 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }

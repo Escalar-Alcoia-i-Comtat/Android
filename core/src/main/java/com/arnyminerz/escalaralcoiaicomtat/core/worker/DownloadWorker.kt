@@ -18,6 +18,7 @@ import androidx.work.WorkerParameters
 import androidx.work.await
 import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
@@ -39,7 +40,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toInt
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_DISPLAY_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_OVERWRITE
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_QUALITY
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerFactory
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
@@ -84,7 +84,6 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
     override val factory: DownloadWorkerFactory = Companion
 
     private lateinit var displayName: String
-    private var downloadPath: String? = null
     private var overwrite: Boolean = false
     private var quality: Int = -1
 
@@ -328,7 +327,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      */
     @Throws(FirebaseFirestoreException::class)
     private suspend fun downloadData(
-        path: String,
+        @ObjectId objectId: String,
+        @Namespace namespace: String,
         progressListener: suspend (progress: ValueMax<Long>) -> Unit
     ): Pair<DownloadData, List<DownloadData>> = coroutineScope {
         val imageFiles = arrayListOf<ImageDownloadData>()
@@ -489,7 +489,6 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
 
     override suspend fun doWork(): Result {
         // Get all data
-        downloadPath = inputData.getString(DOWNLOAD_PATH)
         val displayName = inputData.getString(DOWNLOAD_DISPLAY_NAME)
         overwrite = inputData.getBoolean(DOWNLOAD_OVERWRITE, DOWNLOAD_OVERWRITE_DEFAULT)
         quality = inputData.getInt(DOWNLOAD_OVERWRITE, DOWNLOAD_QUALITY_DEFAULT)
@@ -497,7 +496,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         Timber.v("Starting download for %s".format(displayName))
 
         // Check if any required data is missing
-        return if (downloadPath == null || displayName == null)
+        return if (displayName == null)
             failure(ERROR_MISSING_DATA)
         else {
             Timber.v("Initializing Firebase Storage instance...")
@@ -509,7 +508,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             Timber.v("Initializing search session...")
             appSearchSession = createSearchSession(applicationContext)
 
-            Timber.v("Downloading $downloadPath...")
+            Timber.v("Downloading \"$displayName\"...")
             this.displayName = displayName
 
             val message = applicationContext.getString(
@@ -530,7 +529,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
 
             var namespace: String? = null
             var downloadResult = try {
-                downloadData(downloadPath!!) { progress ->
+                downloadData(obj!!) { progress ->
                     setProgress(workDataOf("progress" to progress.percentage))
                     notification = notification.update {
                         withProgress(progress.toInt())
@@ -778,7 +777,6 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 .setInputData(
                     with(data) {
                         workDataOf(
-                            DOWNLOAD_PATH to path,
                             DOWNLOAD_DISPLAY_NAME to displayName,
                             DOWNLOAD_OVERWRITE to overwrite,
                             DOWNLOAD_QUALITY to quality

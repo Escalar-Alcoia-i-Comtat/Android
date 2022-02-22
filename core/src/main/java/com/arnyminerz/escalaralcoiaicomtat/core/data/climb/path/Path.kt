@@ -7,8 +7,8 @@ import androidx.appsearch.exceptions.AppSearchException
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.get
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.BlockingTypeParceler
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.PitchParceler
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
@@ -16,10 +16,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSa
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
 import com.google.firebase.firestore.FirebaseFirestoreException
-import kotlinx.coroutines.tasks.await
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
 import org.json.JSONException
@@ -49,88 +47,18 @@ class Path internal constructor(
     val builtBy: String?,
     var rebuiltBy: String?,
     val downloaded: Boolean = false,
-    override val documentPath: String,
     val parentSectorId: String,
-) : DataClassImpl(objectId, NAMESPACE, timestampMillis, displayName, documentPath),
+) : DataClassImpl(objectId, NAMESPACE, timestampMillis, displayName),
     Comparable<Path> {
-    /**
-     * Creates a new [Path] from the data of a [DocumentSnapshot].
-     * @author Arnau Mora
-     * @since 20210411
-     * @param data The object to get data from
-     */
-    @Deprecated("Use JSON from data module")
-    constructor(data: DocumentSnapshot) : this(
-        data.id,
-        data.getDate("created")!!.time,
-        data.getString("sketchId")?.toLongOrNull() ?: 0L,
-        data.getString("displayName")!!,
-        data.getString("grade")!!,
-        arrayListOf(),
-        arrayListOf(),
-        data.getString("ending_artifo"),
-        FixedSafesData(
-            data.getLong("stringCount") ?: 0,
-            data.getLong("paraboltCount") ?: 0,
-            data.getLong("spitCount") ?: 0,
-            data.getLong("tensorCount") ?: 0,
-            data.getLong("pitonCount") ?: 0,
-            data.getLong("burilCount") ?: 0,
-        ),
-        RequiredSafesData(
-            data.getBoolean("lanyardRequired") ?: false,
-            data.getBoolean("crackerRequired") ?: false,
-            data.getBoolean("friendRequired") ?: false,
-            data.getBoolean("stripsRequired") ?: false,
-            data.getBoolean("pitonRequired") ?: false,
-            data.getBoolean("nailRequired") ?: false,
-        ),
-        try {
-            data.getString("description")
-        } catch (e: JSONException) {
-            null
-        },
-        try {
-            data.getString("builtBy")
-        } catch (e: JSONException) {
-            null
-        },
-        "", // This gets initialized later
-        documentPath = data.reference.path,
-        parentSectorId = data.reference.parent.parent!!.id
-    ) {
-        val pathData: Map<String, Any>? = data.data
-
-        Timber.d("Loading heights for Path $objectId")
-        val heights = pathData?.get("height") as List<*>?
-        heights?.forEach { height ->
-            height.toString().toLongOrNull()?.let {
-                this.heights.add(it)
-            }
-        } ?: Timber.w("Heights is null")
-
-        Timber.d("Loading endings for Path $objectId")
-        val endingsList = pathData?.get("ending") as List<*>?
-        endingsList?.forEachIndexed { i, _ ->
-            endings.add(endingsList[i].toString().lowercase())
-        }
-
-        Timber.d("Loading rebuilders...")
-        val rebuilders = pathData?.get("rebuiltBy") as List<*>?
-        val d = rebuilders?.joinToString(separator = ",")
-        rebuiltBy = d
-    }
-
     /**
      * Initializes the Path from the values gotten from the Data module.
      * @author Arnau Mora
      * @since 20211224
      * @param data The JSON content to parse.
-     * @param path The path of the Path inside the data module.
-     * @param parentSectorId The ID of the Sector which the Path is contained in.
+     * @param pathId The ID of the Path.
      */
-    constructor(data: JSONObject, path: String, parentSectorId: String) : this(
-        path.split("/").last(),
+    constructor(data: JSONObject, @ObjectId pathId: String) : this(
+        pathId,
         data.getDate("created")!!.time,
         data.getString("sketchId").toLongOrNull() ?: 0L,
         data.getString("displayName"),
@@ -165,8 +93,7 @@ class Path internal constructor(
             null
         },
         "", // This gets initialized later
-        documentPath = path,
-        parentSectorId = parentSectorId
+        parentSectorId = data.getString("zone")
     ) {
         Timber.d("Loading heights for Path $objectId")
         val heights = data.getJSONArray("height")
@@ -253,13 +180,8 @@ class Path internal constructor(
      * @param application The [App] class for fetching areas.
      * @return The parent [Sector], or null if not found.
      */
-    suspend fun getParent(application: App): Sector? {
-        val areas = application.getAreas()
-        val docPath = documentPath.split("/")
-        return areas[docPath[1]]
-            ?.get(application.searchSession, docPath[3])
-            ?.get(application.searchSession, docPath[5])
-    }
+    suspend fun getParent(application: App): Sector? =
+        application.getSector(parentSectorId)
 
     override fun toString(): String = displayName
 
@@ -293,20 +215,26 @@ class Path internal constructor(
      * Fetches the [BlockingType] of the [Path] from the server.
      * @author Arnau Mora
      * @since 20210824
-     * @param firestore The [FirebaseFirestore] instance to fetch the data from.
      * @throws RuntimeException If the blocked parameter of the found item is not a string.
      * @throws FirebaseFirestoreException When there was an error while fetching the data from the
      * server.
      */
     @WorkerThread
     @Throws(RuntimeException::class, FirebaseFirestoreException::class)
-    suspend fun singleBlockStatusFetch(firestore: FirebaseFirestore): BlockingType {
-        Timber.v("$this > Getting path document from the server...")
-        val document = firestore.document(documentPath).get().await()
+    suspend fun singleBlockStatusFetch(): BlockingType {
+        Timber.v("$this > Getting path blocking from the server...")
+        val fetchResult = getJson("http://arnyminerz.com:3000/api/info/blocking/$objectId")
         Timber.v("$this > Extracting blocked from document...")
-        val blocked = document.getString("blocked")
-        Timber.v("$this > Searching for blocking type...")
-        return BlockingType.find(blocked)
+        return if (fetchResult.has("result")) {
+            val blocked = fetchResult.getBoolean("blocked")
+            if (blocked) {
+                val type = fetchResult.getString("type")
+                Timber.v("$this > Searching for blocking type...")
+                BlockingType.find(type)
+            } else
+                BlockingType.UNKNOWN
+        } else
+            BlockingType.UNKNOWN
     }
 
     /**
@@ -317,8 +245,7 @@ class Path internal constructor(
      */
     @WorkerThread
     suspend fun getBlockStatus(
-        searchSession: AppSearchSession,
-        firestore: FirebaseFirestore
+        searchSession: AppSearchSession
     ): BlockingType = try {
         Timber.v("$this > Getting block status...")
         Timber.v("$this > Building search spec...")
@@ -332,7 +259,7 @@ class Path internal constructor(
         val searchPage = searchResults.nextPage.await()
         if (searchPage.isEmpty()) {
             Timber.v("$this > There's no block status in search session.")
-            val blockingType = singleBlockStatusFetch(firestore)
+            val blockingType = singleBlockStatusFetch()
             Timber.v("$this > Blocking type: $blockingType")
             blockingType
         } else {
@@ -377,7 +304,6 @@ class Path internal constructor(
             description = null,
             builtBy = "",
             rebuiltBy = "",
-            documentPath = "/Areas/PL5j43cBRP7F24ecXGOR/Zones/3DmHnKBlDRwqlH1KK85C/Sectors/B9zNqbw6REYVxGZxlYwh/Paths/04BXQMNxFV4cjLILJk3p",
             parentSectorId = "B9zNqbw6REYVxGZxlYwh",
         )
     }

@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
-import com.arnyminerz.escalaralcoiaicomtat.DataLoaderInterface
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
@@ -30,12 +29,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_DEFAULTS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED_KEY
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.md5Compatible
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -406,14 +400,10 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         deepLinkPath: String?,
         @UiThread progressUpdater: (textResource: Int) -> Unit
     ) {
-        Timber.v("Getting DataLoader instance...")
-        val dataLoader = Class
-            .forName("com.arnyminerz.escalaralcoiaicomtat.data.DataLoader")
-            .kotlin.objectInstance as DataLoaderInterface
-        Timber.v("Fetching data...")
-        val data = dataLoader.fetchData(app)
+        Timber.v("Fetching areas data...")
+        val jsonData = getJson("http://arnyminerz.com:3000/api/list/*")
         Timber.i("Data fetched from data module!")
-        val areas = loadAreas(app, data)
+        val areas = loadAreas(app, jsonData)
 
         Timber.v("Finished loading areas.")
         if (areas.isNotEmpty()) {

@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.core.worker.download
 
 
 const val DOWNLOAD_DISPLAY_NAME = "display_name"
-const val DOWNLOAD_PATH = "path"
 const val DOWNLOAD_OVERWRITE = "overwrite"
 const val DOWNLOAD_QUALITY = "quality"
 

@@ -6,7 +6,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.MEGABYTE
 
 const val APPLICATION_ID = "com.arnyminerz.escalaralcoiaicomtat"
 
@@ -16,6 +15,29 @@ const val APPLICATION_ID = "com.arnyminerz.escalaralcoiaicomtat"
  * @since 20220126
  */
 const val CONTACT_EMAIL = "arnyminer.z@gmail.com"
+
+/**
+ * The URL of the REST API to make requests to the server.
+ * @author Arnau Mora
+ * @since 20220221
+ */
+const val REST_API_URL = "http://arnyminerz.com:3000"
+
+/**
+ * The REST API endpoint for fetching the blocking state of a path. At the end /:pathId should be
+ * added.
+ * @author Arnau Mora
+ * @since 20220221
+ */
+const val REST_API_BLOCKING_ENDPOINT = "$REST_API_URL/api/info/blocking"
+
+/**
+ * The REST API endpoint for downloading files from the server. At the end, the path of the file to
+ * download should be added.
+ * @author Arnau Mora
+ * @since 20220221
+ */
+const val REST_API_DOWNLOAD_ENDPOINT = "$REST_API_URL/api/files/download?path="
 
 const val APP_UPDATE_MAX_TIME_DAYS_KEY = "APP_UPDATE_MAX_TIME_DAYS"
 const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7L
@@ -85,84 +107,12 @@ val SEARCH_SCHEMAS = listOf<Class<*>>(
     DownloadedData::class.java,
 )
 
-const val ARGUMENT_AREA_ID = "area_id"
-const val ARGUMENT_ZONE_ID = "zone_id"
-const val ARGUMENT_SECTOR_ID = "sector_id"
-
-/**
- * Used as an argument in fragments for passing the id of a user.
- * @author Arnau Mora
- * @since 20210821
- */
-const val ARGUMENT_USER_ID = "user_id"
-
-const val MAP_MARKERS_BUNDLE_EXTRA = "Markers"
-const val MAP_GEOMETRIES_BUNDLE_EXTRA = "Geometries"
-
-const val TAB_ITEM_HOME = 0
-const val TAB_ITEM_MAP = 1
-const val TAB_ITEM_DOWNLOADS = 2
-const val TAB_ITEM_SETTINGS = 3
-const val TAB_ITEM_EXTRA = -1
-
-const val PREVIEW_SCALE_PREFERENCE_MULTIPLIER = 10
-const val SECTOR_THUMBNAIL_SIZE = .8f
-
-const val ERROR_VIBRATE: Long = 500
-const val INFO_VIBRATION: Long = 20
-
-const val TOGGLE_ANIMATION_DURATION: Long = 300
-const val CROSSFADE_DURATION = 50
-
-const val ROTATION_A = 90f
-const val ROTATION_B = -90f
-
-/**
- * The compression quality for a profile image.
- * @author Arnau Mora
- * @since 20210425
- */
-const val PROFILE_IMAGE_COMPRESSION_QUALITY = 85
-
-/**
- * The maximum download size allowed for the profile image.
- * @author Arnau Mora
- * @since 20210519
- */
-const val PROFILE_IMAGE_MAX_SIZE = MEGABYTE * 5
-
-const val LOCATION_PERMISSION_REQUEST_CODE = 3 // This number was chosen by Dono
-
-/**
- * Requests the user to get logged in
- * @author Arnau Mora
- * @since 20210425
- */
-const val REQUEST_CODE_LOGIN = 5
-
-/**
- * Requests the user to select an image for its profile.
- * @author Arnau Mora
- * @since 20210425
- */
-const val REQUEST_CODE_SELECT_PROFILE_IMAGE = 3
-
-/**
- * Used as a "non-error" answer for the cases where the user is who requested the activity to get
- * closed, such as when tapping the back button.
- * @author Arnau Mora
- * @since 20220106
- */
-const val REQUEST_CODE_REQUESTED_BACK = 0
-
 /**
  * Returned by [DataClassActivity] when no [EXTRA_DATACLASS] is passed through the [Activity.Intent].
  * @author Arnau Mora
  * @since 20220105
  */
 const val REQUEST_CODE_ERROR_NO_DATACLASS = 1
-
-const val PERMISSION_DIALOG_TAG = "PERM_TAG"
 
 const val MIME_TYPE_KML = "application/vnd.google-earth.kml+xml"
 const val MIME_TYPE_KMZ = "application/vnd.google-earth.kmz"
@@ -187,20 +137,6 @@ const val ENDING_TYPE_RAPPEL = "rappel"
 const val ENDING_TYPE_LANYARD = "lanyard"
 const val ENDING_TYPE_NONE = "none"
 
-/**
- * Amount of meters the circumference of the planet measures.
- * @author Arnau Mora
- * @since 20210405
- */
-const val EARTHS_CIRCUMFERENCE = 40075017
-
-/**
- * The amount of meters there are in a degree of latitude nor longitude.
- * @author Arnau Mora
- * @since 20210405
- */
-const val METERS_PER_LAT_LON_DEGREE = EARTHS_CIRCUMFERENCE / 360
-
 // Downloads Constants
 const val DOWNLOAD_OVERWRITE_DEFAULT = true
 const val DOWNLOAD_QUALITY_DEFAULT = 85
@@ -208,57 +144,11 @@ const val DOWNLOAD_QUALITY_MIN = 1
 const val DOWNLOAD_QUALITY_MAX = 100
 
 /**
- * The amount of margin in meters there should be left in the downloaded map around a marker.
- * @author Arnau Mora
- * @since 20210405
- */
-const val DOWNLOAD_MARKER_MARGIN = 100
-const val DOWNLOAD_MARKER_MIN_ZOOM = 10.0
-const val DOWNLOAD_MARKER_MAX_ZOOM = 20.0
-
-/**
- * The time that will be delayed inside the inner children load while, for not overflowing the thread.
- * In millis
- * @author Arnau Mora
- * @since 20210417
- */
-const val DATACLASS_WAIT_CHILDREN_DELAY = 10L
-
-/**
- * The time that will be delayed inside the Path block status load, for not overflowing the thread.
- * In millis
- * @author Arnau Mora
- * @since 20210514
- */
-const val DATACLASS_WAIT_BLOCK_STATUS_DELAY = 10L
-
-/**
  * The scale in which the DataClasses should be loaded when they are shown as a thumbnail.
  * @author Arnau Mora
  * @since 20210822
  */
 const val DATACLASS_PREVIEW_SCALE = .3f
-
-/**
- * Specifies the redirect url for the confirmation mails
- * @author Arnau Mora
- * @since 20210425
- */
-const val CONFIRMATION_EMAIL_URL = "https://escalaralcoiaicomtat.page.link/email"
-
-/**
- * Specifies the dynamic links domain for the confirmation mails
- * @author Arnau Mora
- * @since 20210425
- */
-const val CONFIRMATION_EMAIL_DYNAMIC = "escalaralcoiaicomtat.page.link"
-
-/**
- * This is used as constant for any place that requires a 100, just for making the compiler happy :)
- * @author Arnau Mora
- * @since 20210519
- */
-const val HUNDRED = 100
 
 /**
  * The domain used in Firebase Dynamic Links.

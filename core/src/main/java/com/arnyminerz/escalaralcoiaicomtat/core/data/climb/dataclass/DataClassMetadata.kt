@@ -5,7 +5,6 @@ data class DataClassMetadata(
     val namespace: String,
     val parentNamespace: String?,
     val childNamespace: String?,
-    val documentPath: String,
     val webURL: String?,
     val parentId: String?,
 )

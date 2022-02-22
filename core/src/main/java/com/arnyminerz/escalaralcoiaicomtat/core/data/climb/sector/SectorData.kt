@@ -19,7 +19,6 @@ data class SectorData(
     @Document.StringProperty var weight: String,
     @Document.StringProperty var image: String,
     @Document.StringProperty var kmzReferenceUrl: String,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var documentPath: String,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var webUrl: String,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var parentObjectId: String,
 ) : DataRoot<Sector> {
@@ -36,28 +35,7 @@ data class SectorData(
         if (latitude == null || longitude == null) null else LatLng(latitude!!, longitude!!),
         weight,
         image,
-        documentPath,
         webUrl.ifEmpty { null },
         parentObjectId
-    )
-}
-
-fun Sector.data(index: Int): SectorData {
-    return SectorData(
-        index,
-        objectId,
-        displayName,
-        timestampMillis,
-        sunTime,
-        kidsApt,
-        walkingTime,
-        location?.latitude,
-        location?.longitude,
-        weight,
-        imageReferenceUrl,
-        kmzReferenceUrl ?: "",
-        metadata.documentPath,
-        metadata.webURL ?: "",
-        parentZoneId
     )
 }

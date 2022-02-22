@@ -15,7 +15,6 @@ data class ZoneData(
     @Document.StringProperty var kmzReferenceUrl: String,
     @Document.DoubleProperty var latitude: Double,
     @Document.DoubleProperty var longitude: Double,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var documentPath: String,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var webUrl: String,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var parentObjectId: String,
 ) : DataRoot<Zone> {
@@ -29,24 +28,7 @@ data class ZoneData(
         image,
         kmzReferenceUrl,
         LatLng(latitude, longitude),
-        documentPath,
         webUrl.ifEmpty { null },
         parentObjectId
-    )
-}
-
-fun Zone.data(index: Int): ZoneData {
-    return ZoneData(
-        index,
-        objectId,
-        displayName,
-        timestampMillis,
-        imageReferenceUrl,
-        kmzReferenceUrl,
-        position.latitude,
-        position.longitude,
-        metadata.documentPath,
-        metadata.webURL ?: "",
-        parentAreaId
     )
 }

@@ -59,7 +59,7 @@ fun DataClassItem(
     storage: FirebaseStorage,
     onClick: () -> Unit
 ) {
-    if (item is DataClass<*, *>) {
+    if (item is DataClass<*, *, *>) {
         val context = LocalContext.current
         val viewModel: DataClassItemViewModel = viewModel(
             factory = DataClassItemViewModel.Factory(
@@ -111,7 +111,7 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
  */
 @Composable
 private fun DownloadableDataClassItem(
-    item: DataClass<*, *>,
+    item: DataClass<*, *, *>,
     storage: FirebaseStorage,
     viewModel: DataClassItemViewModel,
     onClick: () -> Unit,
@@ -126,7 +126,6 @@ private fun DownloadableDataClassItem(
         viewModel.startDownloading(
             context,
             item.pin,
-            item.documentPath,
             item.displayName,
             quality = DOWNLOAD_QUALITY_DEFAULT
         )
@@ -334,7 +333,7 @@ private fun DownloadableDataClassItem(
  */
 @Composable
 private fun NonDownloadableDataClassItem(
-    item: DataClass<*, *>,
+    item: DataClass<*, *, *>,
     storage: FirebaseStorage,
     viewModel: DataClassItemViewModel,
     onClick: (() -> Unit)? = null
