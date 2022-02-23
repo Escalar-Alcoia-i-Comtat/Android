@@ -44,8 +44,6 @@ class Sector internal constructor(
     DataClassMetadata(
         objectId,
         NAMESPACE,
-        Zone.NAMESPACE,
-        Path.NAMESPACE,
         webUrl,
         parentZoneId
     ),

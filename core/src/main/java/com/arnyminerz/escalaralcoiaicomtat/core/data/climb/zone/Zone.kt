@@ -38,8 +38,6 @@ class Zone internal constructor(
     DataClassMetadata(
         objectId,
         NAMESPACE,
-        Area.NAMESPACE,
-        Sector.NAMESPACE,
         webUrl,
         parentAreaId
     ),

@@ -41,8 +41,6 @@ class Area internal constructor(
     DataClassMetadata(
         objectId,
         NAMESPACE,
-        null,
-        Zone.NAMESPACE,
         webUrl,
         null
     ),
