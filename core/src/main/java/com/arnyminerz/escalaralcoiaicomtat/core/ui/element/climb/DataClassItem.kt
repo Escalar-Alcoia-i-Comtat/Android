@@ -50,6 +50,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import java.text.SimpleDateFormat
 
 @Composable
@@ -101,7 +102,6 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
  * @author Arnau Mora
  * @since 20211229
  * @param item The DataClass to display.
- * @param storage The Firebase Storage reference for loading images.
  * @param viewModel The View Model for doing async tasks.
  * @param onClick Will get called when the user requests to "navigate" into the DataClass.
  */
@@ -143,7 +143,9 @@ private fun DownloadableDataClassItem(
                         Modifier
                             .fillMaxWidth()
                             .height(160.dp)
-                            .clickable(enabled = true, role = Role.Image, onClick = onClick)
+                            .clickable(enabled = true, role = Role.Image, onClick = onClick),
+                        imageLoadParameters = ImageLoadParameters()
+                            .withResultImageScale(.3f)
                     )
                 }
                 Column(
@@ -321,7 +323,6 @@ private fun DownloadableDataClassItem(
  * @author Arnau Mora
  * @since 20211229
  * @param item The DataClass to display.
- * @param storage The Firebase Storage instance to load the images from.
  * @param viewModel The View Model for doing async tasks.
  * @param onClick What to do when clicked.
  */
@@ -346,7 +347,9 @@ private fun NonDownloadableDataClassItem(
                     .height(160.dp)
                     .clickable {
                         onClick?.let { it() }
-                    }
+                    },
+                imageLoadParameters = ImageLoadParameters()
+                    .withResultImageScale(.3f)
             )
             Column(
                 modifier = Modifier
