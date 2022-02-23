@@ -21,7 +21,7 @@ annotation class Namespace
  */
 @get:Namespace
 @Namespace
-val @receiver:Namespace String.Parent: String
+val @receiver:Namespace String.ParentNamespace: String
     get() =
         when (this) {
             Zone.NAMESPACE -> Area.NAMESPACE
