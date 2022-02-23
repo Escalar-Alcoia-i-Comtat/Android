@@ -22,8 +22,10 @@ import androidx.work.WorkManager
 import androidx.work.await
 import com.android.volley.Request
 import com.android.volley.VolleyError
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ChildrenNamespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ParentNamespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
@@ -519,12 +521,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
 
         // Get the parentId, if it's null, return null
         val parentId: String = metadata.parentId ?: return null
-        // Get the parent's namespace, it null, return null
-        val parentNamespace: String = metadata.parentNamespace ?: return null
 
         // From the different possibilities for the namespace, fetch from searchSession
         @Suppress("UNCHECKED_CAST")
-        return when (parentNamespace) {
+        return when (namespace.ParentNamespace) {
             Area.NAMESPACE -> searchSession.getArea(parentId) as D?
             Zone.NAMESPACE -> searchSession.getZone(parentId) as D?
             Sector.NAMESPACE -> searchSession.getSector(parentId) as D?
@@ -537,18 +537,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @author Arnau Mora
      * @since 20210313
      * @param searchSession The session for performing searches.
-     * @throws IllegalStateException When no [DataClassMetadata.childNamespace] is set in
-     * [DataClass.metadata].
      */
     @WorkerThread
-    @Throws(IllegalStateException::class)
     suspend inline fun <R : Comparable<R>> getChildren(
         searchSession: AppSearchSession,
         crossinline sortBy: (A) -> R?
-    ): List<A> =
-        metadata.childNamespace?.let { childNamespace ->
-            searchSession.getChildren(childNamespace, objectId, sortBy)
-        } ?: throw IllegalStateException("If no child namespace is set in metadata.")
+    ): List<A> = searchSession.getChildren(namespace.ChildrenNamespace, objectId, sortBy)
 
     /**
      * Gets the children element at [index].
