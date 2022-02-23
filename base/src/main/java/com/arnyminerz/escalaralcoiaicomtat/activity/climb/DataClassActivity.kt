@@ -31,8 +31,6 @@ import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
 /**
@@ -68,25 +66,18 @@ class DataClassActivity : NetworkAwareComponentActivity() {
     private val hasInternet = MutableLiveData<Boolean>()
 
     /**
-     * The Firebase Storage instance to fetch files from the server.
-     * @author Arnau Mora
-     * @since 20220105
-     */
-    val storage: FirebaseStorage = Firebase.storage
-
-    /**
      * The Data Class to display.
      * @author Arnau Mora
      * @since 20220105
      */
-    private lateinit var dataClass: DataClass<*, *>
+    private lateinit var dataClass: DataClass<*, *, *>
 
     /**
      * The parent Data Class of [dataClass].
      * @author Arnau Mora
      * @since 20220105
      */
-    private var parentDataClass: DataClass<*, *>? = null
+    private var parentDataClass: DataClass<*, *, *>? = null
 
     /**
      * Used for Sector display, to remember which is the position of the currently showing sector.
@@ -158,7 +149,6 @@ class DataClassActivity : NetworkAwareComponentActivity() {
                     // If not, load the DataClassExplorer
                     DataClassExplorer(
                         exploreViewModel,
-                        storage,
                         dataClass,
                         hasInternet
                     )
@@ -205,7 +195,7 @@ class DataClassActivity : NetworkAwareComponentActivity() {
                 return false
             })
         Timber.v("EXTRA_DATACLASS is present in intent extras. Type: ${dataClassExtra::class.java}")
-        dataClass = dataClassExtra as DataClass<*, *>
+        dataClass = dataClassExtra as DataClass<*, *, *>
         return true
     }
 
@@ -224,7 +214,7 @@ class DataClassActivity : NetworkAwareComponentActivity() {
             ?: savedInstanceState?.getExtra(EXTRA_PARENT)
             ?: return false
         Timber.v("EXTRA_PARENT is present in intent extras. Type: ${parentExtra::class.java}")
-        parentDataClass = parentExtra as DataClass<*, *>
+        parentDataClass = parentExtra as DataClass<*, *, *>
         return true
     }
 }

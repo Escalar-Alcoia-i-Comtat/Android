@@ -104,11 +104,12 @@ const val REMOTE_CONFIG_MIN_FETCH_INTERVAL = 43200L // 12 hours
 
 /**
  * The database name for the app search engine.
+ * * v4: Using MariaDB database under REST API.
  * @author Arnau Mora
  * @since 20210811
  * @see <a href="https://developer.android.com/guide/topics/search/appsearch">AppSearch docs</a>
  */
-const val SEARCH_DATABASE_NAME = "escalaralcoiaicomtat_v3"
+const val SEARCH_DATABASE_NAME = "escalaralcoiaicomtat_v4.1"
 
 /**
  * Stores all the schemas that are used by the search engine.
@@ -136,10 +137,10 @@ const val MIME_TYPE_KMZ = "application/vnd.google-earth.kmz"
 const val MIME_TYPE_GPX = "application/gpx+xml"
 
 // Sun Time constants
-const val ALL_DAY = 0
-const val MORNING = 1
-const val AFTERNOON = 2
-const val NO_SUN = 3
+const val ALL_DAY = "day"
+const val MORNING = "morning"
+const val AFTERNOON = "afternoon"
+const val NO_SUN = "none"
 
 // Ending Type constants
 const val ENDING_TYPE_UNKNOWN = "NULL"

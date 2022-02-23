@@ -11,7 +11,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getLatLng
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -28,7 +27,7 @@ class Sector internal constructor(
     override val objectId: String,
     override val displayName: String,
     override val timestampMillis: Long,
-    @SunTime val sunTime: Int,
+    @SunTime val sunTime: String,
     val kidsApt: Boolean,
     val walkingTime: Long,
     override val location: LatLng?,
@@ -71,10 +70,13 @@ class Sector internal constructor(
         sectorId,
         data.getString("displayName"),
         data.getDate("created")!!.time,
-        data.getLong("sunTime").toInt(),
+        data.getString("sunTime"),
         data.getBoolean("kidsApt"),
         data.getLong("walkingTime"),
-        data.getLatLng("location"),
+        LatLng(
+            data.getDouble("latitude"),
+            data.getDouble("longitude")
+        ),
         data.getString("weight"),
         data.getString("image"),
         try {

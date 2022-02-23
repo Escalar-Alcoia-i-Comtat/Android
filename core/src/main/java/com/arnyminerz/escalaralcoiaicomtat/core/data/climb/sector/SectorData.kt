@@ -11,7 +11,7 @@ data class SectorData(
     @Document.Id var objectId: String,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var displayName: String,
     @Document.CreationTimestampMillis var timestamp: Long,
-    @Document.LongProperty var sunTime: Int,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var sunTime: String,
     @Document.BooleanProperty var kidsApt: Boolean,
     @Document.LongProperty var walkingTime: Long,
     @Document.DoubleProperty var latitude: Double?,

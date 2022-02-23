@@ -53,7 +53,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
 import com.google.android.material.badge.ExperimentalBadgeUtils
-import com.google.firebase.storage.FirebaseStorage
 
 @Composable
 @ExperimentalFoundationApi
@@ -61,8 +60,7 @@ import com.google.firebase.storage.FirebaseStorage
 @ExperimentalBadgeUtils
 fun Activity.DataClassExplorer(
     exploreViewModel: ExploreViewModel,
-    storage: FirebaseStorage,
-    dataClass: DataClass<*, *>,
+    dataClass: DataClass<*, *, *>,
     hasInternetLiveData: MutableLiveData<Boolean>,
 ) {
     val context = LocalContext.current
@@ -149,7 +147,7 @@ fun Activity.DataClassExplorer(
             }
             // The items
             itemsIndexed(items) { i, item ->
-                DataClassItem(item, storage) {
+                DataClassItem(item) {
                     launch(DataClassActivity::class.java) {
                         putExtra(EXTRA_DATACLASS, item as Parcelable)
                         putExtra(EXTRA_PARENT, dataClass as Parcelable)

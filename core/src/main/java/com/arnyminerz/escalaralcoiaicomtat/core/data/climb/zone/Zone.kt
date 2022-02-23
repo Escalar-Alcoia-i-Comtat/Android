@@ -9,7 +9,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDi
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getLatLng
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -66,7 +65,10 @@ class Zone internal constructor(
         data.getDate("created")!!.time,
         data.getString("image"),
         data.getString("kmz"),
-        data.getLatLng("location")!!,
+        LatLng(
+            data.getDouble("latitude"),
+            data.getDouble("longitude")
+        ),
         data.getString("webURL"),
         data.getString("area")
     )

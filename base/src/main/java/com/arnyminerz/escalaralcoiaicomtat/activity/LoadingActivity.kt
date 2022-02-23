@@ -41,17 +41,11 @@ import com.arnyminerz.escalaralcoiaicomtat.view.model.LoadingViewModel
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.ktx.messaging
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.ktx.storage
 import timber.log.Timber
 
 /**
@@ -70,20 +64,6 @@ class LoadingActivity : LanguageComponentActivity() {
     }
 
     /**
-     * The Firestore instance to use.
-     * @author Arnau Mora
-     * @since 20211225
-     */
-    private lateinit var firestore: FirebaseFirestore
-
-    /**
-     * The Firebase Storage instance to use.
-     * @author Arnau Mora
-     * @since 20211225
-     */
-    private lateinit var storage: FirebaseStorage
-
-    /**
      * The Firebase Messaging instance to use.
      * @author Arnau Mora
      * @since 20211225
@@ -96,13 +76,6 @@ class LoadingActivity : LanguageComponentActivity() {
      * @since 20211225
      */
     private lateinit var analytics: FirebaseAnalytics
-
-    /**
-     * The Firebase Auth instance to use.
-     * @author Arnau Mora
-     * @since 20211225
-     */
-    private lateinit var auth: FirebaseAuth
 
     /**
      * The Firebase Remote Config instance to use.
@@ -145,16 +118,10 @@ class LoadingActivity : LanguageComponentActivity() {
         deepLinkPath = getExtra(EXTRA_LINK_PATH)
 
         Timber.i("Initializing Firebase instances...")
-        Timber.v("Getting Firestore instance...")
-        firestore = Firebase.firestore
-        Timber.v("Getting Firebase Storage instance...")
-        storage = Firebase.storage
         Timber.v("Getting Firebase Messaging instance...")
         messaging = Firebase.messaging
         Timber.v("Getting Firebase Analytics instance...")
         analytics = Firebase.analytics
-        Timber.v("Getting Firebase Auth instance...")
-        auth = Firebase.auth
         Timber.v("Getting Firebase Remote Config instance...")
         remoteConfig = Firebase.remoteConfig
 
@@ -178,8 +145,7 @@ class LoadingActivity : LanguageComponentActivity() {
                     deepLinkPath,
                     remoteConfig,
                     messaging,
-                    analytics,
-                    auth
+                    analytics
                 )
             }
         }

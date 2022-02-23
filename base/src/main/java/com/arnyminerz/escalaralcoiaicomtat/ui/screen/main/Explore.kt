@@ -51,13 +51,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.google.android.material.badge.ExperimentalBadgeUtils
-import com.google.firebase.storage.FirebaseStorage
 import timber.log.Timber
 
 @Composable
 @ExperimentalBadgeUtils
 @OptIn(ExperimentalMaterial3Api::class)
-fun MainActivity.ExploreScreen(storage: FirebaseStorage) {
+fun MainActivity.ExploreScreen() {
     val focusManager = LocalFocusManager.current
 
     val areas by exploreViewModel.loadAreas().observeAsState()
@@ -144,7 +143,7 @@ fun MainActivity.ExploreScreen(storage: FirebaseStorage) {
         }
         items(areas ?: listOf()) { area ->
             Timber.d("Displaying $area...")
-            DataClassItem(area, storage) {
+            DataClassItem(area) {
                 launch(DataClassActivity::class.java) {
                     putExtra(EXTRA_DATACLASS, area as Parcelable)
                 }

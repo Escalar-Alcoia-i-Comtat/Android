@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
 import androidx.appsearch.annotation.Document
 import androidx.appsearch.app.AppSearchSchema
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
@@ -13,10 +12,10 @@ data class PathData(
     @Document.CreationTimestampMillis var timestamp: Long,
     @Document.LongProperty var sketchId: Long,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var displayName: String,
-    @Document.StringProperty var grades: String,
-    @Document.StringProperty var heights: String,
-    @Document.StringProperty var endings: String,
-    @Document.StringProperty var pitches: String?,
+    @Document.StringProperty var rawGrades: String,
+    @Document.StringProperty var rawHeights: String,
+    @Document.StringProperty var rawEndings: String,
+    @Document.StringProperty var rawPitches: String,
     @Document.LongProperty val stringCount: Long,
     @Document.LongProperty val paraboltCount: Long,
     @Document.LongProperty val spitCount: Long,
@@ -39,25 +38,15 @@ data class PathData(
     var namespace: String = Path.NAMESPACE
 
     override fun data(): Path {
-        val heightsArray = heights.split(",")
-        val heights = arrayListOf<Long>()
-        for (h in heightsArray)
-            h.toLongOrNull()?.let { heights.add(it) }
-
-        val endingsArray = endings.split(",")
-        val endings = arrayListOf<@EndingType String>()
-        for (e in endingsArray)
-            endings.add(e)
-
         return Path(
             objectId,
             timestamp,
             sketchId,
             displayName,
-            grades,
-            heights,
-            endings,
-            pitches,
+            rawGrades,
+            rawHeights,
+            rawEndings,
+            rawPitches,
             FixedSafesData(
                 stringCount,
                 paraboltCount,
@@ -81,44 +70,4 @@ data class PathData(
             parentSectorId,
         )
     }
-}
-
-fun Path.data(): PathData {
-    var heights = ""
-    for (height in this.heights)
-        heights += "$height,"
-    heights = heights.substringBeforeLast(',')
-
-    var endings = ""
-    for (ending in this.endings)
-        endings += "$ending,"
-    endings = endings.substringBeforeLast(',')
-
-    return PathData(
-        objectId,
-        timestampMillis,
-        sketchId,
-        displayName,
-        rawGrades,
-        heights,
-        endings,
-        rawPitches,
-        fixedSafesData.stringCount,
-        fixedSafesData.paraboltCount,
-        fixedSafesData.spitCount,
-        fixedSafesData.tensorCount,
-        fixedSafesData.pitonCount,
-        fixedSafesData.burilCount,
-        requiredSafesData.lanyardRequired,
-        requiredSafesData.crackerRequired,
-        requiredSafesData.friendRequired,
-        requiredSafesData.stripsRequired,
-        requiredSafesData.pitonRequired,
-        requiredSafesData.nailRequired,
-        description ?: "",
-        builtBy ?: "",
-        rebuiltBy ?: "",
-        downloaded,
-        parentSectorId,
-    )
 }

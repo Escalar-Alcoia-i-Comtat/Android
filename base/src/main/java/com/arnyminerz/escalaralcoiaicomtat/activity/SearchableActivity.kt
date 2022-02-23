@@ -281,7 +281,7 @@ class SearchableActivity : ComponentActivity() {
                         }
                         val app = application as App
                         val parent = runBlocking {
-                            (dataClassImpl as? DataClass<*, *>)
+                            (dataClassImpl as? DataClass<*, *, *>)
                                 ?.getParent(app.searchSession)
                                 ?: run { (dataClassImpl as? Path)?.getParent(app) }
                         }

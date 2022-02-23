@@ -28,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -43,15 +42,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.CONTACT_EMAIL
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.isEmail
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.launch
-import timber.log.Timber
 
 /**
  * An activity that allows the user to send feedback directly to the developers.
@@ -64,9 +57,7 @@ class FeedbackActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
-                FeedbackWindow {
-                    finish()
-                }
+                FeedbackWindow()
             }
         }
     }
@@ -74,9 +65,8 @@ class FeedbackActivity : ComponentActivity() {
 
 @Composable
 @ExperimentalMaterial3Api
-fun FeedbackWindow(finishListener: (() -> Unit)? = null) {
+fun FeedbackWindow() {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
     var fieldsEnabled by remember { mutableStateOf(true) }
     var name by remember { mutableStateOf("") }
@@ -120,33 +110,8 @@ fun FeedbackWindow(finishListener: (() -> Unit)? = null) {
                     else if (message.isEmpty())
                         messageError = true
                     else {
-                        Firebase.firestore
-                            .collection("mail")
-                            .add(
-                                hashMapOf(
-                                    "to" to CONTACT_EMAIL,
-                                    "message" to hashMapOf(
-                                        "html" to "$name ha enviat un missatge des de l'app.<br/>Contacte: $email<hr/>$message",
-                                        "replyTo" to email,
-                                        "subject" to "Nou missatge des d'Escalar Alcoià i Comtat"
-                                    )
-                                )
-                            )
-                            .addOnSuccessListener {
-                                scope.launch {
-                                    toast(context, R.string.toast_message_sent)
-                                    fieldsEnabled = true
-                                    finishListener?.invoke()
-                                }
-                            }
-                            .addOnFailureListener {
-                                Timber.e(it, "Could not send message.")
-                                scope.launch {
-                                    val e = it as? FirebaseFirestoreException
-                                    toast(context, R.string.toast_error_send_message, e?.code ?: "")
-                                    fieldsEnabled = true
-                                }
-                            }
+                        // TODO; Email sending
+                        toast(context, "Feedback currently not working.")
                     }
 
                     fieldsEnabled = emailEmptyError || emailInvalidError || messageError

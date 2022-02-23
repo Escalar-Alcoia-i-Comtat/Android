@@ -11,9 +11,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.livedata.MutableListLiveData
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.ktx.storage
 import com.google.maps.android.data.kml.KmlContainer
 import com.google.maps.android.data.kml.KmlLayer
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,8 +32,6 @@ class MainMapViewModel(
         Timber.d("$this::onCleared")
     }
 
-    private val storage: FirebaseStorage = Firebase.storage
-
     val locations: MutableListLiveData<LatLng> = MutableListLiveData<LatLng>().apply {
         postValue(mutableListOf())
     }
@@ -47,10 +42,10 @@ class MainMapViewModel(
         true
     )
 
-    fun loadGoogleMap(googleMap: GoogleMap, dataClass: DataClass<*, *>) {
+    fun loadGoogleMap(googleMap: GoogleMap, dataClass: DataClass<*, *, *>) {
         @Suppress("BlockingMethodInNonBlockingContext")
         viewModelScope.launch {
-            val kmzFile = dataClass.kmzFile(context, storage, false)
+            val kmzFile = dataClass.kmzFile(context, false)
             val kmzStream = kmzFile.inputStream()
             val kmzLayer = KmlLayer(googleMap, kmzStream, context)
             kmzLayer.addLayerToMap()

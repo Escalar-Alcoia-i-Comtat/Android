@@ -11,7 +11,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.data
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
@@ -46,7 +45,7 @@ private fun <D : DataClass<*, *, I>, I : DataRoot<D>> decode(
     constructor: (data: JSONObject, id: String) -> D
 ): List<I> {
     val index = arrayListOf<I>()
-    val jsonObject = jsonData.getJSONObject(namespace)
+    val jsonObject = jsonData.getJSONObject("${namespace}s")
     val keys = jsonObject.keys()
     for ((i, id) in keys.withIndex()) {
         val json = jsonObject.getJSONObject(id)
@@ -72,7 +71,7 @@ private fun decode(
     jsonData: JSONObject
 ): List<PathData> {
     val index = arrayListOf<PathData>()
-    val jsonObject = jsonData.getJSONObject(Path.NAMESPACE)
+    val jsonObject = jsonData.getJSONObject("${Path.NAMESPACE}s")
     val keys = jsonObject.keys()
     for (id in keys) {
         val json = jsonObject.getJSONObject(id)
@@ -114,7 +113,7 @@ suspend fun loadAreas(
                 Timber.w("Areas is empty, resetting search indexed pref and launching again.")
                 PreferencesModule
                     .systemPreferencesRepository
-                    .markDataIndexed()
+                    .markDataIndexed(false)
                 loadAreas(application, jsonData)
             }
     }
@@ -124,7 +123,7 @@ suspend fun loadAreas(
 
     trace.start()
 
-    Timber.d("Fetching data from data module...")
+    Timber.d("Processing data...")
     try {
         val decodedAreas =
             decode(jsonData, Area.NAMESPACE) { json, id -> Area(json, id) }.toMutableList()

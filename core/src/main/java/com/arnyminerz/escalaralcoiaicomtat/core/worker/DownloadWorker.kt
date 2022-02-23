@@ -334,7 +334,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             if (namespace == Zone.NAMESPACE)
                 url += "?loadChildren=true"
 
-            val jsonData = getJson(url)
+            val jsonData = applicationContext.getJson(url)
             if (!jsonData.has("result"))
                 throw NoSuchElementException("There's no \"result\" field on the server response.")
             val result = jsonData.getJSONObject("result")
@@ -594,10 +594,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 // This is for making it easier to recover later on which DataClasses are downloaded
                 Timber.v("Indexing downloaded element...")
                 // First get all the data from the downloaded result
-                val objectId = downloadResultData.getString("objectId") ?: run {
-                    Timber.w("Could not get \"objectId\". Data: $downloadResultData")
-                    return failure(ERROR_DATA_TRANSFERENCE)
-                }
+                // TODO: parentId may not be correct
                 val parentId = downloadResultData.getString("parentId") ?: run {
                     // Zones won't have any parentId since Areas are not downloadable, so
                     // if the downloaded item is a zone, skip parentId check and return

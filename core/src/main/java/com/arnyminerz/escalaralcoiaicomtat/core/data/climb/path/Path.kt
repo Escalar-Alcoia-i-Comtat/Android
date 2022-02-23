@@ -1,23 +1,27 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
+import android.content.Context
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchSpec
 import androidx.appsearch.exceptions.AppSearchException
 import androidx.work.await
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.EndingType
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.BlockingTypeParceler
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.PitchParceler
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.PitchEndingData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.PitchEndingOrientation
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.PitchEndingRappel
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_BLOCKING_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
 import org.json.JSONException
@@ -37,15 +41,15 @@ class Path internal constructor(
     override val timestampMillis: Long,
     val sketchId: Long,
     override val displayName: String,
-    val rawGrades: String,
-    val heights: ArrayList<Long>,
-    val endings: ArrayList<@EndingType String>,
-    val rawPitches: String?,
+    private val rawGrades: String,
+    private val rawHeights: String,
+    private val rawEndings: String,
+    private val rawPitches: String,
     val fixedSafesData: FixedSafesData,
     val requiredSafesData: RequiredSafesData,
     val description: String?,
-    val builtBy: String?,
-    var rebuiltBy: String?,
+    private val rawBuilt: String?,
+    private val rawReBuilt: String?,
     val downloaded: Boolean = false,
     val parentSectorId: String,
 ) : DataClassImpl(objectId, NAMESPACE, timestampMillis, displayName), Comparable<Path> {
@@ -62,9 +66,13 @@ class Path internal constructor(
         data.getString("sketchId").toLongOrNull() ?: 0L,
         data.getString("displayName"),
         data.getString("grade"),
-        arrayListOf(),
-        arrayListOf(),
-        data.getString("ending_artifo"),
+        data.getString("height"),
+        data.getString("ending"),
+        try {
+            data.getString("pitch_info")
+        } catch (e: JSONException) {
+            ""
+        },
         FixedSafesData(
             data.getLong("stringCount"),
             data.getLong("paraboltCount"),
@@ -91,86 +99,173 @@ class Path internal constructor(
         } catch (e: JSONException) {
             null
         },
-        "", // This gets initialized later
-        parentSectorId = data.getString("zone")
-    ) {
-        Timber.d("Loading heights for Path $objectId")
-        val heights = data.getJSONArray("height")
-        for (k in 0 until heights.length()) {
-            val height = heights[k]
-            height.toString().toLongOrNull()?.let {
-                this.heights.add(it)
-            }
-        }
-
-        Timber.d("Loading endings for Path $objectId")
-        val endingsList = data.getJSONArray("ending")
-        for (i in 0 until endingsList.length()) {
-            endings.add(endingsList.getString(i).lowercase())
-        }
-
-        Timber.d("Loading rebuilders...")
         try {
-            val reBuildersList = data.getJSONArray("rebuiltBy")
-            val rebuilders = arrayListOf<String>()
-            for (k in 0 until reBuildersList.length()) {
-                rebuilders.add(reBuildersList.getString(k))
-            }
-            val d = rebuilders.joinToString(separator = ",")
-            rebuiltBy = d
-        } catch (_: JSONException) {
-        }
+            data.getString("rebuilders")
+        } catch (e: JSONException) {
+            null
+        },
+        parentSectorId = data.getString("sector")
+    )
+
+    /**
+     * The general height of the path. May be null if not set.
+     * @author Arnau Mora
+     * @since 20220223
+     */
+    @IgnoredOnParcel
+    var generalHeight: Long? = null
+        private set
+
+    /**
+     * The general grade of the path.
+     * @author Arnau Mora
+     * @since 20220223
+     */
+    @IgnoredOnParcel
+    var generalGrade: String = "¿?"
+        private set
+
+    /**
+     * The general ending of the path.
+     * @author Arnau Mora
+     * @since 20220223
+     */
+    @IgnoredOnParcel
+    var generalEnding: String? = null
+        private set
+
+    /**
+     * A list of the data of each pitch of the path.
+     * @author Arnau Mora
+     * @since 20220223
+     */
+    @IgnoredOnParcel
+    var pitches: Array<Pitch> = emptyArray()
+        private set
+
+    /**
+     * Contains data about who built the path.
+     * @author Arnau Mora
+     * @since 20220323
+     */
+    @IgnoredOnParcel
+    var buildPatch: Patch? = null
+
+    /**
+     * All the patches made on the path.
+     * @author Arnau Mora
+     * @since 20220223
+     */
+    @IgnoredOnParcel
+    var patches: List<Patch> = emptyList()
+        private set
+
+    private fun <T> processPitch(
+        rawText: String,
+        conversion: (value: String) -> T?,
+        setGeneral: ((value: T) -> Unit)?,
+        setter: (index: Int, value: T) -> Unit
+    ) {
+        if (rawText == "NULL")
+            return
+
+        val split = rawText
+            .replace("\r", "")
+            .split("\n")
+        if (split.size == 1 && setGeneral != null)
+            conversion(rawHeights)?.let { setGeneral(it) }
+        else for (item in split)
+            if (item.startsWith(">") && setGeneral != null)
+                conversion(item.substring(1))?.let { setGeneral(it) }
+            else
+                item.indexOf('>')
+                    .takeUnless { it < 0 }
+                    ?.let { signPos ->
+                        Timber.d("Converting item \"$item\" of $objectId")
+                        val index = item.substring(0, signPos).toInt()
+                        val convertedElem = conversion(item.substring(signPos + 1))
+
+                        // This ensures the size matches, and that all items of the array are initialized.
+                        @Suppress("UNCHECKED_CAST")
+                        pitches = pitches
+                            .copyOf(index + 1)
+                            .let { newPitches ->
+                                for ((i, ir) in newPitches.withIndex())
+                                    if (ir == null)
+                                        newPitches[i] = Pitch()
+                                newPitches
+                            } as Array<Pitch>
+
+                        if (convertedElem != null)
+                            setter(index, convertedElem)
+                    }
+                    ?: run {
+                        Timber.w("Could not take row row \"%s\". Path: %s", item, objectId)
+                    }
     }
 
-    /**
-     * Returns the [Path]'s [Grade]s as a [List].
-     * @author Arnau Mora
-     * @since 20210811
-     */
-    val grades: List<Grade>
-        get() {
-            // Grades should be split in each L
-            val gradeValues = rawGrades
-                .replace("\n", "") // Remove all line jumps
-                .replace("Â", "") // Remove corrupt characters
-                .split("L").toMutableList()
-            if (gradeValues.size > 1)
-                for (i in 1 until gradeValues.size)
-                    gradeValues[i] = 'L' + gradeValues[i]
-            return Grade.listFromStrings(gradeValues)
-        }
+    init {
+        // Transform the height format to the list.
+        processPitch(
+            rawHeights,
+            { it.toLongOrNull() },
+            { generalHeight = it },
+            { index, value -> pitches[index].height = value },
+        )
 
-    /**
-     * Returns the [Path]'s [Pitch]es as a [List].
-     * @author Arnau Mora
-     * @since 20210811
-     */
-    val pitches: List<Pitch>
-        get() {
-            return if (rawPitches == null)
-                emptyList()
-            else
-                arrayListOf<Pitch>().apply {
-                    val artifos = rawPitches.replace("\r", "").split("\n")
-                    for (artifo in artifos)
-                        Pitch.fromEndingDataString(artifo)
-                            ?.let { artifoEnding -> add(artifoEnding) }
+        // Transform the grades format to the list.
+        processPitch(
+            rawGrades,
+            { it.takeIf { it.isNotBlank() } },
+            { generalGrade = it },
+            { index, value -> pitches[index].grade = value },
+        )
+
+        // Transform raw endings into pitches
+        processPitch(
+            rawEndings,
+            { it.takeIf { it.isNotBlank() } },
+            { generalEnding = it },
+            { index, value -> pitches[index].ending = value },
+        )
+
+        // Put pitch info into pitches
+        processPitch(
+            rawPitches,
+            {
+                it.split(" ").let { splitPitch ->
+                    val rappel = PitchEndingRappel.find(splitPitch[0])
+                    val orientation = PitchEndingOrientation.find(splitPitch[1])
+                    if (rappel != null && orientation != null)
+                        PitchEndingData(rappel, orientation)
+                    else {
+                        Timber.w("Could not find rappel \"${splitPitch[0]}\" or orientation \"${splitPitch[1]}\" at $objectId")
+                        null
+                    }
                 }
+            },
+            null,
+            { index, value -> pitches[index].endingData = value },
+        )
+
+        // Process builder
+        if (rawBuilt != null && rawBuilt.contains(";")) {
+            val splitBuilder = rawBuilt.split(";")
+            buildPatch = Patch(splitBuilder[0], splitBuilder[1])
         }
 
-    /**
-     * Returns [rebuiltBy] as a list of strings.
-     * @author Arnau Mora
-     * @since 20210830
-     */
-    val rebuilders: List<String>
-        get() = rebuiltBy?.let {
-            arrayListOf<String>().apply {
-                val rebuilders = it.split(',')
-                for (rebuilder in rebuilders)
-                    add(rebuilder)
+        // Process re-builders
+        if (rawReBuilt != null) {
+            val newPatches = arrayListOf<Patch>()
+            val reBuiltLines = rawReBuilt.replace("\r", "").split("\n")
+            for (line in reBuiltLines) {
+                if (!line.contains(";")) continue
+                val splitLine = line.split(";")
+                newPatches.add(Patch(splitLine[0], splitLine[1]))
             }
-        } ?: emptyList()
+            patches = newPatches
+        }
+    }
 
     /**
      * Returns the parent [Sector] of the [Path].
@@ -192,25 +287,6 @@ class Path internal constructor(
         }
 
     /**
-     * Checks if the Path has a description, built by or rebuilt by information
-     * @author Arnau Mora
-     * @since 20210316
-     * @return True if the path has information
-     */
-    fun hasInfo(): Boolean = (description != null && description.isNotBlank()) ||
-            (builtBy != null && builtBy.isNotBlank()) ||
-            (rebuilders.isNotEmpty())
-
-    /**
-     * Gets the first [Grade] from the [grades] list.
-     * @author Arnau Mora
-     * @since 20210811
-     * @throws NoSuchElementException When [grades] is empty.
-     */
-    @Throws(NoSuchElementException::class)
-    fun grade(): Grade = grades.first()
-
-    /**
      * Fetches the [BlockingType] of the [Path] from the server.
      * @author Arnau Mora
      * @since 20210824
@@ -218,9 +294,9 @@ class Path internal constructor(
      */
     @WorkerThread
     @Throws(RuntimeException::class)
-    suspend fun singleBlockStatusFetch(): BlockingType {
+    suspend fun singleBlockStatusFetch(context: Context): BlockingType {
         Timber.v("$this > Getting path blocking from the server...")
-        val fetchResult = getJson("$REST_API_BLOCKING_ENDPOINT/$objectId")
+        val fetchResult = context.getJson("$REST_API_BLOCKING_ENDPOINT/$objectId")
         Timber.v("$this > Extracting blocked from document...")
         return if (fetchResult.has("result")) {
             val blocked = fetchResult.getBoolean("blocked")
@@ -242,6 +318,7 @@ class Path internal constructor(
      */
     @WorkerThread
     suspend fun getBlockStatus(
+        context: Context,
         searchSession: AppSearchSession
     ): BlockingType = try {
         Timber.v("$this > Getting block status...")
@@ -256,7 +333,7 @@ class Path internal constructor(
         val searchPage = searchResults.nextPage.await()
         if (searchPage.isEmpty()) {
             Timber.v("$this > There's no block status in search session.")
-            val blockingType = singleBlockStatusFetch()
+            val blockingType = singleBlockStatusFetch(context)
             Timber.v("$this > Blocking type: $blockingType")
             blockingType
         } else {
@@ -274,34 +351,43 @@ class Path internal constructor(
         BlockingType.UNKNOWN
     }
 
+    fun data(): PathData {
+        return PathData(
+            objectId,
+            timestampMillis,
+            sketchId,
+            displayName,
+            rawGrades,
+            rawHeights,
+            rawEndings,
+            rawPitches,
+            fixedSafesData.stringCount,
+            fixedSafesData.paraboltCount,
+            fixedSafesData.spitCount,
+            fixedSafesData.tensorCount,
+            fixedSafesData.pitonCount,
+            fixedSafesData.burilCount,
+            requiredSafesData.lanyardRequired,
+            requiredSafesData.crackerRequired,
+            requiredSafesData.friendRequired,
+            requiredSafesData.stripsRequired,
+            requiredSafesData.pitonRequired,
+            requiredSafesData.nailRequired,
+            description ?: "",
+            rawBuilt ?: "",
+            rawReBuilt ?: "",
+            downloaded,
+            parentSectorId,
+        )
+    }
+
     companion object {
         @Namespace
         const val NAMESPACE = "Path"
 
         val SAMPLE_PATH = Path(
-            objectId = "04BXQMNxFV4cjLILJk3p",
-            timestampMillis = 1618153406000,
-            sketchId = 52,
-            displayName = "Regall Impenetrable",
-            rawGrades = "7c+",
-            heights = arrayListOf(),
-            endings = arrayListOf("chain_carabiner"),
-            rawPitches = null,
-            fixedSafesData = FixedSafesData(
-                0, 1, 0, 0, 0, 0,
-            ),
-            requiredSafesData = RequiredSafesData(
-                lanyardRequired = false,
-                crackerRequired = false,
-                friendRequired = false,
-                stripsRequired = false,
-                pitonRequired = false,
-                nailRequired = false,
-            ),
-            description = null,
-            builtBy = "",
-            rebuiltBy = "",
-            parentSectorId = "B9zNqbw6REYVxGZxlYwh",
+            JSONObject("{\"created\":\"2021-04-11T15:03:26.000Z\",\"last_edit\":\"2022-02-17T16:42:14.000Z\",\"displayName\":\"Regall Impenetrable\",\"sketchId\":52,\"grade\":\"7c+\",\"height\":\"\",\"builtBy\":\"NULL\",\"rebuilders\":\"\",\"description\":\"NULL\",\"showDescription\":false,\"stringCount\":0,\"paraboltCount\":1,\"burilCount\":0,\"pitonCount\":0,\"spitCount\":0,\"tensorCount\":0,\"crackerRequired\":false,\"friendRequired\":false,\"lanyardRequired\":false,\"nailRequired\":false,\"pitonRequired\":false,\"stripsRequired\":false,\"ending\":\"chain_carabiner\",\"pitch_info\":\"NULL\",\"sector\":\"B9zNqbw6REYVxGZxlYwh\"}"),
+            "04BXQMNxFV4cjLILJk3p"
         )
     }
 }

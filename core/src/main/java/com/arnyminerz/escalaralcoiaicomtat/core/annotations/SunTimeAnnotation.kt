@@ -1,7 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.annotations
 
 import androidx.annotation.DrawableRes
-import androidx.annotation.IntDef
+import androidx.annotation.StringDef
 import androidx.annotation.StringRes
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.AFTERNOON
@@ -9,7 +9,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.ALL_DAY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.MORNING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
 
-@IntDef(ALL_DAY, MORNING, AFTERNOON, NO_SUN)
+@StringDef(ALL_DAY, MORNING, AFTERNOON, NO_SUN)
 @Retention(AnnotationRetention.SOURCE)
 annotation class SunTime
 
@@ -18,7 +18,7 @@ annotation class SunTime
  * @author Arnau Mora
  * @since 20220106
  */
-val @receiver:SunTime Int.textResource: Int
+val @receiver:SunTime String.textResource: Int
     @StringRes
     get() = when (this) {
         ALL_DAY -> R.string.sector_sun_day
@@ -28,7 +28,7 @@ val @receiver:SunTime Int.textResource: Int
         else -> R.string.toast_error_internal
     }
 
-val @receiver:SunTime Int.icon: Int
+val @receiver:SunTime String.icon: Int
     @DrawableRes
     get() = when (this) {
         ALL_DAY -> R.drawable.weather_sunny

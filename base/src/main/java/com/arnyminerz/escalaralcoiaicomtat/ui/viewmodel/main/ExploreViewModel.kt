@@ -54,7 +54,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
      * @param dataClass The DataClass to load the children from.
      * @return A [MutableState] that contains a list of children. May be empty while loading.
      */
-    inline fun <A : DataClassImpl, T : DataClass<A, *>, R : Comparable<R>> childrenLoader(
+    inline fun <A : DataClassImpl, T : DataClass<A, *, *>, R : Comparable<R>> childrenLoader(
         dataClass: T,
         crossinline sortBy: (A) -> R?,
     ): MutableState<List<DataClassImpl>> =

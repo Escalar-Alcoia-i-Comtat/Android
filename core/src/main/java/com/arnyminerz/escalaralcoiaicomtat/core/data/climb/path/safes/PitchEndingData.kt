@@ -5,7 +5,8 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class PitchEndingData(val orientation: PitchEndingOrientation, val rappel: PitchEndingRappel): Parcelable {
+class PitchEndingData(val rappel: PitchEndingRappel, val orientation: PitchEndingOrientation) :
+    Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readParcelable(PitchEndingOrientation::class.java.classLoader)!!,
         parcel.readParcelable(PitchEndingRappel::class.java.classLoader)!!
@@ -13,5 +14,5 @@ class PitchEndingData(val orientation: PitchEndingOrientation, val rappel: Pitch
 
     override fun toString(): String = dbValue()
 
-    private fun dbValue(): String = "$orientation $rappel"
+    private fun dbValue(): String = "$rappel $orientation"
 }

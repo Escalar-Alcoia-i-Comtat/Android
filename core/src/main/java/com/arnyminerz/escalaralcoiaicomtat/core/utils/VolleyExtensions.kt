@@ -1,10 +1,12 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.utils
 
+import android.content.Context
 import com.android.volley.NetworkResponse
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.HttpHeaderParser
 import com.android.volley.toolbox.JsonObjectRequest
+import com.arnyminerz.escalaralcoiaicomtat.core.network.VolleySingleton
 import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -18,15 +20,16 @@ import kotlin.coroutines.suspendCoroutine
  * @param jsonRequest A [JSONObject] to post with the request. Null indicates no parameters will be posted along with request.
  * @return The GET result in JSON format.
  */
-suspend fun getJson(url: String, jsonRequest: JSONObject? = null) =
+suspend fun Context.getJson(url: String, jsonRequest: JSONObject? = null) =
     suspendCoroutine<JSONObject> { cont ->
-        JsonObjectRequest(
+        val request = JsonObjectRequest(
             Request.Method.GET,
             url,
             jsonRequest,
             { cont.resume(it) },
             { cont.resumeWithException(it) }
         )
+        VolleySingleton.getInstance(this).addToRequestQueue(request)
     }
 
 class InputStreamVolleyRequest(
