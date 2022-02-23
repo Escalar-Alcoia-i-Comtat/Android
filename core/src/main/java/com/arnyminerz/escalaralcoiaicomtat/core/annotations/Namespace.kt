@@ -37,7 +37,7 @@ val @receiver:Namespace String.ParentNamespace: String
  */
 @get:Namespace
 @Namespace
-val @receiver:Namespace String.Children: String
+val @receiver:Namespace String.ChildrenNamespace: String
     get() =
         when (this) {
             Area.NAMESPACE -> Zone.NAMESPACE
