@@ -19,9 +19,8 @@ annotation class Namespace
  * @author Arnau Mora
  * @since 20220222
  */
-@get:Namespace
-@Namespace
 val @receiver:Namespace String.ParentNamespace: String
+    @Namespace
     get() =
         when (this) {
             Zone.NAMESPACE -> Area.NAMESPACE
@@ -35,9 +34,8 @@ val @receiver:Namespace String.ParentNamespace: String
  * @author Arnau Mora
  * @since 20220222
  */
-@get:Namespace
-@Namespace
 val @receiver:Namespace String.ChildrenNamespace: String
+    @Namespace
     get() =
         when (this) {
             Area.NAMESPACE -> Zone.NAMESPACE
