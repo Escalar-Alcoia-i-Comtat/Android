@@ -23,11 +23,7 @@ import androidx.compose.ui.Modifier
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
-import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 
 @Composable
 @OptIn(
@@ -51,7 +47,7 @@ fun MainActivity.DeveloperScreen() {
 
                     },
                     onLongClick = {
-                        vibrate(this@DeveloperScreen, 50)
+                        vibrate(50)
                         developerViewModel.indexedDownloads.postValue(emptyList())
                     }
                 )
@@ -68,7 +64,7 @@ fun MainActivity.DeveloperScreen() {
 
                     },
                     onLongClick = {
-                        vibrate(this@DeveloperScreen, 50)
+                        vibrate(50)
                         developerViewModel.indexTree.postValue("")
                     }
                 )
