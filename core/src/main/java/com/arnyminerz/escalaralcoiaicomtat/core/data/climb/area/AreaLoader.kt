@@ -12,9 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_SCHEMAS
@@ -38,6 +36,26 @@ import java.util.*
  * @param jsonData The data to decode.
  * @param namespace The namespace of [D].
  * @param constructor The constructor for building [D] from [JSONObject].
+ * @return A pair of lists. The first is the objects in [jsonData], the second one is for indexing
+ * search.
+ */
+private fun <D : DataClass<*, *, I>, I : DataRoot<D>> decode(
+    jsonData: JSONObject,
+    @Namespace namespace: String,
+    constructor: (data: JSONObject, id: String) -> D,
+) = decode<D, I, Int>(jsonData, namespace, constructor, null)
+
+/**
+ * Decodes the data from a json object retrieved from the server.
+ * @author Arnau Mora
+ * @since 20220219
+ * @param D The [DataClass] type to decode.
+ * @param I The [DataRoot] class to store in search indexation.
+ * @param R The type for sorting with [sortBy].
+ * @param jsonData The data to decode.
+ * @param namespace The namespace of [D].
+ * @param constructor The constructor for building [D] from [JSONObject].
+ * @param sortBy If set, the list, once constructed, will be sorted by the set parameter.
  * @return A pair of lists. The first is the objects in [jsonData], the second one is for indexing
  * search.
  */
@@ -131,13 +149,8 @@ suspend fun loadAreas(
     try {
         val decodedAreas =
             decode(jsonData, Area.NAMESPACE, { json, id -> Area(json, id) }, { it.displayName })
-        val decodedZones =
-            decode<Zone, ZoneData, Int>(jsonData, Zone.NAMESPACE, { json, id -> Zone(json, id) })
-        val decodedSectors =
-            decode<Sector, SectorData, Int>(
-                jsonData,
-                Sector.NAMESPACE,
-                { json, id -> Sector(json, id) })
+        val decodedZones = decode(jsonData, Zone.NAMESPACE) { json, id -> Zone(json, id) }
+        val decodedSectors = decode(jsonData, Sector.NAMESPACE) { json, id -> Sector(json, id) }
         val decodedPaths = decode(jsonData)
 
         Timber.v("Search > Initializing session future...")
