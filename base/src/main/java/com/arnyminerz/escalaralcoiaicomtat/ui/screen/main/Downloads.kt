@@ -7,7 +7,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,13 +27,14 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DownloadedDataI
 import timber.log.Timber
 
 @Composable
+@ExperimentalMaterial3Api
 fun MainActivity.DownloadsScreen() {
     val downloads by downloadsViewModel.downloads.observeAsState()
     val sizeString by remember { downloadsViewModel.sizeString }
     LazyColumn {
         item {
             Card(
-                backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
