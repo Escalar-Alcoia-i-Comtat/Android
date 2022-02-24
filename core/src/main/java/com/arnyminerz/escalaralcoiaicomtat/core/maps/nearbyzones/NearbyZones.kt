@@ -166,10 +166,11 @@ fun ComponentActivity.NearbyZones() {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
                         .pointerInput(Unit) {
                             detectTapGestures(
                                 onTap = {
-
+                                    // TODO: Request permission and enable nearby zones
                                 },
                                 onLongPress = {
 
