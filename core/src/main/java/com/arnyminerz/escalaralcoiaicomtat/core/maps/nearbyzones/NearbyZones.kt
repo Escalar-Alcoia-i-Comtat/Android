@@ -39,6 +39,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.GoogleMap
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.distanceTo
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toLatLng
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.vibrate
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.Marker
@@ -173,7 +174,10 @@ fun ComponentActivity.NearbyZones() {
                                     // TODO: Request permission and enable nearby zones
                                 },
                                 onLongPress = {
-
+                                    vibrate(50)
+                                    doAsync {
+                                        PreferencesModule.setNearbyZonesEnabled(false)
+                                    }
                                 }
                             )
                         }
