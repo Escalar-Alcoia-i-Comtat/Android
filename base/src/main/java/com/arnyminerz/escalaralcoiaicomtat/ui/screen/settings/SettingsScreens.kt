@@ -236,5 +236,7 @@ fun StorageSettingsScreen(viewModel: SettingsViewModel) {
             },
             switch = true
         )
+
+        // TODO: Add actions from StorageActivity
     }
 }
