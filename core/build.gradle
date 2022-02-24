@@ -85,13 +85,13 @@ dependencies {
     api "androidx.compose.ui:ui-util:$compose_version"
     api "androidx.compose.foundation:foundation:$compose_version"
     api "androidx.compose.material:material:$compose_version"
-    api "androidx.compose.material3:material3:1.0.0-alpha05" // Using Material Compose 3
+    api "androidx.compose.material3:material3:1.0.0-alpha06" // Using Material Compose 3
     api "androidx.compose.material:material-icons-core:$compose_version"
     api "androidx.compose.material:material-icons-extended:$compose_version"
     api "androidx.compose.runtime:runtime-livedata:$compose_version"
     api "androidx.compose.runtime:runtime-rxjava2:$compose_version"
     api 'androidx.activity:activity-compose:1.4.0'
-    api 'androidx.navigation:navigation-compose:2.5.0-alpha02'
+    api 'androidx.navigation:navigation-compose:2.5.0-alpha03'
     androidTestApi "androidx.compose.ui:ui-test-junit4:$compose_version"
 
     // Jetpack Compose utilities - Remember preferences
@@ -106,8 +106,8 @@ dependencies {
     api 'br.com.devsrsouza.compose.icons.android:font-awesome:1.0.0'
 
     // Coil image loading
-    api 'com.github.bumptech.glide:glide:4.13.0'
-    kapt 'com.github.bumptech.glide:compiler:4.13.0'
+    api 'com.github.bumptech.glide:glide:4.13.1'
+    kapt 'com.github.bumptech.glide:compiler:4.13.1'
 
     // Jetpack Compose utilities - Glide
     api 'com.github.skydoves:landscapist-glide:1.4.8'
