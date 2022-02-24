@@ -10,6 +10,7 @@ import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -180,7 +181,7 @@ fun LoadingWindow(
         AnimatedVisibility(
             modifier = Modifier
                 .align(Alignment.Center)
-                .fillMaxWidth(.5f),
+                .fillMaxWidth(.7f),
             visible = shouldShowErrorMessage && errorMessage != null
         ) {
             Text(
@@ -190,17 +191,27 @@ fun LoadingWindow(
             )
         }
 
-        Text(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 9.dp, end = 4.dp),
-            text = progressMessage,
-            textAlign = TextAlign.End
-        )
-        LinearProgressIndicator(
+        AnimatedVisibility(
+            visible = !shouldShowErrorMessage,
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .fillMaxWidth()
-        )
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    modifier = Modifier
+                        .padding(bottom = 9.dp, end = 4.dp),
+                    text = progressMessage,
+                    textAlign = TextAlign.End
+                )
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
+        }
     }
 }
