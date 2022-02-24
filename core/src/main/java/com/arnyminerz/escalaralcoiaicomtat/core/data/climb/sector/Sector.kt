@@ -104,7 +104,6 @@ class Sector internal constructor(
             location?.longitude,
             weight,
             imagePath,
-            kmzPath ?: "",
             metadata.webURL ?: "",
             parentZoneId
         )
@@ -130,7 +129,7 @@ class Sector internal constructor(
             walkingTime = 12,
             location = LatLng(38.741649, -0.466173),
             weight = "aac",
-            imagePath = "gs://escalaralcoiaicomtat.appspot.com/images/sectors/mas-de-la-penya-sector-3_croquis.jpg",
+            imagePath = "images/sectors/mas-de-la-penya-sector-3_croquis.jpg",
             webUrl = null,
             parentZoneId = "3DmHnKBlDRwqlH1KK85C"
         )
