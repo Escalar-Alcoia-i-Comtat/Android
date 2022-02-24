@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
@@ -110,8 +111,9 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
 
         progressMessageResource.value = R.string.status_loading_data
         withContext(Dispatchers.IO) {
-            load(app, deepLinkPath) { stringResource ->
-                progressMessageResource.value = stringResource
+            load(app, deepLinkPath) { stringResource, errorResource ->
+                stringResource?.let { progressMessageResource.value = it }
+                errorResource?.let { errorMessage.value = it }
             }
         }
     }
@@ -293,43 +295,50 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
     private suspend fun load(
         app: App,
         deepLinkPath: String?,
-        @UiThread progressUpdater: (textResource: Int) -> Unit
+        @UiThread progressUpdater: (textResource: Int?, errorResource: Int?) -> Unit
     ) {
-        Timber.v("Fetching areas data...")
-        val jsonData = context.getJson("$REST_API_DATA_LIST/*")
-        Timber.i("Data fetched from data module!")
-        val areas = loadAreas(app, jsonData.getJSONObject("result"))
+        try {
+            Timber.v("Fetching areas data...")
+            val jsonData = context.getJson("$REST_API_DATA_LIST/*")
+            Timber.i("Data fetched from data module!")
+            val areas = loadAreas(app, jsonData.getJSONObject("result"))
 
-        Timber.v("Finished loading areas.")
-        if (areas.isNotEmpty()) {
-            if (deepLinkPath != null) {
-                uiContext {
-                    progressUpdater(R.string.status_loading_deep_link)
-                }
+            Timber.v("Finished loading areas.")
+            if (areas.isNotEmpty()) {
+                if (deepLinkPath != null) {
+                    uiContext {
+                        progressUpdater(R.string.status_loading_deep_link, null)
+                    }
 
-                val intent = DataClass.getIntent(
-                    app,
-                    DataClassActivity::class.java,
-                    app.searchSession,
-                    deepLinkPath
-                )
-                uiContext {
-                    if (intent != null)
-                        app.launch(intent) {
-                            addFlags(FLAG_ACTIVITY_NEW_TASK)
-                        }
-                    else
+                    val intent = DataClass.getIntent(
+                        app,
+                        DataClassActivity::class.java,
+                        app.searchSession,
+                        deepLinkPath
+                    )
+                    uiContext {
+                        if (intent != null)
+                            app.launch(intent) {
+                                addFlags(FLAG_ACTIVITY_NEW_TASK)
+                            }
+                        else
+                            app.launch(MainActivity::class.java) {
+                                addFlags(FLAG_ACTIVITY_NEW_TASK)
+                            }
+                    }
+                } else
+                    uiContext {
+                        Timber.v("Launching MainActivity...")
                         app.launch(MainActivity::class.java) {
                             addFlags(FLAG_ACTIVITY_NEW_TASK)
                         }
-                }
-            } else
-                uiContext {
-                    Timber.v("Launching MainActivity...")
-                    app.launch(MainActivity::class.java) {
-                        addFlags(FLAG_ACTIVITY_NEW_TASK)
                     }
-                }
-        } else Timber.v("Areas is empty, but no handle was called.")
+            } else Timber.v("Areas is empty, but no handle was called.")
+        } catch (e: VolleyError) {
+            Timber.e(e, "An error occurred while loading areas from the server.")
+            uiContext {
+                progressUpdater(null, R.string.status_loading_error_server)
+            }
+        }
     }
 }
