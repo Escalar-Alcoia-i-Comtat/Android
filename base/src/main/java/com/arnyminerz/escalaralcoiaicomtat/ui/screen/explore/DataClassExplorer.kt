@@ -50,7 +50,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.tooltip.Tooltip
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.device.vibrate
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
 import com.google.android.material.badge.ExperimentalBadgeUtils
 
@@ -97,7 +97,7 @@ fun Activity.DataClassExplorer(
                                 role = Role.Button,
                                 onClick = { showNetworkTooltip.value = true },
                                 onLongClick = {
-                                    vibrate(context, 50)
+                                    context.vibrate(50)
                                     showNetworkTooltip.value = true
                                 },
                             ),
