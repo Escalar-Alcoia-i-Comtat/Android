@@ -60,7 +60,7 @@ class Zone internal constructor(
     constructor(data: JSONObject, @ObjectId zoneId: String) : this(
         zoneId,
         data.getString("displayName"),
-        data.getDate("created")!!.time,
+        data.getDate("last_edit")!!.time,
         data.getString("image"),
         data.getString("kmz"),
         LatLng(

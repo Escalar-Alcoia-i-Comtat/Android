@@ -62,7 +62,7 @@ class Area internal constructor(
     constructor(data: JSONObject, objectId: String) : this(
         objectId,
         data.getString("displayName"),
-        data.getDate("created")!!.time,
+        data.getDate("last_edit")!!.time,
         data.getString("image"),
         data.getString("kmz"),
         data.getString("webURL")
