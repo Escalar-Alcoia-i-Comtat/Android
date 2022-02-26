@@ -13,6 +13,8 @@ import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
@@ -81,19 +83,32 @@ sealed class Screen(
     )
 }
 
+data class NavItem(val screen: Screen, val badgeCount: Int? = null)
+
 @Composable
 @ExperimentalPagerApi
-fun RowScope.NavItems(pagerState: PagerState, items: List<Screen>) {
+fun RowScope.NavItems(pagerState: PagerState, items: List<NavItem>) {
     val scope = rememberCoroutineScope()
-    items.forEachIndexed { index, screen ->
+    items.forEachIndexed { index, item ->
+        val screen = item.screen
         val selected = pagerState.currentPage == index
         NavigationBarItem(
             selected,
             icon = {
-                Icon(
-                    if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
-                    screen.contentDescription?.let { stringResource(it) }
-                )
+                if (item.badgeCount == null)
+                    Icon(
+                        if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
+                        screen.contentDescription?.let { stringResource(it) }
+                    )
+                else
+                    BadgedBox(
+                        badge = { Badge { Text(item.badgeCount.toString()) } }
+                    ) {
+                        Icon(
+                            if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
+                            screen.contentDescription?.let { stringResource(it) }
+                        )
+                    }
             },
             label = { Text(text = stringResource(screen.text)) },
             onClick = {
