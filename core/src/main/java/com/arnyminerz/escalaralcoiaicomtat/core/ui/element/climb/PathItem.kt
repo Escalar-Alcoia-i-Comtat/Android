@@ -115,19 +115,19 @@ fun PathItem(path: Path) {
                     )
                 }
                 // Height
-                    Column(
-                        modifier = Modifier.padding(8.dp),
-                    ) {
-                        Text(
-                            text = if (infoVisible && path.pitches.isNotEmpty())
-                                path.pitches.map { it.height }.joinToString(separator = "m\n")
-                            else
-                                path.generalHeight.toString() + "m",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 20.sp,
-                        )
-                    }
+                Column(
+                    modifier = Modifier.padding(8.dp),
+                ) {
+                    Text(
+                        text = if (infoVisible && path.pitches.isNotEmpty())
+                            path.pitches.map { it.height }.joinToString(separator = "m\n")
+                        else
+                            path.generalHeight.toString() + "m",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 16.sp,
+                    )
+                }
                 // View button
                 Column {
                     IconButton(
