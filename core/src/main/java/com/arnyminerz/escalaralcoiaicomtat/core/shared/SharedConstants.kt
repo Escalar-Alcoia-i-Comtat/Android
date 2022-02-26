@@ -56,6 +56,14 @@ const val REST_API_DATA_LIST = "$REST_API_URL/api/list"
  */
 const val REST_API_DATA_FETCH = "$REST_API_URL/api/data/"
 
+/**
+ * The REST API endpoint for checking for new updates. At the end the youngest element on the db's
+ * age should be added (in milliseconds).
+ * @author Arnau Mora
+ * @since 20220226
+ */
+const val REST_API_UPDATER_ENDPOINT = "$REST_API_URL/api/updater?millis="
+
 const val APP_UPDATE_MAX_TIME_DAYS_KEY = "APP_UPDATE_MAX_TIME_DAYS"
 const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7L
 
