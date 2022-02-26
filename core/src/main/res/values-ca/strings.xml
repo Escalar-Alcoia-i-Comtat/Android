@@ -27,7 +27,7 @@
     <string name="action_resend_email">Tornar a enviar correu</string>
     <string name="action_mark_completed">Marcar</string>
     <string name="action_view_activity">Veure Activitat</string>
-    <string name="action_maximize_image">Maximize image</string>
+    <string name="action_maximize_image">Ampliar imatge</string>
     <string name="status_downloading">Baixant…</string>
     <string name="status_loading">Carregant…</string>
     <string name="status_downloaded">Baixat</string>
@@ -175,6 +175,7 @@
     <string name="sector_walking_time">%1$smin</string>
     <string name="sector_height">%1$sm</string>
     <string name="sector_kids_apt">Apte xiquets</string>
+    <string name="sector_sun_time">Temps de sol</string>
     <string name="status_downloading_percent">Baixant %d%</string>
     <string name="status_no_internet">Sense Connexió a Internet</string>
     <string name="status_loading_deep_link">Processant enllaç…</string>
