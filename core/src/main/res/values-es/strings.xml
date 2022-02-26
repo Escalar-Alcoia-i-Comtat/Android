@@ -28,7 +28,7 @@
     <string name="action_mark_completed">Marcar</string>
     <string name="action_view_activity">Ver Actividad</string>
     <string name="action_maximize_image">Ampliar imagen</string>
-    <string name="action_update_all">Update all</string>
+    <string name="action_update_all">Actualizar todos</string>
     <string name="status_downloading">Descargando…</string>
     <string name="status_loading">Cargando…</string>
     <string name="status_downloaded">Descargado</string>
@@ -110,7 +110,7 @@
     <string name="toast_error_delete_post">No se ha podido eliminar el post</string>
     <string name="toast_error_google_play">Escalar Alcoià i Comtat necesita los servicios de Google Play</string>
     <string name="toast_error_permission">El permiso es necesario</string>
-    <string name="toast_error_update">Could not update</string>
+    <string name="toast_error_update">No se pudo actualizar</string>
     <string name="toast_profile_image_updated">Imagen de perfil actualizada!</string>
     <string name="toast_clear_ok">Limpiado correctamente</string>
     <string name="toast_data_uninstalled">Solicitada la desinstalación de los datos</string>
@@ -278,8 +278,8 @@
     <string name="notification_channel_new_update_desc">Esto te avisará de nuevas versiones, y cuando haya una nueva, te ayudará a descargarla.</string>
     <string name="downloads_title">Descargas</string>
     <string name="downloads_size">Tamaño: %s</string>
-    <string name="updates_title">Updates</string>
-    <string name="updates_no_update_available">There are no elements to be updated.</string>
+    <string name="updates_title">Actualizaciones</string>
+    <string name="updates_no_update_available">Aún no hay actualizaciones disponibles.</string>
     <string name="path_warning_dry">En esta ruta hay algunos seguros secándose, posiblemente porque se ha utilizado algún tipo de producto químico para asegurarlos. Debería volver a estar activa en aproximadamente dos días</string>
     <string name="path_warning_build">Esta ruta está bajo revisión.Esto puede llevar de dos días hasta una semana, por favor, sé paciente. Puedes habilitar la notificación de alertas en los ajustes y te avisaremos cuando esté lista</string>
     <string name="path_warning_bird">En esta ruta hay un nido, y por tanto está prohibido escalar.
