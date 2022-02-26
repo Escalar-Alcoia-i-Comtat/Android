@@ -33,6 +33,7 @@ com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector
+com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone
 com.arnyminerz.escalaralcoiaicomtat.core.exception
 com.arnyminerz.escalaralcoiaicomtat.core.exception.notification
