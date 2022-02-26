@@ -28,6 +28,7 @@
     <string name="action_mark_completed">Mark</string>
     <string name="action_view_activity">View Activity</string>
     <string name="action_maximize_image">Maximize image</string>
+    <string name="action_update_all">Update all</string>
     <string name="status_downloading">Downloading…</string>
     <string name="status_loading">Loading…</string>
     <string name="status_downloaded">Downloaded</string>
@@ -109,6 +110,7 @@
     <string name="toast_error_delete_post">Could not delete post</string>
     <string name="toast_error_google_play">Escalar Alcoià i Comtat requires Google Play Services</string>
     <string name="toast_error_permission">The permission is required</string>
+    <string name="toast_error_update">Could not update</string>
     <string name="toast_profile_image_updated">Updated profile image successfully</string>
     <string name="toast_clear_ok">Cleared correctly</string>
     <string name="toast_data_uninstalled">Requested data uninstall</string>
@@ -276,6 +278,8 @@
     <string name="notification_channel_new_update_desc">This will tell you when a new update is available, and will help you downloading it.</string>
     <string name="downloads_title">Downloads</string>
     <string name="downloads_size">Size: %s</string>
+    <string name="updates_title">Updates</string>
+    <string name="updates_no_update_available">There are no elements to be updated.</string>
     <string name="path_warning_dry">This path has some safes getting dry. This may be because some kind of chemical safe has been using for the safes. This should be active for 2 days more or less.</string>
     <string name="path_warning_build">This path is under construction or revision. This may take from days to weeks. Please, be patient. You can enable alert notifications on settings, and we will alert you when this is ready.</string>
     <string name="path_warning_bird">This path has a nest on its way, so it is forbidden to climb. This may take the whole nesting season, so it may take weeks to be available again. You can enable alert notifications on settings, and we will alert you when this is ready.</string>
