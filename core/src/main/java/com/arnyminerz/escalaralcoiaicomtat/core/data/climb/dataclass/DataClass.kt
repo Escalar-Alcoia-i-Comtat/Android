@@ -664,8 +664,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @param permanent If true, the KMZ will get stored in the data directory, if false, it will
      * be cached.
      * @throws IllegalStateException When [kmzPath] is null, so a [File] can't be retrieved.
+     * @throws VolleyError When there's an exception while downloading the KMZ file.
      */
-    @Throws(IllegalStateException::class)
+    @Throws(IllegalStateException::class, VolleyError::class)
     @WorkerThread
     suspend fun kmzFile(
         context: Context,
