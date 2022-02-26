@@ -23,8 +23,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -38,6 +41,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DownloadedDataItem
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
@@ -47,6 +51,7 @@ import timber.log.Timber
 @ExperimentalMaterial3Api
 @ExperimentalMaterialApi
 fun MainActivity.DownloadsScreen(updateAvailable: Boolean) {
+    val context = LocalContext.current
     val downloads by downloadsViewModel.downloads.observeAsState()
     val sizeString by remember { downloadsViewModel.sizeString }
 
@@ -77,15 +82,18 @@ fun MainActivity.DownloadsScreen(updateAvailable: Boolean) {
                         }
                 }
                 if (updateAvailable) {
-                    val updateAvailableObjects = UpdaterSingleton
-                        .getInstance()
-                        .updateAvailableObjects
+                    var updateAvailableObjects by remember {
+                        mutableStateOf(
+                            UpdaterSingleton
+                                .getInstance()
+                                .updateAvailableObjects
+                        )
+                    }
                     LazyColumn {
-                        for ((key, entries) in updateAvailableObjects)
+                        updateAvailableObjects.forEach { key, entries ->
                             items(entries) { item ->
-                                val state = when (
-                                    val namespace = key.substring(0, key.length - 1)
-                                ) {
+                                val namespace = key.substring(0, key.length - 1)
+                                val state = when (namespace) {
                                     Area.NAMESPACE -> downloadsViewModel
                                         .getDataClass<Area>(Area.NAMESPACE, item)
                                     Zone.NAMESPACE -> downloadsViewModel
@@ -99,14 +107,32 @@ fun MainActivity.DownloadsScreen(updateAvailable: Boolean) {
                                         return@items
                                     }
                                 }
-                                val dataClass by remember { state }
+                                val dataClassPair by remember { state }
 
                                 ListItem(
                                     modifier = Modifier.fillMaxWidth(),
                                     trailing = {
+                                        var buttonEnabled by remember { mutableStateOf(true) }
                                         IconButton(
-                                            onClick = { /*TODO*/ },
-                                            enabled = dataClass != null,
+                                            onClick = {
+                                                buttonEnabled = false
+                                                dataClassPair?.let { (dataClass, score) ->
+                                                    doAsync {
+                                                        val updaterSingleton =
+                                                            UpdaterSingleton.getInstance()
+                                                        updaterSingleton
+                                                            .update(
+                                                                context,
+                                                                namespace,
+                                                                dataClass.objectId,
+                                                                score
+                                                            )
+                                                        updateAvailableObjects =
+                                                            updaterSingleton.updateAvailableObjects
+                                                    }
+                                                }
+                                            },
+                                            enabled = dataClassPair != null && buttonEnabled,
                                         ) {
                                             Icon(
                                                 Icons.Rounded.Download,
@@ -116,12 +142,12 @@ fun MainActivity.DownloadsScreen(updateAvailable: Boolean) {
                                     }
                                 ) {
                                     Text(
-                                        text = dataClass?.displayName
+                                        text = dataClassPair?.first?.displayName
                                             ?: stringResource(R.string.status_loading),
                                         modifier = Modifier
                                             .padding(4.dp)
                                             .placeholder(
-                                                dataClass == null,
+                                                dataClassPair == null,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                 highlight = PlaceholderHighlight.shimmer(
                                                     MaterialTheme.colorScheme.onSurfaceVariant
@@ -131,6 +157,7 @@ fun MainActivity.DownloadsScreen(updateAvailable: Boolean) {
                                     )
                                 }
                             }
+                        }
                     }
                 } else
                     Text(
