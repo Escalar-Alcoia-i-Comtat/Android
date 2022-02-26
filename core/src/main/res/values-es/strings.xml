@@ -184,7 +184,7 @@
     <string name="status_loading_auth">Cargando el sistema de autentificación…</string>
     <string name="status_loading_data">Cargando los datos…</string>
     <string name="status_loading_installing_data">Instalando los datos…</string>
-    <string name="status_loading_error_server">Could not connect to server.\n Please, try again later</string>
+    <string name="status_loading_error_server">No se ha podido contactar con el servidor.\n Por favor, inténtalo de nuevo más tarde</string>
     <string name="data_type_area">Área</string>
     <string name="data_type_zone">Zona</string>
     <string name="data_type_sector">Sector</string>
