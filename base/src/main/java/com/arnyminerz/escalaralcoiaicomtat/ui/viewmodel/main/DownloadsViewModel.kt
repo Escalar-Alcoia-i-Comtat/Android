@@ -7,9 +7,23 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.isDownloadIndexed
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getList
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -50,6 +64,74 @@ class DownloadsViewModel(application: Application) : AndroidViewModel(applicatio
             downloads.postValue(list)
         }
     }
+
+    private suspend inline fun <D : DataClass<*, *, R>, reified R : DataRoot<D>> performSearch(
+        @Namespace namespace: String,
+        @ObjectId objectId: String,
+        scoresSet: (index: Int, score: Int) -> Unit,
+        setScore: (index: Int) -> Unit
+    ) = app.searchSession
+        .getList<D, R>("", namespace)
+        { index, scoreItem -> scoresSet(index, scoreItem) }
+        .let {
+            lateinit var dataClass: D
+            it.forEachIndexed { index, item ->
+                if (item.objectId == objectId) {
+                    dataClass = item
+                    setScore(index)
+                }
+            }
+            dataClass
+        }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <D : DataClassImpl> getDataClass(
+        @Namespace namespace: String,
+        @ObjectId objectId: String,
+    ) = mutableStateOf<Pair<D, Int>?>(null)
+        .apply {
+            viewModelScope.launch {
+                Timber.d("Loading %s: %s", namespace, objectId)
+                val scores = hashMapOf<Int, Int>()
+                var score = 0
+
+                val dataClass = when (namespace) {
+                    Area.NAMESPACE -> performSearch<Area, AreaData>(namespace, objectId,
+                        { index, scoreItem ->
+                            scores[index] = scoreItem
+                        }, { index ->
+                            score = scores[index]!!
+                        }
+                    )
+                    Zone.NAMESPACE -> performSearch<Zone, ZoneData>(namespace, objectId,
+                        { index, scoreItem ->
+                            scores[index] = scoreItem
+                        }, { index ->
+                            score = scores[index]!!
+                        }
+                    )
+                    Sector.NAMESPACE -> performSearch<Sector, SectorData>(namespace, objectId,
+                        { index, scoreItem ->
+                            scores[index] = scoreItem
+                        }, { index ->
+                            score = scores[index]!!
+                        }
+                    )
+                    Path.NAMESPACE -> app.searchSession
+                        .getList<Path, PathData>("", Path.NAMESPACE)
+                        .find { it.objectId == objectId }!!
+                    else -> {
+                        Timber.e(
+                            "Could not load data of %s:%s since the namespace is not valid",
+                            namespace, objectId,
+                        )
+                        return@launch
+                    }
+                }
+                Timber.d("Got $namespace: $dataClass")
+                value = (dataClass as D) to score
+            }
+        }
 
     class Factory(
         private val application: Application

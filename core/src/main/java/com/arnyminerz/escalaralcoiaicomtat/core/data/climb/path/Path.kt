@@ -62,7 +62,7 @@ class Path internal constructor(
      */
     constructor(data: JSONObject, @ObjectId pathId: String) : this(
         pathId,
-        data.getDate("created")!!.time,
+        data.getDate("last_edit")!!.time,
         data.getString("sketchId").toLongOrNull() ?: 0L,
         data.getString("displayName"),
         data.getString("grade"),

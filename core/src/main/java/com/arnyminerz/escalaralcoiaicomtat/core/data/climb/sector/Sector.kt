@@ -67,7 +67,7 @@ class Sector internal constructor(
     constructor(data: JSONObject, @ObjectId sectorId: String) : this(
         sectorId,
         data.getString("displayName"),
-        data.getDate("created")!!.time,
+        data.getDate("last_edit")!!.time,
         data.getString("sunTime"),
         data.getBoolean("kidsApt"),
         data.getLong("walkingTime"),
