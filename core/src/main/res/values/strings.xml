@@ -27,6 +27,7 @@
     <string name="action_resend_email">Resend confirmation email</string>
     <string name="action_mark_completed">Mark</string>
     <string name="action_view_activity">View Activity</string>
+    <string name="action_maximize_image">Maximize image</string>
 
     <string name="status_downloading">Downloading…</string>
     <string name="status_loading">Loading…</string>
