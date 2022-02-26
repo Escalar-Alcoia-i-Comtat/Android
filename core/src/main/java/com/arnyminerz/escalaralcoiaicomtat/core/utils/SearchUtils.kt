@@ -83,13 +83,14 @@ suspend fun AppSearchSession.getAreas(): List<Area> {
  * @since 20210820
  * @param query What to search for.
  * @param namespace The namespace of the query.
+ * @param scoreListener Gets called when the score is loaded.
  * @return The [R], or null if not found.
  */
 @WorkerThread
 suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession.getData(
     query: String,
     namespace: String,
-    scoreListener: ((score: Int) -> Unit)
+    scoreListener: ((score: Int) -> Unit),
 ): R? {
     val searchSpec = SearchSpec.Builder()
         .addFilterNamespaces(namespace)
@@ -145,6 +146,7 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
  * @param query What to search for.
  * @param namespace The namespace of the query.
  * @param max The maximum amount of items to fetch.
+ * @param scoreListener Gets called when the score is loaded
  * @return A [List] of [R] with the found items.
  */
 @WorkerThread
@@ -152,6 +154,7 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
     query: String,
     namespace: String,
     max: Int = 100,
+    scoreListener: ((index: Int, score: Int) -> Unit),
 ): List<R> {
     val searchSpec = SearchSpec.Builder()
         .addFilterNamespaces(namespace)
@@ -163,7 +166,7 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
     val searchPage = searchResult.nextPage.await()
 
     return arrayListOf<R>().apply {
-        for (page in searchPage) {
+        for ((i, page) in searchPage.withIndex()) {
             val genericDocument = page.genericDocument
             Timber.v("Got generic document ${genericDocument.namespace}: ${genericDocument.id}")
             if (!listOf(
@@ -174,6 +177,7 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
                 ).contains(genericDocument.schemaType)
             ) continue
 
+            scoreListener(i, genericDocument.score)
             val data: T = try {
                 genericDocument.toDocumentClass(T::class.java)
             } catch (e: AppSearchException) {
@@ -185,6 +189,22 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
         }
     }
 }
+
+/**
+ * Searches for all the [DataClassImpl] typed [R] that are indexed with [query].
+ * @author Arnau Mora
+ * @since 20210820
+ * @param query What to search for.
+ * @param namespace The namespace of the query.
+ * @param max The maximum amount of items to fetch.
+ * @return A [List] of [R] with the found items.
+ */
+@WorkerThread
+suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession.getList(
+    query: String,
+    namespace: String,
+    max: Int = 100,
+): List<R> = getList<R, T>(query, namespace, max) { _, _ -> }
 
 /**
  * Searches for a [Area] with id [areaId] stored in the [AppSearchSession].
