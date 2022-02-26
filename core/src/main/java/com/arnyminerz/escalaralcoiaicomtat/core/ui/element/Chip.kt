@@ -2,6 +2,10 @@ package com.arnyminerz.escalaralcoiaicomtat.core.ui.element
 
 import android.graphics.drawable.Drawable
 import androidx.annotation.ColorInt
+import androidx.compose.material.ChipColors
+import androidx.compose.material.ChipDefaults
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -10,6 +14,20 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.tint
 import com.google.android.material.chip.Chip
+
+/**
+ * The chip colors to be used with Material3.
+ * @author Arnau Mora
+ * @since 20220226
+ */
+@ExperimentalMaterialApi
+val Material3ChipColors: ChipColors
+    @Composable
+    get() = ChipDefaults.chipColors(
+        backgroundColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        leadingIconContentColor = MaterialTheme.colorScheme.onSurface,
+    )
 
 @Composable
 private fun rememberChipWithLifecycle(

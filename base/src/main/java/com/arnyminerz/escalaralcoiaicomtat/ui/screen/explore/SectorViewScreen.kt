@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.List
@@ -43,6 +44,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
  * be the index of the sectors that are inside the Zone which contains [sector].
  */
 @Composable
+@ExperimentalMaterialApi
 @ExperimentalMaterial3Api
 @ExperimentalPagerApi
 fun Activity.SectorViewScreen(

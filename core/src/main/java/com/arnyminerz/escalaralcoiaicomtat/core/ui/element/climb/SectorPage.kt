@@ -5,14 +5,31 @@ import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.Chip
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material.icons.rounded.ChildCare
+import androidx.compose.material.icons.rounded.DirectionsWalk
+import androidx.compose.material.icons.rounded.FlipToBack
+import androidx.compose.material.icons.rounded.FlipToFront
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,20 +38,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
+import androidx.compose.ui.unit.sp
 import com.arnyminerz.escalaralcoiaicomtat.core.R
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.icon
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.textResource
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.vector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Material3ChipColors
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.ZoomableImage
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
+import me.bytebeats.views.charts.bar.BarChar
+import me.bytebeats.views.charts.bar.render.bar.SimpleBarDrawer
+import me.bytebeats.views.charts.bar.render.label.SimpleLabelDrawer
+import me.bytebeats.views.charts.bar.render.xaxis.SimpleXAxisDrawer
+import me.bytebeats.views.charts.bar.render.yaxis.SimpleYAxisDrawer
+import me.bytebeats.views.charts.simpleChartAnimation
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -49,6 +71,7 @@ val Float.Companion.DegreeConverter
     })
 
 @Composable
+@ExperimentalMaterialApi
 fun SectorPage(
     viewModel: SectorPageViewModel,
     sector: Sector,
@@ -106,24 +129,32 @@ fun SectorPage(
                                 ) {
                                     // Chips
                                     Chip(
-                                        text = stringResource(sector.sunTime.textResource),
-                                        icon = ContextCompat.getDrawable(
-                                            context,
-                                            sector.sunTime.icon
-                                        ),
+                                        onClick = { /*TODO*/ },
+                                        leadingIcon = {
+                                            Icon(
+                                                sector.sunTime.vector,
+                                                contentDescription = stringResource(R.string.sector_sun_time)
+                                            )
+                                        },
+                                        colors = Material3ChipColors,
                                         modifier = Modifier.padding(start = 8.dp, end = 4.dp),
-                                        iconTint = MaterialTheme.colorScheme.onSurfaceVariant.toArgb(),
-                                    )
+                                    ) {
+                                        Text(text = stringResource(sector.sunTime.textResource))
+                                    }
                                     if (sector.kidsApt)
                                         Chip(
-                                            text = stringResource(R.string.sector_kids_apt),
-                                            icon = ContextCompat.getDrawable(
-                                                context,
-                                                R.drawable.ic_round_child_care_24
-                                            ),
+                                            onClick = { /*TODO*/ },
+                                            leadingIcon = {
+                                                Icon(
+                                                    Icons.Rounded.ChildCare,
+                                                    contentDescription = stringResource(R.string.sector_sun_time)
+                                                )
+                                            },
+                                            colors = Material3ChipColors,
                                             modifier = Modifier.padding(start = 4.dp),
-                                            iconTint = MaterialTheme.colorScheme.onSurfaceVariant.toArgb(),
-                                        )
+                                        ) {
+                                            Text(text = stringResource(R.string.sector_kids_apt))
+                                        }
                                 }
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -199,8 +230,8 @@ fun SectorPage(
                                 }
                                 // Chart
                                 AnimatedVisibility(visible = chartVisible) {
-                                    Text(text = "Hello, this doesn't work, but hey, here's a pig 🐷")
-                                    /*BarChar(
+                                    // Text(text = "Hello, this doesn't work, but hey, here's a pig 🐷")
+                                    BarChar(
                                         barChartData = viewModel.barChartData,
                                         modifier = Modifier
                                             .height(120.dp)
@@ -218,7 +249,7 @@ fun SectorPage(
                                         labelDrawer = SimpleLabelDrawer(
                                             drawLocation = SimpleLabelDrawer.DrawLocation.XAxis,
                                         )
-                                    )*/
+                                    )
                                 }
                             }
                         }
