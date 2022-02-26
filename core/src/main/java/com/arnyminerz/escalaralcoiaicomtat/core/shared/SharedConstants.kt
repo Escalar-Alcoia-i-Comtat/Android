@@ -126,6 +126,13 @@ val SEARCH_SCHEMAS = listOf<Class<*>>(
 )
 
 /**
+ * The version number for the current search schemas.
+ * @author Arnau Mora
+ * @since 20220226
+ */
+const val SEARCH_SCHEMA_VERSION = 4
+
+/**
  * Returned by [DataClassActivity] when no [EXTRA_DATACLASS] is passed through the [Activity.Intent].
  * @author Arnau Mora
  * @since 20220105
