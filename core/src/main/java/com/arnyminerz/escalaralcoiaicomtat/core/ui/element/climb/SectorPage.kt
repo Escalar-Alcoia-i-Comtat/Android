@@ -5,24 +5,14 @@ import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ChevronLeft
-import androidx.compose.material.icons.rounded.DirectionsWalk
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,156 +57,176 @@ fun SectorPage(
     viewModel.loadPaths(sector)
 
     Column(modifier = Modifier.fillMaxSize()) {
+        var imageMaximized by remember { mutableStateOf(false) }
+
         // Image
-        ZoomableImage(
-            imageModel = viewModel.loadImage(sector),
-            contentDescription = stringResource(R.string.image_desc_sector_image),
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                // TODO: Height fraction should be adjustable from settings
-                .fillMaxHeight(.7f)
-        )
+                .fillMaxHeight(if (imageMaximized) 1f else .7f)
+        ) {
+            ZoomableImage(
+                imageModel = viewModel.loadImage(sector),
+                contentDescription = stringResource(R.string.image_desc_sector_image),
+                modifier = Modifier
+                    .fillMaxSize()
+            )
+            SmallFloatingActionButton(
+                onClick = { imageMaximized = !imageMaximized },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    if (imageMaximized) Icons.Rounded.FlipToBack else Icons.Rounded.FlipToFront,
+                    contentDescription = stringResource(R.string.action_maximize_image)
+                )
+            }
+        }
 
-        // TODO: Sector image
-        LazyColumn {
-            item {
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Info Card
-                    Card(
-                        modifier = Modifier
-                            .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
-                            .fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
-                        backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+        if (!imageMaximized)
+            LazyColumn {
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
+                        // Info Card
+                        Card(
+                            modifier = Modifier
+                                .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
+                                .fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp),
+                            backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                         ) {
                             Row(
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
-                                // Chips
-                                Chip(
-                                    text = stringResource(sector.sunTime.textResource),
-                                    icon = ContextCompat.getDrawable(context, sector.sunTime.icon),
-                                    modifier = Modifier.padding(start = 8.dp, end = 4.dp),
-                                    iconTint = MaterialTheme.colorScheme.onSurfaceVariant.toArgb(),
-                                )
-                                if (sector.kidsApt)
+                                Row(
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    // Chips
                                     Chip(
-                                        text = stringResource(R.string.sector_kids_apt),
+                                        text = stringResource(sector.sunTime.textResource),
                                         icon = ContextCompat.getDrawable(
                                             context,
-                                            R.drawable.ic_round_child_care_24
+                                            sector.sunTime.icon
                                         ),
-                                        modifier = Modifier.padding(start = 4.dp),
+                                        modifier = Modifier.padding(start = 8.dp, end = 4.dp),
                                         iconTint = MaterialTheme.colorScheme.onSurfaceVariant.toArgb(),
                                     )
-                            }
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier
-                                    .align(Alignment.CenterVertically)
-                                    .padding(4.dp)
-                                    .clickable(enabled = sector.location != null) {
-                                        sector.location
-                                            ?.mapsIntent(true, sector.displayName)
-                                            ?.let {
-                                                context.launch(it)
-                                            }
-                                    }
-                            ) {
-                                Icon(
-                                    Icons.Rounded.DirectionsWalk,
-                                    contentDescription = stringResource(R.string.image_desc_walking_time),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                Text(
-                                    stringResource(
-                                        R.string.sector_walking_time,
-                                        sector.walkingTime.toString()
-                                    ),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
-
-                    // Stats card
-                    Card(
-                        modifier = Modifier
-                            .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
-                            .fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
-                        backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
-                    ) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            var chartVisible by remember { mutableStateOf(false) }
-                            val chartButtonIconRotation by animateValueAsState(
-                                targetValue = if (chartVisible) -180f else -90f,
-                                typeConverter = Float.DegreeConverter,
-                            )
-
-                            // Load the chart data
-                            //viewModel.loadBarChartData(sector)
-
-                            // Heading
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .height(40.dp)
-                                    .fillMaxWidth(),
-                            ) {
-                                Text(
-                                    stringResource(R.string.sector_info_chart_title),
+                                    if (sector.kidsApt)
+                                        Chip(
+                                            text = stringResource(R.string.sector_kids_apt),
+                                            icon = ContextCompat.getDrawable(
+                                                context,
+                                                R.drawable.ic_round_child_care_24
+                                            ),
+                                            modifier = Modifier.padding(start = 4.dp),
+                                            iconTint = MaterialTheme.colorScheme.onSurfaceVariant.toArgb(),
+                                        )
+                                }
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
                                     modifier = Modifier
-                                        .padding(8.dp)
-                                        .weight(1f),
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
-                                IconButton(
-                                    onClick = { chartVisible = !chartVisible }
+                                        .align(Alignment.CenterVertically)
+                                        .padding(4.dp)
+                                        .clickable(enabled = sector.location != null) {
+                                            sector.location
+                                                ?.mapsIntent(true, sector.displayName)
+                                                ?.let {
+                                                    context.launch(it)
+                                                }
+                                        }
                                 ) {
                                     Icon(
-                                        Icons.Rounded.ChevronLeft,
-                                        contentDescription = stringResource(R.string.sector_info_chart_button_desc),
-                                        modifier = Modifier.rotate(chartButtonIconRotation),
+                                        Icons.Rounded.DirectionsWalk,
+                                        contentDescription = stringResource(R.string.image_desc_walking_time),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                    Text(
+                                        stringResource(
+                                            R.string.sector_walking_time,
+                                            sector.walkingTime.toString()
+                                        ),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
                             }
-                            // Chart
-                            AnimatedVisibility(visible = chartVisible) {
-                                Text(text = "Hello, this doesn't work, but hey, here's a pig 🐷")
-                                /*BarChar(
-                                    barChartData = viewModel.barChartData,
+                        }
+
+                        // Stats card
+                        Card(
+                            modifier = Modifier
+                                .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
+                                .fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp),
+                            backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                var chartVisible by remember { mutableStateOf(false) }
+                                val chartButtonIconRotation by animateValueAsState(
+                                    targetValue = if (chartVisible) -180f else -90f,
+                                    typeConverter = Float.DegreeConverter,
+                                )
+
+                                // Load the chart data
+                                //viewModel.loadBarChartData(sector)
+
+                                // Heading
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier
-                                        .height(120.dp)
-                                        .fillMaxWidth()
-                                        .padding(bottom = 8.dp, start = 4.dp, end = 4.dp),
-                                    animation = simpleChartAnimation(),
-                                    barDrawer = SimpleBarDrawer(),
-                                    xAxisDrawer = SimpleXAxisDrawer(),
-                                    yAxisDrawer = SimpleYAxisDrawer(
-                                        axisLineThickness = 0.dp,
-                                        axisLineColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        labelTextSize = 0.sp,
-                                        labelValueFormatter = { "" } // Disables values for the y axis
-                                    ),
-                                    labelDrawer = SimpleLabelDrawer(
-                                        drawLocation = SimpleLabelDrawer.DrawLocation.XAxis,
+                                        .height(40.dp)
+                                        .fillMaxWidth(),
+                                ) {
+                                    Text(
+                                        stringResource(R.string.sector_info_chart_title),
+                                        modifier = Modifier
+                                            .padding(8.dp)
+                                            .weight(1f),
+                                        style = MaterialTheme.typography.titleMedium,
                                     )
-                                )*/
+                                    IconButton(
+                                        onClick = { chartVisible = !chartVisible }
+                                    ) {
+                                        Icon(
+                                            Icons.Rounded.ChevronLeft,
+                                            contentDescription = stringResource(R.string.sector_info_chart_button_desc),
+                                            modifier = Modifier.rotate(chartButtonIconRotation),
+                                        )
+                                    }
+                                }
+                                // Chart
+                                AnimatedVisibility(visible = chartVisible) {
+                                    Text(text = "Hello, this doesn't work, but hey, here's a pig 🐷")
+                                    /*BarChar(
+                                        barChartData = viewModel.barChartData,
+                                        modifier = Modifier
+                                            .height(120.dp)
+                                            .fillMaxWidth()
+                                            .padding(bottom = 8.dp, start = 4.dp, end = 4.dp),
+                                        animation = simpleChartAnimation(),
+                                        barDrawer = SimpleBarDrawer(),
+                                        xAxisDrawer = SimpleXAxisDrawer(),
+                                        yAxisDrawer = SimpleYAxisDrawer(
+                                            axisLineThickness = 0.dp,
+                                            axisLineColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            labelTextSize = 0.sp,
+                                            labelValueFormatter = { "" } // Disables values for the y axis
+                                        ),
+                                        labelDrawer = SimpleLabelDrawer(
+                                            drawLocation = SimpleLabelDrawer.DrawLocation.XAxis,
+                                        )
+                                    )*/
+                                }
                             }
                         }
                     }
                 }
+                items(viewModel.paths) { item ->
+                    PathItem(item)
+                }
             }
-            items(viewModel.paths) { item ->
-                PathItem(item)
-            }
-        }
     }
 }
