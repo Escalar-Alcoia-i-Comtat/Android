@@ -45,3 +45,12 @@ class VolleySingleton(context: Context) {
 
     fun <T> addToRequestQueue(req: Request<T>) = requestQueue.add(req)
 }
+
+/**
+ * Adds the request to the [VolleySingleton] request queue.
+ * @author Arnau Mora
+ * @since 20220226
+ * @param context The [Context] that the request is being added from.
+ */
+fun Request<*>.addToRequestQueue(context: Context): Request<*> =
+    VolleySingleton.getInstance(context).addToRequestQueue(this)
