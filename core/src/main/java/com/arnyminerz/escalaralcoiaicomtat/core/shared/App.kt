@@ -5,7 +5,10 @@ import android.app.Application
 import android.content.Context
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
+import androidx.appsearch.app.GenericDocument
+import androidx.appsearch.app.Migrator
 import androidx.appsearch.app.SetSchemaRequest
+import androidx.appsearch.exceptions.AppSearchException
 import androidx.lifecycle.AndroidViewModel
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
@@ -13,6 +16,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
@@ -59,10 +63,16 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         searchSession = runBlocking { createSearchSession(applicationContext) }
         doAsync {
             Timber.v("Search > Adding document classes...")
-            val setSchemaRequest = SetSchemaRequest.Builder()
-                .addDocumentClasses(SEARCH_SCHEMAS)
-                .build()
-            searchSession.setSchema(setSchemaRequest).await()
+            try {
+                val setSchemaRequest = SetSchemaRequest.Builder()
+                    .addDocumentClasses(SEARCH_SCHEMAS)
+                    .setVersion(SEARCH_SCHEMA_VERSION)
+                    .setMigrator("SectorData", SectorData.Companion.Migrator)
+                    .build()
+                searchSession.setSchema(setSchemaRequest).await()
+            } catch (e: AppSearchException) {
+                Timber.e(e, "Search > Could not add search schemas.")
+            }
         }
 
         PreferencesModule.initWith(this)
