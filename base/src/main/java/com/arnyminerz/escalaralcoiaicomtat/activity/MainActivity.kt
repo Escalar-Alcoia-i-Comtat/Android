@@ -5,6 +5,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
@@ -76,7 +77,9 @@ class MainActivity : LanguageComponentActivity() {
 
     @ExperimentalBadgeUtils
     @OptIn(
-        ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+        ExperimentalMaterial3Api::class,
+        ExperimentalMaterialApi::class,
+        ExperimentalFoundationApi::class,
         ExperimentalPagerApi::class,
     )
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,7 +101,7 @@ class MainActivity : LanguageComponentActivity() {
                         val updateAvailableObjects = UpdaterSingleton
                             .getInstance()
                             .updateAvailableObjects
-                        updatesAvailable = updateAvailableObjects.size
+                        updatesAvailable = updateAvailableObjects.entries.sumOf { it.value.size }
                         uiContext { toast("Update available!") }
                     }
                 }
@@ -112,6 +115,7 @@ class MainActivity : LanguageComponentActivity() {
 
     @ExperimentalBadgeUtils
     @ExperimentalMaterial3Api
+    @ExperimentalMaterialApi
     @ExperimentalPagerApi
     @Composable
     private fun Home(updatesAvailable: Int?) {
@@ -143,7 +147,7 @@ class MainActivity : LanguageComponentActivity() {
                 when (index) {
                     0 -> ExploreScreen()
                     1 -> MapScreen()
-                    2 -> DownloadsScreen()
+                    2 -> DownloadsScreen(updatesAvailable?.let { it > 0 } ?: false)
                     3 -> SettingsScreen()
                     4 -> if (BuildConfig.DEBUG) DeveloperScreen()
                 }
