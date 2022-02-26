@@ -173,7 +173,7 @@ class Path internal constructor(
             .replace("\r", "")
             .split("\n")
         if (split.size == 1 && setGeneral != null)
-            conversion(rawHeights)?.let { setGeneral(it) }
+            conversion(rawText)?.let { setGeneral(it) }
         else for (item in split)
             if (item.startsWith(">") && setGeneral != null)
                 conversion(item.substring(1))?.let { setGeneral(it) }
