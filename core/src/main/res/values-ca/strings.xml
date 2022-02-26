@@ -184,6 +184,7 @@
     <string name="status_loading_auth">Carregant el sistema d\'autentificació…</string>
     <string name="status_loading_data">Carregant les dades…</string>
     <string name="status_loading_installing_data">Instal·lant les dades…</string>
+    <string name="status_loading_error_server">Could not connect to server.\n Please, try again later</string>
     <string name="data_type_area">Àrea</string>
     <string name="data_type_zone">Zona</string>
     <string name="data_type_sector">Sector</string>
