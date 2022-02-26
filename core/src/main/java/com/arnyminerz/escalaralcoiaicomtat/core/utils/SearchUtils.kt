@@ -97,7 +97,13 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
         .setResultCountPerPage(1)
         .build()
     val searchResult = search(query, searchSpec)
-    val searchPage = searchResult.nextPage.await().ifEmpty { return null }
+    val searchPage = searchResult
+        .nextPage
+        .await()
+        .ifEmpty {
+            Timber.w("Could not find $namespace at \"$query\"")
+            return null
+        }
 
     // If reached here, searchPage is not empty.
     val page = searchPage[0]
