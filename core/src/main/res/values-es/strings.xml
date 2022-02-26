@@ -27,6 +27,8 @@
     <string name="action_resend_email">Volver a enviar el correo</string>
     <string name="action_mark_completed">Marcar</string>
     <string name="action_view_activity">Ver Actividad</string>
+    <string name="action_maximize_image">Ampliar imagen</string>
+    <string name="action_update_all">Actualizar todos</string>
     <string name="status_downloading">Descargando…</string>
     <string name="status_loading">Cargando…</string>
     <string name="status_downloaded">Descargado</string>
@@ -108,6 +110,7 @@
     <string name="toast_error_delete_post">No se ha podido eliminar el post</string>
     <string name="toast_error_google_play">Escalar Alcoià i Comtat necesita los servicios de Google Play</string>
     <string name="toast_error_permission">El permiso es necesario</string>
+    <string name="toast_error_update">No se pudo actualizar</string>
     <string name="toast_profile_image_updated">Imagen de perfil actualizada!</string>
     <string name="toast_clear_ok">Limpiado correctamente</string>
     <string name="toast_data_uninstalled">Solicitada la desinstalación de los datos</string>
@@ -174,6 +177,7 @@
     <string name="sector_walking_time">%1$smin</string>
     <string name="sector_height">%1$sm</string>
     <string name="sector_kids_apt">Apto niños</string>
+    <string name="sector_sun_time">Tiempo de sol</string>
     <string name="status_downloading_percent">Descargando %d%</string>
     <string name="status_no_internet">Sin conexión a Internet</string>
     <string name="status_loading_deep_link">Procesando enlace…</string>
@@ -184,6 +188,7 @@
     <string name="status_loading_auth">Cargando el sistema de autentificación…</string>
     <string name="status_loading_data">Cargando los datos…</string>
     <string name="status_loading_installing_data">Instalando los datos…</string>
+    <string name="status_loading_error_server">No se ha podido contactar con el servidor.\n Por favor, inténtalo de nuevo más tarde</string>
     <string name="data_type_area">Área</string>
     <string name="data_type_zone">Zona</string>
     <string name="data_type_sector">Sector</string>
@@ -273,6 +278,8 @@
     <string name="notification_channel_new_update_desc">Esto te avisará de nuevas versiones, y cuando haya una nueva, te ayudará a descargarla.</string>
     <string name="downloads_title">Descargas</string>
     <string name="downloads_size">Tamaño: %s</string>
+    <string name="updates_title">Actualizaciones</string>
+    <string name="updates_no_update_available">Aún no hay actualizaciones disponibles.</string>
     <string name="path_warning_dry">En esta ruta hay algunos seguros secándose, posiblemente porque se ha utilizado algún tipo de producto químico para asegurarlos. Debería volver a estar activa en aproximadamente dos días</string>
     <string name="path_warning_build">Esta ruta está bajo revisión.Esto puede llevar de dos días hasta una semana, por favor, sé paciente. Puedes habilitar la notificación de alertas en los ajustes y te avisaremos cuando esté lista</string>
     <string name="path_warning_bird">En esta ruta hay un nido, y por tanto está prohibido escalar.

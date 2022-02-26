@@ -27,6 +27,8 @@
     <string name="action_resend_email">Resend confirmation email</string>
     <string name="action_mark_completed">Mark</string>
     <string name="action_view_activity">View Activity</string>
+    <string name="action_maximize_image">Maximize image</string>
+    <string name="action_update_all">Update all</string>
     <string name="status_downloading">Downloading…</string>
     <string name="status_loading">Loading…</string>
     <string name="status_downloaded">Downloaded</string>
@@ -108,6 +110,7 @@
     <string name="toast_error_delete_post">Could not delete post</string>
     <string name="toast_error_google_play">Escalar Alcoià i Comtat requires Google Play Services</string>
     <string name="toast_error_permission">The permission is required</string>
+    <string name="toast_error_update">Could not update</string>
     <string name="toast_profile_image_updated">Updated profile image successfully</string>
     <string name="toast_clear_ok">Cleared correctly</string>
     <string name="toast_data_uninstalled">Requested data uninstall</string>
@@ -174,6 +177,7 @@
     <string name="sector_walking_time">%1$smin</string>
     <string name="sector_height">%1$sm</string>
     <string name="sector_kids_apt">Kids Apt</string>
+    <string name="sector_sun_time">Sun Time</string>
     <string name="status_downloading_percent">Downloading %d%</string>
     <string name="status_no_internet">No Internet Connection</string>
     <string name="status_loading_deep_link">Processing link…</string>
@@ -184,6 +188,7 @@
     <string name="status_loading_auth">Loading authentication system…</string>
     <string name="status_loading_data">Loading data…</string>
     <string name="status_loading_installing_data">Installing data…</string>
+    <string name="status_loading_error_server">Could not connect to server.\n Please, try again later</string>
     <string name="data_type_area">Area</string>
     <string name="data_type_zone">Zone</string>
     <string name="data_type_sector">Sector</string>
@@ -273,6 +278,8 @@
     <string name="notification_channel_new_update_desc">This will tell you when a new update is available, and will help you downloading it.</string>
     <string name="downloads_title">Downloads</string>
     <string name="downloads_size">Size: %s</string>
+    <string name="updates_title">Updates</string>
+    <string name="updates_no_update_available">There are no elements to be updated.</string>
     <string name="path_warning_dry">This path has some safes getting dry. This may be because some kind of chemical safe has been using for the safes. This should be active for 2 days more or less.</string>
     <string name="path_warning_build">This path is under construction or revision. This may take from days to weeks. Please, be patient. You can enable alert notifications on settings, and we will alert you when this is ready.</string>
     <string name="path_warning_bird">This path has a nest on its way, so it is forbidden to climb. This may take the whole nesting season, so it may take weeks to be available again. You can enable alert notifications on settings, and we will alert you when this is ready.</string>

@@ -27,6 +27,8 @@
     <string name="action_resend_email">Tornar a enviar correu</string>
     <string name="action_mark_completed">Marcar</string>
     <string name="action_view_activity">Veure Activitat</string>
+    <string name="action_maximize_image">Ampliar imatge</string>
+    <string name="action_update_all">Actualitzar tot</string>
     <string name="status_downloading">Baixant…</string>
     <string name="status_loading">Carregant…</string>
     <string name="status_downloaded">Baixat</string>
@@ -108,6 +110,7 @@
     <string name="toast_error_delete_post">No s\'ha pogut eliminar la publicació</string>
     <string name="toast_error_google_play">Escalar Alcoià i Comtat necessita els serveis de Google Play</string>
     <string name="toast_error_permission">El permís és necessari</string>
+    <string name="toast_error_update">No s\'ha pogut actualitzar</string>
     <string name="toast_profile_image_updated">Imatge de perfil actualitzada!</string>
     <string name="toast_clear_ok">Buidat correctament</string>
     <string name="toast_data_uninstalled">Sol·licitada la desinstal·lació de les dades</string>
@@ -174,6 +177,7 @@
     <string name="sector_walking_time">%1$smin</string>
     <string name="sector_height">%1$sm</string>
     <string name="sector_kids_apt">Apte xiquets</string>
+    <string name="sector_sun_time">Temps de sol</string>
     <string name="status_downloading_percent">Baixant %d%</string>
     <string name="status_no_internet">Sense Connexió a Internet</string>
     <string name="status_loading_deep_link">Processant enllaç…</string>
@@ -184,6 +188,7 @@
     <string name="status_loading_auth">Carregant el sistema d\'autentificació…</string>
     <string name="status_loading_data">Carregant les dades…</string>
     <string name="status_loading_installing_data">Instal·lant les dades…</string>
+    <string name="status_loading_error_server">No s\'ha pogut connectar al servidor.\n Per favor, torna-ho a intentar més tard</string>
     <string name="data_type_area">Àrea</string>
     <string name="data_type_zone">Zona</string>
     <string name="data_type_sector">Sector</string>
@@ -273,6 +278,8 @@
     <string name="notification_channel_new_update_desc">Açò t\'advertirà de noves versions, i t\'ajudarà a descarregar-les.</string>
     <string name="downloads_title">Descàrregues</string>
     <string name="downloads_size">Tamany: %s</string>
+    <string name="updates_title">Actualitzacions</string>
+    <string name="updates_no_update_available">No hi ha cap element per a actualitzar.</string>
     <string name="path_warning_dry">S\'estàn secant els segurs d\'aquesta via. Açò és possible que estiga causat perquè els segurs han sigut col·locats mitjançant algun tipus de procés químic. Aquesta alerta deuria mostrar-se durant 2 dies o menys.</string>
     <string name="path_warning_build">Aquesta via està baix revisió o reequipació. Açò pot tardar des de dies fins a setmanes. Per favor, tingues paciència. Pots habilitar les alertes en la configuració, i t\'avisarem quan s\'haja completat el procés.</string>
     <string name="path_warning_bird">Aquesta via té un niu, així que està prohibida la escalada actualment. Açò pot durar tota la nidificació, així que poden passar setmanes fins a que torne a estar disponible. Pots habilitar les alertes en la configuració, i t\'avisarem quan es puga tornar a escalar.</string>
