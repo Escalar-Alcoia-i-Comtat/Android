@@ -9,13 +9,29 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UPDATE_AVAILABLE
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UPDATE_AVAILABLE_FAIL_CLIENT
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UPDATE_AVAILABLE_FAIL_FIELDS
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UPDATE_AVAILABLE_FAIL_SERVER
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UPDATE_AVAILABLE_FALSE
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.updateAvailable
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.DeveloperScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.DownloadsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.ExploreScreen
@@ -32,6 +48,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.material.badge.ExperimentalBadgeUtils
+import timber.log.Timber
 
 class MainActivity : LanguageComponentActivity() {
     internal val exploreViewModel by viewModels<ExploreViewModel>(factoryProducer = {
@@ -66,8 +83,29 @@ class MainActivity : LanguageComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            var updatesAvailable by remember { mutableStateOf<Int?>(null) }
+
+            // Check for updates
+            doAsync {
+                val updateAvailable = updateAvailable(this@MainActivity, app.searchSession)
+                Timber.i("Update available: $updateAvailable")
+                when (updateAvailable) {
+                    UPDATE_AVAILABLE_FALSE -> Timber.i("No updates available")
+                    UPDATE_AVAILABLE_FAIL_SERVER, UPDATE_AVAILABLE_FAIL_FIELDS, UPDATE_AVAILABLE_FAIL_CLIENT -> {
+                        Timber.w("Check for update failed.")
+                    }
+                    UPDATE_AVAILABLE -> {
+                        val updateAvailableObjects = UpdaterSingleton
+                            .getInstance()
+                            .updateAvailableObjects
+                        updatesAvailable = updateAvailableObjects.size
+                        uiContext { toast("Update available!") }
+                    }
+                }
+            }
+
             AppTheme {
-                Home()
+                Home(updatesAvailable)
             }
         }
     }
@@ -76,7 +114,7 @@ class MainActivity : LanguageComponentActivity() {
     @ExperimentalMaterial3Api
     @ExperimentalPagerApi
     @Composable
-    private fun Home() {
+    private fun Home(updatesAvailable: Int?) {
         val pagerState = rememberPagerState()
         Scaffold(
             bottomBar = {
@@ -84,11 +122,14 @@ class MainActivity : LanguageComponentActivity() {
                     NavItems(
                         pagerState,
                         mutableListOf(
-                            Screen.Explore, Screen.Map, Screen.Downloads, Screen.Settings
+                            NavItem(Screen.Explore),
+                            NavItem(Screen.Map),
+                            NavItem(Screen.Downloads, updatesAvailable),
+                            NavItem(Screen.Settings)
                         ).apply {
                             // If in debug mode, add the developer screen
                             if (BuildConfig.DEBUG)
-                                add(Screen.Developer)
+                                add(NavItem(Screen.Developer))
                         }
                     )
                 }
