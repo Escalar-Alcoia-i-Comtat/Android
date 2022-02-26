@@ -5,6 +5,7 @@ import android.os.Parcelable
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.MutableLiveData
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareComponentActivity
@@ -96,6 +97,7 @@ class DataClassActivity : NetworkAwareComponentActivity() {
     @OptIn(
         ExperimentalFoundationApi::class,
         ExperimentalMaterial3Api::class,
+        ExperimentalMaterialApi::class,
         ExperimentalPagerApi::class,
     )
     @ExperimentalBadgeUtils
