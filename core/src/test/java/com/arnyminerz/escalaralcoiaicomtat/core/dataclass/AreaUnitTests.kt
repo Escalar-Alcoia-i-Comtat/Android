@@ -22,17 +22,13 @@ class AreaUnitTests {
         assertEquals(area.objectId, Area.SAMPLE_AREA_OBJECT_ID)
         assertEquals(area.displayName, Area.SAMPLE_AREA_DISPLAY_NAME)
         assertEquals(area.timestampMillis, Area.SAMPLE_AREA_TIMESTAMP)
-        assertEquals(area.imageReferenceUrl, Area.SAMPLE_AREA_IMAGE_REF)
-        assertEquals(area.kmzReferenceUrl, Area.SAMPLE_AREA_KMZ_REF)
-        assertEquals(area.documentPath, Area.SAMPLE_AREA_DOC_PATH)
+        assertEquals(area.imagePath, Area.SAMPLE_AREA_IMAGE_REF)
+        assertEquals(area.kmzPath, Area.SAMPLE_AREA_KMZ_REF)
         assertEquals(area.webUrl, Area.SAMPLE_AREA_WEB_URL)
 
         val metadata = area.metadata
         assertEquals(metadata.objectId, Area.SAMPLE_AREA_OBJECT_ID)
         assertEquals(metadata.namespace, Area.NAMESPACE)
-        assertEquals(metadata.parentNamespace, null)
-        assertEquals(metadata.childNamespace, Zone.NAMESPACE)
-        assertEquals(metadata.documentPath, Area.SAMPLE_AREA_DOC_PATH)
         assertEquals(metadata.webURL, Area.SAMPLE_AREA_WEB_URL)
         assertEquals(metadata.parentId, null)
 
