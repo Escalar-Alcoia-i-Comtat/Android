@@ -19,19 +19,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -243,8 +237,7 @@ class SearchableActivity : ComponentActivity() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
-            elevation = 10.dp
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
         ) {
             Column(
                 modifier = Modifier
@@ -281,7 +274,7 @@ class SearchableActivity : ComponentActivity() {
                         }
                         val app = application as App
                         val parent = runBlocking {
-                            (dataClassImpl as? DataClass<*, *>)
+                            (dataClassImpl as? DataClass<*, *, *>)
                                 ?.getParent(app.searchSession)
                                 ?: run { (dataClassImpl as? Path)?.getParent(app) }
                         }

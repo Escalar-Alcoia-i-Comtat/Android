@@ -11,8 +11,7 @@ data class AreaData(
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var displayName: String,
     @Document.CreationTimestampMillis var timestamp: Long,
     @Document.StringProperty var image: String,
-    @Document.StringProperty var kmzReferenceUrl: String,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var documentPath: String,
+    @Document.StringProperty var kmzPath: String?,
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var webUrl: String,
 ) : DataRoot<Area> {
     @Document.Namespace
@@ -23,21 +22,7 @@ data class AreaData(
         displayName,
         timestamp,
         image,
-        kmzReferenceUrl,
-        documentPath,
+        kmzPath,
         webUrl.ifEmpty { null }
-    )
-}
-
-fun Area.data(index: Int): AreaData {
-    return AreaData(
-        index,
-        objectId,
-        displayName,
-        timestampMillis,
-        imageReferenceUrl,
-        kmzReferenceUrl,
-        metadata.documentPath,
-        metadata.webURL ?: ""
     )
 }

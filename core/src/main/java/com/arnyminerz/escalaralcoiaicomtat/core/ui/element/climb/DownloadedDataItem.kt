@@ -94,7 +94,7 @@ fun DownloadedDataItem(
 }
 
 @Composable
-private inline fun <A : DataClass<*, *>, reified B : DataRoot<A>> DownloadedDataItemRaw(
+private inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> DownloadedDataItemRaw(
     displayName: String,
     @ObjectId objectId: String,
     size: Long,

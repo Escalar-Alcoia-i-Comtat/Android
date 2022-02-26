@@ -32,9 +32,6 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.material.badge.ExperimentalBadgeUtils
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.ktx.storage
 
 class MainActivity : LanguageComponentActivity() {
     internal val exploreViewModel by viewModels<ExploreViewModel>(factoryProducer = {
@@ -59,8 +56,6 @@ class MainActivity : LanguageComponentActivity() {
      * @since 20211230
      */
     internal var googleMap: GoogleMap? = null
-
-    val storage: FirebaseStorage = Firebase.storage
 
     @ExperimentalBadgeUtils
     @OptIn(
@@ -105,7 +100,7 @@ class MainActivity : LanguageComponentActivity() {
                 modifier = Modifier.padding(innerPadding),
             ) { index ->
                 when (index) {
-                    0 -> ExploreScreen(storage)
+                    0 -> ExploreScreen()
                     1 -> MapScreen()
                     2 -> DownloadsScreen()
                     3 -> SettingsScreen()

@@ -65,7 +65,7 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
                 var grades4Count = 0 // 8a-8c+
                 Timber.d("Got ${paths.size} paths. Getting grades...")
                 for (path in paths)
-                    path.grade().displayName.let {
+                    path.generalGrade.let {
                         Timber.v("- Grade: $it")
                         when {
                             it.matches("^[3-5]".toRegex()) -> grades1Count++
@@ -115,7 +115,7 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
         }
     }
 
-    override fun loadImage(sector: Sector) = sector.imageData(context, storage)
+    override fun loadImage(sector: Sector) = sector.imageData(context)
 
     class Factory(
         private val application: Application,

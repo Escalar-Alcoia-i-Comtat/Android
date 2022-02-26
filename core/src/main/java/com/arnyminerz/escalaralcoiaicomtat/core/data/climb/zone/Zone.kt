@@ -2,19 +2,16 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone
 
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getLatLng
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toLatLng
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -27,24 +24,20 @@ class Zone internal constructor(
     override val objectId: String,
     override val displayName: String,
     override val timestampMillis: Long,
-    override val imageReferenceUrl: String,
-    override val kmzReferenceUrl: String,
+    override val imagePath: String,
+    override val kmzPath: String?,
     val position: LatLng,
-    override val documentPath: String,
     val webUrl: String?,
-    val parentAreaId: String,
-) : DataClass<Sector, Area>(
+    private val parentAreaId: String,
+) : DataClass<Sector, Area, ZoneData>(
     displayName,
     timestampMillis,
-    imageReferenceUrl,
-    kmzReferenceUrl,
+    imagePath,
+    kmzPath,
     position,
     DataClassMetadata(
         objectId,
         NAMESPACE,
-        Area.NAMESPACE,
-        Sector.NAMESPACE,
-        documentPath,
         webUrl,
         parentAreaId
     ),
@@ -57,46 +50,25 @@ class Zone internal constructor(
     )
 ) {
     /**
-     * Creates a new [Zone] from the data of a [DocumentSnapshot].
-     * Note: This doesn't add children
-     * @author Arnau Mora
-     * @since 20210411
-     * @param data The object to get data from
-     */
-    @Deprecated("Use data module")
-    constructor(data: DocumentSnapshot) : this(
-        data.id,
-        data.getString("displayName")!!,
-        data.getDate("created")!!.time,
-        data.getString("image")!!,
-        data.getString("kmz")!!,
-        data.getGeoPoint("location")!!.toLatLng(),
-        documentPath = data.reference.path,
-        try {
-            data.getString("webURL")
-        } catch (e: JSONException) {
-            null
-        },
-        data.reference.parent.parent!!.id
-    )
-
-    /**
      * Creates a new [Zone] from the data from the Data Module.
      * Note: This doesn't add children
      * @author Arnau Mora
      * @since 20210411
      * @param data The object to get data from
+     * @param zoneId The ID of the Zone.
      */
-    constructor(data: JSONObject, path: String) : this(
-        path.split('/').last(),
+    constructor(data: JSONObject, @ObjectId zoneId: String) : this(
+        zoneId,
         data.getString("displayName"),
         data.getDate("created")!!.time,
         data.getString("image"),
         data.getString("kmz"),
-        data.getLatLng("location")!!,
-        documentPath = path,
+        LatLng(
+            data.getDouble("latitude"),
+            data.getDouble("longitude")
+        ),
         data.getString("webURL"),
-        path.split("/").let { it[it.size - 3] }
+        data.getString("area")
     )
 
     @IgnoredOnParcel
@@ -104,6 +76,19 @@ class Zone internal constructor(
 
     @IgnoredOnParcel
     override val hasParents: Boolean = true
+
+    override fun data(index: Int) = ZoneData(
+        index,
+        objectId,
+        displayName,
+        timestampMillis,
+        imagePath,
+        kmzPath,
+        position.latitude,
+        position.longitude,
+        metadata.webURL ?: "",
+        parentAreaId
+    )
 
     companion object {
         @Namespace
@@ -115,10 +100,9 @@ class Zone internal constructor(
             objectId = "LtYZWlzTPwqHsWbYIDTt",
             displayName = "Barranquet de Ferri",
             timestampMillis = 1618160538000L,
-            imageReferenceUrl = "gs://escalaralcoiaicomtat.appspot.com/images/BarranquetDeFerriAPP.jpg",
-            kmzReferenceUrl = "gs://escalaralcoiaicomtat.appspot.com/kmz/Barranquet de Ferri.kmz",
+            imagePath = "gs://escalaralcoiaicomtat.appspot.com/images/BarranquetDeFerriAPP.jpg",
+            kmzPath = "gs://escalaralcoiaicomtat.appspot.com/kmz/Barranquet de Ferri.kmz",
             position = LatLng(38.705581, -0.498946),
-            documentPath = "/Areas/WWQME983XhriXVhtVxFu/Zones/LtYZWlzTPwqHsWbYIDTt",
             webUrl = "https://escalaralcoiaicomtat.centrexcursionistalcoi.org/barranquet-de-ferri.html",
             parentAreaId = "WWQME983XhriXVhtVxFu"
         )

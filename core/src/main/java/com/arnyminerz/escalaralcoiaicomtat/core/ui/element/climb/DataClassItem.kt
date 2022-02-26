@@ -50,16 +50,15 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.google.firebase.storage.FirebaseStorage
+import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import java.text.SimpleDateFormat
 
 @Composable
 fun DataClassItem(
     item: DataClassImpl,
-    storage: FirebaseStorage,
     onClick: () -> Unit
 ) {
-    if (item is DataClass<*, *>) {
+    if (item is DataClass<*, *, *>) {
         val context = LocalContext.current
         val viewModel: DataClassItemViewModel = viewModel(
             factory = DataClassItemViewModel.Factory(
@@ -70,14 +69,12 @@ fun DataClassItem(
         if (item.displayOptions.downloadable)
             DownloadableDataClassItem(
                 item,
-                storage,
                 viewModel,
                 onClick,
             )
         else
             NonDownloadableDataClassItem(
                 item,
-                storage,
                 viewModel,
                 onClick,
             )
@@ -105,14 +102,12 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
  * @author Arnau Mora
  * @since 20211229
  * @param item The DataClass to display.
- * @param storage The Firebase Storage reference for loading images.
  * @param viewModel The View Model for doing async tasks.
  * @param onClick Will get called when the user requests to "navigate" into the DataClass.
  */
 @Composable
 private fun DownloadableDataClassItem(
-    item: DataClass<*, *>,
-    storage: FirebaseStorage,
+    item: DataClass<*, *, *>,
     viewModel: DataClassItemViewModel,
     onClick: () -> Unit,
 ) {
@@ -126,11 +121,11 @@ private fun DownloadableDataClassItem(
         viewModel.startDownloading(
             context,
             item.pin,
-            item.documentPath,
             item.displayName,
             quality = DOWNLOAD_QUALITY_DEFAULT
         )
     }
+    val childrenCount by viewModel.childrenCounter(item).observeAsState()
 
     Card(
         backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -146,11 +141,12 @@ private fun DownloadableDataClassItem(
                         .fillMaxWidth(.3f)
                 ) {
                     item.Image(
-                        storage,
-                        modifier = Modifier
+                        Modifier
                             .fillMaxWidth()
                             .height(160.dp)
-                            .clickable(enabled = true, role = Role.Image, onClick = onClick)
+                            .clickable(enabled = true, role = Role.Image, onClick = onClick),
+                        imageLoadParameters = ImageLoadParameters()
+                            .withResultImageScale(.3f)
                     )
                 }
                 Column(
@@ -158,7 +154,6 @@ private fun DownloadableDataClassItem(
                         .padding(start = 4.dp)
                         .weight(1f)
                 ) {
-                    val childrenCount by viewModel.childrenCounter(item).observeAsState()
                     Text(
                         text = item.displayName,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -189,6 +184,7 @@ private fun DownloadableDataClassItem(
                         colors = ButtonDefaults.elevatedButtonColors(
                             containerColor = MaterialTheme.colorScheme.tertiary
                         ),
+                        enabled = childrenCount?.let { it > 0 } ?: false,
                         modifier = Modifier
                             .padding(end = 4.dp),
                         onClick = onClick,
@@ -328,14 +324,12 @@ private fun DownloadableDataClassItem(
  * @author Arnau Mora
  * @since 20211229
  * @param item The DataClass to display.
- * @param storage The Firebase Storage instance to load the images from.
  * @param viewModel The View Model for doing async tasks.
  * @param onClick What to do when clicked.
  */
 @Composable
 private fun NonDownloadableDataClassItem(
-    item: DataClass<*, *>,
-    storage: FirebaseStorage,
+    item: DataClass<*, *, *>,
     viewModel: DataClassItemViewModel,
     onClick: (() -> Unit)? = null
 ) {
@@ -349,13 +343,14 @@ private fun NonDownloadableDataClassItem(
     ) {
         Column {
             item.Image(
-                storage,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(160.dp)
-                    .clickable {
+                    .clickable(enabled = childrenCount?.let { it > 0 } ?: false) {
                         onClick?.let { it() }
-                    }
+                    },
+                imageLoadParameters = ImageLoadParameters()
+                    .withResultImageScale(.3f)
             )
             Column(
                 modifier = Modifier

@@ -33,9 +33,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.core.R
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.drawable
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.text
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Grade
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_CHAIN_CARABINER
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_CHAIN_RING
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_LANYARD
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_NONE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_PITON
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_PLATE
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_PLATE_LANYARD
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_PLATE_RING
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_RAPPEL
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_WALKING
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 
@@ -97,7 +106,7 @@ fun PathItem(path: Path) {
                 Column(
                     modifier = Modifier.padding(start = 4.dp, end = 4.dp),
                 ) {
-                    val grade = path.grade()
+                    val grade = Grade(path.generalGrade)
                     Text(
                         text = grade.getAnnotatedString(),
                         style = MaterialTheme.typography.titleLarge,
@@ -106,21 +115,19 @@ fun PathItem(path: Path) {
                     )
                 }
                 // Height
-                path.heights.takeIf { it.size > 0 }?.run {
                     Column(
                         modifier = Modifier.padding(8.dp),
                     ) {
                         Text(
-                            text = if (infoVisible && size > 1)
-                                subList(1, size - 1).joinToString(separator = "m\n")
+                            text = if (infoVisible && path.pitches.isNotEmpty())
+                                path.pitches.map { it.height }.joinToString(separator = "m\n")
                             else
-                                get(0).toString() + "m",
+                                path.generalHeight.toString() + "m",
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 20.sp,
                         )
                     }
-                }
                 // View button
                 Column {
                     IconButton(
@@ -142,10 +149,39 @@ fun PathItem(path: Path) {
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    if (path.endings.size > 0)
+                    if (path.generalEnding != null)
                         Chip(
-                            text = stringResource(path.endings[0].text),
-                            icon = ContextCompat.getDrawable(context, path.endings[0].drawable),
+                            text = stringResource(
+                                when (path.generalEnding) {
+                                    ENDING_TYPE_PLATE -> R.string.path_ending_plate
+                                    ENDING_TYPE_PLATE_RING -> R.string.path_ending_plate_ring
+                                    ENDING_TYPE_PLATE_LANYARD -> R.string.path_ending_plate_lanyard
+                                    ENDING_TYPE_CHAIN_RING -> R.string.path_ending_chain_ring
+                                    ENDING_TYPE_CHAIN_CARABINER -> R.string.path_ending_chain_carabiner
+                                    ENDING_TYPE_PITON -> R.string.path_ending_piton
+                                    ENDING_TYPE_WALKING -> R.string.path_ending_walking
+                                    ENDING_TYPE_RAPPEL -> R.string.path_ending_rappel
+                                    ENDING_TYPE_LANYARD -> R.string.path_ending_lanyard
+                                    ENDING_TYPE_NONE -> R.string.path_ending_none
+                                    else -> R.string.path_ending_unknown
+                                }
+                            ),
+                            icon = ContextCompat.getDrawable(
+                                context,
+                                when (path.generalEnding) {
+                                    ENDING_TYPE_PLATE -> R.drawable.ic_reunio_xapes_24
+                                    ENDING_TYPE_PLATE_RING -> R.drawable.ic_reunio_xapesargolla
+                                    ENDING_TYPE_PLATE_LANYARD -> R.drawable.ic_lanyard
+                                    ENDING_TYPE_CHAIN_RING -> R.drawable.ic_reunio_cadenaargolla
+                                    ENDING_TYPE_CHAIN_CARABINER -> R.drawable.ic_reunio_cadenamosqueto
+                                    ENDING_TYPE_PITON -> R.drawable.ic_reunio_clau
+                                    ENDING_TYPE_WALKING -> R.drawable.ic_descens_caminant
+                                    ENDING_TYPE_RAPPEL -> R.drawable.ic_via_rappelable
+                                    ENDING_TYPE_LANYARD -> R.drawable.ic_lanyard
+                                    ENDING_TYPE_NONE -> R.drawable.round_close_24
+                                    else -> R.drawable.round_close_24
+                                }
+                            ),
                             modifier = Modifier
                                 .padding(start = 4.dp, end = 4.dp),
                             onClick = { context.toast(R.string.toast_ending_info) },

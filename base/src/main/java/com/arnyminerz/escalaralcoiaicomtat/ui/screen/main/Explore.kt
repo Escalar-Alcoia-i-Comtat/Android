@@ -12,18 +12,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Card
-import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,13 +45,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.google.android.material.badge.ExperimentalBadgeUtils
-import com.google.firebase.storage.FirebaseStorage
 import timber.log.Timber
 
 @Composable
 @ExperimentalBadgeUtils
 @OptIn(ExperimentalMaterial3Api::class)
-fun MainActivity.ExploreScreen(storage: FirebaseStorage) {
+fun MainActivity.ExploreScreen() {
     val focusManager = LocalFocusManager.current
 
     val areas by exploreViewModel.loadAreas().observeAsState()
@@ -71,7 +64,7 @@ fun MainActivity.ExploreScreen(storage: FirebaseStorage) {
                 modifier = Modifier
                     .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
                     .fillMaxWidth(),
-                backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(32.dp),
             ) {
                 OutlinedTextField(
@@ -144,7 +137,7 @@ fun MainActivity.ExploreScreen(storage: FirebaseStorage) {
         }
         items(areas ?: listOf()) { area ->
             Timber.d("Displaying $area...")
-            DataClassItem(area, storage) {
+            DataClassItem(area) {
                 launch(DataClassActivity::class.java) {
                     putExtra(EXTRA_DATACLASS, area as Parcelable)
                 }

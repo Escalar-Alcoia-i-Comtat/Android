@@ -15,10 +15,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Explore
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,6 +39,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.GoogleMap
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.distanceTo
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toLatLng
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.vibrate
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.Marker
@@ -83,6 +85,7 @@ private suspend fun locationCallback(
 }
 
 @SuppressLint("MissingPermission")
+@ExperimentalMaterial3Api
 @Composable
 fun ComponentActivity.NearbyZones() {
     val context = LocalContext.current
@@ -95,7 +98,7 @@ fun ComponentActivity.NearbyZones() {
             .fillMaxWidth()
             .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
         shape = RoundedCornerShape(12.dp),
-        backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
     ) {
         Column(
             modifier = Modifier
@@ -161,15 +164,20 @@ fun ComponentActivity.NearbyZones() {
             else
                 Text(
                     text = stringResource(R.string.nearby_zones_permission),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
                         .pointerInput(Unit) {
                             detectTapGestures(
                                 onTap = {
-
+                                    // TODO: Request permission and enable nearby zones
                                 },
                                 onLongPress = {
-
+                                    vibrate(50)
+                                    doAsync {
+                                        PreferencesModule.setNearbyZonesEnabled(false)
+                                    }
                                 }
                             )
                         }

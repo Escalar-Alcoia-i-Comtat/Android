@@ -10,8 +10,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
-import com.arnyminerz.escalaralcoiaicomtat.DataLoaderInterface
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
@@ -21,17 +21,18 @@ import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATA_MODULE_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_DEFAULTS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_LIST
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED_KEY
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.md5Compatible
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
@@ -39,17 +40,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.play.core.splitinstall.SplitInstallException
-import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
-import com.google.android.play.core.splitinstall.SplitInstallRequest
-import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
-import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
-import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.google.firebase.FirebaseException
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
@@ -79,11 +73,10 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         deepLinkPath: String?,
         remoteConfig: FirebaseRemoteConfig,
         messaging: FirebaseMessaging,
-        analytics: FirebaseAnalytics,
-        auth: FirebaseAuth
+        analytics: FirebaseAnalytics
     ) {
         viewModelScope.launch {
-            loadingRoutine(deepLinkPath, remoteConfig, messaging, analytics, auth)
+            loadingRoutine(deepLinkPath, remoteConfig, messaging, analytics)
         }
     }
 
@@ -92,8 +85,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         deepLinkPath: String?,
         remoteConfig: FirebaseRemoteConfig,
         messaging: FirebaseMessaging,
-        analytics: FirebaseAnalytics,
-        auth: FirebaseAuth
+        analytics: FirebaseAnalytics
     ) {
         val app = getApplication<App>()
 
@@ -117,94 +109,12 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
             dataCollectionSetUp()
         }
 
-        progressMessageResource.value = R.string.status_loading_auth
-        authSetup(auth, app)
-
         progressMessageResource.value = R.string.status_loading_data
-        Timber.v("Installing data module...")
-        val splitInstallManager = SplitInstallManagerFactory.create(app)
-        val request = SplitInstallRequest.newBuilder()
-            .addModule(DATA_MODULE_NAME)
-            .build()
-        Timber.v("Requesting installation of the data module...")
-        splitInstallManager.apply {
-            val listener = SplitInstallStateUpdatedListener { state ->
-                Timber.v("Got split install update. State: $state")
-                when (val status = state.status()) {
-                    SplitInstallSessionStatus.FAILED -> {
-                        val errorCode = state.errorCode()
-                        Timber.e("Data module download status: Failed ($errorCode)")
-                    }
-                    SplitInstallSessionStatus.DOWNLOADING -> {
-                        val current = state.bytesDownloaded()
-                        val max = state.totalBytesToDownload()
-                        val progress = ValueMax(current, max)
-                        Timber.e("Data module download status: Downloading $progress")
-                        progressMessageResource.value = R.string.status_downloading_percent
-                        progressMessageAttributes.value = listOf(progress.percentage)
-                    }
-                    SplitInstallSessionStatus.INSTALLING -> {
-                        Timber.i("Data module download status: Installing")
-                        progressMessageResource.value = R.string.status_loading_installing_data
-                    }
-                    SplitInstallSessionStatus.INSTALLED -> {
-                        Timber.i("Data module download status: Installed")
-                        progressMessageResource.value = R.string.status_loading_data
-                        doAsync {
-                            load(app, deepLinkPath) { stringResource ->
-                                progressMessageResource.value = stringResource
-                            }
-                        }
-                    }
-                    else -> Timber.v("Data module install status: $status")
-                }
+        withContext(Dispatchers.IO) {
+            load(app, deepLinkPath) { stringResource, errorResource ->
+                stringResource?.let { progressMessageResource.value = it }
+                errorResource?.let { errorMessage.value = it }
             }
-            Timber.v("Registering listener for data module installation..")
-            registerListener(listener)
-            Timber.v("Starting data module installation...")
-            startInstall(request)
-                .addOnFailureListener { exception ->
-                    val errorCode = (exception as SplitInstallException).errorCode
-                    Timber.e(exception, "Could not install data module! Error: $errorCode")
-                    when (errorCode) {
-                        SplitInstallErrorCode.ACCESS_DENIED ->
-                            errorMessage.value = R.string.status_data_install_access_denied
-                        SplitInstallErrorCode.ACTIVE_SESSIONS_LIMIT_EXCEEDED ->
-                            errorMessage.value = R.string.status_data_install_active_sessions_limit
-                        SplitInstallErrorCode.API_NOT_AVAILABLE ->
-                            errorMessage.value = R.string.status_data_install_api_not_available
-                        SplitInstallErrorCode.APP_NOT_OWNED ->
-                            errorMessage.value = R.string.status_data_install_app_not_owned
-                        SplitInstallErrorCode.INCOMPATIBLE_WITH_EXISTING_SESSION ->
-                            errorMessage.value = R.string.status_data_install_incompatible_session
-                        SplitInstallErrorCode.INSUFFICIENT_STORAGE ->
-                            errorMessage.value = R.string.status_data_install_insufficient_storage
-                        SplitInstallErrorCode.INTERNAL_ERROR ->
-                            errorMessage.value = R.string.status_data_install_internal_error
-                        SplitInstallErrorCode.INVALID_REQUEST ->
-                            errorMessage.value = R.string.status_data_install_invalid_request
-                        SplitInstallErrorCode.MODULE_UNAVAILABLE ->
-                            errorMessage.value = R.string.status_data_install_module_unavailable
-                        SplitInstallErrorCode.NETWORK_ERROR ->
-                            errorMessage.value = R.string.status_data_install_network_error
-                        SplitInstallErrorCode.NO_ERROR -> return@addOnFailureListener
-                        SplitInstallErrorCode.PLAY_STORE_NOT_FOUND ->
-                            errorMessage.value = R.string.status_data_install_play_store_not_found
-                        SplitInstallErrorCode.SESSION_NOT_FOUND ->
-                            errorMessage.value = R.string.status_data_install_session_not_found
-                        SplitInstallErrorCode.SPLITCOMPAT_COPY_ERROR ->
-                            errorMessage.value = R.string.status_data_install_split_copy_error
-                        SplitInstallErrorCode.SPLITCOMPAT_EMULATION_ERROR ->
-                            errorMessage.value = R.string.status_data_install_split_emu_error
-                        SplitInstallErrorCode.SPLITCOMPAT_VERIFICATION_ERROR ->
-                            errorMessage.value = R.string.status_data_install_split_verif_error
-                        else -> return@addOnFailureListener
-                    }
-                    unregisterListener(listener)
-                }
-                .addOnSuccessListener { sessionId ->
-                    Timber.i("Started install of the data module (sessionId=$sessionId)")
-                }
         }
     }
 
@@ -375,25 +285,6 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
     }
 
     /**
-     * Removes auth state listeners if the authentication is not enabled.
-     * @author Arnau Mora
-     * @since 20210811
-     */
-    private fun authSetup(auth: FirebaseAuth, app: App) {
-        if (!ENABLE_AUTHENTICATION) {
-            Timber.v("Removing auth state listener...")
-            auth.removeAuthStateListener(app.authStateListener)
-        }
-        if (auth.currentUser == null) {
-            Timber.d("Signing in anonymously...")
-            auth.signInAnonymously()
-                .addOnSuccessListener { Timber.i("Logged in anonymously.") }
-                .addOnFailureListener { Timber.e(it, "Could not login anonymously:") }
-        } else
-            Timber.d("Anonymous login not performed.")
-    }
-
-    /**
      * Loads and processes all the data from the data module.
      * Note: The data module needs to have been installed.
      * @author Arnau Mora
@@ -404,47 +295,50 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
     private suspend fun load(
         app: App,
         deepLinkPath: String?,
-        @UiThread progressUpdater: (textResource: Int) -> Unit
+        @UiThread progressUpdater: (textResource: Int?, errorResource: Int?) -> Unit
     ) {
-        Timber.v("Getting DataLoader instance...")
-        val dataLoader = Class
-            .forName("com.arnyminerz.escalaralcoiaicomtat.data.DataLoader")
-            .kotlin.objectInstance as DataLoaderInterface
-        Timber.v("Fetching data...")
-        val data = dataLoader.fetchData(app)
-        Timber.i("Data fetched from data module!")
-        val areas = loadAreas(app, data)
+        try {
+            Timber.v("Fetching areas data...")
+            val jsonData = context.getJson("$REST_API_DATA_LIST/*")
+            Timber.i("Data fetched from data module!")
+            val areas = loadAreas(app, jsonData.getJSONObject("result"))
 
-        Timber.v("Finished loading areas.")
-        if (areas.isNotEmpty()) {
-            if (deepLinkPath != null) {
-                uiContext {
-                    progressUpdater(R.string.status_loading_deep_link)
-                }
+            Timber.v("Finished loading areas.")
+            if (areas.isNotEmpty()) {
+                if (deepLinkPath != null) {
+                    uiContext {
+                        progressUpdater(R.string.status_loading_deep_link, null)
+                    }
 
-                val intent = DataClass.getIntent(
-                    app,
-                    DataClassActivity::class.java,
-                    app.searchSession,
-                    deepLinkPath
-                )
-                uiContext {
-                    if (intent != null)
-                        app.launch(intent) {
-                            addFlags(FLAG_ACTIVITY_NEW_TASK)
-                        }
-                    else
+                    val intent = DataClass.getIntent(
+                        app,
+                        DataClassActivity::class.java,
+                        app.searchSession,
+                        deepLinkPath
+                    )
+                    uiContext {
+                        if (intent != null)
+                            app.launch(intent) {
+                                addFlags(FLAG_ACTIVITY_NEW_TASK)
+                            }
+                        else
+                            app.launch(MainActivity::class.java) {
+                                addFlags(FLAG_ACTIVITY_NEW_TASK)
+                            }
+                    }
+                } else
+                    uiContext {
+                        Timber.v("Launching MainActivity...")
                         app.launch(MainActivity::class.java) {
                             addFlags(FLAG_ACTIVITY_NEW_TASK)
                         }
-                }
-            } else
-                uiContext {
-                    Timber.v("Launching MainActivity...")
-                    app.launch(MainActivity::class.java) {
-                        addFlags(FLAG_ACTIVITY_NEW_TASK)
                     }
-                }
-        } else Timber.v("Areas is empty, but no handle was called.")
+            } else Timber.v("Areas is empty, but no handle was called.")
+        } catch (e: VolleyError) {
+            Timber.e(e, "An error occurred while loading areas from the server.")
+            uiContext {
+                progressUpdater(null, R.string.status_loading_error_server)
+            }
+        }
     }
 }

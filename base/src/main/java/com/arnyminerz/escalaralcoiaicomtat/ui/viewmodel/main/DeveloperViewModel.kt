@@ -62,9 +62,9 @@ class DeveloperViewModel(application: Application) : AndroidViewModel(applicatio
                 for (zone in area.getChildren(app.searchSession) { it.objectId }) {
                     tree.appendLine("  - ${zone.displayName} ($zone)")
                     for (sector in zone.getChildren(app.searchSession) { it.objectId }) {
-                        tree.appendLine("  - ${sector.displayName} ($sector)")
+                        tree.appendLine("    - ${sector.displayName} ($sector)")
                         for (path in sector.getChildren(app.searchSession) { it.objectId })
-                            tree.appendLine("  - ${path.displayName} ($path)")
+                            tree.appendLine("      - ${path.displayName} ($path)")
                     }
                 }
             }

@@ -35,7 +35,6 @@ class DataClassItemViewModel(
     fun startDownloading(
         context: Context,
         pin: String,
-        path: String,
         displayName: String,
         overwrite: Boolean = true,
         quality: Int = 100,
@@ -43,7 +42,6 @@ class DataClassItemViewModel(
         val workerInfo = DataClass.scheduleDownload<DownloadWorker>(
             context,
             pin,
-            path,
             displayName,
             overwrite,
             quality
@@ -97,7 +95,7 @@ class DataClassItemViewModel(
     }
 
     fun downloadInfo(
-        dataClass: DataClass<*, *>
+        dataClass: DataClass<*, *, *>
     ): MutableLiveData<Pair<Date, Long>?> =
         MutableLiveData<Pair<Date, Long>?>().apply {
             viewModelScope.launch {
@@ -108,7 +106,7 @@ class DataClassItemViewModel(
         }
 
     fun deleteDataClass(
-        dataClass: DataClass<*, *>
+        dataClass: DataClass<*, *, *>
     ): MutableLiveData<Boolean?> {
         val result = MutableLiveData<Boolean?>(null)
         viewModelScope.launch {
@@ -118,7 +116,7 @@ class DataClassItemViewModel(
         return result
     }
 
-    fun childrenCounter(dataClass: DataClass<*, *>): MutableLiveData<Int> =
+    fun childrenCounter(dataClass: DataClass<*, *, *>): MutableLiveData<Int> =
         MutableLiveData<Int>().apply {
             viewModelScope.launch {
                 val childrenCount = dataClass.getSize(app.searchSession)

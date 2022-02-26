@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass
 
 import android.os.Parcelable
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import kotlinx.parcelize.Parcelize
 import java.util.*
@@ -9,10 +10,10 @@ import java.util.*
 open class DataClassImpl(
     @ObjectId
     open val objectId: String,
+    @Namespace
     val namespace: String,
     open val timestampMillis: Long,
     open val displayName: String,
-    open val documentPath: String
 ) : Parcelable {
     companion object {
         fun find(list: List<DataClassImpl>, objectId: String): Int {

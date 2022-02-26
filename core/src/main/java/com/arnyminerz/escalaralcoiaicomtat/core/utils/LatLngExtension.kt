@@ -5,7 +5,6 @@ import android.location.Location
 import android.net.Uri
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.firebase.firestore.GeoPoint
 
 fun LatLng.toUri(showMarker: Boolean = false, markerTitle: String? = null): Uri {
     return Uri.parse(
@@ -55,5 +54,3 @@ fun LatLng.distanceTo(other: LatLng): Float {
     val b = other.toLocation()
     return a.distanceTo(b)
 }
-
-fun GeoPoint.toLatLng(): LatLng = LatLng(latitude, longitude)

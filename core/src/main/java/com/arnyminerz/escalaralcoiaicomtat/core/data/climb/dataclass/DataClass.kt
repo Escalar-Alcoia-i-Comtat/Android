@@ -6,10 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.Looper
-import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
@@ -23,8 +20,12 @@ import androidx.lifecycle.LiveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.await
+import com.android.volley.Request
+import com.android.volley.VolleyError
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ChildrenNamespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ParentNamespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
@@ -34,19 +35,18 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
-import com.arnyminerz.escalaralcoiaicomtat.core.exception.CouldNotCreateDynamicLinkException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.APPLICATION_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.network.VolleySingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.network.addToRequestQueue
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MIN
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.DYNAMIC_LINKS_DOMAIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PARENT
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DOWNLOAD_ENDPOINT
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.InputStreamVolleyRequest
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getChildren
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getData
@@ -54,33 +54,18 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getSector
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZone
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.ensureBitmapRead
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
-import com.google.firebase.dynamiclinks.ShortDynamicLink
-import com.google.firebase.dynamiclinks.ktx.androidParameters
-import com.google.firebase.dynamiclinks.ktx.shortLinkAsync
-import com.google.firebase.dynamiclinks.ktx.socialMetaTagParameters
-import com.google.firebase.storage.FileDownloadTask
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageException
-import com.google.firebase.storage.StorageReference
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.glide.GlideImage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.parcelize.IgnoredOnParcel
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.IOException
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -94,14 +79,14 @@ import kotlin.coroutines.suspendCoroutine
  * @param B A reference of the current type.
  * @param displayName The name that will be displayed to the user.
  * @param timestampMillis The creation date of the [DataClass] in milliseconds.
- * @param imageReferenceUrl The [FirebaseStorage] reference url of the image of the [DataClass].
- * @param kmzReferenceUrl The [FirebaseStorage] reference url of the KMZ file of the [DataClass].
+ * @param imagePath The path of the DataClass' image on the server.
+ * @param kmzPath The path of the DataClass' KMZ file on the server.
  * May be null if not applicable or non-existing.
  * @param location The coordinates of the [DataClass] to show in a map.
  * @param metadata Some metadata of the [DataClass].
  * @param displayOptions Options for displaying in the UI.
  */
-abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
+abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
     /**
      * The name that will be displayed to the user.
      * @author Arnau Mora
@@ -115,18 +100,18 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      */
     override val timestampMillis: Long,
     /**
-     * The [FirebaseStorage] reference url of the image of the [DataClass].
+     * The path of the DataClass' image on the server.
      * @author Arnau Mora
-     * @since 20210830
+     * @since 20220221
      */
-    open val imageReferenceUrl: String,
+    open val imagePath: String,
     /**
-     * The [FirebaseStorage] reference url of the KMZ file of the [DataClass].
+     * The path of the DataClass' KMZ file on the server.
      * May be null if not applicable or non-existing.
      * @author Arnau Mora
      * @since 20210830
      */
-    open val kmzReferenceUrl: String?,
+    open val kmzPath: String?,
     /**
      * The coordinates of the [DataClass] to show in a map.
      * @author Arnau Mora
@@ -150,7 +135,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     metadata.namespace,
     timestampMillis,
     displayName,
-    metadata.documentPath
 ) {
     companion object {
         /**
@@ -229,7 +213,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     .apply {
                         dataClass
                             .takeIf { it.hasParents }
-                            ?.getParent<DataClass<*, *>>(searchSession)
+                            ?.getParent<DataClass<*, *, *>>(searchSession)
                             ?.let {
                                 putExtra(EXTRA_PARENT, it)
                             }
@@ -247,7 +231,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
          * @param objectId The [DataClass.objectId] to search for.
          * @return An [Intent] if the [DataClass] was found, or null.
          */
-        suspend inline fun <A : DataClass<*, *>, reified B : DataRoot<A>> getIntent(
+        suspend inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> getIntent(
             context: Context,
             activity: Class<*>,
             searchSession: AppSearchSession,
@@ -260,7 +244,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                     .apply {
                         dataClass
                             .takeIf { it.hasParents }
-                            ?.getParent<DataClass<*, *>>(searchSession)
+                            ?.getParent<DataClass<*, *, *>>(searchSession)
                             ?.let {
                                 putExtra(EXTRA_PARENT, it)
                             }
@@ -316,7 +300,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 val children = searchSession.getChildren<A, String>(childrenNamespace, objectId)
                 { it.objectId }
                 for (child in children)
-                    if (child is DataClass<*, *>)
+                    if (child is DataClass<*, *, *>)
                         lst.add(child.delete(context, searchSession))
             }
 
@@ -409,7 +393,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         inline fun <reified W : DownloadWorkerModel> scheduleDownload(
             context: Context,
             pin: String,
-            path: String,
             displayName: String,
             overwrite: Boolean = true,
             quality: Int = 100
@@ -420,7 +403,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
                 )
             Timber.v("Downloading $pin...")
             Timber.v("Preparing DownloadData...")
-            val downloadData = DownloadData(path, displayName, overwrite, quality)
+            val downloadData = DownloadData(displayName, overwrite, quality)
             Timber.v("Scheduling download...")
             val workerClass = W::class.java
             val schedule = workerClass.getMethod(
@@ -532,19 +515,17 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @param D The parent type of the DataClass.
      * @param searchSession The [AppSearchSession] to get the data from.
      */
-    suspend fun <D : DataClass<*, *>> getParent(searchSession: AppSearchSession): D? {
+    suspend fun <D : DataClass<*, *, *>> getParent(searchSession: AppSearchSession): D? {
         // If the DataClass is root, return null
         if (!hasParents)
             return null
 
         // Get the parentId, if it's null, return null
         val parentId: String = metadata.parentId ?: return null
-        // Get the parent's namespace, it null, return null
-        val parentNamespace: String = metadata.parentNamespace ?: return null
 
         // From the different possibilities for the namespace, fetch from searchSession
         @Suppress("UNCHECKED_CAST")
-        return when (parentNamespace) {
+        return when (namespace.ParentNamespace) {
             Area.NAMESPACE -> searchSession.getArea(parentId) as D?
             Zone.NAMESPACE -> searchSession.getZone(parentId) as D?
             Sector.NAMESPACE -> searchSession.getSector(parentId) as D?
@@ -557,18 +538,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20210313
      * @param searchSession The session for performing searches.
-     * @throws IllegalStateException When no [DataClassMetadata.childNamespace] is set in
-     * [DataClass.metadata].
      */
     @WorkerThread
-    @Throws(IllegalStateException::class)
     suspend inline fun <R : Comparable<R>> getChildren(
         searchSession: AppSearchSession,
         crossinline sortBy: (A) -> R?
-    ): List<A> =
-        metadata.childNamespace?.let { childNamespace ->
-            searchSession.getChildren(childNamespace, objectId, sortBy)
-        } ?: throw IllegalStateException("If no child namespace is set in metadata.")
+    ): List<A> = searchSession.getChildren(namespace.ChildrenNamespace, objectId, sortBy)
 
     /**
      * Gets the children element at [index].
@@ -636,7 +611,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @since 20210724
      */
     override fun equals(other: Any?): Boolean {
-        if (other !is DataClass<*, *>)
+        if (other !is DataClass<*, *, *>)
             return super.equals(other)
         return pin == other.pin
     }
@@ -650,80 +625,64 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     override fun toString(): String = namespace[0] + "/" + objectId
 
     /**
-     * Gets the KMZ file path.
+     * Gets the KMZ file of the [DataClass] and stores it into [targetFile].
      * @author Arnau Mora
      * @since 20210416
-     * @param context The context to run from.
-     */
-    private fun kmzFile(context: Context, permanent: Boolean): File =
-        kmzFile(context, permanent, namespace, objectId)
-
-    /**
-     * Gets the KMZ file of the [Area] and stores it into [targetFile].
-     * @author Arnau Mora
-     * @since 20210416
-     * @param storage The [FirebaseStorage] instance.
      * @param targetFile The [File] to store the KMZ at.
-     * @param progressListener This will get called for updating the progress.
-     * @throws StorageException When there has been an exception with the [storage] download.
-     * @see kmzReferenceUrl
      */
-    @Throws(StorageException::class)
     @WorkerThread
     private suspend fun storeKmz(
-        storage: FirebaseStorage,
+        context: Context,
         targetFile: File,
-        progressListener: (@UiThread (progress: ValueMax<Long>) -> Unit)? = null
-    ): FileDownloadTask.TaskSnapshot? = if (kmzReferenceUrl != null)
-        suspendCoroutine { cont ->
-            storage.getReferenceFromUrl(kmzReferenceUrl!!)
-                .getFile(targetFile)
-                .addOnSuccessListener { cont.resume(it) }
-                .addOnProgressListener {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        it.apply {
-                            Timber.v("Loading progress: ${bytesTransferred}/${totalByteCount}")
-                            progressListener?.invoke(ValueMax(bytesTransferred, totalByteCount))
+    ) = kmzPath?.run {
+        suspendCoroutine<Void?> { cont ->
+            val request = InputStreamVolleyRequest(
+                Request.Method.GET,
+                "$REST_API_DOWNLOAD_ENDPOINT$kmzPath",
+                { bytes ->
+                    targetFile
+                        .outputStream()
+                        .use { stream ->
+                            stream.write(bytes)
                         }
-                    }
-                }
-                .addOnFailureListener { cont.resumeWithException(it) }
+                    cont.resume(null)
+                },
+                { error ->
+                    cont.resumeWithException(error)
+                }, mapOf(), mapOf()
+            )
+            VolleySingleton.getInstance(context).addToRequestQueue(request)
         }
-    else null
+    }
 
     /**
      * Gets the KMZ file path.
-     * If it has never been loaded, it gets loaded from [storage]. Otherwise, it gets loaded from
+     * If it has never been loaded, it gets loaded from the server. Otherwise, it gets loaded from
      * cache.
      * @author Arnau Mora
      * @since 20210416
      * @param context The context to run from.
-     * @param storage The [FirebaseStorage] instance.
      * @param permanent If true, the KMZ will get stored in the data directory, if false, it will
      * be cached.
-     * @param progressListener This will get called for updating the progress.
-     * @throws IllegalStateException When [kmzReferenceUrl] is null, so a [File] can't be retrieved.
-     * @throws StorageException When there's an error while downloading the KMZ file from the server.
+     * @throws IllegalStateException When [kmzPath] is null, so a [File] can't be retrieved.
+     * @throws VolleyError When there's an exception while downloading the KMZ file.
      */
-    @Throws(IllegalStateException::class, StorageException::class)
+    @Throws(IllegalStateException::class, VolleyError::class)
     @WorkerThread
     suspend fun kmzFile(
         context: Context,
-        storage: FirebaseStorage,
         permanent: Boolean,
-        progressListener: (@UiThread (progress: ValueMax<Long>) -> Unit)? = null
     ): File {
-        val kmzFile = kmzFile(context, permanent)
+        val kmzFile = kmzFile(context, permanent, namespace, objectId)
 
         if (!kmzFile.exists()) {
             Timber.v("Storing KMZ file...")
-            val kmzTaskSnapshot = storeKmz(storage, kmzFile) { progress ->
-                progressListener?.invoke(progress)
+            try {
+                storeKmz(context, kmzFile)
+                Timber.v("KMZ stored successfully.")
+            } catch (e: Exception) {
+                Timber.e(e, "Could not store KMZ File ($kmzPath).")
             }
-            if (kmzTaskSnapshot == null)
-                Timber.e("Could not store KMZ File ($kmzReferenceUrl).")
-            else
-                Timber.e(kmzTaskSnapshot.error, "Could not store KMZ File ($kmzReferenceUrl).")
         }
 
         return kmzFile
@@ -765,7 +724,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         overwrite: Boolean = true,
         quality: Int = 100
     ): LiveData<WorkInfo> =
-        scheduleDownload<W>(context, pin, documentPath, displayName, overwrite, quality)
+        scheduleDownload<W>(context, pin, displayName, overwrite, quality)
 
     /**
      * Gets the DownloadStatus of the DataClass
@@ -795,11 +754,19 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     ): Boolean {
         val children = getChildren(searchSession) { it.objectId }
         for (child in children)
-            if (child is DataClass<*, *> &&
+            if (child is DataClass<*, *, *> &&
                 child.downloadStatus(context, searchSession).first == DownloadStatus.DOWNLOADED
             ) return true
         return false
     }
+
+    /**
+     * Converts the DataClass into a Search Data class.
+     * @author Arnau Mora
+     * @since 20220219
+     * @param index The position of the DataClass
+     */
+    abstract fun data(index: Int): D
 
     /**
      * Deletes the downloaded content if downloaded
@@ -834,7 +801,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
 
         val children = getChildren(searchSession) { it.objectId }
         for (child in children)
-            if (child is DataClass<*, *>)
+            if (child is DataClass<*, *, *>)
                 size += child.size(context, searchSession)
 
         Timber.v("$this > Storage usage: $size")
@@ -877,92 +844,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         Companion.cacheImageFile(context, namespace, objectId, suffix)
 
     /**
-     * Creates a dynamic link access for the DataClass
-     * @author Arnau Mora
-     * @since 20210521
-     * @param dynamicLinks The Firebase Dynamic Links instance to create the link from.
-     * @param firebaseStorage The Firebase Storage instance to fetch the image from
-     * @throws IllegalStateException When the DataClass doesn't have a [DataClassMetadata.webURL]
-     * defined in [metadata].
-     * @throws CouldNotCreateDynamicLinkException When there was an unknown exception while creating
-     * the dynamic link.
-     * @throws StorageException When there's an error while fetching the download url of the image.
-     */
-    @Throws(
-        IllegalStateException::class,
-        CouldNotCreateDynamicLinkException::class,
-        StorageException::class
-    )
-    suspend fun getDynamicLink(
-        dynamicLinks: FirebaseDynamicLinks,
-        firebaseStorage: FirebaseStorage
-    ): Uri = suspendCoroutine { cont ->
-        Timber.v("Processing dynamic links for areas...")
-        val webUrl = metadata.webURL
-        if (webUrl != null) {
-            Timber.i("Dynamic link not found for A/$objectId. Creating one...")
-            Timber.i("Getting image URL...")
-            firebaseStorage
-                .getReferenceFromUrl(imageReferenceUrl)
-                .downloadUrl
-                .addOnSuccessListener { imageDownloadUri ->
-                    Timber.i("Creating dynamic link...")
-                    dynamicLinks.shortLinkAsync(ShortDynamicLink.Suffix.SHORT) {
-                        link = Uri.parse("$webUrl/?area=$objectId")
-                        domainUriPrefix = DYNAMIC_LINKS_DOMAIN
-                        androidParameters(APPLICATION_ID) {
-                            fallbackUrl =
-                                Uri.parse("https://play.google.com/store/apps/details?id=${APPLICATION_ID}")
-                            minimumVersion =
-                                192 // This is when the dynamic link handling was introduced
-                        }
-                        socialMetaTagParameters {
-                            title = "Escalar Alcoià i Comtat - $displayName"
-                            description = displayName
-                            imageUrl = imageDownloadUri
-                        }
-                    }.addOnSuccessListener { shortDynLink ->
-                        val link = shortDynLink.shortLink
-                        if (link != null)
-                            cont.resume(link)
-                        else
-                            cont.resumeWithException(
-                                CouldNotCreateDynamicLinkException(
-                                    "There was an unknown error while creating the dynamic link"
-                                )
-                            )
-                    }.addOnFailureListener { e -> cont.resumeWithException(e) }
-                }
-                .addOnFailureListener { e -> cont.resumeWithException(e) }
-        } else cont.resumeWithException(IllegalStateException("The webUrl in the DataClass' metadata is null."))
-    }
-
-    /**
-     * Get the [FirebaseStorage] reference for loading the [DataClass]' image.
-     * @author Arnau Mora
-     * @since 20210721
-     * @param storage The [FirebaseStorage] reference for loading the image file.
-     * @return The [StorageReference] that corresponds to the [DataClass]' image.
-     */
-    @Throws(StorageException::class)
-    fun storageReference(storage: FirebaseStorage): StorageReference =
-        storage.getReferenceFromUrl(imageReferenceUrl)
-
-    /**
-     * Get the [FirebaseStorage] download url for loading the [DataClass]' image.
-     * @author Arnau Mora
-     * @since 20210721
-     * @param storage The [FirebaseStorage] reference for loading the image file.
-     * @return The [DataClass]' download url.
-     */
-    @Throws(StorageException::class)
-    suspend fun storageUrl(storage: FirebaseStorage): Uri {
-        if (downloadUrl == null)
-            downloadUrl = storageReference(storage).downloadUrl.await()
-        return downloadUrl!!
-    }
-
-    /**
      * Checks if the [DataClass] has a stored [downloadUrl].
      * @author Arnau Mora
      * @since 20210722
@@ -974,13 +855,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
      * @author Arnau Mora
      * @since 20220118
      * @param context The [Context] that is requesting to load the image.
-     * @param storage The [FirebaseStorage] instance to load resources from the server.
      * @param imageLoadParameters The parameters for loading the image.
      */
     @Suppress("BlockingMethodInNonBlockingContext")
+    @Throws(ArithmeticException::class)
     fun imageData(
         context: Context,
-        storage: FirebaseStorage,
         imageLoadParameters: ImageLoadParameters? = null
     ): Any {
         val downloadedImageFile = imageFile(context)
@@ -991,56 +871,56 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         val image = when {
             downloadedImageFile.exists() -> downloadedImageFile
             cacheImage.exists() -> cacheImage
-            else -> try {
-                storage.getReferenceFromUrl(imageReferenceUrl)
-            } catch (e: StorageException) {
-                Timber.e(e, "Could not get reference from URL.")
-                AppCompatResources.getDrawable(context, displayOptions.errorPlaceholderDrawable)!!
-            }
+            else -> "$REST_API_DOWNLOAD_ENDPOINT$imagePath"
         }
-        if (image is StorageReference)
-            doAsync {
-                Timber.i("$this > Caching image...")
-                Timber.v("$this > Getting stream...")
-                val snapshot = storage.getReferenceFromUrl(imageReferenceUrl)
-                    .stream
-                    .await()
-                Timber.v("$this > Stream loaded. Decoding...")
-                val stream = snapshot.stream
-                val bitmap: Bitmap? = BitmapFactory.decodeStream(
-                    stream,
-                    null,
-                    BitmapFactory.Options().apply {
-                        inSampleSize = (1 / scale).toInt()
+
+        if (image is String)
+            InputStreamVolleyRequest(
+                Request.Method.GET,
+                "$REST_API_DOWNLOAD_ENDPOINT$imagePath",
+                { bytes ->
+                    val bitmap: Bitmap? = BitmapFactory.decodeByteArray(
+                        bytes,
+                        0,
+                        bytes.size,
+                        BitmapFactory
+                            .Options()
+                            .apply {
+                                inSampleSize = (1 / scale).toInt()
+                            }
+                    )
+                    if (bitmap != null) {
+                        Timber.v("$this > Compressing image...")
+                        val baos = ByteArrayOutputStream()
+                        val compressedBitmap: Boolean =
+                            bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
+                        if (!compressedBitmap) {
+                            Timber.e("$this > Could not compress image!")
+                            throw ArithmeticException("Could not compress image for $this.")
+                        } else {
+                            Timber.v("$this > Storing image...")
+                            cacheImage
+                                .outputStream()
+                                .use { baos.writeTo(it) }
+                            Timber.v("$this > Image stored.")
+                        }
                     }
-                )
-                if (bitmap != null) {
-                    Timber.v("$this > Compressing image...")
-                    val baos = ByteArrayOutputStream()
-                    val compressedBitmap: Boolean =
-                        bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
-                    if (!compressedBitmap) {
-                        Timber.e("$this > Could not compress image!")
-                        throw ArithmeticException("Could not compress image for $this.")
-                    } else {
-                        Timber.v("$this > Storing image...")
-                        baos.writeTo(cacheImage.outputStream())
-                        Timber.v("$this > Image stored.")
-                    }
-                }
-            }
+                },
+                { error ->
+                    Timber.e(error, "Could not download image from server. Url: $image")
+                }, mapOf(), mapOf()
+            ).addToRequestQueue(context)
 
         return image
     }
 
     @Composable
     fun Image(
-        storage: FirebaseStorage,
         modifier: Modifier = Modifier,
         imageLoadParameters: ImageLoadParameters? = null
     ) {
         val context = LocalContext.current
-        val image = imageData(context, storage, imageLoadParameters)
+        val image = imageData(context, imageLoadParameters)
 
         GlideImage(
             imageModel = image,
@@ -1065,105 +945,12 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
         )
     }
 
-    /**
-     * Fetches the image [Bitmap] from the DataClass.
-     * @author Arnau Mora
-     * @since 20210721
-     * @param context The context the app is running on.
-     * @param storage The [FirebaseStorage] reference for loading the image file.
-     * @param imageLoadParameters The parameters desired to load the image.
-     * @param progress The progress listener, for supervising loading.
-     * @throws StorageException When there's an issue while downloading the image from the server.
-     * @throws IOException When there's an issue while reading or writing the image from the fs.
-     * @throws ArithmeticException When there's been an error while compressing the image.
-     * @throws RuntimeException If there's any error while decoding the image into [Bitmap].
-     * @throws IllegalStateException When the function is called from the main thread.
-     * @see ValueMax
-     * @see ImageLoadParameters
-     */
-    @WorkerThread
-    @Suppress("BlockingMethodInNonBlockingContext")
-    @Deprecated("Use Jetpack Compose methods.")
-    @Throws(
-        StorageException::class,
-        IOException::class,
-        ArithmeticException::class,
-        RuntimeException::class,
-        IllegalStateException::class,
-    )
-    suspend fun image(
-        context: Context,
-        storage: FirebaseStorage,
-        imageLoadParameters: ImageLoadParameters? = null,
-        progress: (@UiThread (progress: ValueMax<Long>) -> Unit)? = null
-    ): Bitmap {
-        if (Looper.myLooper() == Looper.getMainLooper())
-            throw IllegalStateException("Image cannot be loaded on main thread.")
-
-        val downloadedImageFile = imageFile(context)
-        return if (downloadedImageFile.exists()) {
-            Timber.d("Loading image from storage: ${downloadedImageFile.path}")
-            ensureBitmapRead(
-                downloadedImageFile,
-                scale = imageLoadParameters?.resultImageSampleSize
-            )
-        } else {
-            val scale = imageLoadParameters?.resultImageScale ?: 1f
-            val cacheImage = cacheImageFile(context, "scale$scale")
-
-            if (!cacheImage.exists())
-                try {
-                    Timber.v("$this > Getting stream...")
-                    val snapshot = storage.getReferenceFromUrl(imageReferenceUrl)
-                        .stream
-                        .addOnProgressListener { snapshot ->
-                            if (progress != null) {
-                                val bytesCount = snapshot.bytesTransferred
-                                val totalBytes = snapshot.totalByteCount
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    progress(ValueMax(bytesCount, totalBytes))
-                                }
-                            }
-                        }
-                        .await()
-                    Timber.v("$this > Stream loaded. Decoding...")
-                    val stream = snapshot.stream
-                    val bitmap: Bitmap? = BitmapFactory.decodeStream(
-                        stream,
-                        null,
-                        BitmapFactory.Options().apply {
-                            inSampleSize = (1 / scale).toInt()
-                        }
-                    )
-                    if (bitmap != null) {
-                        Timber.v("$this > Compressing image...")
-                        val baos = ByteArrayOutputStream()
-                        val compressedBitmap: Boolean =
-                            bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
-                        if (!compressedBitmap) {
-                            Timber.e("$this > Could not compress image!")
-                            throw ArithmeticException("Could not compress image for $this.")
-                        } else {
-                            Timber.v("$this > Storing image...")
-                            baos.writeTo(cacheImage.outputStream())
-                            Timber.v("$this > Image stored.")
-                        }
-                    }
-                } catch (e: Exception) {
-                    Timber.e(e, "$this > Could not load DataClass ($objectId) image.")
-                    throw e
-                }
-
-            Timber.v("$this > Reading cache image ($cacheImage)...")
-            ensureBitmapRead(cacheImage, scale = imageLoadParameters?.resultImageSampleSize)
-        }
-    }
-
     override fun hashCode(): Int {
         var result = objectId.hashCode()
         result = 31 * result + displayName.hashCode()
         result = 31 * result + timestamp.hashCode()
-        result = 31 * result + imageReferenceUrl.hashCode()
+        result = 31 * result + imagePath.hashCode()
+        result = 31 * result + kmzPath.hashCode()
         result = 31 * result + displayOptions.hashCode()
         result = 31 * result + namespace.hashCode()
         return result
@@ -1177,7 +964,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
  * @param objectId The id of the object to search for.
  * @return The object you are searching for, or null if not found.
  */
-operator fun <D : DataClass<*, *>> Iterable<D>.get(objectId: String): D? {
+operator fun <D : DataClass<*, *, *>> Iterable<D>.get(objectId: String): D? {
     for (item in this)
         if (item.objectId == objectId)
             return item
@@ -1191,7 +978,7 @@ operator fun <D : DataClass<*, *>> Iterable<D>.get(objectId: String): D? {
  * @param objectId The id of the object to search for.
  * @return The object you are searching for, or null if not found.
  */
-fun <D : DataClass<*, *>> Iterable<D>.has(objectId: String): Boolean {
+fun <D : DataClass<*, *, *>> Iterable<D>.has(objectId: String): Boolean {
     for (item in this)
         if (item.objectId == objectId)
             return true

@@ -104,9 +104,9 @@ class SystemPreferencesRepositoryImpl(
         }
     }
 
-    override suspend fun markDataIndexed() {
+    override suspend fun markDataIndexed(indexed: Boolean) {
         dataStore.edit {
-            it[Keys.indexedData] = true
+            it[Keys.indexedData] = indexed
         }
     }
 

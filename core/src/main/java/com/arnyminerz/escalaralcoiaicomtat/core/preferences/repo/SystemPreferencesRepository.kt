@@ -38,7 +38,7 @@ interface SystemPreferencesRepository {
      * @author Arnau Mora
      * @since 20211229
      */
-    suspend fun markDataIndexed()
+    suspend fun markDataIndexed(indexed: Boolean = true)
 
     /**
      * Sets the data indexed preference to false, so the system should index it again.
