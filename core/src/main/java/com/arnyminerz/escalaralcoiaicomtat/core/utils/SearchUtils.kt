@@ -88,7 +88,8 @@ suspend fun AppSearchSession.getAreas(): List<Area> {
 @WorkerThread
 suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession.getData(
     query: String,
-    namespace: String
+    namespace: String,
+    scoreListener: ((score: Int) -> Unit)
 ): R? {
     val searchSpec = SearchSpec.Builder()
         .addFilterNamespaces(namespace)
@@ -110,6 +111,7 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
 
     val genericDocument = page.genericDocument
     Timber.v("Got generic document ${genericDocument.namespace}: ${genericDocument.id}")
+    scoreListener(genericDocument.score)
     val data: T = try {
         genericDocument.toDocumentClass(T::class.java)
     } catch (e: AppSearchException) {
@@ -121,6 +123,20 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
     }
     return data.data()
 }
+
+/**
+ * Searches for a [DataClassImpl] parent with Class name [R], and [DataRoot] T.
+ * @author Arnau Mora
+ * @since 20210820
+ * @param query What to search for.
+ * @param namespace The namespace of the query.
+ * @return The [R], or null if not found.
+ */
+@WorkerThread
+suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession.getData(
+    query: String,
+    namespace: String,
+): R? = getData<R, T>(query, namespace) {}
 
 /**
  * Searches for all the [DataClassImpl] typed [R] that are indexed with [query].
