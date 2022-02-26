@@ -198,6 +198,7 @@
     <string name="sector_walking_time">%1$smin</string>
     <string name="sector_height">%1$sm</string>
     <string name="sector_kids_apt">Kids Apt</string>
+    <string name="sector_sun_time">Sun Time</string>
 
     <string name="status_null" translatable="false">-</string>
     <string name="status_null_double" translatable="false">--</string>
