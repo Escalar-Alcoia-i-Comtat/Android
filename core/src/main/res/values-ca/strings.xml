@@ -27,6 +27,7 @@
     <string name="action_resend_email">Tornar a enviar correu</string>
     <string name="action_mark_completed">Marcar</string>
     <string name="action_view_activity">Veure Activitat</string>
+    <string name="action_maximize_image">Maximize image</string>
     <string name="status_downloading">Baixant…</string>
     <string name="status_loading">Carregant…</string>
     <string name="status_downloaded">Baixat</string>
