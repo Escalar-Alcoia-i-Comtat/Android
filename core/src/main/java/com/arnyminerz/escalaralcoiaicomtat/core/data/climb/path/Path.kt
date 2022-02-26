@@ -277,7 +277,7 @@ class Path internal constructor(
     suspend fun getParent(application: App): Sector? =
         application.getSector(parentSectorId)
 
-    override fun toString(): String = displayName
+    override fun toString(): String = "P/$objectId"
 
     override fun compareTo(other: Path): Int =
         when {
