@@ -125,6 +125,7 @@ private fun DownloadableDataClassItem(
             quality = DOWNLOAD_QUALITY_DEFAULT
         )
     }
+    val childrenCount by viewModel.childrenCounter(item).observeAsState()
 
     Card(
         backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -153,7 +154,6 @@ private fun DownloadableDataClassItem(
                         .padding(start = 4.dp)
                         .weight(1f)
                 ) {
-                    val childrenCount by viewModel.childrenCounter(item).observeAsState()
                     Text(
                         text = item.displayName,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -184,6 +184,7 @@ private fun DownloadableDataClassItem(
                         colors = ButtonDefaults.elevatedButtonColors(
                             containerColor = MaterialTheme.colorScheme.tertiary
                         ),
+                        enabled = childrenCount?.let { it > 0 } ?: false,
                         modifier = Modifier
                             .padding(end = 4.dp),
                         onClick = onClick,
@@ -345,7 +346,7 @@ private fun NonDownloadableDataClassItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(160.dp)
-                    .clickable {
+                    .clickable(enabled = childrenCount?.let { it > 0 } ?: false) {
                         onClick?.let { it() }
                     },
                 imageLoadParameters = ImageLoadParameters()
