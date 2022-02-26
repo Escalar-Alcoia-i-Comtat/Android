@@ -31,8 +31,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.DeveloperScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.DownloadsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.ExploreScreen
@@ -102,7 +100,6 @@ class MainActivity : LanguageComponentActivity() {
                             .getInstance()
                             .updateAvailableObjects
                         updatesAvailable = updateAvailableObjects.entries.sumOf { it.value.size }
-                        uiContext { toast("Update available!") }
                     }
                 }
             }
