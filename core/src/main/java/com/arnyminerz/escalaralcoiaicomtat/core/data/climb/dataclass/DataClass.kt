@@ -37,6 +37,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.core.network.VolleySingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.network.addToRequestQueue
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
@@ -857,7 +858,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @param imageLoadParameters The parameters for loading the image.
      */
     @Suppress("BlockingMethodInNonBlockingContext")
-    @Throws(VolleyError::class, ArithmeticException::class)
+    @Throws(ArithmeticException::class)
     fun imageData(
         context: Context,
         imageLoadParameters: ImageLoadParameters? = null
@@ -873,40 +874,42 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
             else -> "$REST_API_DOWNLOAD_ENDPOINT$imagePath"
         }
 
-        val request = InputStreamVolleyRequest(
-            Request.Method.GET,
-            "$REST_API_DOWNLOAD_ENDPOINT$kmzPath",
-            { bytes ->
-                val bitmap: Bitmap? = BitmapFactory.decodeByteArray(
-                    bytes,
-                    0,
-                    bytes.size,
-                    BitmapFactory
-                        .Options()
-                        .apply {
-                            inSampleSize = (1 / scale).toInt()
+        if (image is String)
+            InputStreamVolleyRequest(
+                Request.Method.GET,
+                "$REST_API_DOWNLOAD_ENDPOINT$imagePath",
+                { bytes ->
+                    val bitmap: Bitmap? = BitmapFactory.decodeByteArray(
+                        bytes,
+                        0,
+                        bytes.size,
+                        BitmapFactory
+                            .Options()
+                            .apply {
+                                inSampleSize = (1 / scale).toInt()
+                            }
+                    )
+                    if (bitmap != null) {
+                        Timber.v("$this > Compressing image...")
+                        val baos = ByteArrayOutputStream()
+                        val compressedBitmap: Boolean =
+                            bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
+                        if (!compressedBitmap) {
+                            Timber.e("$this > Could not compress image!")
+                            throw ArithmeticException("Could not compress image for $this.")
+                        } else {
+                            Timber.v("$this > Storing image...")
+                            cacheImage
+                                .outputStream()
+                                .use { baos.writeTo(it) }
+                            Timber.v("$this > Image stored.")
                         }
-                )
-                if (bitmap != null) {
-                    Timber.v("$this > Compressing image...")
-                    val baos = ByteArrayOutputStream()
-                    val compressedBitmap: Boolean =
-                        bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
-                    if (!compressedBitmap) {
-                        Timber.e("$this > Could not compress image!")
-                        throw ArithmeticException("Could not compress image for $this.")
-                    } else {
-                        Timber.v("$this > Storing image...")
-                        cacheImage
-                            .outputStream()
-                            .use { baos.writeTo(it) }
-                        Timber.v("$this > Image stored.")
                     }
-                }
-            },
-            { error -> throw error }, mapOf(), mapOf()
-        )
-        VolleySingleton.getInstance(context).addToRequestQueue(request)
+                },
+                { error ->
+                    Timber.e(error, "Could not download image from server. Url: $image")
+                }, mapOf(), mapOf()
+            ).addToRequestQueue(context)
 
         return image
     }
