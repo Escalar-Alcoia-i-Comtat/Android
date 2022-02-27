@@ -4,15 +4,15 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BugReport
-import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.rounded.BugReport
-import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
@@ -58,12 +58,12 @@ sealed class Screen(
         R.string.item_map
     )
 
-    object Downloads : Screen(
-        "downloads",
-        R.string.item_downloads,
-        Icons.Outlined.Download,
-        Icons.Rounded.Download,
-        R.string.item_downloads
+    object Storage : Screen(
+        "storage",
+        R.string.item_storage,
+        Icons.Outlined.Storage,
+        Icons.Rounded.Storage,
+        R.string.item_storage
     )
 
     object Settings : Screen(

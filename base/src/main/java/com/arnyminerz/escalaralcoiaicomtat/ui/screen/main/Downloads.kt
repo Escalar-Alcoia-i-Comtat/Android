@@ -50,10 +50,10 @@ import timber.log.Timber
 @Composable
 @ExperimentalMaterial3Api
 @ExperimentalMaterialApi
-fun MainActivity.DownloadsScreen(updateAvailable: Boolean) {
+fun MainActivity.StorageScreen(updateAvailable: Boolean) {
     val context = LocalContext.current
-    val downloads by downloadsViewModel.downloads.observeAsState()
-    val sizeString by remember { downloadsViewModel.sizeString }
+    val downloads by storageViewModel.downloads.observeAsState()
+    val sizeString by remember { storageViewModel.sizeString }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Card(
@@ -94,13 +94,13 @@ fun MainActivity.DownloadsScreen(updateAvailable: Boolean) {
                             items(entries) { item ->
                                 val namespace = key.substring(0, key.length - 1)
                                 val state = when (namespace) {
-                                    Area.NAMESPACE -> downloadsViewModel
+                                    Area.NAMESPACE -> storageViewModel
                                         .getDataClass<Area>(Area.NAMESPACE, item)
-                                    Zone.NAMESPACE -> downloadsViewModel
+                                    Zone.NAMESPACE -> storageViewModel
                                         .getDataClass<Zone>(Zone.NAMESPACE, item)
-                                    Sector.NAMESPACE -> downloadsViewModel
+                                    Sector.NAMESPACE -> storageViewModel
                                         .getDataClass<Sector>(Sector.NAMESPACE, item)
-                                    Path.NAMESPACE -> downloadsViewModel
+                                    Path.NAMESPACE -> storageViewModel
                                         .getDataClass<Path>(Path.NAMESPACE, item)
                                     else -> {
                                         Timber.w("Attention! Namespace \"%s\" not valid", namespace)
@@ -210,11 +210,11 @@ fun MainActivity.DownloadsScreen(updateAvailable: Boolean) {
                         DataClassActivity::class.java
                     ) {
                         // This gets called when data gets deleted
-                        downloadsViewModel.loadDownloads()
+                        storageViewModel.loadDownloads()
                     }
             }
         }
     }
 
-    downloadsViewModel.loadDownloads()
+    storageViewModel.loadDownloads()
 }
