@@ -34,7 +34,7 @@
     <string name="status_downloaded">Descargado</string>
     <string name="item_explore">Explorar</string>
     <string name="item_map">Mapa</string>
-    <string name="item_downloads">Descargas</string>
+    <string name="item_storage">Storage</string>
     <string name="item_settings">Configuración</string>
     <string name="path_ending_plate">Placa</string>
     <string name="path_ending_plate_ring">Placa con argolla</string>
@@ -234,6 +234,8 @@
     <string name="pref_info_sum">Versión, Número de Compilación, Librerías…</string>
     <string name="pref_feedback_title">Enviar comentarios</string>
     <string name="pref_feedback_sum">Informa a los desarrolladores sobre algún error o problema que hayas podido tener.</string>
+    <string name="pref_main_show_developer_tab_title">Show developer tab</string>
+    <string name="pref_main_show_developer_tab_sum">Whether or not to show the developer tab on the bottom menu bar.</string>
     <string name="pref_noti_alert_title">Alertas generales</string>
     <string name="pref_noti_alert_sum">Esto activará/desactivará las alertas locales</string>
     <string name="pref_noti_device_title">Ajustes de notificaciones</string>
