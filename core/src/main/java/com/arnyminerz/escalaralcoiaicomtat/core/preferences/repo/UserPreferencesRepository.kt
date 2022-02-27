@@ -105,6 +105,14 @@ interface UserPreferencesRepository {
     suspend fun setDownloadQuality(quality: Int)
 
     /**
+     * Sets whether or not to show the developer bottom tab.
+     * @author Arnau Mora
+     * @since 20220227
+     * @param enabled Whether or not to enable the tab.
+     */
+    suspend fun setDeveloperTabEnabled(enabled: Boolean)
+
+    /**
      * Should return the value of the language preference of the user.
      * @author Arnau Mora
      * @since 20211229
@@ -173,4 +181,12 @@ interface UserPreferencesRepository {
      * @since 20211229
      */
     val meteredDownloadsEnabled: Flow<Boolean>
+
+    /**
+     * Should return whether or not the user has chosen to enable the developer tab on the bottom
+     * menu. Only enabled to debug builds.
+     * @author Arnau Mora
+     * @since 20220227
+     */
+    val developerTabEnabled: Flow<Boolean>
 }
