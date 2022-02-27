@@ -74,7 +74,7 @@ object PreferencesModule {
      * @author Arnau Mora
      * @since 20211229
      */
-    private val userPreferencesRepository by lazy {
+    val userPreferencesRepository by lazy {
         UserPreferencesRepositoryImpl(requireApplication.dataStore)
     }
 

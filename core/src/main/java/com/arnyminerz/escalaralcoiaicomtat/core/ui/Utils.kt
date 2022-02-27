@@ -4,21 +4,22 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BugReport
-import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.rounded.BugReport
-import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -58,12 +59,12 @@ sealed class Screen(
         R.string.item_map
     )
 
-    object Downloads : Screen(
-        "downloads",
-        R.string.item_downloads,
-        Icons.Outlined.Download,
-        Icons.Rounded.Download,
-        R.string.item_downloads
+    object Storage : Screen(
+        "storage",
+        R.string.item_storage,
+        Icons.Outlined.Storage,
+        Icons.Rounded.Storage,
+        R.string.item_storage
     )
 
     object Settings : Screen(
@@ -83,7 +84,11 @@ sealed class Screen(
     )
 }
 
-data class NavItem(val screen: Screen, val badgeCount: Int? = null)
+data class NavItem(
+    val screen: Screen,
+    val badgeCount: Int? = null,
+    val visible: State<Boolean>? = null
+)
 
 @Composable
 @ExperimentalPagerApi
@@ -92,30 +97,32 @@ fun RowScope.NavItems(pagerState: PagerState, items: List<NavItem>) {
     items.forEachIndexed { index, item ->
         val screen = item.screen
         val selected = pagerState.currentPage == index
-        NavigationBarItem(
-            selected,
-            icon = {
-                if (item.badgeCount == null)
-                    Icon(
-                        if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
-                        screen.contentDescription?.let { stringResource(it) }
-                    )
-                else
-                    BadgedBox(
-                        badge = { Badge { Text(item.badgeCount.toString()) } }
-                    ) {
+        val visible = item.visible
+        if (visible?.value != false)
+            NavigationBarItem(
+                selected,
+                icon = {
+                    if (item.badgeCount == null)
                         Icon(
                             if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
                             screen.contentDescription?.let { stringResource(it) }
                         )
+                    else
+                        BadgedBox(
+                            badge = { Badge { Text(item.badgeCount.toString()) } }
+                        ) {
+                            Icon(
+                                if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
+                                screen.contentDescription?.let { stringResource(it) }
+                            )
+                        }
+                },
+                label = { Text(text = stringResource(screen.text)) },
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(index)
                     }
-            },
-            label = { Text(text = stringResource(screen.text)) },
-            onClick = {
-                scope.launch {
-                    pagerState.animateScrollToPage(index)
                 }
-            }
-        )
+            )
     }
 }

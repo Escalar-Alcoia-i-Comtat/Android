@@ -46,6 +46,7 @@ class UserPreferencesRepositoryImpl(
         val meteredDownload = booleanPreferencesKey("metered_download")
         val roamingDownload = booleanPreferencesKey("roaming_download")
         val downloadQuality = intPreferencesKey("download_quality")
+        val enableDeveloperTab = booleanPreferencesKey("developer_tab")
     }
 
     private inline val Preferences.nearbyZonesEnabled
@@ -167,6 +168,12 @@ class UserPreferencesRepositoryImpl(
     override suspend fun setDownloadQuality(quality: Int) {
         dataStore.edit {
             it[Keys.downloadQuality] = quality
+        }
+    }
+
+    override suspend fun setDeveloperTabEnabled(enabled: Boolean) {
+        dataStore.edit {
+            it[Keys.enableDeveloperTab] = enabled
         }
     }
 
@@ -347,6 +354,25 @@ class UserPreferencesRepositoryImpl(
         }
         .map {
             it[Keys.roamingDownload] ?: false
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Returns the preference of the user on showing the developer tab on the bottom navigation bar.
+     * Only enabled to debug builds.
+     * @author Arnau Mora
+     * @since 20220227
+     */
+    override val developerTabEnabled: Flow<Boolean> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[Keys.enableDeveloperTab] ?: true
         }
         .distinctUntilChanged()
 }

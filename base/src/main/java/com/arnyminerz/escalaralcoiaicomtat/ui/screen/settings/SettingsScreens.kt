@@ -19,14 +19,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.FeedbackActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.ListDialogOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsCategory
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsDataDialog
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsItem
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.context.LocaleHelper
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.SettingsViewModel
 
@@ -74,6 +77,25 @@ fun MainSettingsScreen(context: Context, settingsNavController: NavController) {
             },
             icon = Icons.Default.BugReport
         )
+        if (BuildConfig.DEBUG) {
+            val showDeveloperTab by PreferencesModule
+                .userPreferencesRepository
+                .developerTabEnabled
+                .collectAsState(true)
+            SettingsItem(
+                title = stringResource(R.string.pref_main_show_developer_tab_title),
+                subtitle = stringResource(R.string.pref_main_show_developer_tab_sum),
+                stateBoolean = showDeveloperTab,
+                switch = true,
+                setBoolean = {
+                    doAsync {
+                        PreferencesModule
+                            .userPreferencesRepository
+                            .setDeveloperTabEnabled(!showDeveloperTab)
+                    }
+                }
+            )
+        }
     }
 }
 

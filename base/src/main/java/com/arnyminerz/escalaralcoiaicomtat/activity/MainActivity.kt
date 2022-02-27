@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,15 +33,15 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.DeveloperScreen
-import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.DownloadsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.ExploreScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.MapScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.SettingsScreen
+import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.StorageScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.MainMapViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.DeveloperViewModel
-import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.DownloadsViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.SettingsViewModel
+import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.StorageViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.settingsViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -56,8 +57,8 @@ class MainActivity : LanguageComponentActivity() {
     internal val mapViewModel by viewModels<MainMapViewModel>(factoryProducer = {
         MainMapViewModel.Factory(application, PreferencesModule.getMarkerCentering)
     })
-    internal val downloadsViewModel by viewModels<DownloadsViewModel>(factoryProducer = {
-        DownloadsViewModel.Factory(application)
+    internal val storageViewModel by viewModels<StorageViewModel>(factoryProducer = {
+        StorageViewModel.Factory(application)
     })
     internal val settingsViewModel by viewModels<SettingsViewModel>(factoryProducer = {
         PreferencesModule.settingsViewModel
@@ -125,12 +126,20 @@ class MainActivity : LanguageComponentActivity() {
                         mutableListOf(
                             NavItem(Screen.Explore),
                             NavItem(Screen.Map),
-                            NavItem(Screen.Downloads, updatesAvailable),
+                            NavItem(Screen.Storage, updatesAvailable),
                             NavItem(Screen.Settings)
                         ).apply {
                             // If in debug mode, add the developer screen
                             if (BuildConfig.DEBUG)
-                                add(NavItem(Screen.Developer))
+                                add(
+                                    NavItem(
+                                        Screen.Developer,
+                                        visible = PreferencesModule
+                                            .userPreferencesRepository
+                                            .developerTabEnabled
+                                            .collectAsState(true)
+                                    )
+                                )
                         }
                     )
                 }
@@ -144,7 +153,7 @@ class MainActivity : LanguageComponentActivity() {
                 when (index) {
                     0 -> ExploreScreen()
                     1 -> MapScreen()
-                    2 -> DownloadsScreen(updatesAvailable?.let { it > 0 } ?: false)
+                    2 -> StorageScreen(updatesAvailable?.let { it > 0 } ?: false)
                     3 -> SettingsScreen()
                     4 -> if (BuildConfig.DEBUG) DeveloperScreen()
                 }
