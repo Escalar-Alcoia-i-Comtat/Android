@@ -358,4 +358,5 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="activity_summary_grades">Grados</string>
     <string name="title_data">Módulo de Datos</string>
     <string name="attr_gpx">Este GPX ha sido ofrecido por Escalar Alcoià i Comtat. Descarga la app desde https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
+    <string name="item_storage">Almacenaje</string>
 </resources>
