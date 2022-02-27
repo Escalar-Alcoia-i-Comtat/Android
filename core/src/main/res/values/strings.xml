@@ -36,7 +36,7 @@
 
     <string name="item_explore">Explore</string>
     <string name="item_map">Map</string>
-    <string name="item_downloads">Downloads</string>
+    <string name="item_storage">Storage</string>
     <string name="item_settings">Settings</string>
     <string name="item_developer" translatable="false">Developer</string>
 
