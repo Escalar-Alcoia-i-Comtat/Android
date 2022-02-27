@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -83,7 +84,11 @@ sealed class Screen(
     )
 }
 
-data class NavItem(val screen: Screen, val badgeCount: Int? = null)
+data class NavItem(
+    val screen: Screen,
+    val badgeCount: Int? = null,
+    val visible: State<Boolean>? = null
+)
 
 @Composable
 @ExperimentalPagerApi
@@ -92,30 +97,32 @@ fun RowScope.NavItems(pagerState: PagerState, items: List<NavItem>) {
     items.forEachIndexed { index, item ->
         val screen = item.screen
         val selected = pagerState.currentPage == index
-        NavigationBarItem(
-            selected,
-            icon = {
-                if (item.badgeCount == null)
-                    Icon(
-                        if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
-                        screen.contentDescription?.let { stringResource(it) }
-                    )
-                else
-                    BadgedBox(
-                        badge = { Badge { Text(item.badgeCount.toString()) } }
-                    ) {
+        val visible = item.visible
+        if (visible?.value != false)
+            NavigationBarItem(
+                selected,
+                icon = {
+                    if (item.badgeCount == null)
                         Icon(
                             if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
                             screen.contentDescription?.let { stringResource(it) }
                         )
+                    else
+                        BadgedBox(
+                            badge = { Badge { Text(item.badgeCount.toString()) } }
+                        ) {
+                            Icon(
+                                if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
+                                screen.contentDescription?.let { stringResource(it) }
+                            )
+                        }
+                },
+                label = { Text(text = stringResource(screen.text)) },
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(index)
                     }
-            },
-            label = { Text(text = stringResource(screen.text)) },
-            onClick = {
-                scope.launch {
-                    pagerState.animateScrollToPage(index)
                 }
-            }
-        )
+            )
     }
 }

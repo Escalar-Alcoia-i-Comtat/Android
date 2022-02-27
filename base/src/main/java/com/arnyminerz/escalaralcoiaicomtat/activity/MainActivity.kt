@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -130,7 +131,15 @@ class MainActivity : LanguageComponentActivity() {
                         ).apply {
                             // If in debug mode, add the developer screen
                             if (BuildConfig.DEBUG)
-                                add(NavItem(Screen.Developer))
+                                add(
+                                    NavItem(
+                                        Screen.Developer,
+                                        visible = PreferencesModule
+                                            .userPreferencesRepository
+                                            .developerTabEnabled
+                                            .collectAsState(true)
+                                    )
+                                )
                         }
                     )
                 }
