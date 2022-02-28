@@ -40,11 +40,11 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PARENT
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.tooltip.Tooltip
@@ -149,10 +149,12 @@ fun Activity.DataClassExplorer(
             itemsIndexed(items) { i, item ->
                 DataClassItem(item) {
                     launch(DataClassActivity::class.java) {
-                        putExtra(EXTRA_DATACLASS, item as Parcelable)
-                        putExtra(EXTRA_PARENT, dataClass as Parcelable)
-                        putExtra(EXTRA_CHILDREN_COUNT, items.size)
-                        putExtra(EXTRA_INDEX, i)
+                        if (item is Sector) {
+                            putExtra(EXTRA_DATACLASS, dataClass as Parcelable)
+                            putExtra(EXTRA_CHILDREN_COUNT, items.size)
+                            putExtra(EXTRA_INDEX, i)
+                        } else
+                            putExtra(EXTRA_DATACLASS, item as Parcelable)
                     }
                 }
             }

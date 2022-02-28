@@ -1,10 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.utils
 
 import android.util.Patterns
-import java.text.SimpleDateFormat
-import java.util.*
-
-val TIMESTAMP_FORMAT = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
 
 operator fun Char.times(times: Int): String {
     val builder = StringBuilder()

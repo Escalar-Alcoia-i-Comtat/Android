@@ -40,8 +40,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.network.VolleySingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.network.addToRequestQueue
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MIN
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_PARENT
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DOWNLOAD_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.InputStreamVolleyRequest
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
@@ -211,12 +212,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
                 Intent(context, activity)
                     .putExtra(EXTRA_DATACLASS, dataClass)
                     .apply {
-                        dataClass
-                            .takeIf { it.hasParents }
-                            ?.getParent<DataClass<*, *, *>>(searchSession)
-                            ?.let {
-                                putExtra(EXTRA_PARENT, it)
-                            }
+                        if (dataClass is Sector)
+                            dataClass
+                                .getParent<Zone>(searchSession)
+                                ?.let { zone ->
+                                    val sectors = zone.getChildren(searchSession) { it.weight }
+                                    putExtra(EXTRA_DATACLASS, zone)
+                                    putExtra(EXTRA_CHILDREN_COUNT, sectors.size)
+                                    putExtra(EXTRA_INDEX, sectors.indexOf(dataClass))
+                                }
                     }
             }
 
@@ -242,12 +246,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
                 Intent(context, activity)
                     .putExtra(EXTRA_DATACLASS, dataClass)
                     .apply {
-                        dataClass
-                            .takeIf { it.hasParents }
-                            ?.getParent<DataClass<*, *, *>>(searchSession)
-                            ?.let {
-                                putExtra(EXTRA_PARENT, it)
-                            }
+                        if (dataClass is Sector)
+                            dataClass
+                                .getParent<Zone>(searchSession)
+                                ?.let { zone ->
+                                    val sectors = zone.getChildren(searchSession) { it.weight }
+                                    putExtra(EXTRA_DATACLASS, zone)
+                                    putExtra(EXTRA_CHILDREN_COUNT, sectors.size)
+                                    putExtra(EXTRA_INDEX, sectors.indexOf(dataClass))
+                                }
                     }
             }
 
