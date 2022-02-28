@@ -34,7 +34,7 @@
     <string name="status_downloaded">Baixat</string>
     <string name="item_explore">Explorar</string>
     <string name="item_map">Mapa</string>
-    <string name="item_storage">Storage</string>
+    <string name="item_storage">Dades</string>
     <string name="item_settings">Configuració</string>
     <string name="path_ending_plate">Placa</string>
     <string name="path_ending_plate_ring">Placa amb Argolla</string>
@@ -234,8 +234,8 @@
     <string name="pref_info_sum">Versió, número de construcció, Llibreries…</string>
     <string name="pref_feedback_title">Enviar comentaris</string>
     <string name="pref_feedback_sum">Informa als desenvolupadors sobre cap error o problema que hages tingut.</string>
-    <string name="pref_main_show_developer_tab_title">Show developer tab</string>
-    <string name="pref_main_show_developer_tab_sum">Whether or not to show the developer tab on the bottom menu bar.</string>
+    <string name="pref_main_show_developer_tab_title">Mostra la pestanya de desenvolupador</string>
+    <string name="pref_main_show_developer_tab_sum">Si mostrar o no la pestanya de desenvolupador en la barra de menú inferior.</string>
     <string name="pref_noti_alert_title">Alertes Generals</string>
     <string name="pref_noti_alert_sum">Açò habilitarà o no les alertes locals</string>
     <string name="pref_noti_device_title">Configuració de Notificacions</string>
