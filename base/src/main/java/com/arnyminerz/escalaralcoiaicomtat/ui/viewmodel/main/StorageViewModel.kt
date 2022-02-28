@@ -28,7 +28,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class DownloadsViewModel(application: Application) : AndroidViewModel(application) {
+class StorageViewModel(application: Application) : AndroidViewModel(application) {
     init {
         Timber.d("$this::init")
     }
@@ -60,7 +60,7 @@ class DownloadsViewModel(application: Application) : AndroidViewModel(applicatio
                 size += data.sizeBytes
             }
             Timber.i("Size: $size")
-            this@DownloadsViewModel.sizeString.value = humanReadableByteCountBin(size)
+            this@StorageViewModel.sizeString.value = humanReadableByteCountBin(size)
             downloads.postValue(list)
         }
     }
@@ -138,8 +138,8 @@ class DownloadsViewModel(application: Application) : AndroidViewModel(applicatio
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             @Suppress("UNCHECKED_CAST")
-            if (modelClass.isAssignableFrom(DownloadsViewModel::class.java))
-                return DownloadsViewModel(application) as T
+            if (modelClass.isAssignableFrom(StorageViewModel::class.java))
+                return StorageViewModel(application) as T
             error("Unknown view model class: $modelClass")
         }
     }

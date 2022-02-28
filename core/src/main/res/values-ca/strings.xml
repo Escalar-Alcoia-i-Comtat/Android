@@ -360,4 +360,5 @@
     <string name="activity_summary_grades">Graus</string>
     <string name="title_data">Mòdul de Dades</string>
     <string name="attr_gpx">Este GPX ha sigut oferit per Escalar Alcoià i Comtat. Baixa l\'app des de https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
+    <string name="item_storage">Dades</string>
 </resources>
