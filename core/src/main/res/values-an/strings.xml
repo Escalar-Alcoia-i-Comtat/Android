@@ -34,6 +34,7 @@
     <string name="status_downloaded">Downloaded</string>
     <string name="item_explore">Explore</string>
     <string name="item_map">Map</string>
+    <string name="item_storage">Storage</string>
     <string name="item_settings">Settings</string>
     <string name="path_ending_plate">Plate</string>
     <string name="path_ending_plate_ring">Plate Ring</string>
@@ -233,6 +234,8 @@
     <string name="pref_info_sum">Version, Build Number, Libraries…</string>
     <string name="pref_feedback_title">Send feedback</string>
     <string name="pref_feedback_sum">Tell the developers about any errors or issues you might have had.</string>
+    <string name="pref_main_show_developer_tab_title">Show developer tab</string>
+    <string name="pref_main_show_developer_tab_sum">Whether or not to show the developer tab on the bottom menu bar.</string>
     <string name="pref_noti_alert_title">General Alerts</string>
     <string name="pref_noti_alert_sum">This will enable or disable local alerts</string>
     <string name="pref_noti_device_title">Notification Settings</string>
