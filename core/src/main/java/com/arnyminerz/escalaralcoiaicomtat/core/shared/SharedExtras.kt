@@ -23,14 +23,6 @@ val EXTRA_PATH = DataExtra<String>("path")
 val EXTRA_DATACLASS = DataExtra<Parcelable>("dataclass")
 
 /**
- * Used in DataClass activities for knowing which is the parent of the loaded DataClass. Makes the
- * application more agile, since it doesn't need to be loading the same contents again and again.
- * @author Arnau Mora
- * @since 20220106
- */
-val EXTRA_PARENT = DataExtra<Parcelable>("parent")
-
-/**
  * Used in DataClass activities that load multiple groups of children to know how many children
  * there are in the parent DataClass.
  * @author Arnau Mora
@@ -44,7 +36,7 @@ val EXTRA_CHILDREN_COUNT = DataExtra<Int>("children_count")
  * @author Arnau Mora
  * @since 20220106
  */
-val EXTRA_INDEX = DataExtra<Int>("index")
+val EXTRA_INDEX = DataExtra<Int?>("index")
 
 val EXTRA_PATH_DOCUMENT = DataExtra<String>("path_document")
 
