@@ -75,6 +75,7 @@ val Float.Companion.DegreeConverter
 fun SectorPage(
     viewModel: SectorPageViewModel,
     sector: Sector,
+    maximizeStateListener: (maximized: Boolean) -> Unit
 ) {
     val context = LocalContext.current
     viewModel.loadPaths(sector)
@@ -95,7 +96,9 @@ fun SectorPage(
                     .fillMaxSize()
             )
             SmallFloatingActionButton(
-                onClick = { imageMaximized = !imageMaximized },
+                onClick = {
+                    imageMaximized = !imageMaximized; maximizeStateListener(imageMaximized)
+                },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(8.dp)
