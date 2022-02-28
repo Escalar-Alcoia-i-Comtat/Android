@@ -168,17 +168,19 @@ fun Activity.SectorViewScreen(
                 },
             )
 
+        var scrollEnabled by remember { mutableStateOf(true) }
         if (currentSector != null)
             HorizontalPager(
                 count = childrenCount,
                 state = pagerState,
-                modifier = Modifier.padding(padding)
+                modifier = Modifier.padding(padding),
+                userScrollEnabled = scrollEnabled,
             ) {
                 Timber.d("Rendering Sector...")
                 SectorPage(
                     sectorPageViewModel,
                     currentSector!!,
-                )
+                ) { scrollEnabled = !it }
             }
         else
             Box(modifier = Modifier.fillMaxSize()) {
