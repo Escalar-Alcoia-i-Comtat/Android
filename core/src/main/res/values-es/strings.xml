@@ -29,6 +29,7 @@
     <string name="action_view_activity">Ver Actividad</string>
     <string name="action_maximize_image">Ampliar imagen</string>
     <string name="action_update_all">Actualizar todos</string>
+    <string name="action_view_sectors">Ver Sectores</string>
     <string name="status_downloading">Descargando…</string>
     <string name="status_loading">Cargando…</string>
     <string name="status_downloaded">Descargado</string>
@@ -234,8 +235,8 @@
     <string name="pref_info_sum">Versión, Número de Compilación, Librerías…</string>
     <string name="pref_feedback_title">Enviar comentarios</string>
     <string name="pref_feedback_sum">Informa a los desarrolladores sobre algún error o problema que hayas podido tener.</string>
-    <string name="pref_main_show_developer_tab_title">Show developer tab</string>
-    <string name="pref_main_show_developer_tab_sum">Whether or not to show the developer tab on the bottom menu bar.</string>
+    <string name="pref_main_show_developer_tab_title">Muestra la pestaña de desarrollador</string>
+    <string name="pref_main_show_developer_tab_sum">Si mostrar o no la pestaña de desarrollador en la barra de menú inferior.</string>
     <string name="pref_noti_alert_title">Alertas generales</string>
     <string name="pref_noti_alert_sum">Esto activará/desactivará las alertas locales</string>
     <string name="pref_noti_device_title">Ajustes de notificaciones</string>

@@ -29,6 +29,7 @@
     <string name="action_view_activity">View Activity</string>
     <string name="action_maximize_image">Maximize image</string>
     <string name="action_update_all">Update all</string>
+    <string name="action_view_sectors">View Sectors</string>
     <string name="status_downloading">Downloading…</string>
     <string name="status_loading">Loading…</string>
     <string name="status_downloaded">Downloaded</string>
