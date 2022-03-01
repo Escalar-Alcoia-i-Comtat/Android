@@ -44,7 +44,7 @@ import timber.log.Timber
 @ExperimentalMaterial3Api
 @ExperimentalPagerApi
 fun IntroWindow(
-    pages: List<IntroPageData<out Any>>,
+    pages: List<IntroPageData<*>>,
     fabPermissions: Array<String>? = null,
     requestPermissionLauncher: ActivityResultLauncher<Array<String>>? = null,
     finishListener: () -> Unit
@@ -128,7 +128,7 @@ fun IntroWindowDemo() {
     AppTheme {
         IntroWindow(
             pages = listOf(
-                IntroPageData(
+                IntroPageData<Any?>(
                     stringResource(R.string.intro_main_title, "Escalar Alcoià i Comtat"),
                     stringResource(R.string.intro_main_message)
                 ),
@@ -149,7 +149,7 @@ fun IntroWindowDarkDemo() {
     AppTheme(useDarkTheme = true) {
         IntroWindow(
             pages = listOf(
-                IntroPageData(
+                IntroPageData<Any?>(
                     stringResource(R.string.intro_main_title, "Escalar Alcoià i Comtat"),
                     stringResource(R.string.intro_main_message)
                 ),
