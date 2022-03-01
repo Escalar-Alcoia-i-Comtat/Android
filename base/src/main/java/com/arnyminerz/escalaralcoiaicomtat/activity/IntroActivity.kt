@@ -1,7 +1,9 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -53,7 +55,7 @@ class IntroActivity : ComponentActivity() {
      * @author Arnau Mora
      * @since 20220130
      */
-    val locationPermissionRequest = registerForActivityResult(
+    private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         when {
@@ -90,21 +92,24 @@ class IntroActivity : ComponentActivity() {
                 var mayRequestLocationPermissions by remember { mutableStateOf(false) }
                 var nearbyZonesSwitchEnabled by remember { mutableStateOf(true) }
 
-                val introPages = mutableListOf(
-                    IntroPageData(
+                val introPages = mutableListOf<IntroPageData<*>>(
+                    IntroPageData<Any?>(
                         stringResource(R.string.intro_main_title, "Escalar Alcoià i Comtat"),
                         stringResource(R.string.intro_main_message)
                     ),
-                    IntroPageData(
+                    IntroPageData<Any?>(
                         stringResource(R.string.intro_warning_title),
                         stringResource(R.string.intro_warning_message)
                     ),
-                    IntroPageData(
+                ).apply {
+                    val locationPage = IntroPageData(
                         stringResource(R.string.intro_nearbyzones_title),
                         stringResource(R.string.intro_nearbyzones_message),
                         IntroAction(
                             stringResource(R.string.intro_nearbyzones_enable),
-                            runBlocking { PreferencesModule.getNearbyZonesEnabled().first() },
+                            runBlocking {
+                                PreferencesModule.getNearbyZonesEnabled.invoke().first()
+                            },
                             IntroActionType.SWITCH,
                             { checked ->
                                 nearbyZonesSwitchEnabled = false
@@ -140,12 +145,20 @@ class IntroActivity : ComponentActivity() {
                             },
                             nearbyZonesSwitchEnabled
                         )
-                    ),
-                ).apply {
+                    )
+
+                    // Check if GPS is available, and Nearby Zones card
+                    val locationManager =
+                        getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                    if (locationManager.allProviders.contains(LocationManager.GPS_PROVIDER))
+                        add(locationPage)
+                    else
+                        runBlocking { PreferencesModule.setNearbyZonesEnabled(false) }
+
                     if (BuildConfig.DEBUG)
                     // If debug build, warn user
                         add(
-                            IntroPageData(
+                            IntroPageData<Any?>(
                                 stringResource(R.string.intro_beta_title),
                                 stringResource(R.string.intro_beta_message)
                             )
@@ -153,7 +166,7 @@ class IntroActivity : ComponentActivity() {
                 }
 
                 IntroWindow(
-                    introPages,
+                    introPages.toList(),
                     fabPermissions = if (mayRequestLocationPermissions)
                         arrayOf(
                             Manifest.permission.ACCESS_FINE_LOCATION,
