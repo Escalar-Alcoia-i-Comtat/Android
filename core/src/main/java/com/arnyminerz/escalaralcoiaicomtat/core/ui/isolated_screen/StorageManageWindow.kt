@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen
 
-import android.content.Context
 import androidx.annotation.StringRes
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchSpec
@@ -28,12 +27,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATA_MODULE_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
-import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
@@ -167,34 +164,6 @@ private fun ClearSearchSessionButton(
 }
 
 /**
- * A button that uninstalls the data module when clicked.
- * @author Arnau Mora
- * @since 20211227
- */
-@Composable
-fun UninstallDataModuleButton(context: Context) {
-    val splitInstallManager = SplitInstallManagerFactory.create(context)
-    val dataModuleInstalled = splitInstallManager.installedModules.contains(DATA_MODULE_NAME)
-    var uninstallingDataModule by remember { mutableStateOf(!dataModuleInstalled) }
-    Timber.i("Data module installed: $dataModuleInstalled")
-    Button(
-        enabled = !uninstallingDataModule,
-        onClick = {
-            uninstallingDataModule = true
-            Timber.i("Uninstalling data module...")
-            splitInstallManager.deferredUninstall(listOf(DATA_MODULE_NAME))
-
-            uninstallingDataModule = false
-            context.toast(R.string.toast_data_uninstalled)
-        },
-        modifier = Modifier
-            .fillMaxWidth(1f)
-    ) {
-        Text(stringResource(R.string.action_uninstall_data))
-    }
-}
-
-/**
  * The Window displayed in the storage activity which allows the user to clear different parts
  * of the app's contents.
  * @author Arnau Mora
@@ -256,8 +225,6 @@ fun StorageManagerWindow(launchApp: () -> Unit, sendFeedback: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth(1f)
         )
-
-        UninstallDataModuleButton(context)
 
         Button(
             onClick = launchApp,
