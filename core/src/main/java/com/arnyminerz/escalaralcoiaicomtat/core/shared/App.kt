@@ -5,8 +5,6 @@ import android.app.Application
 import android.content.Context
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
-import androidx.appsearch.app.GenericDocument
-import androidx.appsearch.app.Migrator
 import androidx.appsearch.app.SetSchemaRequest
 import androidx.appsearch.exceptions.AppSearchException
 import androidx.lifecycle.AndroidViewModel
@@ -29,7 +27,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPath
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getSector
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZone
-import com.google.android.play.core.splitcompat.SplitCompat
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
@@ -88,11 +85,6 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         appNetworkProvider = ConnectivityProvider.createProvider(this)
         Timber.v("Adding network listener...")
         provider.addListener(this)
-    }
-
-    override fun attachBaseContext(base: Context?) {
-        super.attachBaseContext(base)
-        SplitCompat.install(this)
     }
 
     override fun onTerminate() {
