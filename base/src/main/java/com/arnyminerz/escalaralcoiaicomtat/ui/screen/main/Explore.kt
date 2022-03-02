@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.SearchableActivity
@@ -128,7 +129,7 @@ fun MainActivity.ExploreScreen() {
                 .getNearbyZonesEnabled()
                 .collectAsState(initial = false)
             if (nearbyZonesEnabled)
-                NearbyZones()
+                NearbyZones(BuildConfig.BING_MAPS_KEY)
 
             Box(modifier = Modifier.fillMaxWidth()) {
                 AnimatedVisibility(
