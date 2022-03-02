@@ -76,6 +76,7 @@
     <string name="path_stats_chart_title">Grades</string>
     <string name="nearby_zones_title">Nearby Zones</string>
     <string name="nearby_zones_permission">The location permission is required and not granted. Tap to request.</string>
+    <string name="nearby_zones_permission_rationale">For checking what zones are nearby of yourself, you have to allow the app to access your current location.</string>
     <string name="sector_info_dialog_sun_morning_title">Morning Sun</string>
     <string name="sector_info_dialog_sun_morning_msg">This sector gets shiny on the mornings, and the shade comes on the afternoon.</string>
     <string name="sector_info_dialog_sun_afternoon_title">Afternoon Sun</string>
