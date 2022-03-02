@@ -5,6 +5,24 @@ import android.location.Location
 import android.net.Uri
 import org.osmdroid.util.GeoPoint
 
+/**
+ * Computes the center point of all the ones in the list.
+ * @author Arnau Mora
+ * @since 20220302
+ * @return The center point between all the ones in the list.
+ */
+fun List<GeoPoint>.computeCentroid(): GeoPoint {
+    var latitude = 0.0
+    var longitude = 0.0
+
+    for (point in this) {
+        latitude += point.latitude
+        longitude += point.longitude
+    }
+
+    return GeoPoint(latitude / size, longitude / size)
+}
+
 fun GeoPoint.toUri(showMarker: Boolean = false, markerTitle: String? = null): Uri {
     return Uri.parse(
         if (showMarker)
