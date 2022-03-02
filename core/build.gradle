@@ -150,6 +150,7 @@ dependencies {
 
     // Maps SDK
     api 'org.osmdroid:osmdroid-android:6.1.11'
+    api 'com.github.MKergall:osmbonuspack:6.7.0'
 
     // AndroidX preferences
     api 'androidx.datastore:datastore-preferences:1.0.0'
