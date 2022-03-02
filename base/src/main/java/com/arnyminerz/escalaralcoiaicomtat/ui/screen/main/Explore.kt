@@ -69,7 +69,7 @@ fun MainActivity.ExploreScreen() {
         item {
             Card(
                 modifier = Modifier
-                    .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
+                    .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp)
                     .fillMaxWidth(),
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(32.dp),
