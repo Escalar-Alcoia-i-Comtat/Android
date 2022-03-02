@@ -2,10 +2,10 @@ package com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.location.Location
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
@@ -22,6 +22,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -31,7 +35,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.NearbyZonesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
@@ -39,7 +42,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.GoogleMap
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.distanceTo
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toLatLng
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.vibrate
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.Marker
@@ -73,23 +79,34 @@ private suspend fun locationCallback(
         .collect { nearbyZonesDistance ->
             for (zone in model.zones)
                 zone.location
-                    ?.distanceTo(location.toLatLng())
-                    ?.takeIf { it <= nearbyZonesDistance }
-                    ?.run {
-                        map.addMarker(
-                            MarkerOptions()
-                                .title(zone.displayName)
-                        )?.let { markers.add(it) }
+                    ?.takeIf { it.distanceTo(location.toLatLng()) <= nearbyZonesDistance }
+                    ?.let { markerPosition ->
+                        uiContext {
+                            map.addMarker(
+                                MarkerOptions()
+                                    .title(zone.displayName)
+                                    .position(markerPosition)
+                            )?.let { markers.add(it) }
+                        }
                     }
         }
+
+    // TODO: Move camera to fit markers
 }
 
 @SuppressLint("MissingPermission")
 @ExperimentalMaterial3Api
+@ExperimentalPermissionsApi
 @Composable
 fun ComponentActivity.NearbyZones() {
     val context = LocalContext.current
     val model: NearbyZonesViewModel by viewModels()
+    val locationPermissionState = rememberMultiplePermissionsState(
+        listOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+        )
+    )
 
     model.loadZones()
 
@@ -127,15 +144,7 @@ fun ComponentActivity.NearbyZones() {
                     fontSize = 18.sp,
                 )
             }
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            )
+            if (locationPermissionState.allPermissionsGranted)
                 GoogleMap(
                     modifier = Modifier
                         .padding(end = 4.dp, start = 4.dp, bottom = 4.dp)
@@ -161,27 +170,44 @@ fun ComponentActivity.NearbyZones() {
                     )
                     googleMap.isMyLocationEnabled = true
                 }
-            else
-                Text(
-                    text = stringResource(R.string.nearby_zones_permission),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onTap = {
-                                    // TODO: Request permission and enable nearby zones
-                                },
-                                onLongPress = {
-                                    vibrate(50)
-                                    doAsync {
-                                        PreferencesModule.setNearbyZonesEnabled(false)
+            else {
+                var showRationale by remember { mutableStateOf(false) }
+                Column {
+                    Text(
+                        text = stringResource(R.string.nearby_zones_permission),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+                            .pointerInput(Unit) {
+                                detectTapGestures(
+                                    onTap = {
+                                        showRationale = false
+                                        if (locationPermissionState.shouldShowRationale)
+                                            showRationale = true
+                                        else
+                                            locationPermissionState.launchMultiplePermissionRequest()
+                                    },
+                                    onLongPress = {
+                                        vibrate(50)
+                                        doAsync {
+                                            PreferencesModule.setNearbyZonesEnabled(false)
+                                        }
                                     }
-                                }
-                            )
-                        }
-                )
+                                )
+                            }
+                    )
+                    AnimatedVisibility(showRationale) {
+                        Text(
+                            text = stringResource(R.string.nearby_zones_permission_rationale),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }
