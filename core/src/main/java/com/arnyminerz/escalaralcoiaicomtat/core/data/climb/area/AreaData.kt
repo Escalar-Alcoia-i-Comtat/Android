@@ -8,7 +8,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 data class AreaData(
     @Document.Score var index: Int,
     @Document.Id var objectId: String,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var displayName: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES) var displayName: String,
     @Document.CreationTimestampMillis var timestamp: Long,
     @Document.StringProperty var image: String,
     @Document.StringProperty var kmzPath: String?,

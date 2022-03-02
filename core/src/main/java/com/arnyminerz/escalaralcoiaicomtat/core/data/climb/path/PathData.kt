@@ -11,7 +11,7 @@ data class PathData(
     @Document.Id var objectId: String,
     @Document.CreationTimestampMillis var timestamp: Long,
     @Document.LongProperty var sketchId: Long,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var displayName: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES) var displayName: String,
     @Document.StringProperty var rawGrades: String,
     @Document.StringProperty var rawHeights: String,
     @Document.StringProperty var rawEndings: String,
