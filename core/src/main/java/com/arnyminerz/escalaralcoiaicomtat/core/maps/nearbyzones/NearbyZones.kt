@@ -117,7 +117,7 @@ private suspend fun locationCallback(
 @ExperimentalMaterial3Api
 @ExperimentalPermissionsApi
 @Composable
-fun ComponentActivity.NearbyZones(bingMapsKey: String) {
+fun ComponentActivity.NearbyZones() {
     val context = LocalContext.current
     val model: NearbyZonesViewModel by viewModels()
     val locationPermissionState = rememberMultiplePermissionsState(
@@ -165,7 +165,6 @@ fun ComponentActivity.NearbyZones(bingMapsKey: String) {
             }
             if (locationPermissionState.allPermissionsGranted)
                 MapView(
-                    bingMapsKey,
                     modifier = Modifier
                         .padding(end = 4.dp, start = 4.dp, bottom = 4.dp)
                         .graphicsLayer {

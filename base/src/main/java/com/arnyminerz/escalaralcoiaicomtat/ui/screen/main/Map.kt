@@ -13,7 +13,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.LifecycleOwner
-import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
@@ -37,7 +36,6 @@ fun MainActivity.MapScreen() {
         var bottomDialogImage by remember { mutableStateOf<Uri?>(null) }
 
         MapView(
-            BuildConfig.BING_MAPS_KEY,
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
