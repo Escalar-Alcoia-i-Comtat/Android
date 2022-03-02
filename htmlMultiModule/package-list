@@ -63,7 +63,6 @@ com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 com.arnyminerz.escalaralcoiaicomtat.core.utils
 com.arnyminerz.escalaralcoiaicomtat.core.utils.context
 com.arnyminerz.escalaralcoiaicomtat.core.utils.livedata
-com.arnyminerz.escalaralcoiaicomtat.core.utils.maps
 com.arnyminerz.escalaralcoiaicomtat.core.utils.storage
 com.arnyminerz.escalaralcoiaicomtat.core.view
 com.arnyminerz.escalaralcoiaicomtat.core.web
