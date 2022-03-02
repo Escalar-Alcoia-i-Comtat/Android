@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.utils
 import android.content.Intent
 import android.location.Location
 import android.net.Uri
+import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 
 /**
@@ -21,6 +22,49 @@ fun List<GeoPoint>.computeCentroid(): GeoPoint {
     }
 
     return GeoPoint(latitude / size, longitude / size)
+}
+
+fun List<GeoPoint>.getBoundingBox(): BoundingBox {
+    // First get bottom-left and top-right points
+    var bottomLeft: GeoPoint? = null
+    var topRight: GeoPoint? = null
+
+    for (point in this) {
+        if (bottomLeft == null)
+            bottomLeft = point
+        if (topRight == null)
+            topRight = point
+        if (point.latitude < bottomLeft.latitude && point.longitude < bottomLeft.longitude)
+            bottomLeft = point
+        else if (point.latitude > bottomLeft.latitude && point.longitude > bottomLeft.longitude)
+            topRight = point
+    }
+
+    if (bottomLeft == null || topRight == null)
+        throw IllegalStateException("Could not get bottom left nor top right points.")
+
+    // Now get bounds
+    val north: Double
+    val south: Double
+    val east: Double
+    val west: Double
+
+    if (bottomLeft.latitude > topRight.latitude) {
+        north = bottomLeft.latitude
+        south = topRight.latitude
+    } else {
+        north = topRight.latitude
+        south = bottomLeft.latitude
+    }
+    if (bottomLeft.longitude > topRight.longitude) {
+        east = bottomLeft.longitude
+        west = topRight.longitude
+    } else {
+        east = topRight.longitude
+        west = bottomLeft.longitude
+    }
+
+    return BoundingBox(north, east, south, west)
 }
 
 fun GeoPoint.toUri(showMarker: Boolean = false, markerTitle: String? = null): Uri {

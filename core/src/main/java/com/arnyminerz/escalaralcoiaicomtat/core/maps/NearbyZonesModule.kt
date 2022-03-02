@@ -6,32 +6,43 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import androidx.annotation.UiThread
-import com.google.android.gms.maps.LocationSource
+import org.osmdroid.views.overlay.mylocation.IMyLocationConsumer
+import org.osmdroid.views.overlay.mylocation.IMyLocationProvider
 
 class NearbyZonesModule
 @UiThread constructor(
     context: Context,
     private val locationListener: (location: Location) -> Unit
-) : LocationSource, LocationListener {
-    private lateinit var listener: LocationSource.OnLocationChangedListener
-
+) : IMyLocationProvider, LocationListener {
     private val locationManager: LocationManager =
         context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
     @SuppressLint("MissingPermission")
-    override fun activate(listener: LocationSource.OnLocationChangedListener) {
-        this.listener = listener
-
+    fun activate() {
         // Get updates every 10 seconds or 10 meters
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 10f, this)
     }
 
-    override fun deactivate() {
+    fun deactivate() {
         locationManager.removeUpdates(this)
     }
 
     override fun onLocationChanged(location: Location) {
-        listener.onLocationChanged(location)
         locationListener(location)
     }
+
+    override fun startLocationProvider(myLocationConsumer: IMyLocationConsumer?): Boolean {
+        activate()
+        return true
+    }
+
+    override fun stopLocationProvider() {
+        deactivate()
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun getLastKnownLocation(): Location? =
+        locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+
+    override fun destroy() {}
 }
