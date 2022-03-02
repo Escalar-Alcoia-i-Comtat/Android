@@ -60,10 +60,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestOptions
-import com.google.android.gms.maps.model.LatLng
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.parcelize.IgnoredOnParcel
+import org.osmdroid.util.GeoPoint
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -118,7 +118,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @author Arnau Mora
      * @since 20210830
      */
-    open val location: LatLng?,
+    open val location: GeoPoint?,
     /**
      * Some metadata of the [DataClass].
      * @author Arnau Mora

@@ -149,10 +149,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.9.0'
 
     // Maps SDK
-    api 'com.google.android.gms:play-services-maps:18.0.2'
-    api 'com.google.maps.android:maps-ktx:3.3.0'
-    api 'com.google.maps.android:android-maps-utils:2.3.0'
-    api 'com.google.maps.android:maps-utils-ktx:3.3.0'
+    api 'org.osmdroid:osmdroid-android:6.1.11'
+    api 'com.github.MKergall:osmbonuspack:6.7.0'
 
     // AndroidX preferences
     api 'androidx.datastore:datastore-preferences:1.0.0'

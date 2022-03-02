@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.location.Location
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
@@ -35,21 +36,27 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.NearbyZonesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.GoogleMap
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.MapView
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.distanceTo
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toLatLng
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getBoundingBox
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toGeoPoint
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.vibrate
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.CustomZoomButtonsController
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import timber.log.Timber
 
 /**
@@ -66,39 +73,51 @@ private val markers = arrayListOf<Marker>()
  * @since 20220212
  */
 private suspend fun locationCallback(
+    context: Context,
     model: NearbyZonesViewModel,
-    map: GoogleMap,
+    mapView: MapView,
     location: Location
 ) {
     for (marker in markers)
-        marker.remove()
+        mapView.overlays.remove(marker)
     markers.clear()
 
     PreferencesModule
         .getNearbyZonesDistance()
         .collect { nearbyZonesDistance ->
+            val points = arrayListOf<GeoPoint>()
             for (zone in model.zones)
                 zone.location
-                    ?.takeIf { it.distanceTo(location.toLatLng()) <= nearbyZonesDistance }
+                    ?.takeIf { it.distanceTo(location.toGeoPoint()) <= nearbyZonesDistance }
                     ?.let { markerPosition ->
-                        uiContext {
-                            map.addMarker(
-                                MarkerOptions()
-                                    .title(zone.displayName)
-                                    .position(markerPosition)
-                            )?.let { markers.add(it) }
-                        }
-                    }
-        }
+                        Marker(mapView)
+                            .apply {
+                                position = markerPosition
+                                title = zone.displayName
+                                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                                icon = ContextCompat.getDrawable(
+                                    context,
+                                    R.drawable.ic_waypoint_escalador_blanc
+                                )
 
-    // TODO: Move camera to fit markers
+                                points.add(markerPosition)
+                                markers.add(this)
+                            }
+                    }
+            uiContext {
+                mapView.overlays.addAll(markers)
+
+                mapView.invalidate()
+                mapView.zoomToBoundingBox(points.getBoundingBox(), true, 30)
+            }
+        }
 }
 
 @SuppressLint("MissingPermission")
 @ExperimentalMaterial3Api
 @ExperimentalPermissionsApi
 @Composable
-fun ComponentActivity.NearbyZones() {
+fun ComponentActivity.NearbyZones(bingMapsKey: String) {
     val context = LocalContext.current
     val model: NearbyZonesViewModel by viewModels()
     val locationPermissionState = rememberMultiplePermissionsState(
@@ -145,7 +164,8 @@ fun ComponentActivity.NearbyZones() {
                 )
             }
             if (locationPermissionState.allPermissionsGranted)
-                GoogleMap(
+                MapView(
+                    bingMapsKey,
                     modifier = Modifier
                         .padding(end = 4.dp, start = 4.dp, bottom = 4.dp)
                         .graphicsLayer {
@@ -154,21 +174,45 @@ fun ComponentActivity.NearbyZones() {
                         }
                         .height(150.dp)
                         .fillMaxWidth()
-                ) { googleMap ->
-                    Timber.i("Loaded NearbyZones Google Map.")
-                    googleMap.uiSettings.apply {
-                        isMyLocationButtonEnabled = false
-                        setAllGesturesEnabled(false)
+                ) { mapView ->
+                    Timber.i("Loaded NearbyZones Map.")
+                    mapView.setMultiTouchControls(false)
+                    mapView.isFlingEnabled = false
+                    mapView.zoomController.apply {
+                        setZoomInEnabled(false)
+                        setZoomOutEnabled(false)
+                        setVisibility(CustomZoomButtonsController.Visibility.NEVER)
                     }
-                    googleMap.setLocationSource(
-                        NearbyZonesModule(context) { location ->
-                            doAsync { locationCallback(model, googleMap, location) }
-                            googleMap.moveCamera(
-                                CameraUpdateFactory.newLatLng(location.toLatLng())
-                            )
+
+                    val nearbyZonesModule = NearbyZonesModule(context) { location ->
+                        doAsync { locationCallback(context, model, mapView, location) }
+                        mapView.controller.animateTo(location.toGeoPoint())
+                        mapView.controller.setZoom(14.0)
+                    }
+
+                    var locationOverlay = MyLocationNewOverlay(nearbyZonesModule, mapView)
+                    locationOverlay.enableMyLocation()
+                    mapView.overlays.add(locationOverlay)
+
+                    lifecycle.addObserver(object : LifecycleEventObserver {
+                        override fun onStateChanged(
+                            source: LifecycleOwner,
+                            event: Lifecycle.Event
+                        ) {
+                            when (event) {
+                                Lifecycle.Event.ON_RESUME -> try {
+                                    locationOverlay.enableMyLocation()
+                                } catch (e: RuntimeException) {
+                                    locationOverlay =
+                                        MyLocationNewOverlay(nearbyZonesModule, mapView)
+                                    locationOverlay.enableMyLocation()
+                                    mapView.overlays.add(locationOverlay)
+                                }
+                                Lifecycle.Event.ON_PAUSE -> locationOverlay.disableMyLocation()
+                                else -> {}
+                            }
                         }
-                    )
-                    googleMap.isMyLocationEnabled = true
+                    })
                 }
             else {
                 var showRationale by remember { mutableStateOf(false) }

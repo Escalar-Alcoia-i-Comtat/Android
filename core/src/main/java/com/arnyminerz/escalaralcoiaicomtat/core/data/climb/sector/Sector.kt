@@ -11,11 +11,11 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
-import com.google.android.gms.maps.model.LatLng
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
+import org.osmdroid.util.GeoPoint
 
 /**
  * Creates a new [Sector] instance.
@@ -30,7 +30,7 @@ class Sector internal constructor(
     @SunTime val sunTime: String,
     val kidsApt: Boolean,
     val walkingTime: Long,
-    override val location: LatLng?,
+    override val location: GeoPoint?,
     val weight: String,
     override val imagePath: String,
     val webUrl: String?,
@@ -71,7 +71,7 @@ class Sector internal constructor(
         data.getString("sunTime"),
         data.getBoolean("kidsApt"),
         data.getLong("walkingTime"),
-        LatLng(
+        GeoPoint(
             data.getDouble("latitude"),
             data.getDouble("longitude")
         ),
@@ -127,7 +127,7 @@ class Sector internal constructor(
             sunTime = NO_SUN,
             kidsApt = false,
             walkingTime = 12,
-            location = LatLng(38.741649, -0.466173),
+            location = GeoPoint(38.741649, -0.466173),
             weight = "aac",
             imagePath = "images/sectors/mas-de-la-penya-sector-3_croquis.jpg",
             webUrl = null,

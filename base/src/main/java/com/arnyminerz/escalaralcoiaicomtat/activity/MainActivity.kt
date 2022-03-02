@@ -10,12 +10,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.preference.PreferenceManager
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UPDATE_AVAILABLE
@@ -46,8 +49,8 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.settingsViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.google.android.gms.maps.GoogleMap
 import com.google.android.material.badge.ExperimentalBadgeUtils
+import org.osmdroid.config.Configuration
 import timber.log.Timber
 
 class MainActivity : LanguageComponentActivity() {
@@ -67,13 +70,6 @@ class MainActivity : LanguageComponentActivity() {
         DeveloperViewModel.Factory(application)
     })
 
-    /**
-     * The GoogleMap instance for adding and removing features to the map.
-     * @author Arnau Mora
-     * @since 20211230
-     */
-    internal var googleMap: GoogleMap? = null
-
     @ExperimentalBadgeUtils
     @OptIn(
         ExperimentalMaterial3Api::class,
@@ -83,6 +79,15 @@ class MainActivity : LanguageComponentActivity() {
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Configuration.getInstance()
+            .apply {
+                load(
+                    this@MainActivity,
+                    PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
+                )
+                userAgentValue = BuildConfig.APPLICATION_ID
+            }
 
         setContent {
             var updatesAvailable by remember { mutableStateOf<Int?>(null) }
@@ -118,6 +123,14 @@ class MainActivity : LanguageComponentActivity() {
     @Composable
     private fun Home(updatesAvailable: Int?) {
         val pagerState = rememberPagerState()
+        var userScrollEnabled by remember { mutableStateOf(true) }
+
+        LaunchedEffect(pagerState) {
+            snapshotFlow { pagerState.currentPage }.collect { page ->
+                userScrollEnabled = page != 1
+            }
+        }
+
         Scaffold(
             bottomBar = {
                 NavigationBar {
@@ -149,6 +162,7 @@ class MainActivity : LanguageComponentActivity() {
                 count = 5,
                 state = pagerState,
                 modifier = Modifier.padding(innerPadding),
+                userScrollEnabled = userScrollEnabled,
             ) { index ->
                 when (index) {
                     0 -> ExploreScreen()

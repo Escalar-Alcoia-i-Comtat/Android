@@ -3,7 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone
 import androidx.appsearch.annotation.Document
 import androidx.appsearch.app.AppSearchSchema
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
-import com.google.android.gms.maps.model.LatLng
+import org.osmdroid.util.GeoPoint
 
 @Document
 data class ZoneData(
@@ -27,7 +27,7 @@ data class ZoneData(
         timestamp,
         image,
         kmzPath,
-        LatLng(latitude, longitude),
+        GeoPoint(latitude, longitude),
         webUrl.ifEmpty { null },
         parentObjectId
     )

@@ -9,10 +9,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDi
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
-import com.google.android.gms.maps.model.LatLng
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
+import org.osmdroid.util.GeoPoint
 
 /**
  * Creates a new [Zone] instance.
@@ -26,7 +26,7 @@ class Zone internal constructor(
     override val timestampMillis: Long,
     override val imagePath: String,
     override val kmzPath: String?,
-    val position: LatLng,
+    val position: GeoPoint,
     val webUrl: String?,
     private val parentAreaId: String,
 ) : DataClass<Sector, Area, ZoneData>(
@@ -63,7 +63,7 @@ class Zone internal constructor(
         data.getDate("last_edit")!!.time,
         data.getString("image"),
         data.getString("kmz"),
-        LatLng(
+        GeoPoint(
             data.getDouble("latitude"),
             data.getDouble("longitude")
         ),
@@ -102,7 +102,7 @@ class Zone internal constructor(
             timestampMillis = 1618160538000L,
             imagePath = "gs://escalaralcoiaicomtat.appspot.com/images/BarranquetDeFerriAPP.jpg",
             kmzPath = "gs://escalaralcoiaicomtat.appspot.com/kmz/Barranquet de Ferri.kmz",
-            position = LatLng(38.705581, -0.498946),
+            position = GeoPoint(38.705581, -0.498946),
             webUrl = "https://escalaralcoiaicomtat.centrexcursionistalcoi.org/barranquet-de-ferri.html",
             parentAreaId = "WWQME983XhriXVhtVxFu"
         )

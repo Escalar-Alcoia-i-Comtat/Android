@@ -3,9 +3,8 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector
 import androidx.appsearch.annotation.Document
 import androidx.appsearch.app.AppSearchSchema
 import androidx.appsearch.app.GenericDocument
-import androidx.appsearch.app.Migrator
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
-import com.google.android.gms.maps.model.LatLng
+import org.osmdroid.util.GeoPoint
 
 @Document
 data class SectorData(
@@ -76,7 +75,7 @@ data class SectorData(
         sunTime,
         kidsApt,
         walkingTime,
-        if (latitude == null || longitude == null) null else LatLng(latitude!!, longitude!!),
+        if (latitude == null || longitude == null) null else GeoPoint(latitude!!, longitude!!),
         weight,
         image,
         webUrl.ifEmpty { null },
