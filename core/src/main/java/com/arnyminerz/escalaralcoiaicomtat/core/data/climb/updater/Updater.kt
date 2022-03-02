@@ -49,7 +49,6 @@ private suspend fun lastDownloadedItem(searchSession: AppSearchSession): Long {
         for (searchResult in page) {
             val genericDocument = searchResult.genericDocument
             val creationTimestampMillis = genericDocument.creationTimestampMillis
-            Timber.v("Millis: $creationTimestampMillis")
             creationTimestampMillis
                 .takeIf { it > youngestTime }
                 ?.let { youngestTime = it }
