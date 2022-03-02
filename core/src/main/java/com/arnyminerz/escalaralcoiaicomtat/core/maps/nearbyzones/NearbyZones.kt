@@ -90,25 +90,23 @@ private suspend fun locationCallback(
                 zone.location
                     ?.takeIf { it.distanceTo(location.toGeoPoint()) <= nearbyZonesDistance }
                     ?.let { markerPosition ->
-                        uiContext {
-                            mapView.overlays.add(
-                                Marker(mapView)
-                                    .apply {
-                                        position = markerPosition
-                                        title = zone.displayName
-                                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                                        icon = ContextCompat.getDrawable(
-                                            context,
-                                            R.drawable.ic_waypoint_escalador_blanc
-                                        )
+                        Marker(mapView)
+                            .apply {
+                                position = markerPosition
+                                title = zone.displayName
+                                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                                icon = ContextCompat.getDrawable(
+                                    context,
+                                    R.drawable.ic_waypoint_escalador_blanc
+                                )
 
-                                        points.add(markerPosition)
-                                        markers.add(this)
-                                    }
-                            )
-                        }
+                                points.add(markerPosition)
+                                markers.add(this)
+                            }
                     }
             uiContext {
+                mapView.overlays.addAll(markers)
+
                 mapView.invalidate()
                 mapView.zoomToBoundingBox(points.getBoundingBox(), true, 30)
             }
@@ -191,7 +189,7 @@ fun ComponentActivity.NearbyZones() {
                         mapView.controller.setZoom(14.0)
                     }
 
-                    val locationOverlay = MyLocationNewOverlay(nearbyZonesModule, mapView)
+                    var locationOverlay = MyLocationNewOverlay(nearbyZonesModule, mapView)
                     locationOverlay.enableMyLocation()
                     mapView.overlays.add(locationOverlay)
 
@@ -201,7 +199,14 @@ fun ComponentActivity.NearbyZones() {
                             event: Lifecycle.Event
                         ) {
                             when (event) {
-                                Lifecycle.Event.ON_RESUME -> locationOverlay.enableMyLocation()
+                                Lifecycle.Event.ON_RESUME -> try {
+                                    locationOverlay.enableMyLocation()
+                                } catch (e: RuntimeException) {
+                                    locationOverlay =
+                                        MyLocationNewOverlay(nearbyZonesModule, mapView)
+                                    locationOverlay.enableMyLocation()
+                                    mapView.overlays.add(locationOverlay)
+                                }
                                 Lifecycle.Event.ON_PAUSE -> locationOverlay.disableMyLocation()
                                 else -> {}
                             }
