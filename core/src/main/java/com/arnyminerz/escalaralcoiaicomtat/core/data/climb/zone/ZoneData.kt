@@ -9,7 +9,7 @@ import org.osmdroid.util.GeoPoint
 data class ZoneData(
     @Document.Score var index: Int,
     @Document.Id var objectId: String,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var displayName: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES) var displayName: String,
     @Document.CreationTimestampMillis var timestamp: Long,
     @Document.StringProperty var image: String,
     @Document.StringProperty var kmzPath: String?,

@@ -25,7 +25,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -56,18 +62,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.work.await
-import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone.Companion.SAMPLE_ZONE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATA_SEARCH_SCHEMAS_NAMES
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
@@ -92,12 +99,6 @@ import timber.log.Timber
 @ExperimentalBadgeUtils
 @ExperimentalMaterial3Api
 class SearchableActivity : ComponentActivity() {
-    /**
-     * Stores the last performed search so multiple searches are not made at once.
-     * @author Arnau Mora
-     * @since 20210811
-     */
-    var lastSearch = ""
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,22 +111,20 @@ class SearchableActivity : ComponentActivity() {
                     val searchQuery = if (intent.action == Intent.ACTION_SEARCH)
                         intent.getStringExtra(SearchManager.QUERY)
                     else null
-                    var query by remember { mutableStateOf(searchQuery ?: "") }
 
                     val searchViewModel = SearchViewModel(application)
-                    val list: List<DataClassImpl> by searchViewModel.itemList.observeAsState(listOf())
-                    if (query.isNotBlank() && lastSearch != query) {
-                        lastSearch = query
-                        searchViewModel.search(query)
-                    } else
+                    val list by searchViewModel.itemList.observeAsState(emptyList())
+
+                    if (searchQuery != null && searchQuery.isNotBlank())
+                        searchViewModel.search(searchQuery)
+                    else
                         Timber.w("Search query is null, won't search for anything.")
 
                     Column {
-                        Timber.v("Search query: $query")
-                        SearchBar(query) {
-                            query = it
+                        Timber.v("Search query: $searchQuery")
+                        SearchBar(searchQuery ?: "") { query ->
                             Timber.v("New search query: $query")
-//                            searchViewModel.search(query)
+                            searchViewModel.search(query)
                         }
                         Timber.v("Search results: $list")
                         if (list.isEmpty())
@@ -269,17 +268,18 @@ class SearchableActivity : ComponentActivity() {
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                        ) {
-                            append(dataClassType)
-                        }
-                        val app = application as App
+                        ) { append(dataClassType) }
                         val parent = runBlocking {
-                            (dataClassImpl as? DataClass<*, *, *>)
-                                ?.getParent(app.searchSession)
-                                ?: run { (dataClassImpl as? Path)?.getParent(app) }
+                            when (dataClassImpl) {
+                                is Area -> null
+                                is Zone -> dataClassImpl.getParent<Area>(app.searchSession)
+                                is Sector -> dataClassImpl.getParent<Zone>(app.searchSession)
+                                is Path -> dataClassImpl.getParent(app)
+                                else -> null
+                            }
                         }
                         if (parent != null)
-                            append(" - " + parent.displayName)
+                            append(" - ${parent.displayName}")
                         else Timber.e("Could not find parent for $dataClassImpl")
                     },
                     modifier = Modifier
@@ -341,7 +341,7 @@ class SearchableActivity : ComponentActivity() {
             val session = app.searchSession
             Timber.v("Creating search spec...")
             val searchSpec = SearchSpec.Builder()
-                .addFilterPackageNames(BuildConfig.APPLICATION_ID)
+                .addFilterSchemas(DATA_SEARCH_SCHEMAS_NAMES)
                 .build()
             Timber.v("Performing search...")
             val searchResults = session.search(query, searchSpec)

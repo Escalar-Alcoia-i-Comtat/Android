@@ -10,9 +10,9 @@ import org.osmdroid.util.GeoPoint
 data class SectorData(
     @Document.Score var index: Int,
     @Document.Id var objectId: String,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var displayName: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES) var displayName: String,
     @Document.CreationTimestampMillis var timestamp: Long,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var sunTime: String,
+    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_NONE) var sunTime: String,
     @Document.BooleanProperty var kidsApt: Boolean,
     @Document.LongProperty var walkingTime: Long,
     @Document.DoubleProperty var latitude: Double?,

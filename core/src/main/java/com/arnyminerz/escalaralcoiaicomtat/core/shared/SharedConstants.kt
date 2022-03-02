@@ -134,6 +134,18 @@ val SEARCH_SCHEMAS = listOf<Class<*>>(
 )
 
 /**
+ * The names of the classes that contain climbing data of the app search schema.
+ * @author Arnau Mora
+ * @since 20220302
+ */
+val DATA_SEARCH_SCHEMAS_NAMES = listOf<String>(
+    AreaData::class.java.simpleName,
+    ZoneData::class.java.simpleName,
+    SectorData::class.java.simpleName,
+    PathData::class.java.simpleName,
+)
+
+/**
  * The version number for the current search schemas.
  * @author Arnau Mora
  * @since 20220226
