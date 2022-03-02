@@ -196,10 +196,3 @@ const val DYNAMIC_LINKS_DOMAIN = "https://escalaralcoiaicomtat.page.link"
  * @since 20210521
  */
 const val ESCALAR_ALCOIA_I_COMTAT_HOSTNAME = "escalaralcoiaicomtat.centrexcursionistalcoi.org"
-
-/**
- * The name of the data module, for requesting installs and uninstalls.
- * @author Arnau Mora
- * @since 20211227
- */
-const val DATA_MODULE_NAME = "data"
