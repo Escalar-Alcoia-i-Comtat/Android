@@ -23,7 +23,6 @@ jobs:
           echo 'SIGNING_KEYSTORE_PASSWORD=${{ secrets.SIGNING_KEYSTORE_PASSWORD }}' >> local.properties
           echo 'SIGNING_KEY_ALIAS=${{ secrets.SIGNING_KEY_ALIAS }}' >> local.properties
           echo 'SIGNING_KEY_PASSWORD=${{ secrets.SIGNING_KEY_PASSWORD }}' >> local.properties
-          echo 'GOOGLE_AUTH_CLIENT_ID=${{ secrets.GOOGLE_AUTH_CLIENT_ID }}' >> local.properties
           echo 'BING_MAPS_KEY=${{ secrets.BING_MAPS_KEY }}' >> local.properties
       - name: Prepare Gradle version file
         run: |
