@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel
 
 import android.app.Application
+import androidx.annotation.UiThread
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -44,7 +45,11 @@ class MainMapViewModel(
         true
     )
 
-    fun loadAreasIntoMap(mapView: MapView, areas: List<Area>) {
+    fun loadAreasIntoMap(
+        mapView: MapView,
+        areas: List<Area>,
+        @UiThread finishListener: () -> Unit
+    ) {
         Timber.i("Loading KMZ of ${areas.size} areas...")
         viewModelScope.launch {
             try {
@@ -71,6 +76,7 @@ class MainMapViewModel(
                     for (overlay in mapView.overlays)
                         boundingBox = boundingBox?.concat(overlay.bounds) ?: overlay.bounds
                     boundingBox?.let { mapView.zoomToBoundingBox(it, false) }
+                    finishListener()
                 }
             }catch (e: VolleyError) {
                 Timber.e(e, "Could not download KMZ file.")
