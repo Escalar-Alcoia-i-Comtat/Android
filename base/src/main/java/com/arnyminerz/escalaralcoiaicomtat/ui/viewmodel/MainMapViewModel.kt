@@ -6,18 +6,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.android.volley.VolleyError
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetMarkerCentering
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.livedata.MutableListLiveData
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.data.kml.KmlContainer
-import com.google.maps.android.data.kml.KmlLayer
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.osmdroid.bonuspack.kml.KmlDocument
+import org.osmdroid.util.BoundingBox
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
 import timber.log.Timber
 
 class MainMapViewModel(
@@ -33,7 +34,7 @@ class MainMapViewModel(
         Timber.d("$this::onCleared")
     }
 
-    val locations: MutableListLiveData<LatLng> = MutableListLiveData<LatLng>().apply {
+    val locations: MutableListLiveData<GeoPoint> = MutableListLiveData<GeoPoint>().apply {
         postValue(mutableListOf())
     }
 
@@ -43,53 +44,34 @@ class MainMapViewModel(
         true
     )
 
-    fun loadGoogleMap(googleMap: GoogleMap, dataClass: DataClass<*, *, *>) {
-        @Suppress("BlockingMethodInNonBlockingContext")
+    fun loadAreasIntoMap(mapView: MapView, areas: List<Area>) {
+        Timber.i("Loading KMZ of ${areas.size} areas...")
         viewModelScope.launch {
             try {
-                val kmzFile = dataClass.kmzFile(context, false)
-                val kmzStream = kmzFile.inputStream()
-                val kmzLayer = KmlLayer(googleMap, kmzStream, context)
-                kmzLayer.addLayerToMap()
+                for (area in areas) {
+                    Timber.d("Loading KMZ file of $area...")
+                    val kmzFile = area.kmzFile(context, false)
+                    Timber.d("Parsing KMZ file of $area...")
+                    val kmzDocument = KmlDocument()
+                    kmzDocument.parseKMZFile(kmzFile)
 
-                fun iterateContainers(
-                    hasContainers: Boolean,
-                    containers: Iterable<KmlContainer>,
-                    count: Int = 0
-                ) {
-                    if (count < 10 && hasContainers)
-                        for (container in containers) {
-                            if (container.hasContainers())
-                                iterateContainers(true, container.containers, count + 1)
-                            if (container.hasPlacemarks()) {
-                                Timber.i("Container has placemarks")
-                                for (placemark in container.placemarks) {
-                                    when {
-                                        placemark.markerOptions != null -> {
-                                            locations.add(placemark.markerOptions.position)
-                                        }
-                                        placemark.polygonOptions != null -> {
-                                            val points = placemark.polygonOptions.points
-                                            locations.addAll(points)
-                                        }
-                                        placemark.polylineOptions != null -> {
-                                            val points = placemark.polygonOptions.points
-                                            locations.addAll(points)
-                                        }
-                                        placemark.hasGeometry() -> {
-                                            val geometry = placemark.geometry
-                                            val point = geometry.geometryObject as? LatLng
-                                            if (point != null) {
-                                                Timber.i("Adding point: $point")
-                                                locations.add(point)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    Timber.d("Building KMZ map overlay of $area...")
+                    val kmzOverlay =
+                        kmzDocument.mKmlRoot.buildOverlay(mapView, null, null, kmzDocument)
+
+                    Timber.d("Adding KMZ overlay to the map...")
+                    mapView.overlays.add(kmzOverlay)
                 }
-                iterateContainers(kmzLayer.hasContainers(), kmzLayer.containers)
+
+                uiContext {
+                    Timber.d("Invalidating map...")
+                    mapView.invalidate()
+                    Timber.d("Centering into map overlays...")
+                    var boundingBox: BoundingBox? = null
+                    for (overlay in mapView.overlays)
+                        boundingBox = boundingBox?.concat(overlay.bounds) ?: overlay.bounds
+                    boundingBox?.let { mapView.zoomToBoundingBox(it, false) }
+                }
             }catch (e: VolleyError) {
                 Timber.e(e, "Could not download KMZ file.")
             }
