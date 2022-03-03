@@ -20,7 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.DownloadWorker
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.Date
 
 class DataClassItemViewModel(
     application: Application
@@ -39,24 +39,27 @@ class DataClassItemViewModel(
         overwrite: Boolean = true,
         quality: Int = 100,
     ) {
-        val workerInfo = DataClass.scheduleDownload<DownloadWorker>(
-            context,
-            pin,
-            displayName,
-            overwrite,
-            quality
-        )
-        workerInfo.observe(context as LifecycleOwner) { workInfo ->
-            var state = DownloadStatus.DOWNLOADING
+        viewModelScope.launch {
+            val workerInfo = DataClass.scheduleDownload(
+                context,
+                pin,
+                displayName,
+                DownloadWorker.Companion,
+                overwrite,
+                quality
+            )
+            workerInfo.observe(context as LifecycleOwner) { workInfo ->
+                var state = DownloadStatus.DOWNLOADING
 
-            if (workInfo.state.isFinished) {
-                // TODO: This should not be hardcoded, should be checked for download state
-                state = DownloadStatus.DOWNLOADED
+                if (workInfo.state.isFinished) {
+                    // TODO: This should not be hardcoded, should be checked for download state
+                    state = DownloadStatus.DOWNLOADED
+                }
+
+                for (listener in downloadingStatusListeners)
+                    if (listener.key == pin)
+                        listener.value(state, workInfo)
             }
-
-            for (listener in downloadingStatusListeners)
-                if (listener.key == pin)
-                    listener.value(state, workInfo)
         }
     }
 

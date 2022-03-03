@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchResult
@@ -57,7 +58,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerFactory
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.skydoves.landscapist.ShimmerParams
@@ -67,7 +68,8 @@ import org.osmdroid.util.GeoPoint
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.util.*
+import java.util.Date
+import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -396,13 +398,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          *
          * @throws IllegalArgumentException If the specified quality is out of bounds
          */
+        @WorkerThread
         @Throws(IllegalArgumentException::class)
-        inline fun <reified W : DownloadWorkerModel> scheduleDownload(
+        suspend inline fun <reified W : DownloadWorkerFactory> scheduleDownload(
             context: Context,
             pin: String,
             displayName: String,
+            companion: W,
             overwrite: Boolean = true,
-            quality: Int = 100
+            quality: Int = 100,
         ): LiveData<WorkInfo> {
             if (quality < DOWNLOAD_QUALITY_MIN || quality > DOWNLOAD_QUALITY_MAX)
                 throw IllegalArgumentException(
@@ -417,10 +421,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
                 "schedule",
                 Context::class.java,
                 String::class.java,
-                DownloadData::class.java
+                DownloadData::class.java,
+                Continuation::class.java,
             )
-            @Suppress("UNCHECKED_CAST")
-            return schedule.invoke(null, context, pin, downloadData) as LiveData<WorkInfo>
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                Timber.i("Download Worker schedule args: ${schedule.parameters.map { "${it.name}: ${it.type.simpleName}" }}")
+
+            return suspendCoroutine { continuation ->
+                schedule(companion, context, pin, downloadData, continuation)
+            }
         }
 
         /**
@@ -725,13 +734,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      *
      * @throws IllegalArgumentException If the specified quality is out of bounds
      */
+    @WorkerThread
     @Throws(IllegalArgumentException::class)
-    inline fun <reified W : DownloadWorkerModel> download(
+    suspend inline fun <reified W : DownloadWorkerFactory> download(
         context: Context,
+        companion: W,
         overwrite: Boolean = true,
         quality: Int = 100
     ): LiveData<WorkInfo> =
-        scheduleDownload<W>(context, pin, displayName, overwrite, quality)
+        scheduleDownload<W>(context, pin, displayName, companion, overwrite, quality)
 
     /**
      * Gets the DownloadStatus of the DataClass
