@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.annotations
 
+import androidx.annotation.StringDef
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -12,6 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
     AnnotationTarget.PROPERTY_GETTER
 )
 @Retention(AnnotationRetention.SOURCE)
+@StringDef(Area.NAMESPACE, Zone.NAMESPACE, Sector.NAMESPACE, Path.NAMESPACE)
 annotation class Namespace
 
 /**
