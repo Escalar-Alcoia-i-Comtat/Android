@@ -15,8 +15,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
  * @return A pair of Strings, the first is the decoded namespace, and the second the id.
  */
 fun decodePin(pin: String): Pair<@Namespace String, @ObjectId String> {
-    val namespaceLetter = pin[0]
-    val objectId = pin.substring(2)
+    val separator = pin.indexOf('_')
+    val namespaceLetter = pin.substring(0, separator)
+    val objectId = pin.substring(separator + 1)
     val namespace = if (Area.NAMESPACE.startsWith(namespaceLetter))
         Area.NAMESPACE
     else if (Zone.NAMESPACE.startsWith(namespaceLetter))
