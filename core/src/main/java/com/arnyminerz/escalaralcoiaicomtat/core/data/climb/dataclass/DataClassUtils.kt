@@ -8,6 +8,13 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 
 /**
+ * Contains a list of the namespaces of the downloadable DataClasses.
+ * @author Arnau Mora
+ * @since 20220304
+ */
+val DOWNLOADABLE_NAMESPACES = listOf(Zone.NAMESPACE, Sector.NAMESPACE)
+
+/**
  * Fetches the namespace and object id from a pin.
  * @author Arnau Mora
  * @since 20220304
