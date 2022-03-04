@@ -22,28 +22,26 @@ import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DOWNLOADABLE_NAMESPACES
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.exception.InitializationException
 import com.arnyminerz.escalaralcoiaicomtat.core.network.VolleySingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATACLASS_PREVIEW_SCALE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_OVERWRITE_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_FETCH
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_LIST
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DOWNLOAD_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.InputStreamVolleyRequest
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.size
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_DISPLAY_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_NAMESPACE
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_OBJECT_ID
@@ -286,7 +284,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         @ObjectId
         val objectId: String,
         val displayName: String,
-        val childrenCount: Long = 0,
+        var childrenCount: Long = 0,
         val parentId: String? = null
     ) {
         var size: Long? = null
@@ -306,6 +304,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @throws IllegalStateException If the object doesn't contain a required field.
      * @throws NoSuchElementException If the specified combination of [objectId] and [namespace]
      * does not have any match on the server.
+     * @throws InitializationException When the [namespace] is not valid.
      */
     private suspend fun downloadData(
         @ObjectId objectId: String,
@@ -315,106 +314,96 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         val kmzFiles = arrayListOf<KMZDownloadData>()
 
         /**
-         * Fetches the required data from [path], and adds the requests to imageFiles and kmzFiles
-         * if necessary.
+         * Fetches data from the server, adds images and kmz to the download lists, and returns
+         * a list of [DownloadData] with the data of the objects.
          * @author Arnau Mora
-         * @since 20210928
-         * @param path The path inside [firestore] where to download the data from.
-         * @return An instance of the [DownloadData] class. If it's zone, [DownloadData.childrenCount]
-         * should match the amount of sectors inside the zone. If it's sector, it should be -1.
+         * @since 20220304
+         * @param namespace The namespace of the DataClass to download.
+         * @param objectId The id of the parent DataClass if [isParent] is false, or the id of the
+         * DataClass to download otherwise.
+         * @param isParent If the [objectId] represents the item to download (false), or the parent
+         * of a list (true).
          */
-        suspend fun scheduleDownload(
+        suspend fun generateData(
+            @Namespace namespace: String,
             @ObjectId objectId: String,
-            @Namespace namespace: String
-        ): Pair<DownloadData, List<DownloadData>> {
-            // Get the document data from Firestore
+            isParent: Boolean
+        ): List<DownloadData> {
+            // Get data of the DataClass
             Timber.v("Getting data ($namespace/$objectId)...")
-            var url = "$REST_API_DATA_FETCH/$namespace/$objectId"
+            val endpoint = if (isParent)
+                REST_API_DATA_LIST
+            else
+                REST_API_DATA_FETCH
+            val url = "$endpoint${namespace + "s"}/$objectId"
 
-            if (namespace == Zone.NAMESPACE)
-                url += "?loadChildren=true"
+            // Disabled since currently server not working
+            // if (namespace == Zone.NAMESPACE)
+            //     url += "?loadChildren=true"
 
             val jsonData = applicationContext.getJson(url)
-            if (!jsonData.has("result"))
-                throw NoSuchElementException("There's no \"result\" field on the server response.")
-            val result = jsonData.getJSONObject("result")
-            if (!result.has("parent"))
-                throw NoSuchElementException("The result does not have a \"parent\" element.")
-            val objectData = result.getJSONObject("parent")
+            Timber.v("Parsing result data...")
+            val jsonResult = if (jsonData.has("result")) jsonData.getJSONObject("result")
+            else throw IllegalStateException("Could not find \"result\" field.")
 
-            // Get all the fields from the document
-            Timber.v("Getting fields...")
-            val displayName = objectData.getString("displayName") ?: run {
-                // All documents should contain a display name, if not set, throw an exception.
-                Timber.w("Object at $namespace/$objectId doesn't have a display name.")
-                throw IllegalStateException("Object at $namespace/$objectId doesn't have a display name.")
-            }
-            val imagePath = objectData.getString("image") ?: run {
-                // All documents should contain an image, if not set, throw an exception.
-                Timber.w("Object at $namespace/$objectId doesn't have an image field.")
-                throw IllegalStateException("Object at $namespace/$objectId doesn't have an image field.")
-            }
-            val kmzPath = if (objectData.has("kmz")) objectData.getString("kmz") else null
+            val resultList = arrayListOf<DownloadData>()
 
-            Timber.v("Processing image file download data...")
-            val imageFileName = DataClass.imageName(namespace, objectId, null)
-            val imageFile = File(dataDir(applicationContext), imageFileName)
-            // If the download is Zone, store the image in lower res, if it's Sector, download HD
-            val isPreview = namespace == Zone.NAMESPACE
-            val scale = if (isPreview) DATACLASS_PREVIEW_SCALE else 1f
+            val objectIds = jsonResult.keys()
+            for (jsonObjectId in objectIds) {
+                val jsonObject = jsonResult.getJSONObject(jsonObjectId)
 
-            Timber.v("Adding image download request data to the imageFiles list...")
-            imageFiles.add(ImageDownloadData(imagePath, imageFile, objectId, namespace, scale))
+                Timber.v("Building DataClass object...")
+                val dataClass = DataClass.buildContainers(namespace, jsonObjectId, jsonObject)
 
-            if (kmzPath != null) {
-                Timber.v("Processing KMZ file download data...")
-                val kmzFileName = "${namespace}_$objectId"
-                val kmzFile = File(dataDir(applicationContext), kmzFileName)
+                Timber.v("Adding image file to downloads list...")
+                imageFiles.add(
+                    ImageDownloadData(
+                        dataClass.imagePath,
+                        dataClass.imageFile(applicationContext),
+                        jsonObjectId,
+                        namespace,
+                        // TODO: Scale may be bigger for sector images
+                        .7f
+                    )
+                )
 
-                Timber.v("Adding kmz download request data to the kmzFiles list...")
-                kmzFiles.add(KMZDownloadData(kmzPath, kmzFile))
-            }
-
-            // Download the children if it's a zone
-            val childrenData = mutableListOf<DownloadData>()
-            var childrenCount: Long = 0
-            val parentId: String? = when (namespace) {
-                Zone.NAMESPACE -> if (result.has("children")) {
-                    // Get all the documents inside the "Sectors" collection in the Zone document.
-                    Timber.v("Getting children sectors...")
-                    val sectorsJsonData = result.getJSONArray("children")
-                    Timber.v("Got ${sectorsJsonData.length()} sector documents...")
-                    for (s in 0 until sectorsJsonData.length()) {
-                        val sectorJsonData = sectorsJsonData.getJSONObject(s)
-                        val data = scheduleDownload(
-                            sectorJsonData.getString("objectId"),
-                            Sector.NAMESPACE
+                if (dataClass.kmzPath != null) {
+                    Timber.v("Adding KMZ file to downloads list...")
+                    kmzFiles.add(
+                        KMZDownloadData(
+                            dataClass.kmzPath!!,
+                            dataClass.kmzFile(applicationContext, true)
                         )
-                        // data should not have children. Add the data to the zone's children list
-                        childrenData.add(data.first)
-                        childrenCount += 1L
-                    }
-                    if (result.has("area")) result.getString("area") else null
-                } else null
-                Sector.NAMESPACE -> if (result.has("zone")) result.getString("zone") else null
-                Path.NAMESPACE -> if (result.has("sector")) result.getString("sector") else null
-                else -> null
+                    )
+                }
+
+                resultList.add(
+                    DownloadData(
+                        namespace,
+                        jsonObjectId,
+                        displayName,
+                        0,
+                        objectId.takeIf { isParent }
+                    )
+                )
             }
 
-            return DownloadData(
-                namespace,
-                // It's important to add the downloaded prefix, or the stored data will be overridden
-                objectId,
-                displayName,
-                childrenCount,
-                parentId
-            ) to childrenData
+            return resultList
         }
 
-        Timber.v("Initializing data fetch...")
-        val scheduledDownloadData = scheduleDownload(objectId, namespace)
-        val parentData = scheduledDownloadData.first
-        val childrenData = scheduledDownloadData.second
+        // Get the parent data
+        val sourceDataList = generateData(namespace, objectId, false)
+        if (sourceDataList.isEmpty())
+            throw NoSuchElementException("Could not find DataClass at $namespace with $objectId.")
+        val sourceData = sourceDataList.first()
+
+        // Download children data
+        val childrenList = if (namespace == Zone.NAMESPACE)
+            generateData(Sector.NAMESPACE, objectId, true)
+        else emptyList()
+
+        // Update the children count of sourceData
+        sourceData.childrenCount = childrenList.size.toLong()
 
         Timber.v("Downloading image files...")
         for (downloadRequest in imageFiles) {
@@ -436,254 +425,242 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             downloadKmz(downloadRequest)
         }
 
-        Timber.d("Getting parent size...")
-        val parentImageSize = imageFiles.firstOrNull()?.imageFile?.size()
-            ?: run {
-                Timber.w("There are no image files downloaded to get size from.")
-                0
-            }
-        val parentKmzSize = kmzFiles.firstOrNull()?.kmzFile?.size()
-            ?: run {
-                Timber.w("There are no kmz files downloaded to get size from.")
-                0
-            }
-        val parentSize = parentImageSize + parentKmzSize
-        parentData.size = parentSize
-
-        parentData to childrenData
+        sourceData to childrenList
     }
 
     override suspend fun doWork(): Result {
         // Get all data
+        Timber.v("Getting work input data...")
         val displayName = inputData.getString(DOWNLOAD_DISPLAY_NAME)
-        val objectId =
-            inputData.getString(DOWNLOAD_OBJECT_ID) ?: return failure(ERROR_OBJECT_ID_NOT_SET)
-        val namespace =
-            inputData.getString(DOWNLOAD_NAMESPACE) ?: return failure(ERROR_NAMESPACE_NOT_SET)
+            ?: return failure(ERROR_MISSING_DATA)
+        val objectId = inputData.getString(DOWNLOAD_OBJECT_ID)
+            ?: return failure(ERROR_OBJECT_ID_NOT_SET)
+        val namespace = inputData.getString(DOWNLOAD_NAMESPACE)
+            ?: return failure(ERROR_NAMESPACE_NOT_SET)
         overwrite = inputData.getBoolean(DOWNLOAD_OVERWRITE, DOWNLOAD_OVERWRITE_DEFAULT)
         quality = inputData.getInt(DOWNLOAD_OVERWRITE, DOWNLOAD_QUALITY_DEFAULT)
 
-        if (!listOf(Area.NAMESPACE, Zone.NAMESPACE).contains(namespace))
+        // Check for namespace validity
+        Timber.v("Got input data. Checking if namespace is valid...")
+        if (!DOWNLOADABLE_NAMESPACES.contains(namespace)) {
+            Timber.e("Tried to download a non-downloadable or unknown namespace: $namespace")
             return failure(ERROR_INVALID_NAMESPACE)
+        }
 
         Timber.v("Starting download for %s".format(displayName))
 
         // Check if any required data is missing
-        return if (displayName == null)
-            failure(ERROR_MISSING_DATA)
-        else {
-            Timber.v("Initializing search session...")
-            appSearchSession = createSearchSession(applicationContext)
+        Timber.v("Initializing search session...")
+        appSearchSession = createSearchSession(applicationContext)
 
-            Timber.v("Downloading \"$displayName\"...")
-            this.displayName = displayName
+        Timber.v("Downloading \"$displayName\"...")
+        this.displayName = displayName
 
-            val message = applicationContext.getString(
-                R.string.notification_download_progress_message,
-                displayName
-            )
+        val message = applicationContext.getString(
+            R.string.notification_download_progress_message,
+            displayName
+        )
 
-            // Build the notification
-            val notificationBuilder = Notification.Builder(applicationContext)
-                .withChannelId(DOWNLOAD_PROGRESS_CHANNEL_ID)
-                .withIcon(R.drawable.ic_notifications)
-                .withTitle(R.string.notification_download_progress_title)
-                .withInfoText(R.string.notification_download_progress_info_fetching)
-                .withText(message)
-                .withProgress(-1, 0)
-                .setPersistent(true)
-            notification = notificationBuilder.buildAndShow()
+        // Build the notification
+        val notificationBuilder = Notification.Builder(applicationContext)
+            .withChannelId(DOWNLOAD_PROGRESS_CHANNEL_ID)
+            .withIcon(R.drawable.ic_notifications)
+            .withTitle(R.string.notification_download_progress_title)
+            .withInfoText(R.string.notification_download_progress_info_fetching)
+            .withText(message)
+            .withProgress(-1, 0)
+            .setPersistent(true)
+        notification = notificationBuilder.buildAndShow()
 
-            val downloadResult = try {
-                downloadData(objectId, namespace).let { downloadData ->
-                    val parentData = downloadData.first
-                    val childrenData = downloadData.second
-                    if (childrenData.size.toLong() != parentData.childrenCount)
-                        Timber.w("Loaded children data and theoretical children do not match.")
+        val downloadResult = try {
+            downloadData(objectId, namespace).let { downloadData ->
+                val parentData = downloadData.first
+                val childrenData = downloadData.second
+                if (childrenData.size.toLong() != parentData.childrenCount)
+                    Timber.w("Loaded children data and theoretical children do not match.")
 
-                    val childrenObjectIds = arrayListOf<String>()
-                    val childrenNames = arrayListOf<String>()
-                    val childrenSizes = arrayListOf<Long>()
-                    for (data in childrenData) {
-                        childrenObjectIds.add(data.objectId)
-                        childrenNames.add(data.displayName)
-                        childrenSizes.add(data.size ?: 0)
-                    }
-
-                    Result.success(
-                        workDataOf(
-                            "namespace" to parentData.namespace,
-                            "objectId" to parentData.objectId,
-                            "childrenCount" to parentData.childrenCount,
-                            "parentId" to parentData.parentId,
-                            "size" to parentData.size,
-                            "childrenIds" to childrenObjectIds.toTypedArray(),
-                            "childrenNames" to childrenNames.toTypedArray(),
-                            "childrenSizes" to childrenSizes.toTypedArray(),
-                        )
-                    )
+                val childrenObjectIds = arrayListOf<String>()
+                val childrenNames = arrayListOf<String>()
+                val childrenSizes = arrayListOf<Long>()
+                for (data in childrenData) {
+                    childrenObjectIds.add(data.objectId)
+                    childrenNames.add(data.displayName)
+                    childrenSizes.add(data.size ?: 0)
                 }
-            } catch (e: VolleyError) {
-                Timber.e(e, "There was an error while fetching data from the database.")
-                Timber.v("Destroying the progress notification...")
-                failure(ERROR_DATA_FETCH)
-            } catch (e: RuntimeException) {
-                Timber.e(e, "The type of a field from the server was not expected.")
-                Timber.v("Destroying the progress notification...")
-                failure(ERROR_DATA_TYPE)
-            } catch (e: IllegalStateException) {
-                Timber.e(e, "The type of a field from the server was not expected.")
-                Timber.v("Destroying the progress notification...")
-                failure(ERROR_DATA_FRAGMENTED)
+
+                Result.success(
+                    workDataOf(
+                        "namespace" to parentData.namespace,
+                        "objectId" to parentData.objectId,
+                        "childrenCount" to parentData.childrenCount,
+                        "parentId" to parentData.parentId,
+                        "size" to parentData.size,
+                        "childrenIds" to childrenObjectIds.toTypedArray(),
+                        "childrenNames" to childrenNames.toTypedArray(),
+                        "childrenSizes" to childrenSizes.toTypedArray(),
+                    )
+                )
             }
-
-            Timber.v("Finished downloading $displayName. Result: $downloadResult")
-            notification.destroy()
-
-            val downloadResultData = downloadResult.outputData
-            val intent: PendingIntent? =
-                if (downloadResultData.error == null) {
-                    Timber.v("Getting intent...")
-                    //DataClass.getIntent(context, appSearchSession, downloadPath)
-                    // TODO: Fix the launching intent
-                    null
-                    /*when (namespace) {
-                        // Area Skipped since not-downloadable
-                        Zone.NAMESPACE -> {
-                            // Example: Areas/<Area ID>/Zones/<Zone ID>
-                            val zoneId = downloadPathSplit[3]
-                            Timber.v("Intent will launch zone with id $zoneId")
-                            ZoneActivity.intent(applicationContext, zoneId)
-                        }
-                        Sector.NAMESPACE -> {
-                            // Example: Areas/<Area ID>/Zones/<Zone ID>/Sectors/<Sector ID>
-                            val zoneId = downloadPathSplit[3]
-                            val sectorId = downloadPathSplit[5]
-                            Timber.v("Intent will launch sector with id $sectorId in $zoneId.")
-                            SectorActivity.intent(applicationContext, zoneId, sectorId)
-                        }
-                        else -> {
-                            downloadResult = failure(ERROR_UNKNOWN_NAMESPACE)
-                            null
-                        }
-                    }?.let { intent ->
-                        val pendingIntent = PendingIntent.getActivity(
-                            applicationContext,
-                            (System.currentTimeMillis() and 0xffffff).toInt(),
-                            intent,
-                            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
-                        )
-                        pendingIntent
-                    }*/
-                } else null
-
-            if (downloadResultData.error == null) {
-                Timber.v("Showing download finished notification")
-                val text = applicationContext.getString(
-                    R.string.notification_download_complete_message,
-                    this@DownloadWorker.displayName
-                )
-                Notification.Builder(applicationContext)
-                    .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
-                    .withIcon(R.drawable.ic_notifications)
-                    .withTitle(R.string.notification_download_complete_title)
-                    .withText(text)
-                    .withIntent(intent)
-                    .buildAndShow()
-
-                // This is for making it easier to recover later on which DataClasses are downloaded
-                Timber.v("Indexing downloaded element...")
-                // First get all the data from the downloaded result
-                // TODO: parentId may not be correct
-                val parentId = downloadResultData.getString("parentId") ?: run {
-                    // Zones won't have any parentId since Areas are not downloadable, so
-                    // if the downloaded item is a zone, skip parentId check and return
-                    // an empty string
-                    if (namespace == Zone.NAMESPACE)
-                        ""
-                    else {
-                        Timber.w("Could not get \"parentId\". Data: $downloadResultData")
-                        return failure(ERROR_DATA_TRANSFERENCE)
-                    }
-                }
-                val size = downloadResultData.getLong("size", 0)
-                val childrenCount = downloadResultData.getLong("childrenCount", -1)
-
-                val childrenIds = downloadResultData.getStringArray("childrenIds") ?: arrayOf()
-                val childrenDisplayNames =
-                    downloadResultData.getStringArray("childrenNames") ?: arrayOf()
-                val childrenSizes =
-                    downloadResultData.getLongArray("childrenSizes") ?: longArrayOf()
-
-                // Process the data
-                val timestamp = System.currentTimeMillis()
-                val downloadedData = DownloadedData(
-                    "D/$objectId",
-                    objectId,
-                    timestamp,
-                    namespace,
-                    displayName,
-                    childrenCount,
-                    parentId,
-                    size,
-                )
-                Timber.d("DownloadedData: $downloadedData")
-                // Add the data of all the children
-                val indexData = arrayListOf(downloadedData)
-                if (childrenIds.size.toLong() != childrenCount)
-                    Timber.w("Children id count does not match childrenCount.")
-                for (i in childrenIds.indices)
-                    indexData.add(
-                        DownloadedData(
-                            "D/${childrenIds[i]}",
-                            childrenIds[i],
-                            timestamp,
-                            Sector.NAMESPACE,
-                            childrenDisplayNames[i],
-                            0,
-                            objectId,
-                            childrenSizes[i],
-                        )
-                    )
-
-                // Index it into AppSearch
-                val request = PutDocumentsRequest.Builder()
-                    .addDocuments(indexData)
-                    .build()
-                val result = appSearchSession.put(request).await()
-                if (result.isSuccess)
-                    Timber.i("Indexed download correctly.")
-                else {
-                    Timber.i("Failures:")
-                    for (failure in result.failures) {
-                        val value = failure.value
-                        Timber.i("- ${value.resultCode} :: ${value.errorMessage}")
-                    }
-                }
-            } else {
-                Timber.v("Download failed! Result: $downloadResult. Showing notification.")
-                val text = applicationContext.getString(
-                    R.string.notification_download_failed_message,
-                    this.displayName
-                )
-                Notification.Builder(applicationContext)
-                    .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
-                    .withIcon(R.drawable.ic_notifications)
-                    .withTitle(R.string.notification_download_failed_title)
-                    .withText(text)
-                    .withLongText(
-                        R.string.notification_download_failed_message_long,
-                        displayName,
-                        downloadResult.outputData.error ?: "unknown"
-                    )
-                    .buildAndShow()
-            }
-
-            Timber.v("Closing search session...")
-            appSearchSession.close()
-
-            downloadResult
+        } catch (e: VolleyError) {
+            Timber.e(e, "There was an error while fetching data from the database.")
+            Timber.v("Destroying the progress notification...")
+            failure(ERROR_DATA_FETCH)
+        } catch (e: RuntimeException) {
+            Timber.e(e, "The type of a field from the server was not expected.")
+            Timber.v("Destroying the progress notification...")
+            failure(ERROR_DATA_TYPE)
+        } catch (e: IllegalStateException) {
+            Timber.e(e, "The type of a field from the server was not expected.")
+            Timber.v("Destroying the progress notification...")
+            failure(ERROR_DATA_FRAGMENTED)
         }
+
+        Timber.v("Finished downloading $displayName. Result: $downloadResult")
+        notification.destroy()
+
+        val downloadResultData = downloadResult.outputData
+        val intent: PendingIntent? =
+            if (downloadResultData.error == null) {
+                Timber.v("Getting intent...")
+                //DataClass.getIntent(context, appSearchSession, downloadPath)
+                // TODO: Fix the launching intent
+                null
+                /*when (namespace) {
+                    // Area Skipped since not-downloadable
+                    Zone.NAMESPACE -> {
+                        // Example: Areas/<Area ID>/Zones/<Zone ID>
+                        val zoneId = downloadPathSplit[3]
+                        Timber.v("Intent will launch zone with id $zoneId")
+                        ZoneActivity.intent(applicationContext, zoneId)
+                    }
+                    Sector.NAMESPACE -> {
+                        // Example: Areas/<Area ID>/Zones/<Zone ID>/Sectors/<Sector ID>
+                        val zoneId = downloadPathSplit[3]
+                        val sectorId = downloadPathSplit[5]
+                        Timber.v("Intent will launch sector with id $sectorId in $zoneId.")
+                        SectorActivity.intent(applicationContext, zoneId, sectorId)
+                    }
+                    else -> {
+                        downloadResult = failure(ERROR_UNKNOWN_NAMESPACE)
+                        null
+                    }
+                }?.let { intent ->
+                    val pendingIntent = PendingIntent.getActivity(
+                        applicationContext,
+                        (System.currentTimeMillis() and 0xffffff).toInt(),
+                        intent,
+                        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
+                    )
+                    pendingIntent
+                }*/
+            } else null
+
+        if (downloadResultData.error == null) {
+            Timber.v("Showing download finished notification")
+            val text = applicationContext.getString(
+                R.string.notification_download_complete_message,
+                this@DownloadWorker.displayName
+            )
+            Notification.Builder(applicationContext)
+                .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
+                .withIcon(R.drawable.ic_notifications)
+                .withTitle(R.string.notification_download_complete_title)
+                .withText(text)
+                .withIntent(intent)
+                .buildAndShow()
+
+            // This is for making it easier to recover later on which DataClasses are downloaded
+            Timber.v("Indexing downloaded element...")
+            // First get all the data from the downloaded result
+            // TODO: parentId may not be correct
+            val parentId = downloadResultData.getString("parentId") ?: run {
+                // Zones won't have any parentId since Areas are not downloadable, so
+                // if the downloaded item is a zone, skip parentId check and return
+                // an empty string
+                if (namespace == Zone.NAMESPACE)
+                    ""
+                else {
+                    Timber.w("Could not get \"parentId\". Data: $downloadResultData")
+                    return failure(ERROR_DATA_TRANSFERENCE)
+                }
+            }
+            val size = downloadResultData.getLong("size", 0)
+            val childrenCount = downloadResultData.getLong("childrenCount", -1)
+
+            val childrenIds = downloadResultData.getStringArray("childrenIds") ?: arrayOf()
+            val childrenDisplayNames =
+                downloadResultData.getStringArray("childrenNames") ?: arrayOf()
+            val childrenSizes =
+                downloadResultData.getLongArray("childrenSizes") ?: longArrayOf()
+
+            // Process the data
+            val timestamp = System.currentTimeMillis()
+            val downloadedData = DownloadedData(
+                "D/$objectId",
+                objectId,
+                timestamp,
+                namespace,
+                displayName,
+                childrenCount,
+                parentId,
+                size,
+            )
+            Timber.d("DownloadedData: $downloadedData")
+            // Add the data of all the children
+            val indexData = arrayListOf(downloadedData)
+            if (childrenIds.size.toLong() != childrenCount)
+                Timber.w("Children id count does not match childrenCount.")
+            for (i in childrenIds.indices)
+                indexData.add(
+                    DownloadedData(
+                        "D/${childrenIds[i]}",
+                        childrenIds[i],
+                        timestamp,
+                        Sector.NAMESPACE,
+                        childrenDisplayNames[i],
+                        0,
+                        objectId,
+                        childrenSizes[i],
+                    )
+                )
+
+            // Index it into AppSearch
+            val request = PutDocumentsRequest.Builder()
+                .addDocuments(indexData)
+                .build()
+            val result = appSearchSession.put(request).await()
+            if (result.isSuccess)
+                Timber.i("Indexed download correctly.")
+            else {
+                Timber.i("Failures:")
+                for (failure in result.failures) {
+                    val value = failure.value
+                    Timber.i("- ${value.resultCode} :: ${value.errorMessage}")
+                }
+            }
+        } else {
+            Timber.v("Download failed! Result: $downloadResult. Showing notification.")
+            val text = applicationContext.getString(
+                R.string.notification_download_failed_message,
+                this.displayName
+            )
+            Notification.Builder(applicationContext)
+                .withChannelId(DOWNLOAD_COMPLETE_CHANNEL_ID)
+                .withIcon(R.drawable.ic_notifications)
+                .withTitle(R.string.notification_download_failed_title)
+                .withText(text)
+                .withLongText(
+                    R.string.notification_download_failed_message_long,
+                    displayName,
+                    downloadResult.outputData.error ?: "unknown"
+                )
+                .buildAndShow()
+        }
+
+        Timber.v("Closing search session...")
+        appSearchSession.close()
+
+        return downloadResult
     }
 
     companion object : DownloadWorkerFactory {
@@ -730,6 +707,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                     with(data) {
                         workDataOf(
                             DOWNLOAD_DISPLAY_NAME to displayName,
+                            DOWNLOAD_NAMESPACE to namespace,
+                            DOWNLOAD_OBJECT_ID to objectId,
                             DOWNLOAD_OVERWRITE to overwrite,
                             DOWNLOAD_QUALITY to quality
                         )
