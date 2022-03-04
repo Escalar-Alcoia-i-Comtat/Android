@@ -36,6 +36,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
+import com.arnyminerz.escalaralcoiaicomtat.core.exception.InitializationException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.core.network.VolleySingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.network.addToRequestQueue
@@ -64,6 +65,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.parcelize.IgnoredOnParcel
+import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
@@ -413,8 +415,9 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
                     "Quality must be between $DOWNLOAD_QUALITY_MIN and $DOWNLOAD_QUALITY_MAX"
                 )
             Timber.v("Downloading $pin...")
+            val (namespace, objectId) = decodePin(pin)
             Timber.v("Preparing DownloadData...")
-            val downloadData = DownloadData(displayName, overwrite, quality)
+            val downloadData = DownloadData(displayName, namespace, objectId, overwrite, quality)
             Timber.v("Scheduling download...")
             val workerClass = W::class.java
             val schedule = workerClass.getMethod(
@@ -490,6 +493,51 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
             Timber.d("$pin Finished checking download status. Result: $result")
             return result to downloadWorkInfo
         }
+
+        /**
+         * Builds a DataClass from its namespace, object id and JSON data. Just Area, Zone and
+         * Sector.
+         * @author Arnau Mora
+         * @since 20220304
+         * @param namespace The namespace of the DataClass.
+         * @param objectId The id of the DataClass.
+         * @param data The JSON data from the server.
+         * @throws InitializationException When the [namespace] is unknown or not a container.
+         */
+        @Throws(InitializationException::class)
+        fun buildContainers(
+            @Namespace namespace: String,
+            @ObjectId objectId: String,
+            data: JSONObject
+        ) = when (namespace) {
+            Area.NAMESPACE -> Area(data, objectId)
+            Zone.NAMESPACE -> Zone(data, objectId)
+            Sector.NAMESPACE -> Sector(data, objectId)
+            else -> throw InitializationException(
+                "Could not initialize DataClass with namespace \"$namespace\"",
+            )
+        }
+
+        /**
+         * Builds a DataClass from its namespace, object id and JSON data. Includes Paths
+         * @author Arnau Mora
+         * @since 20220304
+         * @param namespace The namespace of the DataClass.
+         * @param objectId The id of the DataClass.
+         * @param data The JSON data from the server.
+         * @throws InitializationException When the namespace is unknown.
+         */
+        @Throws(InitializationException::class)
+        fun buildAny(@Namespace namespace: String, @ObjectId objectId: String, data: JSONObject) =
+            when (namespace) {
+                Area.NAMESPACE -> Area(data, objectId)
+                Zone.NAMESPACE -> Zone(data, objectId)
+                Sector.NAMESPACE -> Sector(data, objectId)
+                Path.NAMESPACE -> Path(data, objectId)
+                else -> throw InitializationException(
+                    "Could not initialize DataClass with namespace \"$namespace\"",
+                )
+            }
     }
 
     /**
@@ -742,7 +790,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         overwrite: Boolean = true,
         quality: Int = 100
     ): LiveData<WorkInfo> =
-        scheduleDownload<W>(context, pin, displayName, companion, overwrite, quality)
+        scheduleDownload(context, pin, displayName, companion, overwrite, quality)
 
     /**
      * Gets the DownloadStatus of the DataClass
@@ -847,7 +895,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @param context The context to run from
      * @return The path of the image file that can be downloaded
      */
-    private fun imageFile(context: Context): File =
+    fun imageFile(context: Context): File =
         Companion.imageFile(context, namespace, objectId)
 
     /**
