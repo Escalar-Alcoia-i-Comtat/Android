@@ -136,7 +136,7 @@ dependencies {
     api "androidx.appsearch:appsearch-local-storage:$appsearch_version"
 
     // Google Firebase
-    api platform('com.google.firebase:firebase-bom:29.1.0')
+    api platform('com.google.firebase:firebase-bom:29.2.0')
     api 'com.google.firebase:firebase-analytics-ktx'
     api 'com.google.firebase:firebase-crashlytics-ktx'
     api 'com.google.firebase:firebase-config-ktx'
