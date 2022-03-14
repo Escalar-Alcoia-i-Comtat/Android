@@ -1018,6 +1018,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         result = 31 * result + imagePath.hashCode()
         result = 31 * result + kmzPath.hashCode()
         result = 31 * result + displayOptions.hashCode()
+        result = 31 * result + location.hashCode()
         result = 31 * result + namespace.hashCode()
         return result
     }

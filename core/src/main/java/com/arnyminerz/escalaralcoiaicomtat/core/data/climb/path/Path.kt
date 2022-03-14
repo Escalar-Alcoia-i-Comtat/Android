@@ -351,6 +351,26 @@ class Path internal constructor(
         BlockingType.UNKNOWN
     }
 
+    override fun hashCode(): Int {
+        var result = objectId.hashCode()
+        result = 31 * result + objectId.hashCode()
+        result = 31 * result + timestampMillis.hashCode()
+        result = 31 * result + sketchId.hashCode()
+        result = 31 * result + displayName.hashCode()
+        result = 31 * result + rawGrades.hashCode()
+        result = 31 * result + rawHeights.hashCode()
+        result = 31 * result + rawEndings.hashCode()
+        result = 31 * result + rawPitches.hashCode()
+        result = 31 * result + fixedSafesData.hashCode()
+        result = 31 * result + requiredSafesData.hashCode()
+        result = 31 * result + description.hashCode()
+        result = 31 * result + rawBuilt.hashCode()
+        result = 31 * result + rawReBuilt.hashCode()
+        result = 31 * result + downloaded.hashCode()
+        result = 31 * result + parentSectorId.hashCode()
+        return result
+    }
+
     fun data(): PathData {
         return PathData(
             objectId,

@@ -84,6 +84,12 @@ class Area internal constructor(
         metadata.webURL ?: ""
     )
 
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + webUrl.hashCode()
+        return result
+    }
+
     companion object {
         @Namespace
         const val NAMESPACE = "Area"

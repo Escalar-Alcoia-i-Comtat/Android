@@ -91,6 +91,16 @@ class Sector internal constructor(
     @IgnoredOnParcel
     override val hasParents: Boolean = true
 
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + sunTime.hashCode()
+        result = 31 * result + kidsApt.hashCode()
+        result = 31 * result + walkingTime.hashCode()
+        result = 31 * result + weight.hashCode()
+        result = 31 * result + webUrl.hashCode()
+        return result
+    }
+
     override fun data(index: Int): SectorData {
         return SectorData(
             index,

@@ -90,6 +90,14 @@ class Zone internal constructor(
         parentAreaId
     )
 
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + webUrl.hashCode()
+        result = 31 * result + position.hashCode()
+        result = 31 * result + parentAreaId.hashCode()
+        return result
+    }
+
     companion object {
         @Namespace
         const val NAMESPACE = "Zone"
