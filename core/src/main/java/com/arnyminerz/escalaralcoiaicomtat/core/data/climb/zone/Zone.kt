@@ -114,7 +114,7 @@ class Zone internal constructor(
     companion object : DataClassCompanion<Zone>() {
         override val NAMESPACE = Namespace.ZONE
 
-        override val IMAGE_QUALITY = 65
+        override val IMAGE_QUALITY = 30
 
         override val CONSTRUCTOR: (data: JSONObject, objectId: String) -> Zone =
             { data, objectId -> Zone(data, objectId) }
