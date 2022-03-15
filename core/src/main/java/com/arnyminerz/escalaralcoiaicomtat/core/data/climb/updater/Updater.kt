@@ -6,6 +6,7 @@ import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.PutDocumentsRequest
 import androidx.appsearch.exceptions.AppSearchException
+import androidx.lifecycle.MutableLiveData
 import androidx.work.await
 import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.core.R
@@ -24,7 +25,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_FETCH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_LIST
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.append
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getList
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
@@ -83,7 +83,7 @@ private fun <R : DataClassImpl> findUpdatableObjects(
     dataList: List<R>,
     json: JSONObject,
     constructor: (json: JSONObject, objectId: String) -> R
-) = mutableListOf<UpdaterSingleton.UpdateAvailableData>().apply {
+) = mutableListOf<UpdaterSingleton.Item>().apply {
     json.keys()
         .forEach { objectId ->
             val jsonData = json.getJSONObject(objectId)
@@ -91,7 +91,8 @@ private fun <R : DataClassImpl> findUpdatableObjects(
             val localData = dataList.find { it.objectId == objectId }
             if (localData == null || localData.hashCode() != serverData.hashCode())
                 add(
-                    UpdaterSingleton.UpdateAvailableData(
+                    UpdaterSingleton.Item(
+                        serverData.namespace,
                         serverData.objectId,
                         serverData.hashCode(),
                         localData.hashCode()
@@ -141,12 +142,9 @@ suspend fun updateAvailable(
         { json, objectId -> Path(json, objectId) }
 
         // Add all the found elements to the lists
-        updaterSingleton.updateAvailableObjects = updaterSingleton.updateAvailableObjects
-            .toMutableMap()
-            .append(Area.NAMESPACE, updatableAreas)
-            .append(Zone.NAMESPACE, updatableZones)
-            .append(Sector.NAMESPACE, updatableSectors)
-            .append(Path.NAMESPACE, updatablePaths)
+        updaterSingleton.updateAvailableObjects.postValue(
+            listOf(updatableAreas, updatableZones, updatableSectors, updatablePaths).flatten()
+        )
 
         return when {
             updatableAreas.isNotEmpty() ||
@@ -183,7 +181,8 @@ class UpdaterSingleton {
             }
     }
 
-    data class UpdateAvailableData(
+    data class Item(
+        val namespace: Namespace,
         @ObjectId val objectId: String,
         val serverHash: Int,
         val localHash: Int
@@ -194,7 +193,7 @@ class UpdaterSingleton {
      * @author Arnau Mora
      * @since 20220226
      */
-    var updateAvailableObjects: Map<Namespace, List<UpdateAvailableData>> = mapOf()
+    var updateAvailableObjects: MutableLiveData<List<Item>> = MutableLiveData()
 
     suspend fun update(
         context: Context,
@@ -240,14 +239,11 @@ class UpdaterSingleton {
                 .put(request)
                 .await()
             Timber.v("Added to SearchSession, removing element from updateAvailableObjects...")
-            updateAvailableObjects = updateAvailableObjects
-                .toMutableMap()
-                .apply {
-                    val newNamespaceList = arrayListOf<UpdateAvailableData>()
-                    get(namespace)?.forEach { if (it.objectId != objectId) newNamespaceList.add(it) }
-                    Timber.v("Updated id list for $namespace: $newNamespaceList")
-                    put(namespace, newNamespaceList)
-                }
+            updateAvailableObjects.postValue(
+                (updateAvailableObjects.value ?: listOf())
+                    .toMutableList()
+                    .filter { it.objectId != objectId }
+            )
         } catch (e: VolleyError) {
             Timber.e(e, "Could not update element at $namespace with id $objectId.")
             uiContext {

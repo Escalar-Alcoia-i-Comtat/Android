@@ -73,12 +73,14 @@ fun RowScope.TableCell(
  * @author Arnau Mora
  * @since 20220315
  * @param viewModel The [StorageViewModel] instance for loading data.
- * @param updateAvailable Whether or not there's an update available.
  */
 @Composable
 @ExperimentalMaterialApi
-private fun UpdatesCard(viewModel: StorageViewModel, updateAvailable: Boolean) {
+private fun UpdatesCard(viewModel: StorageViewModel) {
     val context = LocalContext.current
+    val updatesAvailable by UpdaterSingleton.getInstance()
+        .updateAvailableObjects
+        .observeAsState(emptyList())
 
     Row(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -89,7 +91,7 @@ private fun UpdatesCard(viewModel: StorageViewModel, updateAvailable: Boolean) {
                 .padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
                 .weight(1f)
         )
-        if (updateAvailable)
+        if (updatesAvailable.isNotEmpty())
             Button(
                 onClick = { /*TODO*/ },
                 colors = ButtonDefaults.textButtonColors()
@@ -97,36 +99,28 @@ private fun UpdatesCard(viewModel: StorageViewModel, updateAvailable: Boolean) {
                 Text(text = stringResource(R.string.action_update_all))
             }
     }
-    if (updateAvailable) {
-        var updateAvailableObjects by remember {
-            mutableStateOf(
-                UpdaterSingleton
-                    .getInstance()
-                    .updateAvailableObjects
-            )
-        }
+    if (updatesAvailable.isNotEmpty()) {
         LazyColumn {
-            items(updateAvailableObjects.toList()) { (namespace, entries) ->
-                for (item in entries) {
-                    val state = when (namespace) {
-                        Area.NAMESPACE -> viewModel.getDataClass<Area>(
-                            Area.NAMESPACE,
-                            item.objectId
-                        )
-                        Zone.NAMESPACE -> viewModel.getDataClass<Zone>(
-                            Zone.NAMESPACE,
-                            item.objectId
-                        )
-                        Sector.NAMESPACE -> viewModel.getDataClass<Sector>(
-                            Sector.NAMESPACE,
-                            item.objectId
+            items(updatesAvailable) { updateData ->
+                val state = when (updateData.namespace) {
+                    Area.NAMESPACE -> viewModel.getDataClass<Area>(
+                        Area.NAMESPACE,
+                        updateData.objectId
+                    )
+                    Zone.NAMESPACE -> viewModel.getDataClass<Zone>(
+                        Zone.NAMESPACE,
+                        updateData.objectId
+                    )
+                    Sector.NAMESPACE -> viewModel.getDataClass<Sector>(
+                        Sector.NAMESPACE,
+                        updateData.objectId
                         )
                         Path.NAMESPACE -> viewModel.getDataClass<Path>(
                             Path.NAMESPACE,
-                            item.objectId
+                            updateData.objectId
                         )
                         else -> {
-                            Timber.w("Attention! Namespace \"%s\" not valid", namespace)
+                            Timber.w("Attention! Namespace \"%s\" not valid", updateData.namespace)
                             return@items
                         }
                     }
@@ -172,11 +166,11 @@ private fun UpdatesCard(viewModel: StorageViewModel, updateAvailable: Boolean) {
                                 }
                                 Row(modifier = Modifier.fillMaxWidth()) {
                                     Text(
-                                        text = item.localHash.toString(),
+                                        text = updateData.localHash.toString(),
                                         modifier = Modifier.fillMaxWidth(.5f),
                                     )
                                     Text(
-                                        text = item.serverHash.toString(),
+                                        text = updateData.serverHash.toString(),
                                         modifier = Modifier.fillMaxWidth(.5f),
                                     )
                                 }
@@ -197,17 +191,13 @@ private fun UpdatesCard(viewModel: StorageViewModel, updateAvailable: Boolean) {
                                     buttonEnabled = false
                                     dataClassPair?.let { (dataClass, score) ->
                                         doAsync {
-                                            val updaterSingleton =
-                                                UpdaterSingleton.getInstance()
-                                            updaterSingleton
+                                            UpdaterSingleton.getInstance()
                                                 .update(
                                                     context,
-                                                    namespace,
+                                                    updateData.namespace,
                                                     dataClass.objectId,
                                                     score
                                                 )
-                                            updateAvailableObjects =
-                                                updaterSingleton.updateAvailableObjects
                                         }
                                     }
                                 },
@@ -235,7 +225,6 @@ private fun UpdatesCard(viewModel: StorageViewModel, updateAvailable: Boolean) {
                                 )
                         )
                     }
-                }
             }
         }
     } else
@@ -251,7 +240,7 @@ private fun UpdatesCard(viewModel: StorageViewModel, updateAvailable: Boolean) {
 @Composable
 @ExperimentalMaterial3Api
 @ExperimentalMaterialApi
-fun MainActivity.StorageScreen(updateAvailable: Boolean) {
+fun MainActivity.StorageScreen() {
     val downloads by storageViewModel.downloads.observeAsState()
     val sizeString by remember { storageViewModel.sizeString }
 
@@ -264,7 +253,7 @@ fun MainActivity.StorageScreen(updateAvailable: Boolean) {
                 .padding(8.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                UpdatesCard(storageViewModel, updateAvailable)
+                UpdatesCard(storageViewModel)
             }
         }
 

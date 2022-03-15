@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -21,20 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.preference.PreferenceManager
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UPDATE_AVAILABLE
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UPDATE_AVAILABLE_FAIL_CLIENT
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UPDATE_AVAILABLE_FAIL_FIELDS
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UPDATE_AVAILABLE_FAIL_SERVER
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UPDATE_AVAILABLE_FALSE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingleton
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.updateAvailable
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.DeveloperScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.ExploreScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.MapScreen
@@ -51,7 +44,6 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import org.osmdroid.config.Configuration
-import timber.log.Timber
 
 class MainActivity : LanguageComponentActivity() {
     internal val exploreViewModel by viewModels<ExploreViewModel>(factoryProducer = {
@@ -90,29 +82,10 @@ class MainActivity : LanguageComponentActivity() {
             }
 
         setContent {
-            var updatesAvailable by remember { mutableStateOf<Int?>(null) }
-
-            // Check for updates
-            doAsync {
-                val updateAvailable = updateAvailable(this@MainActivity, app.searchSession)
-                Timber.i("Update available: $updateAvailable")
-                when (updateAvailable) {
-                    UPDATE_AVAILABLE_FALSE -> Timber.i("No updates available")
-                    UPDATE_AVAILABLE_FAIL_SERVER, UPDATE_AVAILABLE_FAIL_FIELDS, UPDATE_AVAILABLE_FAIL_CLIENT -> {
-                        Timber.w("Check for update failed.")
-                    }
-                    UPDATE_AVAILABLE -> {
-                        val updateAvailableObjects = UpdaterSingleton
-                            .getInstance()
-                            .updateAvailableObjects
-                        updatesAvailable = updateAvailableObjects.entries.sumOf { it.value.size }
-                    }
-                }
-            }
-
             AppTheme {
-                Home(updatesAvailable)
+                Home()
             }
+            storageViewModel.checkForUpdates()
         }
     }
 
@@ -121,7 +94,7 @@ class MainActivity : LanguageComponentActivity() {
     @ExperimentalMaterialApi
     @ExperimentalPagerApi
     @Composable
-    private fun Home(updatesAvailable: Int?) {
+    private fun Home() {
         val pagerState = rememberPagerState()
         var userScrollEnabled by remember { mutableStateOf(true) }
 
@@ -134,12 +107,16 @@ class MainActivity : LanguageComponentActivity() {
         Scaffold(
             bottomBar = {
                 NavigationBar {
+                    val updatesAvailable by UpdaterSingleton.getInstance()
+                        .updateAvailableObjects
+                        .observeAsState(emptyList())
+
                     NavItems(
                         pagerState,
                         mutableListOf(
                             NavItem(Screen.Explore),
                             NavItem(Screen.Map),
-                            NavItem(Screen.Storage, updatesAvailable),
+                            NavItem(Screen.Storage, updatesAvailable.size),
                             NavItem(Screen.Settings)
                         ).apply {
                             // If in debug mode, add the developer screen
@@ -167,7 +144,7 @@ class MainActivity : LanguageComponentActivity() {
                 when (index) {
                     0 -> ExploreScreen()
                     1 -> MapScreen()
-                    2 -> StorageScreen(updatesAvailable?.let { it > 0 } ?: false)
+                    2 -> StorageScreen()
                     3 -> SettingsScreen()
                     4 -> if (BuildConfig.DEBUG) DeveloperScreen()
                 }
