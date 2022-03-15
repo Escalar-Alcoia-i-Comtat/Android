@@ -124,7 +124,7 @@
     <string name="toast_ending_info">Aquest és el tipus de reunió que té la via</string>
     <string name="toast_error_send_message">El missatge no ha pogut ser enviat! %s</string>
     <string name="toast_nearby_zones_enabled">Zones Properes habilitades</string>
-    <string name="badge_new">New</string>
+    <string name="badge_new">Nou</string>
     <string name="snackbar_feedback_alert">Per favor, emplena tots els camps</string>
     <string name="notification_download_progress_title">Baixant…</string>
     <string name="notification_download_progress_message">Baixant %s</string>
