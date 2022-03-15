@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -42,6 +43,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.PoppinsFamily
@@ -214,21 +216,29 @@ private fun DownloadableDataClassItem(
                 verticalAlignment = Alignment.Bottom
             ) {
                 Column(modifier = Modifier.weight(1f)) {
+                    val i = item.namespace to item.objectId
                     viewModel.addDownloadListener(item.namespace, item.objectId) {
                         // TODO: Download progress should be notified
                     }
 
-                    val downloadState by remember { viewModel.downloadStatuses[item.pin]!! }
-                    isPartiallyDownloaded = downloadState.partialDownload == true
+                    val downloadSingleton = DownloadSingleton.getInstance()
+                    val downloadStates by downloadSingleton
+                        .states
+                        .observeAsState(emptyMap())
+
+                    if (!downloadStates.containsKey(i))
+                        viewModel.initializeDownloadStatus(i)
+
+                    isPartiallyDownloaded = downloadStates[i]?.partialDownload == true
                     Button(
                         // Enable button when not downloaded, but download status is known
-                        enabled = !downloadState.downloading && downloadState != DownloadStatus.UNKNOWN,
+                        enabled = downloadStates[i] != null && downloadStates[i]?.downloading != true && downloadStates[i] != DownloadStatus.UNKNOWN,
                         modifier = Modifier
                             .padding(start = 8.dp, end = 4.dp)
                             .fillMaxWidth(),
                         colors = ButtonDefaults.outlinedButtonColors(),
                         onClick = {
-                            when (downloadState) {
+                            when (downloadStates[i]) {
                                 DownloadStatus.DOWNLOADED -> showDownloadInfoDialog = true
                                 DownloadStatus.NOT_DOWNLOADED, DownloadStatus.PARTIALLY -> downloadItem()
                                 else -> toast(context, R.string.toast_error_internal)
@@ -236,13 +246,14 @@ private fun DownloadableDataClassItem(
                         },
                     ) {
                         Icon(
-                            downloadState.getActionIcon(),
+                            downloadStates[i]?.getActionIcon() ?: Icons.Rounded.Close,
                             contentDescription = stringResource(R.string.action_download),
                             modifier = Modifier.size(ButtonDefaults.IconSize)
                         )
                         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                         Text(
-                            text = downloadState.getText()
+                            text = downloadStates[i]?.getText()
+                                ?: stringResource(R.string.status_loading)
                         )
                     }
                 }

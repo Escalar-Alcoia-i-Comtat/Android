@@ -40,20 +40,22 @@ class DownloadSingleton {
      * @since 20220315
      * @param namespace The namespace of the object observed.
      * @param objectId The id of the object observed.
-     * @param workInfo The [WorkInfo] object to use as state.
+     * @param workInfo The [WorkInfo] object to use as state. If null, only [states] will be updated
+     * with the result of [DataClass.isDownloadIndexed].
      */
     @WorkerThread
     suspend fun putState(
         context: Context,
         namespace: Namespace,
         @ObjectId objectId: String,
-        workInfo: WorkInfo
+        workInfo: WorkInfo?
     ) {
-        workInfoList = workInfoList
-            .toMutableMap()
-            .apply {
-                put(namespace to objectId, workInfo)
-            }
+        if (workInfo != null)
+            workInfoList = workInfoList
+                .toMutableMap()
+                .apply {
+                    put(namespace to objectId, workInfo)
+                }
         states.postValue(
             (states.value ?: emptyMap())
                 .toMutableMap()
@@ -68,6 +70,21 @@ class DownloadSingleton {
                 }
         )
     }
+
+    /**
+     * Sets the state of the object at [at] to [workInfo].
+     * @author Arnau Mora
+     * @since 20220315
+     * @param at The namespace and objectId where to put the [workInfo].
+     * @param workInfo The [WorkInfo] object to use as state. If null, only [states] will be updated
+     * with the result of [DataClass.isDownloadIndexed].
+     */
+    @WorkerThread
+    suspend fun putState(
+        context: Context,
+        at: Pair<Namespace, @ObjectId String>,
+        workInfo: WorkInfo?
+    ) = putState(context, at.first, at.second, workInfo)
 
     /**
      * Tells the system that the object with id [objectId] at [namespace] has finished downloading.

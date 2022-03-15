@@ -121,6 +121,20 @@ class DataClassItemViewModel(
             }
         }
 
+    /**
+     * Initializes the download status of [at] in [DownloadSingleton] with the current status,
+     * indexed or downloading.
+     * @author Arnau Mora
+     * @since 20220315
+     * @param at The location of the element to update.
+     */
+    fun initializeDownloadStatus(at: Pair<Namespace, @ObjectId String>) {
+        viewModelScope.launch {
+            DownloadSingleton.getInstance()
+                .putState(context, at, null)
+        }
+    }
+
     class Factory(
         private val application: Application
     ) : ViewModelProvider.Factory {
