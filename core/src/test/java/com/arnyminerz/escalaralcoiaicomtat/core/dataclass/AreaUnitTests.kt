@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.core.dataclass
 
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,7 +17,7 @@ class AreaUnitTests {
     @Test
     fun testAreaInitialization() {
         println("Testing Area initialization...")
-        val area = Area.SAMPLE_AREA
+        val area = Area.SAMPLE
         assertEquals(area.objectId, Area.SAMPLE_AREA_OBJECT_ID)
         assertEquals(area.displayName, Area.SAMPLE_AREA_DISPLAY_NAME)
         assertEquals(area.timestampMillis, Area.SAMPLE_AREA_TIMESTAMP)

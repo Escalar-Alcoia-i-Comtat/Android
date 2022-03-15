@@ -25,10 +25,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -39,7 +41,7 @@ import androidx.lifecycle.MutableLiveData
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
@@ -60,14 +62,12 @@ import com.google.android.material.badge.ExperimentalBadgeUtils
 @ExperimentalBadgeUtils
 fun Activity.DataClassExplorer(
     exploreViewModel: ExploreViewModel,
-    dataClass: DataClass<*, *, *>,
     hasInternetLiveData: MutableLiveData<Boolean>,
+    navStack: MutableState<List<DataClassImpl>>,
+    updateNavStack: (adding: Boolean, item: DataClassImpl) -> Unit,
 ) {
     val context = LocalContext.current
-    val childrenLoader = if (dataClass is Area)
-        exploreViewModel.childrenLoader(dataClass) { it.displayName }
-    else
-        exploreViewModel.childrenLoader(dataClass as Zone) { it.weight }
+    var currentNavStack by navStack
 
     Scaffold(
         topBar = {
@@ -119,45 +119,58 @@ fun Activity.DataClassExplorer(
                 ),
                 title = {
                     Text(
-                        text = dataClass.displayName,
+                        text = if (currentNavStack.isNotEmpty()) currentNavStack.last().displayName else "",
                         fontFamily = CabinFamily
                     )
                 }
             )
         }
     ) { padding ->
-        val items by remember { childrenLoader }
-        LazyColumn(
+        val items = exploreViewModel.children
+
+        Column(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxWidth()
         ) {
             // The loading indicator
-            item {
-                AnimatedVisibility(visible = items.isEmpty()) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                        )
-                    }
+            AnimatedVisibility(visible = items.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                    )
                 }
             }
+
             // The items
-            itemsIndexed(items) { i, item ->
-                DataClassItem(item) {
-                    launch(DataClassActivity::class.java) {
-                        if (item is Sector) {
-                            putExtra(EXTRA_DATACLASS, dataClass as Parcelable)
-                            putExtra(EXTRA_CHILDREN_COUNT, items.size)
-                            putExtra(EXTRA_INDEX, i)
-                        } else
-                            putExtra(EXTRA_DATACLASS, item as Parcelable)
+            LazyColumn(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxWidth()
+            ) {
+                itemsIndexed(items) { i, item ->
+                    DataClassItem(item) {
+                        updateNavStack(true, item)
+
+                        if (item is Sector)
+                            launch(DataClassActivity::class.java) {
+                                putExtra(EXTRA_DATACLASS, navStack.value.last() as Parcelable)
+                                putExtra(EXTRA_CHILDREN_COUNT, items.size)
+                                putExtra(EXTRA_INDEX, i)
+                            }
                     }
                 }
             }
         }
     }
+
+    // Load the children data from dataClass
+    val navStackLast = if (currentNavStack.isNotEmpty()) currentNavStack.last() else null
+    if (navStackLast is Area)
+        exploreViewModel.childrenLoader(navStackLast) { it.displayName }
+    else if (navStackLast != null)
+        exploreViewModel.childrenLoader(navStackLast as Zone) { it.weight }
 }

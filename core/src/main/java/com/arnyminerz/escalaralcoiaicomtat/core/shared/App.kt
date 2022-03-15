@@ -10,6 +10,7 @@ import androidx.appsearch.exceptions.AppSearchException
 import androidx.lifecycle.AndroidViewModel
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
@@ -18,7 +19,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getAreas
@@ -31,9 +31,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.runBlocking
 import timber.log.Timber
-import javax.inject.Inject
 
 class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     private val provider: ConnectivityProvider
@@ -46,18 +44,13 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      */
     private lateinit var analytics: FirebaseAnalytics
 
-    /**
-     * The session for doing search-related operations.
-     * @author Arnau Mora
-     * @since 20210817
-     */
-    @Inject
-    lateinit var searchSession: AppSearchSession
+    private lateinit var searchSingleton: SearchSingleton
 
     override fun onCreate() {
         super.onCreate()
 
-        searchSession = runBlocking { createSearchSession(applicationContext) }
+        searchSingleton = SearchSingleton.getInstance(this)
+
         doAsync {
             Timber.v("Search > Adding document classes...")
             try {
@@ -66,7 +59,10 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
                     .setVersion(SEARCH_SCHEMA_VERSION)
                     .setMigrator("SectorData", SectorData.Companion.Migrator)
                     .build()
-                searchSession.setSchema(setSchemaRequest).await()
+                searchSingleton
+                    .searchSession
+                    .setSchema(setSchemaRequest)
+                    .await()
             } catch (e: AppSearchException) {
                 Timber.e(e, "Search > Could not add search schemas.")
             }
@@ -75,6 +71,7 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         PreferencesModule.initWith(this)
 
         // TODO: Shared preferences will be removed
+        @Suppress("DEPRECATION")
         sharedPreferences =
             applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
 
@@ -92,7 +89,9 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
         Timber.v("Removing network listener...")
         provider.removeListener(this)
         Timber.v("Closing AppSearch...")
-        searchSession.close()
+        searchSingleton
+            .searchSession
+            .close()
         super.onTerminate()
     }
 
@@ -105,62 +104,67 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
     override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {}
 
     /**
-     * Gets all the [Area]s available in [searchSession].
+     * Gets all the [Area]s available.
      * @author Arnau Mora
      * @since 20210818
      */
     @WorkerThread
-    suspend fun getAreas(): List<Area> = searchSession.getAreas()
+    suspend fun getAreas(): List<Area> = searchSingleton.searchSession.getAreas()
 
     /**
-     * Searches for the specified [Zone] in [searchSession].
+     * Searches for the specified [Zone].
      * Serves for a shortcut to [AppSearchSession.getZone].
      * @author Arnau Mora
      * @since 20210820
      * @see AppSearchSession.getZone
      */
     @WorkerThread
-    suspend fun getArea(@ObjectId areaId: String): Area? = searchSession.getArea(areaId)
+    suspend fun getArea(@ObjectId areaId: String): Area? =
+        searchSingleton.searchSession.getArea(areaId)
 
     /**
-     * Searches for the specified [Zone] in [searchSession].
+     * Searches for the specified [Zone].
      * Serves for a shortcut to [AppSearchSession.getZone].
      * @author Arnau Mora
      * @since 20210820
      * @see AppSearchSession.getZone
      */
     @WorkerThread
-    suspend fun getZone(@ObjectId zoneId: String): Zone? = searchSession.getZone(zoneId)
+    suspend fun getZone(@ObjectId zoneId: String): Zone? =
+        searchSingleton.searchSession.getZone(zoneId)
 
     /**
-     * Searches for the specified [Sector] in [searchSession].
+     * Searches for the specified [Sector].
      * Serves for a shortcut to [AppSearchSession.getSector].
      * @author Arnau Mora
      * @since 20210820
      * @see AppSearchSession.getSector
      */
     @WorkerThread
-    suspend fun getSector(@ObjectId sectorId: String): Sector? = searchSession.getSector(sectorId)
+    suspend fun getSector(@ObjectId sectorId: String): Sector? =
+        searchSingleton.searchSession.getSector(sectorId)
 
     /**
-     * Searches for the specified [Path] in [searchSession].
+     * Searches for the specified [Path].
      * Serves for a shortcut to [AppSearchSession.getPath].
      * @author Arnau Mora
      * @since 20210820
      * @see AppSearchSession.getSector
      */
     @WorkerThread
-    suspend fun getPath(@ObjectId pathId: String): Path? = searchSession.getPath(pathId)
+    suspend fun getPath(@ObjectId pathId: String): Path? =
+        searchSingleton.searchSession.getPath(pathId)
 
     /**
-     * Searches for the specified [Path]s in [searchSession].
+     * Searches for the specified [Path]s.
      * Serves for a shortcut to [AppSearchSession.getPaths].
      * @author Arnau Mora
      * @since 20210820
      * @see AppSearchSession.getSector
      */
     @WorkerThread
-    suspend fun getPaths(@ObjectId zoneId: String): List<Path> = searchSession.getPaths(zoneId)
+    suspend fun getPaths(@ObjectId zoneId: String): List<Path> =
+        searchSingleton.searchSession.getPaths(zoneId)
 
     /**
      * Fetches all the downloaded items.
@@ -169,7 +173,7 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      * @return A [Flow] that emits the downloaded items.
      */
     @WorkerThread
-    suspend fun getDownloads(): Flow<DownloadedData> = searchSession.getDownloads()
+    suspend fun getDownloads(): Flow<DownloadedData> = searchSingleton.searchSession.getDownloads()
 }
 
 /**
