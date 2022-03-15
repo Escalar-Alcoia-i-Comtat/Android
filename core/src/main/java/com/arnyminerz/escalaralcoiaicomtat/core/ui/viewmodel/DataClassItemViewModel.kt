@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -14,7 +15,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
@@ -31,6 +34,8 @@ class DataClassItemViewModel(
         mutableMapOf<String, (status: DownloadStatus) -> Unit>()
 
     val downloadStatuses = mutableMapOf<String, MutableState<DownloadStatus>>()
+
+    val children by DataSingleton.getInstance().children
 
     fun startDownloading(
         context: Context,
@@ -132,6 +137,16 @@ class DataClassItemViewModel(
         viewModelScope.launch {
             DownloadSingleton.getInstance()
                 .putState(context, at, null)
+        }
+    }
+
+    fun <T : DataClass<*, *, *>, R : Comparable<R>> loadChildren(
+        dataClass: T,
+        sortBy: (DataClassImpl) -> R
+    ) {
+        viewModelScope.launch {
+            DataSingleton.getInstance()
+                .children.value = dataClass.getChildren(context, sortBy)
         }
     }
 

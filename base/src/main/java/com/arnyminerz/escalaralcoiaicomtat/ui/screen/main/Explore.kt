@@ -43,7 +43,6 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.SearchableActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.NearbyZones
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
@@ -60,7 +59,7 @@ import timber.log.Timber
 fun MainActivity.ExploreScreen() {
     val focusManager = LocalFocusManager.current
 
-    val areas = DataSingleton.getInstance().areas
+    val areas = exploreViewModel.areas
 
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
@@ -133,7 +132,7 @@ fun MainActivity.ExploreScreen() {
 
             Box(modifier = Modifier.fillMaxWidth()) {
                 AnimatedVisibility(
-                    visible = areas == null,
+                    visible = areas.isEmpty(),
                     modifier = Modifier
                         .align(Alignment.Center)
                 ) {

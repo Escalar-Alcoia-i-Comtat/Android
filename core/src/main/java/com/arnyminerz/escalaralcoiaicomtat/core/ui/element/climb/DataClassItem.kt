@@ -61,7 +61,7 @@ import java.text.SimpleDateFormat
 @Composable
 fun DataClassItem(
     item: DataClassImpl,
-    onClick: () -> Unit
+    onClick: (() -> Unit)? = null
 ) {
     if (item is DataClass<*, *, *>) {
         val context = LocalContext.current
@@ -75,7 +75,6 @@ fun DataClassItem(
             DownloadableDataClassItem(
                 item,
                 viewModel,
-                onClick,
             )
         else
             NonDownloadableDataClassItem(
@@ -108,19 +107,21 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
  * @since 20211229
  * @param item The DataClass to display.
  * @param viewModel The View Model for doing async tasks.
- * @param onClick Will get called when the user requests to "navigate" into the DataClass.
  */
 @Composable
 private fun DownloadableDataClassItem(
     item: DataClass<*, *, *>,
     viewModel: DataClassItemViewModel,
-    onClick: () -> Unit,
 ) {
     val context = LocalContext.current
 
     var isPartiallyDownloaded by remember { mutableStateOf(false) }
 
     var showDownloadInfoDialog by remember { mutableStateOf(false) }
+
+    val onClickListener: () -> Unit = {
+        viewModel.loadChildren(item) { it.displayName }
+    }
 
     val downloadItem: () -> Unit = {
         viewModel.startDownloading(
@@ -149,7 +150,11 @@ private fun DownloadableDataClassItem(
                         Modifier
                             .fillMaxWidth()
                             .height(160.dp)
-                            .clickable(enabled = true, role = Role.Image, onClick = onClick),
+                            .clickable(
+                                enabled = true,
+                                role = Role.Image,
+                                onClick = onClickListener
+                            ),
                         imageLoadParameters = ImageLoadParameters()
                             .withResultImageScale(.3f)
                     )
@@ -200,7 +205,7 @@ private fun DownloadableDataClassItem(
                         enabled = childrenCount?.let { it > 0 } ?: false,
                         modifier = Modifier
                             .padding(end = 4.dp),
-                        onClick = onClick,
+                        onClick = onClickListener,
                     ) {
                         Image(
                             Icons.Default.ChevronRight,
@@ -369,7 +374,7 @@ private fun NonDownloadableDataClassItem(
                     .fillMaxWidth()
                     .height(160.dp)
                     .clickable(enabled = childrenCount?.let { it > 0 } ?: false) {
-                        onClick?.let { it() }
+                        onClick?.invoke() ?: viewModel.loadChildren(item) { it.displayName }
                     },
                 imageLoadParameters = ImageLoadParameters()
                     .withResultImageScale(.3f)

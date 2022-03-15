@@ -145,7 +145,7 @@ suspend fun loadAreas(
                     .markDataIndexed(false)
                 loadAreas(context, jsonData)
             }
-        dataSingleton.areas = list
+        dataSingleton.areas.value = list
         return list
     }
 
@@ -219,7 +219,7 @@ suspend fun loadAreas(
 
         return decodedAreas
             .toDataClassList()
-            .also { dataSingleton.areas = it }
+            .also { dataSingleton.areas.value = it }
     } catch (e: Exception) {
         Timber.e(e, "Could not load areas.")
         trace.putAttribute("error", "true")

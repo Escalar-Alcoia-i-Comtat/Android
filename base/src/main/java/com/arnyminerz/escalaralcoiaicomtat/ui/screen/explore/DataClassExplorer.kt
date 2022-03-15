@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore
 
 import android.app.Activity
-import android.os.Parcelable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -11,7 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.CloudOff
@@ -37,20 +36,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.lifecycle.MutableLiveData
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.tooltip.Tooltip
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
 import com.google.android.material.badge.ExperimentalBadgeUtils
@@ -123,7 +114,7 @@ fun Activity.DataClassExplorer(
             )
         }
     ) { padding ->
-        val items = DataSingleton.getInstance().children
+        val items = exploreViewModel.children
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
@@ -143,17 +134,8 @@ fun Activity.DataClassExplorer(
                 }
             }
             // The items
-            itemsIndexed(items) { i, item ->
-                DataClassItem(item) {
-                    launch(DataClassActivity::class.java) {
-                        if (item is Sector) {
-                            putExtra(EXTRA_DATACLASS, dataClass as Parcelable)
-                            putExtra(EXTRA_CHILDREN_COUNT, items.size)
-                            putExtra(EXTRA_INDEX, i)
-                        } else
-                            putExtra(EXTRA_DATACLASS, item as Parcelable)
-                    }
-                }
+            items(items) { item ->
+                DataClassItem(item)
             }
         }
     }

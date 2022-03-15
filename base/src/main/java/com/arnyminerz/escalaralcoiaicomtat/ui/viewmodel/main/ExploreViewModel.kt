@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main
 
 import android.app.Application
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -40,6 +41,10 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     var lastAreas = listOf<Area>()
         private set
 
+    val children by DataSingleton.getInstance().children
+
+    val areas by DataSingleton.getInstance().areas
+
     /**
      * Loads all the available areas, and posts them using a [MutableLiveData].
      * @author Arnau Mora
@@ -49,7 +54,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val areasList = app.getAreas()
                 .sortedBy { it.displayName }
-            dataSingleton.areas = areasList
+            dataSingleton.areas.value = areasList
             lastAreas = areasList
         }
     }
@@ -65,7 +70,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         sortBy: (A) -> R?,
     ) {
         viewModelScope.launch {
-            dataSingleton.children = dataClass.getChildren(context, sortBy)
+            dataSingleton.children.value = dataClass.getChildren(context, sortBy)
         }
     }
 
