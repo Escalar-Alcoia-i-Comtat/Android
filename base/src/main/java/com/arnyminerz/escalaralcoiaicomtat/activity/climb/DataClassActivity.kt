@@ -7,9 +7,11 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
@@ -86,6 +88,8 @@ class DataClassActivity : NetworkAwareComponentActivity() {
      */
     private var childrenCount: Int? = null
 
+    private val navStack = mutableStateOf(emptyList<DataClassImpl>())
+
     @OptIn(
         ExperimentalFoundationApi::class,
         ExperimentalMaterial3Api::class,
@@ -132,9 +136,19 @@ class DataClassActivity : NetworkAwareComponentActivity() {
                     // If not, load the DataClassExplorer
                     DataClassExplorer(
                         exploreViewModel,
-                        dataClass,
-                        hasInternet
-                    )
+                        hasInternet,
+                        navStack
+                    ) { adding, item ->
+                        navStack.value = navStack.value
+                            .toMutableList()
+                            .let { list ->
+                                if (adding) {
+                                    list.add(item)
+                                    list
+                                } else
+                                    list.filter { it != item }
+                            }
+                    }
                 }
             }
         }
@@ -152,6 +166,13 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         super.onStateChange(state)
         Timber.i("Updated network state. Internet: ${state.hasInternet}")
         hasInternet.postValue(state.hasInternet)
+    }
+
+    override fun onBackPressed() {
+        if (navStack.value.size > 1) {
+            navStack.value = navStack.value.dropLast(1)
+        } else
+            super.onBackPressed()
     }
 
     /**
@@ -173,6 +194,7 @@ class DataClassActivity : NetworkAwareComponentActivity() {
             })
         Timber.v("EXTRA_DATACLASS is present in intent extras. Type: ${dataClassExtra::class.java}")
         dataClass = dataClassExtra as DataClass<*, *, *>
+        navStack.value = listOf(dataClass)
         return true
     }
 }

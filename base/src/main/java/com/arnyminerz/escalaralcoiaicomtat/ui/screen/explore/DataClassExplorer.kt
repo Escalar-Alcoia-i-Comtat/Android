@@ -25,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -40,7 +41,6 @@ import androidx.lifecycle.MutableLiveData
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -62,13 +62,12 @@ import com.google.android.material.badge.ExperimentalBadgeUtils
 @ExperimentalBadgeUtils
 fun Activity.DataClassExplorer(
     exploreViewModel: ExploreViewModel,
-    dataClass: DataClass<*, *, *>,
     hasInternetLiveData: MutableLiveData<Boolean>,
+    navStack: MutableState<List<DataClassImpl>>,
+    updateNavStack: (adding: Boolean, item: DataClassImpl) -> Unit,
 ) {
     val context = LocalContext.current
-    var displayDataClass by remember { mutableStateOf<DataClassImpl>(dataClass) }
-
-    val navStack = arrayListOf<DataClassImpl>()
+    var currentNavStack by navStack
 
     Scaffold(
         topBar = {
@@ -120,7 +119,7 @@ fun Activity.DataClassExplorer(
                 ),
                 title = {
                     Text(
-                        text = displayDataClass.displayName,
+                        text = if (currentNavStack.isNotEmpty()) currentNavStack.last().displayName else "",
                         fontFamily = CabinFamily
                     )
                 }
@@ -154,16 +153,14 @@ fun Activity.DataClassExplorer(
             ) {
                 itemsIndexed(items) { i, item ->
                     DataClassItem(item) {
-                        navStack.add(displayDataClass)
+                        updateNavStack(true, item)
 
                         if (item is Sector)
                             launch(DataClassActivity::class.java) {
-                                putExtra(EXTRA_DATACLASS, navStack.last() as Parcelable)
+                                putExtra(EXTRA_DATACLASS, navStack.value.last() as Parcelable)
                                 putExtra(EXTRA_CHILDREN_COUNT, items.size)
                                 putExtra(EXTRA_INDEX, i)
                             }
-                        else
-                            displayDataClass = item
                     }
                 }
             }
@@ -171,8 +168,9 @@ fun Activity.DataClassExplorer(
     }
 
     // Load the children data from dataClass
-    if (dataClass is Area)
-        exploreViewModel.childrenLoader(dataClass) { it.displayName }
-    else
-        exploreViewModel.childrenLoader(dataClass as Zone) { it.weight }
+    val navStackLast = if (currentNavStack.isNotEmpty()) currentNavStack.last() else null
+    if (navStackLast is Area)
+        exploreViewModel.childrenLoader(navStackLast) { it.displayName }
+    else if (navStackLast != null)
+        exploreViewModel.childrenLoader(navStackLast as Zone) { it.weight }
 }
