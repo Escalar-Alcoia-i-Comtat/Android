@@ -2,12 +2,15 @@ package com.arnyminerz.escalaralcoiaicomtat.ui.screen.main
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +20,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,33 +40,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.text.isDigitsOnly
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingleton
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DownloadedDataItem
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.StorageViewModel
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun RowScope.TableCell(
     text: String,
-    weight: Float
+    weight: Float,
+    modifier: Modifier = Modifier,
+    fontWeight: FontWeight = FontWeight.Normal,
 ) {
     Text(
         text = text,
-        Modifier
+        fontWeight = fontWeight,
+        modifier = modifier
             .border(1.dp, Color.Black)
             .weight(weight)
             .padding(8.dp)
@@ -102,106 +108,132 @@ private fun UpdatesCard(viewModel: StorageViewModel) {
     if (updatesAvailable.isNotEmpty()) {
         LazyColumn {
             items(updatesAvailable) { updateData ->
-                val state = when (updateData.namespace) {
-                    Area.NAMESPACE -> viewModel.getDataClass<Area>(
-                        Area.NAMESPACE,
-                        updateData.objectId
-                    )
-                    Zone.NAMESPACE -> viewModel.getDataClass<Zone>(
-                        Zone.NAMESPACE,
-                        updateData.objectId
-                    )
-                    Sector.NAMESPACE -> viewModel.getDataClass<Sector>(
-                        Sector.NAMESPACE,
-                        updateData.objectId
-                        )
-                        Path.NAMESPACE -> viewModel.getDataClass<Path>(
-                            Path.NAMESPACE,
-                            updateData.objectId
-                        )
-                        else -> {
-                            Timber.w("Attention! Namespace \"%s\" not valid", updateData.namespace)
-                            return@items
-                        }
-                    }
-                    val dataClassPair by remember { state }
-                    var showInfoDialog by remember { mutableStateOf(false) }
+                var showInfoDialog by remember { mutableStateOf(false) }
 
-                    if (showInfoDialog)
-                        AlertDialog(
-                            onDismissRequest = { showInfoDialog = false },
-                            confirmButton = {
-                                Button(onClick = { showInfoDialog = false }) {
-                                    Text(text = "Hide")
-                                }
-                            },
-                            text = {
-                                LazyColumn(
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(16.dp),
-                                ) {
-                                    val column1Weight = .3f // 30%
-                                    val column2Weight = .7f // 70%
-
-                                    // header
-                                    item {
-                                        Row(Modifier.background(Color.Gray)) {
-                                            TableCell(text = "Column 1", weight = column1Weight)
-                                            TableCell(text = "Column 2", weight = column2Weight)
-                                        }
-                                    }
-                                    // rows
-                                    val dialogItems =
-                                        dataClassPair?.first?.displayMap() ?: emptyMap()
-                                    items(dialogItems.toList()) { (key, value) ->
-                                        Row(Modifier.fillMaxWidth()) {
-                                            TableCell(text = key, weight = column1Weight)
-                                            TableCell(
-                                                text = value.toString(),
-                                                weight = column2Weight
-                                            )
-                                        }
-                                    }
-                                }
-                                Row(modifier = Modifier.fillMaxWidth()) {
-                                    Text(
-                                        text = updateData.localHash.toString(),
-                                        modifier = Modifier.fillMaxWidth(.5f),
-                                    )
-                                    Text(
-                                        text = updateData.serverHash.toString(),
-                                        modifier = Modifier.fillMaxWidth(.5f),
-                                    )
-                                }
-                            },
-                        )
-
-                    ListItem(
-                        modifier = Modifier.fillMaxWidth(),
-                        trailing = {
-                            var buttonEnabled by remember { mutableStateOf(true) }
-
-                            IconButton(onClick = { /*TODO*/ }) {
-                                Icon(Icons.Rounded.Info, "Info")
+                if (showInfoDialog)
+                    AlertDialog(
+                        onDismissRequest = { showInfoDialog = false },
+                        confirmButton = {
+                            Button(onClick = { showInfoDialog = false }) {
+                                Text(text = "Hide")
                             }
+                        },
+                        text = {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                                    LazyColumn(
+                                        Modifier
+                                            .fillMaxSize()
+                                            .padding(16.dp),
+                                    ) {
+                                        // header
+                                        item {
+                                            Row(Modifier.background(Color.Gray)) {
+                                                TableCell(
+                                                    text = "Key",
+                                                    weight = 1f,
+                                                    modifier = Modifier
+                                                        .width(150.dp),
+                                                )
+                                                TableCell(
+                                                    text = "Local",
+                                                    weight = 1f,
+                                                    modifier = Modifier
+                                                        .width(150.dp),
+                                                )
+                                                TableCell(
+                                                    text = "Server",
+                                                    weight = 1f,
+                                                    modifier = Modifier
+                                                        .width(150.dp),
+                                                )
+                                            }
+                                        }
+                                        // rows
+                                        val dialogItems = updateData.localDisplayMap
+                                        items(dialogItems.toList()) { (key, value) ->
+                                            Row(Modifier.fillMaxWidth()) {
+                                                val local = value.toString()
+                                                    .let {
+                                                        if (it.isDigitsOnly() && it.length == 13)
+                                                            SimpleDateFormat(
+                                                                "yyyy-MM-dd HH:mm:ss",
+                                                                Locale.getDefault()
+                                                            ).format(Date(it.toLong()))
+                                                        else
+                                                            it
+                                                    }
+                                                val server = updateData.serverDisplayMap
+                                                    .getOrDefault(key, "<null>")
+                                                    .toString()
+                                                    .let {
+                                                        if (it.isDigitsOnly() && it.length == 13)
+                                                            SimpleDateFormat(
+                                                                "yyyy-MM-dd HH:mm:ss",
+                                                                Locale.getDefault()
+                                                            ).format(Date(it.toLong()))
+                                                        else
+                                                            it
+                                                    }
+                                                val fontWeight = if (local == server)
+                                                    FontWeight.Normal
+                                                else FontWeight.Bold
+
+                                                TableCell(
+                                                    text = key,
+                                                    weight = 1f,
+                                                    modifier = Modifier
+                                                        .width(150.dp),
+                                                )
+                                                TableCell(
+                                                    text = local,
+                                                    weight = 1f,
+                                                    fontWeight = fontWeight,
+                                                    modifier = Modifier
+                                                        .width(150.dp),
+                                                )
+                                                TableCell(
+                                                    text = server,
+                                                    weight = 1f,
+                                                    fontWeight = fontWeight,
+                                                    modifier = Modifier
+                                                        .width(150.dp),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                Text(
+                                    text = updateData.localHash.toString(),
+                                    modifier = Modifier.fillMaxWidth(.5f),
+                                )
+                                Text(
+                                    text = updateData.serverHash.toString(),
+                                    modifier = Modifier.fillMaxWidth(.5f),
+                                )
+                            }
+                        },
+                    )
+
+                ListItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    trailing = {
+                        var buttonEnabled by remember { mutableStateOf(true) }
+
+                        Row {
+                            if (BuildConfig.DEBUG)
+                                IconButton(onClick = { showInfoDialog = true }) {
+                                    Icon(Icons.Rounded.Info, "Info")
+                                }
 
                             IconButton(
                                 onClick = {
                                     buttonEnabled = false
-                                    dataClassPair?.let { (dataClass, score) ->
-                                        doAsync {
-                                            UpdaterSingleton.getInstance()
-                                                .update(
-                                                    context,
-                                                    updateData.namespace,
-                                                    dataClass.objectId,
-                                                    score
-                                                )
-                                        }
-                                    }
+                                    viewModel.update(updateData)
                                 },
-                                enabled = dataClassPair != null && buttonEnabled,
+                                enabled = buttonEnabled,
                             ) {
                                 Icon(
                                     Icons.Rounded.Download,
@@ -209,22 +241,21 @@ private fun UpdatesCard(viewModel: StorageViewModel) {
                                 )
                             }
                         }
+                    }
+                ) {
+                    BadgedBox(
+                        badge = {
+                            if (updateData.localHash == 0)
+                                Badge { Text(text = stringResource(R.string.badge_new)) }
+                        }
                     ) {
                         Text(
-                            text = dataClassPair?.first?.displayName
-                                ?: stringResource(R.string.status_loading),
+                            text = updateData.displayName,
                             modifier = Modifier
                                 .padding(4.dp)
-                                .placeholder(
-                                    dataClassPair == null,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    highlight = PlaceholderHighlight.shimmer(
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                            .copy(alpha = .5f)
-                                    ),
-                                )
                         )
                     }
+                }
             }
         }
     } else
