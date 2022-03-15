@@ -66,7 +66,7 @@ data class SectorData(
     }
 
     @Document.Namespace
-    var namespace: String = Sector.NAMESPACE
+    var namespace: String = Sector.NAMESPACE.namespace
 
     override fun data() = Sector(
         objectId,

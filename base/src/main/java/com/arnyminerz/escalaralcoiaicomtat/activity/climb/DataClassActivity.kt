@@ -112,7 +112,7 @@ class DataClassActivity : NetworkAwareComponentActivity() {
                 Bundle().apply {
                     putString(FirebaseAnalytics.Param.ITEM_ID, dataClass.objectId)
                     putString(FirebaseAnalytics.Param.ITEM_NAME, dataClass.displayName)
-                    putString(FirebaseAnalytics.Param.CONTENT_TYPE, dataClass.namespace)
+                    putString(FirebaseAnalytics.Param.CONTENT_TYPE, dataClass.namespace.namespace)
                 },
             )
 

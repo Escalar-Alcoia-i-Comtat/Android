@@ -19,7 +19,7 @@ class DownloadData
  */
 constructor(
     val displayName: String,
-    @Namespace val namespace: String,
+    val namespace: Namespace,
     @ObjectId val objectId: String,
     val overwrite: Boolean = DOWNLOAD_OVERWRITE_DEFAULT,
     val quality: Int = DOWNLOAD_QUALITY_DEFAULT

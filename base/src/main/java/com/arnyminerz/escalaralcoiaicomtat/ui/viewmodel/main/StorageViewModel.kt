@@ -66,27 +66,22 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private suspend inline fun <D : DataClass<*, *, R>, reified R : DataRoot<D>> performSearch(
-        @Namespace namespace: String,
+        namespace: Namespace,
         @ObjectId objectId: String,
         scoresSet: (index: Int, score: Int) -> Unit,
         setScore: (index: Int) -> Unit
     ) = app.searchSession
-        .getList<D, R>("", namespace)
-        { index, scoreItem -> scoresSet(index, scoreItem) }
-        .let {
-            lateinit var dataClass: D
-            it.forEachIndexed { index, item ->
-                if (item.objectId == objectId) {
-                    dataClass = item
-                    setScore(index)
+        .getList<D, R>("", namespace) { index, scoreItem -> scoresSet(index, scoreItem) }
+        .let { list ->
+            list.find { it.objectId == objectId }
+                ?.also {
+                    setScore(list.indexOf(it))
                 }
-            }
-            dataClass
         }
 
     @Suppress("UNCHECKED_CAST")
     fun <D : DataClassImpl> getDataClass(
-        @Namespace namespace: String,
+        namespace: Namespace,
         @ObjectId objectId: String,
     ) = mutableStateOf<Pair<D, Int>?>(null)
         .apply {

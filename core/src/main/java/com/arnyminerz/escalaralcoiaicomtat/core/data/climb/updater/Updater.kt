@@ -5,7 +5,6 @@ import androidx.annotation.IntDef
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.PutDocumentsRequest
-import androidx.appsearch.app.SearchSpec
 import androidx.appsearch.exceptions.AppSearchException
 import androidx.work.await
 import com.android.volley.VolleyError
@@ -13,53 +12,26 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_FETCH
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_UPDATER_ENDPOINT
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_LIST
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.append
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getList
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.google.firebase.perf.metrics.AddTrace
+import org.json.JSONObject
 import timber.log.Timber
-
-/**
- * Gets the millis time stored for the youngest element on [searchSession]. This is used for, if
- * in the server there's an even younger element, DB should be updated.
- * @author Arnau Mora
- * @since 20220226
- * @param searchSession The [AppSearchSession] instance for fetching values from db.
- */
-private suspend fun lastDownloadedItem(searchSession: AppSearchSession): Long {
-    var youngestTime = 0L
-    Timber.d("Searching for all data resources from SearchSession...")
-    val searchResults = searchSession.search(
-        "",
-        SearchSpec.Builder()
-            .addFilterSchemas("AreaData", "ZoneData", "SectorData", "PathData")
-            .setResultCountPerPage(100)
-            .build()
-    )
-    Timber.d("Got data resources. Getting first page")
-    var page = searchResults.nextPage.await()
-    while (page.isNotEmpty()) {
-        Timber.v("Page has ${page.size} elements. Searching for latest creation.")
-        for (searchResult in page) {
-            val genericDocument = searchResult.genericDocument
-            val creationTimestampMillis = genericDocument.creationTimestampMillis
-            creationTimestampMillis
-                .takeIf { it > youngestTime }
-                ?.let { youngestTime = it }
-        }
-        Timber.v("Youngest time: $youngestTime")
-
-        page = searchResults.nextPage.await()
-    }
-    Timber.d("Youngest time: $youngestTime")
-    return youngestTime
-}
 
 @Target(AnnotationTarget.TYPE)
 @IntDef(
@@ -107,15 +79,36 @@ const val UPDATE_AVAILABLE_FAIL_CLIENT = 3
  */
 const val UPDATE_AVAILABLE_FAIL_FIELDS = 4
 
+private fun <R : DataClassImpl> findUpdatableObjects(
+    dataList: List<R>,
+    json: JSONObject,
+    constructor: (json: JSONObject, objectId: String) -> R
+) = mutableListOf<UpdaterSingleton.UpdateAvailableData>().apply {
+    json.keys()
+        .forEach { objectId ->
+            val jsonData = json.getJSONObject(objectId)
+            val serverData = constructor(jsonData, objectId)
+            val localData = dataList.find { it.objectId == objectId }
+            if (localData == null || localData.hashCode() != serverData.hashCode())
+                add(
+                    UpdaterSingleton.UpdateAvailableData(
+                        serverData.objectId,
+                        serverData.hashCode(),
+                        localData.hashCode()
+                    )
+                )
+        }
+}
+
+@AddTrace(name = "CheckForUpdates")
 @WorkerThread
 suspend fun updateAvailable(
     context: Context,
     searchSession: AppSearchSession
 ): @UpdateAvailableResult Int {
-    val youngestTime = lastDownloadedItem(searchSession)
     try {
-        // Fetch from server the updatable elements, and continue only if result has "result"
-        val jsonData = context.getJson("$REST_API_UPDATER_ENDPOINT$youngestTime")
+        // Fetch from server the list of data, and continue only if result has "result"
+        val jsonData = context.getJson("$REST_API_DATA_LIST/*")
             .takeIf { it.has("result") }
             ?: return UPDATE_AVAILABLE_FAIL_CLIENT
 
@@ -124,43 +117,48 @@ suspend fun updateAvailable(
 
         // Clear the singleton's possible stored updatable elements
         val updaterSingleton = UpdaterSingleton.getInstance()
-        updaterSingleton.updateAvailableObjects = mapOf()
 
-        // Get the fields required
-        val updateAvailable = jsonResult.getBoolean("updateAvailable")
-        val fieldsAvailable = jsonResult.has("fields")
+        // Get all the lists of elements
+        val jsonAreas = jsonResult.getJSONObject("Areas")
+        val jsonZones = jsonResult.getJSONObject("Zones")
+        val jsonSectors = jsonResult.getJSONObject("Sectors")
+        val jsonPaths = jsonResult.getJSONObject("Paths")
 
-        // If updateAvailable is true, and also result has "fields", parse the updatable elements
-        if (updateAvailable && fieldsAvailable) {
-            // Get the fields list
-            val updatableFields = jsonResult.getJSONArray("fields")
-            // Iterate the fields
-            for (k in 0 until updatableFields.length()) {
-                val field = updatableFields.getJSONObject(k)
-                val table = field.getString("table")
-                val ids = field.getJSONArray("ids").let { array ->
-                    val idList = arrayListOf<String>()
-                    for (i in 0 until array.length())
-                        idList.add(array.getString(i))
-                    idList.toList()
-                }
-                updaterSingleton.updateAvailableObjects = updaterSingleton
-                    .updateAvailableObjects
-                    .toMutableMap()
-                    .apply {
-                        put(table, ids)
-                    }
-            }
-            // If there were updatable fields, return UPDATE_AVAILABLE
-            if (updatableFields.length() > 0)
-                return UPDATE_AVAILABLE
-        } else if (updateAvailable)
-            return UPDATE_AVAILABLE_FAIL_FIELDS
+        // Find the locally stored elements lists
+        val areas = searchSession.getList<Area, AreaData>("", Area.NAMESPACE)
+        val zones = searchSession.getList<Zone, ZoneData>("", Zone.NAMESPACE)
+        val sectors = searchSession.getList<Sector, SectorData>("", Sector.NAMESPACE)
+        val paths = searchSession.getList<Path, PathData>("", Path.NAMESPACE, 1000)
+
+        // Add all the updatable areas
+        val updatableAreas = findUpdatableObjects(areas, jsonAreas)
+        { json, objectId -> Area(json, objectId) }
+        val updatableZones = findUpdatableObjects(zones, jsonZones)
+        { json, objectId -> Zone(json, objectId) }
+        val updatableSectors = findUpdatableObjects(sectors, jsonSectors)
+        { json, objectId -> Sector(json, objectId) }
+        val updatablePaths = findUpdatableObjects(paths, jsonPaths)
+        { json, objectId -> Path(json, objectId) }
+
+        // Add all the found elements to the lists
+        updaterSingleton.updateAvailableObjects = updaterSingleton.updateAvailableObjects
+            .toMutableMap()
+            .append(Area.NAMESPACE, updatableAreas)
+            .append(Zone.NAMESPACE, updatableZones)
+            .append(Sector.NAMESPACE, updatableSectors)
+            .append(Path.NAMESPACE, updatablePaths)
+
+        return when {
+            updatableAreas.isNotEmpty() ||
+                    updatableZones.isNotEmpty() ||
+                    updatableSectors.isNotEmpty() ||
+                    updatablePaths.isNotEmpty() -> UPDATE_AVAILABLE
+            else -> UPDATE_AVAILABLE_FALSE
+        }
     } catch (e: VolleyError) {
         Timber.e(e, "Could not check for updates.")
         return UPDATE_AVAILABLE_FAIL_SERVER
     }
-    return UPDATE_AVAILABLE_FALSE
 }
 
 /**
@@ -185,21 +183,27 @@ class UpdaterSingleton {
             }
     }
 
+    data class UpdateAvailableData(
+        @ObjectId val objectId: String,
+        val serverHash: Int,
+        val localHash: Int
+    )
+
     /**
      * Stores the references that have a new update available.
      * @author Arnau Mora
      * @since 20220226
      */
-    var updateAvailableObjects: Map<@Namespace String, List<@ObjectId String>> = mapOf()
+    var updateAvailableObjects: Map<Namespace, List<UpdateAvailableData>> = mapOf()
 
     suspend fun update(
         context: Context,
-        @Namespace namespace: String,
+        namespace: Namespace,
         @ObjectId objectId: String,
         score: Int
     ) {
         Timber.i("Updating data of $objectId at $namespace...")
-        val at = namespace + "s"
+        val at = namespace.tableName
         try {
             Timber.d("Making data request to server... $namespace/$objectId")
             val jsonData = context.getJson("$REST_API_DATA_FETCH$at/$objectId")
@@ -239,8 +243,8 @@ class UpdaterSingleton {
             updateAvailableObjects = updateAvailableObjects
                 .toMutableMap()
                 .apply {
-                    val newNamespaceList = arrayListOf<String>()
-                    get(namespace)?.forEach { if (it != objectId) newNamespaceList.add(it) }
+                    val newNamespaceList = arrayListOf<UpdateAvailableData>()
+                    get(namespace)?.forEach { if (it.objectId != objectId) newNamespaceList.add(it) }
                     Timber.v("Updated id list for $namespace: $newNamespaceList")
                     put(namespace, newNamespaceList)
                 }

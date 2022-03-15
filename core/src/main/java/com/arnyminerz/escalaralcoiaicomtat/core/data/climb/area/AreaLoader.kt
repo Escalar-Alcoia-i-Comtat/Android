@@ -42,7 +42,7 @@ import java.util.Locale
  */
 private fun <D : DataClass<*, *, I>, I : DataRoot<D>> decode(
     jsonData: JSONObject,
-    @Namespace namespace: String,
+    namespace: Namespace,
     constructor: (data: JSONObject, id: String) -> D,
 ) = decode<D, I, Int>(jsonData, namespace, constructor, null)
 
@@ -62,12 +62,12 @@ private fun <D : DataClass<*, *, I>, I : DataRoot<D>> decode(
  */
 private fun <D : DataClass<*, *, I>, I : DataRoot<D>, R : Comparable<R>> decode(
     jsonData: JSONObject,
-    @Namespace namespace: String,
+    namespace: Namespace,
     constructor: (data: JSONObject, id: String) -> D,
     sortBy: ((I) -> R?)? = null,
 ): List<I> {
     val index = arrayListOf<I>()
-    val jsonObject = jsonData.getJSONObject("${namespace}s")
+    val jsonObject = jsonData.getJSONObject(namespace.tableName)
     val keys = jsonObject.keys()
     for ((i, id) in keys.withIndex()) {
         val json = jsonObject.getJSONObject(id)
@@ -153,15 +153,18 @@ suspend fun loadAreas(
         val decodedSectors = decode(jsonData, Sector.NAMESPACE, Sector.CONSTRUCTOR)
         val decodedPaths = decode(jsonData)
 
+        trace.putMetric("areasCount", decodedAreas.size.toLong())
+        trace.putMetric("zonesCount", decodedZones.size.toLong())
+        trace.putMetric("sectorsCount", decodedSectors.size.toLong())
+        trace.putMetric("pathsCount", decodedPaths.size.toLong())
+
         Timber.v("Search > Initializing session future...")
         val session = application.searchSession
-        val time = System.currentTimeMillis()
         Timber.v("Search > Adding document classes...")
         val setSchemaRequest = SetSchemaRequest.Builder()
             .addDocumentClasses(SEARCH_SCHEMAS)
             .build()
         session.setSchema(setSchemaRequest).await()
-        Timber.i("Set schema time: ${System.currentTimeMillis() - time}")
 
         Timber.v("Search > Adding documents...")
         val putRequest = PutDocumentsRequest.Builder()

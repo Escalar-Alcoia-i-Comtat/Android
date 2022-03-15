@@ -72,7 +72,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone.Companion.SAMPLE_ZONE
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone.Companion.SAMPLE
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATA_SEARCH_SCHEMAS_NAMES
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
@@ -308,7 +308,7 @@ class SearchableActivity : ComponentActivity() {
     @Preview(name = "Zone search result preview", device = Devices.DEFAULT, showBackground = true)
     @Composable
     fun SearchResultPreview() {
-        SearchResult(SAMPLE_ZONE)
+        SearchResult(SAMPLE)
     }
 
     class SearchViewModel(application: Application) : AndroidViewModel(application) {

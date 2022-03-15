@@ -8,6 +8,7 @@ import androidx.appsearch.exceptions.AppSearchException
 import androidx.appsearch.localstorage.LocalStorage
 import androidx.collection.arrayMapOf
 import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
@@ -89,7 +90,7 @@ suspend fun AppSearchSession.getAreas(): List<Area> {
 @WorkerThread
 suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession.getData(
     query: String,
-    namespace: String,
+    namespace: Namespace,
     scoreListener: ((score: Int) -> Unit),
 ): R? {
     val searchSpec = SearchSpec.Builder()
@@ -136,7 +137,7 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
 @WorkerThread
 suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession.getData(
     query: String,
-    namespace: String,
+    namespace: Namespace,
 ): R? = getData<R, T>(query, namespace) {}
 
 /**
@@ -152,7 +153,7 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
 @WorkerThread
 suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession.getList(
     query: String,
-    namespace: String,
+    namespace: Namespace,
     max: Int = 100,
     scoreListener: ((index: Int, score: Int) -> Unit),
 ): List<R> {
@@ -202,7 +203,7 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
 @WorkerThread
 suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession.getList(
     query: String,
-    namespace: String,
+    namespace: Namespace,
     max: Int = 100,
 ): List<R> = getList<R, T>(query, namespace, max) { _, _ -> }
 
@@ -314,7 +315,7 @@ suspend fun AppSearchSession.getPaths(): List<Path> =
  */
 @WorkerThread
 suspend inline fun <A : DataClassImpl, R : Comparable<R>> AppSearchSession.getChildren(
-    childrenNamespace: String,
+    childrenNamespace: Namespace,
     objectId: String,
     crossinline sortBy: (A) -> R?
 ): List<A> {
@@ -401,3 +402,13 @@ suspend fun AppSearchSession.getDownloads(): Flow<DownloadedData> = flow {
         results = searchResults.nextPage.await()
     }
 }
+
+/**
+ * Adds a namespace filter to [SearchSpec] Entry. Only search for documents that have the specified
+ * namespaces. If unset, the query will search over all namespaces.
+ * @author Arnau Mora
+ * @since 20220315
+ * @param namespaces The namespaces to add.
+ */
+fun SearchSpec.Builder.addFilterNamespaces(vararg namespaces: Namespace) =
+    addFilterNamespaces(namespaces.map { it.namespace })

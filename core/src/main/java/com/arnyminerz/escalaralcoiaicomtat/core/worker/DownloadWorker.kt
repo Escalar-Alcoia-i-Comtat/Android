@@ -104,8 +104,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
     private data class ImageDownloadData(
         val imagePath: String,
         val imageFile: File,
-        val objectId: String,
-        val namespace: String,
+        @ObjectId val objectId: String,
+        val namespace: Namespace,
         val scale: Float
     )
 
@@ -126,7 +126,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         val imagePath: String = data.imagePath
         val imageFile: File = data.imageFile
         val objectId: String = data.objectId
-        val namespace: String = data.namespace
+        val namespace: Namespace = data.namespace
         val scale: Float = data.scale
 
         val dataDir = imageFile.parentFile!!
@@ -280,7 +280,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @param parentId The id of the parent DataClass. It's null for Zones since it's not used.
      */
     internal data class DownloadData(
-        val namespace: String,
+        val namespace: Namespace,
         @ObjectId
         val objectId: String,
         val displayName: String,
@@ -307,8 +307,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @throws InitializationException When the [namespace] is not valid.
      */
     private suspend fun downloadData(
+        namespace: Namespace,
         @ObjectId objectId: String,
-        @Namespace namespace: String,
     ): Pair<DownloadData, List<DownloadData>> = coroutineScope {
         val imageFiles = arrayListOf<ImageDownloadData>()
         val kmzFiles = arrayListOf<KMZDownloadData>()
@@ -325,7 +325,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
          * of a list (true).
          */
         suspend fun generateData(
-            @Namespace namespace: String,
+            namespace: Namespace,
             @ObjectId objectId: String,
             isParent: Boolean
         ): List<DownloadData> {
@@ -335,7 +335,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 REST_API_DATA_LIST
             else
                 REST_API_DATA_FETCH
-            val url = "$endpoint${namespace + "s"}/$objectId"
+            val url = "$endpoint${namespace.tableName}/$objectId"
 
             // Disabled since currently server not working
             // if (namespace == Zone.NAMESPACE)
@@ -436,6 +436,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         val objectId = inputData.getString(DOWNLOAD_OBJECT_ID)
             ?: return failure(ERROR_OBJECT_ID_NOT_SET)
         val namespace = inputData.getString(DOWNLOAD_NAMESPACE)
+            ?.let { Namespace.find(it) }
             ?: return failure(ERROR_NAMESPACE_NOT_SET)
         overwrite = inputData.getBoolean(DOWNLOAD_OVERWRITE, DOWNLOAD_OVERWRITE_DEFAULT)
         quality = inputData.getInt(DOWNLOAD_OVERWRITE, DOWNLOAD_QUALITY_DEFAULT)
@@ -473,7 +474,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         notification = notificationBuilder.buildAndShow()
 
         val downloadResult = try {
-            downloadData(objectId, namespace).let { downloadData ->
+            downloadData(namespace, objectId).let { downloadData ->
                 val parentData = downloadData.first
                 val childrenData = downloadData.second
                 if (childrenData.size.toLong() != parentData.childrenCount)
@@ -599,7 +600,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 "D/$objectId",
                 objectId,
                 timestamp,
-                namespace,
+                namespace.namespace,
                 displayName,
                 childrenCount,
                 parentId,
@@ -616,7 +617,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                         "D/${childrenIds[i]}",
                         childrenIds[i],
                         timestamp,
-                        Sector.NAMESPACE,
+                        Sector.NAMESPACE.namespace,
                         childrenDisplayNames[i],
                         0,
                         objectId,

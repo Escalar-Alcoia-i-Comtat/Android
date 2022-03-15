@@ -68,23 +68,23 @@ fun DownloadedDataItem(
     searchSession: AppSearchSession,
     dataClassActivity: Class<*>,
     onDelete: (() -> Unit)?
-) = when (data.namespace) {
+) = when (val namespace = Namespace.find(data.namespace)) {
     // Area is not downloadable
     Zone.NAMESPACE -> DownloadedDataItemRaw<Zone, ZoneData>(
-        data.displayName,
+        namespace,
         data.objectId,
+        data.displayName,
         data.sizeBytes,
-        data.namespace,
         data.childrenCount,
         searchSession,
         dataClassActivity,
         onDelete
     )
     Sector.NAMESPACE -> DownloadedDataItemRaw<Sector, SectorData>(
-        data.displayName,
+        namespace,
         data.objectId,
+        data.displayName,
         data.sizeBytes,
-        data.namespace,
         data.childrenCount,
         searchSession,
         dataClassActivity,
@@ -95,10 +95,10 @@ fun DownloadedDataItem(
 
 @Composable
 private inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> DownloadedDataItemRaw(
-    displayName: String,
+    namespace: Namespace,
     @ObjectId objectId: String,
+    displayName: String,
     size: Long,
-    @Namespace namespace: String,
     childrenCount: Long,
     searchSession: AppSearchSession?,
     dataClassActivity: Class<*>,
@@ -318,10 +318,10 @@ private inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> DownloadedD
 @Composable
 fun DownloadedDataItemPreview() {
     DownloadedDataItemRaw<Zone, ZoneData>(
-        "Zone Placeholder",
-        "object",
-        12 * MEGABYTE,
         Zone.NAMESPACE,
+        "object",
+        "Zone Placeholder",
+        12 * MEGABYTE,
         7,
         null,
         Void::class.java,

@@ -23,10 +23,8 @@ import androidx.work.WorkManager
 import androidx.work.await
 import com.android.volley.Request
 import com.android.volley.VolleyError
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ChildrenNamespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ParentNamespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
@@ -48,6 +46,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DOWNLOAD_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.InputStreamVolleyRequest
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.addFilterNamespaces
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
@@ -70,6 +69,7 @@ import org.osmdroid.util.GeoPoint
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.Serializable
 import java.util.Date
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -147,14 +147,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          * @author Arnau Mora
          * @since 20211231
          */
-        private fun generatePin(namespace: String, objectId: String) = "${namespace}_$objectId"
+        private fun generatePin(namespace: Namespace, objectId: String) = "${namespace}_$objectId"
 
         /**
          * Returns the correct image name for the desired [objectId] and [namespace].
          * @author Arnau Mora
          * @since 20210822
          */
-        fun imageName(namespace: String, objectId: String, suffix: String?) =
+        fun imageName(namespace: Namespace, objectId: String, suffix: String?) =
             "$namespace-$objectId${suffix ?: ""}"
 
         /**
@@ -166,7 +166,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          * @param objectId The id of the DataClass
          * @return The path of the image file that can be downloaded
          */
-        private fun imageFile(context: Context, namespace: String, objectId: String): File =
+        private fun imageFile(context: Context, namespace: Namespace, objectId: String): File =
             File(dataDir(context), imageName(namespace, objectId, null))
 
         /**
@@ -181,13 +181,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          */
         private fun cacheImageFile(
             context: Context,
-            namespace: String,
+            namespace: Namespace,
             objectId: String,
             suffix: String? = null
         ): File =
             File(context.cacheDir, imageName(namespace, objectId, suffix))
 
-        fun kmzFile(context: Context, permanent: Boolean, namespace: String, objectId: String) =
+        fun kmzFile(context: Context, permanent: Boolean, namespace: Namespace, objectId: String) =
             File(
                 if (permanent) dataDir(context) else context.cacheDir,
                 generatePin(namespace, objectId)
@@ -243,7 +243,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
             context: Context,
             activity: Class<*>,
             searchSession: AppSearchSession,
-            @Namespace namespace: String,
+            namespace: Namespace,
             @ObjectId objectId: String
         ): Intent? = searchSession.getData<A, B>(objectId, namespace)
             ?.let { dataClass ->
@@ -277,7 +277,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         suspend fun <A : DataClassImpl> delete(
             context: Context,
             searchSession: AppSearchSession,
-            namespace: String,
+            namespace: Namespace,
             objectId: String
         ): Boolean {
             Timber.v("Deleting $objectId")
@@ -301,19 +301,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
             }
 
             // This may not be the best method, but for now it works
-            when (namespace) {
-                Area.NAMESPACE -> Zone.NAMESPACE
-                Zone.NAMESPACE -> Sector.NAMESPACE
-                Sector.NAMESPACE -> Path.NAMESPACE
-                else -> null
-            }?.let { childrenNamespace ->
-                Timber.d("Deleting children...")
-                val children = searchSession.getChildren<A, String>(childrenNamespace, objectId)
-                { it.objectId }
-                for (child in children)
-                    if (child is DataClass<*, *, *>)
-                        lst.add(child.delete(context, searchSession))
-            }
+            namespace.ChildrenNamespace
+                ?.let { childrenNamespace ->
+                    Timber.d("Deleting children...")
+                    val children = searchSession.getChildren<A, String>(childrenNamespace, objectId)
+                    { it.objectId }
+                    for (child in children)
+                        if (child is DataClass<*, *, *>)
+                            lst.add(child.delete(context, searchSession))
+                }
 
             // Remove dataclass from index.
             // Since Sectors that are children of a Zone also contain its ID this will also remove them
@@ -506,7 +502,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          */
         @Throws(InitializationException::class)
         fun buildContainers(
-            @Namespace namespace: String,
+            namespace: Namespace,
             @ObjectId objectId: String,
             data: JSONObject
         ) = when (namespace) {
@@ -528,7 +524,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          * @throws InitializationException When the namespace is unknown.
          */
         @Throws(InitializationException::class)
-        fun buildAny(@Namespace namespace: String, @ObjectId objectId: String, data: JSONObject) =
+        fun buildAny(namespace: Namespace, @ObjectId objectId: String, data: JSONObject) =
             when (namespace) {
                 Area.NAMESPACE -> Area(data, objectId)
                 Zone.NAMESPACE -> Zone(data, objectId)
@@ -602,12 +598,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @author Arnau Mora
      * @since 20210313
      * @param searchSession The session for performing searches.
+     * @throws NullPointerException When [namespace] does not have children.
      */
     @WorkerThread
+    @Throws(NullPointerException::class)
     suspend inline fun <R : Comparable<R>> getChildren(
         searchSession: AppSearchSession,
         crossinline sortBy: (A) -> R?
-    ): List<A> = searchSession.getChildren(namespace.ChildrenNamespace, objectId, sortBy)
+    ): List<A> = searchSession.getChildren(namespace.ChildrenNamespace!!, objectId, sortBy)
 
     /**
      * Gets the children element at [index].
@@ -686,7 +684,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @author Arnau Mora
      * @since 20210724
      */
-    override fun toString(): String = namespace[0] + "/" + objectId
+    override fun toString(): String = namespace.namespace[0] + "/" + objectId
 
     /**
      * Gets the KMZ file of the [DataClass] and stores it into [targetFile].
@@ -833,6 +831,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @param index The position of the DataClass
      */
     abstract fun data(index: Int): D
+
+    /**
+     * Returns a map used to display the stored data to the user. Keys should be the parameter name,
+     * and the value the value to display. Should be overridden by target class.
+     * @author Arnau Mora
+     * @since 20220315
+     */
+    abstract override fun displayMap(): Map<String, Serializable?>
 
     /**
      * Deletes the downloaded content if downloaded
@@ -1072,7 +1078,7 @@ suspend fun @receiver:ObjectId String.isDownloadIndexed(searchSession: AppSearch
 suspend inline fun <A : DataClassImpl, R : Comparable<R>> @receiver:ObjectId
 String.getChildren(
     searchSession: AppSearchSession,
-    namespace: String,
+    namespace: Namespace,
     crossinline sortBy: (A) -> R?
 ) =
     searchSession.getChildren(namespace, this, sortBy)

@@ -1,7 +1,10 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.screen.main
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +15,8 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -27,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -47,6 +53,20 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import timber.log.Timber
+
+@Composable
+fun RowScope.TableCell(
+    text: String,
+    weight: Float
+) {
+    Text(
+        text = text,
+        Modifier
+            .border(1.dp, Color.Black)
+            .weight(weight)
+            .padding(8.dp)
+    )
+}
 
 /**
  * Shows the updates available card.
@@ -86,25 +106,92 @@ private fun UpdatesCard(viewModel: StorageViewModel, updateAvailable: Boolean) {
             )
         }
         LazyColumn {
-            items(updateAvailableObjects.toList()) { (key, entries) ->
+            items(updateAvailableObjects.toList()) { (namespace, entries) ->
                 for (item in entries) {
-                    val namespace = key.substring(0, key.length - 1)
                     val state = when (namespace) {
-                        Area.NAMESPACE -> viewModel.getDataClass<Area>(Area.NAMESPACE, item)
-                        Zone.NAMESPACE -> viewModel.getDataClass<Zone>(Zone.NAMESPACE, item)
-                        Sector.NAMESPACE -> viewModel.getDataClass<Sector>(Sector.NAMESPACE, item)
-                        Path.NAMESPACE -> viewModel.getDataClass<Path>(Path.NAMESPACE, item)
+                        Area.NAMESPACE -> viewModel.getDataClass<Area>(
+                            Area.NAMESPACE,
+                            item.objectId
+                        )
+                        Zone.NAMESPACE -> viewModel.getDataClass<Zone>(
+                            Zone.NAMESPACE,
+                            item.objectId
+                        )
+                        Sector.NAMESPACE -> viewModel.getDataClass<Sector>(
+                            Sector.NAMESPACE,
+                            item.objectId
+                        )
+                        Path.NAMESPACE -> viewModel.getDataClass<Path>(
+                            Path.NAMESPACE,
+                            item.objectId
+                        )
                         else -> {
                             Timber.w("Attention! Namespace \"%s\" not valid", namespace)
                             return@items
                         }
                     }
                     val dataClassPair by remember { state }
+                    var showInfoDialog by remember { mutableStateOf(false) }
+
+                    if (showInfoDialog)
+                        AlertDialog(
+                            onDismissRequest = { showInfoDialog = false },
+                            confirmButton = {
+                                Button(onClick = { showInfoDialog = false }) {
+                                    Text(text = "Hide")
+                                }
+                            },
+                            text = {
+                                LazyColumn(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp),
+                                ) {
+                                    val column1Weight = .3f // 30%
+                                    val column2Weight = .7f // 70%
+
+                                    // header
+                                    item {
+                                        Row(Modifier.background(Color.Gray)) {
+                                            TableCell(text = "Column 1", weight = column1Weight)
+                                            TableCell(text = "Column 2", weight = column2Weight)
+                                        }
+                                    }
+                                    // rows
+                                    val dialogItems =
+                                        dataClassPair?.first?.displayMap() ?: emptyMap()
+                                    items(dialogItems.toList()) { (key, value) ->
+                                        Row(Modifier.fillMaxWidth()) {
+                                            TableCell(text = key, weight = column1Weight)
+                                            TableCell(
+                                                text = value.toString(),
+                                                weight = column2Weight
+                                            )
+                                        }
+                                    }
+                                }
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    Text(
+                                        text = item.localHash.toString(),
+                                        modifier = Modifier.fillMaxWidth(.5f),
+                                    )
+                                    Text(
+                                        text = item.serverHash.toString(),
+                                        modifier = Modifier.fillMaxWidth(.5f),
+                                    )
+                                }
+                            },
+                        )
 
                     ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         trailing = {
                             var buttonEnabled by remember { mutableStateOf(true) }
+
+                            IconButton(onClick = { /*TODO*/ }) {
+                                Icon(Icons.Rounded.Info, "Info")
+                            }
+
                             IconButton(
                                 onClick = {
                                     buttonEnabled = false

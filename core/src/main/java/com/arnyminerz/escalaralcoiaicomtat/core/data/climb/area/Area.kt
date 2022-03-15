@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassCompanion
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
@@ -11,6 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
+import java.io.Serializable
 
 /**
  * Creates a new Area instance.
@@ -84,17 +86,28 @@ class Area internal constructor(
         metadata.webURL ?: ""
     )
 
+    override fun displayMap(): Map<String, Serializable?> = mapOf(
+        "objectId" to objectId,
+        "displayName" to displayName,
+        "timestampMillis" to timestampMillis,
+        "imagePath" to imagePath,
+        "kmzPath" to kmzPath,
+        "webUrl" to webUrl,
+    )
+
     override fun hashCode(): Int {
         var result = super.hashCode()
         result = 31 * result + webUrl.hashCode()
         return result
     }
 
-    companion object {
-        @Namespace
-        const val NAMESPACE = "Area"
+    companion object : DataClassCompanion<Area>() {
+        override val NAMESPACE = Namespace.AREA
 
-        const val IMAGE_QUALITY = 65
+        override val IMAGE_QUALITY = 65
+
+        override val CONSTRUCTOR: (data: JSONObject, objectId: String) -> Area =
+            { data, objectId -> Area(data, objectId) }
 
         const val SAMPLE_AREA_OBJECT_ID = "PL5j43cBRP7F24ecXGOR"
         const val SAMPLE_AREA_DISPLAY_NAME = "Cocentaina"
@@ -106,7 +119,7 @@ class Area internal constructor(
         const val SAMPLE_AREA_WEB_URL =
             "https://escalaralcoiaicomtat.org/zones-escalada-cocentaina.html"
 
-        val SAMPLE_AREA = Area(
+        override val SAMPLE = Area(
             objectId = SAMPLE_AREA_OBJECT_ID,
             displayName = SAMPLE_AREA_DISPLAY_NAME,
             timestampMillis = SAMPLE_AREA_TIMESTAMP,
