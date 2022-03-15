@@ -20,6 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.updateAvailable
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
@@ -133,6 +134,19 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val updateAvailable = updateAvailable(getApplication(), app.searchSession)
             Timber.i("Update available: $updateAvailable")
+        }
+    }
+
+    fun update(data: UpdaterSingleton.Item) {
+        viewModelScope.launch {
+            Timber.i("Updating ${data.namespace}/${data.objectId}...")
+            UpdaterSingleton.getInstance()
+                .update(
+                    getApplication(),
+                    data.namespace,
+                    data.objectId,
+                    data.score
+                )
         }
     }
 
