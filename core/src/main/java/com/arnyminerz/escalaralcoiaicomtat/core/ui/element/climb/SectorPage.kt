@@ -51,7 +51,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.ZoomableImage
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
-import me.bytebeats.views.charts.bar.BarChar
+import me.bytebeats.views.charts.bar.BarChart
 import me.bytebeats.views.charts.bar.render.bar.SimpleBarDrawer
 import me.bytebeats.views.charts.bar.render.label.SimpleLabelDrawer
 import me.bytebeats.views.charts.bar.render.xaxis.SimpleXAxisDrawer
@@ -234,7 +234,7 @@ fun SectorPage(
                                 // Chart
                                 AnimatedVisibility(visible = chartVisible) {
                                     // Text(text = "Hello, this doesn't work, but hey, here's a pig 🐷")
-                                    BarChar(
+                                    BarChart(
                                         barChartData = viewModel.barChartData,
                                         modifier = Modifier
                                             .height(120.dp)
