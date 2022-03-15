@@ -35,11 +35,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.SectorPage
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModel
@@ -71,13 +71,15 @@ fun Activity.SectorViewScreen(
     index: Int?,
     indexInterface: (index: Int) -> Unit
 ) {
+    val context = LocalContext.current
+
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(index!!)
 
     var sectors by remember { mutableStateOf(emptyList<Sector>()) }
     var currentSector by remember { mutableStateOf<Sector?>(null) }
     LaunchedEffect(this) {
-        sectors = zone.getChildren(app.searchSession) { it.weight }
+        sectors = zone.getChildren(context) { it.weight }
         currentSector = sectors[index]
     }
     LaunchedEffect(pagerState) {

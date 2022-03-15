@@ -313,7 +313,6 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                     val intent = DataClass.getIntent(
                         app,
                         DataClassActivity::class.java,
-                        app.searchSession,
                         deepLinkPath
                     )
                     uiContext {

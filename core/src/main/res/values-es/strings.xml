@@ -76,6 +76,7 @@
     <string name="path_stats_chart_title">Grados</string>
     <string name="nearby_zones_title">Zonas Cercanas</string>
     <string name="nearby_zones_permission">El acceso a la ubicación es necesario y no está dado. Pulsa para solicitar.</string>
+    <string name="nearby_zones_permission_rationale">Para comprobar qué zonas están cerca de ti, tienes que permitir que la aplicación acceda a tu ubicación actual.</string>
     <string name="sector_info_dialog_sun_morning_title">Sol por la mañana</string>
     <string name="sector_info_dialog_sun_morning_msg">Al sector le da el sol por la mañana y la sombra por la tarde.</string>
     <string name="sector_info_dialog_sun_afternoon_title">Sol por la tarde</string>
@@ -123,6 +124,7 @@
     <string name="toast_ending_info">Este es el tipo de reunión que tiene la vía</string>
     <string name="toast_error_send_message">El mensaje no ha podido ser enviado! %s</string>
     <string name="toast_nearby_zones_enabled">Zonas Cercanas habilitadas</string>
+    <string name="badge_new">Nuevo</string>
     <string name="snackbar_feedback_alert">Por favor, rellena todos los campos</string>
     <string name="notification_download_progress_title">Descargando…</string>
     <string name="notification_download_progress_message">Descargando %s</string>

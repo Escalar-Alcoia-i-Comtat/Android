@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
@@ -20,9 +21,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.updateAvailable
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getList
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import kotlinx.coroutines.launch
@@ -54,7 +58,7 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
             val downloadsFlow = app.getDownloads()
             downloadsFlow.collect { data ->
                 val parentIndexed =
-                    data.parentId.ifEmpty { null }?.isDownloadIndexed(app.searchSession)
+                    data.parentId.ifEmpty { null }?.isDownloadIndexed(context)
                 Timber.i("Collected ${data.namespace}:${data.objectId}, adding. Parent (${data.parentId}) indexed: $parentIndexed")
                 list.add(data to (parentIndexed?.downloaded ?: false))
                 size += data.sizeBytes
@@ -66,27 +70,23 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private suspend inline fun <D : DataClass<*, *, R>, reified R : DataRoot<D>> performSearch(
-        @Namespace namespace: String,
+        namespace: Namespace,
         @ObjectId objectId: String,
         scoresSet: (index: Int, score: Int) -> Unit,
         setScore: (index: Int) -> Unit
-    ) = app.searchSession
-        .getList<D, R>("", namespace)
-        { index, scoreItem -> scoresSet(index, scoreItem) }
-        .let {
-            lateinit var dataClass: D
-            it.forEachIndexed { index, item ->
-                if (item.objectId == objectId) {
-                    dataClass = item
-                    setScore(index)
+    ) = SearchSingleton.getInstance(context)
+        .searchSession
+        .getList<D, R>("", namespace) { index, scoreItem -> scoresSet(index, scoreItem) }
+        .let { list ->
+            list.find { it.objectId == objectId }
+                ?.also {
+                    setScore(list.indexOf(it))
                 }
-            }
-            dataClass
         }
 
     @Suppress("UNCHECKED_CAST")
     fun <D : DataClassImpl> getDataClass(
-        @Namespace namespace: String,
+        namespace: Namespace,
         @ObjectId objectId: String,
     ) = mutableStateOf<Pair<D, Int>?>(null)
         .apply {
@@ -117,7 +117,8 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
                             score = scores[index]!!
                         }
                     )
-                    Path.NAMESPACE -> app.searchSession
+                    Path.NAMESPACE -> SearchSingleton.getInstance(context)
+                        .searchSession
                         .getList<Path, PathData>("", Path.NAMESPACE)
                         .find { it.objectId == objectId }!!
                     else -> {
@@ -132,6 +133,26 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
                 value = (dataClass as D) to score
             }
         }
+
+    fun checkForUpdates() {
+        viewModelScope.launch {
+            val updateAvailable = updateAvailable(getApplication())
+            Timber.i("Update available: $updateAvailable")
+        }
+    }
+
+    fun update(data: UpdaterSingleton.Item) {
+        viewModelScope.launch {
+            Timber.i("Updating ${data.namespace}/${data.objectId}...")
+            UpdaterSingleton.getInstance()
+                .update(
+                    getApplication(),
+                    data.namespace,
+                    data.objectId,
+                    data.score
+                )
+        }
+    }
 
     class Factory(
         private val application: Application

@@ -3,8 +3,8 @@ package com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZones
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.livedata.MutableListLiveData
 import kotlinx.coroutines.CoroutineScope
@@ -34,7 +34,10 @@ class NearbyZonesViewModel(application: Application) : AndroidViewModel(applicat
     fun loadZones() {
         viewModelScope.launch {
             CoroutineScope(Dispatchers.IO).launch {
-                val foundZones = app.searchSession.getZones()
+                val foundZones = SearchSingleton
+                    .getInstance(getApplication())
+                    .searchSession
+                    .getZones()
                 zones.clear()
                 zones.addAll(foundZones)
             }

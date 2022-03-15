@@ -15,7 +15,7 @@ data class AreaData(
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var webUrl: String,
 ) : DataRoot<Area> {
     @Document.Namespace
-    var namespace: String = Area.NAMESPACE
+    var namespace: String = Area.NAMESPACE.namespace
 
     override fun data() = Area(
         objectId,

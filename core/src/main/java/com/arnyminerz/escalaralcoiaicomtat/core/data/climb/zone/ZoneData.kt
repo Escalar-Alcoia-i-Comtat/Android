@@ -19,7 +19,7 @@ data class ZoneData(
     @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var parentObjectId: String,
 ) : DataRoot<Zone> {
     @Document.Namespace
-    var namespace: String = Zone.NAMESPACE
+    var namespace: String = Zone.NAMESPACE.namespace
 
     override fun data() = Zone(
         objectId,

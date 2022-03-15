@@ -99,10 +99,10 @@ dependencies {
 
     // Jetpack Compose utilities - Accompanist libraries
     api 'com.google.accompanist:accompanist-appcompat-theme:0.23.1'
-    api "com.google.accompanist:accompanist-pager:0.24.3-alpha"
-    api 'com.google.accompanist:accompanist-drawablepainter:0.24.3-alpha'
-    api 'com.google.accompanist:accompanist-placeholder:0.24.3-alpha'
-    api 'com.google.accompanist:accompanist-permissions:0.24.3-alpha'
+    api "com.google.accompanist:accompanist-pager:0.24.4-alpha"
+    api 'com.google.accompanist:accompanist-drawablepainter:0.24.4-alpha'
+    api 'com.google.accompanist:accompanist-placeholder:0.24.4-alpha'
+    api 'com.google.accompanist:accompanist-permissions:0.24.4-alpha'
 
     // Jetpack Compose utilities - Icons
     api 'br.com.devsrsouza.compose.icons.android:font-awesome:1.0.0'
