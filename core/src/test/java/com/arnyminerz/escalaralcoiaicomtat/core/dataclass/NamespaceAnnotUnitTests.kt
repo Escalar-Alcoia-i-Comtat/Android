@@ -1,9 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.dataclass
 
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ChildrenNamespace
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ParentNamespace
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import org.junit.Assert.assertEquals
@@ -21,21 +19,22 @@ class NamespaceAnnotUnitTests {
     @Test
     fun testNamespaceExtension() {
         println("Testing namespace extensions")
-        val areaNamespace = Area.NAMESPACE
-        val zoneNamespace = Zone.NAMESPACE
-        val sectorNamespace = Sector.NAMESPACE
-        val pathNamespace = Path.NAMESPACE
 
-        assertEquals(areaNamespace.ParentNamespace, "")
-        assertEquals(areaNamespace.ChildrenNamespace, zoneNamespace)
+        assert(Area.NAMESPACE == Namespace.AREA)
+        assert(Zone.NAMESPACE == Namespace.ZONE)
+        assert(Sector.NAMESPACE == Namespace.SECTOR)
+        // assert(Path.NAMESPACE == Namespace.PATH)
 
-        assertEquals(zoneNamespace.ParentNamespace, areaNamespace)
-        assertEquals(zoneNamespace.ChildrenNamespace, sectorNamespace)
+        assertEquals(Area.NAMESPACE.ParentNamespace, null)
+        assertEquals(Area.NAMESPACE.ChildrenNamespace, Zone.NAMESPACE)
 
-        assertEquals(sectorNamespace.ParentNamespace, zoneNamespace)
-        assertEquals(sectorNamespace.ChildrenNamespace, pathNamespace)
+        assertEquals(Zone.NAMESPACE.ParentNamespace, Area.NAMESPACE)
+        assertEquals(Zone.NAMESPACE.ChildrenNamespace, Sector.NAMESPACE)
 
-        assertEquals(pathNamespace.ParentNamespace, sectorNamespace)
-        assertEquals(pathNamespace.ChildrenNamespace, "")
+        assertEquals(Sector.NAMESPACE.ParentNamespace, Zone.NAMESPACE)
+        // assertEquals(Sector.NAMESPACE.ChildrenNamespace, Path.NAMESPACE)
+
+        // assertEquals(Path.NAMESPACE.ParentNamespace, Sector.NAMESPACE)
+        // assertEquals(Path.NAMESPACE.ChildrenNamespace, null)
     }
 }
