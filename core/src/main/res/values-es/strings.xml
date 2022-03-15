@@ -124,7 +124,7 @@
     <string name="toast_ending_info">Este es el tipo de reunión que tiene la vía</string>
     <string name="toast_error_send_message">El mensaje no ha podido ser enviado! %s</string>
     <string name="toast_nearby_zones_enabled">Zonas Cercanas habilitadas</string>
-    <string name="badge_new">New</string>
+    <string name="badge_new">Nuevo</string>
     <string name="snackbar_feedback_alert">Por favor, rellena todos los campos</string>
     <string name="notification_download_progress_title">Descargando…</string>
     <string name="notification_download_progress_message">Descargando %s</string>
