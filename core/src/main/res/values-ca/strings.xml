@@ -76,6 +76,7 @@
     <string name="path_stats_chart_title">Graus</string>
     <string name="nearby_zones_title">Zones Properes</string>
     <string name="nearby_zones_permission">És necessari que proporciones accés a la teva ubicació perquè funcioni aquesta funció. Prem per a sol·licitar.</string>
+    <string name="nearby_zones_permission_rationale">Per a comprovar quines zones tens a prop, has de permetre que l\'aplicació accedisca a la teua ubicació.</string>
     <string name="sector_info_dialog_sun_morning_title">Sol de Matí</string>
     <string name="sector_info_dialog_sun_morning_msg">Aquest sector té sol de matí, i ombra de vesprada.</string>
     <string name="sector_info_dialog_sun_afternoon_title">Sol de Vesprada</string>
@@ -123,6 +124,7 @@
     <string name="toast_ending_info">Aquest és el tipus de reunió que té la via</string>
     <string name="toast_error_send_message">El missatge no ha pogut ser enviat! %s</string>
     <string name="toast_nearby_zones_enabled">Zones Properes habilitades</string>
+    <string name="badge_new">Nou</string>
     <string name="snackbar_feedback_alert">Per favor, emplena tots els camps</string>
     <string name="notification_download_progress_title">Baixant…</string>
     <string name="notification_download_progress_message">Baixant %s</string>
