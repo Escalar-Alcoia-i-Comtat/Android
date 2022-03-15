@@ -5,6 +5,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassCompanion
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -13,6 +14,7 @@ import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
+import java.io.Serializable
 
 /**
  * Creates a new [Zone] instance.
@@ -90,13 +92,34 @@ class Zone internal constructor(
         parentAreaId
     )
 
-    companion object {
-        @Namespace
-        const val NAMESPACE = "Zone"
+    override fun displayMap(): Map<String, Serializable?> = mapOf(
+        "objectId" to objectId,
+        "displayName" to displayName,
+        "timestampMillis" to timestampMillis,
+        "imagePath" to imagePath,
+        "kmzPath" to kmzPath,
+        "position" to position,
+        "webUrl" to webUrl,
+        "parentAreaId" to parentAreaId,
+    )
 
-        const val IMAGE_QUALITY = 65
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + webUrl.hashCode()
+        result = 31 * result + position.hashCode()
+        result = 31 * result + parentAreaId.hashCode()
+        return result
+    }
 
-        val SAMPLE_ZONE = Zone(
+    companion object : DataClassCompanion<Zone>() {
+        override val NAMESPACE = Namespace.ZONE
+
+        override val IMAGE_QUALITY = 30
+
+        override val CONSTRUCTOR: (data: JSONObject, objectId: String) -> Zone =
+            { data, objectId -> Zone(data, objectId) }
+
+        override val SAMPLE = Zone(
             objectId = "LtYZWlzTPwqHsWbYIDTt",
             displayName = "Barranquet de Ferri",
             timestampMillis = 1618160538000L,

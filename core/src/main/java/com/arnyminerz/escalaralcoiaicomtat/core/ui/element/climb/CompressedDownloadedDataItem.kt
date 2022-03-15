@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 
-import androidx.appsearch.app.AppSearchSession
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,7 +37,6 @@ import kotlinx.coroutines.launch
 fun CompressedDownloadedDataItem(
     displayName: String,
     objectId: String,
-    searchSession: AppSearchSession,
     dataClassActivity: Class<*>
 ) {
     val context = LocalContext.current
@@ -77,7 +75,6 @@ fun CompressedDownloadedDataItem(
                             val intent = DataClass.getIntent(
                                 context,
                                 dataClassActivity,
-                                searchSession,
                                 objectId
                             )
                             uiScope.launch {

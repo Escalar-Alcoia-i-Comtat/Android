@@ -6,8 +6,8 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import androidx.annotation.WorkerThread
-import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchResult
 import androidx.appsearch.app.SearchSpec
 import androidx.compose.material3.MaterialTheme
@@ -17,24 +17,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.work.WorkInfo
-import androidx.work.WorkManager
 import androidx.work.await
 import com.android.volley.Request
 import com.android.volley.VolleyError
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ChildrenNamespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ParentNamespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
+import com.arnyminerz.escalaralcoiaicomtat.core.exception.InitializationException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.core.network.VolleySingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.network.addToRequestQueue
@@ -46,8 +47,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DOWNLOAD_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.InputStreamVolleyRequest
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.addFilterNamespaces
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getChildren
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getData
@@ -55,19 +58,23 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.getSector
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZone
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerModel
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerFactory
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.parcelize.IgnoredOnParcel
+import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.util.*
+import java.io.Serializable
+import java.util.Date
+import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -143,14 +150,14 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          * @author Arnau Mora
          * @since 20211231
          */
-        private fun generatePin(namespace: String, objectId: String) = "${namespace}_$objectId"
+        fun generatePin(namespace: Namespace, objectId: String) = "${namespace}_$objectId"
 
         /**
          * Returns the correct image name for the desired [objectId] and [namespace].
          * @author Arnau Mora
          * @since 20210822
          */
-        fun imageName(namespace: String, objectId: String, suffix: String?) =
+        fun imageName(namespace: Namespace, objectId: String, suffix: String?) =
             "$namespace-$objectId${suffix ?: ""}"
 
         /**
@@ -162,7 +169,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          * @param objectId The id of the DataClass
          * @return The path of the image file that can be downloaded
          */
-        private fun imageFile(context: Context, namespace: String, objectId: String): File =
+        private fun imageFile(context: Context, namespace: Namespace, objectId: String): File =
             File(dataDir(context), imageName(namespace, objectId, null))
 
         /**
@@ -177,13 +184,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          */
         private fun cacheImageFile(
             context: Context,
-            namespace: String,
+            namespace: Namespace,
             objectId: String,
             suffix: String? = null
         ): File =
             File(context.cacheDir, imageName(namespace, objectId, suffix))
 
-        fun kmzFile(context: Context, permanent: Boolean, namespace: String, objectId: String) =
+        fun kmzFile(context: Context, permanent: Boolean, namespace: Namespace, objectId: String) =
             File(
                 if (permanent) dataDir(context) else context.cacheDir,
                 generatePin(namespace, objectId)
@@ -195,7 +202,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          * @author Arnau Mora
          * @since 20210825
          * @param context The [Context] that is requesting the [Intent].
-         * @param searchSession The [AppSearchSession] that has all the data stored.
          * @param query What to search for. May be [DataClass.displayName] or [DataClassMetadata.webURL].
          * @return An [Intent] if the [DataClass] was found, or null.
          */
@@ -203,24 +209,29 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         suspend fun getIntent(
             context: Context,
             activity: Class<*>,
-            searchSession: AppSearchSession,
             query: String
-        ): Intent? = (searchSession.getData<Area, AreaData>(query, Area.NAMESPACE)
-            ?: searchSession.getData<Zone, ZoneData>(query, Zone.NAMESPACE)
-            ?: searchSession.getData<Sector, SectorData>(query, Sector.NAMESPACE))
-            ?.let { dataClass ->
-                Intent(context, activity)
-                    .putExtra(EXTRA_DATACLASS, dataClass)
-                    .apply {
-                        if (dataClass is Sector)
-                            dataClass
-                                .getParent<Zone>(searchSession)
-                                ?.let { zone ->
-                                    val sectors = zone.getChildren(searchSession) { it.weight }
-                                    putExtra(EXTRA_DATACLASS, zone)
-                                    putExtra(EXTRA_CHILDREN_COUNT, sectors.size)
-                                    putExtra(EXTRA_INDEX, sectors.indexOf(dataClass))
-                                }
+        ): Intent? = SearchSingleton
+            .getInstance(context)
+            .searchSession
+            .let { searchSession ->
+                (searchSession.getData<Area, AreaData>(query, Area.NAMESPACE)
+                    ?: searchSession.getData<Zone, ZoneData>(query, Zone.NAMESPACE)
+                    ?: searchSession.getData<Sector, SectorData>(query, Sector.NAMESPACE))
+                    ?.let { dataClass ->
+                        Intent(context, activity)
+                            .putExtra(EXTRA_DATACLASS, dataClass)
+                            .apply {
+                                if (dataClass is Sector)
+                                    dataClass
+                                        .getParent<Zone>(context)
+                                        ?.let { zone ->
+                                            val sectors =
+                                                zone.getChildren(context) { it.weight }
+                                            putExtra(EXTRA_DATACLASS, zone)
+                                            putExtra(EXTRA_CHILDREN_COUNT, sectors.size)
+                                            putExtra(EXTRA_INDEX, sectors.indexOf(dataClass))
+                                        }
+                            }
                     }
             }
 
@@ -230,7 +241,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          * @author Arnau Mora
          * @since 20220128
          * @param context The [Context] that is requesting the [Intent].
-         * @param searchSession The [AppSearchSession] that has all the data stored.
          * @param namespace The [DataClass.namespace] of the [objectId].
          * @param objectId The [DataClass.objectId] to search for.
          * @return An [Intent] if the [DataClass] was found, or null.
@@ -238,24 +248,27 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         suspend inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> getIntent(
             context: Context,
             activity: Class<*>,
-            searchSession: AppSearchSession,
-            @Namespace namespace: String,
+            namespace: Namespace,
             @ObjectId objectId: String
-        ): Intent? = searchSession.getData<A, B>(objectId, namespace)
-            ?.let { dataClass ->
-                Intent(context, activity)
-                    .putExtra(EXTRA_DATACLASS, dataClass)
-                    .apply {
-                        if (dataClass is Sector)
-                            dataClass
-                                .getParent<Zone>(searchSession)
-                                ?.let { zone ->
-                                    val sectors = zone.getChildren(searchSession) { it.weight }
-                                    putExtra(EXTRA_DATACLASS, zone)
-                                    putExtra(EXTRA_CHILDREN_COUNT, sectors.size)
-                                    putExtra(EXTRA_INDEX, sectors.indexOf(dataClass))
-                                }
-                    }
+        ): Intent? = SearchSingleton
+            .getInstance(context)
+            .searchSession
+            .let { searchSession ->
+                searchSession.getData<A, B>(objectId, namespace)?.let { dataClass ->
+                    Intent(context, activity)
+                        .putExtra(EXTRA_DATACLASS, dataClass)
+                        .apply {
+                            if (dataClass is Sector)
+                                dataClass
+                                    .getParent<Zone>(context)
+                                    ?.let { zone ->
+                                        val sectors = zone.getChildren(context) { it.weight }
+                                        putExtra(EXTRA_DATACLASS, zone)
+                                        putExtra(EXTRA_CHILDREN_COUNT, sectors.size)
+                                        putExtra(EXTRA_INDEX, sectors.indexOf(dataClass))
+                                    }
+                        }
+                }
             }
 
         /**
@@ -264,16 +277,13 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          * @since 20211231
          * @param A The type of the children of the DataClass
          * @param context The [Context] that is requesting the deletion.
-         * @param searchSession The [AppSearchSession] for fetching children and un-indexing the
-         * download.
          * @param namespace The namespace of the DataClass to delete.
          * @param objectId The id of the DataClass to delete.
          * @return True if the DataClass was deleted successfully.
          */
         suspend fun <A : DataClassImpl> delete(
             context: Context,
-            searchSession: AppSearchSession,
-            namespace: String,
+            namespace: Namespace,
             objectId: String
         ): Boolean {
             Timber.v("Deleting $objectId")
@@ -296,20 +306,20 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
                 lst.add(imgFile.delete())
             }
 
+            val searchSession = SearchSingleton
+                .getInstance(context)
+                .searchSession
+
             // This may not be the best method, but for now it works
-            when (namespace) {
-                Area.NAMESPACE -> Zone.NAMESPACE
-                Zone.NAMESPACE -> Sector.NAMESPACE
-                Sector.NAMESPACE -> Path.NAMESPACE
-                else -> null
-            }?.let { childrenNamespace ->
-                Timber.d("Deleting children...")
-                val children = searchSession.getChildren<A, String>(childrenNamespace, objectId)
-                { it.objectId }
-                for (child in children)
-                    if (child is DataClass<*, *, *>)
-                        lst.add(child.delete(context, searchSession))
-            }
+            namespace.ChildrenNamespace
+                ?.let { childrenNamespace ->
+                    Timber.d("Deleting children...")
+                    val children = searchSession.getChildren<A, String>(childrenNamespace, objectId)
+                    { it.objectId }
+                    for (child in children)
+                        if (child is DataClass<*, *, *>)
+                            lst.add(child.delete(context))
+                }
 
             // Remove dataclass from index.
             // Since Sectors that are children of a Zone also contain its ID this will also remove them
@@ -329,20 +339,23 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          * Checks if the DataClass with id [objectId] is indexed as a download.
          * @author Arnau Mora
          * @since 20220101
-         * @param searchSession The search session to fetch the data from.
+         * @param context Used for searching through the index.
          * @param objectId The id of the DataClass to search for.
          */
         suspend fun isDownloadIndexed(
-            searchSession: AppSearchSession,
+            context: Context,
             objectId: String
         ): DownloadStatus {
             Timber.d("Finding for element in indexed downloads...")
-            val searchResults = searchSession.search(
-                objectId,
-                SearchSpec.Builder()
-                    .addFilterDocumentClasses(DownloadedData::class.java)
-                    .build()
-            )
+            val searchResults = SearchSingleton
+                .getInstance(context)
+                .searchSession
+                .search(
+                    objectId,
+                    SearchSpec.Builder()
+                        .addFilterDocumentClasses(DownloadedData::class.java)
+                        .build()
+                )
             val searchResultsList = arrayListOf<SearchResult>()
             var page = searchResults.nextPage.await()
             while (page.isNotEmpty()) {
@@ -396,91 +409,85 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          *
          * @throws IllegalArgumentException If the specified quality is out of bounds
          */
+        @WorkerThread
         @Throws(IllegalArgumentException::class)
-        inline fun <reified W : DownloadWorkerModel> scheduleDownload(
+        suspend inline fun <reified W : DownloadWorkerFactory> scheduleDownload(
             context: Context,
             pin: String,
             displayName: String,
+            companion: W,
             overwrite: Boolean = true,
-            quality: Int = 100
+            quality: Int = 100,
         ): LiveData<WorkInfo> {
             if (quality < DOWNLOAD_QUALITY_MIN || quality > DOWNLOAD_QUALITY_MAX)
                 throw IllegalArgumentException(
                     "Quality must be between $DOWNLOAD_QUALITY_MIN and $DOWNLOAD_QUALITY_MAX"
                 )
             Timber.v("Downloading $pin...")
+            val (namespace, objectId) = decodePin(pin)
             Timber.v("Preparing DownloadData...")
-            val downloadData = DownloadData(displayName, overwrite, quality)
+            val downloadData = DownloadData(displayName, namespace, objectId, overwrite, quality)
             Timber.v("Scheduling download...")
             val workerClass = W::class.java
             val schedule = workerClass.getMethod(
                 "schedule",
                 Context::class.java,
                 String::class.java,
-                DownloadData::class.java
+                DownloadData::class.java,
+                Continuation::class.java,
             )
-            @Suppress("UNCHECKED_CAST")
-            return schedule.invoke(null, context, pin, downloadData) as LiveData<WorkInfo>
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                Timber.i("Download Worker schedule args: ${schedule.parameters.map { "${it.name}: ${it.type.simpleName}" }}")
+
+            return suspendCoroutine { continuation ->
+                schedule(companion, context, pin, downloadData, continuation)
+            }
         }
 
         /**
-         * Gets the [WorkInfo] if the DataClass is being downloaded, or null otherwise.
+         * Builds a DataClass from its namespace, object id and JSON data. Just Area, Zone and
+         * Sector.
          * @author Arnau Mora
-         * @since 20210417
-         * @param context The context to check from
-         * @param pin The [DataClass.pin] to check the state for.
+         * @since 20220304
+         * @param namespace The namespace of the DataClass.
+         * @param objectId The id of the DataClass.
+         * @param data The JSON data from the server.
+         * @throws InitializationException When the [namespace] is unknown or not a container.
          */
-        @WorkerThread
-        fun downloadWorkInfo(context: Context, pin: String): WorkInfo? {
-            val workManager = WorkManager.getInstance(context)
-            val workInfos = workManager.getWorkInfosByTag(pin).get()
-            var result: WorkInfo? = null
-            if (workInfos.isNotEmpty())
-                for (workInfo in workInfos)
-                    if (!workInfo.state.isFinished) {
-                        result = workInfos[0]
-                        break
-                    }
-            return result
+        @Throws(InitializationException::class)
+        fun buildContainers(
+            namespace: Namespace,
+            @ObjectId objectId: String,
+            data: JSONObject
+        ) = when (namespace) {
+            Area.NAMESPACE -> Area(data, objectId)
+            Zone.NAMESPACE -> Zone(data, objectId)
+            Sector.NAMESPACE -> Sector(data, objectId)
+            else -> throw InitializationException(
+                "Could not initialize DataClass with namespace \"$namespace\"",
+            )
         }
 
         /**
-         * Gets a [LiveData] of the [WorkInfo] for all works for the current [DataClass].
+         * Builds a DataClass from its namespace, object id and JSON data. Includes Paths
          * @author Arnau Mora
-         * @since 20210417
-         * @param context The context to check from.
-         * @param pin The [DataClass.pin] to get the download work info for.
+         * @since 20220304
+         * @param namespace The namespace of the DataClass.
+         * @param objectId The id of the DataClass.
+         * @param data The JSON data from the server.
+         * @throws InitializationException When the namespace is unknown.
          */
-        @WorkerThread
-        fun downloadWorkInfoLiveData(context: Context, pin: String): LiveData<List<WorkInfo>> {
-            val workManager = WorkManager.getInstance(context)
-            return workManager.getWorkInfosByTagLiveData(pin)
-        }
-
-        /**
-         * Gets the DownloadStatus of the DataClass
-         * @author Arnau Mora
-         * @since 20210313
-         * @param context The currently calling [Context].
-         * @return a matching DownloadStatus representing the Data Class' download status
-         */
-        @WorkerThread
-        suspend fun downloadStatus(
-            context: Context,
-            searchSession: AppSearchSession,
-            pin: String,
-        ): Pair<DownloadStatus, WorkInfo?> {
-            Timber.d("$pin Checking if downloaded")
-
-            val objectId = pin.substring(pin.indexOf('_') + 1)
-            val downloadWorkInfo = downloadWorkInfo(context, pin)
-            val result = if (downloadWorkInfo != null)
-                DownloadStatus.DOWNLOADING
-            else isDownloadIndexed(searchSession, objectId)
-
-            Timber.d("$pin Finished checking download status. Result: $result")
-            return result to downloadWorkInfo
-        }
+        @Throws(InitializationException::class)
+        fun buildAny(namespace: Namespace, @ObjectId objectId: String, data: JSONObject) =
+            when (namespace) {
+                Area.NAMESPACE -> Area(data, objectId)
+                Zone.NAMESPACE -> Zone(data, objectId)
+                Sector.NAMESPACE -> Sector(data, objectId)
+                Path.NAMESPACE -> Path(data, objectId)
+                else -> throw InitializationException(
+                    "Could not initialize DataClass with namespace \"$namespace\"",
+                )
+            }
     }
 
     /**
@@ -520,15 +527,19 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @author Arnau Mora
      * @since 20220106
      * @param D The parent type of the DataClass.
-     * @param searchSession The [AppSearchSession] to get the data from.
+     * @param context The context used for initializing the index if not ready.
      */
-    suspend fun <D : DataClass<*, *, *>> getParent(searchSession: AppSearchSession): D? {
+    suspend fun <D : DataClass<*, *, *>> getParent(context: Context): D? {
         // If the DataClass is root, return null
         if (!hasParents)
             return null
 
         // Get the parentId, if it's null, return null
         val parentId: String = metadata.parentId ?: return null
+
+        val searchSession = SearchSingleton
+            .getInstance(context)
+            .searchSession
 
         // From the different possibilities for the namespace, fetch from searchSession
         @Suppress("UNCHECKED_CAST")
@@ -544,13 +555,18 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * Returns the children of the [DataClass].
      * @author Arnau Mora
      * @since 20210313
-     * @param searchSession The session for performing searches.
+     * @param context Used for initializing the index loader if not ready.
+     * @throws NullPointerException When [namespace] does not have children.
      */
     @WorkerThread
+    @Throws(NullPointerException::class)
     suspend inline fun <R : Comparable<R>> getChildren(
-        searchSession: AppSearchSession,
+        context: Context,
         crossinline sortBy: (A) -> R?
-    ): List<A> = searchSession.getChildren(namespace.ChildrenNamespace, objectId, sortBy)
+    ): List<A> = SearchSingleton
+        .getInstance(context)
+        .searchSession
+        .getChildren(namespace.ChildrenNamespace!!, objectId, sortBy)
 
     /**
      * Gets the children element at [index].
@@ -561,8 +577,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      */
     @Throws(IndexOutOfBoundsException::class)
     @WorkerThread
-    suspend fun get(searchSession: AppSearchSession, index: Int): A =
-        getChildren(searchSession) { it.objectId }[index]
+    suspend fun get(context: Context, index: Int): A = getChildren(context) { it.objectId }[index]
 
     /**
      * Finds an [DataClass] inside a list with an specific id. If it's not found, null is returned.
@@ -571,16 +586,16 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @param objectId The id to search
      */
     @WorkerThread
-    suspend fun get(searchSession: AppSearchSession, objectId: String): A? {
-        for (o in getChildren(searchSession) { it.objectId })
+    suspend fun get(context: Context, objectId: String): A? {
+        for (o in getChildren(context) { it.objectId })
             if (o.objectId == objectId)
                 return o
         return null
     }
 
     @WorkerThread
-    suspend fun has(searchSession: AppSearchSession, objectId: String): Boolean {
-        for (o in getChildren(searchSession) { it.displayName })
+    suspend fun has(context: Context, objectId: String): Boolean {
+        for (o in getChildren(context) { it.displayName })
             if (o.objectId == objectId)
                 return true
         return false
@@ -593,7 +608,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @since 20210411
      */
     @WorkerThread
-    suspend fun isEmpty(searchSession: AppSearchSession): Boolean = getSize(searchSession) <= 0
+    suspend fun isEmpty(context: Context): Boolean = getSize(context) <= 0
 
     /**
      * Checks if the data class doesn't have any children
@@ -601,7 +616,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @since 20210411
      */
     @WorkerThread
-    suspend fun isNotEmpty(searchSession: AppSearchSession): Boolean = getSize(searchSession) > 0
+    suspend fun isNotEmpty(context: Context): Boolean = getSize(context) > 0
 
     /**
      * Returns the amount of children the [DataClass] has.
@@ -609,8 +624,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @since 20210724
      */
     @WorkerThread
-    suspend fun getSize(searchSession: AppSearchSession): Int =
-        getChildren(searchSession) { it.objectId }.size
+    suspend fun getSize(context: Context): Int =
+        getChildren(context) { it.objectId }.size
 
     /**
      * Checks if the [DataClass] is the same as another one.
@@ -629,7 +644,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @author Arnau Mora
      * @since 20210724
      */
-    override fun toString(): String = namespace[0] + "/" + objectId
+    override fun toString(): String = namespace.namespace[0] + "/" + objectId
 
     /**
      * Gets the KMZ file of the [DataClass] and stores it into [targetFile].
@@ -695,24 +710,24 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         return kmzFile
     }
 
-    /**
-     * Gets the [WorkInfo] if the DataClass is being downloaded, or null otherwise.
-     * @author Arnau Mora
-     * @since 20210417
-     * @param context The context to check from
-     */
-    @WorkerThread
-    fun downloadWorkInfo(context: Context): WorkInfo? = downloadWorkInfo(context, pin)
-
-    /**
-     * Gets a [LiveData] of the [WorkInfo] for all works for the current [DataClass].
-     * @author Arnau Mora
-     * @since 20210417
-     * @param context The context to check from
-     */
-    @WorkerThread
-    fun downloadWorkInfoLiveData(context: Context): LiveData<List<WorkInfo>> =
-        downloadWorkInfoLiveData(context, pin)
+    inner class WorkInfoObserver(
+        private val context: Context,
+        private val liveData: LiveData<WorkInfo>,
+        private val namespace: Namespace,
+        private val objectId: String,
+    ) : Observer<WorkInfo> {
+        override fun onChanged(workInfo: WorkInfo?) {
+            doAsync {
+                if (workInfo == null || workInfo.state.isFinished) {
+                    DownloadSingleton.getInstance()
+                        .finishedDownloading(namespace, objectId)
+                    uiContext { liveData.removeObserver(this@WorkInfoObserver) }
+                } else
+                    DownloadSingleton.getInstance()
+                        .putState(context, namespace, objectId, workInfo)
+            }
+        }
+    }
 
     /**
      * Downloads the image data of the DataClass.
@@ -725,45 +740,42 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      *
      * @throws IllegalArgumentException If the specified quality is out of bounds
      */
+    @WorkerThread
     @Throws(IllegalArgumentException::class)
-    inline fun <reified W : DownloadWorkerModel> download(
+    suspend inline fun <reified W : DownloadWorkerFactory> download(
         context: Context,
+        companion: W,
         overwrite: Boolean = true,
         quality: Int = 100
     ): LiveData<WorkInfo> =
-        scheduleDownload<W>(context, pin, displayName, overwrite, quality)
+        scheduleDownload(context, pin, displayName, companion, overwrite, quality)
+            .also { it.observeForever(WorkInfoObserver(context, it, namespace, objectId)) }
 
     /**
      * Gets the DownloadStatus of the DataClass
      * @author Arnau Mora
      * @since 20210313
-     * @param context The currently calling [Context].
      * @return a matching DownloadStatus representing the Data Class' download status
      */
-    @WorkerThread
-    suspend fun downloadStatus(
-        context: Context,
-        searchSession: AppSearchSession
-    ): Pair<DownloadStatus, WorkInfo?> = Companion.downloadStatus(context, searchSession, pin)
+    fun downloadStatus(): DownloadStatus = DownloadSingleton.getInstance()
+        .states
+        .value
+        ?.get(namespace to objectId)
+        ?: DownloadStatus.UNKNOWN
 
     /**
      * Checks if the data class has any children that has been downloaded
      * @author Arnau Mora
      * @date 2020/09/14
      * @param context The currently calling [Context].
-     * @param searchSession The search session for fetching data.
      * @return If the data class has any downloaded children
      */
     @WorkerThread
-    suspend fun hasAnyDownloadedChildren(
-        context: Context,
-        searchSession: AppSearchSession
-    ): Boolean {
-        val children = getChildren(searchSession) { it.objectId }
+    suspend fun hasAnyDownloadedChildren(context: Context): Boolean {
+        val children = getChildren(context) { it.objectId }
         for (child in children)
-            if (child is DataClass<*, *, *> &&
-                child.downloadStatus(context, searchSession).first == DownloadStatus.DOWNLOADED
-            ) return true
+            if (child is DataClass<*, *, *> && child.downloadStatus() == DownloadStatus.DOWNLOADED)
+                return true
         return false
     }
 
@@ -776,16 +788,23 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
     abstract fun data(index: Int): D
 
     /**
+     * Returns a map used to display the stored data to the user. Keys should be the parameter name,
+     * and the value the value to display. Should be overridden by target class.
+     * @author Arnau Mora
+     * @since 20220315
+     */
+    abstract override fun displayMap(): Map<String, Serializable?>
+
+    /**
      * Deletes the downloaded content if downloaded
      * @author Arnau Mora
      * @date 20210724
      * @param context The currently calling [Context].
-     * @param searchSession The search session for fetching data.
      * @return If the content was deleted successfully. Note: returns true if not downloaded
      */
     @WorkerThread
-    suspend fun delete(context: Context, searchSession: AppSearchSession): Boolean =
-        Companion.delete<A>(context, searchSession, namespace, objectId)
+    suspend fun delete(context: Context): Boolean =
+        Companion.delete<A>(context, namespace, objectId)
 
     /**
      * Gets the space that is occupied by the data class' downloaded data in the system
@@ -793,23 +812,21 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @date 2020/09/11
      * @patch 2020/09/12 - Arnau Mora: Added child space computation
      * @param context The currently calling context.
-     * @param searchSession The search session for fetching data.
      * @return The size in bytes that is used by the downloaded data
-     *
      * @throws NotDownloadedException If tried to get size when not downloaded
      */
     @Throws(NotDownloadedException::class)
-    suspend fun size(context: Context, searchSession: AppSearchSession): Long {
+    suspend fun size(context: Context): Long {
         val imgFile = imageFile(context)
 
         if (!imgFile.exists()) throw NotDownloadedException(this)
 
         var size = imgFile.length()
 
-        val children = getChildren(searchSession) { it.objectId }
+        val children = getChildren(context) { it.objectId }
         for (child in children)
             if (child is DataClass<*, *, *>)
-                size += child.size(context, searchSession)
+                size += child.size(context)
 
         Timber.v("$this > Storage usage: $size")
 
@@ -836,7 +853,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @param context The context to run from
      * @return The path of the image file that can be downloaded
      */
-    private fun imageFile(context: Context): File =
+    fun imageFile(context: Context): File =
         Companion.imageFile(context, namespace, objectId)
 
     /**
@@ -959,6 +976,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         result = 31 * result + imagePath.hashCode()
         result = 31 * result + kmzPath.hashCode()
         result = 31 * result + displayOptions.hashCode()
+        result = 31 * result + location.hashCode()
         result = 31 * result + namespace.hashCode()
         return result
     }
@@ -996,23 +1014,25 @@ fun <D : DataClass<*, *, *>> Iterable<D>.has(objectId: String): Boolean {
  * Checks if the DataClass with the specified object id is indexed in the downloads.
  * @author Arnau Mora
  * @since 20220101
- * @param searchSession The search session where to search for the DataClass.
+ * @param context The context to initialize the search session from if not read.
  */
-suspend fun @receiver:ObjectId String.isDownloadIndexed(searchSession: AppSearchSession) =
-    DataClass.isDownloadIndexed(searchSession, this)
+suspend fun @receiver:ObjectId String.isDownloadIndexed(context: Context) =
+    DataClass.isDownloadIndexed(context, this)
 
 /**
  * Fetches all the children of the DataClass with the specified object id.
  * @author Arnau Mora
  * @since 20220101
  * @param A The children object type.
- * @param searchSession The search session where to search for the data.
+ * @param context The context to initialize the search session from if not read.
  * @param namespace The namespace of [A].
  */
 suspend inline fun <A : DataClassImpl, R : Comparable<R>> @receiver:ObjectId
 String.getChildren(
-    searchSession: AppSearchSession,
-    namespace: String,
+    context: Context,
+    namespace: Namespace,
     crossinline sortBy: (A) -> R?
-) =
-    searchSession.getChildren(namespace, this, sortBy)
+) = SearchSingleton
+    .getInstance(context)
+    .searchSession
+    .getChildren(namespace, this, sortBy)

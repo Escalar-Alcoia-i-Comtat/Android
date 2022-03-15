@@ -8,8 +8,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -33,12 +35,14 @@ class DeveloperViewModel(application: Application) : AndroidViewModel(applicatio
      */
     fun loadIndexedDownloads() {
         viewModelScope.launch {
-            val searchResults = app.searchSession.search(
-                "",
-                SearchSpec.Builder()
-                    .addFilterDocumentClasses(DownloadedData::class.java)
-                    .build()
-            )
+            val searchResults = SearchSingleton.getInstance(context)
+                .searchSession
+                .search(
+                    "",
+                    SearchSpec.Builder()
+                        .addFilterDocumentClasses(DownloadedData::class.java)
+                        .build()
+                )
             var page = searchResults.nextPage.await()
             val items = mutableListOf<String>()
             while (page.isNotEmpty()) {
@@ -59,11 +63,11 @@ class DeveloperViewModel(application: Application) : AndroidViewModel(applicatio
             val areas = app.getAreas()
             for (area in areas) {
                 tree.appendLine("- ${area.displayName} ($area)")
-                for (zone in area.getChildren(app.searchSession) { it.objectId }) {
+                for (zone in area.getChildren(context) { it.objectId }) {
                     tree.appendLine("  - ${zone.displayName} ($zone)")
-                    for (sector in zone.getChildren(app.searchSession) { it.objectId }) {
+                    for (sector in zone.getChildren(context) { it.objectId }) {
                         tree.appendLine("    - ${sector.displayName} ($sector)")
-                        for (path in sector.getChildren(app.searchSession) { it.objectId })
+                        for (path in sector.getChildren(context) { it.objectId })
                             tree.appendLine("      - ${path.displayName} ($path)")
                     }
                 }

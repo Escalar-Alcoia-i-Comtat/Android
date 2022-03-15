@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 
-import androidx.appsearch.app.AppSearchSession
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -57,7 +56,6 @@ import kotlinx.coroutines.launch
  * @author Arnau Mora
  * @since 20220101
  * @param data The [DownloadedData] to display.
- * @param searchSession For requesting deletions.
  * @param onDelete Will get called when the data is deleted.
  * @throws IllegalArgumentException When the [data] is not a [Zone] or [Sector].
  */
@@ -65,28 +63,25 @@ import kotlinx.coroutines.launch
 @Throws(IllegalArgumentException::class)
 fun DownloadedDataItem(
     data: DownloadedData,
-    searchSession: AppSearchSession,
     dataClassActivity: Class<*>,
     onDelete: (() -> Unit)?
-) = when (data.namespace) {
+) = when (val namespace = Namespace.find(data.namespace)) {
     // Area is not downloadable
     Zone.NAMESPACE -> DownloadedDataItemRaw<Zone, ZoneData>(
-        data.displayName,
+        namespace,
         data.objectId,
+        data.displayName,
         data.sizeBytes,
-        data.namespace,
         data.childrenCount,
-        searchSession,
         dataClassActivity,
         onDelete
     )
     Sector.NAMESPACE -> DownloadedDataItemRaw<Sector, SectorData>(
-        data.displayName,
+        namespace,
         data.objectId,
+        data.displayName,
         data.sizeBytes,
-        data.namespace,
         data.childrenCount,
-        searchSession,
         dataClassActivity,
         onDelete
     )
@@ -95,12 +90,11 @@ fun DownloadedDataItem(
 
 @Composable
 private inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> DownloadedDataItemRaw(
-    displayName: String,
+    namespace: Namespace,
     @ObjectId objectId: String,
+    displayName: String,
     size: Long,
-    @Namespace namespace: String,
     childrenCount: Long,
-    searchSession: AppSearchSession?,
     dataClassActivity: Class<*>,
     noinline onDelete: (() -> Unit)?
 ) {
@@ -163,7 +157,7 @@ private inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> DownloadedD
                     modifier = Modifier.padding(4.dp),
                 )
                 // Children chip
-                if (childrenCount > 0 && searchSession != null)
+                if (childrenCount > 0)
                     Chip(
                         text = stringResource(R.string.downloads_sectors_title, childrenCount),
                         enabled = !loadingChildren,
@@ -171,10 +165,8 @@ private inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> DownloadedD
                     ) {
                         loadingChildren = true
                         doAsync {
-                            childrenSectors =
-                                objectId.getChildren(searchSession, Sector.NAMESPACE) {
-                                    it.displayName
-                                }
+                            childrenSectors = objectId
+                                .getChildren(context, Sector.NAMESPACE) { it.displayName }
                             loadingChildren = false
                             showChildrenDialog = true
                         }
@@ -194,7 +186,6 @@ private inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> DownloadedD
                         text = stringResource(R.string.action_delete),
                     )
                 }
-                if (searchSession != null)
                     Button(
                         enabled = viewButtonEnabled,
                         onClick = {
@@ -203,7 +194,6 @@ private inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> DownloadedD
                                 val intent = DataClass.getIntent<A, B>(
                                     context,
                                     dataClassActivity,
-                                    searchSession,
                                     namespace,
                                     objectId
                                 )
@@ -229,10 +219,10 @@ private inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> DownloadedD
     val delete: suspend () -> Unit = {
         val deleted = if (namespace == Zone.NAMESPACE)
             DataClass
-                .delete<Sector>(context, searchSession!!, namespace, objectId)
+                .delete<Sector>(context, namespace, objectId)
         else
             DataClass
-                .delete<Path>(context, searchSession!!, namespace, objectId)
+                .delete<Path>(context, namespace, objectId)
         deleted.then {
             // DataClass deleted correctly
             uiScope.launch {
@@ -258,10 +248,7 @@ private inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> DownloadedD
             },
             confirmButton = {
                 Button(
-                    enabled = searchSession != null,
                     onClick = {
-                        if (searchSession == null)
-                            return@Button
                         doAsync {
                             // Delete the DataClass
                             delete()
@@ -283,7 +270,7 @@ private inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> DownloadedD
             }
         )
 
-    if (showChildrenDialog && searchSession != null)
+    if (showChildrenDialog)
         AlertDialog(
             onDismissRequest = {
                 showChildrenDialog = false
@@ -305,7 +292,6 @@ private inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> DownloadedD
                         CompressedDownloadedDataItem(
                             item.displayName,
                             item.objectId,
-                            searchSession,
                             dataClassActivity,
                         )
                     }
@@ -318,12 +304,11 @@ private inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> DownloadedD
 @Composable
 fun DownloadedDataItemPreview() {
     DownloadedDataItemRaw<Zone, ZoneData>(
-        "Zone Placeholder",
-        "object",
-        12 * MEGABYTE,
         Zone.NAMESPACE,
+        "object",
+        "Zone Placeholder",
+        12 * MEGABYTE,
         7,
-        null,
         Void::class.java,
         null
     )

@@ -5,6 +5,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.SunTime
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassCompanion
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
@@ -16,6 +17,7 @@ import kotlinx.parcelize.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
+import java.io.Serializable
 
 /**
  * Creates a new [Sector] instance.
@@ -91,6 +93,16 @@ class Sector internal constructor(
     @IgnoredOnParcel
     override val hasParents: Boolean = true
 
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + sunTime.hashCode()
+        result = 31 * result + kidsApt.hashCode()
+        result = 31 * result + walkingTime.hashCode()
+        result = 31 * result + weight.hashCode()
+        result = 31 * result + webUrl.hashCode()
+        return result
+    }
+
     override fun data(index: Int): SectorData {
         return SectorData(
             index,
@@ -109,18 +121,34 @@ class Sector internal constructor(
         )
     }
 
-    companion object {
-        @Namespace
-        const val NAMESPACE = "Sector"
+    override fun displayMap(): Map<String, Serializable?> = mapOf(
+        "objectId" to objectId,
+        "displayName" to displayName,
+        "timestampMillis" to timestampMillis,
+        "sunTime" to sunTime,
+        "kidsApt" to kidsApt,
+        "walkingTime" to walkingTime,
+        "location" to location,
+        "weight" to weight,
+        "imagePath" to imagePath,
+        "webUrl" to webUrl,
+        "parentZoneId" to parentZoneId,
+    )
 
-        const val IMAGE_QUALITY = 100
+    companion object : DataClassCompanion<Sector>() {
+        override val NAMESPACE = Namespace.SECTOR
+
+        override val IMAGE_QUALITY = 100
+
+        override val CONSTRUCTOR: (data: JSONObject, objectId: String) -> Sector =
+            { data, objectId -> Sector(data, objectId) }
 
         /**
          * A sample sector for debugging and placeholder.
          * @author Arnau Mora
          * @since 20220106
          */
-        val SAMPLE_SECTOR = Sector(
+        override val SAMPLE = Sector(
             objectId = "B9zNqbw6REYVxGZxlYwh",
             displayName = "Mas de la Penya 3",
             timestampMillis = 1618153404000L,

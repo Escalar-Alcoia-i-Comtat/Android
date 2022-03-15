@@ -1,58 +1,69 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.annotations
 
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-@Target(
-    AnnotationTarget.TYPE,
-    AnnotationTarget.VALUE_PARAMETER,
-    AnnotationTarget.PROPERTY,
-    AnnotationTarget.PROPERTY_GETTER
-)
-@Retention(AnnotationRetention.SOURCE)
-annotation class Namespace
+@Parcelize
+enum class Namespace(val namespace: String, val tableName: String) : Parcelable {
+    AREA("Area", "Areas"),
+    ZONE("Zone", "Zones"),
+    SECTOR("Sector", "Sectors"),
+    PATH("Path", "Paths");
 
-/**
- * Gets the parent namespace according to the current namespace.
- * @author Arnau Mora
- * @since 20220222
- */
-val @receiver:Namespace String.ParentNamespace: String
-    @Namespace
-    get() =
-        when (this) {
-            Zone.NAMESPACE -> Area.NAMESPACE
-            Sector.NAMESPACE -> Zone.NAMESPACE
-            Path.NAMESPACE -> Sector.NAMESPACE
-            else -> ""
+    companion object {
+        /**
+         * Tries to find the [Namespace] that has [namespace] or [tableName] equal to [query].
+         * @author Arnau Mora
+         * @since 20220315
+         */
+        fun find(query: String) =
+            values().find { it.namespace == query || it.tableName == query }
+
+        /**
+         * Tries to find the [Namespace] that starts with [char].
+         * @author Arnau Mora
+         * @since 20220315
+         */
+        fun find(char: Char) =
+            values().find { it.namespace[0].equals(char, true) }
+    }
+
+    override fun toString(): String = namespace
+
+    /**
+     * Gets the parent namespace according to the current namespace.
+     * @author Arnau Mora
+     * @since 20220222
+     */
+    val ParentNamespace: Namespace?
+        get() = when (this) {
+            ZONE -> AREA
+            SECTOR -> ZONE
+            PATH -> SECTOR
+            else -> null
         }
 
-/**
- * Gets the namespace of the children according to the current namespace.
- * @author Arnau Mora
- * @since 20220222
- */
-val @receiver:Namespace String.ChildrenNamespace: String
-    @Namespace
-    get() =
-        when (this) {
-            Area.NAMESPACE -> Zone.NAMESPACE
-            Zone.NAMESPACE -> Sector.NAMESPACE
-            Sector.NAMESPACE -> Path.NAMESPACE
-            else -> ""
+    /**
+     * Gets the namespace of the children according to the current namespace.
+     * @author Arnau Mora
+     * @since 20220222
+     */
+    val ChildrenNamespace: Namespace?
+        get() = when (this) {
+            AREA -> ZONE
+            ZONE -> SECTOR
+            SECTOR -> PATH
+            else -> null
         }
 
-/**
- * Checks if the set namespace may have children.
- * @author Arnau Mora
- * @since 20220222
- */
-@Namespace
-val @receiver:Namespace String.HasChildren: Boolean
-    get() =
-        when (this) {
-            Area.NAMESPACE, Zone.NAMESPACE, Sector.NAMESPACE -> true
+    /**
+     * Checks if the set namespace may have children.
+     * @author Arnau Mora
+     * @since 20220222
+     */
+    val HashChildren: Boolean
+        get() = when (this) {
+            AREA, ZONE, SECTOR -> true
             else -> false
         }
+}

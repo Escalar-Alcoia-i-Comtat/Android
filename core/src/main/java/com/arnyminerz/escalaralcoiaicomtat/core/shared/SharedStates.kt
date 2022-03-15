@@ -5,6 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 
 const val PREFERENCES_NAME = "EAICPreferences"
+
+@Deprecated("DataStore is the new recommended method for storing key-value data.")
 lateinit var sharedPreferences: SharedPreferences
 
 var appNetworkState: ConnectivityProvider.NetworkState =

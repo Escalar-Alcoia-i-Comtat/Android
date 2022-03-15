@@ -27,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -60,7 +59,8 @@ import timber.log.Timber
 fun MainActivity.ExploreScreen() {
     val focusManager = LocalFocusManager.current
 
-    val areas by exploreViewModel.loadAreas().observeAsState()
+    val areas = exploreViewModel.areas
+
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
     var searchTextField by remember { mutableStateOf("") }
@@ -132,7 +132,7 @@ fun MainActivity.ExploreScreen() {
 
             Box(modifier = Modifier.fillMaxWidth()) {
                 AnimatedVisibility(
-                    visible = areas == null,
+                    visible = areas.isEmpty(),
                     modifier = Modifier
                         .align(Alignment.Center)
                 ) {
@@ -142,7 +142,7 @@ fun MainActivity.ExploreScreen() {
                 }
             }
         }
-        items(areas ?: listOf()) { area ->
+        items(areas) { area ->
             Timber.d("Displaying $area...")
             DataClassItem(area) {
                 launch(DataClassActivity::class.java) {
@@ -151,4 +151,7 @@ fun MainActivity.ExploreScreen() {
             }
         }
     }
+
+    if (areas.isEmpty())
+        exploreViewModel.loadAreas()
 }

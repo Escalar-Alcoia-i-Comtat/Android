@@ -1,6 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
-import android.app.Application
+import android.content.Context
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.PutDocumentsRequest
 import androidx.appsearch.app.SetSchemaRequest
@@ -8,13 +8,15 @@ import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.toDataClassList
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_SCHEMAS
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
@@ -25,7 +27,8 @@ import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import timber.log.Timber
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
 /**
  * Decodes the data from a json object retrieved from the server.
@@ -41,7 +44,7 @@ import java.util.*
  */
 private fun <D : DataClass<*, *, I>, I : DataRoot<D>> decode(
     jsonData: JSONObject,
-    @Namespace namespace: String,
+    namespace: Namespace,
     constructor: (data: JSONObject, id: String) -> D,
 ) = decode<D, I, Int>(jsonData, namespace, constructor, null)
 
@@ -61,12 +64,12 @@ private fun <D : DataClass<*, *, I>, I : DataRoot<D>> decode(
  */
 private fun <D : DataClass<*, *, I>, I : DataRoot<D>, R : Comparable<R>> decode(
     jsonData: JSONObject,
-    @Namespace namespace: String,
+    namespace: Namespace,
     constructor: (data: JSONObject, id: String) -> D,
     sortBy: ((I) -> R?)? = null,
 ): List<I> {
     val index = arrayListOf<I>()
-    val jsonObject = jsonData.getJSONObject("${namespace}s")
+    val jsonObject = jsonData.getJSONObject(namespace.tableName)
     val keys = jsonObject.keys()
     for ((i, id) in keys.withIndex()) {
         val json = jsonObject.getJSONObject(id)
@@ -113,22 +116,26 @@ private fun decode(
  * - 0/0 paths are being processed.
  * @author Arnau Mora
  * @since 20210313
- * @param application The [Application] that owns the app execution.
+ * @param context The context used for fetching and putting data into the index.
  * @param jsonData The data loaded from the data module
  * @return A collection of areas
  */
 @WorkerThread
 suspend fun loadAreas(
-    application: App,
+    context: Context,
     jsonData: JSONObject
 ): List<Area> {
+    val dataSingleton = DataSingleton.getInstance()
+    val searchSingleton = SearchSingleton.getInstance(context)
+
     val indexedDataFlow = PreferencesModule
         .systemPreferencesRepository
         .indexedData
     val indexedSearch = indexedDataFlow.first()
     if (indexedSearch) {
         Timber.v("Search results already indexed. Fetching from application...")
-        return application
+        val list = searchSingleton
+            .searchSession
             .getAreas() // If not empty, return areas
             .ifEmpty {
                 // If empty, reset the preference, and launch loadAreas again
@@ -136,8 +143,10 @@ suspend fun loadAreas(
                 PreferencesModule
                     .systemPreferencesRepository
                     .markDataIndexed(false)
-                loadAreas(application, jsonData)
+                loadAreas(context, jsonData)
             }
+        dataSingleton.areas.value = list
+        return list
     }
 
     val performance = Firebase.performance
@@ -147,21 +156,24 @@ suspend fun loadAreas(
 
     Timber.d("Processing data...")
     try {
-        val decodedAreas =
-            decode(jsonData, Area.NAMESPACE, { json, id -> Area(json, id) }, { it.displayName })
-        val decodedZones = decode(jsonData, Zone.NAMESPACE) { json, id -> Zone(json, id) }
-        val decodedSectors = decode(jsonData, Sector.NAMESPACE) { json, id -> Sector(json, id) }
+        val decodedAreas = decode(jsonData, Area.NAMESPACE, Area.CONSTRUCTOR) { it.displayName }
+        val decodedZones = decode(jsonData, Zone.NAMESPACE, Zone.CONSTRUCTOR)
+        val decodedSectors = decode(jsonData, Sector.NAMESPACE, Sector.CONSTRUCTOR)
         val decodedPaths = decode(jsonData)
 
-        Timber.v("Search > Initializing session future...")
-        val session = application.searchSession
-        val time = System.currentTimeMillis()
+        trace.putMetric("areasCount", decodedAreas.size.toLong())
+        trace.putMetric("zonesCount", decodedZones.size.toLong())
+        trace.putMetric("sectorsCount", decodedSectors.size.toLong())
+        trace.putMetric("pathsCount", decodedPaths.size.toLong())
+
         Timber.v("Search > Adding document classes...")
         val setSchemaRequest = SetSchemaRequest.Builder()
             .addDocumentClasses(SEARCH_SCHEMAS)
             .build()
-        session.setSchema(setSchemaRequest).await()
-        Timber.i("Set schema time: ${System.currentTimeMillis() - time}")
+        searchSingleton
+            .searchSession
+            .setSchema(setSchemaRequest)
+            .await()
 
         Timber.v("Search > Adding documents...")
         val putRequest = PutDocumentsRequest.Builder()
@@ -170,7 +182,10 @@ suspend fun loadAreas(
             .addDocuments(decodedSectors)
             .addDocuments(decodedPaths)
             .build()
-        val putResponse = session.put(putRequest).await()
+        val putResponse = searchSingleton
+            .searchSession
+            .put(putRequest)
+            .await()
         val successfulResults = putResponse?.successes
         val failedResults = putResponse?.failures
         if (successfulResults?.isEmpty() != true)
@@ -180,7 +195,10 @@ suspend fun loadAreas(
 
         // This persists the data to the disk
         Timber.v("Search > Flushing database...")
-        session.requestFlush().await()
+        searchSingleton
+            .searchSession
+            .requestFlush()
+            .await()
 
         Timber.v("Search > Storing to preferences...")
         PreferencesModule
@@ -199,12 +217,14 @@ suspend fun loadAreas(
 
         trace.stop()
 
-        return session.getAreas()
+        return decodedAreas
+            .toDataClassList()
+            .also { dataSingleton.areas.value = it }
     } catch (e: Exception) {
         Timber.e(e, "Could not load areas.")
         trace.putAttribute("error", "true")
         trace.stop()
-        uiContext { toast(application, R.string.toast_error_load_areas) }
+        uiContext { toast(context, R.string.toast_error_load_areas) }
         return emptyList()
     }
 }

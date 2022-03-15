@@ -5,6 +5,7 @@ import androidx.appsearch.app.SearchSpec
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
@@ -16,6 +17,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.addFilterNamespaces
 import timber.log.Timber
 
 /**
@@ -34,13 +36,13 @@ import timber.log.Timber
  */
 class DataClassPagingSource(
     private val searchSession: AppSearchSession,
-    val areaId: String? = null,
-    val zoneId: String? = null,
-    val sectorId: String? = null,
+    private val areaId: String? = null,
+    private val zoneId: String? = null,
+    private val sectorId: String? = null,
 ) : PagingSource<Int, DataClassImpl>() {
     data class SearchData<D : DataRoot<*>>(
-        val id: String,
-        val namespace: String,
+        val objectId: String,
+        val namespace: Namespace,
         val dataClass: Class<D>
     )
 
@@ -58,13 +60,14 @@ class DataClassPagingSource(
     ): List<DataClassImpl> {
         Timber.v("Performing load for $loadSize items at $offset...")
         // Will load the sector's contents, they are paths
-        val id = data.id
+        val id = data.objectId
         val namespace = data.namespace
         val dataClassType = data.dataClass
         val dataClassTypeName = dataClassType.simpleName
         // Set spec to search for paths
         Timber.v("Building SearchSpec...")
         val searchSpec = SearchSpec.Builder()
+            .addFilterNamespaces("")
             .addFilterNamespaces(namespace)
             .setResultCountPerPage(offset + loadSize)
             .setOrder(SearchSpec.ORDER_ASCENDING)

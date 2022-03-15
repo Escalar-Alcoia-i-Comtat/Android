@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen
 
 import androidx.annotation.StringRes
-import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.SearchSpec
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
@@ -130,14 +130,14 @@ private fun ClearSettingsButton(
  * @author Arnau Mora
  * @since 20211214
  * @param buttonText The text of the button.
- * @param searchSession The search session to clear.
  */
 @Composable
 private fun ClearSearchSessionButton(
     @StringRes buttonText: Int,
-    searchSession: AppSearchSession,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
     ClearButton(
         buttonText,
         valueLoad = { true },
@@ -152,7 +152,8 @@ private fun ClearSearchSessionButton(
                     PathData::class.java,
                 )
                 .build()
-            searchSession
+            SearchSingleton.getInstance(context)
+                .searchSession
                 .remove("", searchSpec)
                 .await()
             PreferencesModule
@@ -178,7 +179,6 @@ fun StorageManagerWindow(launchApp: () -> Unit, sendFeedback: () -> Unit) {
     val storageDir = cacheDir.parentFile
 
     val app = context.applicationContext as App
-    val searchSession = app.searchSession
 
     Column(
         modifier = Modifier
@@ -221,7 +221,7 @@ fun StorageManagerWindow(launchApp: () -> Unit, sendFeedback: () -> Unit) {
         }
 
         ClearSearchSessionButton(
-            buttonText = R.string.action_clear_data, searchSession = searchSession,
+            buttonText = R.string.action_clear_data,
             modifier = Modifier
                 .fillMaxWidth(1f)
         )

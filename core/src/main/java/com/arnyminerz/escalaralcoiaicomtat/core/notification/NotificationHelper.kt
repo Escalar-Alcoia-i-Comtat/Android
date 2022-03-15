@@ -20,6 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.exception.notification.NullIconE
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.view.getColor
 import timber.log.Timber
+import java.util.MissingFormatArgumentException
 import java.util.UUID
 
 private var notificationIdCounter = 0
@@ -336,7 +337,13 @@ class Notification private constructor(private val builder: Builder) {
          * @return The Builder instance
          */
         fun withLongText(@StringRes longTextRes: Int, vararg args: Any): Builder {
-            this.longText = context.getString(longTextRes, args)
+            this.longText = context.getString(longTextRes).let {
+                try {
+                    it.format(args)
+                } catch (e: MissingFormatArgumentException) {
+                    it
+                }
+            }
             return this
         }
 

@@ -5,3 +5,5 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassIm
 interface DataRoot<T : DataClassImpl> {
     fun data(): T
 }
+
+fun <T : DataClassImpl, D : DataRoot<T>> Iterable<D>.toDataClassList(): List<T> = map { it.data() }

@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.map
 
-import android.content.Context
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -31,13 +30,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
@@ -48,15 +47,15 @@ import timber.log.Timber
 
 @Composable
 fun BoxScope.MapBottomDialog(
-    context: Context,
-    app: App,
     dataClassActivity: Class<*>,
     bottomDialogVisible: Boolean,
     bottomDialogTitle: String,
     bottomDialogImage: Uri?,
     elementWebUrl: String?
 ) {
+    val context = LocalContext.current
     val density = LocalDensity.current
+
     AnimatedVisibility(
         visible = bottomDialogVisible,
         enter = slideInVertically { with(density) { 40.dp.roundToPx() } } +
@@ -112,7 +111,6 @@ fun BoxScope.MapBottomDialog(
                                     DataClass.getIntent(
                                         context,
                                         dataClassActivity,
-                                        app.searchSession,
                                         "($bottomDialogTitle) OR ($elementWebUrl)"
                                     )?.let { intent ->
                                         uiContext {
