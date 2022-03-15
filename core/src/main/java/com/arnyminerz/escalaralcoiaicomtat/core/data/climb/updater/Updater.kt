@@ -32,6 +32,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.perf.metrics.AddTrace
 import org.json.JSONObject
 import timber.log.Timber
+import java.io.Serializable
 
 @Target(AnnotationTarget.TYPE)
 @IntDef(
@@ -95,7 +96,11 @@ private fun <R : DataClassImpl> findUpdatableObjects(
                         serverData.namespace,
                         serverData.objectId,
                         serverData.hashCode(),
-                        localData.hashCode()
+                        localData.hashCode(),
+                        0, // TODO: Find a valid score
+                        serverData.displayName,
+                        serverData.displayMap(),
+                        localData?.displayMap() ?: emptyMap()
                     )
                 )
         }
@@ -185,7 +190,11 @@ class UpdaterSingleton {
         val namespace: Namespace,
         @ObjectId val objectId: String,
         val serverHash: Int,
-        val localHash: Int
+        val localHash: Int,
+        val score: Int,
+        val displayName: String,
+        val serverDisplayMap: Map<String, Serializable?>,
+        val localDisplayMap: Map<String, Serializable?>,
     )
 
     /**
@@ -195,6 +204,15 @@ class UpdaterSingleton {
      */
     var updateAvailableObjects: MutableLiveData<List<Item>> = MutableLiveData()
 
+    /**
+     * Updates the selected [namespace] and [objectId].
+     * @author Arnau Mora
+     * @since 20220315
+     * @param context The context to run from.
+     * @param namespace The namespace of the object to update.
+     * @param objectId The id of the object to update.
+     * @param score The score for ordering search results.
+     */
     suspend fun update(
         context: Context,
         namespace: Namespace,
