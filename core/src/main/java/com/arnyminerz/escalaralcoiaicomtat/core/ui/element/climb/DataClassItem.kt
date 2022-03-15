@@ -44,6 +44,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadSingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_DEFAULT
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.PoppinsFamily
@@ -75,6 +76,7 @@ fun DataClassItem(
             DownloadableDataClassItem(
                 item,
                 viewModel,
+                onClick,
             )
         else
             NonDownloadableDataClassItem(
@@ -112,6 +114,7 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
 private fun DownloadableDataClassItem(
     item: DataClass<*, *, *>,
     viewModel: DataClassItemViewModel,
+    onClick: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
 
@@ -120,7 +123,9 @@ private fun DownloadableDataClassItem(
     var showDownloadInfoDialog by remember { mutableStateOf(false) }
 
     val onClickListener: () -> Unit = {
-        viewModel.loadChildren(item) { it.displayName }
+        if (item !is Sector)
+            viewModel.loadChildren(item) { if (it is Sector) it.weight else it.displayName }
+        onClick?.invoke()
     }
 
     val downloadItem: () -> Unit = {

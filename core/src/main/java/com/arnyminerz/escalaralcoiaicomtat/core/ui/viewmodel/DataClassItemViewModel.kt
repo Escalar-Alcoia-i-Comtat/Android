@@ -145,8 +145,10 @@ class DataClassItemViewModel(
         sortBy: (DataClassImpl) -> R
     ) {
         viewModelScope.launch {
-            DataSingleton.getInstance()
-                .children.value = dataClass.getChildren(context, sortBy)
+            DataSingleton.getInstance().apply {
+                children.value = emptyList()
+                children.value = dataClass.getChildren(context, sortBy)
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore
 
 import android.app.Activity
+import android.os.Parcelable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -10,7 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.CloudOff
@@ -28,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -36,12 +38,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.lifecycle.MutableLiveData
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.tooltip.Tooltip
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.vibrate
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
 import com.google.android.material.badge.ExperimentalBadgeUtils
@@ -56,6 +66,9 @@ fun Activity.DataClassExplorer(
     hasInternetLiveData: MutableLiveData<Boolean>,
 ) {
     val context = LocalContext.current
+    var displayDataClass by remember { mutableStateOf<DataClassImpl>(dataClass) }
+
+    val navStack = arrayListOf<DataClassImpl>()
 
     Scaffold(
         topBar = {
@@ -107,7 +120,7 @@ fun Activity.DataClassExplorer(
                 ),
                 title = {
                     Text(
-                        text = dataClass.displayName,
+                        text = displayDataClass.displayName,
                         fontFamily = CabinFamily
                     )
                 }
@@ -115,27 +128,44 @@ fun Activity.DataClassExplorer(
         }
     ) { padding ->
         val items = exploreViewModel.children
-        LazyColumn(
+
+        Column(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxWidth()
         ) {
             // The loading indicator
-            item {
-                AnimatedVisibility(visible = items.isEmpty()) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                        )
-                    }
+            AnimatedVisibility(visible = items.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                    )
                 }
             }
+
             // The items
-            items(items) { item ->
-                DataClassItem(item)
+            LazyColumn(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxWidth()
+            ) {
+                itemsIndexed(items) { i, item ->
+                    DataClassItem(item) {
+                        navStack.add(displayDataClass)
+
+                        if (item is Sector)
+                            launch(DataClassActivity::class.java) {
+                                putExtra(EXTRA_DATACLASS, navStack.last() as Parcelable)
+                                putExtra(EXTRA_CHILDREN_COUNT, items.size)
+                                putExtra(EXTRA_INDEX, i)
+                            }
+                        else
+                            displayDataClass = item
+                    }
+                }
             }
         }
     }
