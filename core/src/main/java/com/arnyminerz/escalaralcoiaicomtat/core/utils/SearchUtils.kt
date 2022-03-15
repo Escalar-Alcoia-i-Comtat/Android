@@ -21,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATA_SEARCH_SCHEMAS_NAMES
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_DATABASE_NAME
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -170,13 +171,7 @@ suspend inline fun <R : DataClassImpl, reified T : DataRoot<R>> AppSearchSession
         for ((i, page) in searchPage.withIndex()) {
             val genericDocument = page.genericDocument
             Timber.v("Got generic document ${genericDocument.namespace}: ${genericDocument.id}")
-            if (!listOf(
-                    "AreaData",
-                    "ZoneData",
-                    "SectorData",
-                    "PathData"
-                ).contains(genericDocument.schemaType)
-            ) continue
+            if (!DATA_SEARCH_SCHEMAS_NAMES.contains(genericDocument.schemaType)) continue
 
             scoreListener(i, genericDocument.score)
             val data: T = try {
