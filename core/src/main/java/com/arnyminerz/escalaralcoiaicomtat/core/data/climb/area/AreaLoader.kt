@@ -1,6 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
-import android.app.Application
+import android.content.Context
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.PutDocumentsRequest
 import androidx.appsearch.app.SetSchemaRequest
@@ -9,6 +9,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
@@ -16,8 +17,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.toDataClassList
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_SCHEMAS
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.ktx.Firebase
@@ -115,16 +116,17 @@ private fun decode(
  * - 0/0 paths are being processed.
  * @author Arnau Mora
  * @since 20210313
- * @param application The [Application] that owns the app execution.
+ * @param context The context used for fetching and putting data into the index.
  * @param jsonData The data loaded from the data module
  * @return A collection of areas
  */
 @WorkerThread
 suspend fun loadAreas(
-    application: App,
+    context: Context,
     jsonData: JSONObject
 ): List<Area> {
     val dataSingleton = DataSingleton.getInstance()
+    val searchSingleton = SearchSingleton.getInstance(context)
 
     val indexedDataFlow = PreferencesModule
         .systemPreferencesRepository
@@ -132,7 +134,8 @@ suspend fun loadAreas(
     val indexedSearch = indexedDataFlow.first()
     if (indexedSearch) {
         Timber.v("Search results already indexed. Fetching from application...")
-        val list = application
+        val list = searchSingleton
+            .searchSession
             .getAreas() // If not empty, return areas
             .ifEmpty {
                 // If empty, reset the preference, and launch loadAreas again
@@ -140,7 +143,7 @@ suspend fun loadAreas(
                 PreferencesModule
                     .systemPreferencesRepository
                     .markDataIndexed(false)
-                loadAreas(application, jsonData)
+                loadAreas(context, jsonData)
             }
         dataSingleton.areas = list
         return list
@@ -163,13 +166,14 @@ suspend fun loadAreas(
         trace.putMetric("sectorsCount", decodedSectors.size.toLong())
         trace.putMetric("pathsCount", decodedPaths.size.toLong())
 
-        Timber.v("Search > Initializing session future...")
-        val session = application.searchSession
         Timber.v("Search > Adding document classes...")
         val setSchemaRequest = SetSchemaRequest.Builder()
             .addDocumentClasses(SEARCH_SCHEMAS)
             .build()
-        session.setSchema(setSchemaRequest).await()
+        searchSingleton
+            .searchSession
+            .setSchema(setSchemaRequest)
+            .await()
 
         Timber.v("Search > Adding documents...")
         val putRequest = PutDocumentsRequest.Builder()
@@ -178,7 +182,10 @@ suspend fun loadAreas(
             .addDocuments(decodedSectors)
             .addDocuments(decodedPaths)
             .build()
-        val putResponse = session.put(putRequest).await()
+        val putResponse = searchSingleton
+            .searchSession
+            .put(putRequest)
+            .await()
         val successfulResults = putResponse?.successes
         val failedResults = putResponse?.failures
         if (successfulResults?.isEmpty() != true)
@@ -188,7 +195,10 @@ suspend fun loadAreas(
 
         // This persists the data to the disk
         Timber.v("Search > Flushing database...")
-        session.requestFlush().await()
+        searchSingleton
+            .searchSession
+            .requestFlush()
+            .await()
 
         Timber.v("Search > Storing to preferences...")
         PreferencesModule
@@ -214,7 +224,7 @@ suspend fun loadAreas(
         Timber.e(e, "Could not load areas.")
         trace.putAttribute("error", "true")
         trace.stop()
-        uiContext { toast(application, R.string.toast_error_load_areas) }
+        uiContext { toast(context, R.string.toast_error_load_areas) }
         return emptyList()
     }
 }

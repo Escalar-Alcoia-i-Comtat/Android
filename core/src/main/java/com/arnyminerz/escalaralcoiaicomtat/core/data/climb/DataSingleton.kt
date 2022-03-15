@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 
 class DataSingleton {
     companion object {
@@ -23,4 +24,6 @@ class DataSingleton {
     }
 
     var areas by mutableStateOf(emptyList<Area>())
+
+    var children by mutableStateOf(emptyList<DataClassImpl>())
 }

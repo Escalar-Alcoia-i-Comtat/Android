@@ -38,6 +38,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.lifecycle.MutableLiveData
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -64,10 +65,6 @@ fun Activity.DataClassExplorer(
     hasInternetLiveData: MutableLiveData<Boolean>,
 ) {
     val context = LocalContext.current
-    val childrenLoader = if (dataClass is Area)
-        exploreViewModel.childrenLoader(dataClass) { it.displayName }
-    else
-        exploreViewModel.childrenLoader(dataClass as Zone) { it.weight }
 
     Scaffold(
         topBar = {
@@ -126,7 +123,7 @@ fun Activity.DataClassExplorer(
             )
         }
     ) { padding ->
-        val items by remember { childrenLoader }
+        val items = DataSingleton.getInstance().children
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
@@ -160,4 +157,10 @@ fun Activity.DataClassExplorer(
             }
         }
     }
+
+    // Load the children data from dataClass
+    if (dataClass is Area)
+        exploreViewModel.childrenLoader(dataClass) { it.displayName }
+    else
+        exploreViewModel.childrenLoader(dataClass as Zone) { it.weight }
 }

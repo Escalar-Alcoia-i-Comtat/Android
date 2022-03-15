@@ -38,7 +38,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,7 +47,6 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingleton
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DownloadedDataItem
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.StorageViewModel
@@ -83,7 +81,6 @@ fun RowScope.TableCell(
 @Composable
 @ExperimentalMaterialApi
 private fun UpdatesCard(viewModel: StorageViewModel) {
-    val context = LocalContext.current
     val updatesAvailable by UpdaterSingleton.getInstance()
         .updateAvailableObjects
         .observeAsState(emptyList())
@@ -324,7 +321,6 @@ fun MainActivity.StorageScreen() {
                 if (!isParentDownloaded)
                     DownloadedDataItem(
                         data.first,
-                        app.searchSession,
                         DataClassActivity::class.java
                     ) {
                         // This gets called when data gets deleted

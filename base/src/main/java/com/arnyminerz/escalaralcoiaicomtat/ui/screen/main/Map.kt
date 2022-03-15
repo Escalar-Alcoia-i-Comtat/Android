@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.LifecycleOwner
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.MapBottomDialog
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.MapView
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.computeCentroid
@@ -106,8 +105,6 @@ fun MainActivity.MapScreen() {
         }
 
         MapBottomDialog(
-            this@MapScreen,
-            app,
             DataClassActivity::class.java,
             bottomDialogVisible,
             bottomDialogTitle,

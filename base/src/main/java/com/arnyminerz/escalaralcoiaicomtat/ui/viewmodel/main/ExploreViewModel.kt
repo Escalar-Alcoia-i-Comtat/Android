@@ -1,8 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main
 
 import android.app.Application
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,6 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -25,6 +24,13 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         super.onCleared()
         Timber.d("$this::onCleared")
     }
+
+    /**
+     * For accessing the DataSingleton at any moment.
+     * @author Arnau Mora
+     * @since 20220315
+     */
+    private val dataSingleton = DataSingleton.getInstance()
 
     /**
      * Serves as a cache of the loaded areas so the map screen can access them.
@@ -43,9 +49,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val areasList = app.getAreas()
                 .sortedBy { it.displayName }
-            DataSingleton
-                .getInstance()
-                .areas = areasList
+            dataSingleton.areas = areasList
             lastAreas = areasList
         }
     }
@@ -55,18 +59,15 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
      * @author Arnau Mora
      * @since 20220102
      * @param dataClass The DataClass to load the children from.
-     * @return A [MutableState] that contains a list of children. May be empty while loading.
      */
-    inline fun <A : DataClassImpl, T : DataClass<A, *, *>, R : Comparable<R>> childrenLoader(
+    fun <A : DataClassImpl, T : DataClass<A, *, *>, R : Comparable<R>> childrenLoader(
         dataClass: T,
-        crossinline sortBy: (A) -> R?,
-    ): MutableState<List<DataClassImpl>> =
-        mutableStateOf<List<DataClassImpl>>(emptyList()).apply {
-            viewModelScope.launch {
-                val children = dataClass.getChildren(app.searchSession, sortBy)
-                value = children
-            }
+        sortBy: (A) -> R?,
+    ) {
+        viewModelScope.launch {
+            dataSingleton.children = dataClass.getChildren(context, sortBy)
         }
+    }
 
     class Factory(
         private val application: Application

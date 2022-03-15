@@ -3,7 +3,6 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater
 import android.content.Context
 import androidx.annotation.IntDef
 import androidx.annotation.WorkerThread
-import androidx.appsearch.app.AppSearchSession
 import androidx.appsearch.app.PutDocumentsRequest
 import androidx.appsearch.exceptions.AppSearchException
 import androidx.lifecycle.MutableLiveData
@@ -12,6 +11,7 @@ import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
@@ -109,8 +109,7 @@ private fun <R : DataClassImpl> findUpdatableObjects(
 @AddTrace(name = "CheckForUpdates")
 @WorkerThread
 suspend fun updateAvailable(
-    context: Context,
-    searchSession: AppSearchSession
+    context: Context
 ): @UpdateAvailableResult Int {
     try {
         // Fetch from server the list of data, and continue only if result has "result"
@@ -129,6 +128,9 @@ suspend fun updateAvailable(
         val jsonZones = jsonResult.getJSONObject("Zones")
         val jsonSectors = jsonResult.getJSONObject("Sectors")
         val jsonPaths = jsonResult.getJSONObject("Paths")
+
+        val searchSession = SearchSingleton.getInstance(context)
+            .searchSession
 
         // Find the locally stored elements lists
         val areas = searchSession.getList<Area, AreaData>("", Area.NAMESPACE)
@@ -253,7 +255,8 @@ class UpdaterSingleton {
                 .addDocuments(doc)
                 .build()
             Timber.v("Requesting documents put... $namespace/$objectId")
-            app.searchSession
+            SearchSingleton.getInstance(context)
+                .searchSession
                 .put(request)
                 .await()
             Timber.v("Added to SearchSession, removing element from updateAvailableObjects...")

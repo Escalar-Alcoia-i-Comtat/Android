@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.grade_black
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.grade_blue
@@ -58,7 +57,7 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
         viewModelScope.launch {
             val bars = withContext(Dispatchers.IO) {
                 Timber.d("Loading path grades...")
-                val paths = sector.getChildren(app.searchSession) { it.objectId }
+                val paths = sector.getChildren(context) { it.objectId }
                 var grades1Count = 0 // 3º-5+
                 var grades2Count = 0 // 6a-6c+
                 var grades3Count = 0 // 7a-7c+
@@ -109,7 +108,7 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
         viewModelScope.launch {
             val pathsList = withContext(Dispatchers.IO) {
                 Timber.d("Loading paths from $sector...")
-                sector.getChildren(app.searchSession) { it.sketchId }
+                sector.getChildren(context) { it.sketchId }
             }
             paths = pathsList
         }

@@ -51,6 +51,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 import java.text.SimpleDateFormat
 
 @Composable
@@ -176,7 +179,15 @@ private fun DownloadableDataClassItem(
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .padding(start = 4.dp)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .placeholder(
+                                visible = childrenCount == null,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    .copy(alpha = 0.5f),
+                                highlight = PlaceholderHighlight.shimmer(
+                                    highlightColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            ),
                     )
                 }
                 Column {
@@ -203,7 +214,7 @@ private fun DownloadableDataClassItem(
                 verticalAlignment = Alignment.Bottom
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    viewModel.addDownloadListener(item.pin) { _, _ ->
+                    viewModel.addDownloadListener(item.namespace, item.objectId) {
                         // TODO: Download progress should be notified
                     }
 

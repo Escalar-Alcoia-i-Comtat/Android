@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
@@ -25,6 +26,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.updateAvailab
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getList
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import kotlinx.coroutines.launch
@@ -56,7 +58,7 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
             val downloadsFlow = app.getDownloads()
             downloadsFlow.collect { data ->
                 val parentIndexed =
-                    data.parentId.ifEmpty { null }?.isDownloadIndexed(app.searchSession)
+                    data.parentId.ifEmpty { null }?.isDownloadIndexed(context)
                 Timber.i("Collected ${data.namespace}:${data.objectId}, adding. Parent (${data.parentId}) indexed: $parentIndexed")
                 list.add(data to (parentIndexed?.downloaded ?: false))
                 size += data.sizeBytes
@@ -72,7 +74,8 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
         @ObjectId objectId: String,
         scoresSet: (index: Int, score: Int) -> Unit,
         setScore: (index: Int) -> Unit
-    ) = app.searchSession
+    ) = SearchSingleton.getInstance(context)
+        .searchSession
         .getList<D, R>("", namespace) { index, scoreItem -> scoresSet(index, scoreItem) }
         .let { list ->
             list.find { it.objectId == objectId }
@@ -114,7 +117,8 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
                             score = scores[index]!!
                         }
                     )
-                    Path.NAMESPACE -> app.searchSession
+                    Path.NAMESPACE -> SearchSingleton.getInstance(context)
+                        .searchSession
                         .getList<Path, PathData>("", Path.NAMESPACE)
                         .find { it.objectId == objectId }!!
                     else -> {
@@ -132,7 +136,7 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
 
     fun checkForUpdates() {
         viewModelScope.launch {
-            val updateAvailable = updateAvailable(getApplication(), app.searchSession)
+            val updateAvailable = updateAvailable(getApplication())
             Timber.i("Update available: $updateAvailable")
         }
     }

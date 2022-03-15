@@ -64,6 +64,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
@@ -77,6 +78,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATA_SEARCH_SCHEMAS_NAMES
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.SearchItemTypeColor
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.LoadingIndicator
@@ -272,8 +274,8 @@ class SearchableActivity : ComponentActivity() {
                         val parent = runBlocking {
                             when (dataClassImpl) {
                                 is Area -> null
-                                is Zone -> dataClassImpl.getParent<Area>(app.searchSession)
-                                is Sector -> dataClassImpl.getParent<Zone>(app.searchSession)
+                                is Zone -> dataClassImpl.getParent<Area>(this@SearchableActivity)
+                                is Sector -> dataClassImpl.getParent<Zone>(this@SearchableActivity)
                                 is Path -> dataClassImpl.getParent(app)
                                 else -> null
                             }
@@ -337,14 +339,14 @@ class SearchableActivity : ComponentActivity() {
         private suspend fun performSearch(query: String): List<DataClassImpl> {
             val searchItems = arrayListOf<DataClassImpl>()
 
-            Timber.v("Creating search session...")
-            val session = app.searchSession
             Timber.v("Creating search spec...")
             val searchSpec = SearchSpec.Builder()
                 .addFilterSchemas(DATA_SEARCH_SCHEMAS_NAMES)
                 .build()
             Timber.v("Performing search...")
-            val searchResults = session.search(query, searchSpec)
+            val searchResults = SearchSingleton.getInstance(context)
+                .searchSession
+                .search(query, searchSpec)
             Timber.v("Getting next page...")
             val searchPage = searchResults.nextPage.await()
             Timber.v("Got ${searchPage.size} results.")
