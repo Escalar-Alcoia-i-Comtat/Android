@@ -104,7 +104,7 @@ class Area internal constructor(
     companion object : DataClassCompanion<Area>() {
         override val NAMESPACE = Namespace.AREA
 
-        override val IMAGE_QUALITY = 65
+        override val IMAGE_QUALITY = 30
 
         override val CONSTRUCTOR: (data: JSONObject, objectId: String) -> Area =
             { data, objectId -> Area(data, objectId) }
