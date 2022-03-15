@@ -25,7 +25,8 @@ import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import timber.log.Timber
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
 /**
  * Decodes the data from a json object retrieved from the server.
@@ -147,10 +148,9 @@ suspend fun loadAreas(
 
     Timber.d("Processing data...")
     try {
-        val decodedAreas =
-            decode(jsonData, Area.NAMESPACE, { json, id -> Area(json, id) }, { it.displayName })
-        val decodedZones = decode(jsonData, Zone.NAMESPACE) { json, id -> Zone(json, id) }
-        val decodedSectors = decode(jsonData, Sector.NAMESPACE) { json, id -> Sector(json, id) }
+        val decodedAreas = decode(jsonData, Area.NAMESPACE, Area.CONSTRUCTOR) { it.displayName }
+        val decodedZones = decode(jsonData, Zone.NAMESPACE, Zone.CONSTRUCTOR)
+        val decodedSectors = decode(jsonData, Sector.NAMESPACE, Sector.CONSTRUCTOR)
         val decodedPaths = decode(jsonData)
 
         Timber.v("Search > Initializing session future...")
