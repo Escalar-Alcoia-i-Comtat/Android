@@ -27,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,6 +43,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.SearchableActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.NearbyZones
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
@@ -60,7 +60,8 @@ import timber.log.Timber
 fun MainActivity.ExploreScreen() {
     val focusManager = LocalFocusManager.current
 
-    val areas by exploreViewModel.loadAreas().observeAsState()
+    val areas = DataSingleton.getInstance().areas
+
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
     var searchTextField by remember { mutableStateOf("") }
@@ -142,7 +143,7 @@ fun MainActivity.ExploreScreen() {
                 }
             }
         }
-        items(areas ?: listOf()) { area ->
+        items(areas) { area ->
             Timber.d("Displaying $area...")
             DataClassItem(area) {
                 launch(DataClassActivity::class.java) {
@@ -151,4 +152,7 @@ fun MainActivity.ExploreScreen() {
             }
         }
     }
+
+    if (areas.isEmpty())
+        exploreViewModel.loadAreas()
 }

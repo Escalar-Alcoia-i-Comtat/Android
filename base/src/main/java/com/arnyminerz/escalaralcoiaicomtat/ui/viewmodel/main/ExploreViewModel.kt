@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
@@ -38,11 +39,13 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
      * @author Arnau Mora
      * @since 20220105
      */
-    fun loadAreas(): MutableLiveData<List<Area>> = MutableLiveData<List<Area>>().apply {
+    fun loadAreas() {
         viewModelScope.launch {
             val areasList = app.getAreas()
                 .sortedBy { it.displayName }
-            postValue(areasList)
+            DataSingleton
+                .getInstance()
+                .areas = areasList
             lastAreas = areasList
         }
     }

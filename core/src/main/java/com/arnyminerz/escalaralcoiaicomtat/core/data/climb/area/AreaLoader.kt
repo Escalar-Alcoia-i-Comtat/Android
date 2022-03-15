@@ -8,15 +8,16 @@ import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.toDataClassList
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_SCHEMAS
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.ktx.Firebase
@@ -123,13 +124,15 @@ suspend fun loadAreas(
     application: App,
     jsonData: JSONObject
 ): List<Area> {
+    val dataSingleton = DataSingleton.getInstance()
+
     val indexedDataFlow = PreferencesModule
         .systemPreferencesRepository
         .indexedData
     val indexedSearch = indexedDataFlow.first()
     if (indexedSearch) {
         Timber.v("Search results already indexed. Fetching from application...")
-        return application
+        val list = application
             .getAreas() // If not empty, return areas
             .ifEmpty {
                 // If empty, reset the preference, and launch loadAreas again
@@ -139,6 +142,8 @@ suspend fun loadAreas(
                     .markDataIndexed(false)
                 loadAreas(application, jsonData)
             }
+        dataSingleton.areas = list
+        return list
     }
 
     val performance = Firebase.performance
@@ -202,7 +207,9 @@ suspend fun loadAreas(
 
         trace.stop()
 
-        return session.getAreas()
+        return decodedAreas
+            .toDataClassList()
+            .also { dataSingleton.areas = it }
     } catch (e: Exception) {
         Timber.e(e, "Could not load areas.")
         trace.putAttribute("error", "true")
