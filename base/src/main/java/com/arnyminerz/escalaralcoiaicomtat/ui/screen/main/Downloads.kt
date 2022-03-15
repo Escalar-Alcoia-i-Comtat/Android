@@ -42,16 +42,129 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DownloadedDataItem
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.StorageViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import timber.log.Timber
 
+/**
+ * Shows the updates available card.
+ * @author Arnau Mora
+ * @since 20220315
+ * @param viewModel The [StorageViewModel] instance for loading data.
+ * @param updateAvailable Whether or not there's an update available.
+ */
+@Composable
+@ExperimentalMaterialApi
+private fun UpdatesCard(viewModel: StorageViewModel, updateAvailable: Boolean) {
+    val context = LocalContext.current
+
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.updates_title),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
+                .weight(1f)
+        )
+        if (updateAvailable)
+            Button(
+                onClick = { /*TODO*/ },
+                colors = ButtonDefaults.textButtonColors()
+            ) {
+                Text(text = stringResource(R.string.action_update_all))
+            }
+    }
+    if (updateAvailable) {
+        var updateAvailableObjects by remember {
+            mutableStateOf(
+                UpdaterSingleton
+                    .getInstance()
+                    .updateAvailableObjects
+            )
+        }
+        LazyColumn {
+            items(updateAvailableObjects.toList()) { (key, entries) ->
+                for (item in entries) {
+                    val namespace = key.substring(0, key.length - 1)
+                    val state = when (namespace) {
+                        Area.NAMESPACE -> viewModel.getDataClass<Area>(Area.NAMESPACE, item)
+                        Zone.NAMESPACE -> viewModel.getDataClass<Zone>(Zone.NAMESPACE, item)
+                        Sector.NAMESPACE -> viewModel.getDataClass<Sector>(Sector.NAMESPACE, item)
+                        Path.NAMESPACE -> viewModel.getDataClass<Path>(Path.NAMESPACE, item)
+                        else -> {
+                            Timber.w("Attention! Namespace \"%s\" not valid", namespace)
+                            return@items
+                        }
+                    }
+                    val dataClassPair by remember { state }
+
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        trailing = {
+                            var buttonEnabled by remember { mutableStateOf(true) }
+                            IconButton(
+                                onClick = {
+                                    buttonEnabled = false
+                                    dataClassPair?.let { (dataClass, score) ->
+                                        doAsync {
+                                            val updaterSingleton =
+                                                UpdaterSingleton.getInstance()
+                                            updaterSingleton
+                                                .update(
+                                                    context,
+                                                    namespace,
+                                                    dataClass.objectId,
+                                                    score
+                                                )
+                                            updateAvailableObjects =
+                                                updaterSingleton.updateAvailableObjects
+                                        }
+                                    }
+                                },
+                                enabled = dataClassPair != null && buttonEnabled,
+                            ) {
+                                Icon(
+                                    Icons.Rounded.Download,
+                                    contentDescription = stringResource(R.string.action_download)
+                                )
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = dataClassPair?.first?.displayName
+                                ?: stringResource(R.string.status_loading),
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .placeholder(
+                                    dataClassPair == null,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    highlight = PlaceholderHighlight.shimmer(
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                            .copy(alpha = .5f)
+                                    ),
+                                )
+                        )
+                    }
+                }
+            }
+        }
+    } else
+        Text(
+            text = stringResource(R.string.updates_no_update_available),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .padding(8.dp)
+        )
+}
+
 @Composable
 @ExperimentalMaterial3Api
 @ExperimentalMaterialApi
 fun MainActivity.StorageScreen(updateAvailable: Boolean) {
-    val context = LocalContext.current
     val downloads by storageViewModel.downloads.observeAsState()
     val sizeString by remember { storageViewModel.sizeString }
 
@@ -64,109 +177,7 @@ fun MainActivity.StorageScreen(updateAvailable: Boolean) {
                 .padding(8.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = stringResource(R.string.updates_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
-                            .weight(1f)
-                    )
-                    if (updateAvailable)
-                        Button(
-                            onClick = { /*TODO*/ },
-                            colors = ButtonDefaults.textButtonColors()
-                        ) {
-                            Text(text = stringResource(R.string.action_update_all))
-                        }
-                }
-                if (updateAvailable) {
-                    var updateAvailableObjects by remember {
-                        mutableStateOf(
-                            UpdaterSingleton
-                                .getInstance()
-                                .updateAvailableObjects
-                        )
-                    }
-                    LazyColumn {
-                        updateAvailableObjects.forEach { key, entries ->
-                            items(entries) { item ->
-                                val namespace = key.substring(0, key.length - 1)
-                                val state = when (namespace) {
-                                    Area.NAMESPACE -> storageViewModel
-                                        .getDataClass<Area>(Area.NAMESPACE, item)
-                                    Zone.NAMESPACE -> storageViewModel
-                                        .getDataClass<Zone>(Zone.NAMESPACE, item)
-                                    Sector.NAMESPACE -> storageViewModel
-                                        .getDataClass<Sector>(Sector.NAMESPACE, item)
-                                    Path.NAMESPACE -> storageViewModel
-                                        .getDataClass<Path>(Path.NAMESPACE, item)
-                                    else -> {
-                                        Timber.w("Attention! Namespace \"%s\" not valid", namespace)
-                                        return@items
-                                    }
-                                }
-                                val dataClassPair by remember { state }
-
-                                ListItem(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    trailing = {
-                                        var buttonEnabled by remember { mutableStateOf(true) }
-                                        IconButton(
-                                            onClick = {
-                                                buttonEnabled = false
-                                                dataClassPair?.let { (dataClass, score) ->
-                                                    doAsync {
-                                                        val updaterSingleton =
-                                                            UpdaterSingleton.getInstance()
-                                                        updaterSingleton
-                                                            .update(
-                                                                context,
-                                                                namespace,
-                                                                dataClass.objectId,
-                                                                score
-                                                            )
-                                                        updateAvailableObjects =
-                                                            updaterSingleton.updateAvailableObjects
-                                                    }
-                                                }
-                                            },
-                                            enabled = dataClassPair != null && buttonEnabled,
-                                        ) {
-                                            Icon(
-                                                Icons.Rounded.Download,
-                                                contentDescription = stringResource(R.string.action_download)
-                                            )
-                                        }
-                                    }
-                                ) {
-                                    Text(
-                                        text = dataClassPair?.first?.displayName
-                                            ?: stringResource(R.string.status_loading),
-                                        modifier = Modifier
-                                            .padding(4.dp)
-                                            .placeholder(
-                                                dataClassPair == null,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                highlight = PlaceholderHighlight.shimmer(
-                                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                                        .copy(alpha = .5f)
-                                                ),
-                                            )
-                                    )
-                                }
-                            }
-                        }
-                    }
-                } else
-                    Text(
-                        text = stringResource(R.string.updates_no_update_available),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .padding(8.dp)
-                    )
+                UpdatesCard(storageViewModel, updateAvailable)
             }
         }
 
