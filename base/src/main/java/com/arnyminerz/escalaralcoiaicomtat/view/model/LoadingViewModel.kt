@@ -317,8 +317,13 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                         path
                     )
                 }
+
+                val systemPreferencesRepository = PreferencesModule.systemPreferencesRepository
+                val shownPSWarning = systemPreferencesRepository.shownPlayServicesWarning.first()
+                val shownPrefWarning = systemPreferencesRepository.shownPreferencesWarning.first()
+
                 uiContext {
-                    if (migratedFromSharedPreferences || !hasGooglePlayServices)
+                    if ((migratedFromSharedPreferences && !shownPrefWarning) || (!hasGooglePlayServices && !shownPSWarning))
                         app.launch(WarningActivity::class.java) {
                             if (intent != null)
                                 putExtra(EXTRA_WARNING_INTENT, intent)
