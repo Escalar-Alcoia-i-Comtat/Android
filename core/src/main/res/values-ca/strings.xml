@@ -177,6 +177,10 @@
     <string name="intro_nearbyzones_title">Funcionalitat de Zones Properes</string>
     <string name="intro_nearbyzones_message">Escalar Alcoià i Comtat té una funció a la que anomenem \"Zones Properes\", que obté la ubicació actualitzada del teu dispositiu, i et mostra les zones que hi ha al teu voltant, en un radi personalitzat. Pots triar si habilitar o deshabilitar aquesta funció, no obstant, si està habilitat hauràs de mantenir l\'accés a la teua ubicació per aquesta aplicació habilitat.</string>
     <string name="intro_nearbyzones_enable">Habilitar Zones Properes</string>
+    <string name="warning_preferences_title">Attention!</string>
+    <string name="warning_preferences_message">Since our last update we have changed the way your preferences are stored. We will try to migrate your old options as soon as you leave this screen.</string>
+    <string name="warning_play_services_title">Attention!</string>
+    <string name="warning_play_services_message">We have detected that your device is not compatible with Google Play Services. This may cause some issues with some parts of the app. You have been warned.</string>
     <string name="sector_walking_time">%1$smin</string>
     <string name="sector_height">%1$sm</string>
     <string name="sector_kids_apt">Apte xiquets</string>
