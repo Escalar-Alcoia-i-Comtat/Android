@@ -46,7 +46,6 @@ import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DownloadedDataItem
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.StorageViewModel
@@ -103,6 +102,7 @@ private fun UpdatesCard(viewModel: StorageViewModel) {
     if (updatesAvailable.isNotEmpty()) {
         LazyColumn {
             items(updatesAvailable) { updateData ->
+                val i = updateData.namespace to updateData.objectId
                 var showInfoDialog by remember { mutableStateOf(false) }
 
                 if (showInfoDialog)
@@ -215,8 +215,6 @@ private fun UpdatesCard(viewModel: StorageViewModel) {
                 ListItem(
                     modifier = Modifier.fillMaxWidth(),
                     trailing = {
-                        var buttonEnabled by remember { mutableStateOf(true) }
-
                         Row {
                             if (BuildConfig.DEBUG)
                                 IconButton(onClick = { showInfoDialog = true }) {
@@ -225,10 +223,9 @@ private fun UpdatesCard(viewModel: StorageViewModel) {
 
                             IconButton(
                                 onClick = {
-                                    buttonEnabled = false
                                     viewModel.update(updateData)
                                 },
-                                enabled = buttonEnabled,
+                                enabled = !viewModel.currentlyUpdatingItems.containsKey(i),
                             ) {
                                 Icon(
                                     Icons.Rounded.Download,
