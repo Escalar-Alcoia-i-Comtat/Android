@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.arnyminerz.escalaralcoiaicomtat.core.R
@@ -86,7 +87,7 @@ sealed class Screen(
 
 data class NavItem(
     val screen: Screen,
-    val badgeCount: Int? = null,
+    val badgeCountList: SnapshotStateList<*>? = null,
     val visible: State<Boolean>? = null
 )
 
@@ -102,14 +103,14 @@ fun RowScope.NavItems(pagerState: PagerState, items: List<NavItem>) {
             NavigationBarItem(
                 selected,
                 icon = {
-                    if (item.badgeCount == null || item.badgeCount <= 0)
+                    if (item.badgeCountList == null || item.badgeCountList.isEmpty())
                         Icon(
                             if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
                             screen.contentDescription?.let { stringResource(it) }
                         )
                     else
                         BadgedBox(
-                            badge = { Badge { Text(item.badgeCount.toString()) } }
+                            badge = { Badge { Text(item.badgeCountList.size.toString()) } }
                         ) {
                             Icon(
                                 if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
