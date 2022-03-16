@@ -102,7 +102,7 @@ fun RowScope.NavItems(pagerState: PagerState, items: List<NavItem>) {
             NavigationBarItem(
                 selected,
                 icon = {
-                    if (item.badgeCount == null)
+                    if (item.badgeCount == null || item.badgeCount <= 0)
                         Icon(
                             if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
                             screen.contentDescription?.let { stringResource(it) }
