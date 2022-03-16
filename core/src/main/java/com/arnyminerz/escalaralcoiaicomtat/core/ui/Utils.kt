@@ -20,6 +20,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -88,42 +90,42 @@ sealed class Screen(
 data class NavItem(
     val screen: Screen,
     val badgeCountList: SnapshotStateList<*>? = null,
-    val visible: State<Boolean>? = null
+    val visible: State<Boolean> = mutableStateOf(true)
 )
 
 @Composable
 @ExperimentalPagerApi
-fun RowScope.NavItems(pagerState: PagerState, items: List<NavItem>) {
+fun RowScope.NavigationItem(pagerState: PagerState, item: NavItem, itemPosition: Int) {
     val scope = rememberCoroutineScope()
-    items.forEachIndexed { index, item ->
-        val screen = item.screen
-        val selected = pagerState.currentPage == index
-        val visible = item.visible
-        if (visible?.value != false)
-            NavigationBarItem(
-                selected,
-                icon = {
-                    if (item.badgeCountList == null || item.badgeCountList.isEmpty())
+
+    val screen = item.screen
+    val selected = pagerState.currentPage == itemPosition
+    val visible by item.visible
+
+    if (visible)
+        NavigationBarItem(
+            selected,
+            icon = {
+                if (item.badgeCountList == null || item.badgeCountList.isEmpty())
+                    Icon(
+                        if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
+                        screen.contentDescription?.let { stringResource(it) }
+                    )
+                else
+                    BadgedBox(
+                        badge = { Badge { Text(item.badgeCountList.size.toString()) } }
+                    ) {
                         Icon(
                             if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
                             screen.contentDescription?.let { stringResource(it) }
                         )
-                    else
-                        BadgedBox(
-                            badge = { Badge { Text(item.badgeCountList.size.toString()) } }
-                        ) {
-                            Icon(
-                                if (selected) screen.selectedIcon ?: screen.icon else screen.icon,
-                                screen.contentDescription?.let { stringResource(it) }
-                            )
-                        }
-                },
-                label = { Text(text = stringResource(screen.text)) },
-                onClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage(index)
                     }
+            },
+            label = { Text(text = stringResource(screen.text)) },
+            onClick = {
+                scope.launch {
+                    pagerState.animateScrollToPage(itemPosition)
                 }
-            )
-    }
+            }
+        )
 }
