@@ -22,7 +22,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_FETCH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_LIST
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
@@ -243,7 +242,6 @@ class UpdaterSingleton {
                     return
                 }
             }
-            val app = context.applicationContext as App
             Timber.d("Getting AppSearch document... $namespace/$objectId")
             val doc = if (data is DataClass<*, *, *>)
                 data.data(score)
