@@ -24,7 +24,7 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActiv
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItem
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItems
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavigationItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.DeveloperScreen
@@ -84,7 +84,6 @@ class MainActivity : LanguageComponentActivity() {
             AppTheme {
                 Home()
             }
-            storageViewModel.checkForUpdates()
         }
     }
 
@@ -108,27 +107,22 @@ class MainActivity : LanguageComponentActivity() {
                 NavigationBar {
                     val updatesAvailable = UpdaterSingleton.getInstance().updateAvailableObjects
 
-                    NavItems(
-                        pagerState,
-                        mutableListOf(
-                            NavItem(Screen.Explore),
-                            NavItem(Screen.Map),
-                            NavItem(Screen.Storage, updatesAvailable.size),
-                            NavItem(Screen.Settings)
-                        ).apply {
-                            // If in debug mode, add the developer screen
-                            if (BuildConfig.DEBUG)
-                                add(
-                                    NavItem(
-                                        Screen.Developer,
-                                        visible = PreferencesModule
-                                            .userPreferencesRepository
-                                            .developerTabEnabled
-                                            .collectAsState(true)
-                                    )
-                                )
-                        }
-                    )
+                    NavigationItem(pagerState, NavItem(Screen.Explore), 0)
+                    NavigationItem(pagerState, NavItem(Screen.Map), 1)
+                    NavigationItem(pagerState, NavItem(Screen.Storage, updatesAvailable), 2)
+                    NavigationItem(pagerState, NavItem(Screen.Settings), 3)
+                    if (BuildConfig.DEBUG)
+                        NavigationItem(
+                            pagerState,
+                            NavItem(
+                                Screen.Developer,
+                                visible = PreferencesModule
+                                    .userPreferencesRepository
+                                    .developerTabEnabled
+                                    .collectAsState(true)
+                            ),
+                            4
+                        )
                 }
             }
         ) { innerPadding ->
@@ -147,5 +141,7 @@ class MainActivity : LanguageComponentActivity() {
                 }
             }
         }
+
+        storageViewModel.checkForUpdates()
     }
 }
