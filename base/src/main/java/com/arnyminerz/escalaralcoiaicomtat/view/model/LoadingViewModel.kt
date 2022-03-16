@@ -14,6 +14,7 @@ import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.WarningActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
@@ -23,6 +24,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS_
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION_KEY
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_INTENT
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_PLAY_SERVICES
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_PREFERENCE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_DEFAULTS
@@ -35,7 +39,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.md5Compatible
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -63,6 +67,9 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
 
     @get:StringRes
     var errorMessage = mutableStateOf<Int?>(null)
+
+    var migratedFromSharedPreferences = false
+    var hasGooglePlayServices = true
 
     /**
      * Requests the view model to start loading
@@ -99,7 +106,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         }
 
         progressMessageResource.value = R.string.status_loading_checks
-        checkGooglePlayServices(app)
+        hasGooglePlayServices = checkGooglePlayServices(app)
         withContext(Dispatchers.IO) {
             checkMD5Support(analytics, app)
         }
@@ -194,21 +201,15 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * @since 20210919
      */
     @UiThread
-    private fun checkGooglePlayServices(context: Context) {
+    private fun checkGooglePlayServices(context: Context): Boolean {
         Timber.i("Checking if Google Play Services are available...")
         val googleApiAvailability = GoogleApiAvailability.getInstance()
         val servicesAvailable = googleApiAvailability.isGooglePlayServicesAvailable(context)
-        if (servicesAvailable != ConnectionResult.SUCCESS)
-            try {
-                // TODO: Fix need of activity
-                Timber.e("Google Play Services not available.")
-                /*googleApiAvailability
-                    .getErrorDialog(context, servicesAvailable, 0)
-                    ?.show()*/
-            } catch (e: IllegalArgumentException) {
-                Timber.e(e, "Google Play Services required.")
-                toast(context, R.string.toast_error_google_play)
-            }
+        if (servicesAvailable != ConnectionResult.SUCCESS) {
+            Timber.e("Google Play Services not available.")
+            return false
+        }
+        return true
     }
 
     /**
@@ -305,33 +306,36 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
 
             Timber.v("Finished loading areas.")
             if (areas.isNotEmpty()) {
-                if (deepLinkPath != null) {
+                val intent = deepLinkPath?.let { path ->
                     uiContext {
                         progressUpdater(R.string.status_loading_deep_link, null)
                     }
 
-                    val intent = DataClass.getIntent(
+                    DataClass.getIntent(
                         app,
                         DataClassActivity::class.java,
-                        deepLinkPath
+                        path
                     )
-                    uiContext {
-                        if (intent != null)
-                            app.launch(intent) {
-                                addFlags(FLAG_ACTIVITY_NEW_TASK)
-                            }
-                        else
-                            app.launch(MainActivity::class.java) {
-                                addFlags(FLAG_ACTIVITY_NEW_TASK)
-                            }
-                    }
-                } else
-                    uiContext {
+                }
+                uiContext {
+                    if (migratedFromSharedPreferences || !hasGooglePlayServices)
+                        app.launch(WarningActivity::class.java) {
+                            if (intent != null)
+                                putExtra(EXTRA_WARNING_INTENT, intent)
+                            putExtra(EXTRA_WARNING_PREFERENCE, migratedFromSharedPreferences)
+                            putExtra(EXTRA_WARNING_PLAY_SERVICES, !hasGooglePlayServices)
+                        }
+                    if (intent != null) {
+                        app.launch(intent) {
+                            addFlags(FLAG_ACTIVITY_NEW_TASK)
+                        }
+                    } else {
                         Timber.v("Launching MainActivity...")
                         app.launch(MainActivity::class.java) {
                             addFlags(FLAG_ACTIVITY_NEW_TASK)
                         }
                     }
+                }
             } else Timber.v("Areas is empty, but no handle was called.")
         } catch (e: VolleyError) {
             Timber.e(e, "An error occurred while loading areas from the server.")
