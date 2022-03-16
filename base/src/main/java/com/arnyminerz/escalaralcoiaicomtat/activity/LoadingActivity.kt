@@ -33,6 +33,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
@@ -141,6 +142,9 @@ class LoadingActivity : LanguageComponentActivity() {
                         if (errorMessageResource != null) stringResource(errorMessageResource!!) else ""
                     )
                 }
+
+                loadingViewModel.migratedFromSharedPreferences =
+                    sharedPreferences.getBoolean(LegacyIndexedSearchKey, false)
 
                 loadingViewModel.startLoading(
                     deepLinkPath,

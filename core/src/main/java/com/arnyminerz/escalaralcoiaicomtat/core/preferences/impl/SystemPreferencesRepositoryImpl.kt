@@ -58,6 +58,20 @@ class SystemPreferencesRepositoryImpl(
          * @since 20211229
          */
         val shownMd5Warning = booleanPreferencesKey("md5_warning")
+
+        /**
+         * Whether or not the Play Services not present warning has been shown.
+         * @author Arnau Mora
+         * @since 20220316
+         */
+        val shownPlayServicesWarning = booleanPreferencesKey("play_warning")
+
+        /**
+         * Whether or not the SharedPreferences migration warning has been shown.
+         * @author Arnau Mora
+         * @since 20220316
+         */
+        val shownPreferencesWarning = booleanPreferencesKey("preferences_warning")
     }
 
     private inline val Preferences.shownIntro
@@ -75,6 +89,12 @@ class SystemPreferencesRepositoryImpl(
     private inline val Preferences.shownMd5Warning
         get() = this[Keys.shownMd5Warning] ?: false
 
+    private inline val Preferences.shownPlayServicesWarning
+        get() = this[Keys.shownPlayServicesWarning] ?: false
+
+    private inline val Preferences.shownPreferencesMigrationWarning
+        get() = this[Keys.shownPreferencesWarning] ?: false
+
     override val systemPreferences: Flow<SystemPreferences> = dataStore.data
         .catch {
             if (it is IOException)
@@ -87,7 +107,9 @@ class SystemPreferencesRepositoryImpl(
                 preferences.shownBatteryOptimizationWarning,
                 preferences.indexedData,
                 preferences.dataVersion,
-                preferences.shownMd5Warning
+                preferences.shownMd5Warning,
+                preferences.shownPlayServicesWarning,
+                preferences.shownPreferencesMigrationWarning,
             )
         }
         .distinctUntilChanged()
@@ -128,12 +150,19 @@ class SystemPreferencesRepositoryImpl(
         }
     }
 
-    /**
-     * Returns whether or not the intro has been shown.
-     * @author Arnau Mora
-     * @since 20211229
-     */
-    override val shownIntro: Flow<Boolean> = dataStore.data
+    override suspend fun shownPlayServicesWarning(shown: Boolean) {
+        dataStore.edit {
+            it[Keys.shownPlayServicesWarning] = shown
+        }
+    }
+
+    override suspend fun shownPreferencesMigrationWarning(shown: Boolean) {
+        dataStore.edit {
+            it[Keys.shownPreferencesWarning] = shown
+        }
+    }
+
+    private fun <R> getTheFlow(key: Preferences.Key<R>, default: R): Flow<R> = dataStore.data
         .catch {
             if (it is IOException) {
                 emit(emptyPreferences())
@@ -142,61 +171,51 @@ class SystemPreferencesRepositoryImpl(
             }
         }
         .map {
-            it[Keys.shownIntro] ?: false
+            it[key] ?: default
         }
         .distinctUntilChanged()
+
+    /**
+     * Returns whether or not the intro has been shown.
+     * @author Arnau Mora
+     * @since 20211229
+     */
+    override val shownIntro: Flow<Boolean> = getTheFlow(Keys.shownIntro, false)
 
     /**
      * Returns whether or not the MD5 warning has been shown.
      * @author Arnau Mora
      * @since 20211229
      */
-    override val shownMd5Warning: Flow<Boolean> = dataStore.data
-        .catch {
-            if (it is IOException) {
-                emit(emptyPreferences())
-            } else {
-                throw it
-            }
-        }
-        .map {
-            it[Keys.shownMd5Warning] ?: false
-        }
-        .distinctUntilChanged()
+    override val shownMd5Warning: Flow<Boolean> = getTheFlow(Keys.shownMd5Warning, false)
 
     /**
      * Returns whether or not the system has indexed all the data from the data module.
      * @author Arnau Mora
      * @since 20220118
      */
-    override val indexedData: Flow<Boolean> = dataStore.data
-        .catch {
-            if (it is IOException) {
-                emit(emptyPreferences())
-            } else {
-                throw it
-            }
-        }
-        .map {
-            it[Keys.indexedData] ?: false
-        }
-        .distinctUntilChanged()
+    override val indexedData: Flow<Boolean> = getTheFlow(Keys.indexedData, false)
 
     /**
      * Returns the version of the currently stored data.
      * @author Arnau Mora
      * @since 20220118
      */
-    override val dataVersion: Flow<Long> = dataStore.data
-        .catch {
-            if (it is IOException) {
-                emit(emptyPreferences())
-            } else {
-                throw it
-            }
-        }
-        .map {
-            it[Keys.dataVersion] ?: -1L
-        }
-        .distinctUntilChanged()
+    override val dataVersion: Flow<Long> = getTheFlow(Keys.dataVersion, -1L)
+
+    /**
+     * Returns whether or not the Play Services not present warning has been shown to the user.
+     * @author Arnau Mora
+     * @since 20220316
+     */
+    override val shownPlayServicesWarning: Flow<Boolean> =
+        getTheFlow(Keys.shownPlayServicesWarning, false)
+
+    /**
+     * Returns whether or not the Preferences migration warning has been shown to the user.
+     * @author Arnau Mora
+     * @since 20220316
+     */
+    override val shownPreferencesWarning: Flow<Boolean> =
+        getTheFlow(Keys.shownPreferencesWarning, false)
 }

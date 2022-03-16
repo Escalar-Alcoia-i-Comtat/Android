@@ -63,6 +63,26 @@ interface SystemPreferencesRepository {
     suspend fun markMd5WarningShown()
 
     /**
+     * Tells the system that the user has already been warned about Google Play Services not being
+     * present on the device.
+     * @author Arnau Mora
+     * @since 20220316
+     * @param shown The value to set. Leave default to mark as shown. Otherwise used for resetting
+     * state.
+     */
+    suspend fun shownPlayServicesWarning(shown: Boolean = true)
+
+    /**
+     * Tells the system that the user has already been warned about migration from SharedPreferences
+     * to DataStore.
+     * @author Arnau Mora
+     * @since 20220316
+     * @param shown The value to set. Leave default to mark as shown. Otherwise used for resetting
+     * state.
+     */
+    suspend fun shownPreferencesMigrationWarning(shown: Boolean = true)
+
+    /**
      * Should return the value of the shown intro preference.
      * @author Arnau Mora
      * @since 20211229
@@ -89,4 +109,18 @@ interface SystemPreferencesRepository {
      * @since 20220118
      */
     val dataVersion: Flow<Long>
+
+    /**
+     * Should return the value of the stored shown Play Services warning preference.
+     * @author Arnau Mora
+     * @since 20220316
+     */
+    val shownPlayServicesWarning: Flow<Boolean>
+
+    /**
+     * Should return the value of the stored shown preferences warning preference.
+     * @author Arnau Mora
+     * @since 20220316
+     */
+    val shownPreferencesWarning: Flow<Boolean>
 }
