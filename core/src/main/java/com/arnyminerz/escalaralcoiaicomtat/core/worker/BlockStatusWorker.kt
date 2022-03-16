@@ -2,9 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.core.worker
 
 import android.content.Context
 import androidx.annotation.WorkerThread
-import androidx.appsearch.app.PutDocumentsRequest
-import androidx.appsearch.app.SetSchemaRequest
-import androidx.appsearch.exceptions.AppSearchException
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -14,16 +11,17 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.await
-import androidx.work.workDataOf
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.database.BlockingDatabase
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.database.DataClassDatabase
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.repository.BlockingRepository
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.repository.DataClassRepository
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_FAILED_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_IN_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.clipboard
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.copy
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -31,10 +29,19 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
     CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
         Timber.v("Getting search session...")
-        val searchSession = createSearchSession(applicationContext)
+        val database = DataClassDatabase.getInstance(applicationContext)
+        val repository = DataClassRepository(
+            database.areasDao(),
+            database.zonesDao(),
+            database.sectorsDao(),
+            database.pathsDao(),
+        )
+
+        val blockingDatabase = BlockingDatabase.getInstance(applicationContext)
+        val blockingRepository = BlockingRepository(blockingDatabase.blockingDao())
 
         Timber.v("Getting paths from search session...")
-        val paths = searchSession.getPaths()
+        val paths = repository.getPaths().map { it.data() }
         val pathsCount = paths.size
 
         return if (paths.isEmpty()) {
@@ -51,27 +58,6 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                 .withProgress(0, pathsCount)
                 .buildAndShow()
 
-            try {
-                Timber.v("Building schema request...")
-                val schema = searchSession.schema.await()
-                val setSchemaRequest = SetSchemaRequest.Builder()
-                    .addSchemas(schema.schemas)
-                    .addDocumentClasses(BlockingData::class.java)
-                    .build()
-                Timber.v("Applying schema to search session...")
-                searchSession.setSchema(setSchemaRequest).await()
-            } catch (e: AppSearchException) {
-                // Destroy the progress notification
-                notification.destroy()
-                Notification.Builder(applicationContext)
-                    .withChannelId(TASK_FAILED_CHANNEL_ID)
-                    .withIcon(R.drawable.ic_notifications)
-                    .withTitle(R.string.notification_block_status_error_title)
-                    .withText(R.string.notification_block_status_error_schema)
-                    .buildAndShow()
-                return Result.failure()
-            }
-
             Timber.v("Extracting block statuses...")
             val blockingStatuses = arrayListOf<BlockingData>()
             val failedBlockStatus = arrayListOf<String>()
@@ -87,10 +73,8 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                         .withInfoText("${i + 1}/$pathsCount")
                         .withProgress(i, pathsCount)
                         .buildAndShow()
-                    val blockStatus = path.singleBlockStatusFetch(applicationContext)
-                    blockingStatuses.add(
-                        BlockingData(path.objectId, blockStatus.idName)
-                    )
+                    path.fetchBlockStatus(applicationContext)
+                        ?.let { blockingStatuses.add(it) }
                 } catch (e: RuntimeException) {
                     Timber.e(e, "Could not fetch block status of ${path.displayName}")
                     failedBlockStatus.add(path.displayName)
@@ -147,72 +131,19 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                 .buildAndShow()
 
             try {
-                Timber.v("Building put request...")
-                val putRequest = PutDocumentsRequest.Builder()
-                    .addDocuments(blockingStatuses)
-                    .build()
-                Timber.v("Awaiting for put request...")
-                val putResponse = searchSession.put(putRequest).await()
-                if (!putResponse.isSuccess) {
-                    val successes = putResponse.successes
-                    val failures = putResponse.failures
+                Timber.v("Putting elements...")
+                blockingRepository.addAll(blockingStatuses)
 
-                    Timber.v("Closing search session...")
-                    searchSession.close()
-                    
-                    notification.destroy()
+                Timber.v("Closing databases...")
+                database.close()
+                blockingDatabase.close()
 
-                    // Show the error notification
-                    Notification.Builder(applicationContext)
-                        .withChannelId(TASK_FAILED_CHANNEL_ID)
-                        .withIcon(R.drawable.ic_notifications)
-                        .withTitle(R.string.notification_block_status_error_title)
-                        .withText(R.string.notification_block_status_error_store_short)
-                        .withLongText(
-                            applicationContext.getString(
-                                R.string.notification_block_status_error_store,
-                                successes.size,
-                                failures.size,
-                            )
-                        )
-                        .buildAndShow()
+                Timber.v("Dismissing progress notification...")
+                notification.destroy()
 
-                    Result.failure(
-                        workDataOf(
-                            WORK_RESULT_STORE_SUCCESSES to successes,
-                            WORK_RESULT_STORE_FAILURES to failures,
-                        )
-                    )
-                } else {
-                    try {
-                        Timber.v("Storing results to disk...")
-                        searchSession.requestFlush().await()
-
-                        Timber.v("Closing search session...")
-                        searchSession.close()
-                        
-                        Timber.v("Dismissing progress notification...")
-                        notification.destroy()
-
-                        Timber.v("Finished fetching block statuses...")
-                        Result.success()
-                    } catch (e: AppSearchException) {
-                        Timber.e(e, "Could not persist to disk.")
-
-                        notification.destroy()
-                        
-                        // Show the error notification
-                        Notification.Builder(applicationContext)
-                            .withChannelId(TASK_FAILED_CHANNEL_ID)
-                            .withIcon(R.drawable.ic_notifications)
-                            .withTitle(R.string.notification_block_status_error_title)
-                            .withText(R.string.notification_block_status_error_store_short)
-                            .buildAndShow()
-
-                        Result.failure()
-                    }
-                }
-            } catch (e: AppSearchException) {
+                Timber.v("Finished fetching block statuses...")
+                Result.success()
+            } catch (e: Exception) {
                 // Show the error notification
                 notification.destroy()
                 Notification.Builder(applicationContext)

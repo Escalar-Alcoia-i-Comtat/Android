@@ -1,19 +1,21 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
-import androidx.appsearch.annotation.Document
-import androidx.appsearch.app.AppSearchSchema
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
+import java.util.Date
 
-@Document
+@Entity(tableName = "Blocking")
 data class BlockingData(
-    @Document.Id var pathId: String,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) val rawBlockingType: String?,
+    @PrimaryKey var id: String,
+    @ColumnInfo(name = "path") val pathId: String,
+    @ColumnInfo(name = "type") val rawBlockingType: String,
+    @ColumnInfo(name = "end_date") val endDate: Date?,
 ) {
     companion object {
         const val NAMESPACE = "PathBlockingData"
     }
-
-    @Document.Namespace
-    var namespace: String = NAMESPACE
 
     /**
      * Returns [rawBlockingType] as a valid [BlockingType].
@@ -21,5 +23,6 @@ data class BlockingData(
      * @author Arnau Mora
      * @since 20210824
      */
+    @Ignore
     val blockingType: BlockingType = BlockingType.find(rawBlockingType)
 }

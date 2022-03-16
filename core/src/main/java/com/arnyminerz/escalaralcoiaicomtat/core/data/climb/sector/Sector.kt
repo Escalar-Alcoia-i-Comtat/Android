@@ -18,6 +18,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
 import java.io.Serializable
+import java.util.Date
 
 /**
  * Creates a new [Sector] instance.
@@ -37,6 +38,9 @@ class Sector internal constructor(
     override val imagePath: String,
     val webUrl: String?,
     private val parentZoneId: String,
+    var downloaded: Boolean = false,
+    var downloadSize: Long?,
+    val childrenCount: Long,
 ) : DataClass<Path, Zone, SectorData>(
     displayName,
     timestampMillis,
@@ -66,7 +70,7 @@ class Sector internal constructor(
      * @param data The object to get data from
      * @param sectorId The ID of the Sector.
      */
-    constructor(data: JSONObject, @ObjectId sectorId: String) : this(
+    constructor(data: JSONObject, @ObjectId sectorId: String, childrenCount: Long) : this(
         sectorId,
         data.getString("displayName"),
         data.getDate("last_edit")!!.time,
@@ -84,7 +88,10 @@ class Sector internal constructor(
         } catch (e: JSONException) {
             null
         },
-        data.getString("zone")
+        data.getString("zone"),
+        downloaded = false,
+        downloadSize = null,
+        childrenCount = childrenCount,
     )
 
     @IgnoredOnParcel
@@ -103,21 +110,22 @@ class Sector internal constructor(
         return result
     }
 
-    override fun data(index: Int): SectorData {
+    override fun data(): SectorData {
         return SectorData(
-            index,
             objectId,
+            Date(timestampMillis),
             displayName,
-            timestampMillis,
-            sunTime,
+            imagePath,
             kidsApt,
-            walkingTime,
             location?.latitude,
             location?.longitude,
+            sunTime,
+            walkingTime,
             weight,
-            imagePath,
-            metadata.webURL ?: "",
-            parentZoneId
+            parentZoneId,
+            downloaded,
+            downloadSize,
+            childrenCount,
         )
     }
 
@@ -164,8 +172,10 @@ class Sector internal constructor(
 
         override val IMAGE_QUALITY = 100
 
-        override val CONSTRUCTOR: (data: JSONObject, objectId: String) -> Sector =
-            { data, objectId -> Sector(data, objectId) }
+        override val CONSTRUCTOR: (data: JSONObject, objectId: String, childrenCount: Long) -> Sector =
+            { data, objectId, childrenCount -> Sector(data, objectId, childrenCount) }
+
+        const val SAMPLE_OBJECT_ID = "B9zNqbw6REYVxGZxlYwh"
 
         /**
          * A sample sector for debugging and placeholder.
@@ -173,7 +183,7 @@ class Sector internal constructor(
          * @since 20220106
          */
         override val SAMPLE = Sector(
-            objectId = "B9zNqbw6REYVxGZxlYwh",
+            objectId = SAMPLE_OBJECT_ID,
             displayName = "Mas de la Penya 3",
             timestampMillis = 1618153404000L,
             sunTime = NO_SUN,
@@ -183,7 +193,8 @@ class Sector internal constructor(
             weight = "aac",
             imagePath = "images/sectors/mas-de-la-penya-sector-3_croquis.jpg",
             webUrl = null,
-            parentZoneId = "3DmHnKBlDRwqlH1KK85C"
+            parentZoneId = "3DmHnKBlDRwqlH1KK85C",
+            false, null, 0L,
         )
     }
 }

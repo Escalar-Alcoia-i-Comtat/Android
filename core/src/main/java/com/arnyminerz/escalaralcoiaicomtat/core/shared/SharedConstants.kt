@@ -1,12 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.shared
 
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
-
 const val APPLICATION_ID = "com.arnyminerz.escalaralcoiaicomtat"
 
 /**
@@ -56,14 +49,6 @@ const val REST_API_DATA_LIST = "$REST_API_URL/api/list"
  */
 const val REST_API_DATA_FETCH = "$REST_API_URL/api/data/"
 
-/**
- * The REST API endpoint for checking for new updates. At the end the youngest element on the db's
- * age should be added (in milliseconds).
- * @author Arnau Mora
- * @since 20220226
- */
-const val REST_API_UPDATER_ENDPOINT = "$REST_API_URL/api/updater?millis="
-
 const val APP_UPDATE_MAX_TIME_DAYS_KEY = "APP_UPDATE_MAX_TIME_DAYS"
 const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7L
 
@@ -109,48 +94,6 @@ val REMOTE_CONFIG_DEFAULTS = mapOf(
     PROFILE_IMAGE_SIZE_KEY to PROFILE_IMAGE_SIZE_DEFAULT,
 )
 const val REMOTE_CONFIG_MIN_FETCH_INTERVAL = 43200L // 12 hours
-
-/**
- * The database name for the app search engine.
- * * v4: Using MariaDB database under REST API.
- * @author Arnau Mora
- * @since 20210811
- * @see <a href="https://developer.android.com/guide/topics/search/appsearch">AppSearch docs</a>
- */
-const val SEARCH_DATABASE_NAME = "escalaralcoiaicomtat_v4.1"
-
-/**
- * Stores all the schemas that are used by the search engine.
- * @author Arnau Mora
- * @since 20210828
- */
-val SEARCH_SCHEMAS = listOf<Class<*>>(
-    AreaData::class.java,
-    ZoneData::class.java,
-    SectorData::class.java,
-    PathData::class.java,
-    BlockingData::class.java,
-    DownloadedData::class.java,
-)
-
-/**
- * The names of the classes that contain climbing data of the app search schema.
- * @author Arnau Mora
- * @since 20220302
- */
-val DATA_SEARCH_SCHEMAS_NAMES = listOf<String>(
-    AreaData::class.java.simpleName,
-    ZoneData::class.java.simpleName,
-    SectorData::class.java.simpleName,
-    PathData::class.java.simpleName,
-)
-
-/**
- * The version number for the current search schemas.
- * @author Arnau Mora
- * @since 20220226
- */
-const val SEARCH_SCHEMA_VERSION = 4
 
 /**
  * Returned by [DataClassActivity] when no [EXTRA_DATACLASS] is passed through the [Activity.Intent].

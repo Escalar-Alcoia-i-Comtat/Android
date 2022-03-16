@@ -35,7 +35,7 @@ class DataClassItemViewModel(
 
     val downloadStatuses = mutableMapOf<String, MutableState<DownloadStatus>>()
 
-    val children by DataSingleton.getInstance().children
+    val children by DataSingleton.getInstance(application).children
 
     fun startDownloading(
         context: Context,
@@ -145,7 +145,7 @@ class DataClassItemViewModel(
         sortBy: (DataClassImpl) -> R
     ) {
         viewModelScope.launch {
-            DataSingleton.getInstance().apply {
+            DataSingleton.getInstance(getApplication()).apply {
                 children.value = emptyList()
                 children.value = dataClass.getChildren(context, sortBy)
             }

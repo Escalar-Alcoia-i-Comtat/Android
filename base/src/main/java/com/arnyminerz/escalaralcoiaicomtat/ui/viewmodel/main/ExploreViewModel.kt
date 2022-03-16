@@ -31,7 +31,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
      * @author Arnau Mora
      * @since 20220315
      */
-    private val dataSingleton = DataSingleton.getInstance()
+    private val dataSingleton = DataSingleton.getInstance(application)
 
     /**
      * Serves as a cache of the loaded areas so the map screen can access them.
@@ -41,9 +41,9 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     var lastAreas = listOf<Area>()
         private set
 
-    val children by DataSingleton.getInstance().children
+    val children by DataSingleton.getInstance(application).children
 
-    val areas by DataSingleton.getInstance().areas
+    val areas by DataSingleton.getInstance(application).areas
 
     /**
      * Loads all the available areas, and posts them using a [MutableLiveData].

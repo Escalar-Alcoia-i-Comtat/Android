@@ -15,6 +15,7 @@ import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
 import java.io.Serializable
+import java.util.Date
 
 /**
  * Creates a new [Zone] instance.
@@ -31,6 +32,9 @@ class Zone internal constructor(
     val position: GeoPoint,
     val webUrl: String?,
     private val parentAreaId: String,
+    var downloaded: Boolean = false,
+    var downloadSize: Long?,
+    val childrenCount: Long,
 ) : DataClass<Sector, Area, ZoneData>(
     displayName,
     timestampMillis,
@@ -59,7 +63,7 @@ class Zone internal constructor(
      * @param data The object to get data from
      * @param zoneId The ID of the Zone.
      */
-    constructor(data: JSONObject, @ObjectId zoneId: String) : this(
+    constructor(data: JSONObject, @ObjectId zoneId: String, childrenCount: Long) : this(
         zoneId,
         data.getString("displayName"),
         data.getDate("last_edit")!!.time,
@@ -70,7 +74,10 @@ class Zone internal constructor(
             data.getDouble("longitude")
         ),
         data.getString("webURL"),
-        data.getString("area")
+        data.getString("area"),
+        downloaded = false,
+        downloadSize = null,
+        childrenCount = childrenCount,
     )
 
     @IgnoredOnParcel
@@ -79,17 +86,19 @@ class Zone internal constructor(
     @IgnoredOnParcel
     override val hasParents: Boolean = true
 
-    override fun data(index: Int) = ZoneData(
-        index,
+    override fun data() = ZoneData(
         objectId,
+        Date(timestampMillis),
         displayName,
-        timestampMillis,
         imagePath,
         kmzPath,
         position.latitude,
         position.longitude,
         metadata.webURL ?: "",
-        parentAreaId
+        parentAreaId,
+        childrenCount,
+        downloaded,
+        downloadSize,
     )
 
     override fun displayMap(): Map<String, Serializable?> = mapOf(
@@ -137,18 +146,21 @@ class Zone internal constructor(
 
         override val IMAGE_QUALITY = 30
 
-        override val CONSTRUCTOR: (data: JSONObject, objectId: String) -> Zone =
-            { data, objectId -> Zone(data, objectId) }
+        override val CONSTRUCTOR: (data: JSONObject, objectId: String, childrenCount: Long) -> Zone =
+            { data, objectId, childrenCount -> Zone(data, objectId, childrenCount) }
+
+        const val SAMPLE_OBJECT_ID = "LtYZWlzTPwqHsWbYIDTt"
 
         override val SAMPLE = Zone(
-            objectId = "LtYZWlzTPwqHsWbYIDTt",
+            objectId = SAMPLE_OBJECT_ID,
             displayName = "Barranquet de Ferri",
             timestampMillis = 1618160538000L,
             imagePath = "gs://escalaralcoiaicomtat.appspot.com/images/BarranquetDeFerriAPP.jpg",
             kmzPath = "gs://escalaralcoiaicomtat.appspot.com/kmz/Barranquet de Ferri.kmz",
             position = GeoPoint(38.705581, -0.498946),
             webUrl = "https://escalaralcoiaicomtat.centrexcursionistalcoi.org/barranquet-de-ferri.html",
-            parentAreaId = "WWQME983XhriXVhtVxFu"
+            parentAreaId = "WWQME983XhriXVhtVxFu",
+            false, null, 0L,
         )
     }
 }

@@ -36,7 +36,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.getChildren
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
@@ -52,36 +51,36 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import kotlinx.coroutines.launch
 
 /**
- * Used for displaying the contents of [DownloadedData].
+ * Used for displaying the contents of [DataClass].
  * @author Arnau Mora
  * @since 20220101
- * @param data The [DownloadedData] to display.
+ * @param data The [DataClass] to display.
  * @param onDelete Will get called when the data is deleted.
  * @throws IllegalArgumentException When the [data] is not a [Zone] or [Sector].
  */
 @Composable
 @Throws(IllegalArgumentException::class)
 fun DownloadedDataItem(
-    data: DownloadedData,
+    data: DataClass<*, *, *>,
     dataClassActivity: Class<*>,
     onDelete: (() -> Unit)?
-) = when (val namespace = Namespace.find(data.namespace)) {
+) = when (data) {
     // Area is not downloadable
-    Zone.NAMESPACE -> DownloadedDataItemRaw<Zone, ZoneData>(
-        namespace,
+    is Zone -> DownloadedDataItemRaw<Zone, ZoneData>(
+        data.namespace,
         data.objectId,
         data.displayName,
-        data.sizeBytes,
+        data.downloadSize ?: 0L,
         data.childrenCount,
         dataClassActivity,
         onDelete
     )
-    Sector.NAMESPACE -> DownloadedDataItemRaw<Sector, SectorData>(
-        namespace,
+    is Sector -> DownloadedDataItemRaw<Sector, SectorData>(
+        data.namespace,
         data.objectId,
         data.displayName,
-        data.sizeBytes,
-        data.childrenCount,
+        data.downloadSize ?: 0L,
+        data.childrenCount ?: 0L,
         dataClassActivity,
         onDelete
     )
@@ -167,6 +166,7 @@ private inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> DownloadedD
                         doAsync {
                             childrenSectors = objectId
                                 .getChildren(context, Sector.NAMESPACE) { it.displayName }
+                                ?: emptyList()
                             loadingChildren = false
                             showChildrenDialog = true
                         }

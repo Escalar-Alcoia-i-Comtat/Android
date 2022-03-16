@@ -1,42 +1,40 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
-import androidx.appsearch.annotation.Document
-import androidx.appsearch.app.AppSearchSchema
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 
-@Document
+@Entity(tableName = "Paths")
 data class PathData(
-    @Document.Id var objectId: String,
-    @Document.CreationTimestampMillis var timestamp: Long,
-    @Document.LongProperty var sketchId: Long,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES) var displayName: String,
-    @Document.StringProperty var rawGrades: String,
-    @Document.StringProperty var rawHeights: String,
-    @Document.StringProperty var rawEndings: String,
-    @Document.StringProperty var rawPitches: String,
-    @Document.LongProperty val stringCount: Long,
-    @Document.LongProperty val paraboltCount: Long,
-    @Document.LongProperty val spitCount: Long,
-    @Document.LongProperty val tensorCount: Long,
-    @Document.LongProperty val pitonCount: Long,
-    @Document.LongProperty val burilCount: Long,
-    @Document.BooleanProperty val lanyardRequired: Boolean,
-    @Document.BooleanProperty val crackerRequired: Boolean,
-    @Document.BooleanProperty val friendRequired: Boolean,
-    @Document.BooleanProperty val stripsRequired: Boolean,
-    @Document.BooleanProperty val pitonRequired: Boolean,
-    @Document.BooleanProperty val nailRequired: Boolean,
-    @Document.StringProperty var description: String,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var builtBy: String,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var rebuiltBy: String,
-    @Document.BooleanProperty var downloaded: Boolean,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var parentSectorId: String,
+    @PrimaryKey var objectId: String,
+    @ColumnInfo(name = "last_edit") val timestamp: Long,
+    @ColumnInfo(name = "sketchId") val sketchId: Long,
+    @ColumnInfo(name = "displayName") val displayName: String,
+    @ColumnInfo(name = "grade") val rawGrades: String,
+    @ColumnInfo(name = "height") val rawHeights: String?,
+    @ColumnInfo(name = "ending") val rawEndings: String,
+    @ColumnInfo(name = "pitch_info") val rawPitches: String,
+    @ColumnInfo(name = "stringCount") val stringCount: Long,
+    @ColumnInfo(name = "paraboltCount") val paraboltCount: Long,
+    @ColumnInfo(name = "spitCount") val spitCount: Long,
+    @ColumnInfo(name = "tensorCount") val tensorCount: Long,
+    @ColumnInfo(name = "pitonCount") val pitonCount: Long,
+    @ColumnInfo(name = "burilCount") val burilCount: Long,
+    @ColumnInfo(name = "lanyardRequired") val lanyardRequired: Boolean,
+    @ColumnInfo(name = "crackerRequired") val crackerRequired: Boolean,
+    @ColumnInfo(name = "friendRequired") val friendRequired: Boolean,
+    @ColumnInfo(name = "stripsRequired") val stripsRequired: Boolean,
+    @ColumnInfo(name = "pitonRequired") val pitonRequired: Boolean,
+    @ColumnInfo(name = "nailRequired") val nailRequired: Boolean,
+    @ColumnInfo(name = "description") val description: String?,
+    @ColumnInfo(name = "builtBy") val builtBy: String,
+    @ColumnInfo(name = "rebuilders") val rebuiltBy: String,
+    @ColumnInfo(name = "downloaded") val downloaded: Boolean,
+    @ColumnInfo(name = "sector") val parentSectorId: String,
 ) : DataRoot<Path> {
-    @Document.Namespace
-    var namespace: String = Path.NAMESPACE.namespace
-
     override fun data(): Path {
         return Path(
             objectId,
@@ -44,7 +42,7 @@ data class PathData(
             sketchId,
             displayName,
             rawGrades,
-            rawHeights,
+            rawHeights ?: "",
             rawEndings,
             rawPitches,
             FixedSafesData(

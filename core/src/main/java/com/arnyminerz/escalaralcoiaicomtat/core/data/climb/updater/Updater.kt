@@ -3,29 +3,22 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater
 import android.content.Context
 import androidx.annotation.IntDef
 import androidx.annotation.WorkerThread
-import androidx.appsearch.app.PutDocumentsRequest
-import androidx.appsearch.exceptions.AppSearchException
 import androidx.compose.runtime.mutableStateListOf
-import androidx.work.await
 import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_FETCH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_LIST
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getList
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.perf.metrics.AddTrace
@@ -79,16 +72,19 @@ const val UPDATE_AVAILABLE_FAIL_CLIENT = 3
  */
 const val UPDATE_AVAILABLE_FAIL_FIELDS = 4
 
-private fun <R : DataClassImpl> findUpdatableObjects(
-    dataList: List<R>,
+private fun <R : DataClassImpl, D : DataRoot<R>> findUpdatableObjects(
+    dataList: List<D>,
     json: JSONObject,
-    constructor: (json: JSONObject, objectId: String) -> R
+    childrenCount: (objectId: String) -> Long,
+    constructor: (json: JSONObject, objectId: String, childrenCount: Long) -> R
 ) = mutableListOf<UpdaterSingleton.Item>().apply {
     json.keys()
         .forEach { objectId ->
             val jsonData = json.getJSONObject(objectId)
-            val serverData = constructor(jsonData, objectId)
-            val localData = dataList.find { it.objectId == objectId }
+            val serverData = constructor(jsonData, objectId, childrenCount(objectId))
+            val localData = dataList
+                .map { it.data() }
+                .find { it.objectId == objectId }
             if (localData == null || localData.hashCode() != serverData.hashCode())
                 add(
                     UpdaterSingleton.Item(
@@ -128,24 +124,36 @@ suspend fun updateAvailable(
         val jsonSectors = jsonResult.getJSONObject("Sectors")
         val jsonPaths = jsonResult.getJSONObject("Paths")
 
-        val searchSession = SearchSingleton.getInstance(context)
-            .searchSession
+        val dataRepository = DataSingleton.getInstance(context)
+            .repository
 
         // Find the locally stored elements lists
-        val areas = searchSession.getList<Area, AreaData>("", Area.NAMESPACE)
-        val zones = searchSession.getList<Zone, ZoneData>("", Zone.NAMESPACE)
-        val sectors = searchSession.getList<Sector, SectorData>("", Sector.NAMESPACE)
-        val paths = searchSession.getList<Path, PathData>("", Path.NAMESPACE, 1000)
+        val areas = dataRepository.getAreas()
+        val zones = dataRepository.getZones()
+        val sectors = dataRepository.getSectors()
+        val paths = dataRepository.getPaths()
 
         // Add all the updatable areas
-        val updatableAreas = findUpdatableObjects(areas, jsonAreas)
-        { json, objectId -> Area(json, objectId) }
-        val updatableZones = findUpdatableObjects(zones, jsonZones)
-        { json, objectId -> Zone(json, objectId) }
-        val updatableSectors = findUpdatableObjects(sectors, jsonSectors)
-        { json, objectId -> Sector(json, objectId) }
-        val updatablePaths = findUpdatableObjects(paths, jsonPaths)
-        { json, objectId -> Path(json, objectId) }
+        val updatablePaths = findUpdatableObjects(paths, jsonPaths, { 0L })
+        { json, objectId, childrenCount -> Path(json, objectId) }
+        val updatableSectors = findUpdatableObjects(
+            sectors,
+            jsonSectors,
+            { id -> updatablePaths.filter { it.objectId == id }.size.toLong() },
+            Sector.CONSTRUCTOR,
+        )
+        val updatableZones = findUpdatableObjects(
+            zones,
+            jsonZones,
+            { id -> updatableSectors.filter { it.objectId == id }.size.toLong() },
+            Zone.CONSTRUCTOR,
+        )
+        val updatableAreas = findUpdatableObjects(
+            areas,
+            jsonAreas,
+            { id -> updatableZones.filter { it.objectId == id }.size.toLong() },
+            Area.CONSTRUCTOR,
+        )
 
         // Add all the found elements to the lists
         updaterSingleton.updateAvailableObjects.clear()
@@ -213,13 +221,11 @@ class UpdaterSingleton {
      * @param context The context to run from.
      * @param namespace The namespace of the object to update.
      * @param objectId The id of the object to update.
-     * @param score The score for ordering search results.
      */
     suspend fun update(
         context: Context,
         namespace: Namespace,
         @ObjectId objectId: String,
-        score: Int
     ) {
         Timber.i("Updating data of $objectId at $namespace...")
         val at = namespace.tableName
@@ -232,41 +238,39 @@ class UpdaterSingleton {
                 Timber.e("Server returned invalid result. $namespace/$objectId")
                 return
             }
+
+            val childrenCount = namespace.ChildrenNamespace?.let { childrenNamespace ->
+                DataSingleton.getInstance(context)
+                    .repository
+                    .getChildren(childrenNamespace, objectId)
+                    ?.size
+                    ?.toLong()
+            } ?: 0L
+
             Timber.d("Constructing data... $namespace/$objectId")
             val data = when (namespace) {
-                Area.NAMESPACE -> Area(jsonElement, objectId)
-                Zone.NAMESPACE -> Zone(jsonElement, objectId)
-                Sector.NAMESPACE -> Sector(jsonElement, objectId)
+                Area.NAMESPACE -> Area(jsonElement, objectId, childrenCount)
+                Zone.NAMESPACE -> Zone(jsonElement, objectId, childrenCount)
+                Sector.NAMESPACE -> Sector(jsonElement, objectId, childrenCount)
                 Path.NAMESPACE -> Path(jsonElement, objectId)
                 else -> {
                     Timber.e("Namespace ($namespace) is not valid.")
                     return
                 }
             }
-            Timber.d("Getting AppSearch document... $namespace/$objectId")
+            Timber.d("Getting document... $namespace/$objectId")
             val doc = if (data is DataClass<*, *, *>)
-                data.data(score)
+                data.data()
             else
                 (data as Path).data()
-            Timber.d("Putting document into search session... $namespace/$objectId")
-            Timber.v("Building PutDocumentsRequest... $namespace/$objectId")
-            val request = PutDocumentsRequest.Builder()
-                .addDocuments(doc)
-                .build()
-            Timber.v("Requesting documents put... $namespace/$objectId")
-            SearchSingleton.getInstance(context)
-                .searchSession
-                .put(request)
-                .await()
+            Timber.d("Putting document into db... $namespace/$objectId")
+            DataSingleton.getInstance(context)
+                .repository
+                .update(doc)
             Timber.v("Added to SearchSession, removing element from updateAvailableObjects...")
             updateAvailableObjects.removeIf { it.objectId == objectId }
         } catch (e: VolleyError) {
             Timber.e(e, "Could not update element at $namespace with id $objectId.")
-            uiContext {
-                context.toast(R.string.toast_error_update)
-            }
-        } catch (e: AppSearchException) {
-            Timber.e(e, "Could not store element at $namespace with id $objectId.")
             uiContext {
                 context.toast(R.string.toast_error_update)
             }

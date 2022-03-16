@@ -23,7 +23,11 @@ import androidx.compose.ui.Modifier
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.vibrate
 
 @Composable
 @OptIn(
@@ -88,7 +92,7 @@ fun MainActivity.DeveloperScreen() {
         LazyColumn {
             items(indexedDownloads ?: emptyList()) { item ->
                 ListItem {
-                    Text(text = item)
+                    Text(text = item.data().displayName)
                 }
                 Divider()
             }

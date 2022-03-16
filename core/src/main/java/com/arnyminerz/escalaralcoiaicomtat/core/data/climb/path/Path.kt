@@ -1,11 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
 import android.content.Context
-import androidx.annotation.WorkerThread
-import androidx.appsearch.app.AppSearchSession
-import androidx.appsearch.app.SearchSpec
-import androidx.appsearch.exceptions.AppSearchException
-import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
@@ -27,6 +22,7 @@ import kotlinx.parcelize.TypeParceler
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
+import java.util.UUID
 
 /**
  * Creates a new [Path] instance.
@@ -372,71 +368,6 @@ class Path internal constructor(
             else -> 0
         }
 
-    /**
-     * Fetches the [BlockingType] of the [Path] from the server.
-     * @author Arnau Mora
-     * @since 20210824
-     * @throws RuntimeException If the blocked parameter of the found item is not a string.
-     */
-    @WorkerThread
-    @Throws(RuntimeException::class)
-    suspend fun singleBlockStatusFetch(context: Context): BlockingType {
-        Timber.v("$this > Getting path blocking from the server...")
-        val fetchResult = context.getJson("$REST_API_BLOCKING_ENDPOINT/$objectId")
-        Timber.v("$this > Extracting blocked from document...")
-        return if (fetchResult.has("result")) {
-            val blocked = fetchResult.getBoolean("blocked")
-            if (blocked) {
-                val type = fetchResult.getString("type")
-                Timber.v("$this > Searching for blocking type...")
-                BlockingType.find(type)
-            } else
-                BlockingType.UNKNOWN
-        } else
-            BlockingType.UNKNOWN
-    }
-
-    /**
-     * Fetches the blocking status of the path from the server. Also updates [blockingType] with the
-     * result.
-     * @author Arnau Mora
-     * @since 20210824
-     */
-    @WorkerThread
-    suspend fun getBlockStatus(
-        context: Context,
-        searchSession: AppSearchSession
-    ): BlockingType = try {
-        Timber.v("$this > Getting block status...")
-        Timber.v("$this > Building search spec...")
-        val searchSpec = SearchSpec.Builder()
-            .addFilterNamespaces(BlockingData.NAMESPACE) // Search for BlockingData
-            .setResultCountPerPage(1) // Get just one result
-            .build()
-        Timber.v("$this > Searching for path in session...")
-        val searchResults = searchSession.search(objectId, searchSpec)
-        Timber.v("$this > Awaiting for page results...")
-        val searchPage = searchResults.nextPage.await()
-        if (searchPage.isEmpty()) {
-            Timber.v("$this > There's no block status in search session.")
-            val blockingType = singleBlockStatusFetch(context)
-            Timber.v("$this > Blocking type: $blockingType")
-            blockingType
-        } else {
-            Timber.v("$this > Getting first search result...")
-            val searchResult = searchPage[0]
-            Timber.v("$this > Getting generic document...")
-            val document = searchResult.genericDocument
-            Timber.v("$this > Converting document class...")
-            val data = document.toDocumentClass(BlockingData::class.java)
-            Timber.v("$this > Converting to BlockingType...")
-            data.blockingType
-        }
-    } catch (e: AppSearchException) {
-        Timber.e(e, "$this > Could not get blocking type.")
-        BlockingType.UNKNOWN
-    }
-
     override fun hashCode(): Int {
         var result = objectId.hashCode()
         result = 31 * result + objectId.hashCode()
@@ -487,6 +418,22 @@ class Path internal constructor(
         )
     }
 
+    /**
+     * Fetches the current block status of the path.
+     * @author Arnau Mora
+     * @since 20220316
+     * @param context The context that is requesting the fetch.
+     */
+    suspend fun fetchBlockStatus(context: Context): BlockingData? {
+        val blockStatusJson = context.getJson("$REST_API_BLOCKING_ENDPOINT/$objectId")
+        return if (blockStatusJson.getBoolean("blocked")) {
+            val type = blockStatusJson.getString("type")
+            val endDate =
+                if (blockStatusJson.has("endDate")) blockStatusJson.getDate("endDate") else null
+            BlockingData(UUID.randomUUID().toString(), objectId, type, endDate)
+        } else null
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -521,9 +468,11 @@ class Path internal constructor(
     companion object {
         val NAMESPACE = Namespace.PATH
 
+        const val SAMPLE_PATH_OBJECT_ID = "04BXQMNxFV4cjLILJk3p"
+
         val SAMPLE_PATH = Path(
             JSONObject("{\"created\":\"2021-04-11T15:03:26.000Z\",\"last_edit\":\"2022-02-17T16:42:14.000Z\",\"displayName\":\"Regall Impenetrable\",\"sketchId\":52,\"grade\":\"7c+\",\"height\":\"\",\"builtBy\":\"NULL\",\"rebuilders\":\"\",\"description\":\"NULL\",\"showDescription\":false,\"stringCount\":0,\"paraboltCount\":1,\"burilCount\":0,\"pitonCount\":0,\"spitCount\":0,\"tensorCount\":0,\"crackerRequired\":false,\"friendRequired\":false,\"lanyardRequired\":false,\"nailRequired\":false,\"pitonRequired\":false,\"stripsRequired\":false,\"ending\":\"chain_carabiner\",\"pitch_info\":\"NULL\",\"sector\":\"B9zNqbw6REYVxGZxlYwh\"}"),
-            "04BXQMNxFV4cjLILJk3p"
+            SAMPLE_PATH_OBJECT_ID
         )
     }
 }

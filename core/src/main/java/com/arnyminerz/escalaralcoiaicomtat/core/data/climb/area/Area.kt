@@ -13,6 +13,7 @@ import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.io.Serializable
+import java.util.Date
 
 /**
  * Creates a new Area instance.
@@ -34,6 +35,7 @@ class Area internal constructor(
     override val imagePath: String,
     override val kmzPath: String?,
     val webUrl: String?,
+    val childrenCount: Long,
 ) : DataClass<Zone, DataClassImpl, AreaData>(
     displayName,
     timestampMillis,
@@ -61,13 +63,14 @@ class Area internal constructor(
      * @since 20210411
      * @param data The object to get data from
      */
-    constructor(data: JSONObject, objectId: String) : this(
+    constructor(data: JSONObject, objectId: String, childrenCount: Long) : this(
         objectId,
         data.getString("displayName"),
         data.getDate("last_edit")!!.time,
         data.getString("image"),
         data.getString("kmz"),
-        data.getString("webURL")
+        data.getString("webURL"),
+        childrenCount
     )
 
     @IgnoredOnParcel
@@ -76,14 +79,14 @@ class Area internal constructor(
     @IgnoredOnParcel
     override val hasParents: Boolean = false
 
-    override fun data(index: Int): AreaData = AreaData(
-        index,
+    override fun data(): AreaData = AreaData(
         objectId,
+        Date(timestampMillis),
         displayName,
-        timestampMillis,
         imagePath,
         kmzPath,
-        metadata.webURL ?: ""
+        metadata.webURL,
+        childrenCount,
     )
 
     override fun displayMap(): Map<String, Serializable?> = mapOf(
@@ -125,8 +128,8 @@ class Area internal constructor(
 
         override val IMAGE_QUALITY = 30
 
-        override val CONSTRUCTOR: (data: JSONObject, objectId: String) -> Area =
-            { data, objectId -> Area(data, objectId) }
+        override val CONSTRUCTOR: (data: JSONObject, objectId: String, childrenCount: Long) -> Area =
+            { data, objectId, childrenCount -> Area(data, objectId, childrenCount) }
 
         const val SAMPLE_AREA_OBJECT_ID = "PL5j43cBRP7F24ecXGOR"
         const val SAMPLE_AREA_DISPLAY_NAME = "Cocentaina"
@@ -145,6 +148,7 @@ class Area internal constructor(
             imagePath = SAMPLE_AREA_IMAGE_REF,
             kmzPath = SAMPLE_AREA_KMZ_REF,
             webUrl = SAMPLE_AREA_WEB_URL,
+            0L
         )
     }
 }

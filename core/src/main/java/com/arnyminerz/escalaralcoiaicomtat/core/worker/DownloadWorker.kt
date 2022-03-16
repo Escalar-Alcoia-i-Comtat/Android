@@ -5,8 +5,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.annotation.WorkerThread
-import androidx.appsearch.app.AppSearchSession
-import androidx.appsearch.app.PutDocumentsRequest
 import androidx.lifecycle.LiveData
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -15,7 +13,6 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import androidx.work.await
 import androidx.work.workDataOf
 import com.android.volley.Request
 import com.android.volley.VolleyError
@@ -24,9 +21,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DOWNLOADABLE_NAMESPACES
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.database.DataClassDatabase
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.repository.DataClassRepository
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.InitializationException
 import com.arnyminerz.escalaralcoiaicomtat.core.network.VolleySingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
@@ -40,7 +40,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_LIST
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DOWNLOAD_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.InputStreamVolleyRequest
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.createSearchSession
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_DISPLAY_NAME
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DOWNLOAD_NAMESPACE
@@ -99,7 +98,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @author Arnau Mora
      * @since 20210818
      */
-    private lateinit var appSearchSession: AppSearchSession
+    private lateinit var repository: DataClassRepository
 
     private data class ImageDownloadData(
         val imagePath: String,
@@ -352,8 +351,17 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
             for (jsonObjectId in objectIds) {
                 val jsonObject = jsonResult.getJSONObject(jsonObjectId)
 
+                Timber.v("Getting children count...")
+                val childrenCount = namespace.ChildrenNamespace?.let { childrenNamespace ->
+                    repository
+                        .getChildren(childrenNamespace, objectId)
+                        ?.size
+                        ?.toLong()
+                } ?: 0L
+
                 Timber.v("Building DataClass object...")
-                val dataClass = DataClass.buildContainers(namespace, jsonObjectId, jsonObject)
+                val dataClass =
+                    DataClass.buildContainers(namespace, jsonObjectId, jsonObject, childrenCount)
 
                 Timber.v("Adding image file to downloads list...")
                 imageFiles.add(
@@ -451,8 +459,14 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
         Timber.v("Starting download for %s".format(displayName))
 
         // Check if any required data is missing
-        Timber.v("Initializing search session...")
-        appSearchSession = createSearchSession(applicationContext)
+        Timber.v("Initializing repository...")
+        val database = DataClassDatabase.getInstance(applicationContext)
+        repository = DataClassRepository(
+            database.areasDao(),
+            database.zonesDao(),
+            database.sectorsDao(),
+            database.pathsDao(),
+        )
 
         Timber.v("Downloading \"$displayName\"...")
         this.displayName = displayName
@@ -596,48 +610,27 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
 
             // Process the data
             val timestamp = System.currentTimeMillis()
-            val downloadedData = DownloadedData(
-                "D/$objectId",
-                objectId,
-                timestamp,
-                namespace.namespace,
-                displayName,
-                childrenCount,
-                parentId,
-                size,
-            )
-            Timber.d("DownloadedData: $downloadedData")
+            val dataClass = repository.get(namespace, objectId)
+
+            Timber.d("DataClass: $dataClass")
+
             // Add the data of all the children
-            val indexData = arrayListOf(downloadedData)
             if (childrenIds.size.toLong() != childrenCount)
                 Timber.w("Children id count does not match childrenCount.")
             for (i in childrenIds.indices)
-                indexData.add(
-                    DownloadedData(
-                        "D/${childrenIds[i]}",
-                        childrenIds[i],
-                        timestamp,
-                        Sector.NAMESPACE.namespace,
-                        childrenDisplayNames[i],
-                        0,
-                        objectId,
-                        childrenSizes[i],
-                    )
-                )
+                repository.getSector(objectId)
+                    ?.apply {
+                        downloaded = true
+                        downloadSize = childrenSizes[i]
+                    }
+                    ?.let { repository.update(it) }
 
             // Index it into AppSearch
-            val request = PutDocumentsRequest.Builder()
-                .addDocuments(indexData)
-                .build()
-            val result = appSearchSession.put(request).await()
-            if (result.isSuccess)
-                Timber.i("Indexed download correctly.")
-            else {
-                Timber.i("Failures:")
-                for (failure in result.failures) {
-                    val value = failure.value
-                    Timber.i("- ${value.resultCode} :: ${value.errorMessage}")
-                }
+            if (dataClass != null) {
+                Timber.d("Updating DataClass...")
+                (dataClass as? ZoneData)?.apply { downloaded = true; downloadSize = size }
+                    ?: (dataClass as? SectorData)?.apply { downloaded = true; downloadSize = size }
+                repository.update(dataClass)
             }
         } else {
             Timber.v("Download failed! Result: $downloadResult. Showing notification.")
@@ -658,8 +651,8 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
                 .buildAndShow()
         }
 
-        Timber.v("Closing search session...")
-        appSearchSession.close()
+        Timber.v("Closing db...")
+        database.close()
 
         return downloadResult
     }

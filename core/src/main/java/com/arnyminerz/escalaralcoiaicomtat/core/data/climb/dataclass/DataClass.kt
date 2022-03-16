@@ -8,8 +8,6 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.WorkerThread
-import androidx.appsearch.app.SearchResult
-import androidx.appsearch.app.SearchSpec
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,18 +17,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.work.WorkInfo
-import androidx.work.await
 import com.android.volley.Request
 import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadSingleton
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -47,15 +41,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DOWNLOAD_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.InputStreamVolleyRequest
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.addFilterNamespaces
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getChildren
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getData
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getSector
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZone
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
@@ -210,28 +198,26 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
             context: Context,
             activity: Class<*>,
             query: String
-        ): Intent? = SearchSingleton
+        ): Intent? = DataSingleton
             .getInstance(context)
-            .searchSession
-            .let { searchSession ->
-                (searchSession.getData<Area, AreaData>(query, Area.NAMESPACE)
-                    ?: searchSession.getData<Zone, ZoneData>(query, Zone.NAMESPACE)
-                    ?: searchSession.getData<Sector, SectorData>(query, Sector.NAMESPACE))
-                    ?.let { dataClass ->
-                        Intent(context, activity)
-                            .putExtra(EXTRA_DATACLASS, dataClass)
-                            .apply {
-                                if (dataClass is Sector)
-                                    dataClass
-                                        .getParent<Zone>(context)
-                                        ?.let { zone ->
-                                            val sectors =
-                                                zone.getChildren(context) { it.weight }
-                                            putExtra(EXTRA_DATACLASS, zone)
-                                            putExtra(EXTRA_CHILDREN_COUNT, sectors.size)
-                                            putExtra(EXTRA_INDEX, sectors.indexOf(dataClass))
-                                        }
-                            }
+            .repository
+            .find(query)
+            .takeIf { it.isNotEmpty() }
+            ?.let { resultList ->
+                val dataClass = resultList[0].data()
+                Intent(context, activity)
+                    .putExtra(EXTRA_DATACLASS, dataClass)
+                    .apply {
+                        if (dataClass is Sector)
+                            dataClass
+                                .getParent<Zone>(context)
+                                ?.let { zone ->
+                                    val sectors =
+                                        zone.getChildren(context) { it.weight }
+                                    putExtra(EXTRA_DATACLASS, zone)
+                                    putExtra(EXTRA_CHILDREN_COUNT, sectors.size)
+                                    putExtra(EXTRA_INDEX, sectors.indexOf(dataClass))
+                                }
                     }
             }
 
@@ -250,25 +236,25 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
             activity: Class<*>,
             namespace: Namespace,
             @ObjectId objectId: String
-        ): Intent? = SearchSingleton
+        ): Intent? = DataSingleton
             .getInstance(context)
-            .searchSession
-            .let { searchSession ->
-                searchSession.getData<A, B>(objectId, namespace)?.let { dataClass ->
-                    Intent(context, activity)
-                        .putExtra(EXTRA_DATACLASS, dataClass)
-                        .apply {
-                            if (dataClass is Sector)
-                                dataClass
-                                    .getParent<Zone>(context)
-                                    ?.let { zone ->
-                                        val sectors = zone.getChildren(context) { it.weight }
-                                        putExtra(EXTRA_DATACLASS, zone)
-                                        putExtra(EXTRA_CHILDREN_COUNT, sectors.size)
-                                        putExtra(EXTRA_INDEX, sectors.indexOf(dataClass))
-                                    }
-                        }
-                }
+            .repository
+            .find(namespace, objectId)
+            ?.let { data ->
+                val dataClass = data.data()
+                Intent(context, activity)
+                    .putExtra(EXTRA_DATACLASS, dataClass)
+                    .apply {
+                        if (dataClass is Sector)
+                            dataClass
+                                .getParent<Zone>(context)
+                                ?.let { zone ->
+                                    val sectors = zone.getChildren(context) { it.weight }
+                                    putExtra(EXTRA_DATACLASS, zone)
+                                    putExtra(EXTRA_CHILDREN_COUNT, sectors.size)
+                                    putExtra(EXTRA_INDEX, sectors.indexOf(dataClass))
+                                }
+                    }
             }
 
         /**
@@ -306,31 +292,23 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
                 lst.add(imgFile.delete())
             }
 
-            val searchSession = SearchSingleton
-                .getInstance(context)
-                .searchSession
+            val dataRepository = DataSingleton.getInstance(context).repository
 
-            // This may not be the best method, but for now it works
-            namespace.ChildrenNamespace
-                ?.let { childrenNamespace ->
-                    Timber.d("Deleting children...")
-                    val children = searchSession.getChildren<A, String>(childrenNamespace, objectId)
-                    { it.objectId }
-                    for (child in children)
-                        if (child is DataClass<*, *, *>)
-                            lst.add(child.delete(context))
-                }
+            namespace.ChildrenNamespace?.let { childrenNamespace ->
+                Timber.d("Deleting all elements from $childrenNamespace and parent object id $objectId")
+                dataRepository.deleteFromParentId(childrenNamespace, objectId)
+            }
 
             // Remove dataclass from index.
             // Since Sectors that are children of a Zone also contain its ID this will also remove them
             // from the index.
-            searchSession.remove(
-                objectId,
-                SearchSpec.Builder()
-                    .addFilterNamespaces(namespace)
-                    .addFilterDocumentClasses(DownloadedData::class.java)
-                    .build()
-            ).await()
+            val newElements = dataRepository.getAll(namespace)
+                .filter { it is ZoneData || it is SectorData }
+                .onEach {
+                    if (it is ZoneData) it.downloaded = false
+                    else if (it is SectorData) it.downloaded = false
+                }
+            dataRepository.updateAll(newElements)
 
             return lst.allTrue()
         }
@@ -347,38 +325,26 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
             objectId: String
         ): DownloadStatus {
             Timber.d("Finding for element in indexed downloads...")
-            val searchResults = SearchSingleton
-                .getInstance(context)
-                .searchSession
-                .search(
-                    objectId,
-                    SearchSpec.Builder()
-                        .addFilterDocumentClasses(DownloadedData::class.java)
-                        .build()
-                )
-            val searchResultsList = arrayListOf<SearchResult>()
-            var page = searchResults.nextPage.await()
-            while (page.isNotEmpty()) {
-                searchResultsList.addAll(page)
-                page = searchResults.nextPage.await()
-            }
-            Timber.d("Got ${searchResultsList.size} indexed downloads for $this")
+            val searchResults = DataSingleton.getInstance(context)
+                .repository
+                .getAllByDownloadedObjectId(objectId)
+            Timber.d("Got ${searchResults.size} indexed downloads for $this")
 
             var isDownloaded = false
             var childrenCount = -1L
             var downloadedChildrenCount = 0
-            if (searchResultsList.isNotEmpty()) {
-                for (result in searchResultsList) {
-                    val document = result.genericDocument
-                    val downloadedData = document.toDocumentClass(DownloadedData::class.java)
-                    val isChildren = downloadedData.parentId == objectId
+            if (searchResults.isNotEmpty()) {
+                for (data in searchResults) {
+                    val dataClass = data.data()
+                    val isChildren = dataClass.metadata.parentId == objectId
                     if (isChildren)
                     // If it's a children, increase the counter
                         downloadedChildrenCount++
                     else {
                         // If it's not a children, it means that the dataclass is downloaded
                         isDownloaded = true
-                        childrenCount = downloadedData.childrenCount
+                        childrenCount =
+                            dataClass.getChildren(context) { it.displayName }.size.toLong()
                     }
                 }
             }
@@ -458,36 +424,16 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         fun buildContainers(
             namespace: Namespace,
             @ObjectId objectId: String,
-            data: JSONObject
+            data: JSONObject,
+            childrenCount: Long,
         ) = when (namespace) {
-            Area.NAMESPACE -> Area(data, objectId)
-            Zone.NAMESPACE -> Zone(data, objectId)
-            Sector.NAMESPACE -> Sector(data, objectId)
+            Area.NAMESPACE -> Area(data, objectId, childrenCount)
+            Zone.NAMESPACE -> Zone(data, objectId, childrenCount)
+            Sector.NAMESPACE -> Sector(data, objectId, childrenCount)
             else -> throw InitializationException(
                 "Could not initialize DataClass with namespace \"$namespace\"",
             )
         }
-
-        /**
-         * Builds a DataClass from its namespace, object id and JSON data. Includes Paths
-         * @author Arnau Mora
-         * @since 20220304
-         * @param namespace The namespace of the DataClass.
-         * @param objectId The id of the DataClass.
-         * @param data The JSON data from the server.
-         * @throws InitializationException When the namespace is unknown.
-         */
-        @Throws(InitializationException::class)
-        fun buildAny(namespace: Namespace, @ObjectId objectId: String, data: JSONObject) =
-            when (namespace) {
-                Area.NAMESPACE -> Area(data, objectId)
-                Zone.NAMESPACE -> Zone(data, objectId)
-                Sector.NAMESPACE -> Sector(data, objectId)
-                Path.NAMESPACE -> Path(data, objectId)
-                else -> throw InitializationException(
-                    "Could not initialize DataClass with namespace \"$namespace\"",
-                )
-            }
     }
 
     /**
@@ -537,16 +483,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         // Get the parentId, if it's null, return null
         val parentId: String = metadata.parentId ?: return null
 
-        val searchSession = SearchSingleton
-            .getInstance(context)
-            .searchSession
+        val dataRepository = DataSingleton.getInstance(context)
+            .repository
 
         // From the different possibilities for the namespace, fetch from searchSession
         @Suppress("UNCHECKED_CAST")
         return when (namespace.ParentNamespace) {
-            Area.NAMESPACE -> searchSession.getArea(parentId) as D?
-            Zone.NAMESPACE -> searchSession.getZone(parentId) as D?
-            Sector.NAMESPACE -> searchSession.getSector(parentId) as D?
+            Area.NAMESPACE -> dataRepository.getArea(parentId) as D?
+            Zone.NAMESPACE -> dataRepository.getZone(parentId) as D?
+            Sector.NAMESPACE -> dataRepository.getSector(parentId) as D?
             else -> null
         }
     }
@@ -558,15 +503,18 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @param context Used for initializing the index loader if not ready.
      * @throws NullPointerException When [namespace] does not have children.
      */
+    @Suppress("UNCHECKED_CAST")
     @WorkerThread
     @Throws(NullPointerException::class)
     suspend inline fun <R : Comparable<R>> getChildren(
         context: Context,
         crossinline sortBy: (A) -> R?
-    ): List<A> = SearchSingleton
-        .getInstance(context)
-        .searchSession
-        .getChildren(namespace.ChildrenNamespace!!, objectId, sortBy)
+    ): List<A> = DataSingleton.getInstance(context)
+        .repository
+        .getChildren(namespace.ChildrenNamespace!!, objectId)
+        ?.map { it.data() as A }
+        ?.sortedBy(sortBy)
+        ?: emptyList()
 
     /**
      * Gets the children element at [index].
@@ -783,9 +731,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * Converts the DataClass into a Search Data class.
      * @author Arnau Mora
      * @since 20220219
-     * @param index The position of the DataClass
      */
-    abstract fun data(index: Int): D
+    abstract fun data(): D
 
     /**
      * Returns a map used to display the stored data to the user. Keys should be the parameter name,
@@ -1027,12 +974,15 @@ suspend fun @receiver:ObjectId String.isDownloadIndexed(context: Context) =
  * @param context The context to initialize the search session from if not read.
  * @param namespace The namespace of [A].
  */
+@Suppress("UNCHECKED_CAST")
 suspend inline fun <A : DataClassImpl, R : Comparable<R>> @receiver:ObjectId
 String.getChildren(
     context: Context,
     namespace: Namespace,
     crossinline sortBy: (A) -> R?
-) = SearchSingleton
+) = DataSingleton
     .getInstance(context)
-    .searchSession
-    .getChildren(namespace, this, sortBy)
+    .repository
+    .getChildren(namespace, this)
+    ?.map { it.data() as A }
+    ?.sortedBy(sortBy)

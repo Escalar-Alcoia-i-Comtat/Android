@@ -1,28 +1,22 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
-import androidx.appsearch.annotation.Document
-import androidx.appsearch.app.AppSearchSchema
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
+import java.util.Date
 
-@Document
+@Entity(tableName = "Areas")
 data class AreaData(
-    @Document.Score var index: Int,
-    @Document.Id var objectId: String,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES) var displayName: String,
-    @Document.CreationTimestampMillis var timestamp: Long,
-    @Document.StringProperty var image: String,
-    @Document.StringProperty var kmzPath: String?,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var webUrl: String,
+    @PrimaryKey var objectId: String,
+    @ColumnInfo(name = "last_edit") val lastEdit: Date,
+    @ColumnInfo(name = "displayName") val displayName: String,
+    @ColumnInfo(name = "image") val image: String,
+    @ColumnInfo(name = "kmz") val kmz: String?,
+    @ColumnInfo(name = "webURL") val webUrl: String?,
+    @ColumnInfo(name = "childrenCount") var childrenCount: Long,
 ) : DataRoot<Area> {
-    @Document.Namespace
-    var namespace: String = Area.NAMESPACE.namespace
-
-    override fun data() = Area(
-        objectId,
-        displayName,
-        timestamp,
-        image,
-        kmzPath,
-        webUrl.ifEmpty { null }
+    override fun data(): Area = Area(
+        objectId, displayName, lastEdit.time, image, kmz, webUrl, childrenCount,
     )
 }
