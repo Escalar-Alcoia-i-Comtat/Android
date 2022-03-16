@@ -5,7 +5,7 @@ import androidx.annotation.IntDef
 import androidx.annotation.WorkerThread
 import androidx.appsearch.app.PutDocumentsRequest
 import androidx.appsearch.exceptions.AppSearchException
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.mutableStateListOf
 import androidx.work.await
 import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.core.R
@@ -148,7 +148,8 @@ suspend fun updateAvailable(
         { json, objectId -> Path(json, objectId) }
 
         // Add all the found elements to the lists
-        updaterSingleton.updateAvailableObjects.postValue(
+        updaterSingleton.updateAvailableObjects.clear()
+        updaterSingleton.updateAvailableObjects.addAll(
             listOf(updatableAreas, updatableZones, updatableSectors, updatablePaths).flatten()
         )
 
@@ -203,7 +204,7 @@ class UpdaterSingleton {
      * @author Arnau Mora
      * @since 20220226
      */
-    var updateAvailableObjects: MutableLiveData<List<Item>> = MutableLiveData()
+    var updateAvailableObjects = mutableStateListOf<Item>()
 
     /**
      * Updates the selected [namespace] and [objectId].
@@ -258,11 +259,7 @@ class UpdaterSingleton {
                 .put(request)
                 .await()
             Timber.v("Added to SearchSession, removing element from updateAvailableObjects...")
-            updateAvailableObjects.postValue(
-                (updateAvailableObjects.value ?: listOf())
-                    .toMutableList()
-                    .filter { it.objectId != objectId }
-            )
+            updateAvailableObjects.removeIf { it.objectId == objectId }
         } catch (e: VolleyError) {
             Timber.e(e, "Could not update element at $namespace with id $objectId.")
             uiContext {

@@ -81,9 +81,7 @@ fun RowScope.TableCell(
 @Composable
 @ExperimentalMaterialApi
 private fun UpdatesCard(viewModel: StorageViewModel) {
-    val updatesAvailable by UpdaterSingleton.getInstance()
-        .updateAvailableObjects
-        .observeAsState(emptyList())
+    val updatesAvailable = viewModel.updatesAvailable
 
     Row(modifier = Modifier.fillMaxWidth()) {
         Text(

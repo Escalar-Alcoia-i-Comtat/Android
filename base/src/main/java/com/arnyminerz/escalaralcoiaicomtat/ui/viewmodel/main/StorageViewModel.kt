@@ -45,6 +45,8 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
     val downloads: MutableLiveData<List<Pair<DownloadedData, Boolean>>> = MutableLiveData()
     val sizeString = mutableStateOf(humanReadableByteCountBin(0))
 
+    val updatesAvailable = UpdaterSingleton.getInstance().updateAvailableObjects
+
     /**
      * Loads the downloaded DataClasses and adds them to [downloads]. [sizeString] will be updated.
      * @author Arnau Mora
