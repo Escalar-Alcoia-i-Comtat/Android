@@ -154,14 +154,15 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun update(data: UpdaterSingleton.Item) {
+    private fun update(data: UpdaterSingleton.Item, addToUpdatingList: Boolean) {
         viewModelScope.launch {
             Timber.i("Updating ${data.namespace}/${data.objectId}...")
-            currentlyUpdatingItems = currentlyUpdatingItems
-                .toMutableMap()
-                .apply {
-                    put(data.namespace to data.objectId, data)
-                }
+            if (addToUpdatingList)
+                currentlyUpdatingItems = currentlyUpdatingItems
+                    .toMutableMap()
+                    .apply {
+                        put(data.namespace to data.objectId, data)
+                    }
             UpdaterSingleton.getInstance()
                 .update(
                     getApplication(),
@@ -172,6 +173,26 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
             currentlyUpdatingItems = currentlyUpdatingItems
                 .toMutableMap()
                 .filterKeys { it.first != data.namespace && it.second != data.objectId }
+        }
+    }
+
+    fun update(data: UpdaterSingleton.Item) = update(data, true)
+
+    /**
+     * Updates all the elements from [updatesAvailable].
+     * @author Arnau Mora
+     * @since 20220316
+     */
+    fun updateAll() {
+        // Add all the items to currentlyUpdatingItems
+        currentlyUpdatingItems = currentlyUpdatingItems
+            .toMutableMap()
+            .apply {
+                putAll(updatesAvailable.map { (it.namespace to it.objectId) to it })
+            }
+        // Start requesting updates
+        currentlyUpdatingItems.forEach { (_, data) ->
+            update(data, false)
         }
     }
 

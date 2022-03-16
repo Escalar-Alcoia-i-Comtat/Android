@@ -93,7 +93,7 @@ private fun UpdatesCard(viewModel: StorageViewModel) {
         )
         if (updatesAvailable.isNotEmpty())
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { viewModel.updateAll() },
                 colors = ButtonDefaults.textButtonColors()
             ) {
                 Text(text = stringResource(R.string.action_update_all))
