@@ -1,7 +1,9 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main
 
 import android.app.Application
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -46,6 +48,15 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
     val sizeString = mutableStateOf(humanReadableByteCountBin(0))
 
     val updatesAvailable = UpdaterSingleton.getInstance().updateAvailableObjects
+
+    /**
+     * Used for checking which elements are currently being updated.
+     * @author Arnau Mora
+     * @since 20220316
+     */
+    var currentlyUpdatingItems by
+    mutableStateOf(emptyMap<Pair<Namespace, @ObjectId String>, UpdaterSingleton.Item>())
+        private set
 
     /**
      * Loads the downloaded DataClasses and adds them to [downloads]. [sizeString] will be updated.
@@ -146,6 +157,11 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
     fun update(data: UpdaterSingleton.Item) {
         viewModelScope.launch {
             Timber.i("Updating ${data.namespace}/${data.objectId}...")
+            currentlyUpdatingItems = currentlyUpdatingItems
+                .toMutableMap()
+                .apply {
+                    put(data.namespace to data.objectId, data)
+                }
             UpdaterSingleton.getInstance()
                 .update(
                     getApplication(),
@@ -153,6 +169,9 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
                     data.objectId,
                     data.score
                 )
+            currentlyUpdatingItems = currentlyUpdatingItems
+                .toMutableMap()
+                .filterKeys { it.first != data.namespace && it.second != data.objectId }
         }
     }
 
