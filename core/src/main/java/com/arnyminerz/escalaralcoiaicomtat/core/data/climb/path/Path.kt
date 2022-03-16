@@ -401,6 +401,37 @@ class Path internal constructor(
         )
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Path
+
+        if (objectId != other.objectId) return false
+        if (timestampMillis != other.timestampMillis) return false
+        if (sketchId != other.sketchId) return false
+        if (displayName != other.displayName) return false
+        if (rawGrades != other.rawGrades) return false
+        if (rawHeights != other.rawHeights) return false
+        if (rawEndings != other.rawEndings) return false
+        if (rawPitches != other.rawPitches) return false
+        if (fixedSafesData != other.fixedSafesData) return false
+        if (requiredSafesData != other.requiredSafesData) return false
+        if (description != other.description) return false
+        if (rawBuilt != other.rawBuilt) return false
+        if (rawReBuilt != other.rawReBuilt) return false
+        if (downloaded != other.downloaded) return false
+        if (parentSectorId != other.parentSectorId) return false
+        if (generalHeight != other.generalHeight) return false
+        if (generalGrade != other.generalGrade) return false
+        if (generalEnding != other.generalEnding) return false
+        if (!pitches.contentEquals(other.pitches)) return false
+        if (buildPatch != other.buildPatch) return false
+        if (patches != other.patches) return false
+
+        return true
+    }
+
     companion object {
         val NAMESPACE = Namespace.PATH
 

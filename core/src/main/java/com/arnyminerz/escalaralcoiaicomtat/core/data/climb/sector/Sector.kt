@@ -135,6 +135,30 @@ class Sector internal constructor(
         "parentZoneId" to parentZoneId,
     )
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
+
+        other as Sector
+
+        if (objectId != other.objectId) return false
+        if (displayName != other.displayName) return false
+        if (timestampMillis != other.timestampMillis) return false
+        if (sunTime != other.sunTime) return false
+        if (kidsApt != other.kidsApt) return false
+        if (walkingTime != other.walkingTime) return false
+        if (location != other.location) return false
+        if (weight != other.weight) return false
+        if (imagePath != other.imagePath) return false
+        if (webUrl != other.webUrl) return false
+        if (parentZoneId != other.parentZoneId) return false
+        if (imageQuality != other.imageQuality) return false
+        if (hasParents != other.hasParents) return false
+
+        return true
+    }
+
     companion object : DataClassCompanion<Sector>() {
         override val NAMESPACE = Namespace.SECTOR
 

@@ -111,6 +111,27 @@ class Zone internal constructor(
         return result
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
+
+        other as Zone
+
+        if (objectId != other.objectId) return false
+        if (displayName != other.displayName) return false
+        if (timestampMillis != other.timestampMillis) return false
+        if (imagePath != other.imagePath) return false
+        if (kmzPath != other.kmzPath) return false
+        if (position != other.position) return false
+        if (webUrl != other.webUrl) return false
+        if (parentAreaId != other.parentAreaId) return false
+        if (imageQuality != other.imageQuality) return false
+        if (hasParents != other.hasParents) return false
+
+        return true
+    }
+
     companion object : DataClassCompanion<Zone>() {
         override val NAMESPACE = Namespace.ZONE
 
