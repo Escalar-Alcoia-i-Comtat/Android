@@ -108,13 +108,29 @@ class Path internal constructor(
     )
 
     /**
+     * Used internally for determining if pitches is initialized, and used for intermediate storage.
+     * @author Arnau Mora
+     * @since 20220316
+     */
+    @IgnoredOnParcel
+    private var _generalHeight: Long? = null
+
+    /**
      * The general height of the path. May be null if not set.
      * @author Arnau Mora
      * @since 20220223
      */
     @IgnoredOnParcel
-    var generalHeight: Long? = null
-        private set
+    val generalHeight: Long?
+        get() = _generalHeight ?: run { processPitches(); _generalHeight }
+
+    /**
+     * Used internally for determining if pitches is initialized, and used for intermediate storage.
+     * @author Arnau Mora
+     * @since 20220316
+     */
+    @IgnoredOnParcel
+    private var _generalGrade: String? = null
 
     /**
      * The general grade of the path.
@@ -122,8 +138,20 @@ class Path internal constructor(
      * @since 20220223
      */
     @IgnoredOnParcel
-    var generalGrade: String = "¿?"
-        private set
+    val generalGrade: String
+        get() = _generalGrade ?: run {
+            processPitches(); _generalGrade?.run {
+            _generalGrade = "¿?"
+        }; _generalGrade!!
+        }
+
+    /**
+     * Used internally for determining if pitches is initialized, and used for intermediate storage.
+     * @author Arnau Mora
+     * @since 20220316
+     */
+    @IgnoredOnParcel
+    private var _generalEnding: String? = null
 
     /**
      * The general ending of the path.
@@ -131,8 +159,16 @@ class Path internal constructor(
      * @since 20220223
      */
     @IgnoredOnParcel
-    var generalEnding: String? = null
-        private set
+    val generalEnding: String?
+        get() = _generalEnding ?: run { processPitches(); _generalEnding }
+
+    /**
+     * Used internally for determining if pitches is initialized, and used for intermediate storage.
+     * @author Arnau Mora
+     * @since 20220316
+     */
+    @IgnoredOnParcel
+    private var _pitches: Array<Pitch> = emptyArray()
 
     /**
      * A list of the data of each pitch of the path.
@@ -140,8 +176,8 @@ class Path internal constructor(
      * @since 20220223
      */
     @IgnoredOnParcel
-    var pitches: Array<Pitch> = emptyArray()
-        private set
+    val pitches: Array<Pitch>
+        get() = _pitches.takeIf { it.isNotEmpty() } ?: run { processPitches(); _pitches }
 
     /**
      * Contains data about who built the path.
@@ -160,6 +196,15 @@ class Path internal constructor(
     var patches: List<Patch> = emptyList()
         private set
 
+    /**
+     * Processes the value of [rawText] to be added into pitches and its general term if applicable.
+     * @author Arnau Mora
+     * @since 200220316
+     * @param rawText The text to parse.
+     * @param conversion Used for converting the found values into [T].
+     * @param setGeneral Should update the value of the general term into the passed one.
+     * @param setter Should update the specific value of [_pitches] at the passed index.
+     */
     private fun <T> processPitch(
         rawText: String,
         conversion: (value: String) -> T?,
@@ -169,64 +214,103 @@ class Path internal constructor(
         if (rawText == "NULL")
             return
 
-        val split = rawText
-            .replace("\r", "")
-            .split("\n")
-        if (split.size == 1 && setGeneral != null)
+        // Example for rawText:
+        // >6b+
+        // 1>6b
+        // 2>6a+
+        // 3>6c
+
+        var position = rawText.indexOf('>')
+        if (position < 0 && setGeneral != null)
             conversion(rawText)?.let { setGeneral(it) }
-        else for (item in split)
-            if (item.startsWith(">") && setGeneral != null)
+        else while (position >= 0) {
+            // Obtain the text between the current '>' and the line jump. If there's no line jump,
+            // take until the end of the string. It means that it's the last line of the value.
+            val item = rawText.substring(
+                position,
+                rawText.indexOf('\n', position).takeIf { it >= 0 } ?: rawText.length
+            )
+            Timber.v("Analysis item for position $position: $item")
+
+            // If position is on the starting point of the string, just check if it's '>'. If it's
+            // somewhere in the middle of rawText, check if the previous char is a number, if it is,
+            // it mens that the row is not general.
+            val isGeneral = if (position > 0) !rawText[position - 1].isDigit() else item[0] == '>'
+
+            // If it has been determined that the item is the general row, and setGeneral is not
+            // null, run it with the current line except the starting '>'.
+            if (isGeneral && setGeneral != null)
                 conversion(item.substring(1))?.let { setGeneral(it) }
-            else
-                item.indexOf('>')
-                    .takeUnless { it < 0 }
-                    ?.let { signPos ->
-                        Timber.d("Converting item \"$item\" of $objectId")
-                        val index = item.substring(0, signPos).toInt()
-                        val convertedElem = conversion(item.substring(signPos + 1))
-
-                        // This ensures the size matches, and that all items of the array are initialized.
-                        @Suppress("UNCHECKED_CAST")
-                        pitches = pitches
-                            .copyOf(index + 1)
-                            .let { newPitches ->
-                                for ((i, ir) in newPitches.withIndex())
-                                    if (ir == null)
-                                        newPitches[i] = Pitch()
-                                newPitches
-                            } as Array<Pitch>
-
-                        if (convertedElem != null)
-                            setter(index, convertedElem)
+            else {
+                Timber.d("Converting item \"$item\" of $objectId")
+                // Get the number that has the current row as prefix
+                val index = rawText.substring(0, position)
+                    .let { chain ->
+                        Timber.v("Getting index from chain: $chain")
+                        var builder = ""
+                        var c = chain.length - 1
+                        while (c >= 0 && chain[c].isDigit()) {
+                            builder += chain[c]
+                            c--
+                        }
+                        Timber.v("Index conversion result: $builder")
+                        builder
                     }
-                    ?: run {
-                        Timber.w("Could not take row row \"%s\". Path: %s", item, objectId)
-                    }
+                    .toInt()
+
+                val convertedElem = conversion(item.substring(1))
+
+                // This ensures the size matches, and that all items of the array are initialized.
+                if (_pitches.size <= index) {
+                    @Suppress("UNCHECKED_CAST")
+                    _pitches = _pitches
+                        .copyOf(index + 1)
+                        .let { newPitches ->
+                            for ((i, ir) in newPitches.withIndex())
+                                if (ir == null)
+                                    newPitches[i] = Pitch()
+                            newPitches
+                        } as Array<Pitch>
+                }
+
+                if (convertedElem != null)
+                    setter(index, convertedElem)
+            }
+
+            // Take next '>'
+            position = rawText.indexOf('>', position + 1)
+        }
     }
 
-    init {
+    /**
+     * Processes all the elements from the constructor parameters and adds them to [_pitches]. This
+     * builds the array only whenever it's necessary.
+     * @author Arnau Mora
+     * @since 20220316
+     */
+    private fun processPitches() {
         // Transform the height format to the list.
         processPitch(
             rawHeights,
             { it.toLongOrNull() },
-            { generalHeight = it },
-            { index, value -> pitches[index].height = value },
+            { _generalHeight = it },
+            { index, value -> _pitches[index].height = value },
         )
 
         // Transform the grades format to the list.
         processPitch(
             rawGrades,
             { it.takeIf { it.isNotBlank() } },
-            { generalGrade = it },
-            { index, value -> pitches[index].grade = value },
+            { _generalGrade = it },
+            { index, value -> _pitches[index].grade = value },
         )
 
         // Transform raw endings into pitches
         processPitch(
             rawEndings,
             { it.takeIf { it.isNotBlank() } },
-            { generalEnding = it },
-            { index, value -> pitches[index].ending = value },
+            { _generalEnding = it },
+            { index, value -> _pitches[index].ending = value },
         )
 
         // Put pitch info into pitches
@@ -245,9 +329,11 @@ class Path internal constructor(
                 }
             },
             null,
-            { index, value -> pitches[index].endingData = value },
+            { index, value -> _pitches[index].endingData = value },
         )
+    }
 
+    init {
         // Process builder
         if (rawBuilt != null && rawBuilt.contains(";")) {
             val splitBuilder = rawBuilt.split(";")
