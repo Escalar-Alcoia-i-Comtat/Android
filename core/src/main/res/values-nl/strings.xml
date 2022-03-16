@@ -177,6 +177,10 @@
     <string name="intro_nearbyzones_title">Nearby Zones Functionality</string>
     <string name="intro_nearbyzones_message">Escalar Alcoià i Comtat has a functionality that we call \"Nearby Zones\", which takes the location of your device and shows you which climbing zones are at a set radius. You can choose to enable or disable this, but if you enable it, keep in mind that the location permission should be always enabled.</string>
     <string name="intro_nearbyzones_enable">Enable Nearby Zones</string>
+    <string name="warning_preferences_title">Attention!</string>
+    <string name="warning_preferences_message">Since our last update we have changed the way your preferences are stored. We will try to migrate your old options as soon as you leave this screen.</string>
+    <string name="warning_play_services_title">Attention!</string>
+    <string name="warning_play_services_message">We have detected that your device is not compatible with Google Play Services. This may cause some issues with some parts of the app. You have been warned.</string>
     <string name="sector_walking_time">%1$smin</string>
     <string name="sector_height">%1$sm</string>
     <string name="sector_kids_apt">Kids Apt</string>
