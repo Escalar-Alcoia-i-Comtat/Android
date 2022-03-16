@@ -10,11 +10,17 @@ package com.arnyminerz.escalaralcoiaicomtat.core.preferences.model
  * @param indexedData Whether or not the data has been indexed.
  * @param dataVersion The version of the indexed data, for checking for updates.
  * @param shownMd5Warning Whether or not the incompatible MD5 encryption warning has been shown.
+ * @param shownPlayServicesWarning Whether or not the Play Services not present warning has been
+ * shown.
+ * @param shownPreferencesMigrationWarning Whether or not the shared preferences change warning has
+ * been shown.
  */
 data class SystemPreferences(
     val shownIntro: Boolean,
     val shownBatteryOptimizationWarning: Boolean,
     val indexedData: Boolean,
     val dataVersion: Long,
-    val shownMd5Warning: Boolean
+    val shownMd5Warning: Boolean,
+    val shownPlayServicesWarning: Boolean,
+    val shownPreferencesMigrationWarning: Boolean,
 )
