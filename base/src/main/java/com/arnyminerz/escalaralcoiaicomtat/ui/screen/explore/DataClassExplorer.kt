@@ -153,14 +153,14 @@ fun Activity.DataClassExplorer(
             ) {
                 itemsIndexed(items) { i, item ->
                     DataClassItem(item) {
-                        updateNavStack(true, item)
-
                         if (item is Sector)
                             launch(DataClassActivity::class.java) {
                                 putExtra(EXTRA_DATACLASS, navStack.value.last() as Parcelable)
                                 putExtra(EXTRA_CHILDREN_COUNT, items.size)
                                 putExtra(EXTRA_INDEX, i)
                             }
+
+                        updateNavStack(true, item)
                     }
                 }
             }
@@ -171,6 +171,6 @@ fun Activity.DataClassExplorer(
     val navStackLast = if (currentNavStack.isNotEmpty()) currentNavStack.last() else null
     if (navStackLast is Area)
         exploreViewModel.childrenLoader(navStackLast) { it.displayName }
-    else if (navStackLast != null)
-        exploreViewModel.childrenLoader(navStackLast as Zone) { it.weight }
+    else if (navStackLast is Zone)
+        exploreViewModel.childrenLoader(navStackLast) { it.weight }
 }
