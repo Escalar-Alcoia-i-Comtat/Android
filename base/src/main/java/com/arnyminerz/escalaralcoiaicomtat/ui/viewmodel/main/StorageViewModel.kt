@@ -1,7 +1,9 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main
 
 import android.app.Application
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -44,6 +46,17 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
 
     val downloads: MutableLiveData<List<Pair<DownloadedData, Boolean>>> = MutableLiveData()
     val sizeString = mutableStateOf(humanReadableByteCountBin(0))
+
+    val updatesAvailable = UpdaterSingleton.getInstance().updateAvailableObjects
+
+    /**
+     * Used for checking which elements are currently being updated.
+     * @author Arnau Mora
+     * @since 20220316
+     */
+    var currentlyUpdatingItems by
+    mutableStateOf(emptyMap<Pair<Namespace, @ObjectId String>, UpdaterSingleton.Item>())
+        private set
 
     /**
      * Loads the downloaded DataClasses and adds them to [downloads]. [sizeString] will be updated.
@@ -141,9 +154,15 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun update(data: UpdaterSingleton.Item) {
+    private fun update(data: UpdaterSingleton.Item, addToUpdatingList: Boolean) {
         viewModelScope.launch {
             Timber.i("Updating ${data.namespace}/${data.objectId}...")
+            if (addToUpdatingList)
+                currentlyUpdatingItems = currentlyUpdatingItems
+                    .toMutableMap()
+                    .apply {
+                        put(data.namespace to data.objectId, data)
+                    }
             UpdaterSingleton.getInstance()
                 .update(
                     getApplication(),
@@ -151,6 +170,29 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
                     data.objectId,
                     data.score
                 )
+            currentlyUpdatingItems = currentlyUpdatingItems
+                .toMutableMap()
+                .filterKeys { it.first != data.namespace && it.second != data.objectId }
+        }
+    }
+
+    fun update(data: UpdaterSingleton.Item) = update(data, true)
+
+    /**
+     * Updates all the elements from [updatesAvailable].
+     * @author Arnau Mora
+     * @since 20220316
+     */
+    fun updateAll() {
+        // Add all the items to currentlyUpdatingItems
+        currentlyUpdatingItems = currentlyUpdatingItems
+            .toMutableMap()
+            .apply {
+                putAll(updatesAvailable.map { (it.namespace to it.objectId) to it })
+            }
+        // Start requesting updates
+        currentlyUpdatingItems.forEach { (_, data) ->
+            update(data, false)
         }
     }
 
