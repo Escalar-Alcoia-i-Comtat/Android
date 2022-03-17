@@ -14,6 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.grade_black
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.grade_blue
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.grade_green
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.grade_purple
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.grade_red
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -49,6 +50,11 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
                     value = 0f,
                     color = grade_black,
                 ),
+                BarChartData.Bar(
+                    label = "¿?",
+                    value = 0f,
+                    color = grade_purple,
+                ),
             )
         )
     )
@@ -62,6 +68,7 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
                 var grades2Count = 0 // 6a-6c+
                 var grades3Count = 0 // 7a-7c+
                 var grades4Count = 0 // 8a-8c+
+                var grades5Count = 0 // ¿?
                 Timber.d("Got ${paths.size} paths. Getting grades...")
                 for (path in paths)
                     path.generalGrade.let {
@@ -70,11 +77,12 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
                             it.matches("^[3-5]".toRegex()) -> grades1Count++
                             it.matches("^6".toRegex()) -> grades2Count++
                             it.matches("^7".toRegex()) -> grades3Count++
-                            else -> grades4Count++
+                            it.matches("^8".toRegex()) -> grades4Count++
+                            else -> grades5Count++
                         }
                     }
 
-                Timber.d("Grades processed: $grades1Count, $grades2Count, $grades3Count, $grades4Count.")
+                Timber.d("Grades processed: $grades1Count, $grades2Count, $grades3Count, $grades4Count, $grades5Count.")
                 listOf(
                     BarChartData.Bar(
                         label = "3º-5+",
@@ -96,11 +104,16 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
                         value = grades4Count.toFloat(),
                         color = grade_black,
                     ),
+                    BarChartData.Bar(
+                        label = "¿?",
+                        value = grades5Count.toFloat(),
+                        color = grade_purple,
+                    ),
                 )
             }
 
             Timber.d("BarChartData built. Updating value...")
-            barChartData = barChartData.copy(bars = bars)
+            barChartData = BarChartData(bars)
         }
     }
 
