@@ -38,4 +38,13 @@ class DataSingleton private constructor(context: Context) {
     val areas = mutableStateOf(emptyList<Area>())
 
     val children = mutableStateOf(emptyList<DataClassImpl>())
+
+    /**
+     * Closes the connection with the local database.
+     * @author Arnau Mora
+     * @since 20220317
+     */
+    fun close() {
+        database.close()
+    }
 }
