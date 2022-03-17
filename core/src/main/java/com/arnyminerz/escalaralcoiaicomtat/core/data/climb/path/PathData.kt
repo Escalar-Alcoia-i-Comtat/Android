@@ -33,7 +33,7 @@ data class PathData(
     @ColumnInfo(name = "builtBy") val builtBy: String,
     @ColumnInfo(name = "rebuilders") val rebuiltBy: String,
     @ColumnInfo(name = "downloaded") val downloaded: Boolean,
-    @ColumnInfo(name = "sector") val parentSectorId: String,
+    @ColumnInfo(name = "sector") val sector: String,
 ) : DataRoot<Path> {
     override fun data(): Path {
         return Path(
@@ -65,7 +65,7 @@ data class PathData(
             builtBy.ifEmpty { null },
             rebuiltBy.ifEmpty { null },
             downloaded,
-            parentSectorId,
+            sector,
         )
     }
 }

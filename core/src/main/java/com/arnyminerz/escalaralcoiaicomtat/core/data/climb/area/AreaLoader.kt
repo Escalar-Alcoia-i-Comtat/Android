@@ -157,7 +157,7 @@ suspend fun loadAreas(
         val decodedPaths = decode(jsonData)
         val decodedSectors = decode(
             jsonData,
-            { id -> decodedPaths.filter { it.parentSectorId == id }.size.toLong() },
+            { id -> decodedPaths.filter { it.sector == id }.size.toLong() },
             Sector.NAMESPACE,
             Sector.CONSTRUCTOR,
         )
