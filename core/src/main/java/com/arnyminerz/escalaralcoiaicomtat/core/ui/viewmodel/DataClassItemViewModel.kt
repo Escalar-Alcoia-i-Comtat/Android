@@ -118,14 +118,6 @@ class DataClassItemViewModel(
         return result
     }
 
-    fun childrenCounter(dataClass: DataClass<*, *, *>): MutableLiveData<Int> =
-        MutableLiveData<Int>().apply {
-            viewModelScope.launch {
-                val childrenCount = dataClass.getSize(context)
-                postValue(childrenCount)
-            }
-        }
-
     /**
      * Initializes the download status of [at] in [DownloadSingleton] with the current status,
      * indexed or downloading.
