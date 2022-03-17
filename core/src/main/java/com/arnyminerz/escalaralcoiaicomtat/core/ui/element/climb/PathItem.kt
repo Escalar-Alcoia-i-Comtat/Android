@@ -122,7 +122,7 @@ fun PathItem(path: Path) {
                         text = if (infoVisible && path.pitches.isNotEmpty())
                             path.pitches.map { it.height }.joinToString(separator = "m\n")
                         else
-                            path.generalHeight.toString() + "m",
+                            path.generalHeight?.let { it.toString() + "m" } ?: "",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 16.sp,
