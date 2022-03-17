@@ -25,6 +25,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -87,8 +88,10 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
 
     fun checkForUpdates() {
         viewModelScope.launch {
-            val updateAvailable = updateAvailable(getApplication())
-            Timber.i("Update available: $updateAvailable")
+            launch(Dispatchers.IO) {
+                val updateAvailable = updateAvailable(getApplication())
+                Timber.i("Update available: $updateAvailable")
+            }
         }
     }
 
