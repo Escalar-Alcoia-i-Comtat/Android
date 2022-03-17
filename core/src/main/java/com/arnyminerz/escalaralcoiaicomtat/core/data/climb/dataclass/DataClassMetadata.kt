@@ -7,4 +7,5 @@ data class DataClassMetadata(
     val namespace: Namespace,
     val webURL: String?,
     val parentId: String?,
+    val childrenCount: Long,
 )

@@ -34,7 +34,7 @@ class Zone internal constructor(
     private val parentAreaId: String,
     var downloaded: Boolean = false,
     var downloadSize: Long?,
-    val childrenCount: Long,
+    private val childrenCount: Long,
 ) : DataClass<Sector, Area, ZoneData>(
     displayName,
     timestampMillis,
@@ -45,7 +45,8 @@ class Zone internal constructor(
         objectId,
         NAMESPACE,
         webUrl,
-        parentAreaId
+        parentAreaId,
+        childrenCount,
     ),
     DataClassDisplayOptions(
         R.drawable.ic_tall_placeholder,
@@ -74,7 +75,7 @@ class Zone internal constructor(
             data.getDouble("longitude")
         ),
         data.getString("webURL"),
-        data.getString("area"),
+        parentAreaId = data.getString("area"),
         downloaded = false,
         downloadSize = null,
         childrenCount = childrenCount,

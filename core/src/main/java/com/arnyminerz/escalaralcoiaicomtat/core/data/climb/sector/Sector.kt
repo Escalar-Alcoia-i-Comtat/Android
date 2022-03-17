@@ -40,7 +40,7 @@ class Sector internal constructor(
     private val parentZoneId: String,
     var downloaded: Boolean = false,
     var downloadSize: Long?,
-    val childrenCount: Long,
+    private val childrenCount: Long,
 ) : DataClass<Path, Zone, SectorData>(
     displayName,
     timestampMillis,
@@ -51,7 +51,8 @@ class Sector internal constructor(
         objectId,
         NAMESPACE,
         webUrl,
-        parentZoneId
+        parentZoneId,
+        childrenCount,
     ),
     DataClassDisplayOptions(
         R.drawable.ic_wide_placeholder,

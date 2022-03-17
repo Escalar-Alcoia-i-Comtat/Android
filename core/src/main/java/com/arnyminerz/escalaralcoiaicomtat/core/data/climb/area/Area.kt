@@ -35,7 +35,7 @@ class Area internal constructor(
     override val imagePath: String,
     override val kmzPath: String?,
     val webUrl: String?,
-    val childrenCount: Long,
+    private val childrenCount: Long,
 ) : DataClass<Zone, DataClassImpl, AreaData>(
     displayName,
     timestampMillis,
@@ -46,7 +46,8 @@ class Area internal constructor(
         objectId,
         NAMESPACE,
         webUrl,
-        null
+        null,
+        childrenCount,
     ),
     DataClassDisplayOptions(
         R.drawable.ic_wide_placeholder,
