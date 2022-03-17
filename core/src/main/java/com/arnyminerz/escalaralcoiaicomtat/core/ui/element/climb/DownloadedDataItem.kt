@@ -71,7 +71,7 @@ fun DownloadedDataItem(
         data.objectId,
         data.displayName,
         data.downloadSize ?: 0L,
-        data.childrenCount,
+        data.metadata.childrenCount,
         dataClassActivity,
         onDelete
     )
@@ -80,7 +80,7 @@ fun DownloadedDataItem(
         data.objectId,
         data.displayName,
         data.downloadSize ?: 0L,
-        data.childrenCount ?: 0L,
+        data.metadata.childrenCount,
         dataClassActivity,
         onDelete
     )
