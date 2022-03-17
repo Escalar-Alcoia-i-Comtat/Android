@@ -511,7 +511,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         crossinline sortBy: (A) -> R?
     ): List<A> = DataSingleton.getInstance(context)
         .repository
-        .getChildren(namespace.ChildrenNamespace!!, objectId)
+        .getChildren(namespace, objectId)
         ?.map { it.data() as A }
         ?.sortedBy(sortBy)
         ?: emptyList()
