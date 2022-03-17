@@ -41,7 +41,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.textResource
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.vector
@@ -205,7 +204,7 @@ fun SectorPage(
                                 )
 
                                 // Load the chart data
-                                //viewModel.loadBarChartData(sector)
+                                viewModel.loadBarChartData(sector)
 
                                 // Heading
                                 Row(
@@ -239,14 +238,15 @@ fun SectorPage(
                                         modifier = Modifier
                                             .height(120.dp)
                                             .fillMaxWidth()
-                                            .padding(bottom = 8.dp, start = 4.dp, end = 4.dp),
+                                            .padding(bottom = 24.dp, start = 4.dp, end = 4.dp),
                                         animation = simpleChartAnimation(),
                                         barDrawer = SimpleBarDrawer(),
                                         xAxisDrawer = SimpleXAxisDrawer(),
                                         yAxisDrawer = SimpleYAxisDrawer(
                                             axisLineThickness = 0.dp,
                                             axisLineColor = MaterialTheme.colorScheme.surfaceVariant,
-                                            labelTextSize = 0.sp,
+                                            drawLabelEvery = Int.MAX_VALUE,
+                                            // labelTextSize = 0.sp,
                                             labelValueFormatter = { "" } // Disables values for the y axis
                                         ),
                                         labelDrawer = SimpleLabelDrawer(
