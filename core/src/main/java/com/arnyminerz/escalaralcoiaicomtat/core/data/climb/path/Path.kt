@@ -333,17 +333,18 @@ class Path internal constructor(
         // Process builder
         if (rawBuilt != null && rawBuilt.contains(";")) {
             val splitBuilder = rawBuilt.split(";")
-            buildPatch = Patch(splitBuilder[0], splitBuilder[1])
+            buildPatch = Patch(splitBuilder.getOrNull(0), splitBuilder.getOrNull(1))
         }
 
         // Process re-builders
         if (rawReBuilt != null) {
             val newPatches = arrayListOf<Patch>()
-            val reBuiltLines = rawReBuilt.replace("\r", "").split("\n")
+            val reBuiltLines = rawReBuilt
+                .replace("\r", "")
+                .split("\n")
             for (line in reBuiltLines) {
-                if (!line.contains(";")) continue
                 val splitLine = line.split(";")
-                newPatches.add(Patch(splitLine[0], splitLine[1]))
+                newPatches.add(Patch(splitLine.getOrNull(0), splitLine.getOrNull(1)))
             }
             patches = newPatches
         }
