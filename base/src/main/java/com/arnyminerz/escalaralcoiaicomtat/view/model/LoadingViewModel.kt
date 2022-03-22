@@ -7,9 +7,13 @@ import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.volley.NoConnectionError
+import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -71,6 +75,8 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
     var migratedFromSharedPreferences = false
     var hasGooglePlayServices = true
 
+    private var deepLinkPath by mutableStateOf<String?>(null)
+
     /**
      * Requests the view model to start loading
      * @author Arnau Mora
@@ -87,6 +93,20 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    /**
+     * Tries calling [load] again, when an error occurred. Only gets called when [errorMessage] is
+     * not null, this is, when an error occurred.
+     * @author Arnau Mora
+     * @since 20220322
+     */
+    fun tryLoading() {
+        if (errorMessage.value != null)
+            viewModelScope.launch {
+                Timber.v("Trying to load data again...")
+                performLoad()
+            }
+    }
+
     @UiThread
     private suspend fun loadingRoutine(
         deepLinkPath: String?,
@@ -95,6 +115,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         analytics: FirebaseAnalytics
     ) {
         val app = getApplication<App>()
+        this.deepLinkPath = deepLinkPath
 
         progressMessageResource.value = R.string.status_loading_config
         initializeRemoteConfig(remoteConfig)
@@ -117,6 +138,29 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         }
 
         progressMessageResource.value = R.string.status_loading_data
+        withContext(Dispatchers.IO) {
+            load(app, deepLinkPath) { stringResource, errorResource ->
+                stringResource?.let { progressMessageResource.value = it }
+                errorResource?.let { errorMessage.value = it }
+            }
+        }
+
+        performLoad()
+    }
+
+    /**
+     * Calls [load] including callbacks. Also resets [errorMessage] and sets [progressMessageResource]
+     * to "Loading data".
+     * @author Arnau Mora
+     * @since 20220322
+     */
+    @UiThread
+    private suspend fun performLoad() {
+        val app = getApplication<App>()
+
+        errorMessage.value = null
+        progressMessageResource.value = R.string.status_loading_data
+
         withContext(Dispatchers.IO) {
             load(app, deepLinkPath) { stringResource, errorResource ->
                 stringResource?.let { progressMessageResource.value = it }
@@ -345,7 +389,14 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         } catch (e: VolleyError) {
             Timber.e(e, "An error occurred while loading areas from the server.")
             uiContext {
-                progressUpdater(null, R.string.status_loading_error_server)
+                when (e) {
+                    is NoConnectionError -> progressUpdater(
+                        null,
+                        R.string.status_loading_error_connection
+                    )
+                    is TimeoutError -> progressUpdater(null, R.string.status_loading_error_server)
+                    else -> progressUpdater(null, R.string.status_loading_error_server)
+                }
             }
         }
     }
