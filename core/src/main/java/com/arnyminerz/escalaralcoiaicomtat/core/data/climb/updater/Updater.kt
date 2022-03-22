@@ -92,7 +92,6 @@ private fun <R : DataClassImpl, D : DataRoot<R>> findUpdatableObjects(
                         serverData.objectId,
                         serverData.hashCode(),
                         localData.hashCode(),
-                        0, // TODO: Find a valid score
                         serverData.displayName,
                         serverData.displayMap(),
                         localData?.displayMap() ?: emptyMap()
@@ -201,7 +200,6 @@ class UpdaterSingleton {
         @ObjectId val objectId: String,
         val serverHash: Int,
         val localHash: Int,
-        val score: Int,
         val displayName: String,
         val serverDisplayMap: Map<String, Serializable?>,
         val localDisplayMap: Map<String, Serializable?>,
