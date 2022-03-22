@@ -30,7 +30,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareComponentActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
@@ -55,7 +56,7 @@ import timber.log.Timber
  * @author Arnau Mora
  * @since 20211225
  */
-class LoadingActivity : LanguageComponentActivity() {
+class LoadingActivity : NetworkAwareComponentActivity() {
     companion object {
         /**
          * The key used in shared preferences for checking if data has been indexed before v83.
@@ -100,6 +101,8 @@ class LoadingActivity : LanguageComponentActivity() {
      */
     private val viewModel by viewModels<LoadingActivityViewModel>(factoryProducer = { PreferencesModule.loadingActivityViewModel })
 
+    private lateinit var loadingViewModel: LoadingViewModel
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -129,7 +132,7 @@ class LoadingActivity : LanguageComponentActivity() {
 
         setContent {
             AppTheme {
-                val loadingViewModel: LoadingViewModel = viewModel()
+                loadingViewModel = viewModel()
                 val progressMessageResource by loadingViewModel.progressMessageResource
                 val progressMessageAttributes by loadingViewModel.progressMessageAttributes
 
@@ -154,6 +157,13 @@ class LoadingActivity : LanguageComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
+        super.onStateChange(state)
+
+        if (this::loadingViewModel.isInitialized)
+            loadingViewModel.tryLoading()
     }
 }
 
