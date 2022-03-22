@@ -196,6 +196,7 @@
     <string name="status_loading_data">Cargando los datos…</string>
     <string name="status_loading_installing_data">Instalando los datos…</string>
     <string name="status_loading_error_server">No se ha podido contactar con el servidor.\n Por favor, inténtalo de nuevo más tarde</string>
+    <string name="status_loading_error_connection">You don\'t have an active Internet connection.\nPlease, try again later, when connected.</string>
     <string name="data_type_area">Área</string>
     <string name="data_type_zone">Zona</string>
     <string name="data_type_sector">Sector</string>
