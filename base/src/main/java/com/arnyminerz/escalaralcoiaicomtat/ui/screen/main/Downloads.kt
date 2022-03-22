@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,6 +47,7 @@ import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DownloadedDataItem
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.StorageViewModel
@@ -264,7 +266,16 @@ private fun UpdatesCard(viewModel: StorageViewModel) {
 @ExperimentalMaterial3Api
 @ExperimentalMaterialApi
 fun MainActivity.StorageScreen() {
-    val downloads by storageViewModel.downloads.observeAsState()
+    val context = LocalContext.current
+    val dataSingleton = DataSingleton.getInstance(context)
+    val sectorsLiveData by dataSingleton
+        .repository
+        .readAllSectors
+        .observeAsState(emptyList())
+    val zonesLiveData by dataSingleton
+        .repository
+        .readAllZones
+        .observeAsState(emptyList())
     val sizeString by remember { storageViewModel.sizeString }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -311,19 +322,24 @@ fun MainActivity.StorageScreen() {
                     }
                 }
             }
-            items(downloads ?: emptyList()) { data ->
-                val isParentDownloaded = data.second
-                if (!isParentDownloaded)
+            items(zonesLiveData) { data ->
+                if (data.downloaded)
                     DownloadedDataItem(
-                        data.first,
+                        data.data(),
                         DataClassActivity::class.java
-                    ) {
-                        // This gets called when data gets deleted
-                        storageViewModel.loadDownloads()
-                    }
+                    ) { }
+            }
+            items(sectorsLiveData) { data ->
+                if (data.downloaded) {
+                    val isParentDownloaded =
+                        zonesLiveData.find { it.downloaded && it.objectId == data.zone } != null
+                    if (!isParentDownloaded)
+                        DownloadedDataItem(
+                            data.data(),
+                            DataClassActivity::class.java
+                        ) { }
+                }
             }
         }
     }
-
-    storageViewModel.loadDownloads()
 }

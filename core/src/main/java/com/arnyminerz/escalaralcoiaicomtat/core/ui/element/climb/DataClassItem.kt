@@ -54,9 +54,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
 import java.text.SimpleDateFormat
 
 @Composable
@@ -136,7 +133,6 @@ private fun DownloadableDataClassItem(
             quality = DOWNLOAD_QUALITY_DEFAULT
         )
     }
-    val childrenCount by viewModel.childrenCounter(item).observeAsState()
 
     Card(
         backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -180,26 +176,18 @@ private fun DownloadableDataClassItem(
                             .fillMaxWidth(),
                     )
                     Text(
-                        text = childrenCount?.let {
+                        text = item.metadata.childrenCount.let {
                             if (item.namespace == Zone.NAMESPACE)
                                 stringResource(R.string.downloads_zones_title, it)
                             else
                                 stringResource(R.string.downloads_sectors_title, it)
-                        } ?: stringResource(R.string.status_loading),
+                        },
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .padding(start = 4.dp)
-                            .fillMaxWidth()
-                            .placeholder(
-                                visible = childrenCount == null,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    .copy(alpha = 0.5f),
-                                highlight = PlaceholderHighlight.shimmer(
-                                    highlightColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            ),
+                            .fillMaxWidth(),
                     )
                 }
                 Column {
@@ -207,7 +195,6 @@ private fun DownloadableDataClassItem(
                         colors = ButtonDefaults.elevatedButtonColors(
                             containerColor = MaterialTheme.colorScheme.tertiary
                         ),
-                        enabled = childrenCount?.let { it > 0 } ?: false,
                         modifier = Modifier
                             .padding(end = 4.dp),
                         onClick = onClickListener,
@@ -365,8 +352,6 @@ private fun NonDownloadableDataClassItem(
     viewModel: DataClassItemViewModel,
     onClick: (() -> Unit)? = null
 ) {
-    val childrenCount by viewModel.childrenCounter(item).observeAsState()
-
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
@@ -378,7 +363,7 @@ private fun NonDownloadableDataClassItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(160.dp)
-                    .clickable(enabled = childrenCount?.let { it > 0 } ?: false) {
+                    .clickable {
                         onClick?.invoke() ?: viewModel.loadChildren(item) { it.displayName }
                     },
                 imageLoadParameters = ImageLoadParameters()
@@ -399,9 +384,10 @@ private fun NonDownloadableDataClassItem(
                         .fillMaxWidth()
                 )
                 Text(
-                    text = childrenCount?.let {
-                        stringResource(R.string.downloads_zones_title, it)
-                    } ?: stringResource(R.string.status_loading),
+                    text = stringResource(
+                        R.string.downloads_zones_title,
+                        item.metadata.childrenCount
+                    ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier

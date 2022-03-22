@@ -5,20 +5,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.isDownloadIndexed
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -27,10 +23,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingle
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.updateAvailable
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getList
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -44,7 +39,6 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
         Timber.d("$this::onCleared")
     }
 
-    val downloads: MutableLiveData<List<Pair<DownloadedData, Boolean>>> = MutableLiveData()
     val sizeString = mutableStateOf(humanReadableByteCountBin(0))
 
     val updatesAvailable = UpdaterSingleton.getInstance().updateAvailableObjects
@@ -58,82 +52,27 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
     mutableStateOf(emptyMap<Pair<Namespace, @ObjectId String>, UpdaterSingleton.Item>())
         private set
 
-    /**
-     * Loads the downloaded DataClasses and adds them to [downloads]. [sizeString] will be updated.
-     * @author Arnau Mora
-     * @since 20220101
-     */
-    fun loadDownloads() {
-        viewModelScope.launch {
-            Timber.i("Loading downloads...")
-            var size = 0L
-            val list = arrayListOf<Pair<DownloadedData, Boolean>>()
-            val downloadsFlow = app.getDownloads()
-            downloadsFlow.collect { data ->
-                val parentIndexed =
-                    data.parentId.ifEmpty { null }?.isDownloadIndexed(context)
-                Timber.i("Collected ${data.namespace}:${data.objectId}, adding. Parent (${data.parentId}) indexed: $parentIndexed")
-                list.add(data to (parentIndexed?.downloaded ?: false))
-                size += data.sizeBytes
-            }
-            Timber.i("Size: $size")
-            this@StorageViewModel.sizeString.value = humanReadableByteCountBin(size)
-            downloads.postValue(list)
-        }
-    }
-
-    private suspend inline fun <D : DataClass<*, *, R>, reified R : DataRoot<D>> performSearch(
+    private suspend inline fun <D : DataClassImpl, reified R : DataRoot<D>> performSearch(
         namespace: Namespace,
         @ObjectId objectId: String,
-        scoresSet: (index: Int, score: Int) -> Unit,
-        setScore: (index: Int) -> Unit
-    ) = SearchSingleton.getInstance(context)
-        .searchSession
-        .getList<D, R>("", namespace) { index, scoreItem -> scoresSet(index, scoreItem) }
-        .let { list ->
-            list.find { it.objectId == objectId }
-                ?.also {
-                    setScore(list.indexOf(it))
-                }
-        }
+    ) = DataSingleton.getInstance(context)
+        .repository
+        .get(namespace, objectId)
 
     @Suppress("UNCHECKED_CAST")
     fun <D : DataClassImpl> getDataClass(
         namespace: Namespace,
         @ObjectId objectId: String,
-    ) = mutableStateOf<Pair<D, Int>?>(null)
+    ) = mutableStateOf<D?>(null)
         .apply {
             viewModelScope.launch {
                 Timber.d("Loading %s: %s", namespace, objectId)
-                val scores = hashMapOf<Int, Int>()
-                var score = 0
 
                 val dataClass = when (namespace) {
-                    Area.NAMESPACE -> performSearch<Area, AreaData>(namespace, objectId,
-                        { index, scoreItem ->
-                            scores[index] = scoreItem
-                        }, { index ->
-                            score = scores[index]!!
-                        }
-                    )
-                    Zone.NAMESPACE -> performSearch<Zone, ZoneData>(namespace, objectId,
-                        { index, scoreItem ->
-                            scores[index] = scoreItem
-                        }, { index ->
-                            score = scores[index]!!
-                        }
-                    )
-                    Sector.NAMESPACE -> performSearch<Sector, SectorData>(namespace, objectId,
-                        { index, scoreItem ->
-                            scores[index] = scoreItem
-                        }, { index ->
-                            score = scores[index]!!
-                        }
-                    )
-                    Path.NAMESPACE -> SearchSingleton.getInstance(context)
-                        .searchSession
-                        .getList<Path, PathData>("", Path.NAMESPACE)
-                        .find { it.objectId == objectId }!!
+                    Area.NAMESPACE -> performSearch<Area, AreaData>(namespace, objectId)
+                    Zone.NAMESPACE -> performSearch<Zone, ZoneData>(namespace, objectId)
+                    Sector.NAMESPACE -> performSearch<Sector, SectorData>(namespace, objectId)
+                    Path.NAMESPACE -> performSearch<Path, PathData>(namespace, objectId)
                     else -> {
                         Timber.e(
                             "Could not load data of %s:%s since the namespace is not valid",
@@ -143,14 +82,16 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
                     }
                 }
                 Timber.d("Got $namespace: $dataClass")
-                value = (dataClass as D) to score
+                value = dataClass as D
             }
         }
 
     fun checkForUpdates() {
         viewModelScope.launch {
-            val updateAvailable = updateAvailable(getApplication())
-            Timber.i("Update available: $updateAvailable")
+            launch(Dispatchers.IO) {
+                val updateAvailable = updateAvailable(getApplication())
+                Timber.i("Update available: $updateAvailable")
+            }
         }
     }
 
@@ -168,7 +109,6 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
                     getApplication(),
                     data.namespace,
                     data.objectId,
-                    data.score
                 )
             currentlyUpdatingItems = currentlyUpdatingItems
                 .toMutableMap()

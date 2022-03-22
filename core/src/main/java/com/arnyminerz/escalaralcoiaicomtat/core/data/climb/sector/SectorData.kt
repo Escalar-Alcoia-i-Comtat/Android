@@ -1,84 +1,43 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector
 
-import androidx.appsearch.annotation.Document
-import androidx.appsearch.app.AppSearchSchema
-import androidx.appsearch.app.GenericDocument
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import org.osmdroid.util.GeoPoint
+import java.util.Date
 
-@Document
+@Entity(tableName = "Sectors")
 data class SectorData(
-    @Document.Score var index: Int,
-    @Document.Id var objectId: String,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES) var displayName: String,
-    @Document.CreationTimestampMillis var timestamp: Long,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_NONE) var sunTime: String,
-    @Document.BooleanProperty var kidsApt: Boolean,
-    @Document.LongProperty var walkingTime: Long,
-    @Document.DoubleProperty var latitude: Double?,
-    @Document.DoubleProperty var longitude: Double?,
-    @Document.StringProperty var weight: String,
-    @Document.StringProperty var image: String,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var webUrl: String,
-    @Document.StringProperty(indexingType = AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS) var parentObjectId: String,
+    @PrimaryKey var objectId: String,
+    @ColumnInfo(name = "last_edit") val lastEdit: Date,
+    @ColumnInfo(name = "displayName") val displayName: String,
+    @ColumnInfo(name = "image") val image: String,
+    @ColumnInfo(name = "kidsApt") val kidsApt: Boolean,
+    @ColumnInfo(name = "latitude") val latitude: Double?,
+    @ColumnInfo(name = "longitude") val longitude: Double?,
+    @ColumnInfo(name = "sunTime") val sunTime: String,
+    @ColumnInfo(name = "walkingTime") val walkingTime: Long,
+    @ColumnInfo(name = "weight") val weight: String,
+    @ColumnInfo(name = "zone") val zone: String,
+    @ColumnInfo(name = "downloaded") var downloaded: Boolean = false,
+    @ColumnInfo(name = "downloadSize") var downloadSize: Long?,
+    @ColumnInfo(name = "childrenCount") var childrenCount: Long,
 ) : DataRoot<Sector> {
-    companion object {
-        object Migrator : androidx.appsearch.app.Migrator() {
-            override fun shouldMigrate(
-                currentVersion: Int,
-                finalVersion: Int
-            ): Boolean =
-                finalVersion > currentVersion
-
-            override fun onUpgrade(
-                currentVersion: Int,
-                finalVersion: Int,
-                document: GenericDocument
-            ): GenericDocument {
-                val sectorData = if (finalVersion == 4) {
-                    SectorData(
-                        document.score,
-                        document.id,
-                        document.getPropertyString("displayName")!!,
-                        document.getPropertyLong("timestamp"),
-                        document.getPropertyString("sunTime")!!,
-                        document.getPropertyBoolean("kidsApt"),
-                        document.getPropertyLong("walkingTime"),
-                        document.getPropertyDouble("latitude"),
-                        document.getPropertyDouble("longitude"),
-                        document.getPropertyString("weight")!!,
-                        document.getPropertyString("image")!!,
-                        document.getPropertyString("webUrl")!!,
-                        document.getPropertyString("parentObjectId")!!
-                    )
-                } else throw IllegalStateException("Could not convert migrate search schema")
-                return GenericDocument.fromDocumentClass(sectorData)
-            }
-
-            override fun onDowngrade(
-                currentVersion: Int,
-                finalVersion: Int,
-                document: GenericDocument
-            ): GenericDocument {
-                throw IllegalStateException("Downgrade must not be performed.")
-            }
-        }
-    }
-
-    @Document.Namespace
-    var namespace: String = Sector.NAMESPACE.namespace
-
-    override fun data() = Sector(
+    override fun data(): Sector = Sector(
         objectId,
         displayName,
-        timestamp,
+        lastEdit.time,
         sunTime,
         kidsApt,
         walkingTime,
-        if (latitude == null || longitude == null) null else GeoPoint(latitude!!, longitude!!),
+        if (latitude != null && longitude != null) GeoPoint(latitude, longitude) else null,
         weight,
         image,
-        webUrl.ifEmpty { null },
-        parentObjectId
+        null,
+        zone,
+        downloaded,
+        downloadSize,
+        childrenCount,
     )
 }

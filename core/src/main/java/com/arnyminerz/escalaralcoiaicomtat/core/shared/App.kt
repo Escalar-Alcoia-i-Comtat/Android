@@ -4,33 +4,19 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import androidx.annotation.WorkerThread
-import androidx.appsearch.app.AppSearchSession
-import androidx.appsearch.app.SetSchemaRequest
-import androidx.appsearch.exceptions.AppSearchException
 import androidx.lifecycle.AndroidViewModel
-import androidx.work.await
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getArea
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getAreas
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDownloads
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPath
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getPaths
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getSector
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getZone
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
 
 class App : Application(), ConnectivityProvider.ConnectivityStateListener {
@@ -44,29 +30,12 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      */
     private lateinit var analytics: FirebaseAnalytics
 
-    private lateinit var searchSingleton: SearchSingleton
+    private lateinit var dataSingleton: DataSingleton
 
     override fun onCreate() {
         super.onCreate()
 
-        searchSingleton = SearchSingleton.getInstance(this)
-
-        doAsync {
-            Timber.v("Search > Adding document classes...")
-            try {
-                val setSchemaRequest = SetSchemaRequest.Builder()
-                    .addDocumentClasses(SEARCH_SCHEMAS)
-                    .setVersion(SEARCH_SCHEMA_VERSION)
-                    .setMigrator("SectorData", SectorData.Companion.Migrator)
-                    .build()
-                searchSingleton
-                    .searchSession
-                    .setSchema(setSchemaRequest)
-                    .await()
-            } catch (e: AppSearchException) {
-                Timber.e(e, "Search > Could not add search schemas.")
-            }
-        }
+        dataSingleton = DataSingleton.getInstance(this)
 
         PreferencesModule.initWith(this)
 
@@ -86,12 +55,13 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
 
     override fun onTerminate() {
         Timber.i("Terminating app...")
+
         Timber.v("Removing network listener...")
         provider.removeListener(this)
-        Timber.v("Closing AppSearch...")
-        searchSingleton
-            .searchSession
-            .close()
+
+        Timber.v("Closing database connection...")
+        dataSingleton.close()
+
         super.onTerminate()
     }
 
@@ -109,71 +79,64 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
      * @since 20210818
      */
     @WorkerThread
-    suspend fun getAreas(): List<Area> = searchSingleton.searchSession.getAreas()
+    suspend fun getAreas(): List<Area> = dataSingleton.repository.getAreas().map { it.data() }
 
     /**
      * Searches for the specified [Zone].
-     * Serves for a shortcut to [AppSearchSession.getZone].
      * @author Arnau Mora
      * @since 20210820
-     * @see AppSearchSession.getZone
      */
     @WorkerThread
     suspend fun getArea(@ObjectId areaId: String): Area? =
-        searchSingleton.searchSession.getArea(areaId)
+        dataSingleton.repository.getArea(areaId)?.data()
 
     /**
      * Searches for the specified [Zone].
-     * Serves for a shortcut to [AppSearchSession.getZone].
      * @author Arnau Mora
      * @since 20210820
-     * @see AppSearchSession.getZone
      */
     @WorkerThread
     suspend fun getZone(@ObjectId zoneId: String): Zone? =
-        searchSingleton.searchSession.getZone(zoneId)
+        dataSingleton.repository.getZone(zoneId)?.data()
 
     /**
      * Searches for the specified [Sector].
-     * Serves for a shortcut to [AppSearchSession.getSector].
      * @author Arnau Mora
      * @since 20210820
-     * @see AppSearchSession.getSector
      */
     @WorkerThread
     suspend fun getSector(@ObjectId sectorId: String): Sector? =
-        searchSingleton.searchSession.getSector(sectorId)
+        dataSingleton.repository.getSector(sectorId)?.data()
 
     /**
      * Searches for the specified [Path].
-     * Serves for a shortcut to [AppSearchSession.getPath].
      * @author Arnau Mora
      * @since 20210820
-     * @see AppSearchSession.getSector
      */
     @WorkerThread
     suspend fun getPath(@ObjectId pathId: String): Path? =
-        searchSingleton.searchSession.getPath(pathId)
+        dataSingleton.repository.getPath(pathId)?.data()
 
     /**
      * Searches for the specified [Path]s.
-     * Serves for a shortcut to [AppSearchSession.getPaths].
      * @author Arnau Mora
      * @since 20210820
-     * @see AppSearchSession.getSector
      */
     @WorkerThread
     suspend fun getPaths(@ObjectId zoneId: String): List<Path> =
-        searchSingleton.searchSession.getPaths(zoneId)
+        dataSingleton
+            .repository
+            .getChildren(Namespace.PATH, zoneId)
+            ?.map { it.data() as Path }
+            ?: emptyList()
 
     /**
      * Fetches all the downloaded items.
      * @author Arnau Mora
      * @since 20211231
-     * @return A [Flow] that emits the downloaded items.
      */
     @WorkerThread
-    suspend fun getDownloads(): Flow<DownloadedData> = searchSingleton.searchSession.getDownloads()
+    suspend fun getDownloads() = dataSingleton.repository.getAllByDownloaded()
 }
 
 /**

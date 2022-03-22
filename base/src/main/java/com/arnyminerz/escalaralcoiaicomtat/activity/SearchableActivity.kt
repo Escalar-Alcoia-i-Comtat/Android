@@ -8,9 +8,6 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.WorkerThread
-import androidx.appsearch.app.SearchResult
-import androidx.appsearch.app.SearchSpec
-import androidx.appsearch.exceptions.AppSearchException
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -61,21 +58,15 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone.Companion.SAMPLE
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.DATA_SEARCH_SCHEMAS_NAMES
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
@@ -339,40 +330,13 @@ class SearchableActivity : ComponentActivity() {
         private suspend fun performSearch(query: String): List<DataClassImpl> {
             val searchItems = arrayListOf<DataClassImpl>()
 
-            Timber.v("Creating search spec...")
-            val searchSpec = SearchSpec.Builder()
-                .addFilterSchemas(DATA_SEARCH_SCHEMAS_NAMES)
-                .build()
-            Timber.v("Performing search...")
-            val searchResults = SearchSingleton.getInstance(context)
-                .searchSession
-                .search(query, searchSpec)
-            Timber.v("Getting next page...")
-            val searchPage = searchResults.nextPage.await()
-            Timber.v("Got ${searchPage.size} results.")
-            for (searchResult in searchPage) {
-                val genericDocument = searchResult.genericDocument
-                val schemaType = genericDocument.schemaType
-                val dataClassImpl: DataClassImpl? = try {
-                    when (schemaType) {
-                        "AreaData" -> genericDocument.toDocumentClass(AreaData::class.java)
-                            .data()
-                        "ZoneData" -> genericDocument.toDocumentClass(ZoneData::class.java)
-                            .data()
-                        "SectorData" -> genericDocument.toDocumentClass(SectorData::class.java)
-                            .data()
-                        "PathData" -> genericDocument.toDocumentClass(PathData::class.java)
-                            .data()
-                        else -> null
-                    }
-                } catch (e: AppSearchException) {
-                    Timber.e(e, "Failed to convert the data to a valid dataClass.")
-                    null
-                }
-                if (dataClassImpl != null)
-                    searchItems.add(dataClassImpl)
-                else Timber.i("Could not add result since dataClassImpl is null")
-            }
+            val searchResults = DataSingleton.getInstance(context)
+                .repository
+                .find(query)
+
+            Timber.v("Got ${searchResults.size} results.")
+            for (searchResult in searchResults)
+                searchItems.add(searchResult.data())
 
             return searchItems
         }

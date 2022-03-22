@@ -1,7 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen
 
 import androidx.annotation.StringRes
-import androidx.appsearch.app.SearchSpec
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,15 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.R
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.filesDir
@@ -142,20 +135,15 @@ private fun ClearSearchSessionButton(
         buttonText,
         valueLoad = { true },
         deleteAction = {
-            val searchSpec = SearchSpec.Builder()
-                .addFilterPackageNames("com.arnyminerz.escalaralcoiaicomtat")
-                .setResultCountPerPage(10000)
-                .addFilterDocumentClasses(
-                    AreaData::class.java,
-                    ZoneData::class.java,
-                    SectorData::class.java,
-                    PathData::class.java,
-                )
-                .build()
-            SearchSingleton.getInstance(context)
-                .searchSession
-                .remove("", searchSpec)
-                .await()
+            DataSingleton.getInstance(context)
+                .repository
+                .apply {
+                    clearAreas()
+                    clearZones()
+                    clearSectors()
+                    clearPaths()
+                }
+
             PreferencesModule
                 .systemPreferencesRepository
                 .voidData()
@@ -177,8 +165,6 @@ fun StorageManagerWindow(launchApp: () -> Unit, sendFeedback: () -> Unit) {
     val context = LocalContext.current
     val cacheDir = context.cacheDir
     val storageDir = cacheDir.parentFile
-
-    val app = context.applicationContext as App
 
     Column(
         modifier = Modifier

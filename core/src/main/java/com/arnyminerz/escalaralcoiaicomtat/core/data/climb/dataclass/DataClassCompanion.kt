@@ -9,7 +9,7 @@ abstract class DataClassCompanion<D : DataClass<*, *, *>> {
 
     abstract val IMAGE_QUALITY: Int
 
-    abstract val CONSTRUCTOR: (data: JSONObject, objectId: String) -> D
+    abstract val CONSTRUCTOR: (data: JSONObject, objectId: String, childrenCount: Long) -> D
 
     abstract val SAMPLE: D
 }

@@ -2,14 +2,10 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
 import android.content.Context
 import androidx.annotation.WorkerThread
-import androidx.appsearch.app.PutDocumentsRequest
-import androidx.appsearch.app.SetSchemaRequest
-import androidx.work.await
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
@@ -17,8 +13,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.toDataClassList
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SEARCH_SCHEMAS
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.ktx.Firebase
@@ -37,6 +31,7 @@ import java.util.Locale
  * @param D The [DataClass] type to decode.
  * @param I The [DataRoot] class to store in search indexation.
  * @param jsonData The data to decode.
+ * @param childrenCount The amount of children the DataClass has.
  * @param namespace The namespace of [D].
  * @param constructor The constructor for building [D] from [JSONObject].
  * @return A pair of lists. The first is the objects in [jsonData], the second one is for indexing
@@ -44,9 +39,10 @@ import java.util.Locale
  */
 private fun <D : DataClass<*, *, I>, I : DataRoot<D>> decode(
     jsonData: JSONObject,
+    childrenCount: (objectId: String) -> Long,
     namespace: Namespace,
-    constructor: (data: JSONObject, id: String) -> D,
-) = decode<D, I, Int>(jsonData, namespace, constructor, null)
+    constructor: (data: JSONObject, id: String, childrenCount: Long) -> D,
+) = decode<D, I, Int>(jsonData, childrenCount, namespace, constructor, null)
 
 /**
  * Decodes the data from a json object retrieved from the server.
@@ -56,6 +52,7 @@ private fun <D : DataClass<*, *, I>, I : DataRoot<D>> decode(
  * @param I The [DataRoot] class to store in search indexation.
  * @param R The type for sorting with [sortBy].
  * @param jsonData The data to decode.
+ * @param childrenCount The amount of children the DataClass has.
  * @param namespace The namespace of [D].
  * @param constructor The constructor for building [D] from [JSONObject].
  * @param sortBy If set, the list, once constructed, will be sorted by the set parameter.
@@ -64,21 +61,22 @@ private fun <D : DataClass<*, *, I>, I : DataRoot<D>> decode(
  */
 private fun <D : DataClass<*, *, I>, I : DataRoot<D>, R : Comparable<R>> decode(
     jsonData: JSONObject,
+    childrenCount: (objectId: String) -> Long,
     namespace: Namespace,
-    constructor: (data: JSONObject, id: String) -> D,
+    constructor: (data: JSONObject, id: String, childrenCount: Long) -> D,
     sortBy: ((I) -> R?)? = null,
 ): List<I> {
     val index = arrayListOf<I>()
     val jsonObject = jsonData.getJSONObject(namespace.tableName)
     val keys = jsonObject.keys()
-    for ((i, id) in keys.withIndex()) {
+    for (id in keys) {
         val json = jsonObject.getJSONObject(id)
 
         // Process the DataClass data
-        val dataClass = constructor(json, id)
+        val dataClass = constructor(json, id, childrenCount(id))
 
         // Add the DataClass to the list
-        index.add(dataClass.data(i))
+        index.add(dataClass.data())
     }
     sortBy?.let { index.sortBy(it) }
     return index
@@ -125,8 +123,7 @@ suspend fun loadAreas(
     context: Context,
     jsonData: JSONObject
 ): List<Area> {
-    val dataSingleton = DataSingleton.getInstance()
-    val searchSingleton = SearchSingleton.getInstance(context)
+    val dataSingleton = DataSingleton.getInstance(context)
 
     val indexedDataFlow = PreferencesModule
         .systemPreferencesRepository
@@ -134,9 +131,10 @@ suspend fun loadAreas(
     val indexedSearch = indexedDataFlow.first()
     if (indexedSearch) {
         Timber.v("Search results already indexed. Fetching from application...")
-        val list = searchSingleton
-            .searchSession
+        val list = dataSingleton
+            .repository
             .getAreas() // If not empty, return areas
+            .map { it.data() }
             .ifEmpty {
                 // If empty, reset the preference, and launch loadAreas again
                 Timber.w("Areas is empty, resetting search indexed pref and launching again.")
@@ -156,49 +154,39 @@ suspend fun loadAreas(
 
     Timber.d("Processing data...")
     try {
-        val decodedAreas = decode(jsonData, Area.NAMESPACE, Area.CONSTRUCTOR) { it.displayName }
-        val decodedZones = decode(jsonData, Zone.NAMESPACE, Zone.CONSTRUCTOR)
-        val decodedSectors = decode(jsonData, Sector.NAMESPACE, Sector.CONSTRUCTOR)
         val decodedPaths = decode(jsonData)
+        val decodedSectors = decode(
+            jsonData,
+            { id -> decodedPaths.filter { it.sector == id }.size.toLong() },
+            Sector.NAMESPACE,
+            Sector.CONSTRUCTOR,
+        )
+        val decodedZones = decode(
+            jsonData,
+            { id -> decodedSectors.filter { it.zone == id }.size.toLong() },
+            Zone.NAMESPACE,
+            Zone.CONSTRUCTOR,
+        )
+        val decodedAreas = decode(
+            jsonData,
+            { id -> decodedZones.filter { it.area == id }.size.toLong() },
+            Area.NAMESPACE,
+            Area.CONSTRUCTOR
+        ) { it.displayName }
 
         trace.putMetric("areasCount", decodedAreas.size.toLong())
         trace.putMetric("zonesCount", decodedZones.size.toLong())
         trace.putMetric("sectorsCount", decodedSectors.size.toLong())
         trace.putMetric("pathsCount", decodedPaths.size.toLong())
 
-        Timber.v("Search > Adding document classes...")
-        val setSchemaRequest = SetSchemaRequest.Builder()
-            .addDocumentClasses(SEARCH_SCHEMAS)
-            .build()
-        searchSingleton
-            .searchSession
-            .setSchema(setSchemaRequest)
-            .await()
-
         Timber.v("Search > Adding documents...")
-        val putRequest = PutDocumentsRequest.Builder()
-            .addDocuments(decodedAreas)
-            .addDocuments(decodedZones)
-            .addDocuments(decodedSectors)
-            .addDocuments(decodedPaths)
-            .build()
-        val putResponse = searchSingleton
-            .searchSession
-            .put(putRequest)
-            .await()
-        val successfulResults = putResponse?.successes
-        val failedResults = putResponse?.failures
-        if (successfulResults?.isEmpty() != true)
-            Timber.i("Search > Added ${successfulResults?.size} documents...")
-        if (failedResults?.isEmpty() != true)
-            Timber.w("Search > Could not add ${failedResults?.size} documents...")
+        dataSingleton.repository
+            .addAll(decodedAreas)
+            .addAll(decodedZones)
+            .addAll(decodedSectors)
+            .addAll(decodedPaths)
 
-        // This persists the data to the disk
-        Timber.v("Search > Flushing database...")
-        searchSingleton
-            .searchSession
-            .requestFlush()
-            .await()
+        Timber.i("Search > Added documents")
 
         Timber.v("Search > Storing to preferences...")
         PreferencesModule

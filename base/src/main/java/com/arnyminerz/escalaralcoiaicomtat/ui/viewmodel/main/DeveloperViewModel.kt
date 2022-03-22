@@ -1,15 +1,15 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main
 
 import android.app.Application
-import androidx.appsearch.app.SearchSpec
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.work.await
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.SearchSingleton
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadedData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import kotlinx.coroutines.launch
@@ -25,7 +25,8 @@ class DeveloperViewModel(application: Application) : AndroidViewModel(applicatio
         Timber.d("$this::onCleared")
     }
 
-    val indexedDownloads: MutableLiveData<List<String>> = MutableLiveData()
+    val indexedDownloads: MutableLiveData<List<DataRoot<out DataClass<out DataClassImpl, *, out DataRoot<*>>>>> =
+        MutableLiveData()
     val indexTree: MutableLiveData<String> = MutableLiveData()
 
     /**
@@ -35,25 +36,11 @@ class DeveloperViewModel(application: Application) : AndroidViewModel(applicatio
      */
     fun loadIndexedDownloads() {
         viewModelScope.launch {
-            val searchResults = SearchSingleton.getInstance(context)
-                .searchSession
-                .search(
-                    "",
-                    SearchSpec.Builder()
-                        .addFilterDocumentClasses(DownloadedData::class.java)
-                        .build()
-                )
-            var page = searchResults.nextPage.await()
-            val items = mutableListOf<String>()
-            while (page.isNotEmpty()) {
-                for (result in page) {
-                    val genericDocument = result.genericDocument
-                    val data = genericDocument.toDocumentClass(DownloadedData::class.java)
-                    items.add(data.toString())
-                }
-                page = searchResults.nextPage.await()
-            }
-            indexedDownloads.postValue(items)
+            indexedDownloads.postValue(
+                DataSingleton.getInstance(context)
+                    .repository
+                    .getAllByDownloaded()
+            )
         }
     }
 
