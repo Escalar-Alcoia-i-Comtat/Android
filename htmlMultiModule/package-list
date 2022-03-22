@@ -11,7 +11,6 @@ com.arnyminerz.escalaralcoiaicomtat.fragment.dialog
 com.arnyminerz.escalaralcoiaicomtat.fragment.model
 com.arnyminerz.escalaralcoiaicomtat.list.completions.holder
 com.arnyminerz.escalaralcoiaicomtat.list.holder
-com.arnyminerz.escalaralcoiaicomtat.paging
 com.arnyminerz.escalaralcoiaicomtat.service
 com.arnyminerz.escalaralcoiaicomtat.shared
 com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore
@@ -28,6 +27,10 @@ com.arnyminerz.escalaralcoiaicomtat.core.data
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass
+com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.converter
+com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.dao
+com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.database
+com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.repository
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
