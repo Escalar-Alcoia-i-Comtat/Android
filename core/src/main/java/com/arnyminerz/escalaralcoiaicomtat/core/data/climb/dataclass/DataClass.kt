@@ -5,11 +5,16 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.WorkerThread
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -50,9 +55,15 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerFactory
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
+import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
-import com.skydoves.landscapist.ShimmerParams
+import com.bumptech.glide.request.target.Target
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.fade
+import com.google.accompanist.placeholder.placeholder
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.parcelize.IgnoredOnParcel
 import org.json.JSONObject
@@ -61,7 +72,7 @@ import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.Serializable
-import java.util.Date
+import java.util.*
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -892,6 +903,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
     ) {
         val context = LocalContext.current
         val image = imageData(context, imageLoadParameters)
+        var isLoading by remember { mutableStateOf(true) }
 
         GlideImage(
             imageModel = image,
@@ -903,16 +915,35 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
                     .encodeQuality(imageQuality)
                     .sizeMultiplier(imageLoadParameters?.resultImageScale ?: 1f)
             },
-            shimmerParams = ShimmerParams(
-                baseColor = MaterialTheme.colorScheme.surfaceVariant,
-                highlightColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                durationMillis = 350,
-                dropOff = 0.65f,
-                tilt = 20f
-            ),
+            requestListener = object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean = false
+
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    isLoading = false
+                    return false
+                }
+            },
             contentScale = ContentScale.Crop,
             alignment = Alignment.Center,
-            modifier = modifier,
+            modifier = modifier
+                .placeholder(
+                    isLoading,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    highlight = PlaceholderHighlight.fade(
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                ),
         )
     }
 
