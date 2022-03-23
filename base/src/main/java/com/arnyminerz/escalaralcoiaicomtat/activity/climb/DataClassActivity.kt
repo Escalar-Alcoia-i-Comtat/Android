@@ -90,6 +90,13 @@ class DataClassActivity : NetworkAwareComponentActivity() {
 
     private val navStack = mutableStateOf(emptyList<DataClassImpl>())
 
+    /**
+     * Stores whether or not the sector image is maximized.
+     * @author Arnau Mora
+     * @since 20220323
+     */
+    private var isMaximized = mutableStateOf(false)
+
     @OptIn(
         ExperimentalFoundationApi::class,
         ExperimentalMaterial3Api::class,
@@ -129,6 +136,7 @@ class DataClassActivity : NetworkAwareComponentActivity() {
                         sectorPageViewModel,
                         zone,
                         childrenCount!!,
+                        isMaximized,
                         index,
                     ) { index = it }
                 } else {
@@ -169,9 +177,11 @@ class DataClassActivity : NetworkAwareComponentActivity() {
     }
 
     override fun onBackPressed() {
-        if (navStack.value.size > 1) {
+        if (navStack.value.size > 1)
             navStack.value = navStack.value.dropLast(1)
-        } else
+        else if (isMaximized.value)
+            isMaximized.value = false
+        else
             super.onBackPressed()
     }
 

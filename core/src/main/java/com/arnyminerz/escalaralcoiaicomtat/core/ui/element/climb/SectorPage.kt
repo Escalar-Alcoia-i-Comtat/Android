@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,13 +75,13 @@ val Float.Companion.DegreeConverter
 fun SectorPage(
     viewModel: SectorPageViewModel,
     sector: Sector,
-    maximizeStateListener: (maximized: Boolean) -> Unit
+    maximized: MutableState<Boolean>,
 ) {
     val context = LocalContext.current
     viewModel.loadPaths(sector)
 
     Column(modifier = Modifier.fillMaxSize()) {
-        var imageMaximized by remember { mutableStateOf(false) }
+        var imageMaximized by remember { maximized }
 
         // Image
         Box(
@@ -95,9 +96,7 @@ fun SectorPage(
                     .fillMaxSize()
             )
             SmallFloatingActionButton(
-                onClick = {
-                    imageMaximized = !imageMaximized; maximizeStateListener(imageMaximized)
-                },
+                onClick = { imageMaximized = !imageMaximized },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(8.dp)
