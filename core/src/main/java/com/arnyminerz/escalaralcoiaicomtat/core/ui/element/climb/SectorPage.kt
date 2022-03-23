@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.TwoWayConverter
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -82,12 +83,13 @@ fun SectorPage(
 
     Column(modifier = Modifier.fillMaxSize()) {
         var imageMaximized by remember { maximized }
+        val heightFraction by animateFloatAsState(targetValue = if (imageMaximized) 1f else .7f)
 
         // Image
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(if (imageMaximized) 1f else .7f)
+                .fillMaxHeight(heightFraction)
         ) {
             ZoomableImage(
                 imageModel = viewModel.loadImage(sector),
