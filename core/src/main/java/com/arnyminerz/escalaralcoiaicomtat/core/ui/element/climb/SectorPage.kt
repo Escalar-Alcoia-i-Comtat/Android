@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.TwoWayConverter
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,19 +76,20 @@ val Float.Companion.DegreeConverter
 fun SectorPage(
     viewModel: SectorPageViewModel,
     sector: Sector,
-    maximizeStateListener: (maximized: Boolean) -> Unit
+    maximized: MutableState<Boolean>,
 ) {
     val context = LocalContext.current
     viewModel.loadPaths(sector)
 
     Column(modifier = Modifier.fillMaxSize()) {
-        var imageMaximized by remember { mutableStateOf(false) }
+        var imageMaximized by remember { maximized }
+        val heightFraction by animateFloatAsState(targetValue = if (imageMaximized) 1f else .7f)
 
         // Image
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(if (imageMaximized) 1f else .7f)
+                .fillMaxHeight(heightFraction)
         ) {
             ZoomableImage(
                 imageModel = viewModel.loadImage(sector),
@@ -95,9 +98,7 @@ fun SectorPage(
                     .fillMaxSize()
             )
             SmallFloatingActionButton(
-                onClick = {
-                    imageMaximized = !imageMaximized; maximizeStateListener(imageMaximized)
-                },
+                onClick = { imageMaximized = !imageMaximized },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(8.dp)

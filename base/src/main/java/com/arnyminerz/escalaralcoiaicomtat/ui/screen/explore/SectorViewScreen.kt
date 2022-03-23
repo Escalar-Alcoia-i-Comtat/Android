@@ -27,6 +27,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +58,7 @@ import timber.log.Timber
  * contents asynchronously.
  * @param zone The [Zone] that contains the children to be displayed.
  * @param childrenCount The amount of children the [zone] has.
+ * @param maximized Stores whether or not the image is maximized.
  * @param index The index to currently display.
  * @param indexInterface For updating the activity's stored index value.
  */
@@ -68,8 +70,9 @@ fun Activity.SectorViewScreen(
     sectorPageViewModel: SectorPageViewModel,
     zone: Zone,
     childrenCount: Int,
+    maximized: MutableState<Boolean>,
     index: Int?,
-    indexInterface: (index: Int) -> Unit
+    indexInterface: (index: Int) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -170,19 +173,19 @@ fun Activity.SectorViewScreen(
                 },
             )
 
-        var scrollEnabled by remember { mutableStateOf(true) }
         if (currentSector != null)
             HorizontalPager(
                 count = childrenCount,
                 state = pagerState,
                 modifier = Modifier.padding(padding),
-                userScrollEnabled = scrollEnabled,
+                userScrollEnabled = !maximized.value,
             ) {
                 Timber.d("Rendering Sector...")
                 SectorPage(
                     sectorPageViewModel,
                     currentSector!!,
-                ) { scrollEnabled = !it }
+                    maximized,
+                )
             }
         else
             Box(modifier = Modifier.fillMaxSize()) {
