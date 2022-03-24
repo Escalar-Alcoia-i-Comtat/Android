@@ -36,11 +36,11 @@ class DeveloperViewModel(application: Application) : AndroidViewModel(applicatio
      */
     fun loadIndexedDownloads() {
         viewModelScope.launch {
-            indexedDownloads.postValue(
-                DataSingleton.getInstance(context)
-                    .repository
-                    .getAllByDownloaded()
-            )
+            val downloadedItems = DataSingleton.getInstance(context)
+                .repository
+                .getAllByDownloaded()
+
+            indexedDownloads.postValue(downloadedItems)
         }
     }
 
