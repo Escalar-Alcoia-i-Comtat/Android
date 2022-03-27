@@ -102,7 +102,7 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
 
     private data class ImageDownloadData(
         val imagePath: String,
-        val imageFile: File,
+        val imageFile: File?,
         @ObjectId val objectId: String,
         val namespace: Namespace,
         val scale: Float
@@ -118,12 +118,15 @@ private constructor(appContext: Context, workerParams: WorkerParameters) :
      * @author Arnau Mora
      * @since 20210822
      * @param data The data class that sets what to download
+     * @throws IllegalStateException When the storage is not available.
      */
+    @Throws(IllegalStateException::class)
     private suspend fun downloadImageFile(
         data: ImageDownloadData,
     ): Result = coroutineScope {
         val imagePath: String = data.imagePath
         val imageFile: File = data.imageFile
+            ?: throw IllegalStateException("Storage not available. Image file not accessible.")
         val objectId: String = data.objectId
         val namespace: Namespace = data.namespace
         val scale: Float = data.scale

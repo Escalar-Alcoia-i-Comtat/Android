@@ -22,7 +22,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.filesDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -193,7 +192,7 @@ fun StorageManagerWindow(launchApp: () -> Unit, sendFeedback: () -> Unit) {
         Row(modifier = Modifier.fillMaxWidth(1f)) {
             ClearDirectoryButton(
                 R.string.action_clear_downloads,
-                filesDir(context),
+                context.filesDir,
                 modifier = Modifier
                     .fillMaxWidth(.5f)
                     .padding(end = 4.dp)

@@ -10,8 +10,14 @@ import java.io.OutputStream
 
 const val KBYTE = 1024
 
-fun filesDir(context: Context): File = context.filesDir
-fun dataDir(context: Context): File = File(filesDir(context), "data")
+/**
+ * Gets the storage directory for all the app files.
+ * @author Arnau Mora
+ * @since 20220327
+ * @param context The context to get the directory from.
+ * @return May return null if storage is not available.
+ */
+fun dataDir(context: Context): File? = context.filesDir?.let { File(it, "data") }
 
 /**
  * Calculates the size that should be used for decoding a [Bitmap] so no memory is wasted.

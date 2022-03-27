@@ -9,21 +9,18 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.WorkerThread
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.work.WorkInfo
 import com.android.volley.Request
 import com.android.volley.VolleyError
+import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
@@ -61,9 +58,6 @@ import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.fade
-import com.google.accompanist.placeholder.placeholder
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.parcelize.IgnoredOnParcel
 import org.json.JSONObject
@@ -72,7 +66,7 @@ import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -168,8 +162,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          * @param objectId The id of the DataClass
          * @return The path of the image file that can be downloaded
          */
-        private fun imageFile(context: Context, namespace: Namespace, objectId: String): File =
-            File(dataDir(context), imageName(namespace, objectId, null))
+        private fun imageFile(context: Context, namespace: Namespace, objectId: String): File? =
+            dataDir(context)?.let { File(it, imageName(namespace, objectId, null)) }
 
         /**
          * Returns the File that represents the image of the DataClass in cache.
@@ -186,8 +180,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
             namespace: Namespace,
             objectId: String,
             suffix: String? = null
-        ): File =
-            File(context.cacheDir, imageName(namespace, objectId, suffix))
+        ): File? = context.cacheDir?.let { File(it, imageName(namespace, objectId, suffix)) }
 
         fun kmzFile(context: Context, permanent: Boolean, namespace: Namespace, objectId: String) =
             File(
@@ -295,8 +288,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
 
             // Instead of deleting image, move to cache. System will manage it if necessary.
             val imgFile = imageFile(context, namespace, objectId)
-            if (imgFile.exists()) {
-                val cacheImageFile = cacheImageFile(context, namespace, objectId)
+            val cacheImageFile = cacheImageFile(context, namespace, objectId)
+            if (imgFile?.exists() == true && cacheImageFile != null) {
                 Timber.v("$this > Copying \"$imgFile\" to \"$cacheImageFile\"...")
                 imgFile.copyTo(cacheImageFile, true)
                 Timber.v("$this > Deleting \"$imgFile\"")
@@ -775,7 +768,10 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      */
     @Throws(NotDownloadedException::class)
     suspend fun size(context: Context): Long {
-        val imgFile = imageFile(context)
+        val imgFile = imageFile(context) ?: run {
+            Timber.e("Storage is not available. imgFile is null.")
+            return 0L
+        }
 
         if (!imgFile.exists()) throw NotDownloadedException(this)
 
@@ -798,7 +794,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @param context The context to run from
      * @return The date when the data class was downloaded or null if not downloaded
      */
-    fun downloadDate(context: Context): Date? = imageFile(context).let {
+    fun downloadDate(context: Context): Date? = imageFile(context)?.let {
         if (it.exists())
             Date(it.lastModified())
         else null
@@ -811,7 +807,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @param context The context to run from
      * @return The path of the image file that can be downloaded
      */
-    fun imageFile(context: Context): File =
+    fun imageFile(context: Context): File? =
         Companion.imageFile(context, namespace, objectId)
 
     /**
@@ -822,7 +818,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @param suffix If not null, will be added to the end of the file name.
      * @return The path of the image file that can be downloaded
      */
-    private fun cacheImageFile(context: Context, suffix: String? = null): File =
+    private fun cacheImageFile(context: Context, suffix: String? = null): File? =
         Companion.cacheImageFile(context, namespace, objectId, suffix)
 
     /**
@@ -851,8 +847,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
 
         // If image is downloaded, load it
         val image = when {
-            downloadedImageFile.exists() -> downloadedImageFile
-            cacheImage.exists() -> cacheImage
+            downloadedImageFile?.exists() == true -> downloadedImageFile
+            cacheImage?.exists() == true -> cacheImage
             else -> "$REST_API_DOWNLOAD_ENDPOINT$imagePath"
         }
 
@@ -871,7 +867,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
                                 inSampleSize = (1 / scale).toInt()
                             }
                     )
-                    if (bitmap != null) {
+                    if (bitmap != null && cacheImage != null) {
                         Timber.v("$this > Compressing image...")
                         val baos = ByteArrayOutputStream()
                         val compressedBitmap: Boolean =
@@ -886,7 +882,8 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
                                 .use { baos.writeTo(it) }
                             Timber.v("$this > Image stored.")
                         }
-                    }
+                    } else if (cacheImage != null)
+                        Timber.e("cacheImage is null. Storage not available.")
                 },
                 { error ->
                     Timber.e(error, "Could not download image from server. Url: $image")
@@ -899,52 +896,56 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
     @Composable
     fun Image(
         modifier: Modifier = Modifier,
-        imageLoadParameters: ImageLoadParameters? = null
+        imageLoadParameters: ImageLoadParameters? = null,
+        isPlaceholder: Boolean = false,
+        onFinishLoading: () -> Unit
     ) {
-        val context = LocalContext.current
-        val image = imageData(context, imageLoadParameters)
-        var isLoading by remember { mutableStateOf(true) }
 
-        GlideImage(
-            imageModel = image,
-            requestOptions = {
-                RequestOptions
-                    .placeholderOf(displayOptions.placeholderDrawable)
-                    .error(displayOptions.placeholderDrawable)
-                    .downsample(DownsampleStrategy.CENTER_OUTSIDE)
-                    .encodeQuality(imageQuality)
-                    .sizeMultiplier(imageLoadParameters?.resultImageScale ?: 1f)
-            },
-            requestListener = object : RequestListener<Drawable> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    isFirstResource: Boolean
-                ): Boolean = false
+        if (isPlaceholder)
+            androidx.compose.foundation.Image(
+                painterResource(displayOptions.placeholderDrawable),
+                contentDescription = "Placeholder image",
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.Center,
+                modifier = modifier,
+            )
+        else {
+            val context = LocalContext.current
+            val image = imageData(context, imageLoadParameters)
+            GlideImage(
+                imageModel = image,
+                requestOptions = {
+                    RequestOptions
+                        .placeholderOf(displayOptions.placeholderDrawable)
+                        .error(displayOptions.placeholderDrawable)
+                        .downsample(DownsampleStrategy.CENTER_OUTSIDE)
+                        .encodeQuality(imageQuality)
+                        .sizeMultiplier(imageLoadParameters?.resultImageScale ?: 1f)
+                },
+                requestListener = object : RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        isFirstResource: Boolean
+                    ): Boolean = false
 
-                override fun onResourceReady(
-                    resource: Drawable?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    dataSource: DataSource?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    isLoading = false
-                    return false
-                }
-            },
-            contentScale = ContentScale.Crop,
-            alignment = Alignment.Center,
-            modifier = modifier
-                .placeholder(
-                    isLoading,
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    highlight = PlaceholderHighlight.fade(
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                ),
-        )
+                    override fun onResourceReady(
+                        resource: Drawable?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        onFinishLoading()
+                        return false
+                    }
+                },
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.Center,
+                modifier = modifier,
+            )
+        }
     }
 
     override fun hashCode(): Int {
