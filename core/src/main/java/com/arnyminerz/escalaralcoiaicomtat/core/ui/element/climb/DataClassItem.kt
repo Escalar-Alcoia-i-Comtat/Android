@@ -115,7 +115,7 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
 private fun DownloadableDataClassItem(
     item: DataClass<*, *, *>,
     viewModel: DataClassItemViewModel,
-    onClick: (() -> Unit)? = null
+    onClick: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -128,7 +128,7 @@ private fun DownloadableDataClassItem(
     val onClickListener: () -> Unit = {
         if (item !is Sector)
             viewModel.loadChildren(item) { if (it is Sector) it.weight else it.displayName }
-        onClick?.invoke()
+        onClick()
     }
 
     val downloadItem: () -> Unit = {
@@ -187,8 +187,8 @@ private fun DownloadableDataClassItem(
                         fontSize = 20.sp,
                         modifier = Modifier
                             .padding(start = 4.dp, top = 4.dp)
-                            .fillMaxWidth(),
-                        // TODO: Make title clickable as well as image and go button
+                            .fillMaxWidth()
+                            .clickable(onClick = onClickListener),
                     )
                     Text(
                         text = item.metadata.childrenCount.let {
@@ -373,6 +373,7 @@ private fun NonDownloadableDataClassItem(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
+            .clickable(onClick = onClick),
     ) {
         Column {
             item.Image(
@@ -405,8 +406,8 @@ private fun NonDownloadableDataClassItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .padding(start = 8.dp, end = 8.dp, top = 4.dp)
-                        .fillMaxWidth(),
-                    // TODO: Make title clickable as well as image and go button
+                        .fillMaxWidth()
+                        .clickable(onClick = onClick),
                 )
                 Text(
                     text = stringResource(
