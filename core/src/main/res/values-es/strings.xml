@@ -181,6 +181,8 @@
     <string name="warning_preferences_message">En la nueva actualización hemos cambiado el modo en el cual las preferencias son guardadas. Intentaremos migrar tu configuración tan pronto como abandones esta pantalla. Aun así, por desgracia es posible que algunos valores se pierdan.</string>
     <string name="warning_play_services_title">¡Atención!</string>
     <string name="warning_play_services_message">Hemos detectado que tu dispositivo no es compatible con los Servicios de Google Play. Esto puede causar problemas en algunas funciones de la aplicación. Te hemos advertido.</string>
+    <string name="warning_md5_title">¡Atención!</string>
+    <string name="warning_md5_message">Hemos detectado que su sistema no es compatible con el hashing MD5. Esto significa que tendrá problemas para buscar nuevas actualizaciones de datos. No se volverá a avisar.</string>
     <string name="sector_walking_time">%1$smin</string>
     <string name="sector_height">%1$sm</string>
     <string name="sector_kids_apt">Apto niños</string>
