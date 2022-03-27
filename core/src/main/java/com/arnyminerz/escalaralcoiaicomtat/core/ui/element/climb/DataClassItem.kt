@@ -36,10 +36,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
@@ -54,12 +56,15 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.fade
+import com.google.accompanist.placeholder.placeholder
 import java.text.SimpleDateFormat
 
 @Composable
 fun DataClassItem(
     item: DataClassImpl,
-    onClick: (() -> Unit)? = null
+    onClick: () -> Unit
 ) {
     if (item is DataClass<*, *, *>) {
         val context = LocalContext.current
@@ -78,8 +83,7 @@ fun DataClassItem(
         else
             NonDownloadableDataClassItem(
                 item,
-                viewModel,
-                onClick,
+                onClick = onClick,
             )
     } else
         PathDataClassItem(item)
@@ -119,6 +123,8 @@ private fun DownloadableDataClassItem(
 
     var showDownloadInfoDialog by remember { mutableStateOf(false) }
 
+    var loadingImage by remember { mutableStateOf(true) }
+
     val onClickListener: () -> Unit = {
         if (item !is Sector)
             viewModel.loadChildren(item) { if (it is Sector) it.weight else it.displayName }
@@ -155,10 +161,18 @@ private fun DownloadableDataClassItem(
                                 enabled = true,
                                 role = Role.Image,
                                 onClick = onClickListener
+                            )
+                            .placeholder(
+                                loadingImage,
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                highlight = PlaceholderHighlight.fade(
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                        .copy(alpha = .8f)
+                                ),
                             ),
                         imageLoadParameters = ImageLoadParameters()
                             .withResultImageScale(.3f)
-                    )
+                    ) { loadingImage = false }
                 }
                 Column(
                     modifier = Modifier
@@ -174,6 +188,7 @@ private fun DownloadableDataClassItem(
                         modifier = Modifier
                             .padding(start = 4.dp, top = 4.dp)
                             .fillMaxWidth(),
+                        // TODO: Make title clickable as well as image and go button
                     )
                     Text(
                         text = item.metadata.childrenCount.let {
@@ -343,15 +358,16 @@ private fun DownloadableDataClassItem(
  * @author Arnau Mora
  * @since 20211229
  * @param item The DataClass to display.
- * @param viewModel The View Model for doing async tasks.
  * @param onClick What to do when clicked.
  */
 @Composable
 private fun NonDownloadableDataClassItem(
     item: DataClass<*, *, *>,
-    viewModel: DataClassItemViewModel,
-    onClick: (() -> Unit)? = null
+    isPlaceholder: Boolean = false,
+    onClick: () -> Unit,
 ) {
+    var loadingImage by remember { mutableStateOf(true) }
+
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
@@ -363,12 +379,20 @@ private fun NonDownloadableDataClassItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(160.dp)
-                    .clickable {
-                        onClick?.invoke() ?: viewModel.loadChildren(item) { it.displayName }
-                    },
+                    .clickable(onClick = onClick)
+                    .placeholder(
+                        visible = loadingImage,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        highlight = PlaceholderHighlight.fade(
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                                .copy(alpha = .8f)
+                        ),
+                    ),
+                isPlaceholder = isPlaceholder,
                 imageLoadParameters = ImageLoadParameters()
                     .withResultImageScale(.3f)
-            )
+            ) { loadingImage = isPlaceholder }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -381,7 +405,8 @@ private fun NonDownloadableDataClassItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .padding(start = 8.dp, end = 8.dp, top = 4.dp)
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    // TODO: Make title clickable as well as image and go button
                 )
                 Text(
                     text = stringResource(
@@ -397,4 +422,13 @@ private fun NonDownloadableDataClassItem(
             }
         }
     }
+}
+
+@Preview(name = "Non-downloadable DataClass Item")
+@Composable
+fun NonDownloadableDataClassItemPreview() {
+    NonDownloadableDataClassItem(
+        Area.SAMPLE,
+        true,
+    ) {}
 }
