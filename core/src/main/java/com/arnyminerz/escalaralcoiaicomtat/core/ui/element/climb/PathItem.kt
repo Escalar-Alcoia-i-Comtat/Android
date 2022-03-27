@@ -276,3 +276,33 @@ fun PathItem(path: Path, infoVisibleStart: Boolean = false) {
 fun PathItemPreview() {
     PathItem(path = Path.SAMPLE_PATH)
 }
+
+@Preview(name = "Path with builder")
+@Composable
+fun PathItemBuilderPreview() {
+    PathItem(
+        path = Path(
+            "1234",
+            0,
+            12,
+            "Testing path",
+            ">6c+\n1>6c\n2>6c+\n3>7a",
+            ">80\n1>30\n2>30\n3>20",
+            ">chain_carabiner\n1>chain_carabiner\n2>chain_carabiner\n3>chain_ring",
+            "1>horizontal equipped\n2>diagonal equipped\n3>vertical clear",
+            FixedSafesData(10, 0, 0, 0, 0, 0),
+            RequiredSafesData(
+                lanyardRequired = true,
+                crackerRequired = false,
+                friendRequired = false,
+                stripsRequired = true,
+                pitonRequired = false,
+                nailRequired = false
+            ),
+            null,
+            "Testing builder;2019",
+            null,
+            parentSectorId = "123"
+        ), true
+    )
+}
