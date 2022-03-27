@@ -181,6 +181,8 @@
     <string name="warning_preferences_message">En l\'última actualització hem canviat la manera amb la qual desem les teves preferències. Intentarem migrar les teves preferències en el moment abandones aquesta pantalla, no obstant això, pot ser alguns valors es perguen.</string>
     <string name="warning_play_services_title">Atenció!</string>
     <string name="warning_play_services_message">Hem detectat que el teu dispositiu no és compatible amb els Serveis de Google Play. Açò pot causar alguns problemes en algunes parts de l\'aplicació. T\'hem advertit.</string>
+    <string name="warning_md5_title">Attention!</string>
+    <string name="warning_md5_message">We have detected that your device is not compatible with MD5 hashing. This means that there will be problems on searching for updates. You have been warned.</string>
     <string name="sector_walking_time">%1$smin</string>
     <string name="sector_height">%1$sm</string>
     <string name="sector_kids_apt">Apte xiquets</string>
