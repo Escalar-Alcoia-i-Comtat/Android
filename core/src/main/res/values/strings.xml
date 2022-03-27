@@ -205,6 +205,8 @@
     <string name="warning_preferences_message">Since our last update we have changed the way your preferences are stored. We will try to migrate your old options as soon as you leave this screen.</string>
     <string name="warning_play_services_title">Attention!</string>
     <string name="warning_play_services_message">We have detected that your device is not compatible with Google Play Services. This may cause some issues with some parts of the app. You have been warned.</string>
+    <string name="warning_md5_title">Attention!</string>
+    <string name="warning_md5_message">We have detected that your device is not compatible with MD5 hashing. This means that there will be problems on searching for updates. You have been warned.</string>
 
     <string name="sector_walking_time">%1$smin</string>
     <string name="sector_height">%1$sm</string>

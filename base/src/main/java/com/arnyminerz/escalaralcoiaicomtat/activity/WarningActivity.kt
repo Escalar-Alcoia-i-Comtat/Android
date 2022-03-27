@@ -14,6 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_INTENT
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_MD5
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_PLAY_SERVICES
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_PREFERENCE
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.IntroPageData
@@ -69,6 +70,13 @@ class WarningActivity : ComponentActivity() {
                                     stringResource(R.string.warning_play_services_message)
                                 )
                             )
+                        if (intent.getExtra(EXTRA_WARNING_MD5, false))
+                            add(
+                                IntroPageData<Any?>(
+                                    stringResource(R.string.warning_md5_title),
+                                    stringResource(R.string.warning_md5_message)
+                                )
+                            )
                     }
 
                 IntroWindow(
@@ -80,6 +88,7 @@ class WarningActivity : ComponentActivity() {
                             doAsync {
                                 shownPlayServicesWarning()
                                 shownPreferencesMigrationWarning()
+                                markMd5WarningShown()
 
                                 uiContext {
                                     intent.getExtra(EXTRA_WARNING_INTENT)

@@ -50,4 +50,12 @@ val EXTRA_WARNING_PREFERENCE = DataExtra<Boolean>("WarningPreference")
  */
 val EXTRA_WARNING_PLAY_SERVICES = DataExtra<Boolean>("WarningPlayServices")
 
+/**
+ * Used in the Warning Activity to tell the user that their device is not compatible with MD5
+ * hashing. This may cause that updates don't work.
+ * @author Arnau Mora
+ * @since 20220327
+ */
+val EXTRA_WARNING_MD5 = DataExtra<Boolean>("WarningMd5")
+
 val EXTRA_WARNING_INTENT = DataExtra<Parcelable>("WarningIntent")
