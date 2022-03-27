@@ -88,6 +88,7 @@ class WarningActivity : ComponentActivity() {
                             doAsync {
                                 shownPlayServicesWarning()
                                 shownPreferencesMigrationWarning()
+                                markMd5WarningShown()
 
                                 uiContext {
                                     intent.getExtra(EXTRA_WARNING_INTENT)
