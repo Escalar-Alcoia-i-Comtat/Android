@@ -29,6 +29,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_INTENT
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_MD5
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_PLAY_SERVICES
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_PREFERENCE
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE
@@ -39,7 +40,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_LIST
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.md5Compatible
@@ -47,7 +47,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.FirebaseException
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
@@ -72,8 +71,29 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
     @get:StringRes
     var errorMessage = mutableStateOf<Int?>(null)
 
+    /**
+     * Stores whether or not the user was using the app before the migration to DataStore. If so,
+     * show a warning, and try to migrate.
+     * @author Arnau Mora
+     * @since 20220327
+     */
     var migratedFromSharedPreferences = false
+
+    /**
+     * Stores whether or not the device is compatible with Google Play Services. If not, a warning
+     * should be shown since some functions may not work correctly.
+     * @author Arnau Mora
+     * @since 20220327
+     */
     var hasGooglePlayServices = true
+
+    /**
+     * Stores whether or not the device is compatible with MD5 encryption. If not, updates may not
+     * work correctly.
+     * @author Arnau Mora
+     * @since 20220327
+     */
+    var md5Compatible = true
 
     private var deepLinkPath by mutableStateOf<String?>(null)
 
@@ -129,7 +149,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         progressMessageResource.value = R.string.status_loading_checks
         hasGooglePlayServices = checkGooglePlayServices(app)
         withContext(Dispatchers.IO) {
-            checkMD5Support(analytics, app)
+            checkMD5Support(analytics)
         }
 
         progressMessageResource.value = R.string.status_loading_data_collection
@@ -263,29 +283,12 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * @since 20210929
      */
     @WorkerThread
-    private suspend fun checkMD5Support(analytics: FirebaseAnalytics, context: Context) {
-        val md5Supported = md5Compatible()
-        Timber.i("Is MD5 hashing supported: $md5Supported")
-        if (!md5Supported) {
+    private fun checkMD5Support(analytics: FirebaseAnalytics) {
+        md5Compatible = md5Compatible()
+        Timber.i("Is MD5 hashing supported: $md5Compatible")
+        if (!md5Compatible) {
             Timber.w("MD5 hashing is not compatible")
             analytics.logEvent("MD5NotSupported") { }
-            val systemPrefRepo = PreferencesModule.systemPreferencesRepository
-            val getWarnedMd5 = PreferencesModule.shownMd5Warning
-            val shownMd5Warning = getWarnedMd5().first()
-            if (!shownMd5Warning)
-                uiContext {
-                    Timber.i("Showing MD5 hashing warning dialog")
-                    MaterialAlertDialogBuilder(context, R.style.MaterialAlertDialog_App)
-                        .setTitle(R.string.dialog_md5_incompatible_title)
-                        .setMessage(R.string.dialog_md5_incompatible_message)
-                        .setPositiveButton(R.string.action_ok) { dialog, _ ->
-                            doAsync {
-                                systemPrefRepo.markMd5WarningShown()
-                            }
-                            dialog.dismiss()
-                        }
-                        .show()
-                }
         }
     }
 
@@ -365,13 +368,18 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                 val systemPreferencesRepository = PreferencesModule.systemPreferencesRepository
                 val shownPSWarning = systemPreferencesRepository.shownPlayServicesWarning.first()
                 val shownPrefWarning = systemPreferencesRepository.shownPreferencesWarning.first()
+                val shownMd5Warning = systemPreferencesRepository.shownMd5Warning.first()
 
                 uiContext {
-                    if ((migratedFromSharedPreferences && !shownPrefWarning) || (!hasGooglePlayServices && !shownPSWarning))
+                    if ((migratedFromSharedPreferences && !shownPrefWarning) ||
+                        (!hasGooglePlayServices && !shownPSWarning) ||
+                        (!md5Compatible) && !shownMd5Warning
+                    )
                         app.launch(WarningActivity::class.java) {
                             addFlags(FLAG_ACTIVITY_NEW_TASK)
                             if (intent != null)
                                 putExtra(EXTRA_WARNING_INTENT, intent)
+                            putExtra(EXTRA_WARNING_MD5, md5Compatible)
                             putExtra(EXTRA_WARNING_PREFERENCE, migratedFromSharedPreferences)
                             putExtra(EXTRA_WARNING_PLAY_SERVICES, !hasGooglePlayServices)
                         }
