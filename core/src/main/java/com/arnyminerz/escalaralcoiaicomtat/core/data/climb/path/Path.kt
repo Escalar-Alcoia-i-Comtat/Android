@@ -330,7 +330,7 @@ class Path internal constructor(
 
     init {
         // Process builder
-        if (rawBuilt != null && rawBuilt.contains(";")) {
+        if (rawBuilt != null) {
             val splitBuilder = rawBuilt.split(";")
             buildPatch = Patch(splitBuilder.getOrNull(0), splitBuilder.getOrNull(1))
         }
