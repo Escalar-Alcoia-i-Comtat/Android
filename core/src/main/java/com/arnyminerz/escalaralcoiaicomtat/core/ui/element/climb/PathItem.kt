@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +36,8 @@ import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Grade
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_CHAIN_CARABINER
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_CHAIN_RING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_LANYARD
@@ -49,7 +52,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 
 @Composable
-fun PathItem(path: Path) {
+fun PathItem(path: Path, infoVisibleStart: Boolean = false) {
     val context = LocalContext.current
 
     Card(
@@ -62,7 +65,7 @@ fun PathItem(path: Path) {
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            var infoVisible by remember { mutableStateOf(false) }
+            var infoVisible by remember { mutableStateOf(infoVisibleStart) }
             val infoIconRotation by animateValueAsState(
                 targetValue = if (infoVisible) -180f else -90f,
                 typeConverter = Float.DegreeConverter,
@@ -101,6 +104,21 @@ fun PathItem(path: Path) {
                         maxLines = 1,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    val builderName = path.buildPatch?.name
+                    val builderDate = path.buildPatch?.date
+                    if (builderName != null || builderDate != null)
+                        AnimatedVisibility(visible = infoVisible) {
+                            Text(
+                                text = (builderName ?: "") + (builderDate?.let { ", $it" } ?: ""),
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                fontSize = 14.sp,
+                                fontStyle = FontStyle.Italic,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                overflow = TextOverflow.Visible,
+                                maxLines = 2,
+                            )
+                        }
                 }
                 // Grade
                 Column(
