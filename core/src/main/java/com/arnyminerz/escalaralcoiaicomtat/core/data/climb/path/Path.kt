@@ -136,9 +136,8 @@ class Path internal constructor(
     @IgnoredOnParcel
     val generalGrade: String
         get() = _generalGrade ?: run {
-            processPitches(); _generalGrade?.run {
-            _generalGrade = "¿?"
-        }; _generalGrade!!
+            processPitches()
+            _generalGrade ?: "¿?".also { _generalGrade = it }
         }
 
     /**
