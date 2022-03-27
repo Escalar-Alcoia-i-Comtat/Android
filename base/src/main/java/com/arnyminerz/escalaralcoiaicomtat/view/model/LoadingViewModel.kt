@@ -369,6 +369,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                 uiContext {
                     if ((migratedFromSharedPreferences && !shownPrefWarning) || (!hasGooglePlayServices && !shownPSWarning))
                         app.launch(WarningActivity::class.java) {
+                            addFlags(FLAG_ACTIVITY_NEW_TASK)
                             if (intent != null)
                                 putExtra(EXTRA_WARNING_INTENT, intent)
                             putExtra(EXTRA_WARNING_PREFERENCE, migratedFromSharedPreferences)
