@@ -3,8 +3,6 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
@@ -34,7 +32,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.InitializationException
 import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.core.network.VolleySingleton
-import com.arnyminerz.escalaralcoiaicomtat.core.network.addToRequestQueue
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MAX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
@@ -42,7 +39,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DOWNLOAD_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.InputStreamVolleyRequest
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.WEBP_LOSSY_LEGACY
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
@@ -53,6 +49,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerFactory
 import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestListener
@@ -63,10 +60,9 @@ import kotlinx.parcelize.IgnoredOnParcel
 import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
 import timber.log.Timber
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.Serializable
-import java.util.Date
+import java.util.*
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -130,7 +126,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @author Arnau Mora
      * @since 20210830
      */
-    val displayOptions: DataClassDisplayOptions,
+    open val displayOptions: DataClassDisplayOptions,
 ) : DataClassImpl(
     metadata.objectId,
     metadata.namespace,
@@ -164,23 +160,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          */
         private fun imageFile(context: Context, namespace: Namespace, objectId: String): File? =
             dataDir(context)?.let { File(it, imageName(namespace, objectId, null)) }
-
-        /**
-         * Returns the File that represents the image of the DataClass in cache.
-         * @author Arnau Mora
-         * @date 20210724
-         * @param context The context to run from
-         * @param namespace The namespace of the DataClass
-         * @param objectId The id of the DataClass
-         * @param suffix If not null, will be added to the end of the file name.
-         * @return The path of the image file that can be downloaded
-         */
-        private fun cacheImageFile(
-            context: Context,
-            namespace: Namespace,
-            objectId: String,
-            suffix: String? = null
-        ): File? = context.cacheDir?.let { File(it, imageName(namespace, objectId, suffix)) }
 
         fun kmzFile(context: Context, permanent: Boolean, namespace: Namespace, objectId: String) =
             File(
@@ -288,10 +267,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
 
             // Instead of deleting image, move to cache. System will manage it if necessary.
             val imgFile = imageFile(context, namespace, objectId)
-            val cacheImageFile = cacheImageFile(context, namespace, objectId)
-            if (imgFile?.exists() == true && cacheImageFile != null) {
-                Timber.v("$this > Copying \"$imgFile\" to \"$cacheImageFile\"...")
-                imgFile.copyTo(cacheImageFile, true)
+            if (imgFile?.exists() == true) {
                 Timber.v("$this > Deleting \"$imgFile\"")
                 lst.add(imgFile.delete())
             }
@@ -811,87 +787,11 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         Companion.imageFile(context, namespace, objectId)
 
     /**
-     * Returns the File that represents the image of the DataClass in cache.
-     * @author Arnau Mora
-     * @date 20210724
-     * @param context The context to run from
-     * @param suffix If not null, will be added to the end of the file name.
-     * @return The path of the image file that can be downloaded
-     */
-    private fun cacheImageFile(context: Context, suffix: String? = null): File? =
-        Companion.cacheImageFile(context, namespace, objectId, suffix)
-
-    /**
      * Checks if the [DataClass] has a stored [downloadUrl].
      * @author Arnau Mora
      * @since 20210722
      */
     fun hasStorageUrl() = downloadUrl != null
-
-    /**
-     * Gets the data of the image that should be loaded for representing the [DataClass].
-     * @author Arnau Mora
-     * @since 20220118
-     * @param context The [Context] that is requesting to load the image.
-     * @param imageLoadParameters The parameters for loading the image.
-     */
-    @Suppress("BlockingMethodInNonBlockingContext")
-    @Throws(ArithmeticException::class)
-    fun imageData(
-        context: Context,
-        imageLoadParameters: ImageLoadParameters? = null
-    ): Any {
-        val downloadedImageFile = imageFile(context)
-        val scale = imageLoadParameters?.resultImageScale ?: 1f
-        val cacheImage = cacheImageFile(context, "scale$scale")
-
-        // If image is downloaded, load it
-        val image = when {
-            downloadedImageFile?.exists() == true -> downloadedImageFile
-            cacheImage?.exists() == true -> cacheImage
-            else -> "$REST_API_DOWNLOAD_ENDPOINT$imagePath"
-        }
-
-        if (image is String)
-            InputStreamVolleyRequest(
-                Request.Method.GET,
-                "$REST_API_DOWNLOAD_ENDPOINT$imagePath",
-                { bytes ->
-                    val bitmap: Bitmap? = BitmapFactory.decodeByteArray(
-                        bytes,
-                        0,
-                        bytes.size,
-                        BitmapFactory
-                            .Options()
-                            .apply {
-                                inSampleSize = (1 / scale).toInt()
-                            }
-                    )
-                    if (bitmap != null && cacheImage != null) {
-                        Timber.v("$this > Compressing image...")
-                        val baos = ByteArrayOutputStream()
-                        val compressedBitmap: Boolean =
-                            bitmap.compress(WEBP_LOSSY_LEGACY, imageQuality, baos)
-                        if (!compressedBitmap) {
-                            Timber.e("$this > Could not compress image!")
-                            throw ArithmeticException("Could not compress image for $this.")
-                        } else {
-                            Timber.v("$this > Storing image...")
-                            cacheImage
-                                .outputStream()
-                                .use { baos.writeTo(it) }
-                            Timber.v("$this > Image stored.")
-                        }
-                    } else if (cacheImage != null)
-                        Timber.e("cacheImage is null. Storage not available.")
-                },
-                { error ->
-                    Timber.e(error, "Could not download image from server. Url: $image")
-                }, mapOf(), mapOf()
-            ).addToRequestQueue(context)
-
-        return image
-    }
 
     @Composable
     fun Image(
@@ -900,7 +800,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         isPlaceholder: Boolean = false,
         onFinishLoading: () -> Unit
     ) {
-
         if (isPlaceholder)
             androidx.compose.foundation.Image(
                 painterResource(displayOptions.placeholderDrawable),
@@ -911,7 +810,18 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
             )
         else {
             val context = LocalContext.current
-            val image = imageData(context, imageLoadParameters)
+
+            val downloadedImageFile = imageFile(context)
+
+            val scale = imageLoadParameters?.resultImageScale ?: 1f
+            val overrideSize = imageLoadParameters?.overrideSize
+
+            // If image is downloaded, load it
+            val image = when {
+                downloadedImageFile?.exists() == true -> downloadedImageFile
+                else -> "$REST_API_DOWNLOAD_ENDPOINT$imagePath"
+            }
+
             GlideImage(
                 imageModel = image,
                 requestOptions = {
@@ -920,7 +830,15 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
                         .error(displayOptions.placeholderDrawable)
                         .downsample(DownsampleStrategy.CENTER_OUTSIDE)
                         .encodeQuality(imageQuality)
-                        .sizeMultiplier(imageLoadParameters?.resultImageScale ?: 1f)
+                        .sizeMultiplier(scale)
+                        .let {
+                            // Override size if requested
+                            if (overrideSize != null)
+                                it.override(overrideSize.first, overrideSize.second)
+                            else
+                                it
+                        }
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
                 },
                 requestListener = object : RequestListener<Drawable> {
                     override fun onLoadFailed(
@@ -988,15 +906,6 @@ fun <D : DataClass<*, *, *>> Iterable<D>.has(objectId: String): Boolean {
             return true
     return false
 }
-
-/**
- * Checks if the DataClass with the specified object id is indexed in the downloads.
- * @author Arnau Mora
- * @since 20220101
- * @param context The context to initialize the search session from if not read.
- */
-suspend fun @receiver:ObjectId String.isDownloadIndexed(context: Context) =
-    DataClass.isDownloadIndexed(context, this)
 
 /**
  * Fetches all the children of the DataClass with the specified object id.
