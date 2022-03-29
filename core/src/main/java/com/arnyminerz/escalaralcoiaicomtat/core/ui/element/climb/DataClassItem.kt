@@ -1,21 +1,23 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 
 import android.app.Application
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -31,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -45,6 +46,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadableDataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -54,6 +56,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.DataClassItemViewMo
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.then
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.thenComp
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.google.accompanist.placeholder.PlaceholderHighlight
@@ -76,7 +80,7 @@ fun DataClassItem(
 
         if (item.displayOptions.downloadable)
             DownloadableDataClassItem(
-                item,
+                item as DownloadableDataClass<*, *, *>,
                 viewModel,
                 onClick,
             )
@@ -113,17 +117,22 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
  */
 @Composable
 private fun DownloadableDataClassItem(
-    item: DataClass<*, *, *>,
+    item: DownloadableDataClass<*, *, *>,
     viewModel: DataClassItemViewModel,
     onClick: () -> Unit
 ) {
     val context = LocalContext.current
 
-    var isPartiallyDownloaded by remember { mutableStateOf(false) }
+    val i = item.namespace to item.objectId
+    val itemDownloaded = item.downloaded
+
+    var loadingImage by remember { mutableStateOf(true) }
 
     var showDownloadInfoDialog by remember { mutableStateOf(false) }
 
-    var loadingImage by remember { mutableStateOf(true) }
+    val downloadStates by DownloadSingleton.getInstance()
+        .states
+        .observeAsState(emptyMap())
 
     val onClickListener: () -> Unit = {
         if (item !is Sector)
@@ -150,13 +159,14 @@ private fun DownloadableDataClassItem(
         Column {
             Row {
                 Column(
+                    // TODO: Size should not be hardcoded
                     modifier = Modifier
-                        .fillMaxWidth(.3f)
+                        .width(120.dp)
+                        .height(160.dp)
                 ) {
                     item.Image(
                         Modifier
-                            .fillMaxWidth()
-                            .height(160.dp)
+                            .fillMaxSize()
                             .clickable(
                                 enabled = true,
                                 role = Role.Image,
@@ -167,11 +177,11 @@ private fun DownloadableDataClassItem(
                                 color = MaterialTheme.colorScheme.surfaceVariant,
                                 highlight = PlaceholderHighlight.fade(
                                     MaterialTheme.colorScheme.onSurfaceVariant
-                                        .copy(alpha = .8f)
+                                        .copy(alpha = .8f),
                                 ),
                             ),
                         imageLoadParameters = ImageLoadParameters()
-                            .withResultImageScale(.3f)
+                            .withSize(120.dp, 160.dp)
                     ) { loadingImage = false }
                 }
                 Column(
@@ -214,12 +224,10 @@ private fun DownloadableDataClassItem(
                             .padding(end = 4.dp),
                         onClick = onClickListener,
                     ) {
-                        Image(
+                        Icon(
                             Icons.Default.ChevronRight,
                             stringResource(R.string.action_view),
-                            colorFilter = ColorFilter.tint(
-                                MaterialTheme.colorScheme.onTertiary
-                            )
+                            tint = MaterialTheme.colorScheme.onTertiary,
                         )
                     }
                 }
@@ -228,23 +236,9 @@ private fun DownloadableDataClassItem(
                 verticalAlignment = Alignment.Bottom
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    val i = item.namespace to item.objectId
-                    viewModel.addDownloadListener(item.namespace, item.objectId) {
-                        // TODO: Download progress should be notified
-                    }
-
-                    val downloadSingleton = DownloadSingleton.getInstance()
-                    val downloadStates by downloadSingleton
-                        .states
-                        .observeAsState(emptyMap())
-
-                    if (!downloadStates.containsKey(i))
-                        viewModel.initializeDownloadStatus(i)
-
-                    isPartiallyDownloaded = downloadStates[i]?.partialDownload == true
                     Button(
                         // Enable button when not downloaded, but download status is known
-                        enabled = downloadStates[i] != null && downloadStates[i]?.downloading != true && downloadStates[i] != DownloadStatus.UNKNOWN,
+                        enabled = !itemDownloaded && downloadStates[i] != DownloadStatus.DOWNLOADING,
                         modifier = Modifier
                             .padding(start = 8.dp, end = 4.dp)
                             .fillMaxWidth(),
@@ -258,14 +252,19 @@ private fun DownloadableDataClassItem(
                         },
                     ) {
                         Icon(
-                            downloadStates[i]?.getActionIcon() ?: Icons.Rounded.Close,
+                            item.downloaded
+                                .then { Icons.Rounded.DownloadDone }
+                                ?: downloadStates[i]?.getActionIcon()
+                                ?: Icons.Rounded.Download,
                             contentDescription = stringResource(R.string.action_download),
                             modifier = Modifier.size(ButtonDefaults.IconSize)
                         )
                         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                         Text(
-                            text = downloadStates[i]?.getText()
-                                ?: stringResource(R.string.status_loading)
+                            text = item.downloaded
+                                .thenComp { stringResource(R.string.status_downloaded) }
+                                ?: downloadStates[i]?.getText()
+                                ?: stringResource(R.string.action_download)
                         )
                     }
                 }
@@ -321,7 +320,7 @@ private fun DownloadableDataClassItem(
                             } ?: stringResource(R.string.status_loading)
                         )
                     )
-                    if (isPartiallyDownloaded)
+                    if (downloadStates[i]?.partialDownload == true)
                         Text(
                             text = stringResource(
                                 R.string.dialog_downloaded_partially_msg,
@@ -331,7 +330,7 @@ private fun DownloadableDataClassItem(
                 }
             },
             dismissButton = {
-                if (isPartiallyDownloaded)
+                if (downloadStates[i]?.partialDownload == true)
                     Button(onClick = { downloadItem() }) {
                         Text(text = stringResource(R.string.action_download))
                     }
