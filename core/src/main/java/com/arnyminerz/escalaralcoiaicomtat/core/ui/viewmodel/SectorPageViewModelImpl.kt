@@ -127,8 +127,6 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
         }
     }
 
-    override fun loadImage(sector: Sector) = sector.imageData(context)
-
     class Factory(
         private val application: Application,
     ) : ViewModelProvider.Factory {
