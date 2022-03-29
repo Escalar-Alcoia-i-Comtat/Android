@@ -154,7 +154,7 @@ fun SectorPage(
                                             leadingIcon = {
                                                 Icon(
                                                     Icons.Rounded.ChildCare,
-                                                    contentDescription = stringResource(R.string.sector_sun_time)
+                                                    contentDescription = stringResource(R.string.sector_kids_apt)
                                                 )
                                             },
                                             colors = Material3ChipColors,
