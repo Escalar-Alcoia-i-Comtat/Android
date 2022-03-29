@@ -15,7 +15,7 @@ import kotlinx.coroutines.withContext
  * @since 20210510
  */
 val asyncCoroutineScope
-    get() = CoroutineScope(Dispatchers.Default)
+    get() = CoroutineScope(Dispatchers.IO)
 
 /**
  * The [CoroutineScope] used in functions such as [doOnMain].
@@ -26,7 +26,7 @@ val mainCoroutineScope
     get() = CoroutineScope(Dispatchers.Main)
 
 /**
- * Runs some code asyncronously.
+ * Runs some code asynchronously.
  * Use [doOnMain] for updating UI elements.
  * @author Arnau Mora
  * @since 20210413

@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
@@ -173,12 +176,19 @@ fun LoadingWindow(
     shouldShowErrorMessage: Boolean = false,
     errorMessage: String? = null
 ) {
+    val context = LocalContext.current
+
     val bottomPadding: Int by animateIntAsState(
         targetValue = if (shouldShowErrorMessage && errorMessage != null) 500 else 0,
         animationSpec = tween(durationMillis = 300, easing = FastOutLinearInEasing)
     )
+
     val drawable = AppCompatResources.getDrawable(LocalContext.current, R.mipmap.ic_launcher_round)
-    Box(modifier = Modifier.fillMaxSize()) {
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -198,11 +208,26 @@ fun LoadingWindow(
                 .fillMaxWidth(.7f),
             visible = shouldShowErrorMessage && errorMessage != null
         ) {
-            Text(
-                text = errorMessage ?: "",
-                textAlign = TextAlign.Center,
-                overflow = TextOverflow.Visible
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = errorMessage ?: "",
+                    textAlign = TextAlign.Center,
+                    overflow = TextOverflow.Visible
+                )
+                if (BuildConfig.DEBUG)
+                    OutlinedButton(
+                        modifier = Modifier.padding(top = 8.dp),
+                        onClick = {
+                            context.launch(MainActivity::class.java) {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                        }
+                    ) {
+                        Text(text = "Enter anyway")
+                    }
+            }
         }
 
         AnimatedVisibility(
