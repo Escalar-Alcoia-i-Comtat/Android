@@ -47,6 +47,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.textResource
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.vector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DOWNLOAD_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Material3ChipColors
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.ZoomableImage
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModel
@@ -94,7 +95,8 @@ fun SectorPage(
                 .fillMaxHeight(heightFraction)
         ) {
             ZoomableImage(
-                imageModel = imageFile?.takeIf { it.exists() } ?: sector.imagePath,
+                imageModel = imageFile?.takeIf { it.exists() }
+                    ?: "$REST_API_DOWNLOAD_ENDPOINT${sector.imagePath}",
                 contentDescription = stringResource(R.string.image_desc_sector_image),
                 modifier = Modifier
                     .fillMaxSize()
