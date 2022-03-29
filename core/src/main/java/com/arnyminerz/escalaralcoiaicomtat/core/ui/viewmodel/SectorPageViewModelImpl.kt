@@ -74,10 +74,10 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
                     path.generalGrade.let {
                         Timber.v("- Grade: $it")
                         when {
-                            it.matches("^[3-5]".toRegex()) -> grades1Count++
-                            it.matches("^6".toRegex()) -> grades2Count++
-                            it.matches("^7".toRegex()) -> grades3Count++
-                            it.matches("^8".toRegex()) -> grades4Count++
+                            it.matches("^[3-5].*".toRegex()) -> grades1Count++
+                            it.matches("^6.*".toRegex()) -> grades2Count++
+                            it.matches("^7.*".toRegex()) -> grades3Count++
+                            it.matches("^8.*".toRegex()) -> grades4Count++
                             else -> grades5Count++
                         }
                     }
