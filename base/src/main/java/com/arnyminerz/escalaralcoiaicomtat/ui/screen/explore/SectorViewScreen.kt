@@ -78,6 +78,7 @@ fun Activity.SectorViewScreen(
 
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(index!!)
+    var currentPage by remember { mutableStateOf(index) }
 
     var sectors by remember { mutableStateOf(emptyList<Sector>()) }
     var currentSector by remember { mutableStateOf<Sector?>(null) }
@@ -87,6 +88,7 @@ fun Activity.SectorViewScreen(
     }
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect { page ->
+            currentPage = page
             indexInterface(page)
             if (sectors.isNotEmpty())
                 currentSector = sectors[page]
@@ -158,7 +160,7 @@ fun Activity.SectorViewScreen(
                                     },
                                 icon = {
                                     Icon(
-                                        if (index == listIndex)
+                                        if (currentPage == listIndex)
                                             Icons.Rounded.RadioButtonChecked
                                         else
                                             Icons.Rounded.RadioButtonUnchecked,
