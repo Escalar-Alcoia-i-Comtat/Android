@@ -83,33 +83,48 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
                     }
 
                 Timber.d("Grades processed: $grades1Count, $grades2Count, $grades3Count, $grades4Count, $grades5Count.")
-                listOf(
-                    BarChartData.Bar(
-                        label = "3º-5+",
-                        value = grades1Count.toFloat(),
-                        color = grade_green,
-                    ),
-                    BarChartData.Bar(
-                        label = "6a-6c+",
-                        value = grades2Count.toFloat(),
-                        color = grade_blue,
-                    ),
-                    BarChartData.Bar(
-                        label = "7a-7c+",
-                        value = grades3Count.toFloat(),
-                        color = grade_red,
-                    ),
-                    BarChartData.Bar(
-                        label = "8a-8c+",
-                        value = grades4Count.toFloat(),
-                        color = grade_black,
-                    ),
-                    BarChartData.Bar(
-                        label = "¿?",
-                        value = grades5Count.toFloat(),
-                        color = grade_purple,
-                    ),
-                )
+                arrayListOf<BarChartData.Bar>().apply {
+                    if (grades1Count > 0)
+                        add(
+                            BarChartData.Bar(
+                                label = "3º-5+",
+                                value = grades1Count.toFloat(),
+                                color = grade_green,
+                            )
+                        )
+                    if (grades2Count > 0)
+                        add(
+                            BarChartData.Bar(
+                                label = "6a-6c+",
+                                value = grades2Count.toFloat(),
+                                color = grade_blue,
+                            )
+                        )
+                    if (grades3Count > 0)
+                        add(
+                            BarChartData.Bar(
+                                label = "7a-7c+",
+                                value = grades3Count.toFloat(),
+                                color = grade_red,
+                            )
+                        )
+                    if (grades4Count > 0)
+                        add(
+                            BarChartData.Bar(
+                                label = "8a-8c+",
+                                value = grades4Count.toFloat(),
+                                color = grade_black,
+                            )
+                        )
+                    if (grades5Count > 0)
+                        add(
+                            BarChartData.Bar(
+                                label = "¿?",
+                                value = grades5Count.toFloat(),
+                                color = grade_purple,
+                            )
+                        )
+                }
             }
 
             Timber.d("BarChartData built. Updating value...")
