@@ -14,7 +14,7 @@ const val CONTACT_EMAIL = "arnyminer.z@gmail.com"
  * @author Arnau Mora
  * @since 20220221
  */
-const val REST_API_URL = "http://server.escalaralcoiaicomtat.org:3000"
+const val REST_API_URL = "https://server.escalaralcoiaicomtat.org"
 
 /**
  * The REST API endpoint for fetching the blocking state of a path. At the end /:pathId should be
