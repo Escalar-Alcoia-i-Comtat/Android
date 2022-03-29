@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.element
 
+import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 import androidx.annotation.FloatRange
 import androidx.annotation.IntRange
@@ -44,9 +45,15 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
+import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
-import com.skydoves.landscapist.ShimmerParams
+import com.bumptech.glide.request.target.Target
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.fade
+import com.google.accompanist.placeholder.placeholder
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.launch
 import kotlin.math.PI
@@ -103,6 +110,8 @@ fun ZoomableImage(
         rotation += rotationChange
         offset += offsetChange
     }
+
+    var loadingImage by remember { mutableStateOf(true) }
 
     var dragOffset by remember { mutableStateOf(Offset.Zero) }
     var imageCenter by remember { mutableStateOf(Offset.Zero) }
@@ -293,13 +302,28 @@ fun ZoomableImage(
                     .encodeQuality(encodeQuality)
                     .sizeMultiplier(sizeMultiplier)
             },
-            shimmerParams = ShimmerParams(
-                baseColor = MaterialTheme.colorScheme.surfaceVariant,
-                highlightColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                durationMillis = 350,
-                dropOff = 0.65f,
-                tilt = 20f,
-            ),
+            requestListener = object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    loadingImage = false
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    loadingImage = false
+                    return false
+                }
+            },
             modifier = Modifier
                 .align(Alignment.Center)
                 .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
@@ -317,7 +341,15 @@ fun ZoomableImage(
                     val windowOffset = coordinates.localToWindow(localOffset)
                     imageCenter = coordinates.parentLayoutCoordinates?.windowToLocal(windowOffset)
                         ?: Offset.Zero
-                },
+                }
+                .placeholder(
+                    loadingImage,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    highlight = PlaceholderHighlight.fade(
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                            .copy(alpha = .8f),
+                    ),
+                ),
         )
     }
 }

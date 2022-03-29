@@ -47,6 +47,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.textResource
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.vector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DOWNLOAD_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Material3ChipColors
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.ZoomableImage
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModel
@@ -94,7 +95,8 @@ fun SectorPage(
                 .fillMaxHeight(heightFraction)
         ) {
             ZoomableImage(
-                imageModel = imageFile?.takeIf { it.exists() } ?: sector.imagePath,
+                imageModel = imageFile?.takeIf { it.exists() }
+                    ?: "$REST_API_DOWNLOAD_ENDPOINT${sector.imagePath}",
                 contentDescription = stringResource(R.string.image_desc_sector_image),
                 modifier = Modifier
                     .fillMaxSize()
@@ -152,7 +154,7 @@ fun SectorPage(
                                             leadingIcon = {
                                                 Icon(
                                                     Icons.Rounded.ChildCare,
-                                                    contentDescription = stringResource(R.string.sector_sun_time)
+                                                    contentDescription = stringResource(R.string.sector_kids_apt)
                                                 )
                                             },
                                             colors = Material3ChipColors,
@@ -248,9 +250,11 @@ fun SectorPage(
                                         yAxisDrawer = SimpleYAxisDrawer(
                                             axisLineThickness = 0.dp,
                                             axisLineColor = MaterialTheme.colorScheme.surfaceVariant,
-                                            drawLabelEvery = Int.MAX_VALUE,
+                                            drawLabelEvery = 10,
                                             // labelTextSize = 0.sp,
-                                            labelValueFormatter = { "" } // Disables values for the y axis
+                                            labelValueFormatter = {
+                                                it.toInt().toString()
+                                            } // Disables values for the y axis
                                         ),
                                         labelDrawer = SimpleLabelDrawer(
                                             drawLocation = SimpleLabelDrawer.DrawLocation.XAxis,

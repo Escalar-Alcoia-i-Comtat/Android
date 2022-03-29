@@ -22,7 +22,7 @@ import kotlinx.parcelize.TypeParceler
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.UUID
+import java.util.*
 
 /**
  * Creates a new [Path] instance.
@@ -332,7 +332,10 @@ class Path internal constructor(
         // Process builder
         if (rawBuilt != null) {
             val splitBuilder = rawBuilt.split(";")
-            buildPatch = Patch(splitBuilder.getOrNull(0), splitBuilder.getOrNull(1))
+            buildPatch = Patch(
+                splitBuilder.getOrNull(0).takeUnless { it == "NULL" },
+                splitBuilder.getOrNull(1).takeUnless { it == "NULL" },
+            )
         }
 
         // Process re-builders
