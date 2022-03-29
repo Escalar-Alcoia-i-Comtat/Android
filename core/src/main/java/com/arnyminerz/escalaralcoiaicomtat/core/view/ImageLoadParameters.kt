@@ -1,12 +1,21 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.view
 
 import android.widget.ImageView
+import androidx.compose.ui.unit.Dp
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.px
 
 @Suppress("unused")
 class ImageLoadParameters {
-    internal var showPlaceholder: Boolean = true
+    var showPlaceholder: Boolean = true
     var resultImageScale: Float? = null
     var scaleType: ImageView.ScaleType = ImageView.ScaleType.CENTER_CROP
+
+    /**
+     * Can be set to any value to override the set image size.
+     * @author Arnau Mora
+     * @since 20220329
+     */
+    var overrideSize: Pair<Int, Int>? = null
 
     /**
      * Returns [resultImageScale] as an int, this is, for example, if [resultImageScale] is 0.5,
@@ -26,9 +35,8 @@ class ImageLoadParameters {
      * @param scale The image's scale
      * @return The current instance for chaining calls
      */
-    fun withResultImageScale(scale: Float?): ImageLoadParameters {
-        this.resultImageScale = scale
-        return this
+    fun withResultImageScale(scale: Float?): ImageLoadParameters = also {
+        it.resultImageScale = scale
     }
 
     /**
@@ -38,9 +46,30 @@ class ImageLoadParameters {
      * @param scaleType The [ImageView.ScaleType] to set.
      * @return The current instance for chaining calls
      */
-    fun withScaleType(scaleType: ImageView.ScaleType): ImageLoadParameters {
-        this.scaleType = scaleType
-        return this
+    fun withScaleType(scaleType: ImageView.ScaleType): ImageLoadParameters = also {
+        it.scaleType = scaleType
+    }
+
+    /**
+     * Sets the value of [overrideSize] and returns itself.
+     * @author Arnau Mora
+     * @since 20220329
+     * @param width The new target width to override.
+     * @param height The new target height to override.
+     */
+    fun withSize(width: Int, height: Int): ImageLoadParameters = also {
+        it.overrideSize = width to height
+    }
+
+    /**
+     * Sets the value of [overrideSize] and returns itself.
+     * @author Arnau Mora
+     * @since 20220329
+     * @param width The new target width to override.
+     * @param height The new target height to override.
+     */
+    fun withSize(width: Dp, height: Dp): ImageLoadParameters = also {
+        it.overrideSize = width.px.toInt() to height.px.toInt()
     }
 
     /**
@@ -50,8 +79,7 @@ class ImageLoadParameters {
      * @param showPlaceholder If the placeholder should be shown
      * @return The current instance for chaining calls
      */
-    fun setShowPlaceholder(showPlaceholder: Boolean): ImageLoadParameters {
-        this.showPlaceholder = showPlaceholder
-        return this
+    fun setShowPlaceholder(showPlaceholder: Boolean): ImageLoadParameters = also {
+        it.showPlaceholder = showPlaceholder
     }
 }
