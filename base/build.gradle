@@ -54,6 +54,8 @@ android {
             setProperty("archivesBaseName", "EscalarAlcoiaIComtat-${android.defaultConfig.versionCode}-${android.defaultConfig.versionName}")
             // Set the signing keys
             signingConfig signingConfigs.release
+            // Enable minifying
+            minifyEnabled true
 
             kotlinOptions {
                 // Allow experimental

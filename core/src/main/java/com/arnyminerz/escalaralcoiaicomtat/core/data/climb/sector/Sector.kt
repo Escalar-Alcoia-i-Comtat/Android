@@ -4,10 +4,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.SunTime
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassCompanion
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadableDataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
@@ -18,7 +18,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
 import java.io.Serializable
-import java.util.Date
+import java.util.*
 
 /**
  * Creates a new [Sector] instance.
@@ -38,10 +38,10 @@ class Sector internal constructor(
     override val imagePath: String,
     val webUrl: String?,
     private val parentZoneId: String,
-    var downloaded: Boolean = false,
-    var downloadSize: Long?,
+    override var downloaded: Boolean = false,
+    override var downloadSize: Long?,
     private val childrenCount: Long,
-) : DataClass<Path, Zone, SectorData>(
+) : DownloadableDataClass<Path, Zone, SectorData>(
     displayName,
     timestampMillis,
     imagePath,
@@ -60,7 +60,9 @@ class Sector internal constructor(
         1,
         downloadable = true,
         showLocation = location != null,
-    )
+    ),
+    downloaded,
+    downloadSize,
 ) {
 
     /**

@@ -4,10 +4,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassCompanion
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadableDataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
 import kotlinx.parcelize.IgnoredOnParcel
@@ -15,7 +15,7 @@ import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
 import java.io.Serializable
-import java.util.Date
+import java.util.*
 
 /**
  * Creates a new [Zone] instance.
@@ -32,10 +32,10 @@ class Zone internal constructor(
     val position: GeoPoint,
     val webUrl: String?,
     private val parentAreaId: String,
-    var downloaded: Boolean = false,
-    var downloadSize: Long?,
+    override var downloaded: Boolean = false,
+    override var downloadSize: Long?,
     private val childrenCount: Long,
-) : DataClass<Sector, Area, ZoneData>(
+) : DownloadableDataClass<Sector, Area, ZoneData>(
     displayName,
     timestampMillis,
     imagePath,
@@ -54,7 +54,9 @@ class Zone internal constructor(
         2,
         downloadable = true,
         showLocation = true
-    )
+    ),
+    downloaded,
+    downloadSize,
 ) {
     /**
      * Creates a new [Zone] from the data from the Data Module.

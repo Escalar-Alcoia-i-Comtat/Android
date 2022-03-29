@@ -85,6 +85,8 @@ fun SectorPage(
         var imageMaximized by remember { maximized }
         val heightFraction by animateFloatAsState(targetValue = if (imageMaximized) 1f else .7f)
 
+        val imageFile = sector.imageFile(context)
+
         // Image
         Box(
             modifier = Modifier
@@ -92,7 +94,7 @@ fun SectorPage(
                 .fillMaxHeight(heightFraction)
         ) {
             ZoomableImage(
-                imageModel = viewModel.loadImage(sector),
+                imageModel = imageFile?.takeIf { it.exists() } ?: sector.imagePath,
                 contentDescription = stringResource(R.string.image_desc_sector_image),
                 modifier = Modifier
                     .fillMaxSize()

@@ -33,12 +33,4 @@ interface SectorPageViewModel {
      * @param sector The [Sector] to load the [Path] from.
      */
     fun loadPaths(sector: Sector)
-
-    /**
-     * Loads the image from the server, or the file system if downloaded/cached.
-     * @author Arnau Mora
-     * @since 20220118
-     * @param sector The [Sector] to load the image from.
-     */
-    fun loadImage(sector: Sector): Any
 }

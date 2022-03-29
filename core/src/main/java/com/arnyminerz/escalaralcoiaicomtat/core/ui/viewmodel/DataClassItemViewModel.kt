@@ -6,24 +6,20 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
-import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.DownloadWorker
 import kotlinx.coroutines.launch
-import java.util.Date
+import java.util.*
 
 class DataClassItemViewModel(
     application: Application
@@ -68,34 +64,6 @@ class DataClassItemViewModel(
         }
     }
 
-    fun addDownloadListener(
-        namespace: Namespace,
-        @ObjectId objectId: String,
-        callback: (status: DownloadStatus) -> Unit
-    ) {
-        val pin = DataClass.generatePin(namespace, objectId)
-        val downloadStatus = downloadStatuses.getOrPut(pin) {
-            mutableStateOf(DownloadStatus.UNKNOWN)
-        }
-        downloadingStatusListeners[pin] = { status ->
-            downloadStatus.value = status
-            callback(status)
-        }
-        viewModelScope.launch {
-            val state = DownloadSingleton.getInstance().states
-
-            state.observeForever { newMap ->
-                downloadingStatusListeners[pin]?.invoke(
-                    newMap[namespace to objectId] ?: DownloadStatus.UNKNOWN
-                )
-            }
-
-            downloadingStatusListeners[pin]?.invoke(
-                state.value?.get(namespace to objectId) ?: DownloadStatus.UNKNOWN
-            )
-        }
-    }
-
     fun downloadInfo(
         dataClass: DataClass<*, *, *>
     ): MutableLiveData<Pair<Date, Long>?> =
@@ -116,20 +84,6 @@ class DataClassItemViewModel(
             result.postValue(deleted)
         }
         return result
-    }
-
-    /**
-     * Initializes the download status of [at] in [DownloadSingleton] with the current status,
-     * indexed or downloading.
-     * @author Arnau Mora
-     * @since 20220315
-     * @param at The location of the element to update.
-     */
-    fun initializeDownloadStatus(at: Pair<Namespace, @ObjectId String>) {
-        viewModelScope.launch {
-            DownloadSingleton.getInstance()
-                .putState(context, at, null)
-        }
     }
 
     fun <T : DataClass<*, *, *>, R : Comparable<R>> loadChildren(
