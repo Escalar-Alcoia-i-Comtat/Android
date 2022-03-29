@@ -250,9 +250,11 @@ fun SectorPage(
                                         yAxisDrawer = SimpleYAxisDrawer(
                                             axisLineThickness = 0.dp,
                                             axisLineColor = MaterialTheme.colorScheme.surfaceVariant,
-                                            drawLabelEvery = Int.MAX_VALUE,
+                                            drawLabelEvery = 10,
                                             // labelTextSize = 0.sp,
-                                            labelValueFormatter = { "" } // Disables values for the y axis
+                                            labelValueFormatter = {
+                                                it.toInt().toString()
+                                            } // Disables values for the y axis
                                         ),
                                         labelDrawer = SimpleLabelDrawer(
                                             drawLocation = SimpleLabelDrawer.DrawLocation.XAxis,
