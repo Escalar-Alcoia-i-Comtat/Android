@@ -194,6 +194,7 @@
     <string name="status_loading_config">Cargando configuración…</string>
     <string name="status_loading_noti_list">Añadiendo detectores de notificaciones…</string>
     <string name="status_loading_data_collection">Configurando la recolección de datos…</string>
+    <string name="status_loading_workers">Programando trabajos…</string>
     <string name="status_loading_auth">Cargando el sistema de autentificación…</string>
     <string name="status_loading_data">Cargando los datos…</string>
     <string name="status_loading_installing_data">Instalando los datos…</string>
@@ -292,6 +293,14 @@
     <string name="downloads_size">Tamaño: %s</string>
     <string name="updates_title">Actualizaciones</string>
     <string name="updates_no_update_available">Aún no hay actualizaciones disponibles.</string>
+    <string name="path_warning_description_unknown">Unknown</string>
+    <string name="path_warning_description_dry">Dry Path</string>
+    <string name="path_warning_description_build">Path under construction</string>
+    <string name="path_warning_description_bird">Nesting season</string>
+    <string name="path_warning_description_old">Old path</string>
+    <string name="path_warning_description_rocks">Loose rocks on the path</string>
+    <string name="path_warning_description_plants">Plants on the path</string>
+    <string name="path_warning_description_rope_length">Rope Length may be an issue</string>
     <string name="path_warning_dry">En esta ruta hay algunos seguros secándose, posiblemente porque se ha utilizado algún tipo de producto químico para asegurarlos. Debería volver a estar activa en aproximadamente dos días</string>
     <string name="path_warning_build">Esta ruta está bajo revisión.Esto puede llevar de dos días hasta una semana, por favor, sé paciente. Puedes habilitar la notificación de alertas en los ajustes y te avisaremos cuando esté lista</string>
     <string name="path_warning_bird">En esta ruta hay un nido, y por tanto está prohibido escalar.
