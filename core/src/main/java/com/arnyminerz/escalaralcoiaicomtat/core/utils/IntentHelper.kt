@@ -122,7 +122,26 @@ fun Context.launch(target: Class<*>, options: Bundle, properties: (Intent.() -> 
  * @param properties The setter for the properties of the Intent.
  */
 @UiThread
-fun Context.launch(intent: Intent, options: Bundle? = null, properties: (Intent.() -> Unit)? = null) =
+fun Context.launch(
+    intent: Intent,
+    options: Bundle? = null,
+    properties: (Intent.() -> Unit)? = null
+) =
     startActivity(intent.also {
         properties?.invoke(it)
     }, options)
+
+/**
+ * Shares [text] through the system UI.
+ * @author Arnau Mora
+ * @since 20220330
+ * @param text The text to share.
+ */
+fun Context.share(text: String) {
+    val sendIntent: Intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, text)
+        type = "text/plain"
+    }
+    startActivity(Intent.createChooser(sendIntent, null))
+}

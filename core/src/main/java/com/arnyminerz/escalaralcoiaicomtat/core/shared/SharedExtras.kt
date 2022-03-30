@@ -11,6 +11,13 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.DataExtra
 val EXTRA_DATACLASS = DataExtra<Parcelable>("dataclass")
 
 /**
+ * Used in DataClass activities for knowing which is the DataClass to load.
+ * @author Arnau Mora
+ * @since 20220330
+ */
+val EXTRA_DATACLASS_ID = DataExtra<String>("dataclass_id")
+
+/**
  * Used in DataClass activities that load multiple groups of children to know how many children
  * there are in the parent DataClass.
  * @author Arnau Mora
