@@ -26,6 +26,7 @@ import androidx.compose.material.icons.rounded.ChildCare
 import androidx.compose.material.icons.rounded.DirectionsWalk
 import androidx.compose.material.icons.rounded.FlipToBack
 import androidx.compose.material.icons.rounded.FlipToFront
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -74,6 +75,7 @@ val Float.Companion.DegreeConverter
 
 @Composable
 @ExperimentalMaterialApi
+@ExperimentalMaterial3Api
 fun SectorPage(
     viewModel: SectorPageViewModel,
     sector: Sector,
