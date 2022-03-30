@@ -194,7 +194,7 @@
     <string name="status_loading_config">Cargando configuración…</string>
     <string name="status_loading_noti_list">Añadiendo detectores de notificaciones…</string>
     <string name="status_loading_data_collection">Configurando la recolección de datos…</string>
-    <string name="status_loading_workers">Scheduling workers…</string>
+    <string name="status_loading_workers">Programando trabajos…</string>
     <string name="status_loading_auth">Cargando el sistema de autentificación…</string>
     <string name="status_loading_data">Cargando los datos…</string>
     <string name="status_loading_installing_data">Instalando los datos…</string>
