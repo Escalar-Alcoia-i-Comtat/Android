@@ -1,5 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -27,6 +29,8 @@ interface SectorPageViewModel {
      */
     var blockStatusList: List<BlockingData>
 
+    var dataClass: DataClass<*, *, *>?
+
     /**
      * Loads the [BarChartData] of [sector] into [loadBarChartData].
      * @author Arnau Mora
@@ -41,4 +45,12 @@ interface SectorPageViewModel {
      * @param sector The [Sector] to load the [Path] from.
      */
     fun loadPaths(sector: Sector)
+
+    /**
+     * Loads the zone at [objectId].
+     * @author Arnau Mora
+     * @since 20220330
+     * @param objectId The id of the zone to load.
+     */
+    fun loadZone(@ObjectId objectId: String)
 }
