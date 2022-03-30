@@ -23,121 +23,17 @@ import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_IN_PROGRESS_CH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_BLOCKING_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.hasValid
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.then
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
-@Suppress("unused")
 class BlockStatusWorker(context: Context, params: WorkerParameters) :
     CoroutineWorker(context, params) {
 
-    /**
-     * Runs [Context.getJson] for fetching all the blockages on the server endpoint.
-     * @author Arnau Mora
-     * @since 20220330
-     * @param context The context to fetch from.
-     */
-    private suspend fun fetchAllBlockagesFromServer(context: Context): JSONObject =
-        context.getJson("$REST_API_BLOCKING_ENDPOINT/*")
-
-    override suspend fun doWork(): Result {
-        Timber.d("Opening blockages database...")
-        val blockingDatabase = BlockingDatabase.getInstance(applicationContext)
-        val blockingRepository = BlockingRepository(blockingDatabase.blockingDao())
-
-        var notification = Notification.Builder(applicationContext)
-            .withChannelId(TASK_IN_PROGRESS_CHANNEL_ID)
-            .withIcon(R.drawable.ic_notifications)
-            .withTitle(R.string.notification_block_status_title)
-            .withText(R.string.notification_block_status_message)
-            .setPersistent(true)
-            .setAlertOnce(true)
-            .build()
-
-        return try {
-            // First, create the info notification...
-            notification.show()
-
-            Timber.v("Getting block statuses from server...")
-            val blockStatusJson = fetchAllBlockagesFromServer(applicationContext)
-
-            Timber.v("Parsing block statuses response...")
-            if (!blockStatusJson.has("result"))
-                throw IllegalArgumentException("Blocking result list doesn't have a result. JSON: $blockStatusJson")
-            val blockStatusResult = blockStatusJson.getJSONObject("result")
-            val pathIds = blockStatusResult.keys()
-
-            Timber.v("Extracting block statuses...")
-            val blockingStatuses = arrayListOf<BlockingData>()
-
-            for (objectId in pathIds) {
-                // Get the JSON object at current iteration position
-                val blockStatus = blockStatusResult.getJSONObject(objectId)
-                // If blocked is false, continue
-                if (!blockStatus.getBoolean("blocked")) continue
-                // Otherwise, add item to blockingStatuses
-                blockingStatuses.add(
-                    BlockingData(
-                        UUID.randomUUID().toString(),
-                        objectId,
-                        blockStatus.getString("type"),
-                        blockStatus.getDate("endDate"),
-                    )
-                )
-            }
-
-            Timber.v("Building storing notification...")
-            notification = notification.edit()
-                .withText(R.string.notification_block_status_storing)
-                .withProgress(-1, 0)
-                .buildAndShow()
-
-            try {
-                Timber.v("Clearing old blocking statuses...")
-                blockingRepository.clear()
-
-                Timber.v("Putting elements...")
-                blockingRepository.addAll(blockingStatuses)
-
-                Timber.v("Closing database...")
-                blockingDatabase.close()
-
-                Timber.v("Dismissing progress notification...")
-                notification.destroy()
-
-                Timber.v("Finished fetching block statuses...")
-                Result.success()
-            } catch (e: Exception) {
-                Timber.e("Could not store the blocking status list into the database.")
-
-                // Show the error notification
-                notification.destroy()
-                Notification.Builder(applicationContext)
-                    .withChannelId(TASK_FAILED_CHANNEL_ID)
-                    .withIcon(R.drawable.ic_notifications)
-                    .withTitle(R.string.notification_block_status_error_title)
-                    .withText(R.string.notification_block_status_error_store_short)
-                    .buildAndShow()
-
-                return Result.failure()
-            } finally {
-                // Destroy the progress notification
-                Timber.v("Destroying progress notification.")
-                notification.destroy()
-            }
-        } catch (e: TimeoutError) {
-            Result.failure()
-        } catch (e: VolleyError) {
-            Result.failure()
-        } finally {
-            if (!notification.destroyed) {
-                // Destroy the progress notification
-                Timber.v("Destroying progress notification.")
-                notification.destroy()
-            }
-        }
-    }
+    override suspend fun doWork(): Result = blockStatusFetchRoutine(applicationContext)
 
     companion object {
         private const val WORKER_TAG = "BlockStatusWorker"
@@ -265,6 +161,119 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     ExistingPeriodicWorkPolicy.KEEP,
                     workRequest
                 )
+        }
+
+        /**
+         * Runs [Context.getJson] for fetching all the blockages on the server endpoint.
+         * @author Arnau Mora
+         * @since 20220330
+         * @param context The context to fetch from.
+         */
+        private suspend fun fetchAllBlockagesFromServer(context: Context): JSONObject =
+            context.getJson("$REST_API_BLOCKING_ENDPOINT/*")
+
+        @WorkerThread
+        suspend fun blockStatusFetchRoutine(applicationContext: Context): Result {
+            Timber.d("Opening blockages database...")
+            val blockingDatabase = BlockingDatabase.getInstance(applicationContext)
+            val blockingRepository = BlockingRepository(blockingDatabase.blockingDao())
+
+            var notification = Notification.Builder(applicationContext)
+                .withChannelId(TASK_IN_PROGRESS_CHANNEL_ID)
+                .withIcon(R.drawable.ic_notifications)
+                .withTitle(R.string.notification_block_status_title)
+                .withText(R.string.notification_block_status_message)
+                .setPersistent(true)
+                .setAlertOnce(true)
+                .build()
+
+            return try {
+                // First, create the info notification...
+                notification.show()
+
+                Timber.v("Getting block statuses from server...")
+                val blockStatusJson = fetchAllBlockagesFromServer(applicationContext)
+
+                Timber.v("Parsing block statuses response...")
+                if (!blockStatusJson.has("result"))
+                    throw IllegalArgumentException("Blocking result list doesn't have a result. JSON: $blockStatusJson")
+                val blockStatusResult = blockStatusJson.getJSONObject("result")
+                val pathIds = blockStatusResult.keys()
+
+                Timber.v("Extracting block statuses...")
+                val blockingStatuses = arrayListOf<BlockingData>()
+
+                for (objectId in pathIds) {
+                    // Get the JSON object at current iteration position
+                    val blockStatus = blockStatusResult.getJSONObject(objectId)
+
+                    // If blocked is false, continue
+                    if (!blockStatus.getBoolean("blocked")) continue
+
+                    // Otherwise, add item to blockingStatuses
+                    val blockingData = try {
+                        BlockingData(
+                            UUID.randomUUID().toString(),
+                            objectId,
+                            blockStatus.getString("type"),
+                            blockStatus.hasValid("endDate").then { blockStatus.getDate("endDate") },
+                        )
+                    } catch (e: Exception) {
+                        continue
+                    }
+                    blockingStatuses.add(blockingData)
+                }
+
+                Timber.v("Building storing notification...")
+                notification = notification.edit()
+                    .withText(R.string.notification_block_status_storing)
+                    .withProgress(-1, 0)
+                    .buildAndShow()
+
+                try {
+                    Timber.v("Clearing old blocking statuses...")
+                    blockingRepository.clear()
+
+                    Timber.v("Putting elements...")
+                    blockingRepository.addAll(blockingStatuses)
+
+                    // Timber.v("Closing database...")
+                    // blockingDatabase.close()
+
+                    Timber.v("Dismissing progress notification...")
+                    notification.destroy()
+
+                    Timber.v("Finished fetching block statuses...")
+                    Result.success()
+                } catch (e: Exception) {
+                    Timber.e(e, "Could not store the blocking status list into the database.")
+
+                    // Show the error notification
+                    notification.destroy()
+                    Notification.Builder(applicationContext)
+                        .withChannelId(TASK_FAILED_CHANNEL_ID)
+                        .withIcon(R.drawable.ic_notifications)
+                        .withTitle(R.string.notification_block_status_error_title)
+                        .withText(R.string.notification_block_status_error_store_short)
+                        .buildAndShow()
+
+                    return Result.failure()
+                } finally {
+                    // Destroy the progress notification
+                    Timber.v("Destroying progress notification.")
+                    notification.destroy()
+                }
+            } catch (e: TimeoutError) {
+                Result.failure()
+            } catch (e: VolleyError) {
+                Result.failure()
+            } finally {
+                if (!notification.destroyed) {
+                    // Destroy the progress notification
+                    Timber.v("Destroying progress notification.")
+                    notification.destroy()
+                }
+            }
         }
     }
 }
