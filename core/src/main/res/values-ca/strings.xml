@@ -293,6 +293,14 @@
     <string name="downloads_size">Tamany: %s</string>
     <string name="updates_title">Actualitzacions</string>
     <string name="updates_no_update_available">No hi ha cap element per a actualitzar.</string>
+    <string name="path_warning_description_unknown">Unknown</string>
+    <string name="path_warning_description_dry">Dry Path</string>
+    <string name="path_warning_description_build">Path under construction</string>
+    <string name="path_warning_description_bird">Nesting season</string>
+    <string name="path_warning_description_old">Old path</string>
+    <string name="path_warning_description_rocks">Loose rocks on the path</string>
+    <string name="path_warning_description_plants">Plants on the path</string>
+    <string name="path_warning_description_rope_length">Rope Length may be an issue</string>
     <string name="path_warning_dry">S\'estàn secant els segurs d\'aquesta via. Açò és possible que estiga causat perquè els segurs han sigut col·locats mitjançant algun tipus de procés químic. Aquesta alerta deuria mostrar-se durant 2 dies o menys.</string>
     <string name="path_warning_build">Aquesta via està baix revisió o reequipació. Açò pot tardar des de dies fins a setmanes. Per favor, tingues paciència. Pots habilitar les alertes en la configuració, i t\'avisarem quan s\'haja completat el procés.</string>
     <string name="path_warning_bird">Aquesta via té un niu, així que està prohibida la escalada actualment. Açò pot durar tota la nidificació, així que poden passar setmanes fins a que torne a estar disponible. Pots habilitar les alertes en la configuració, i t\'avisarem quan es puga tornar a escalar.</string>
