@@ -20,8 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.exception.notification.NullIconE
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ValueMax
 import com.arnyminerz.escalaralcoiaicomtat.core.view.getColor
 import timber.log.Timber
-import java.util.MissingFormatArgumentException
-import java.util.UUID
+import java.util.*
 
 private var notificationIdCounter = 0
 private fun generateNotificationId(): Int = notificationIdCounter++
@@ -59,6 +58,15 @@ class Notification private constructor(private val builder: Builder) {
      * @since 20210406
      */
     var android: android.app.Notification? = null
+        private set
+
+    /**
+     * Stores whether or not the notification has been destroyed. Will be false until [show] is
+     * called.
+     * @author Arnau Mora
+     * @since 20220330
+     */
+    var destroyed: Boolean = true
         private set
 
     /**
@@ -134,6 +142,7 @@ class Notification private constructor(private val builder: Builder) {
             NotificationManagerCompat.from(builder.context)
                 .notify(builder.id, android!!)
         }
+        destroyed = false
         return this
     }
 
@@ -158,6 +167,7 @@ class Notification private constructor(private val builder: Builder) {
      */
     fun destroy() {
         hide()
+        destroyed = true
         builders.remove(builder.id)
     }
 
