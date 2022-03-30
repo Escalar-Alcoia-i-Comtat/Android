@@ -222,6 +222,7 @@
     <string name="status_loading_config">Loading configuration…</string>
     <string name="status_loading_noti_list">Adding notification listeners…</string>
     <string name="status_loading_data_collection">Configuring data collection…</string>
+    <string name="status_loading_workers">Scheduling workers…</string>
     <string name="status_loading_auth">Loading authentication system…</string>
     <string name="status_loading_data">Loading data…</string>
     <string name="status_loading_installing_data">Installing data…</string>
