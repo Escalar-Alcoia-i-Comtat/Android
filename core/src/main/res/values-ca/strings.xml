@@ -194,7 +194,7 @@
     <string name="status_loading_config">Carregant configuració…</string>
     <string name="status_loading_noti_list">Afegint detectors de notificacions…</string>
     <string name="status_loading_data_collection">Configurant la recol·lecció de dades…</string>
-    <string name="status_loading_workers">Scheduling workers…</string>
+    <string name="status_loading_workers">Programant treballs…</string>
     <string name="status_loading_auth">Carregant el sistema d\'autentificació…</string>
     <string name="status_loading_data">Carregant les dades…</string>
     <string name="status_loading_installing_data">Instal·lant les dades…</string>
