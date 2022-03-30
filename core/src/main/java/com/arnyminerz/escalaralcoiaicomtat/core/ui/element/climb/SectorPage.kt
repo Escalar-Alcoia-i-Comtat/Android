@@ -266,7 +266,10 @@ fun SectorPage(
                     }
                 }
                 items(viewModel.paths) { item ->
-                    PathItem(item)
+                    PathItem(
+                        item,
+                        viewModel.blockStatusList.find { it.pathId == item.objectId }
+                    )
                 }
             }
     }

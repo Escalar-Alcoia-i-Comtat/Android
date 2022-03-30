@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel
 
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import me.bytebeats.views.charts.bar.BarChartData
@@ -18,6 +19,13 @@ interface SectorPageViewModel {
      * @since 20220106
      */
     var paths: List<Path>
+
+    /**
+     * A mutable state delegation of a list of [BlockingData] of the paths.
+     * @author Arnau Mora
+     * @since 20220330
+     */
+    var blockStatusList: List<BlockingData>
 
     /**
      * Loads the [BarChartData] of [sector] into [loadBarChartData].

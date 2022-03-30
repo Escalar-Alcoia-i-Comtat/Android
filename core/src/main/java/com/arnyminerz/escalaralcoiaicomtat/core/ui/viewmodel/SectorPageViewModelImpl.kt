@@ -8,6 +8,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.database.BlockingDatabase
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
@@ -16,6 +18,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.grade_blue
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.grade_green
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.grade_purple
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.grade_red
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.BlockStatusWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,6 +29,8 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
     SectorPageViewModel {
 
     override var paths: List<Path> by mutableStateOf(emptyList())
+
+    override var blockStatusList: List<BlockingData> by mutableStateOf(emptyList())
 
     override var barChartData: BarChartData by mutableStateOf(
         BarChartData(
@@ -138,6 +143,20 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
                 Timber.d("Loading paths from $sector...")
                 sector.getChildren(context) { it.sketchId }
             }
+            val blockingStatus = withContext(Dispatchers.IO) {
+                val database = BlockingDatabase.getInstance(context)
+                val dao = database.blockingDao()
+                dao.getAllOnce().takeIf { it.isNotEmpty() } ?: run {
+                    Timber.v("No block status have been loaded. Fetching all now.")
+                    BlockStatusWorker.blockStatusFetchRoutine(context)
+
+                    dao.getAllOnce()
+                }
+            }
+
+            Timber.v("Blocking status: $blockingStatus")
+
+            blockStatusList = blockingStatus
             paths = pathsList
         }
     }
