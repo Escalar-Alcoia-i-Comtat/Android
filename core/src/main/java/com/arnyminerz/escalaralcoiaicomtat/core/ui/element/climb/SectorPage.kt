@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.TwoWayConverter
@@ -20,12 +21,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AddToHomeScreen
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChildCare
 import androidx.compose.material.icons.rounded.DirectionsWalk
 import androidx.compose.material.icons.rounded.FlipToBack
 import androidx.compose.material.icons.rounded.FlipToFront
+import androidx.compose.material.icons.rounded.Launch
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,6 +51,10 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
+import androidx.core.graphics.drawable.toBitmap
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.textResource
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.vector
@@ -54,12 +65,14 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.ZoomableImage
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.share
 import me.bytebeats.views.charts.bar.BarChart
 import me.bytebeats.views.charts.bar.render.bar.SimpleBarDrawer
 import me.bytebeats.views.charts.bar.render.label.SimpleLabelDrawer
 import me.bytebeats.views.charts.bar.render.xaxis.SimpleXAxisDrawer
 import me.bytebeats.views.charts.bar.render.yaxis.SimpleYAxisDrawer
 import me.bytebeats.views.charts.simpleChartAnimation
+import java.util.UUID
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -79,10 +92,16 @@ val Float.Companion.DegreeConverter
 fun SectorPage(
     viewModel: SectorPageViewModel,
     sector: Sector,
+    dataClassIntent: (sector: Sector) -> Intent,
     maximized: MutableState<Boolean>,
 ) {
     val context = LocalContext.current
     viewModel.loadPaths(sector)
+
+    var showLaunchDialog by remember { mutableStateOf(false) }
+
+    if (showLaunchDialog)
+        LaunchDialog(sector, dataClassIntent) { showLaunchDialog = false }
 
     Column(modifier = Modifier.fillMaxSize()) {
         var imageMaximized by remember { maximized }
@@ -103,16 +122,27 @@ fun SectorPage(
                 modifier = Modifier
                     .fillMaxSize()
             )
-            SmallFloatingActionButton(
-                onClick = { imageMaximized = !imageMaximized },
+            Row(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(8.dp)
             ) {
-                Icon(
-                    if (imageMaximized) Icons.Rounded.FlipToBack else Icons.Rounded.FlipToFront,
-                    contentDescription = stringResource(R.string.action_maximize_image)
-                )
+                SmallFloatingActionButton(
+                    onClick = { imageMaximized = !imageMaximized },
+                ) {
+                    Icon(
+                        if (imageMaximized) Icons.Rounded.FlipToBack else Icons.Rounded.FlipToFront,
+                        contentDescription = stringResource(R.string.action_maximize_image)
+                    )
+                }
+                SmallFloatingActionButton(
+                    onClick = { showLaunchDialog = true },
+                ) {
+                    Icon(
+                        Icons.Rounded.Launch,
+                        contentDescription = stringResource(R.string.fab_desc_launch)
+                    )
+                }
             }
         }
 
@@ -275,4 +305,78 @@ fun SectorPage(
                 }
             }
     }
+}
+
+@Composable
+@ExperimentalMaterialApi
+fun LaunchDialog(
+    sector: Sector,
+    dataClassIntent: (sector: Sector) -> Intent,
+    onDismissRequest: () -> Unit
+) {
+    val context = LocalContext.current
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(text = stringResource(R.string.dialog_share_title))
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                val sectorLaunchLabel = stringResource(R.string.action_open_sector)
+
+                if (sector.webUrl != null)
+                    ListItem(
+                        icon = {
+                            Icon(
+                                Icons.Rounded.Share,
+                                contentDescription = stringResource(R.string.action_share)
+                            )
+                        },
+                        text = {
+                            Text(text = stringResource(R.string.action_share))
+                        },
+                        modifier = Modifier
+                            .clickable { context.share(sector.webUrl) },
+                    )
+                ListItem(
+                    icon = {
+                        Icon(
+                            Icons.Rounded.AddToHomeScreen,
+                            contentDescription = stringResource(R.string.action_add_to_homescreen)
+                        )
+                    },
+                    text = {
+                        Text(text = stringResource(R.string.action_add_to_homescreen))
+                    },
+                    modifier = Modifier
+                        .clickable {
+                            val shortcut =
+                                ShortcutInfoCompat.Builder(context, UUID.randomUUID().toString())
+                                    .setShortLabel(sector.displayName)
+                                    .setLongLabel(sector.displayName)
+                                    .setIcon(
+                                        IconCompat.createWithBitmap(
+                                            context.packageManager
+                                                .getApplicationIcon(context.applicationInfo)
+                                                .toBitmap()
+                                        )
+                                    )
+                                    .setIntent(
+                                        dataClassIntent(sector)
+                                    )
+                                    .build()
+                            ShortcutManagerCompat.requestPinShortcut(context, shortcut, null)
+                        },
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDismissRequest) {
+                Text(text = stringResource(R.string.action_close))
+            }
+        },
+    )
 }

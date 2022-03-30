@@ -8,7 +8,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.database.BlockingDatabase
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.database.DataClassDatabase
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -27,6 +29,8 @@ import timber.log.Timber
 
 class SectorPageViewModelImpl(application: Application) : AndroidViewModel(application),
     SectorPageViewModel {
+
+    override var dataClass: DataClass<*, *, *>? by mutableStateOf(null)
 
     override var paths: List<Path> by mutableStateOf(emptyList())
 
@@ -158,6 +162,19 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
 
             blockStatusList = blockingStatus
             paths = pathsList
+        }
+    }
+
+    override fun loadZone(objectId: String) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                Timber.i("Loading Zone $objectId...")
+                val db = DataClassDatabase.getInstance(context)
+                val dao = db.zonesDao()
+                dao.get(objectId)?.data()
+            }?.let { dataClass = it } ?: run {
+                Timber.w("Could not find $objectId!")
+            }
         }
     }
 

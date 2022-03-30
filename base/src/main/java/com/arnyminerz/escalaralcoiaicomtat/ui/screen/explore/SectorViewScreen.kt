@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore
 
 import android.app.Activity
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,11 +40,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS_ID
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.SectorPage
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModel
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -181,11 +187,19 @@ fun Activity.SectorViewScreen(
                 state = pagerState,
                 modifier = Modifier.padding(padding),
                 userScrollEnabled = !maximized.value,
-            ) {
+            ) { index ->
                 Timber.d("Rendering Sector...")
                 SectorPage(
                     sectorPageViewModel,
                     currentSector!!,
+                    {
+                        Intent(this@SectorViewScreen, DataClassActivity::class.java)
+                            .setAction(Intent.ACTION_MAIN)
+                            .putExtra(EXTRA_DATACLASS_ID, zone.objectId)
+                            .putExtra(EXTRA_CHILDREN_COUNT, childrenCount)
+                            .putExtra(EXTRA_INDEX, index)
+                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    },
                     maximized,
                 )
             }

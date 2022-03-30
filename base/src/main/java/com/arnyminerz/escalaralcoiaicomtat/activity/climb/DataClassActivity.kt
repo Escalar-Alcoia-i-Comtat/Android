@@ -5,9 +5,14 @@ import android.os.Parcelable
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.MutableLiveData
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
@@ -16,6 +21,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
@@ -68,11 +74,11 @@ class DataClassActivity : NetworkAwareComponentActivity() {
     private val hasInternet = MutableLiveData<Boolean>()
 
     /**
-     * The Data Class to display.
+     * The id of the DataClass to display.
      * @author Arnau Mora
-     * @since 20220105
+     * @since 20220330
      */
-    private lateinit var dataClass: DataClass<*, *, *>
+    private var dataClassId: String? = null
 
     /**
      * Used for Sector display, to remember which is the position of the currently showing sector.
@@ -117,53 +123,70 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         // Load childrenCount
         childrenCount = getExtraOrSavedInstanceState(EXTRA_CHILDREN_COUNT, savedInstanceState)
 
-        Firebase.analytics
-            .logEvent(
+        if (sectorPageViewModel.dataClass != null)
+            Firebase.analytics.logEvent(
                 FirebaseAnalytics.Event.SELECT_CONTENT,
                 Bundle().apply {
-                    putString(FirebaseAnalytics.Param.ITEM_ID, dataClass.objectId)
-                    putString(FirebaseAnalytics.Param.ITEM_NAME, dataClass.displayName)
-                    putString(FirebaseAnalytics.Param.CONTENT_TYPE, dataClass.namespace.namespace)
+                    putString(
+                        FirebaseAnalytics.Param.ITEM_ID,
+                        sectorPageViewModel.dataClass!!.objectId
+                    )
+                    putString(
+                        FirebaseAnalytics.Param.ITEM_NAME,
+                        sectorPageViewModel.dataClass!!.displayName
+                    )
+                    putString(
+                        FirebaseAnalytics.Param.CONTENT_TYPE,
+                        sectorPageViewModel.dataClass!!.namespace.namespace
+                    )
                 },
             )
 
         setContent {
             AppTheme {
-                Timber.d("DataClass namespace: ${dataClass.namespace}. Index=$index. Children Count=$childrenCount")
-                if (dataClass.namespace == Zone.NAMESPACE && index != null && childrenCount != null) {
-                    val zone = dataClass as Zone
-                    SectorViewScreen(
-                        sectorPageViewModel,
-                        zone,
-                        childrenCount!!,
-                        isMaximized,
-                        index,
-                    ) { index = it }
-                } else {
-                    Timber.d("Rendering Area/Zone...")
-                    // If not, load the DataClassExplorer
-                    DataClassExplorer(
-                        exploreViewModel,
-                        hasInternet,
-                        navStack
-                    ) { adding, item ->
-                        navStack.value = navStack.value
-                            .toMutableList()
-                            .let { list ->
-                                if (adding) {
-                                    list.add(item)
-                                    list
-                                } else
-                                    list.filter { it != item }
-                            }
+                val dataClass = sectorPageViewModel.dataClass
+                if (dataClass != null) {
+                    Timber.d("DataClass namespace: ${dataClass.namespace}. Index=$index. Children Count=$childrenCount")
+                    if (dataClass.namespace == Zone.NAMESPACE && index != null && childrenCount != null) {
+                        val zone = dataClass as Zone
+                        SectorViewScreen(
+                            sectorPageViewModel,
+                            zone,
+                            childrenCount!!,
+                            isMaximized,
+                            index,
+                        ) { index = it }
+                    } else {
+                        Timber.d("Rendering Area/Zone...")
+                        // If not, load the DataClassExplorer
+                        DataClassExplorer(
+                            exploreViewModel,
+                            hasInternet,
+                            navStack
+                        ) { adding, item ->
+                            navStack.value = navStack.value
+                                .toMutableList()
+                                .let { list ->
+                                    if (adding) {
+                                        list.add(item)
+                                        list
+                                    } else
+                                        list.filter { it != item }
+                                }
+                        }
                     }
-                }
+                } else
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) { CircularProgressIndicator() }
             }
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.put(EXTRA_DATACLASS, dataClass)
+        dataClassId?.let { outState.put(EXTRA_DATACLASS_ID, it) }
+        sectorPageViewModel.dataClass?.let { outState.put(EXTRA_DATACLASS, it) }
         outState.put(EXTRA_INDEX, index)
         childrenCount?.let { outState.put(EXTRA_CHILDREN_COUNT, it) }
 
@@ -196,15 +219,27 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         extras: Bundle?,
         savedInstanceState: Bundle?,
     ): Boolean {
-        val dataClassExtra: Parcelable = (extras?.getExtra(EXTRA_DATACLASS)
-            ?: savedInstanceState?.getExtra(EXTRA_DATACLASS) ?: run {
-                Timber.e("Finishing DataClassActivity since no DataClass was passed.")
-                finishActivity(REQUEST_CODE_ERROR_NO_DATACLASS)
-                return false
-            })
-        Timber.v("EXTRA_DATACLASS is present in intent extras. Type: ${dataClassExtra::class.java}")
-        dataClass = dataClassExtra as DataClass<*, *, *>
-        navStack.value = listOf(dataClass)
+        val dataClassExtra: Parcelable? =
+            extras?.getExtra(EXTRA_DATACLASS) ?: savedInstanceState?.getExtra(EXTRA_DATACLASS)
+
+        Timber.v("EXTRA_DATACLASS is present in intent extras. Type: ${dataClassExtra?.let { it::class.java }}")
+
+        val castDataClass = dataClassExtra as DataClass<*, *, *>?
+        sectorPageViewModel.dataClass = castDataClass
+        val dataClassId =
+            extras?.getExtra(EXTRA_DATACLASS_ID) ?: savedInstanceState?.getExtra(EXTRA_DATACLASS_ID)
+
+        if (dataClassId != null)
+            sectorPageViewModel.loadZone(dataClassId)
+
+        if (dataClassId == null && dataClassExtra == null) {
+            Timber.e("Finishing DataClassActivity since no DataClass was passed.")
+            finishActivity(REQUEST_CODE_ERROR_NO_DATACLASS)
+            return false
+        }
+
+        navStack.value =
+            if (castDataClass != null) listOf<DataClassImpl>(castDataClass) else emptyList()
         return true
     }
 }
