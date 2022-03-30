@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,14 +32,16 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Grade
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_CHAIN_CARABINER
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_CHAIN_RING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_LANYARD
@@ -51,12 +55,32 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_WALKING
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 
+private class PathItemSampleBlockingDataProvider : PreviewParameterProvider<BlockingData> {
+    override val values: Sequence<BlockingData> = sequenceOf(
+        BlockingData("1234", Path.SAMPLE_PATH_OBJECT_ID, BlockingType.UNKNOWN.idName, null),
+        BlockingData("1234", Path.SAMPLE_PATH_OBJECT_ID, BlockingType.BIRD.idName, null),
+    )
+}
+
 @Composable
-fun PathItem(path: Path, infoVisibleStart: Boolean = false) {
-    val context = LocalContext.current
+@ExperimentalMaterial3Api
+fun PathItem(
+    path: Path,
+    @PreviewParameter(PathItemSampleBlockingDataProvider::class) blockingData: BlockingData? = null,
+) {
+    val backgroundColor = if (blockingData != null)
+        MaterialTheme.colorScheme.errorContainer
+    else
+        MaterialTheme.colorScheme.surfaceVariant
+
+    val textColor = if (blockingData != null)
+        MaterialTheme.colorScheme.onErrorContainer
+    else
+        MaterialTheme.colorScheme.onSurfaceVariant
 
     Card(
-        backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = backgroundColor,
+        contentColor = textColor,
         modifier = Modifier
             .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
             .fillMaxWidth(),
@@ -65,7 +89,7 @@ fun PathItem(path: Path, infoVisibleStart: Boolean = false) {
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            var infoVisible by remember { mutableStateOf(infoVisibleStart) }
+            var infoVisible by remember { mutableStateOf(false) }
             val infoIconRotation by animateValueAsState(
                 targetValue = if (infoVisible) -180f else -90f,
                 typeConverter = Float.DegreeConverter,
@@ -84,7 +108,7 @@ fun PathItem(path: Path, infoVisibleStart: Boolean = false) {
                     Text(
                         text = path.sketchId.toString(),
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = textColor,
                         style = MaterialTheme.typography.titleLarge,
                         fontSize = 20.sp,
                     )
@@ -102,7 +126,7 @@ fun PathItem(path: Path, infoVisibleStart: Boolean = false) {
                         fontSize = 18.sp,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = textColor,
                     )
                     val builderName = path.buildPatch?.name
                     val builderDate = path.buildPatch?.date
@@ -114,7 +138,7 @@ fun PathItem(path: Path, infoVisibleStart: Boolean = false) {
                                     .fillMaxWidth(),
                                 fontSize = 14.sp,
                                 fontStyle = FontStyle.Italic,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = textColor,
                                 overflow = TextOverflow.Visible,
                                 maxLines = 2,
                             )
@@ -142,7 +166,7 @@ fun PathItem(path: Path, infoVisibleStart: Boolean = false) {
                         else
                             path.generalHeight?.let { it.toString() + "m" } ?: "",
                         style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = textColor,
                         fontSize = 16.sp,
                     )
                 }
@@ -163,146 +187,169 @@ fun PathItem(path: Path, infoVisibleStart: Boolean = false) {
                 }
             }
             AnimatedVisibility(visible = infoVisible) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                Column(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    if (path.generalEnding != null)
-                        Chip(
-                            text = stringResource(
-                                when (path.generalEnding) {
-                                    ENDING_TYPE_PLATE -> R.string.path_ending_plate
-                                    ENDING_TYPE_PLATE_RING -> R.string.path_ending_plate_ring
-                                    ENDING_TYPE_PLATE_LANYARD -> R.string.path_ending_plate_lanyard
-                                    ENDING_TYPE_CHAIN_RING -> R.string.path_ending_chain_ring
-                                    ENDING_TYPE_CHAIN_CARABINER -> R.string.path_ending_chain_carabiner
-                                    ENDING_TYPE_PITON -> R.string.path_ending_piton
-                                    ENDING_TYPE_WALKING -> R.string.path_ending_walking
-                                    ENDING_TYPE_RAPPEL -> R.string.path_ending_rappel
-                                    ENDING_TYPE_LANYARD -> R.string.path_ending_lanyard
-                                    ENDING_TYPE_NONE -> R.string.path_ending_none
-                                    else -> R.string.path_ending_unknown
+                    val blockingType = blockingData?.blockingType
+                    if (blockingType != null && blockingType != BlockingType.UNKNOWN)
+                        Card(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError,
+                            modifier = Modifier
+                                .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
+                                .fillMaxWidth(),
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column {
+                                    Icon(
+                                        Icons.Rounded.Warning,
+                                        contentDescription = stringResource(blockingType.contentDescription),
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .padding(start = 4.dp, top = 4.dp),
+                                        tint = MaterialTheme.colorScheme.onError,
+                                    )
                                 }
-                            ),
-                            icon = ContextCompat.getDrawable(
-                                context,
-                                when (path.generalEnding) {
-                                    ENDING_TYPE_PLATE -> R.drawable.ic_reunio_xapes_24
-                                    ENDING_TYPE_PLATE_RING -> R.drawable.ic_reunio_xapesargolla
-                                    ENDING_TYPE_PLATE_LANYARD -> R.drawable.ic_lanyard
-                                    ENDING_TYPE_CHAIN_RING -> R.drawable.ic_reunio_cadenaargolla
-                                    ENDING_TYPE_CHAIN_CARABINER -> R.drawable.ic_reunio_cadenamosqueto
-                                    ENDING_TYPE_PITON -> R.drawable.ic_reunio_clau
-                                    ENDING_TYPE_WALKING -> R.drawable.ic_descens_caminant
-                                    ENDING_TYPE_RAPPEL -> R.drawable.ic_via_rappelable
-                                    ENDING_TYPE_LANYARD -> R.drawable.ic_lanyard
-                                    ENDING_TYPE_NONE -> R.drawable.round_close_24
-                                    else -> R.drawable.round_close_24
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(
+                                            start = 4.dp,
+                                            end = 4.dp,
+                                            top = 8.dp,
+                                            bottom = 8.dp
+                                        )
+                                ) {
+                                    Text(
+                                        text = stringResource(blockingType.explanation),
+                                        color = MaterialTheme.colorScheme.onError,
+                                        fontSize = 13.sp,
+                                    )
                                 }
-                            ),
-                            modifier = Modifier
-                                .padding(start = 4.dp, end = 4.dp),
-                            onClick = { context.toast(R.string.toast_ending_info) },
-                        )
+                            }
+                        }
 
-                    val fixedSafesData = path.fixedSafesData
-                    for (chip in fixedSafesData.list())
-                        if (chip.count > 0)
-                            Chip(
-                                text = stringResource(chip.displayName, chip.count),
-                                icon = ContextCompat.getDrawable(context, chip.image),
-                                modifier = Modifier
-                                    .padding(start = 4.dp, end = 4.dp),
-                                onClick = { context.toast(R.string.toast_material_fixed) }
-                            )
-
-                    val requiredSafesData = path.requiredSafesData
-                    if (requiredSafesData.crackerRequired)
-                        Chip(
-                            text = stringResource(R.string.safe_required_cracker),
-                            icon = ContextCompat.getDrawable(context, R.drawable.ic_cracker),
-                            modifier = Modifier
-                                .padding(start = 4.dp, end = 4.dp),
-                            onClick = { context.toast(R.string.toast_material_required) },
-                        )
-                    if (requiredSafesData.friendRequired)
-                        Chip(
-                            text = stringResource(R.string.safe_required_friend),
-                            icon = ContextCompat.getDrawable(context, R.drawable.ic_friend),
-                            modifier = Modifier
-                                .padding(start = 4.dp, end = 4.dp),
-                            onClick = { context.toast(R.string.toast_material_required) },
-                        )
-                    if (requiredSafesData.lanyardRequired)
-                        Chip(
-                            text = stringResource(R.string.safe_required_lanyard),
-                            icon = ContextCompat.getDrawable(context, R.drawable.ic_lanyard),
-                            modifier = Modifier
-                                .padding(start = 4.dp, end = 4.dp),
-                            onClick = { context.toast(R.string.toast_material_required) },
-                        )
-                    if (requiredSafesData.nailRequired)
-                        Chip(
-                            text = stringResource(R.string.safe_required_nail),
-                            icon = ContextCompat.getDrawable(context, R.drawable.ic_reunio_clau),
-                            modifier = Modifier
-                                .padding(start = 4.dp, end = 4.dp),
-                            onClick = { context.toast(R.string.toast_material_required) },
-                        )
-                    if (requiredSafesData.pitonRequired)
-                        Chip(
-                            text = stringResource(R.string.safe_required_piton),
-                            icon = ContextCompat.getDrawable(context, R.drawable.ic_reunio_clau),
-                            modifier = Modifier
-                                .padding(start = 4.dp, end = 4.dp),
-                            onClick = { context.toast(R.string.toast_material_required) },
-                        )
-                    if (requiredSafesData.stripsRequired)
-                        Chip(
-                            text = stringResource(R.string.safe_required_strips),
-                            icon = ContextCompat.getDrawable(context, R.drawable.ic_strips),
-                            modifier = Modifier
-                                .padding(start = 4.dp, end = 4.dp),
-                            onClick = { context.toast(R.string.toast_material_required) },
-                        )
+                    BadgesRow(path)
                 }
             }
         }
     }
 }
 
-@Preview
 @Composable
-fun PathItemPreview() {
-    PathItem(path = Path.SAMPLE_PATH)
+fun BadgesRow(path: Path) {
+    val context = LocalContext.current
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+    ) {
+        if (path.generalEnding != null)
+            Chip(
+                text = stringResource(
+                    when (path.generalEnding) {
+                        ENDING_TYPE_PLATE -> R.string.path_ending_plate
+                        ENDING_TYPE_PLATE_RING -> R.string.path_ending_plate_ring
+                        ENDING_TYPE_PLATE_LANYARD -> R.string.path_ending_plate_lanyard
+                        ENDING_TYPE_CHAIN_RING -> R.string.path_ending_chain_ring
+                        ENDING_TYPE_CHAIN_CARABINER -> R.string.path_ending_chain_carabiner
+                        ENDING_TYPE_PITON -> R.string.path_ending_piton
+                        ENDING_TYPE_WALKING -> R.string.path_ending_walking
+                        ENDING_TYPE_RAPPEL -> R.string.path_ending_rappel
+                        ENDING_TYPE_LANYARD -> R.string.path_ending_lanyard
+                        ENDING_TYPE_NONE -> R.string.path_ending_none
+                        else -> R.string.path_ending_unknown
+                    }
+                ),
+                icon = ContextCompat.getDrawable(
+                    context,
+                    when (path.generalEnding) {
+                        ENDING_TYPE_PLATE -> R.drawable.ic_reunio_xapes_24
+                        ENDING_TYPE_PLATE_RING -> R.drawable.ic_reunio_xapesargolla
+                        ENDING_TYPE_PLATE_LANYARD -> R.drawable.ic_lanyard
+                        ENDING_TYPE_CHAIN_RING -> R.drawable.ic_reunio_cadenaargolla
+                        ENDING_TYPE_CHAIN_CARABINER -> R.drawable.ic_reunio_cadenamosqueto
+                        ENDING_TYPE_PITON -> R.drawable.ic_reunio_clau
+                        ENDING_TYPE_WALKING -> R.drawable.ic_descens_caminant
+                        ENDING_TYPE_RAPPEL -> R.drawable.ic_via_rappelable
+                        ENDING_TYPE_LANYARD -> R.drawable.ic_lanyard
+                        ENDING_TYPE_NONE -> R.drawable.round_close_24
+                        else -> R.drawable.round_close_24
+                    }
+                ),
+                modifier = Modifier
+                    .padding(start = 4.dp, end = 4.dp),
+                onClick = { context.toast(R.string.toast_ending_info) },
+            )
+
+        val fixedSafesData = path.fixedSafesData
+        for (chip in fixedSafesData.list())
+            if (chip.count > 0)
+                Chip(
+                    text = stringResource(chip.displayName, chip.count),
+                    icon = ContextCompat.getDrawable(context, chip.image),
+                    modifier = Modifier
+                        .padding(start = 4.dp, end = 4.dp),
+                    onClick = { context.toast(R.string.toast_material_fixed) }
+                )
+
+        val requiredSafesData = path.requiredSafesData
+        if (requiredSafesData.crackerRequired)
+            Chip(
+                text = stringResource(R.string.safe_required_cracker),
+                icon = ContextCompat.getDrawable(context, R.drawable.ic_cracker),
+                modifier = Modifier
+                    .padding(start = 4.dp, end = 4.dp),
+                onClick = { context.toast(R.string.toast_material_required) },
+            )
+        if (requiredSafesData.friendRequired)
+            Chip(
+                text = stringResource(R.string.safe_required_friend),
+                icon = ContextCompat.getDrawable(context, R.drawable.ic_friend),
+                modifier = Modifier
+                    .padding(start = 4.dp, end = 4.dp),
+                onClick = { context.toast(R.string.toast_material_required) },
+            )
+        if (requiredSafesData.lanyardRequired)
+            Chip(
+                text = stringResource(R.string.safe_required_lanyard),
+                icon = ContextCompat.getDrawable(context, R.drawable.ic_lanyard),
+                modifier = Modifier
+                    .padding(start = 4.dp, end = 4.dp),
+                onClick = { context.toast(R.string.toast_material_required) },
+            )
+        if (requiredSafesData.nailRequired)
+            Chip(
+                text = stringResource(R.string.safe_required_nail),
+                icon = ContextCompat.getDrawable(context, R.drawable.ic_reunio_clau),
+                modifier = Modifier
+                    .padding(start = 4.dp, end = 4.dp),
+                onClick = { context.toast(R.string.toast_material_required) },
+            )
+        if (requiredSafesData.pitonRequired)
+            Chip(
+                text = stringResource(R.string.safe_required_piton),
+                icon = ContextCompat.getDrawable(context, R.drawable.ic_reunio_clau),
+                modifier = Modifier
+                    .padding(start = 4.dp, end = 4.dp),
+                onClick = { context.toast(R.string.toast_material_required) },
+            )
+        if (requiredSafesData.stripsRequired)
+            Chip(
+                text = stringResource(R.string.safe_required_strips),
+                icon = ContextCompat.getDrawable(context, R.drawable.ic_strips),
+                modifier = Modifier
+                    .padding(start = 4.dp, end = 4.dp),
+                onClick = { context.toast(R.string.toast_material_required) },
+            )
+    }
 }
 
-@Preview(name = "Path with builder")
+@Preview
 @Composable
-fun PathItemBuilderPreview() {
-    PathItem(
-        path = Path(
-            "1234",
-            0,
-            12,
-            "Testing path",
-            ">6c+\n1>6c\n2>6c+\n3>7a",
-            ">80\n1>30\n2>30\n3>20",
-            ">chain_carabiner\n1>chain_carabiner\n2>chain_carabiner\n3>chain_ring",
-            "1>horizontal equipped\n2>diagonal equipped\n3>vertical clear",
-            FixedSafesData(10, 0, 0, 0, 0, 0),
-            RequiredSafesData(
-                lanyardRequired = true,
-                crackerRequired = false,
-                friendRequired = false,
-                stripsRequired = true,
-                pitonRequired = false,
-                nailRequired = false
-            ),
-            null,
-            "Testing builder;2019",
-            null,
-            parentSectorId = "123"
-        ), true
-    )
+@OptIn(ExperimentalMaterial3Api::class)
+fun PathItemPreview() {
+    PathItem(path = Path.SAMPLE_PATH)
 }

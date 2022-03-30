@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
-import android.content.Context
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
@@ -13,16 +12,13 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.PitchEndin
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_BLOCKING_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.*
 
 /**
  * Creates a new [Path] instance.
@@ -419,22 +415,6 @@ class Path internal constructor(
             downloaded,
             parentSectorId,
         )
-    }
-
-    /**
-     * Fetches the current block status of the path.
-     * @author Arnau Mora
-     * @since 20220316
-     * @param context The context that is requesting the fetch.
-     */
-    suspend fun fetchBlockStatus(context: Context): BlockingData? {
-        val blockStatusJson = context.getJson("$REST_API_BLOCKING_ENDPOINT/$objectId")
-        return if (blockStatusJson.getBoolean("blocked")) {
-            val type = blockStatusJson.getString("type")
-            val endDate =
-                if (blockStatusJson.has("endDate")) blockStatusJson.getDate("endDate") else null
-            BlockingData(UUID.randomUUID().toString(), objectId, type, endDate)
-        } else null
     }
 
     override fun equals(other: Any?): Boolean {

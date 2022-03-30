@@ -7,7 +7,8 @@ import org.json.JSONObject
 import timber.log.Timber
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 
 /**
@@ -31,4 +32,36 @@ fun JSONObject.getDate(key: String, defaultValue: Date? = null): Date? =
     } catch (e: ParseException) {
         Timber.e(e, "Could not parse data.")
         defaultValue
+    }
+
+/**
+ * Gets the value at [key] and gets casted to [T], if could not be casted, or not existing returns
+ * [defaultValue].
+ * @author Arnau Mora
+ * @since 20220330
+ * @param key The key to get.
+ * @param defaultValue The value to return if the object does not contain [key] or it's invalid.
+ */
+@Suppress("UNCHECKED_CAST")
+fun <T : Any?> JSONObject.getValue(key: String, defaultValue: T): T =
+    try {
+        if (hasValid(key))
+            get(key) as? T ?: defaultValue
+        else
+            defaultValue
+    } catch (e: JSONException) {
+        defaultValue
+    }
+
+/**
+ * Checks if the [JSONObject] has a child key with a valid value (excluding "NULL").
+ * @author Arnau Mora
+ * @since 20220330
+ * @return True if [JSONObject] has [key] and it's not null.
+ */
+fun JSONObject.hasValid(key: String): Boolean =
+    try {
+        has(key) && getString(key).uppercase() != "NULL"
+    } catch (e: JSONException) {
+        false
     }

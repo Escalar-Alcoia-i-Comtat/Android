@@ -13,6 +13,9 @@ interface BlockingDatabaseDao {
     @Query("SELECT * FROM Blocking")
     fun getAll(): LiveData<List<BlockingData>>
 
+    @Query("SELECT * FROM Blocking")
+    suspend fun getAllOnce(): List<BlockingData>
+
     @Query("SELECT * FROM Blocking WHERE id=:id LIMIT 1")
     fun getById(id: String): BlockingData?
 
