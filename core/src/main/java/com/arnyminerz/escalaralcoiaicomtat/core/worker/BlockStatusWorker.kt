@@ -11,117 +11,80 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.await
+import com.android.volley.TimeoutError
+import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.database.BlockingDatabase
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.database.DataClassDatabase
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.repository.BlockingRepository
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.repository.DataClassRepository
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_FAILED_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_IN_PROGRESS_CHANNEL_ID
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.clipboard
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.copy
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_BLOCKING_ENDPOINT
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
+import org.json.JSONObject
 import timber.log.Timber
+import java.util.*
 import java.util.concurrent.TimeUnit
 
+@Suppress("unused")
 class BlockStatusWorker(context: Context, params: WorkerParameters) :
     CoroutineWorker(context, params) {
-    override suspend fun doWork(): Result {
-        Timber.v("Getting search session...")
-        val database = DataClassDatabase.getInstance(applicationContext)
-        val repository = DataClassRepository(
-            database.areasDao(),
-            database.zonesDao(),
-            database.sectorsDao(),
-            database.pathsDao(),
-        )
 
+    /**
+     * Runs [Context.getJson] for fetching all the blockages on the server endpoint.
+     * @author Arnau Mora
+     * @since 20220330
+     * @param context The context to fetch from.
+     */
+    private suspend fun fetchAllBlockagesFromServer(context: Context): JSONObject =
+        context.getJson("$REST_API_BLOCKING_ENDPOINT/*")
+
+    override suspend fun doWork(): Result {
+        Timber.d("Opening blockages database...")
         val blockingDatabase = BlockingDatabase.getInstance(applicationContext)
         val blockingRepository = BlockingRepository(blockingDatabase.blockingDao())
 
-        Timber.v("Getting paths from search session...")
-        val paths = repository.getPaths().map { it.data() }
-        val pathsCount = paths.size
+        var notification = Notification.Builder(applicationContext)
+            .withChannelId(TASK_IN_PROGRESS_CHANNEL_ID)
+            .withIcon(R.drawable.ic_notifications)
+            .withTitle(R.string.notification_block_status_title)
+            .withText(R.string.notification_block_status_message)
+            .setPersistent(true)
+            .setAlertOnce(true)
+            .build()
 
-        return if (paths.isEmpty()) {
-            Timber.e("Paths is empty.")
-            Result.failure()
-        } else {// First, create the info notification...
-            var notification = Notification.Builder(applicationContext)
-                .withChannelId(TASK_IN_PROGRESS_CHANNEL_ID)
-                .withIcon(R.drawable.ic_notifications)
-                .withTitle(R.string.notification_block_status_title)
-                .withText(R.string.notification_block_status_message)
-                .setPersistent(true)
-                .setAlertOnce(true)
-                .withProgress(0, pathsCount)
-                .buildAndShow()
+        return try {
+            // First, create the info notification...
+            notification.show()
+
+            Timber.v("Getting block statuses from server...")
+            val blockStatusJson = fetchAllBlockagesFromServer(applicationContext)
+
+            Timber.v("Parsing block statuses response...")
+            if (!blockStatusJson.has("result"))
+                throw IllegalArgumentException("Blocking result list doesn't have a result. JSON: $blockStatusJson")
+            val blockStatusResult = blockStatusJson.getJSONObject("result")
+            val pathIds = blockStatusResult.keys()
 
             Timber.v("Extracting block statuses...")
             val blockingStatuses = arrayListOf<BlockingData>()
-            val failedBlockStatus = arrayListOf<String>()
-            for ((i, path) in paths.withIndex()) {
-                try {
-                    notification = notification.edit()
-                        .withText(
-                            applicationContext.getString(
-                                R.string.notification_block_status_progress,
-                                path.displayName
-                            )
-                        )
-                        .withInfoText("${i + 1}/$pathsCount")
-                        .withProgress(i, pathsCount)
-                        .buildAndShow()
-                    path.fetchBlockStatus(applicationContext)
-                        ?.let { blockingStatuses.add(it) }
-                } catch (e: RuntimeException) {
-                    Timber.e(e, "Could not fetch block status of ${path.displayName}")
-                    failedBlockStatus.add(path.displayName)
-                }
-            }
 
-            if (failedBlockStatus.isNotEmpty()) {
-                notification.destroy()
-                Timber.v("Showing failed block status fetch notification")
-                Notification.Builder(applicationContext)
-                    .withChannelId(TASK_FAILED_CHANNEL_ID)
-                    .withIcon(R.drawable.ic_notifications)
-                    .withTitle(R.string.notification_block_status_error_title)
-                    .withText(
-                        applicationContext.getString(
-                            R.string.notification_block_status_error_count,
-                            failedBlockStatus.size
-                        )
+            for (objectId in pathIds) {
+                // Get the JSON object at current iteration position
+                val blockStatus = blockStatusResult.getJSONObject(objectId)
+                // If blocked is false, continue
+                if (!blockStatus.getBoolean("blocked")) continue
+                // Otherwise, add item to blockingStatuses
+                blockingStatuses.add(
+                    BlockingData(
+                        UUID.randomUUID().toString(),
+                        objectId,
+                        blockStatus.getString("type"),
+                        blockStatus.getDate("endDate"),
                     )
-                    .withLongText(
-                        applicationContext.getString(
-                            R.string.notification_block_status_error_count,
-                            failedBlockStatus.size
-                        )
-                    )
-                    .addAction(
-                        R.drawable.content_copy,
-                        R.string.action_copy
-                    ) {
-                        // Generate the items list
-                        val sb = StringBuilder()
-                        for (pathName in failedBlockStatus)
-                            sb.appendLine("- $pathName")
-
-                        // Copy to clipboard
-                        val clipboard = applicationContext.clipboard
-                        val text = context.getString(
-                            R.string.notification_block_status_error_log,
-                            failedBlockStatus.size,
-                            sb.toString()
-                        )
-                        text.copy(clipboard)
-
-                        // Hide the notification
-                        Notification.dismiss(applicationContext, id)
-                    }
-                    .buildAndShow()
+                )
             }
 
             Timber.v("Building storing notification...")
@@ -131,11 +94,13 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                 .buildAndShow()
 
             try {
+                Timber.v("Clearing old blocking statuses...")
+                blockingRepository.clear()
+
                 Timber.v("Putting elements...")
                 blockingRepository.addAll(blockingStatuses)
 
-                Timber.v("Closing databases...")
-                database.close()
+                Timber.v("Closing database...")
                 blockingDatabase.close()
 
                 Timber.v("Dismissing progress notification...")
@@ -144,6 +109,8 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                 Timber.v("Finished fetching block statuses...")
                 Result.success()
             } catch (e: Exception) {
+                Timber.e("Could not store the blocking status list into the database.")
+
                 // Show the error notification
                 notification.destroy()
                 Notification.Builder(applicationContext)
@@ -152,8 +119,19 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     .withTitle(R.string.notification_block_status_error_title)
                     .withText(R.string.notification_block_status_error_store_short)
                     .buildAndShow()
+
                 return Result.failure()
             } finally {
+                // Destroy the progress notification
+                Timber.v("Destroying progress notification.")
+                notification.destroy()
+            }
+        } catch (e: TimeoutError) {
+            Result.failure()
+        } catch (e: VolleyError) {
+            Result.failure()
+        } finally {
+            if (!notification.destroyed) {
                 // Destroy the progress notification
                 Timber.v("Destroying progress notification.")
                 notification.destroy()
@@ -162,7 +140,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
     }
 
     companion object {
-        const val WORKER_TAG = "BlockStatusWorker"
+        private const val WORKER_TAG = "BlockStatusWorker"
 
         /**
          * The amount of time that should be between status updates.
@@ -170,7 +148,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
          * @author Arnau Mora
          * @since 20210825
          */
-        val WORKER_SCHEDULE: Pair<Long, TimeUnit> = 12L to TimeUnit.HOURS
+        private val WORKER_SCHEDULE: Pair<Long, TimeUnit> = 12L to TimeUnit.HOURS
 
         /**
          * Serves as the error work result for showing how much successes there were.
@@ -192,7 +170,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
          * @author Arnau Mora
          * @since 20210825
          */
-        val WORKER_SCHEDULE_TAG: String
+        private val WORKER_SCHEDULE_TAG: String
             get() = "BSW" + WORKER_SCHEDULE.second.toMinutes(WORKER_SCHEDULE.first)
 
         /**
@@ -279,11 +257,14 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                 .addTag(WORKER_SCHEDULE_TAG)
                 .setConstraints(workConstraints)
                 .build()
-            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-                WORKER_TAG,
-                ExistingPeriodicWorkPolicy.KEEP,
-                workRequest
-            )
+
+            Timber.v("Enqueueing BlockStatusWorker periodic work...")
+            WorkManager.getInstance(context)
+                .enqueueUniquePeriodicWork(
+                    WORKER_TAG,
+                    ExistingPeriodicWorkPolicy.KEEP,
+                    workRequest
+                )
         }
     }
 }
