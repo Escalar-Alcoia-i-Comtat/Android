@@ -30,6 +30,9 @@
     <string name="action_maximize_image">Ampliar imatge</string>
     <string name="action_update_all">Actualitzar tot</string>
     <string name="action_view_sectors">Veure sectors</string>
+    <string name="action_share">Share</string>
+    <string name="action_add_to_homescreen">Add to Home screen</string>
+    <string name="action_open_sector">Open Sector</string>
     <string name="status_downloading">Baixant…</string>
     <string name="status_loading">Carregant…</string>
     <string name="status_downloaded">Baixat</string>
@@ -154,6 +157,7 @@
     <string name="dialog_downloaded_msg">Descarregat al: %s</string>
     <string name="dialog_downloaded_partially_msg">Alguns elements s\'han baixat, però no %s sencera. Vols descarregar-la sencera?</string>
     <string name="dialog_uses_storage_msg">Ocupa: %s</string>
+    <string name="dialog_share_title">Share</string>
     <string name="downloads_sector_dialog_title">Sectors</string>
     <string name="downloads_delete_dialog_title">N\'estàs segur?</string>
     <string name="downloads_delete_dialog_msg">Açò eliminarà %s del teu dispositiu PERMANENTMENT. Ho hauràs de tornar a descarregar si ho desitges.</string>
@@ -161,13 +165,14 @@
     <string name="zone_title">Zona</string>
     <string name="downloads_zones_title">%d Zones</string>
     <string name="downloads_sectors_title">%d Sectors</string>
-    <string name="fab_desc_map">Obrir Google Maps</string>
-    <string name="fab_desc_enter">Accedir</string>
     <string name="image_desc_marker_image">Imatge del marcador</string>
     <string name="image_desc_downloaded_marker">Marcador de Descàrrega</string>
+    <string name="fab_desc_map">Obrir Google Maps</string>
+    <string name="fab_desc_enter">Accedir</string>
     <string name="fab_desc_next">Següent</string>
     <string name="fab_desc_finish">Finalitzar</string>
     <string name="fab_desc_grant">Donar permís</string>
+    <string name="fab_desc_launch">Launch</string>
     <string name="intro_main_title">Benvingut a %s</string>
     <string name="intro_main_message">Anem a guiar-te per un procés curt de configuració. No et preocupes, és ràpid i ben senzill</string>
     <string name="intro_beta_title">Prova Beta</string>
