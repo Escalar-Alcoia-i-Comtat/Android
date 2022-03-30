@@ -45,6 +45,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.md5Compatible
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.worker.BlockStatusWorker
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.FirebaseException
@@ -150,6 +151,13 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         hasGooglePlayServices = checkGooglePlayServices(app)
         withContext(Dispatchers.IO) {
             checkMD5Support(analytics)
+        }
+
+        progressMessageResource.value = R.string.status_loading_workers
+        withContext(Dispatchers.IO) {
+            val alreadyScheduled = BlockStatusWorker.isScheduled(context)
+            if (!alreadyScheduled)
+                BlockStatusWorker.schedule(context)
         }
 
         progressMessageResource.value = R.string.status_loading_data_collection
