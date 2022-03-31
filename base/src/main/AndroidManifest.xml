@@ -70,7 +70,8 @@
         <activity
             android:name=".activity.LoadingActivity"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
