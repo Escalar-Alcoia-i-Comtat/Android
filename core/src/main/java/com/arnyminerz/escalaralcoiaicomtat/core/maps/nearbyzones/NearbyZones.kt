@@ -177,6 +177,8 @@ fun ComponentActivity.NearbyZones() {
                     fontSize = 18.sp,
                 )
                 Badge(
+                    containerColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.surfaceVariant,
                     modifier = Modifier.padding(end = 4.dp)
                 ) {
                     Text(
