@@ -23,6 +23,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_NAV_STACK
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModelImpl
@@ -122,6 +123,8 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         index = getExtraOrSavedInstanceState(EXTRA_INDEX, savedInstanceState)
         // Load childrenCount
         childrenCount = getExtraOrSavedInstanceState(EXTRA_CHILDREN_COUNT, savedInstanceState)
+        // Load the nav stack
+        loadNavStack(savedInstanceState)
 
         if (sectorPageViewModel.dataClass != null)
             Firebase.analytics.logEvent(
@@ -189,6 +192,7 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         sectorPageViewModel.dataClass?.let { outState.put(EXTRA_DATACLASS, it) }
         outState.put(EXTRA_INDEX, index)
         childrenCount?.let { outState.put(EXTRA_CHILDREN_COUNT, it) }
+        outState.put(EXTRA_NAV_STACK, ArrayList(navStack.value))
 
         super.onSaveInstanceState(outState)
     }
@@ -209,7 +213,7 @@ class DataClassActivity : NetworkAwareComponentActivity() {
     }
 
     /**
-     * Loads the value of [dataClass] from the Activity extras.
+     * Loads the value of the DataClass to load from the Activity extras.
      * @author Arnau Mora
      * @since 20220106
      * @param extras The intent extras.
@@ -241,5 +245,22 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         navStack.value =
             if (castDataClass != null) listOf<DataClassImpl>(castDataClass) else emptyList()
         return true
+    }
+
+    /**
+     * Loads the nav stack from the Activity's saved instance state.
+     * @author Arnau Mora
+     * @since 20220331
+     * @param savedInstanceState The Activity's saved instance state.
+     */
+    private fun loadNavStack(savedInstanceState: Bundle?) {
+        if (savedInstanceState == null)
+            return
+
+        val newNavStack = savedInstanceState.getExtra(EXTRA_NAV_STACK)
+            ?.map { it as DataClassImpl }
+            ?: return
+
+        navStack.value = newNavStack
     }
 }
