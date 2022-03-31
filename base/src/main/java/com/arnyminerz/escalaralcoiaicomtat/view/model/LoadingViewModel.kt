@@ -96,6 +96,8 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      */
     var md5Compatible = true
 
+    private var isLoading = false
+
     private var deepLinkPath by mutableStateOf<String?>(null)
 
     /**
@@ -165,13 +167,13 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
             dataCollectionSetUp()
         }
 
-        progressMessageResource.value = R.string.status_loading_data
+        /*progressMessageResource.value = R.string.status_loading_data
         withContext(Dispatchers.IO) {
             load(app, deepLinkPath) { stringResource, errorResource ->
                 stringResource?.let { progressMessageResource.value = it }
                 errorResource?.let { errorMessage.value = it }
             }
-        }
+        }*/
 
         performLoad()
     }
@@ -189,12 +191,15 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         errorMessage.value = null
         progressMessageResource.value = R.string.status_loading_data
 
-        withContext(Dispatchers.IO) {
-            load(app, deepLinkPath) { stringResource, errorResource ->
-                stringResource?.let { progressMessageResource.value = it }
-                errorResource?.let { errorMessage.value = it }
+        if (!isLoading)
+            withContext(Dispatchers.IO) {
+                load(app, deepLinkPath) { stringResource, errorResource ->
+                    stringResource?.let { progressMessageResource.value = it }
+                    errorResource?.let { errorMessage.value = it }
+                }
             }
-        }
+        else
+            Timber.w("Tried to run performLoad() that is already loading.")
     }
 
     /**
@@ -354,6 +359,8 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         @UiThread progressUpdater: (textResource: Int?, errorResource: Int?) -> Unit
     ) {
         try {
+            isLoading = true
+
             Timber.v("Fetching areas data...")
             val jsonData = context.getJson("$REST_API_DATA_LIST/*")
             Timber.i("Data fetched from data module!")
@@ -391,7 +398,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                             putExtra(EXTRA_WARNING_PREFERENCE, migratedFromSharedPreferences)
                             putExtra(EXTRA_WARNING_PLAY_SERVICES, !hasGooglePlayServices)
                         }
-                    if (intent != null) {
+                    else if (intent != null) {
                         app.launch(intent) {
                             addFlags(FLAG_ACTIVITY_NEW_TASK)
                         }
@@ -415,6 +422,8 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                     else -> progressUpdater(null, R.string.status_loading_error_server)
                 }
             }
+        } finally {
+            isLoading = false
         }
     }
 }
