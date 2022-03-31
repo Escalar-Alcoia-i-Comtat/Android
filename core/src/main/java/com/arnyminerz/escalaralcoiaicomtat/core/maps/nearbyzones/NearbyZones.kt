@@ -108,7 +108,8 @@ private suspend fun locationCallback(
                 mapView.overlays.addAll(markers)
 
                 mapView.invalidate()
-                mapView.zoomToBoundingBox(points.getBoundingBox(), true, 30)
+                if (points.size > 1)
+                    mapView.zoomToBoundingBox(points.getBoundingBox(), true, 30)
             }
         }
 }
