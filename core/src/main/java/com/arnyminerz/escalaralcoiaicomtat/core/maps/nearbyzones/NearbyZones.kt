@@ -6,6 +6,8 @@ import android.content.Context
 import android.location.Location
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
+import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -16,12 +18,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Explore
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,7 +55,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.vibrate
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -72,11 +74,13 @@ private val markers = arrayListOf<Marker>()
  * @author Arnau Mora
  * @since 20220212
  */
+@WorkerThread
 private suspend fun locationCallback(
     context: Context,
     model: NearbyZonesViewModel,
     mapView: MapView,
-    location: Location
+    location: Location,
+    @UiThread onLoadedPoints: (count: Int) -> Unit,
 ) {
     for (marker in markers)
         mapView.overlays.remove(marker)
@@ -85,8 +89,7 @@ private suspend fun locationCallback(
     PreferencesModule
         .getNearbyZonesDistance()
         .collect { nearbyZonesDistance ->
-            val points = arrayListOf<GeoPoint>()
-            for (zone in model.zones)
+            val points = model.zones.mapNotNull { zone ->
                 zone.location
                     ?.takeIf { it.distanceTo(location.toGeoPoint()) <= nearbyZonesDistance }
                     ?.let { markerPosition ->
@@ -100,12 +103,20 @@ private suspend fun locationCallback(
                                     R.drawable.ic_waypoint_escalador_blanc
                                 )
 
-                                points.add(markerPosition)
                                 markers.add(this)
                             }
+                        markerPosition
                     }
+            }.toMutableList()
+
             uiContext {
                 mapView.overlays.addAll(markers)
+
+                Timber.i("Nearby Zones points: $points")
+                onLoadedPoints(points.size)
+
+                // Add the current location when getting the bounding box
+                points.add(location.toGeoPoint())
 
                 mapView.invalidate()
                 if (points.size > 1)
@@ -127,6 +138,7 @@ fun ComponentActivity.NearbyZones() {
             Manifest.permission.ACCESS_COARSE_LOCATION,
         )
     )
+    var pointsCount: Int? by remember { mutableStateOf(null) }
 
     model.loadZones()
 
@@ -158,11 +170,22 @@ fun ComponentActivity.NearbyZones() {
                 Text(
                     text = stringResource(R.string.nearby_zones_title),
                     modifier = Modifier
-                        .padding(start = 4.dp),
+                        .padding(start = 4.dp)
+                        .weight(1f),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 18.sp,
                 )
+                Badge(
+                    modifier = Modifier.padding(end = 4.dp)
+                ) {
+                    Text(
+                        text = if (pointsCount != null && pointsCount!! > 0)
+                            stringResource(R.string.downloads_zones_title, pointsCount ?: 0)
+                        else
+                            stringResource(R.string.zones_count_any)
+                    )
+                }
             }
             if (locationPermissionState.allPermissionsGranted)
                 MapView(
@@ -185,7 +208,9 @@ fun ComponentActivity.NearbyZones() {
                     }
 
                     val nearbyZonesModule = NearbyZonesModule(context) { location ->
-                        doAsync { locationCallback(context, model, mapView, location) }
+                        doAsync {
+                            locationCallback(context, model, mapView, location) { pointsCount = it }
+                        }
                         mapView.controller.animateTo(location.toGeoPoint())
                         mapView.controller.setZoom(14.0)
                     }
