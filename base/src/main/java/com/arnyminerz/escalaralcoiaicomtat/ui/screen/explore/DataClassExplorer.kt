@@ -158,8 +158,8 @@ fun Activity.DataClassExplorer(
                                 putExtra(EXTRA_CHILDREN_COUNT, items.size)
                                 putExtra(EXTRA_INDEX, i)
                             }
-
-                        updateNavStack(true, item)
+                        else
+                            updateNavStack(true, item)
                     }
                 }
             }
