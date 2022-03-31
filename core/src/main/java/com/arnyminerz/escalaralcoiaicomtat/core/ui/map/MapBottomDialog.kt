@@ -41,6 +41,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiLet
 import com.bumptech.glide.request.RequestOptions
 import com.skydoves.landscapist.glide.GlideImage
 import timber.log.Timber
@@ -51,7 +52,6 @@ fun BoxScope.MapBottomDialog(
     bottomDialogVisible: Boolean,
     bottomDialogTitle: String,
     bottomDialogImage: Uri?,
-    elementWebUrl: String?
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -111,13 +111,11 @@ fun BoxScope.MapBottomDialog(
                                     DataClass.getIntent(
                                         context,
                                         dataClassActivity,
-                                        "($bottomDialogTitle) OR ($elementWebUrl)"
-                                    )?.let { intent ->
-                                        uiContext {
-                                            buttonEnabled = true
-                                            context.launch(intent)
-                                        }
-                                    } ?: run {
+                                        bottomDialogTitle,
+                                    )?.uiLet { intent ->
+                                        buttonEnabled = true
+                                        context.launch(intent)
+                                    } ?: uiContext {
                                         Timber.e("Could not find intent for \"$bottomDialogTitle\"")
                                         context.toast(R.string.toast_error_internal)
                                     }
