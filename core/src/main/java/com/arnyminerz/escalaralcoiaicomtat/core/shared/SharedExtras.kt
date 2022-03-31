@@ -34,6 +34,13 @@ val EXTRA_CHILDREN_COUNT = DataExtra<Int>("children_count")
 val EXTRA_INDEX = DataExtra<Int?>("index")
 
 /**
+ * Used for storing the nav stack in the saved instance state.
+ * @author Arnau Mora
+ * @since 20220330
+ */
+val EXTRA_NAV_STACK = DataExtra<ArrayList<Parcelable>>("nav_stack")
+
+/**
  * Used in [DynamicLinkHandler] for passing [LoadingActivity] the link that is wanted to be launched
  * once the data is loaded.
  * @author Arnau Mora
