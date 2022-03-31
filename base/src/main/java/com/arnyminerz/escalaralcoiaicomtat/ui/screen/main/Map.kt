@@ -31,7 +31,6 @@ fun MainActivity.MapScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
         var bottomDialogVisible by remember { mutableStateOf(false) }
         var bottomDialogTitle by remember { mutableStateOf("") }
-        var bottomDialogWebUrl by remember { mutableStateOf<String?>(null) }
         var bottomDialogImage by remember { mutableStateOf<Uri?>(null) }
 
         MapView(
@@ -78,14 +77,6 @@ fun MainActivity.MapScreen() {
                                         if (!loadedImageUrl)
                                             bottomDialogImage = null
 
-                                        bottomDialogWebUrl = marker.snippet?.let { snippet ->
-                                            val index =
-                                                snippet.indexOf("https://escalaralcoiaicomtat")
-                                                    .takeIf { it >= 0 }
-                                                    ?: return@let null
-                                            snippet.substring(index)
-                                        }
-
                                         Timber.i("Marker snippet: ${marker.snippet}")
                                     }
 
@@ -109,7 +100,6 @@ fun MainActivity.MapScreen() {
             bottomDialogVisible,
             bottomDialogTitle,
             bottomDialogImage,
-            bottomDialogWebUrl
         )
     }
     mapViewModel.locations.observe(this as LifecycleOwner) { locations ->
