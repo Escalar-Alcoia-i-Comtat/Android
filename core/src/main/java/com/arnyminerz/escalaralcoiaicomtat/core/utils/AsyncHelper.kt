@@ -40,6 +40,19 @@ fun doAsync(@WorkerThread block: suspend CoroutineScope.() -> Unit) =
     }
 
 /**
+ * Runs some code asynchronously.
+ * Use [uiContext] for updating UI elements.
+ * This method is intended to be used for parameters that require a function in the `() -> Unit` form.
+ * @author Arnau Mora
+ * @since 20220406
+ * @param block The code to run
+ * @see uiContext For updating UI elements.
+ */
+fun async(@WorkerThread block: suspend CoroutineScope.() -> Unit): () -> Unit = {
+    asyncCoroutineScope.launch { block(this) }
+}
+
+/**
  * Runs some code on the UI thread.
  * @author Arnau Mora
  * @since 20210413

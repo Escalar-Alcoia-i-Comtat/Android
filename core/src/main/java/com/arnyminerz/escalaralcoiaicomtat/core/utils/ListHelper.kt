@@ -19,3 +19,13 @@ fun <A, B> MutableMap<A, B>.append(key: A, value: B): MutableMap<A, B> {
     put(key, value)
     return this
 }
+
+/**
+ * Adds [value] to the end of the list if not null, and returns `this`.
+ * @author Arnau Mora
+ * @since 20220401
+ */
+fun <A> MutableList<A>.append(value: A?): MutableList<A> =
+    also {
+        value?.let { add(it) }
+    }

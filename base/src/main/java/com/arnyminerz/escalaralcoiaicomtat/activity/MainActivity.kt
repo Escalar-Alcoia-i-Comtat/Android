@@ -41,6 +41,7 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.settingsViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import org.osmdroid.config.Configuration
 
@@ -63,10 +64,11 @@ class MainActivity : LanguageComponentActivity() {
 
     @ExperimentalBadgeUtils
     @OptIn(
-        ExperimentalMaterial3Api::class,
-        ExperimentalMaterialApi::class,
-        ExperimentalFoundationApi::class,
         ExperimentalPagerApi::class,
+        ExperimentalMaterialApi::class,
+        ExperimentalMaterial3Api::class,
+        ExperimentalFoundationApi::class,
+        ExperimentalPermissionsApi::class,
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,11 +89,13 @@ class MainActivity : LanguageComponentActivity() {
         }
     }
 
-    @ExperimentalBadgeUtils
-    @ExperimentalMaterial3Api
-    @ExperimentalMaterialApi
-    @ExperimentalPagerApi
     @Composable
+    @ExperimentalPagerApi
+    @ExperimentalBadgeUtils
+    @ExperimentalMaterialApi
+    @ExperimentalMaterial3Api
+    @ExperimentalFoundationApi
+    @ExperimentalPermissionsApi
     private fun Home() {
         val pagerState = rememberPagerState()
         var userScrollEnabled by remember { mutableStateOf(true) }

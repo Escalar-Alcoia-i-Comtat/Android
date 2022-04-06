@@ -11,7 +11,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import org.osmdroid.views.MapView
 
 @Composable
-fun rememberMapViewWithLifecycle(): MapView {
+fun rememberMapViewWithLifecycle(onCreate: (mapView: MapView) -> Unit): MapView {
     val context = LocalContext.current
     val mapView = remember {
         MapView(context).apply {
@@ -20,7 +20,7 @@ fun rememberMapViewWithLifecycle(): MapView {
     }
 
     // Makes MapView follow the lifecycle of this composable
-    val lifecycleObserver = rememberMapLifecycleObserver(mapView)
+    val lifecycleObserver = rememberMapLifecycleObserver(mapView, onCreate)
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
         lifecycle.addObserver(lifecycleObserver)
@@ -33,10 +33,14 @@ fun rememberMapViewWithLifecycle(): MapView {
 }
 
 @Composable
-fun rememberMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
+fun rememberMapLifecycleObserver(
+    mapView: MapView,
+    onCreate: (mapView: MapView) -> Unit
+): LifecycleEventObserver =
     remember(mapView) {
         LifecycleEventObserver { _, event ->
             when (event) {
+                Lifecycle.Event.ON_CREATE -> onCreate(mapView)
                 Lifecycle.Event.ON_RESUME -> mapView.onResume()
                 Lifecycle.Event.ON_PAUSE -> mapView.onPause()
                 else -> {}

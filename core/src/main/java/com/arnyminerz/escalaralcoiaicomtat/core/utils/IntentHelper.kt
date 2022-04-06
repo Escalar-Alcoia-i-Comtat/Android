@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import timber.log.Timber
 import java.io.Serializable
 
@@ -145,3 +146,22 @@ fun Context.share(text: String) {
     }
     startActivity(Intent.createChooser(sendIntent, null))
 }
+
+/**
+ * Runs [Context.startActivity] with `this`.
+ * @author Arnau Mora
+ * @since 20220406
+ * @param context The context to run from.
+ */
+fun Intent.launch(context: Context) =
+    context.startActivity(this)
+
+/**
+ * Runs [Context.startActivity] with `this` in the UI thread.
+ * @author Arnau Mora
+ * @since 20220406
+ * @param context The context to run from.
+ */
+@WorkerThread
+suspend fun Intent.launchAsync(context: Context) =
+    this.uiLet { context.startActivity(it) }

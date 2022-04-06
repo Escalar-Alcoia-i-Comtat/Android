@@ -33,7 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareComponentActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.dataClassExploreActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
@@ -109,6 +111,8 @@ class LoadingActivity : NetworkAwareComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        dataClassExploreActivity = DataClassActivity::class.java
 
         // TODO: Detect if there's a sharedPreference for intro shown set to true. This means the
         // user has already been using the app, and it should be informed that the behaviour has
