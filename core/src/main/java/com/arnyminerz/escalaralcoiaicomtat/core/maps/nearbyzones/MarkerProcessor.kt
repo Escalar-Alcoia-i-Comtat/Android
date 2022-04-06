@@ -35,15 +35,12 @@ internal val nearbyZonesMarkers = mutableStateOf<List<Marker>>(emptyList())
  * @param mapView The map to update.
  * @param currentLocation The last known location of the device. Used for including this location
  * when centering. Can be null and will be ignored.
- * @param onLoadedPoints Will get called when the points are processed, and returns the amount of
- * points that will be used on the centering of the camera.
  * @param animate Whether or not to animate the camera movement update.
  */
 @UiThread
 internal fun processNearbyZonesMarkers(
     mapView: MapView,
     currentLocation: Location?,
-    onLoadedPoints: (count: Int) -> Unit,
     animate: Boolean = true,
 ) {
     val markersList = nearbyZonesMarkers.value
@@ -55,9 +52,6 @@ internal fun processNearbyZonesMarkers(
     mapView.overlays.addAll(markersList)
 
     val points = markersList.map { it.position }.toMutableList()
-
-    Timber.i("Nearby Zones points: $points")
-    onLoadedPoints(points.size)
 
     // Add the current location when getting the bounding box
     points.append(currentLocation?.toGeoPoint())
@@ -78,6 +72,8 @@ internal fun processNearbyZonesMarkers(
  * should be updated.
  * @author Arnau Mora
  * @since 20220212
+ * @param onLoadedPoints Will get called when the points are processed, and returns the amount of
+ * points that will be used on the centering of the camera.
  */
 @WorkerThread
 internal suspend fun locationCallback(
@@ -120,15 +116,30 @@ internal suspend fun locationCallback(
                     }
             }
 
-            uiContext {
-                var newItems = false
-                nearbyZonesMarkers.value.forEach { marker ->
-                    newMarkersList.find { it.title == marker.title }
-                        ?: run { newItems = true; return@forEach }
-                }
-                nearbyZonesMarkers.value = newMarkersList
+            Timber.v("Found ${newMarkersList.size} markers: $newMarkersList")
 
-                processNearbyZonesMarkers(mapView, location, onLoadedPoints, newItems)
+            uiContext {
+                // Check if there are new items on the markers list
+                val newItems = nearbyZonesMarkers.value
+                    .map { it.title }
+                    .toSet() != newMarkersList
+                    .map { it.title }
+                    .toSet()
+
+                if (newItems) {
+                    Timber.v("Updating nearbyZonesMarkers...")
+                    nearbyZonesMarkers.value = newMarkersList
+
+                    Timber.v("Processing nearby zones markers on map...")
+                    processNearbyZonesMarkers(mapView, location, true)
+
+                    Timber.v("Calling onLoadedPoints with new list...")
+                    onLoadedPoints(newMarkersList.size)
+                } else {
+                    Timber.d("Old markers: ${nearbyZonesMarkers.value}")
+                    Timber.v("Calling onLoadedPoints with old markers...")
+                    onLoadedPoints(nearbyZonesMarkers.value.size)
+                }
             }
         }
 }
