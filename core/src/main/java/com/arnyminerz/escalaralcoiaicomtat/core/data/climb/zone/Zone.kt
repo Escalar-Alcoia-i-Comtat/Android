@@ -1,5 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone
 
+import android.content.Context
+import android.content.Intent
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
@@ -9,13 +11,16 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDi
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadableDataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.dataClassExploreActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 
 /**
  * Creates a new [Zone] instance.
@@ -88,6 +93,17 @@ class Zone internal constructor(
 
     @IgnoredOnParcel
     override val hasParents: Boolean = true
+
+    /**
+     * Fetches the [Intent] that launches [dataClassExploreActivity] with [EXTRA_DATACLASS] as
+     * `this`.
+     * @author Arnau Mora
+     * @since 20220406
+     * @param context The context launching from.
+     */
+    fun intent(context: Context) =
+        Intent(context, dataClassExploreActivity)
+            .putExtra(EXTRA_DATACLASS, this)
 
     override fun data() = ZoneData(
         objectId,
