@@ -44,6 +44,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.vibrate
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import dev.burnoo.compose.rememberpreference.rememberBooleanPreference
 
 @SuppressLint("MissingPermission")
 @ExperimentalMaterialApi
@@ -59,7 +60,11 @@ fun ComponentActivity.NearbyZones() {
         )
     )
     var pointsCount: Int? by remember { mutableStateOf(null) }
-    var mapVisible by remember { mutableStateOf(true) }
+    var mapVisible by rememberBooleanPreference(
+        keyName = "NearbyZonesToggled",
+        initialValue = true,
+        defaultValue = true,
+    )
 
     model.loadZones()
 
