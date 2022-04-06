@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -59,8 +60,10 @@ import timber.log.Timber
 
 @Composable
 @ExperimentalBadgeUtils
+@ExperimentalMaterialApi
+@ExperimentalMaterial3Api
 @ExperimentalFoundationApi
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@ExperimentalPermissionsApi
 fun MainActivity.ExploreScreen() {
     val focusManager = LocalFocusManager.current
 
