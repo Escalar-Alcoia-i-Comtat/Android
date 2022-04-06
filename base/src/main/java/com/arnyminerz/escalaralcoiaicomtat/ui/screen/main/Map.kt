@@ -2,16 +2,25 @@ package com.arnyminerz.escalaralcoiaicomtat.ui.screen.main
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
@@ -28,6 +37,8 @@ import timber.log.Timber
 fun MainActivity.MapScreen() {
     var mapView: MapView? = null
 
+    val density = LocalDensity.current
+
     Box(modifier = Modifier.fillMaxSize()) {
         var bottomDialogVisible by remember { mutableStateOf(false) }
         var bottomDialogTitle by remember { mutableStateOf("") }
@@ -43,8 +54,11 @@ fun MainActivity.MapScreen() {
             map.setMultiTouchControls(true)
             map.maxZoomLevel = 18.0
 
-            map.setOnClickListener { bottomDialogVisible = false }
-            map.setOnDragListener { _, _ -> bottomDialogVisible = false; true }
+            map.setOnTouchListener { view, _ ->
+                view.performClick()
+                bottomDialogVisible = false
+                false
+            }
 
             if (exploreViewModel.lastAreas.isNotEmpty())
                 mapViewModel.loadAreasIntoMap(map, exploreViewModel.lastAreas) {
@@ -95,12 +109,22 @@ fun MainActivity.MapScreen() {
             else Timber.w("Won't load KMZs since lastAreas is not loaded")
         }
 
-        MapBottomDialog(
-            DataClassActivity::class.java,
-            bottomDialogVisible,
-            bottomDialogTitle,
-            bottomDialogImage,
-        )
+        AnimatedVisibility(
+            visible = bottomDialogVisible,
+            enter = slideInVertically { with(density) { 40.dp.roundToPx() } } +
+                    fadeIn(initialAlpha = .3f),
+            exit = slideOutVertically() + fadeOut(),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
+        ) {
+            MapBottomDialog(
+                DataClassActivity::class.java,
+                bottomDialogTitle,
+                bottomDialogImage,
+            )
+        }
     }
     mapViewModel.locations.observe(this as LifecycleOwner) { locations ->
         try {
