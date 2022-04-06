@@ -27,6 +27,18 @@ import timber.log.Timber
  */
 internal val nearbyZonesMarkers = mutableStateOf<List<Marker>>(emptyList())
 
+/**
+ * Processes all the markers from [nearbyZonesMarkers], and adds them to the map. Also centers the
+ * camera so it fits all the markers.
+ * @author Arnau Mora
+ * @since 20220406
+ * @param mapView The map to update.
+ * @param currentLocation The last known location of the device. Used for including this location
+ * when centering. Can be null and will be ignored.
+ * @param onLoadedPoints Will get called when the points are processed, and returns the amount of
+ * points that will be used on the centering of the camera.
+ * @param animate Whether or not to animate the camera movement update.
+ */
 @UiThread
 internal fun processNearbyZonesMarkers(
     mapView: MapView,
