@@ -91,6 +91,7 @@ class MainActivity : LanguageComponentActivity() {
     @ExperimentalMaterial3Api
     @ExperimentalMaterialApi
     @ExperimentalPagerApi
+    @ExperimentalFoundationApi
     @Composable
     private fun Home() {
         val pagerState = rememberPagerState()
