@@ -24,45 +24,32 @@ fun List<GeoPoint>.computeCentroid(): GeoPoint {
     return GeoPoint(latitude / size, longitude / size)
 }
 
+/**
+ * Gets the [BoundingBox] of a list of [GeoPoint]s. Will cause issues when called with less than
+ * 2 elements on the list.
+ * @author Arnau Mora
+ * @since 20220401
+ * @return A [BoundingBox] instance containing all the points of the list.
+ * @throws IllegalStateException When the bounding box could not have been obtained.
+ */
+@Throws(IllegalStateException::class)
 fun List<GeoPoint>.getBoundingBox(): BoundingBox {
-    // First get bottom-left and top-right points
-    var bottomLeft: GeoPoint? = null
-    var topRight: GeoPoint? = null
-
-    for (point in this) {
-        if (bottomLeft == null)
-            bottomLeft = point
-        if (topRight == null)
-            topRight = point
-        if (point.latitude < bottomLeft.latitude && point.longitude < bottomLeft.longitude)
-            bottomLeft = point
-        else if (point.latitude > bottomLeft.latitude && point.longitude > bottomLeft.longitude)
-            topRight = point
-    }
-
-    if (bottomLeft == null || topRight == null)
-        throw IllegalStateException("Could not get bottom left nor top right points.")
-
     // Now get bounds
-    val north: Double
-    val south: Double
-    val east: Double
-    val west: Double
+    var north: Double? = null
+    var south: Double? = null
+    var east: Double? = null
+    var west: Double? = null
 
-    if (bottomLeft.latitude > topRight.latitude) {
-        north = bottomLeft.latitude
-        south = topRight.latitude
-    } else {
-        north = topRight.latitude
-        south = bottomLeft.latitude
+    for (position in this) {
+        north = north?.let { Math.max(position.latitude, it) } ?: position.latitude
+        south = south?.let { Math.min(position.latitude, it) } ?: position.latitude
+
+        east = east?.let { Math.max(position.longitude, it) } ?: position.longitude
+        west = west?.let { Math.min(position.longitude, it) } ?: position.longitude
     }
-    if (bottomLeft.longitude > topRight.longitude) {
-        east = bottomLeft.longitude
-        west = topRight.longitude
-    } else {
-        east = topRight.longitude
-        west = bottomLeft.longitude
-    }
+
+    if (north == null || south == null || east == null || west == null)
+        throw IllegalStateException("Could not get directions. north=$north, south=$south, east=$east, west=$west")
 
     return BoundingBox(north, east, south, west)
 }
@@ -104,6 +91,14 @@ fun GeoPoint.toLocation(): Location {
     return location
 }
 
+/**
+ * Computes the distance between two [GeoPoint]. Quite a dirty approach, using conversions to
+ * [Location], but works as expected.
+ * @author Arnau Mora
+ * @since 20220401
+ * @param other The point to compute the distance to.
+ * @return The distance in meters between the two points.
+ */
 fun GeoPoint.distanceTo(other: GeoPoint): Float {
     val a = this.toLocation()
     val b = other.toLocation()
