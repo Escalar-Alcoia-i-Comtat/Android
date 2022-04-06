@@ -59,7 +59,6 @@ internal fun NearbyZonesMap(
                 mapView.controller.animateTo(location.toGeoPoint())
                 mapView.controller.setZoom(14.0)
             }
-            nearbyZonesMarkers.value = emptyList()
 
             var locationOverlay = MyLocationNewOverlay(nearbyZonesModule, mapView)
             locationOverlay.enableMyLocation()
