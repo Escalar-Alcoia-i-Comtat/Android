@@ -4,7 +4,12 @@ import android.app.SearchManager
 import android.content.Intent
 import android.os.Parcelable
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,7 +35,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -43,7 +47,7 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.SearchableActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.NearbyZones
+import com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.ui.NearbyZones
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
@@ -55,6 +59,7 @@ import timber.log.Timber
 
 @Composable
 @ExperimentalBadgeUtils
+@ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 fun MainActivity.ExploreScreen() {
     val focusManager = LocalFocusManager.current
@@ -65,88 +70,94 @@ fun MainActivity.ExploreScreen() {
     var isFocused by remember { mutableStateOf(false) }
     var searchTextField by remember { mutableStateOf("") }
 
-    LazyColumn {
-        item {
-            Card(
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Search bar
+        Card(
+            modifier = Modifier
+                .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp)
+                .fillMaxWidth(),
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            shape = RoundedCornerShape(32.dp),
+        ) {
+            OutlinedTextField(
+                value = searchTextField,
+                onValueChange = { searchTextField = it },
                 modifier = Modifier
-                    .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp)
-                    .fillMaxWidth(),
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    .fillMaxWidth()
+                    .onFocusChanged { isFocused = it.isFocused }
+                    .focusRequester(focusRequester),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    trailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    leadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
                 shape = RoundedCornerShape(32.dp),
-            ) {
-                OutlinedTextField(
-                    value = searchTextField,
-                    onValueChange = { searchTextField = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .onFocusChanged { isFocused = it.isFocused }
-                        .focusRequester(focusRequester),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        textColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        trailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        leadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    ),
-                    shape = RoundedCornerShape(32.dp),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Rounded.Search,
-                            contentDescription = stringResource(R.string.search_hint),
-                        )
-                    },
-                    trailingIcon = {
-                        AnimatedVisibility(visible = isFocused) {
-                            IconButton(
-                                onClick = {
-                                    if (searchTextField.isEmpty())
-                                        focusManager.clearFocus()
-                                    else
-                                        focusRequester.requestFocus()
-                                    searchTextField = ""
-                                },
-                            ) {
-                                Icon(Icons.Rounded.Close, "Clear text")
-                            }
-                        }
-                    },
-                    placeholder = {
-                        Text(text = stringResource(R.string.search_hint))
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(
-                        onSearch = {
-                            launch(SearchableActivity::class.java) {
-                                action = Intent.ACTION_SEARCH
-                                putExtra(SearchManager.QUERY, searchTextField)
-                            }
-                        }
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Search,
+                        contentDescription = stringResource(R.string.search_hint),
                     )
+                },
+                trailingIcon = {
+                    AnimatedVisibility(visible = isFocused) {
+                        IconButton(
+                            onClick = {
+                                if (searchTextField.isEmpty())
+                                    focusManager.clearFocus()
+                                else
+                                    focusRequester.requestFocus()
+                                searchTextField = ""
+                            },
+                        ) {
+                            Icon(Icons.Rounded.Close, "Clear text")
+                        }
+                    }
+                },
+                placeholder = {
+                    Text(text = stringResource(R.string.search_hint))
+                },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        launch(SearchableActivity::class.java) {
+                            action = Intent.ACTION_SEARCH
+                            putExtra(SearchManager.QUERY, searchTextField)
+                        }
+                    }
                 )
-            }
+            )
+        }
 
-            val nearbyZonesEnabled by PreferencesModule
-                .getNearbyZonesEnabled()
-                .collectAsState(initial = false)
-            if (nearbyZonesEnabled)
-                NearbyZones()
+        // Nearby Zones
+        val nearbyZonesEnabled by PreferencesModule
+            .getNearbyZonesEnabled()
+            .collectAsState(initial = false)
+        if (nearbyZonesEnabled)
+            NearbyZones()
 
-            Box(modifier = Modifier.fillMaxWidth()) {
-                AnimatedVisibility(
-                    visible = areas.isEmpty(),
-                    modifier = Modifier
-                        .align(Alignment.Center)
+        // Areas list
+        LazyColumn(
+            modifier = Modifier.fillMaxHeight()
+        ) {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
                 ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    AnimatedVisibility(
+                        visible = areas.isEmpty(),
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
             }
-        }
-        items(areas) { area ->
-            Timber.d("Displaying $area...")
-            DataClassItem(area) {
-                launch(DataClassActivity::class.java) {
-                    putExtra(EXTRA_DATACLASS, area as Parcelable)
+            items(areas) { area ->
+                Timber.d("Displaying $area...")
+                DataClassItem(area) {
+                    launch(DataClassActivity::class.java) {
+                        putExtra(EXTRA_DATACLASS, area as Parcelable)
+                    }
                 }
             }
         }
