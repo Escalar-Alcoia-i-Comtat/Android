@@ -16,6 +16,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.NearbyZonesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.NearbyZonesViewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.locationCallback
+import com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.nearbyZonesMarkers
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.processNearbyZonesMarkers
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.MapView
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
@@ -40,55 +41,57 @@ internal fun NearbyZonesMap(
                 clip = true
             }
             .height(150.dp)
-            .fillMaxWidth()
-    ) { mapView ->
-        Timber.i("Loaded NearbyZones Map.")
-        mapView.setMultiTouchControls(false)
-        mapView.isFlingEnabled = false
-        mapView.zoomController.apply {
-            setZoomInEnabled(false)
-            setZoomOutEnabled(false)
-            setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-        }
-
-        val nearbyZonesModule = NearbyZonesModule(context) { location ->
-            doAsync {
-                locationCallback(context, model, mapView, location, setPointsCount)
+            .fillMaxWidth(),
+        onCreate = { mapView ->
+            Timber.i("Loaded NearbyZones Map.")
+            mapView.setMultiTouchControls(false)
+            mapView.isFlingEnabled = false
+            mapView.zoomController.apply {
+                setZoomInEnabled(false)
+                setZoomOutEnabled(false)
+                setVisibility(CustomZoomButtonsController.Visibility.NEVER)
             }
-            mapView.controller.animateTo(location.toGeoPoint())
-            mapView.controller.setZoom(14.0)
-        }
 
-        var locationOverlay = MyLocationNewOverlay(nearbyZonesModule, mapView)
-        locationOverlay.enableMyLocation()
-        mapView.overlays.add(locationOverlay)
-
-        lifecycle.addObserver(object : LifecycleEventObserver {
-            override fun onStateChanged(
-                source: LifecycleOwner,
-                event: Lifecycle.Event
-            ) {
-                when (event) {
-                    Lifecycle.Event.ON_RESUME -> try {
-                        locationOverlay.enableMyLocation()
-                    } catch (e: RuntimeException) {
-                        locationOverlay =
-                            MyLocationNewOverlay(nearbyZonesModule, mapView)
-                        locationOverlay.enableMyLocation()
-                        mapView.overlays.add(locationOverlay)
-                    }
-                    Lifecycle.Event.ON_PAUSE -> locationOverlay.disableMyLocation()
-                    else -> {}
+            val nearbyZonesModule = NearbyZonesModule(context) { location ->
+                doAsync {
+                    locationCallback(context, model, mapView, location, setPointsCount)
                 }
+                mapView.controller.animateTo(location.toGeoPoint())
+                mapView.controller.setZoom(14.0)
             }
-        })
+            nearbyZonesMarkers.value = emptyList()
 
-        // Add all the markers if not added. This is for UI refreshes
-        processNearbyZonesMarkers(
-            mapView,
-            nearbyZonesModule.lastKnownLocation,
-            setPointsCount,
-            false,
-        )
-    }
+            var locationOverlay = MyLocationNewOverlay(nearbyZonesModule, mapView)
+            locationOverlay.enableMyLocation()
+            mapView.overlays.add(locationOverlay)
+
+            lifecycle.addObserver(object : LifecycleEventObserver {
+                override fun onStateChanged(
+                    source: LifecycleOwner,
+                    event: Lifecycle.Event
+                ) {
+                    when (event) {
+                        Lifecycle.Event.ON_RESUME -> try {
+                            locationOverlay.enableMyLocation()
+                        } catch (e: RuntimeException) {
+                            locationOverlay =
+                                MyLocationNewOverlay(nearbyZonesModule, mapView)
+                            locationOverlay.enableMyLocation()
+                            mapView.overlays.add(locationOverlay)
+                        }
+                        Lifecycle.Event.ON_PAUSE -> locationOverlay.disableMyLocation()
+                        else -> {}
+                    }
+                }
+            })
+
+            // Add all the markers if not added. This is for UI refreshes
+            processNearbyZonesMarkers(
+                mapView,
+                nearbyZonesModule.lastKnownLocation,
+                false,
+            )
+            setPointsCount(nearbyZonesMarkers.value.size)
+        }
+    )
 }
