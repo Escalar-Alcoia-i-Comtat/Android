@@ -6,21 +6,23 @@ import androidx.compose.ui.viewinterop.AndroidView
 import org.osmdroid.views.MapView
 
 /**
- * A composable Google Map.
+ * A composable MapView.
  * @author Arnau Mora
  * @since 20211230
  * @param modifier Modifiers to apply to the map.
- * @param onLoad This will get called once the map has been loaded.
+ * @param onCreate This will get called once the map view's onCreate method is called.
+ * @param onUpdate This will get called whenever the map is updated.
  */
 @Composable
 fun MapView(
     modifier: Modifier = Modifier,
-    onLoad: ((map: MapView) -> Unit)? = null
+    onCreate: ((mapView: MapView) -> Unit)? = null,
+    onUpdate: ((mapView: MapView) -> Unit)? = null,
 ) {
-    val mapViewState = rememberMapViewWithLifecycle()
+    val mapViewState = rememberMapViewWithLifecycle { onCreate?.invoke(it) }
 
     AndroidView(
         { mapViewState },
         modifier
-    ) { mapView -> onLoad?.invoke(mapView) }
+    ) { mapView -> onUpdate?.invoke(mapView) }
 }
