@@ -42,6 +42,7 @@ com.arnyminerz.escalaralcoiaicomtat.core.exception
 com.arnyminerz.escalaralcoiaicomtat.core.exception.notification
 com.arnyminerz.escalaralcoiaicomtat.core.maps
 com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones
+com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.ui
 com.arnyminerz.escalaralcoiaicomtat.core.network
 com.arnyminerz.escalaralcoiaicomtat.core.network.base
 com.arnyminerz.escalaralcoiaicomtat.core.notification
