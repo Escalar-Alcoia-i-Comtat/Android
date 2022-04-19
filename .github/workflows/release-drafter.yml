@@ -48,7 +48,7 @@ jobs:
           echo "Building ${{ steps.create_release.outputs.tag_name }}..."
           bash ./gradlew assembleRelease --stacktrace
       - name: APK Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: APK Artifact
           path: ./base/build/outputs/apk/release/EscalarAlcoiaIComtat-release.apk
@@ -65,7 +65,7 @@ jobs:
           bash ./gradlew :base:bundleRelease --stacktrace
       - name: AAB Artifact
         id: aab_artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: AAB Artifact
           path: ./base/build/outputs/bundle/release/EscalarAlcoiaIComtat-release.aab
