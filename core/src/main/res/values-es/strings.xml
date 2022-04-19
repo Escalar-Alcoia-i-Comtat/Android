@@ -165,6 +165,7 @@
     <string name="zone_title">Zona</string>
     <string name="downloads_zones_title">%d Zonas</string>
     <string name="downloads_sectors_title">%d Sectores</string>
+    <string name="zones_count_any">Sin Zonas</string>
     <string name="image_desc_marker_image">Imagen del marcador</string>
     <string name="image_desc_downloaded_marker">Marcador de Descarga</string>
     <string name="fab_desc_map">Abrir Google Maps</string>
