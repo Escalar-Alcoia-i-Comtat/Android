@@ -1,425 +1,457 @@
+<!doctype html>
 <html>
-  <head>
+<head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>SettingsViewModel</title>
-</head><body><link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
-    <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script><link href="../../../styles/style.css" rel="Stylesheet"><link href="../../../styles/jetbrains-mono.css" rel="Stylesheet"><link href="../../../styles/main.css" rel="Stylesheet"><link href="../../../styles/prism.css" rel="Stylesheet"><link href="../../../styles/logo-styles.css" rel="Stylesheet"><script type="text/javascript" src="../../../scripts/clipboard.js" async></script><script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script><script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script><script type="text/javascript" src="../../../scripts/main.js" defer></script><script type="text/javascript" src="../../../scripts/prism.js" async></script><script>const storage = localStorage.getItem("dokka-dark-mode")
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
 const savedDarkMode = storage ? JSON.parse(storage) : false
 if(savedDarkMode === true){
     document.getElementsByTagName("html")[0].classList.add("theme-dark")
 }</script>
-
-  
-    <div class="navigation-wrapper" id="navigation-wrapper">
-      <div id="leftToggler"><span class="icon-toggler"></span></div>
-      <div class="library-name"><a href="../../../index.html"><span>Escalar Alcoia i Comtat</span></a></div>
-      <div></div>
-      <div class="pull-right d-flex"><button id="theme-toggle-button"><span id="theme-toggle"></span></button>
-        <div id="searchBar"></div>
-      </div>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Escalar Alcoia i Comtat</span>            </a>    </div>
+    <div>
     </div>
-    <div id="container">
-      <div id="leftColumn">
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
         <div id="sideMenu"></div>
-      </div>
-      <div id="main">
-        <div class="main-content" id="content" pageids="base::com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main/SettingsViewModel///PointingToDeclaration//-1445146142">
-          <div class="breadcrumbs"><a href="../../index.html">base</a>/<a href="../index.html">com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main</a>/<a href="index.html">SettingsViewModel</a></div>
-          <div class="cover ">
-            <h1 class="cover"><span>Settings</span><wbr><span>View</span><wbr><span><span>Model</span></span></h1>
-            <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">SettingsViewModel</a><span class="token punctuation">(</span>language<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-language/index.html">GetLanguage</a><span class="token punctuation">, </span>nearbyZonesEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-nearby-zones-enabled/index.html">GetNearbyZonesEnabled</a><span class="token punctuation">, </span>nearbyZonesDistance<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-nearby-zones-distance/index.html">GetNearbyZonesDistance</a><span class="token punctuation">, </span>markerCentering<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-marker-centering/index.html">GetMarkerCentering</a><span class="token punctuation">, </span>errorCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-error-collection/index.html">GetErrorCollection</a><span class="token punctuation">, </span>dataCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-data-collection/index.html">GetDataCollection</a><span class="token punctuation">, </span>alertNotificationsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-alert-notifications-enabled/index.html">GetAlertNotificationsEnabled</a><span class="token punctuation">, </span>mobileDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-mobile-downloads-enabled/index.html">GetMobileDownloadsEnabled</a><span class="token punctuation">, </span>meteredDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-metered-downloads-enabled/index.html">GetMeteredDownloadsEnabled</a><span class="token punctuation">, </span>roamingDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-roaming-downloads-enabled/index.html">GetRoamingDownloadsEnabled</a><span class="token punctuation">, </span>_setLanguage<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-language/index.html">SetLanguage</a><span class="token punctuation">, </span>_setNearbyZonesEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-nearby-zones-enabled/index.html">SetNearbyZonesEnabled</a><span class="token punctuation">, </span>_setNearbyZonesDistance<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-nearby-zones-distance/index.html">SetNearbyZonesDistance</a><span class="token punctuation">, </span>_setMarkerCentering<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-marker-centering/index.html">SetMarkerCentering</a><span class="token punctuation">, </span>_setErrorCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-error-collection/index.html">SetErrorCollection</a><span class="token punctuation">, </span>_setDataCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-data-collection/index.html">SetDataCollection</a><span class="token punctuation">, </span>_setAlertNotificationsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-alert-notifications-enabled/index.html">SetAlertNotificationsEnabled</a><span class="token punctuation">, </span>_setMobileDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-mobile-downloads-enabled/index.html">SetMobileDownloadsEnabled</a><span class="token punctuation">, </span>_setMeteredDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-metered-downloads-enabled/index.html">SetMeteredDownloadsEnabled</a><span class="token punctuation">, </span>_setRoamingDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-roaming-downloads-enabled/index.html">SetRoamingDownloadsEnabled</a><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-          </div>
-          <div class="tabbedcontent">
-            <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
-            <div class="tabs-section-body">
-              <h2 class="">Types</h2>
-              <div class="table" data-togglable="Types"><a data-name="1971499099%2FClasslikes%2F-1445146142" anchor-label="Factory" id="1971499099%2FClasslikes%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="-factory/index.html"><span><span>Factory</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1971499099%2FClasslikes%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-factory/index.html">Factory</a><span class="token punctuation">(</span>getLanguage<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-language/index.html">GetLanguage</a><span class="token punctuation">, </span>getNearbyZonesEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-nearby-zones-enabled/index.html">GetNearbyZonesEnabled</a><span class="token punctuation">, </span>getNearbyZonesDistance<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-nearby-zones-distance/index.html">GetNearbyZonesDistance</a><span class="token punctuation">, </span>getMarkerCentering<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-marker-centering/index.html">GetMarkerCentering</a><span class="token punctuation">, </span>getErrorCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-error-collection/index.html">GetErrorCollection</a><span class="token punctuation">, </span>getDataCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-data-collection/index.html">GetDataCollection</a><span class="token punctuation">, </span>getAlertNotificationsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-alert-notifications-enabled/index.html">GetAlertNotificationsEnabled</a><span class="token punctuation">, </span>getMobileDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-mobile-downloads-enabled/index.html">GetMobileDownloadsEnabled</a><span class="token punctuation">, </span>getMeteredDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-metered-downloads-enabled/index.html">GetMeteredDownloadsEnabled</a><span class="token punctuation">, </span>getRoamingDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-roaming-downloads-enabled/index.html">GetRoamingDownloadsEnabled</a><span class="token punctuation">, </span>setLanguage<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-language/index.html">SetLanguage</a><span class="token punctuation">, </span>setNearbyZonesEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-nearby-zones-enabled/index.html">SetNearbyZonesEnabled</a><span class="token punctuation">, </span>setNearbyZonesDistance<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-nearby-zones-distance/index.html">SetNearbyZonesDistance</a><span class="token punctuation">, </span>setMarkerCentering<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-marker-centering/index.html">SetMarkerCentering</a><span class="token punctuation">, </span>setErrorCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-error-collection/index.html">SetErrorCollection</a><span class="token punctuation">, </span>setDataCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-data-collection/index.html">SetDataCollection</a><span class="token punctuation">, </span>setAlertNotificationsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-alert-notifications-enabled/index.html">SetAlertNotificationsEnabled</a><span class="token punctuation">, </span>setMobileDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-mobile-downloads-enabled/index.html">SetMobileDownloadsEnabled</a><span class="token punctuation">, </span>setMeteredDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-metered-downloads-enabled/index.html">SetMeteredDownloadsEnabled</a><span class="token punctuation">, </span>setRoamingDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-roaming-downloads-enabled/index.html">SetRoamingDownloadsEnabled</a><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModelProvider.Factory.html">ViewModelProvider.Factory</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <h2 class="">Functions</h2>
-              <div class="table" data-togglable="Functions"><a data-name="264516373%2FFunctions%2F-1445146142" anchor-label="addCloseable" id="264516373%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#264516373%2FFunctions%2F-1445146142"><span>add</span><wbr><span><span>Closeable</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="264516373%2FFunctions%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#264516373%2FFunctions%2F-1445146142"><span class="token function">addCloseable</span></a><span class="token punctuation">(</span><span><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation">NonNull</span></a>&nbsp;</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/Closeable.html">Closeable</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-1936886459%2FFunctions%2F-1445146142" anchor-label="clear" id="-1936886459%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-1936886459%2FFunctions%2F-1445146142"><span><span>clear</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1936886459%2FFunctions%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/MainThread.html"><span class="token annotation">MainThread</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-1936886459%2FFunctions%2F-1445146142"><span class="token function">clear</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-215894976%2FFunctions%2F-1445146142" anchor-label="getTag" id="-215894976%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-215894976%2FFunctions%2F-1445146142"><span>get</span><wbr><span><span>Tag</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-215894976%2FFunctions%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-215894976%2FFunctions%2F-1445146142">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-215894976%2FFunctions%2F-1445146142"><span class="token function">getTag</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-215894976%2FFunctions%2F-1445146142">T</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="31993466%2FFunctions%2F-1445146142" anchor-label="setAlertNotificationsEnabled" id="31993466%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="set-alert-notifications-enabled.html"><span>set</span><wbr><span>Alert</span><wbr><span>Notifications</span><wbr><span><span>Enabled</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="31993466%2FFunctions%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-alert-notifications-enabled.html"><span class="token function">setAlertNotificationsEnabled</span></a><span class="token punctuation">(</span>enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="1182989037%2FFunctions%2F-1445146142" anchor-label="setDataCollection" id="1182989037%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="set-data-collection.html"><span>set</span><wbr><span>Data</span><wbr><span><span>Collection</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1182989037%2FFunctions%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-data-collection.html"><span class="token function">setDataCollection</span></a><span class="token punctuation">(</span>enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-289372279%2FFunctions%2F-1445146142" anchor-label="setErrorCollection" id="-289372279%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="set-error-collection.html"><span>set</span><wbr><span>Error</span><wbr><span><span>Collection</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-289372279%2FFunctions%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-error-collection.html"><span class="token function">setErrorCollection</span></a><span class="token punctuation">(</span>enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="122996620%2FFunctions%2F-1445146142" anchor-label="setLanguage" id="122996620%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="set-language.html"><span>set</span><wbr><span><span>Language</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="122996620%2FFunctions%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-language.html"><span class="token function">setLanguage</span></a><span class="token punctuation">(</span>language<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="524544348%2FFunctions%2F-1445146142" anchor-label="setMarkerCentering" id="524544348%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="set-marker-centering.html"><span>set</span><wbr><span>Marker</span><wbr><span><span>Centering</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="524544348%2FFunctions%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-marker-centering.html"><span class="token function">setMarkerCentering</span></a><span class="token punctuation">(</span>enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="1059199089%2FFunctions%2F-1445146142" anchor-label="setMeteredDownloadsEnabled" id="1059199089%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="set-metered-downloads-enabled.html"><span>set</span><wbr><span>Metered</span><wbr><span>Downloads</span><wbr><span><span>Enabled</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1059199089%2FFunctions%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-metered-downloads-enabled.html"><span class="token function">setMeteredDownloadsEnabled</span></a><span class="token punctuation">(</span>enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-204496067%2FFunctions%2F-1445146142" anchor-label="setMobileDownloadsEnabled" id="-204496067%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="set-mobile-downloads-enabled.html"><span>set</span><wbr><span>Mobile</span><wbr><span>Downloads</span><wbr><span><span>Enabled</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-204496067%2FFunctions%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-mobile-downloads-enabled.html"><span class="token function">setMobileDownloadsEnabled</span></a><span class="token punctuation">(</span>enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="776974763%2FFunctions%2F-1445146142" anchor-label="setNearbyZonesDistance" id="776974763%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="set-nearby-zones-distance.html"><span>set</span><wbr><span>Nearby</span><wbr><span>Zones</span><wbr><span><span>Distance</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="776974763%2FFunctions%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-nearby-zones-distance.html"><span class="token function">setNearbyZonesDistance</span></a><span class="token punctuation">(</span>distance<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="2117609244%2FFunctions%2F-1445146142" anchor-label="setNearbyZonesEnabled" id="2117609244%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="set-nearby-zones-enabled.html"><span>set</span><wbr><span>Nearby</span><wbr><span>Zones</span><wbr><span><span>Enabled</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2117609244%2FFunctions%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-nearby-zones-enabled.html"><span class="token function">setNearbyZonesEnabled</span></a><span class="token punctuation">(</span>enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-505785568%2FFunctions%2F-1445146142" anchor-label="setRoamingDownloadsEnabled" id="-505785568%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="set-roaming-downloads-enabled.html"><span>set</span><wbr><span>Roaming</span><wbr><span>Downloads</span><wbr><span><span>Enabled</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-505785568%2FFunctions%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-roaming-downloads-enabled.html"><span class="token function">setRoamingDownloadsEnabled</span></a><span class="token punctuation">(</span>enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-1567230750%2FFunctions%2F-1445146142" anchor-label="setTagIfAbsent" id="-1567230750%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-1567230750%2FFunctions%2F-1445146142"><span>set</span><wbr><span>Tag</span><wbr><span>If</span><wbr><span><span>Absent</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1567230750%2FFunctions%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-1567230750%2FFunctions%2F-1445146142">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-1567230750%2FFunctions%2F-1445146142"><span class="token function">setTagIfAbsent</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span>p1<span class="token operator">: </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-1567230750%2FFunctions%2F-1445146142">T</a><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-1567230750%2FFunctions%2F-1445146142">T</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <h2 class="">Properties</h2>
-              <div class="table" data-togglable="Properties"><a data-name="247902525%2FProperties%2F-1445146142" anchor-label="alertNotificationsEnabled" id="247902525%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="alert-notifications-enabled.html">alertNotificationsEnabled</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="247902525%2FProperties%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="247902525%2FProperties%2F-1445146142" anchor-label="alertNotificationsEnabled" id="247902525%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="alert-notifications-enabled.html">alertNotificationsEnabled</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="2088844640%2FProperties%2F-1445146142" anchor-label="dataCollection" id="2088844640%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="data-collection.html">dataCollection</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2088844640%2FProperties%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="2088844640%2FProperties%2F-1445146142" anchor-label="dataCollection" id="2088844640%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="data-collection.html">dataCollection</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-54986100%2FProperties%2F-1445146142" anchor-label="errorCollection" id="-54986100%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="error-collection.html">errorCollection</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-54986100%2FProperties%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="-54986100%2FProperties%2F-1445146142" anchor-label="errorCollection" id="-54986100%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="error-collection.html">errorCollection</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="112499248%2FProperties%2F-1445146142" anchor-label="language" id="112499248%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="language.html">language</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="112499248%2FProperties%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="112499248%2FProperties%2F-1445146142" anchor-label="language" id="112499248%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="language.html">language</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-928138849%2FProperties%2F-1445146142" anchor-label="markerCentering" id="-928138849%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="marker-centering.html">markerCentering</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-928138849%2FProperties%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="-928138849%2FProperties%2F-1445146142" anchor-label="markerCentering" id="-928138849%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="marker-centering.html">markerCentering</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="2089875828%2FProperties%2F-1445146142" anchor-label="meteredDownloadsEnabled" id="2089875828%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="metered-downloads-enabled.html">meteredDownloadsEnabled</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2089875828%2FProperties%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="2089875828%2FProperties%2F-1445146142" anchor-label="meteredDownloadsEnabled" id="2089875828%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="metered-downloads-enabled.html">meteredDownloadsEnabled</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-1410041424%2FProperties%2F-1445146142" anchor-label="mobileDownloadsEnabled" id="-1410041424%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="mobile-downloads-enabled.html">mobileDownloadsEnabled</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1410041424%2FProperties%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="-1410041424%2FProperties%2F-1445146142" anchor-label="mobileDownloadsEnabled" id="-1410041424%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="mobile-downloads-enabled.html">mobileDownloadsEnabled</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="2098357141%2FProperties%2F-1445146142" anchor-label="nearbyZonesDistance" id="2098357141%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="nearby-zones-distance.html">nearbyZonesDistance</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2098357141%2FProperties%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="2098357141%2FProperties%2F-1445146142" anchor-label="nearbyZonesDistance" id="2098357141%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="nearby-zones-distance.html">nearbyZonesDistance</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="331365327%2FProperties%2F-1445146142" anchor-label="nearbyZonesEnabled" id="331365327%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="nearby-zones-enabled.html">nearbyZonesEnabled</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="331365327%2FProperties%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="331365327%2FProperties%2F-1445146142" anchor-label="nearbyZonesEnabled" id="331365327%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="nearby-zones-enabled.html">nearbyZonesEnabled</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-1868627357%2FProperties%2F-1445146142" anchor-label="roamingDownloadsEnabled" id="-1868627357%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="roaming-downloads-enabled.html">roamingDownloadsEnabled</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1868627357%2FProperties%2F-1445146142"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="-1868627357%2FProperties%2F-1445146142" anchor-label="roamingDownloadsEnabled" id="-1868627357%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="roaming-downloads-enabled.html">roamingDownloadsEnabled</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="base::com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main/SettingsViewModel///PointingToDeclaration//-1445146142">
+  <div class="breadcrumbs"><a href="../../index.html">base</a><span class="delimiter">/</span><a href="../index.html">com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main</a><span class="delimiter">/</span><a href="index.html">SettingsViewModel</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Settings</span><wbr><span>View</span><wbr><span><span>Model</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">SettingsViewModel</a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;language<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-language/index.html">GetLanguage</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;nearbyZonesEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-nearby-zones-enabled/index.html">GetNearbyZonesEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;nearbyZonesDistance<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-nearby-zones-distance/index.html">GetNearbyZonesDistance</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;markerCentering<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-marker-centering/index.html">GetMarkerCentering</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;errorCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-error-collection/index.html">GetErrorCollection</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;dataCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-data-collection/index.html">GetDataCollection</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;alertNotificationsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-alert-notifications-enabled/index.html">GetAlertNotificationsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;mobileDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-mobile-downloads-enabled/index.html">GetMobileDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;meteredDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-metered-downloads-enabled/index.html">GetMeteredDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;roamingDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-roaming-downloads-enabled/index.html">GetRoamingDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setLanguage<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-language/index.html">SetLanguage</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setNearbyZonesEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-nearby-zones-enabled/index.html">SetNearbyZonesEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setNearbyZonesDistance<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-nearby-zones-distance/index.html">SetNearbyZonesDistance</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setMarkerCentering<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-marker-centering/index.html">SetMarkerCentering</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setErrorCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-error-collection/index.html">SetErrorCollection</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setDataCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-data-collection/index.html">SetDataCollection</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setAlertNotificationsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-alert-notifications-enabled/index.html">SetAlertNotificationsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setMobileDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-mobile-downloads-enabled/index.html">SetMobileDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setMeteredDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-metered-downloads-enabled/index.html">SetMeteredDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setRoamingDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-roaming-downloads-enabled/index.html">SetRoamingDownloadsEnabled</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section-body">
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="-595248724%2FConstructors%2F-1445146142" anchor-label="SettingsViewModel" id="-595248724%2FConstructors%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-settings-view-model.html"><span>Settings</span><wbr><span>View</span><wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-595248724%2FConstructors%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-settings-view-model.html"><span class="token function">SettingsViewModel</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;language<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-language/index.html">GetLanguage</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;nearbyZonesEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-nearby-zones-enabled/index.html">GetNearbyZonesEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;nearbyZonesDistance<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-nearby-zones-distance/index.html">GetNearbyZonesDistance</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;markerCentering<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-marker-centering/index.html">GetMarkerCentering</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;errorCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-error-collection/index.html">GetErrorCollection</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;dataCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-data-collection/index.html">GetDataCollection</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;alertNotificationsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-alert-notifications-enabled/index.html">GetAlertNotificationsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;mobileDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-mobile-downloads-enabled/index.html">GetMobileDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;meteredDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-metered-downloads-enabled/index.html">GetMeteredDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;roamingDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-roaming-downloads-enabled/index.html">GetRoamingDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setLanguage<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-language/index.html">SetLanguage</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setNearbyZonesEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-nearby-zones-enabled/index.html">SetNearbyZonesEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setNearbyZonesDistance<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-nearby-zones-distance/index.html">SetNearbyZonesDistance</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setMarkerCentering<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-marker-centering/index.html">SetMarkerCentering</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setErrorCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-error-collection/index.html">SetErrorCollection</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setDataCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-data-collection/index.html">SetDataCollection</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setAlertNotificationsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-alert-notifications-enabled/index.html">SetAlertNotificationsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setMobileDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-mobile-downloads-enabled/index.html">SetMobileDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setMeteredDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-metered-downloads-enabled/index.html">SetMeteredDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;_setRoamingDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-roaming-downloads-enabled/index.html">SetRoamingDownloadsEnabled</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
               </div>
             </div>
           </div>
         </div>
-        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span></div>
+      </div>
+      <h2 class="">Types</h2>
+      <div class="table" data-togglable="Types"><a data-name="1971499099%2FClasslikes%2F-1445146142" anchor-label="Factory" id="1971499099%2FClasslikes%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-factory/index.html"><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1971499099%2FClasslikes%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-factory/index.html">Factory</a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;getLanguage<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-language/index.html">GetLanguage</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;getNearbyZonesEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-nearby-zones-enabled/index.html">GetNearbyZonesEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;getNearbyZonesDistance<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-nearby-zones-distance/index.html">GetNearbyZonesDistance</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;getMarkerCentering<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-marker-centering/index.html">GetMarkerCentering</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;getErrorCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-error-collection/index.html">GetErrorCollection</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;getDataCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-data-collection/index.html">GetDataCollection</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;getAlertNotificationsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-alert-notifications-enabled/index.html">GetAlertNotificationsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;getMobileDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-mobile-downloads-enabled/index.html">GetMobileDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;getMeteredDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-metered-downloads-enabled/index.html">GetMeteredDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;getRoamingDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-get-roaming-downloads-enabled/index.html">GetRoamingDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;setLanguage<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-language/index.html">SetLanguage</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;setNearbyZonesEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-nearby-zones-enabled/index.html">SetNearbyZonesEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;setNearbyZonesDistance<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-nearby-zones-distance/index.html">SetNearbyZonesDistance</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;setMarkerCentering<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-marker-centering/index.html">SetMarkerCentering</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;setErrorCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-error-collection/index.html">SetErrorCollection</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;setDataCollection<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-data-collection/index.html">SetDataCollection</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;setAlertNotificationsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-alert-notifications-enabled/index.html">SetAlertNotificationsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;setMobileDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-mobile-downloads-enabled/index.html">SetMobileDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;setMeteredDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-metered-downloads-enabled/index.html">SetMeteredDownloadsEnabled</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;setRoamingDownloadsEnabled<span class="token operator">: </span><a href="../../../core/com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user/-set-roaming-downloads-enabled/index.html">SetRoamingDownloadsEnabled</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModelProvider.Factory.html">ViewModelProvider.Factory</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="264516373%2FFunctions%2F-1445146142" anchor-label="addCloseable" id="264516373%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#264516373%2FFunctions%2F-1445146142"><span>add</span><wbr><span><span>Closeable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="264516373%2FFunctions%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#264516373%2FFunctions%2F-1445146142"><span class="token function">addCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation">NonNull</span></a>&nbsp;</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/Closeable.html">Closeable</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1936886459%2FFunctions%2F-1445146142" anchor-label="clear" id="-1936886459%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-1936886459%2FFunctions%2F-1445146142"><span><span>clear</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1936886459%2FFunctions%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/MainThread.html"><span class="token annotation">MainThread</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-1936886459%2FFunctions%2F-1445146142"><span class="token function">clear</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-215894976%2FFunctions%2F-1445146142" anchor-label="getTag" id="-215894976%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-215894976%2FFunctions%2F-1445146142"><span>get</span><wbr><span><span>Tag</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-215894976%2FFunctions%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-215894976%2FFunctions%2F-1445146142">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-215894976%2FFunctions%2F-1445146142"><span class="token function">getTag</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-215894976%2FFunctions%2F-1445146142">T</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="31993466%2FFunctions%2F-1445146142" anchor-label="setAlertNotificationsEnabled" id="31993466%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-alert-notifications-enabled.html"><span>set</span><wbr><span>Alert</span><wbr><span>Notifications</span><wbr><span><span>Enabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="31993466%2FFunctions%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-alert-notifications-enabled.html"><span class="token function">setAlertNotificationsEnabled</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1182989037%2FFunctions%2F-1445146142" anchor-label="setDataCollection" id="1182989037%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-data-collection.html"><span>set</span><wbr><span>Data</span><wbr><span><span>Collection</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1182989037%2FFunctions%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-data-collection.html"><span class="token function">setDataCollection</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-289372279%2FFunctions%2F-1445146142" anchor-label="setErrorCollection" id="-289372279%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-error-collection.html"><span>set</span><wbr><span>Error</span><wbr><span><span>Collection</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-289372279%2FFunctions%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-error-collection.html"><span class="token function">setErrorCollection</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="122996620%2FFunctions%2F-1445146142" anchor-label="setLanguage" id="122996620%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-language.html"><span>set</span><wbr><span><span>Language</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="122996620%2FFunctions%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-language.html"><span class="token function">setLanguage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">language<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="524544348%2FFunctions%2F-1445146142" anchor-label="setMarkerCentering" id="524544348%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-marker-centering.html"><span>set</span><wbr><span>Marker</span><wbr><span><span>Centering</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="524544348%2FFunctions%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-marker-centering.html"><span class="token function">setMarkerCentering</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1059199089%2FFunctions%2F-1445146142" anchor-label="setMeteredDownloadsEnabled" id="1059199089%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-metered-downloads-enabled.html"><span>set</span><wbr><span>Metered</span><wbr><span>Downloads</span><wbr><span><span>Enabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1059199089%2FFunctions%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-metered-downloads-enabled.html"><span class="token function">setMeteredDownloadsEnabled</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-204496067%2FFunctions%2F-1445146142" anchor-label="setMobileDownloadsEnabled" id="-204496067%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-mobile-downloads-enabled.html"><span>set</span><wbr><span>Mobile</span><wbr><span>Downloads</span><wbr><span><span>Enabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-204496067%2FFunctions%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-mobile-downloads-enabled.html"><span class="token function">setMobileDownloadsEnabled</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="776974763%2FFunctions%2F-1445146142" anchor-label="setNearbyZonesDistance" id="776974763%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-nearby-zones-distance.html"><span>set</span><wbr><span>Nearby</span><wbr><span>Zones</span><wbr><span><span>Distance</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="776974763%2FFunctions%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-nearby-zones-distance.html"><span class="token function">setNearbyZonesDistance</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">distance<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2117609244%2FFunctions%2F-1445146142" anchor-label="setNearbyZonesEnabled" id="2117609244%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-nearby-zones-enabled.html"><span>set</span><wbr><span>Nearby</span><wbr><span>Zones</span><wbr><span><span>Enabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2117609244%2FFunctions%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-nearby-zones-enabled.html"><span class="token function">setNearbyZonesEnabled</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-505785568%2FFunctions%2F-1445146142" anchor-label="setRoamingDownloadsEnabled" id="-505785568%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-roaming-downloads-enabled.html"><span>set</span><wbr><span>Roaming</span><wbr><span>Downloads</span><wbr><span><span>Enabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-505785568%2FFunctions%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-roaming-downloads-enabled.html"><span class="token function">setRoamingDownloadsEnabled</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1567230750%2FFunctions%2F-1445146142" anchor-label="setTagIfAbsent" id="-1567230750%2FFunctions%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-1567230750%2FFunctions%2F-1445146142"><span>set</span><wbr><span>Tag</span><wbr><span>If</span><wbr><span><span>Absent</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1567230750%2FFunctions%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-1567230750%2FFunctions%2F-1445146142">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-1567230750%2FFunctions%2F-1445146142"><span class="token function">setTagIfAbsent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">p1<span class="token operator">: </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-1567230750%2FFunctions%2F-1445146142">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.arnyminerz.escalaralcoiaicomtat.view.model/-loading-view-model/index.html#-1567230750%2FFunctions%2F-1445146142">T</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="247902525%2FProperties%2F-1445146142" anchor-label="alertNotificationsEnabled" id="247902525%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="alert-notifications-enabled.html">alertNotificationsEnabled</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="247902525%2FProperties%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="247902525%2FProperties%2F-1445146142" anchor-label="alertNotificationsEnabled" id="247902525%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="alert-notifications-enabled.html">alertNotificationsEnabled</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2088844640%2FProperties%2F-1445146142" anchor-label="dataCollection" id="2088844640%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="data-collection.html">dataCollection</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2088844640%2FProperties%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="2088844640%2FProperties%2F-1445146142" anchor-label="dataCollection" id="2088844640%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="data-collection.html">dataCollection</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-54986100%2FProperties%2F-1445146142" anchor-label="errorCollection" id="-54986100%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="error-collection.html">errorCollection</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-54986100%2FProperties%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="-54986100%2FProperties%2F-1445146142" anchor-label="errorCollection" id="-54986100%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="error-collection.html">errorCollection</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="112499248%2FProperties%2F-1445146142" anchor-label="language" id="112499248%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="language.html">language</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="112499248%2FProperties%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="112499248%2FProperties%2F-1445146142" anchor-label="language" id="112499248%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="language.html">language</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-928138849%2FProperties%2F-1445146142" anchor-label="markerCentering" id="-928138849%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="marker-centering.html">markerCentering</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-928138849%2FProperties%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="-928138849%2FProperties%2F-1445146142" anchor-label="markerCentering" id="-928138849%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="marker-centering.html">markerCentering</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2089875828%2FProperties%2F-1445146142" anchor-label="meteredDownloadsEnabled" id="2089875828%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="metered-downloads-enabled.html">meteredDownloadsEnabled</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2089875828%2FProperties%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="2089875828%2FProperties%2F-1445146142" anchor-label="meteredDownloadsEnabled" id="2089875828%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="metered-downloads-enabled.html">meteredDownloadsEnabled</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1410041424%2FProperties%2F-1445146142" anchor-label="mobileDownloadsEnabled" id="-1410041424%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="mobile-downloads-enabled.html">mobileDownloadsEnabled</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1410041424%2FProperties%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="-1410041424%2FProperties%2F-1445146142" anchor-label="mobileDownloadsEnabled" id="-1410041424%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="mobile-downloads-enabled.html">mobileDownloadsEnabled</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2098357141%2FProperties%2F-1445146142" anchor-label="nearbyZonesDistance" id="2098357141%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="nearby-zones-distance.html">nearbyZonesDistance</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2098357141%2FProperties%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="2098357141%2FProperties%2F-1445146142" anchor-label="nearbyZonesDistance" id="2098357141%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="nearby-zones-distance.html">nearbyZonesDistance</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="331365327%2FProperties%2F-1445146142" anchor-label="nearbyZonesEnabled" id="331365327%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="nearby-zones-enabled.html">nearbyZonesEnabled</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="331365327%2FProperties%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="331365327%2FProperties%2F-1445146142" anchor-label="nearbyZonesEnabled" id="331365327%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="nearby-zones-enabled.html">nearbyZonesEnabled</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1868627357%2FProperties%2F-1445146142" anchor-label="roamingDownloadsEnabled" id="-1868627357%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":base:dokkaHtmlPartial/release" data-filterable-set=":base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="roaming-downloads-enabled.html">roamingDownloadsEnabled</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1868627357%2FProperties%2F-1445146142"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":base:dokkaHtmlPartial/release"><a data-name="-1868627357%2FProperties%2F-1445146142" anchor-label="roamingDownloadsEnabled" id="-1868627357%2FProperties%2F-1445146142" data-filterable-set=":base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="roaming-downloads-enabled.html">roamingDownloadsEnabled</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  
-</body></html>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
 
+</body></html>
 
