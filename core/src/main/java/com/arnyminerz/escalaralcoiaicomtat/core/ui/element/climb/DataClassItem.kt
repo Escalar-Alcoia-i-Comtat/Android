@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.rounded.Download
@@ -22,6 +21,9 @@ import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -66,6 +68,7 @@ import com.google.accompanist.placeholder.placeholder
 import java.text.SimpleDateFormat
 
 @Composable
+@ExperimentalMaterial3Api
 fun DataClassItem(
     item: DataClassImpl,
     onClick: () -> Unit
@@ -116,6 +119,7 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
  * @param viewModel The View Model for doing async tasks.
  */
 @Composable
+@ExperimentalMaterial3Api
 private fun DownloadableDataClassItem(
     item: DownloadableDataClass<*, *, *>,
     viewModel: DataClassItemViewModel,
@@ -150,7 +154,9 @@ private fun DownloadableDataClassItem(
     }
 
     Card(
-        backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .padding(start = 8.dp, bottom = 4.dp, end = 8.dp, top = 4.dp)
@@ -360,6 +366,7 @@ private fun DownloadableDataClassItem(
  * @param onClick What to do when clicked.
  */
 @Composable
+@ExperimentalMaterial3Api
 private fun NonDownloadableDataClassItem(
     item: DataClass<*, *, *>,
     isPlaceholder: Boolean = false,
@@ -424,8 +431,9 @@ private fun NonDownloadableDataClassItem(
     }
 }
 
-@Preview(name = "Non-downloadable DataClass Item")
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(name = "Non-downloadable DataClass Item")
 fun NonDownloadableDataClassItemPreview() {
     NonDownloadableDataClassItem(
         Area.SAMPLE,
