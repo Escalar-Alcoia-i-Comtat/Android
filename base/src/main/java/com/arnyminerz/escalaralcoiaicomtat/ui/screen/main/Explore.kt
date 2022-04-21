@@ -5,13 +5,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,19 +17,8 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -69,19 +52,21 @@ fun MainActivity.ExploreScreen() {
 
     val areas = exploreViewModel.areas
 
-    val focusRequester = remember { FocusRequester() }
-    var isFocused by remember { mutableStateOf(false) }
-    var searchTextField by remember { mutableStateOf("") }
-
     Column(modifier = Modifier.fillMaxSize()) {
         // Search bar
         Card(
             modifier = Modifier
                 .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp)
                 .fillMaxWidth(),
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
             shape = RoundedCornerShape(32.dp),
         ) {
+            val focusRequester = remember { FocusRequester() }
+            var isFocused by remember { mutableStateOf(false) }
+            var searchTextField by remember { mutableStateOf("") }
+
             OutlinedTextField(
                 value = searchTextField,
                 onValueChange = { searchTextField = it },

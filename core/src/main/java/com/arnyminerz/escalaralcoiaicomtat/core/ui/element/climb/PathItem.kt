@@ -2,27 +2,13 @@ package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateValueAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.Warning
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -42,16 +28,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Grade
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_CHAIN_CARABINER
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_CHAIN_RING
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_LANYARD
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_NONE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_PITON
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_PLATE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_PLATE_LANYARD
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_PLATE_RING
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_RAPPEL
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_WALKING
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 
@@ -79,8 +56,10 @@ fun PathItem(
         MaterialTheme.colorScheme.onSurfaceVariant
 
     Card(
-        containerColor = backgroundColor,
-        contentColor = textColor,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = backgroundColor,
+            contentColor = textColor,
+        ),
         modifier = Modifier
             .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
             .fillMaxWidth(),
@@ -193,8 +172,10 @@ fun PathItem(
                     val blockingType = blockingData?.blockingType
                     if (blockingType != null && blockingType != BlockingType.UNKNOWN)
                         Card(
-                            containerColor = MaterialTheme.colorScheme.error,
-                            contentColor = MaterialTheme.colorScheme.onError,
+                            colors = CardDefaults.elevatedCardColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError,
+                            ),
                             modifier = Modifier
                                 .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
                                 .fillMaxWidth(),

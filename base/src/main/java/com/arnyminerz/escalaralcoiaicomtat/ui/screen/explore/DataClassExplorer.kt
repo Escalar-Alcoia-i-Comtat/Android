@@ -147,7 +147,6 @@ fun Activity.DataClassExplorer(
             // The items
             LazyColumn(
                 modifier = Modifier
-                    .padding(padding)
                     .fillMaxWidth()
             ) {
                 itemsIndexed(items) { i, item ->
