@@ -46,6 +46,7 @@ jobs:
         id: build_apk
         run: |
           echo "Building ${{ steps.create_release.outputs.tag_name }}..."
+          yes | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;32.1.0-rc1"
           bash ./gradlew assembleRelease --stacktrace
       - name: APK Artifact
         uses: actions/upload-artifact@v3
@@ -62,6 +63,7 @@ jobs:
         id: build_aab
         run: |
           echo "Building ${{ steps.create_release.outputs.tag_name }}..."
+          yes | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;32.1.0-rc1"
           bash ./gradlew :base:bundleRelease --stacktrace
       - name: AAB Artifact
         id: aab_artifact
