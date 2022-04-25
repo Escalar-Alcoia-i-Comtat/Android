@@ -106,7 +106,7 @@ dependencies {
     api 'com.google.accompanist:accompanist-appcompat-theme:0.23.1'
     api "com.google.accompanist:accompanist-pager:0.24.6-alpha"
     api 'com.google.accompanist:accompanist-drawablepainter:0.24.7-alpha'
-    api 'com.google.accompanist:accompanist-permissions:0.24.6-alpha'
+    api 'com.google.accompanist:accompanist-permissions:0.24.7-alpha'
     api 'com.google.accompanist:accompanist-placeholder:0.24.7-alpha'
 
     // Jetpack Compose utilities - Icons
