@@ -19,6 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Explore
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -104,6 +106,24 @@ fun ComponentActivity.NearbyZones() {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 18.sp,
                 )
+                Image(
+                    imageVector = if (mapVisible)
+                        Icons.Rounded.Visibility
+                    else
+                        Icons.Rounded.VisibilityOff,
+                    contentDescription = stringResource(
+                        if (mapVisible)
+                            R.string.nearby_zones_state_visible
+                        else
+                            R.string.nearby_zones_state_invisible
+                    ),
+                    colorFilter = ColorFilter.tint(
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    ),
+                    modifier = Modifier
+                        .size(26.dp)
+                        .padding(end = 6.dp),
+                )
                 Badge(
                     containerColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     contentColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -155,7 +175,7 @@ fun ComponentActivity.NearbyZones() {
                                     onLongPress = {
                                         vibrate(50)
                                         doAsync {
-                                            PreferencesModule.setNearbyZonesEnabled(false)
+                                            PreferencesModule.setNearbyZonesEnabled.invoke(false)
                                         }
                                     }
                                 )
