@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -46,7 +44,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadStatus
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadableDataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -57,9 +54,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.DataClassItemViewMo
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.mapsIntent
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.then
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.thenComp
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.fade
@@ -238,7 +232,7 @@ private fun DownloadableDataClassItem(
             Row(
                 verticalAlignment = Alignment.Bottom
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                /*Column(modifier = Modifier.weight(1f)) {
                     Button(
                         // Enable button when not downloaded, but download status is known
                         enabled = !itemDownloaded && downloadStates[i] != DownloadStatus.DOWNLOADING,
@@ -270,7 +264,7 @@ private fun DownloadableDataClassItem(
                                 ?: stringResource(R.string.action_download)
                         )
                     }
-                }
+                }*/
 
                 val location = item.location
                 if (location != null)
