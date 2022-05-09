@@ -80,8 +80,8 @@
     <string name="nearby_zones_title">Zonas Cercanas</string>
     <string name="nearby_zones_permission">El acceso a la ubicación es necesario y no está dado. Pulsa para solicitar.</string>
     <string name="nearby_zones_permission_rationale">Para comprobar qué zonas están cerca de ti, tienes que permitir que la aplicación acceda a tu ubicación actual.</string>
-    <string name="nearby_zones_state_visible">Nearby Zones Visible</string>
-    <string name="nearby_zones_state_invisible">Nearby Zones Invisible</string>
+    <string name="nearby_zones_state_visible">Zonas Cercanas Visibles</string>
+    <string name="nearby_zones_state_invisible">Zonas Cercanas Invisibles</string>
     <string name="sector_info_dialog_sun_morning_title">Sol por la mañana</string>
     <string name="sector_info_dialog_sun_morning_msg">Al sector le da el sol por la mañana y la sombra por la tarde.</string>
     <string name="sector_info_dialog_sun_afternoon_title">Sol por la tarde</string>
