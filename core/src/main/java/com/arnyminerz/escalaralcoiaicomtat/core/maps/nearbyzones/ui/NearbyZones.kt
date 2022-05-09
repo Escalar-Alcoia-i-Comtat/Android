@@ -11,6 +11,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -106,35 +107,43 @@ fun ComponentActivity.NearbyZones() {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 18.sp,
                 )
-                Image(
-                    imageVector = if (mapVisible)
-                        Icons.Rounded.Visibility
-                    else
-                        Icons.Rounded.VisibilityOff,
-                    contentDescription = stringResource(
-                        if (mapVisible)
-                            R.string.nearby_zones_state_visible
-                        else
-                            R.string.nearby_zones_state_invisible
-                    ),
-                    colorFilter = ColorFilter.tint(
-                        MaterialTheme.colorScheme.onSurfaceVariant,
-                    ),
-                    modifier = Modifier
-                        .size(26.dp)
-                        .padding(end = 6.dp),
-                )
-                Badge(
-                    containerColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.surfaceVariant,
-                    modifier = Modifier.padding(end = 4.dp)
-                ) {
-                    Text(
-                        text = if (pointsCount != null && pointsCount!! > 0)
-                            stringResource(R.string.downloads_zones_title, pointsCount ?: 0)
-                        else
-                            stringResource(R.string.zones_count_any)
-                    )
+                AnimatedVisibility(visible = locationPermissionState.allPermissionsGranted) {
+                    Row(
+                        modifier = Modifier
+                            .height(32.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Image(
+                            imageVector = if (mapVisible)
+                                Icons.Rounded.Visibility
+                            else
+                                Icons.Rounded.VisibilityOff,
+                            contentDescription = stringResource(
+                                if (mapVisible)
+                                    R.string.nearby_zones_state_visible
+                                else
+                                    R.string.nearby_zones_state_invisible
+                            ),
+                            colorFilter = ColorFilter.tint(
+                                MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                            modifier = Modifier
+                                .size(26.dp)
+                                .padding(end = 6.dp),
+                        )
+                        Badge(
+                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            contentColor = MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier.padding(end = 4.dp)
+                        ) {
+                            Text(
+                                text = if (pointsCount != null && pointsCount!! > 0)
+                                    stringResource(R.string.downloads_zones_title, pointsCount ?: 0)
+                                else
+                                    stringResource(R.string.zones_count_any)
+                            )
+                        }
+                    }
                 }
             }
             if (locationPermissionState.allPermissionsGranted)
