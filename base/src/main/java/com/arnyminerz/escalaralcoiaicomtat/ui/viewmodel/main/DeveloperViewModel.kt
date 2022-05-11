@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
@@ -28,21 +27,6 @@ class DeveloperViewModel(application: Application) : AndroidViewModel(applicatio
     val indexedDownloads: MutableLiveData<List<DataRoot<out DataClass<out DataClassImpl, *, out DataRoot<*>>>>> =
         MutableLiveData()
     val indexTree: MutableLiveData<String> = MutableLiveData()
-
-    /**
-     * Loads all the downloads that have been indexed into [indexedDownloads].
-     * @author Arnau Mora
-     * @since 20220101
-     */
-    fun loadIndexedDownloads() {
-        viewModelScope.launch {
-            val downloadedItems = DataSingleton.getInstance(context)
-                .repository
-                .getAllByDownloaded()
-
-            indexedDownloads.postValue(downloadedItems)
-        }
-    }
 
     fun loadIndexTree() {
         viewModelScope.launch {

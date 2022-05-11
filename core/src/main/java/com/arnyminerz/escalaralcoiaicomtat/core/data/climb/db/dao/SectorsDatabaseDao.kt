@@ -19,12 +19,6 @@ interface SectorsDatabaseDao {
     @Query("SELECT * FROM Sectors WHERE objectId=:objectId LIMIT 1")
     fun getLiveData(objectId: String): LiveData<SectorData?>
 
-    @Query("SELECT * FROM Sectors WHERE downloaded=:downloaded")
-    suspend fun getAllByDownloaded(downloaded: Boolean): List<SectorData>
-
-    @Query("SELECT * FROM Sectors WHERE objectId=:objectId AND downloaded=:downloaded")
-    suspend fun getAllByDownloadedId(objectId: String, downloaded: Boolean): List<SectorData>
-
     @Query("SELECT * FROM Sectors WHERE objectId=:objectId LIMIT 1")
     suspend fun getByObjectId(objectId: String): SectorData?
 

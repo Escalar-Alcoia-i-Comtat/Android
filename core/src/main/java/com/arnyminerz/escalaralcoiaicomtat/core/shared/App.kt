@@ -129,14 +129,6 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
             .getChildren(Namespace.PATH, zoneId)
             ?.map { it.data() as Path }
             ?: emptyList()
-
-    /**
-     * Fetches all the downloaded items.
-     * @author Arnau Mora
-     * @since 20211231
-     */
-    @WorkerThread
-    suspend fun getDownloads() = dataSingleton.repository.getAllByDownloaded()
 }
 
 /**

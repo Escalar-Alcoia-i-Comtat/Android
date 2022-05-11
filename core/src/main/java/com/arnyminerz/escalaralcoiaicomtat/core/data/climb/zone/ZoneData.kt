@@ -19,8 +19,6 @@ data class ZoneData(
     @ColumnInfo(name = "webURL") val webUrl: String?,
     @ColumnInfo(name = "area") val area: String,
     @ColumnInfo(name = "childrenCount") var childrenCount: Long,
-    @ColumnInfo(name = "downloaded") var downloaded: Boolean = false,
-    @ColumnInfo(name = "downloadSize") var downloadSize: Long? = null,
 ) : DataRoot<Zone> {
     override fun data(): Zone = Zone(
         objectId,
@@ -31,8 +29,6 @@ data class ZoneData(
         GeoPoint(latitude, longitude),
         webUrl,
         area,
-        downloaded,
-        downloadSize,
         childrenCount,
     )
 }

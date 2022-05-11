@@ -11,7 +11,7 @@ import androidx.annotation.DrawableRes
  * @param errorPlaceholderDrawable The drawable resource of the image to load when there's an error
  * while loading the real one.
  * @param columns The amount of columns that should be shown to the user.
- * @param downloadable Whether or not the [DataClass] is downloadable.
+ * @param vertical Whether the DataClass' image is vertical or not.
  * @param showLocation Whether or not the location button should be visible.
  */
 data class DataClassDisplayOptions(
@@ -39,7 +39,7 @@ data class DataClassDisplayOptions(
      * @author Arnau Mora
      * @since 20210819
      */
-    val downloadable: Boolean,
+    val vertical: Boolean,
     /**
      * Whether or not the location button should be visible.
      * @author Arnau Mora
@@ -56,7 +56,7 @@ data class DataClassDisplayOptions(
         var result = placeholderDrawable.hashCode()
         result = 31 * result + errorPlaceholderDrawable.hashCode()
         result = 31 * result + columns.hashCode()
-        result = 31 * result + downloadable.hashCode()
+        result = 31 * result + vertical.hashCode()
         result = 31 * result + showLocation.hashCode()
         return result
     }
@@ -75,7 +75,7 @@ data class DataClassDisplayOptions(
         if (placeholderDrawable != other.placeholderDrawable) return false
         if (errorPlaceholderDrawable != other.errorPlaceholderDrawable) return false
         if (columns != other.columns) return false
-        if (downloadable != other.downloadable) return false
+        if (vertical != other.vertical) return false
         if (showLocation != other.showLocation) return false
 
         return true

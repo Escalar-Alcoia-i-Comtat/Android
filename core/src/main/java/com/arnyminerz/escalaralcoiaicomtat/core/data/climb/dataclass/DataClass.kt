@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.os.Build
 import androidx.annotation.WorkerThread
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -13,41 +12,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
-import androidx.work.WorkInfo
 import com.android.volley.Request
 import com.android.volley.VolleyError
-import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads.DownloadSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
-import com.arnyminerz.escalaralcoiaicomtat.core.exception.InitializationException
-import com.arnyminerz.escalaralcoiaicomtat.core.exception.NotDownloadedException
 import com.arnyminerz.escalaralcoiaicomtat.core.network.VolleySingleton
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MAX
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.DOWNLOAD_QUALITY_MIN
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DOWNLOAD_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.InputStreamVolleyRequest
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.allTrue
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteIfExists
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.storage.dataDir
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadData
-import com.arnyminerz.escalaralcoiaicomtat.core.worker.download.DownloadWorkerFactory
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
@@ -57,13 +39,10 @@ import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.parcelize.IgnoredOnParcel
-import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
 import timber.log.Timber
 import java.io.File
 import java.io.Serializable
-import java.util.*
-import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -239,181 +218,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
                                 }
                     }
             }
-
-        /**
-         * Deletes a DataClass from the device.
-         * @author Arnau Mora
-         * @since 20211231
-         * @param A The type of the children of the DataClass
-         * @param context The [Context] that is requesting the deletion.
-         * @param namespace The namespace of the DataClass to delete.
-         * @param objectId The id of the DataClass to delete.
-         * @return True if the DataClass was deleted successfully.
-         */
-        suspend fun <A : DataClassImpl> delete(
-            context: Context,
-            namespace: Namespace,
-            objectId: String
-        ): Boolean {
-            Timber.v("Deleting $objectId")
-            val lst = arrayListOf<Boolean>() // Stores all the delete success statuses
-
-            // KMZ should be deleted
-            val kmzFile = kmzFile(context, true, namespace, objectId)
-            if (kmzFile.exists()) {
-                Timber.v("$this > Deleting \"$kmzFile\"")
-                lst.add(kmzFile.deleteIfExists())
-            }
-
-            // Instead of deleting image, move to cache. System will manage it if necessary.
-            val imgFile = imageFile(context, namespace, objectId)
-            if (imgFile?.exists() == true) {
-                Timber.v("$this > Deleting \"$imgFile\"")
-                lst.add(imgFile.delete())
-            }
-
-            val dataRepository = DataSingleton.getInstance(context).repository
-
-            namespace.ChildrenNamespace?.let { childrenNamespace ->
-                Timber.d("Deleting all elements from $childrenNamespace and parent object id $objectId")
-                dataRepository.deleteFromParentId(childrenNamespace, objectId)
-            }
-
-            // Remove dataclass from index.
-            // Since Sectors that are children of a Zone also contain its ID this will also remove them
-            // from the index.
-            val newElements = dataRepository.getAll(namespace)
-                .filter { it is ZoneData || it is SectorData }
-                .onEach {
-                    if (it is ZoneData) it.downloaded = false
-                    else if (it is SectorData) it.downloaded = false
-                }
-            dataRepository.updateAll(newElements)
-
-            return lst.allTrue()
-        }
-
-        /**
-         * Checks if the DataClass with id [objectId] is indexed as a download.
-         * @author Arnau Mora
-         * @since 20220101
-         * @param context Used for searching through the index.
-         * @param objectId The id of the DataClass to search for.
-         */
-        suspend fun isDownloadIndexed(
-            context: Context,
-            objectId: String
-        ): DownloadStatus {
-            Timber.d("Finding for element in indexed downloads...")
-            val searchResults = DataSingleton.getInstance(context)
-                .repository
-                .getAllByDownloadedObjectId(objectId)
-            Timber.d("Got ${searchResults.size} indexed downloads for $this")
-
-            var isDownloaded = false
-            var childrenCount = -1L
-            var downloadedChildrenCount = 0
-            if (searchResults.isNotEmpty()) {
-                for (data in searchResults) {
-                    val dataClass = data.data()
-                    val isChildren = dataClass.metadata.parentId == objectId
-                    if (isChildren)
-                    // If it's a children, increase the counter
-                        downloadedChildrenCount++
-                    else {
-                        // If it's not a children, it means that the dataclass is downloaded
-                        isDownloaded = true
-                        childrenCount =
-                            dataClass.getChildren(context) { it.displayName }.size.toLong()
-                    }
-                }
-            }
-            Timber.d("$this is downloaded: $isDownloaded. Has $downloadedChildrenCount/$childrenCount downloaded children.")
-
-            // If the Dataclass is downloaded:
-            // - There are not any downloaded children: PARTIALLY
-            // - If all the children are downloaded: DOWNLOADED
-            // - If there's a non-downloaded children: PARTIALLY
-            // If the DataClass is not downloaded:
-            // NOT_DOWNLOADED
-
-            return if (!isDownloaded || childrenCount < 0)
-                DownloadStatus.NOT_DOWNLOADED
-            else if (downloadedChildrenCount >= childrenCount)
-                DownloadStatus.DOWNLOADED
-            else DownloadStatus.PARTIALLY
-        }
-
-        /**
-         * Downloads the image data of the DataClass.
-         * @author Arnau Mora
-         * @since 20210313
-         * @param context The context to run from.
-         * @param overwrite If the new data should overwrite the old one
-         * @param quality The quality in which do the codification
-         * @return A LiveData object with the download work info
-         *
-         * @throws IllegalArgumentException If the specified quality is out of bounds
-         */
-        @WorkerThread
-        @Throws(IllegalArgumentException::class)
-        suspend inline fun <reified W : DownloadWorkerFactory> scheduleDownload(
-            context: Context,
-            pin: String,
-            displayName: String,
-            companion: W,
-            overwrite: Boolean = true,
-            quality: Int = 100,
-        ): LiveData<WorkInfo> {
-            if (quality < DOWNLOAD_QUALITY_MIN || quality > DOWNLOAD_QUALITY_MAX)
-                throw IllegalArgumentException(
-                    "Quality must be between $DOWNLOAD_QUALITY_MIN and $DOWNLOAD_QUALITY_MAX"
-                )
-            Timber.v("Downloading $pin...")
-            val (namespace, objectId) = decodePin(pin)
-            Timber.v("Preparing DownloadData...")
-            val downloadData = DownloadData(displayName, namespace, objectId, overwrite, quality)
-            Timber.v("Scheduling download...")
-            val workerClass = W::class.java
-            val schedule = workerClass.getMethod(
-                "schedule",
-                Context::class.java,
-                String::class.java,
-                DownloadData::class.java,
-                Continuation::class.java,
-            )
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                Timber.i("Download Worker schedule args: ${schedule.parameters.map { "${it.name}: ${it.type.simpleName}" }}")
-
-            return suspendCoroutine { continuation ->
-                schedule(companion, context, pin, downloadData, continuation)
-            }
-        }
-
-        /**
-         * Builds a DataClass from its namespace, object id and JSON data. Just Area, Zone and
-         * Sector.
-         * @author Arnau Mora
-         * @since 20220304
-         * @param namespace The namespace of the DataClass.
-         * @param objectId The id of the DataClass.
-         * @param data The JSON data from the server.
-         * @throws InitializationException When the [namespace] is unknown or not a container.
-         */
-        @Throws(InitializationException::class)
-        fun buildContainers(
-            namespace: Namespace,
-            @ObjectId objectId: String,
-            data: JSONObject,
-            childrenCount: Long,
-        ) = when (namespace) {
-            Area.NAMESPACE -> Area(data, objectId, childrenCount)
-            Zone.NAMESPACE -> Zone(data, objectId, childrenCount)
-            Sector.NAMESPACE -> Sector(data, objectId, childrenCount)
-            else -> throw InitializationException(
-                "Could not initialize DataClass with namespace \"$namespace\"",
-            )
-        }
     }
 
     /**
@@ -536,7 +340,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @since 20210411
      */
     @WorkerThread
-    suspend fun isEmpty(context: Context): Boolean = getSize(context) <= 0
+    suspend fun isEmpty(context: Context): Boolean = getCount(context) <= 0
 
     /**
      * Checks if the data class doesn't have any children
@@ -544,7 +348,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @since 20210411
      */
     @WorkerThread
-    suspend fun isNotEmpty(context: Context): Boolean = getSize(context) > 0
+    suspend fun isNotEmpty(context: Context): Boolean = getCount(context) > 0
 
     /**
      * Returns the amount of children the [DataClass] has.
@@ -552,7 +356,17 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @since 20210724
      */
     @WorkerThread
+    @Deprecated("Renamed to getCount", replaceWith = ReplaceWith("getCount(context)"))
     suspend fun getSize(context: Context): Int =
+        getChildren(context) { it.objectId }.size
+
+    /**
+     * Returns the amount of children the [DataClass] has.
+     * @author Arnau Mora
+     * @since 20220515
+     */
+    @WorkerThread
+    suspend fun getCount(context: Context): Int =
         getChildren(context) { it.objectId }.size
 
     /**
@@ -638,75 +452,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
         return kmzFile
     }
 
-    inner class WorkInfoObserver(
-        private val context: Context,
-        private val liveData: LiveData<WorkInfo>,
-        private val namespace: Namespace,
-        private val objectId: String,
-    ) : Observer<WorkInfo> {
-        override fun onChanged(workInfo: WorkInfo?) {
-            doAsync {
-                if (workInfo == null || workInfo.state.isFinished) {
-                    DownloadSingleton.getInstance()
-                        .finishedDownloading(namespace, objectId)
-                    uiContext { liveData.removeObserver(this@WorkInfoObserver) }
-                } else
-                    DownloadSingleton.getInstance()
-                        .putState(context, namespace, objectId, workInfo)
-            }
-        }
-    }
-
-    /**
-     * Downloads the image data of the DataClass.
-     * @author Arnau Mora
-     * @since 20210313
-     * @param context The context to run from.
-     * @param overwrite If the new data should overwrite the old one
-     * @param quality The quality in which do the codification
-     * @return A LiveData object with the download work info
-     *
-     * @throws IllegalArgumentException If the specified quality is out of bounds
-     */
-    @WorkerThread
-    @Throws(IllegalArgumentException::class)
-    suspend inline fun <reified W : DownloadWorkerFactory> download(
-        context: Context,
-        companion: W,
-        overwrite: Boolean = true,
-        quality: Int = 100
-    ): LiveData<WorkInfo> =
-        scheduleDownload(context, pin, displayName, companion, overwrite, quality)
-            .also { it.observeForever(WorkInfoObserver(context, it, namespace, objectId)) }
-
-    /**
-     * Gets the DownloadStatus of the DataClass
-     * @author Arnau Mora
-     * @since 20210313
-     * @return a matching DownloadStatus representing the Data Class' download status
-     */
-    fun downloadStatus(): DownloadStatus = DownloadSingleton.getInstance()
-        .states
-        .value
-        ?.get(namespace to objectId)
-        ?: DownloadStatus.UNKNOWN
-
-    /**
-     * Checks if the data class has any children that has been downloaded
-     * @author Arnau Mora
-     * @date 2020/09/14
-     * @param context The currently calling [Context].
-     * @return If the data class has any downloaded children
-     */
-    @WorkerThread
-    suspend fun hasAnyDownloadedChildren(context: Context): Boolean {
-        val children = getChildren(context) { it.objectId }
-        for (child in children)
-            if (child is DataClass<*, *, *> && child.downloadStatus() == DownloadStatus.DOWNLOADED)
-                return true
-        return false
-    }
-
     /**
      * Converts the DataClass into a Search Data class.
      * @author Arnau Mora
@@ -721,60 +466,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @since 20220315
      */
     abstract override fun displayMap(): Map<String, Serializable?>
-
-    /**
-     * Deletes the downloaded content if downloaded
-     * @author Arnau Mora
-     * @date 20210724
-     * @param context The currently calling [Context].
-     * @return If the content was deleted successfully. Note: returns true if not downloaded
-     */
-    @WorkerThread
-    suspend fun delete(context: Context): Boolean =
-        Companion.delete<A>(context, namespace, objectId)
-
-    /**
-     * Gets the space that is occupied by the data class' downloaded data in the system
-     * @author Arnau Mora
-     * @date 2020/09/11
-     * @patch 2020/09/12 - Arnau Mora: Added child space computation
-     * @param context The currently calling context.
-     * @return The size in bytes that is used by the downloaded data
-     * @throws NotDownloadedException If tried to get size when not downloaded
-     */
-    @Throws(NotDownloadedException::class)
-    suspend fun size(context: Context): Long {
-        val imgFile = imageFile(context) ?: run {
-            Timber.e("Storage is not available. imgFile is null.")
-            return 0L
-        }
-
-        if (!imgFile.exists()) throw NotDownloadedException(this)
-
-        var size = imgFile.length()
-
-        val children = getChildren(context) { it.objectId }
-        for (child in children)
-            if (child is DataClass<*, *, *>)
-                size += child.size(context)
-
-        Timber.v("$this > Storage usage: $size")
-
-        return size
-    }
-
-    /**
-     * Gets when the data was downloaded
-     * @author Arnau Mora
-     * @date 2020/09/11
-     * @param context The context to run from
-     * @return The date when the data class was downloaded or null if not downloaded
-     */
-    fun downloadDate(context: Context): Date? = imageFile(context)?.let {
-        if (it.exists())
-            Date(it.lastModified())
-        else null
-    }
 
     /**
      * Returns the File that represents the image of the DataClass

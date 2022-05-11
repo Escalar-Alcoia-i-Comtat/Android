@@ -20,8 +20,6 @@ data class SectorData(
     @ColumnInfo(name = "walkingTime") val walkingTime: Long,
     @ColumnInfo(name = "weight") val weight: String,
     @ColumnInfo(name = "zone") val zone: String,
-    @ColumnInfo(name = "downloaded") var downloaded: Boolean = false,
-    @ColumnInfo(name = "downloadSize") var downloadSize: Long?,
     @ColumnInfo(name = "childrenCount") var childrenCount: Long,
 ) : DataRoot<Sector> {
     override fun data(): Sector = Sector(
@@ -36,8 +34,6 @@ data class SectorData(
         image,
         null,
         zone,
-        downloaded,
-        downloadSize,
         childrenCount,
     )
 }
