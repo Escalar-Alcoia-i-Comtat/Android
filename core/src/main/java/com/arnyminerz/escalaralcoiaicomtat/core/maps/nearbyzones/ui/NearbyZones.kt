@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -76,7 +77,9 @@ fun ComponentActivity.NearbyZones() {
             .fillMaxWidth()
             .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
         shape = RoundedCornerShape(12.dp),
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
     ) {
         Column(
             modifier = Modifier

@@ -20,6 +20,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -147,7 +148,9 @@ private fun DownloadableDataClassItem(
     }
 
     Card(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .padding(start = 8.dp, bottom = 4.dp, end = 8.dp, top = 4.dp)
