@@ -25,7 +25,6 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.vibrate
 
@@ -40,24 +39,6 @@ fun MainActivity.DeveloperScreen() {
     val indexTree by developerViewModel.indexTree.observeAsState()
     Column {
         Row {
-            Button(
-                onClick = {
-                    // This should be moved somewhere else
-                    toast("Loading downloads...")
-                    developerViewModel.loadIndexedDownloads()
-                },
-                modifier = Modifier.combinedClickable(
-                    onClick = {
-
-                    },
-                    onLongClick = {
-                        vibrate(50)
-                        developerViewModel.indexedDownloads.postValue(emptyList())
-                    }
-                )
-            ) {
-                Text(text = "Load downloads")
-            }
             Button(
                 onClick = {
                     // This should be moved somewhere else

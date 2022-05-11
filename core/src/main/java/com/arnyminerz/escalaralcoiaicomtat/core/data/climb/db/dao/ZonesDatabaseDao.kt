@@ -19,12 +19,6 @@ interface ZonesDatabaseDao {
     @Query("SELECT * FROM Zones WHERE objectId=:objectId LIMIT 1")
     fun getLiveData(objectId: String): LiveData<ZoneData?>
 
-    @Query("SELECT * FROM Zones WHERE downloaded=:downloaded")
-    suspend fun getAllByDownloaded(downloaded: Boolean): List<ZoneData>
-
-    @Query("SELECT * FROM Zones WHERE objectId=:objectId AND downloaded=:downloaded")
-    suspend fun getAllByDownloadedId(objectId: String, downloaded: Boolean): List<ZoneData>
-
     @Query("SELECT * FROM Zones WHERE objectId=:objectId LIMIT 1")
     suspend fun getByObjectId(objectId: String): ZoneData?
 

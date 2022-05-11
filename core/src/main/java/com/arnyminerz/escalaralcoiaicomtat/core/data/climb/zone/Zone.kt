@@ -6,10 +6,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassCompanion
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadableDataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.dataClassExploreActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
@@ -37,10 +37,8 @@ class Zone internal constructor(
     val position: GeoPoint,
     val webUrl: String?,
     private val parentAreaId: String,
-    override var downloaded: Boolean = false,
-    override var downloadSize: Long?,
     private val childrenCount: Long,
-) : DownloadableDataClass<Sector, Area, ZoneData>(
+) : DataClass<Sector, Area, ZoneData>(
     displayName,
     timestampMillis,
     imagePath,
@@ -57,11 +55,9 @@ class Zone internal constructor(
         R.drawable.ic_tall_placeholder,
         R.drawable.ic_tall_placeholder,
         2,
-        downloadable = true,
+        vertical = true,
         showLocation = true
     ),
-    downloaded,
-    downloadSize,
 ) {
     /**
      * Creates a new [Zone] from the data from the Data Module.
@@ -83,8 +79,6 @@ class Zone internal constructor(
         ),
         data.getString("webURL"),
         parentAreaId = data.getString("area"),
-        downloaded = false,
-        downloadSize = null,
         childrenCount = childrenCount,
     )
 
@@ -116,8 +110,6 @@ class Zone internal constructor(
         metadata.webURL ?: "",
         parentAreaId,
         childrenCount,
-        downloaded,
-        downloadSize,
     )
 
     override fun displayMap(): Map<String, Serializable?> = mapOf(
@@ -179,7 +171,7 @@ class Zone internal constructor(
             position = GeoPoint(38.705581, -0.498946),
             webUrl = "https://escalaralcoiaicomtat.centrexcursionistalcoi.org/barranquet-de-ferri.html",
             parentAreaId = "WWQME983XhriXVhtVxFu",
-            false, null, 0L,
+            0L,
         )
     }
 }

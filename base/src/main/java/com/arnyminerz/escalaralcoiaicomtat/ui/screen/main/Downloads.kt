@@ -33,13 +33,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,12 +45,7 @@ import androidx.core.text.isDigitsOnly
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.Chip
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DownloadedDataItem
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.StorageViewModel
-import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -267,18 +260,6 @@ private fun UpdatesCard(viewModel: StorageViewModel) {
 @ExperimentalMaterial3Api
 @ExperimentalMaterialApi
 fun MainActivity.StorageScreen() {
-    val context = LocalContext.current
-    val dataSingleton = DataSingleton.getInstance(context)
-    val sectorsLiveData by dataSingleton
-        .repository
-        .readAllSectors
-        .observeAsState(emptyList())
-    val zonesLiveData by dataSingleton
-        .repository
-        .readAllZones
-        .observeAsState(emptyList())
-    val sizeString by remember { storageViewModel.sizeString }
-
     Column(modifier = Modifier.fillMaxSize()) {
         Card(
             colors = CardDefaults.cardColors(
@@ -291,59 +272,6 @@ fun MainActivity.StorageScreen() {
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 UpdatesCard(storageViewModel)
-            }
-        }
-
-        LazyColumn {
-            item {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            text = stringResource(R.string.downloads_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
-                        )
-
-                        Row(
-                            modifier = Modifier
-                                .padding(start = 12.dp, end = 12.dp)
-                                .fillMaxWidth()
-                        ) {
-                            Timber.i("Size: $sizeString")
-                            Chip(stringResource(R.string.downloads_size, sizeString))
-                        }
-                    }
-                }
-            }
-            items(zonesLiveData) { data ->
-                if (data.downloaded)
-                    DownloadedDataItem(
-                        data.data(),
-                        DataClassActivity::class.java
-                    ) { }
-            }
-            items(sectorsLiveData) { data ->
-                if (data.downloaded) {
-                    val isParentDownloaded =
-                        zonesLiveData.find { it.downloaded && it.objectId == data.zone } != null
-                    if (!isParentDownloaded)
-                        DownloadedDataItem(
-                            data.data(),
-                            DataClassActivity::class.java
-                        ) { }
-                }
             }
         }
     }

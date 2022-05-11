@@ -4,10 +4,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.SunTime
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassCompanion
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DownloadableDataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.NO_SUN
@@ -18,7 +18,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 
 /**
  * Creates a new [Sector] instance.
@@ -38,10 +38,8 @@ class Sector internal constructor(
     override val imagePath: String,
     val webUrl: String?,
     private val parentZoneId: String,
-    override var downloaded: Boolean = false,
-    override var downloadSize: Long?,
     private val childrenCount: Long,
-) : DownloadableDataClass<Path, Zone, SectorData>(
+) : DataClass<Path, Zone, SectorData>(
     displayName,
     timestampMillis,
     imagePath,
@@ -58,11 +56,9 @@ class Sector internal constructor(
         R.drawable.ic_wide_placeholder,
         R.drawable.ic_wide_placeholder,
         1,
-        downloadable = true,
+        vertical = true,
         showLocation = location != null,
     ),
-    downloaded,
-    downloadSize,
 ) {
 
     /**
@@ -92,8 +88,6 @@ class Sector internal constructor(
             null
         },
         data.getString("zone"),
-        downloaded = false,
-        downloadSize = null,
         childrenCount = childrenCount,
     )
 
@@ -126,8 +120,6 @@ class Sector internal constructor(
             walkingTime,
             weight,
             parentZoneId,
-            downloaded,
-            downloadSize,
             childrenCount,
         )
     }
@@ -197,7 +189,7 @@ class Sector internal constructor(
             imagePath = "images/sectors/mas-de-la-penya-sector-3_croquis.jpg",
             webUrl = null,
             parentZoneId = "3DmHnKBlDRwqlH1KK85C",
-            false, null, 0L,
+            0L,
         )
     }
 }

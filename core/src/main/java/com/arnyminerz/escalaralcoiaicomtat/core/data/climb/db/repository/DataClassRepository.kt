@@ -48,15 +48,6 @@ class DataClassRepository(
 
     suspend fun getZones() = zonesDatabaseDao.all()
 
-    private suspend fun getDownloadedZones(downloaded: Boolean = true) =
-        zonesDatabaseDao.getAllByDownloaded(downloaded)
-
-    private suspend fun getDownloadedZonesById(
-        @ObjectId objectId: String,
-        downloaded: Boolean = true
-    ) =
-        zonesDatabaseDao.getAllByDownloadedId(objectId, downloaded)
-
     suspend fun clearZones() = zonesDatabaseDao.deleteAll()
 
 
@@ -69,15 +60,6 @@ class DataClassRepository(
     suspend fun delete(sector: SectorData) = sectorsDatabaseDao.delete(sector)
 
     suspend fun getSectors() = sectorsDatabaseDao.all()
-
-    private suspend fun getDownloadedSectors(downloaded: Boolean = true) =
-        sectorsDatabaseDao.getAllByDownloaded(downloaded)
-
-    private suspend fun getDownloadedSectorsById(
-        @ObjectId objectId: String,
-        downloaded: Boolean = true
-    ) =
-        sectorsDatabaseDao.getAllByDownloadedId(objectId, downloaded)
 
     suspend fun clearSectors() = sectorsDatabaseDao.deleteAll()
 
@@ -120,59 +102,6 @@ class DataClassRepository(
             Namespace.SECTOR -> getSector(objectId)
             Namespace.PATH -> getPath(objectId)
         }
-
-    /**
-     * Gets all the elements from [namespace] that have downloaded state equal to [downloaded].
-     * @author Arnau Mora
-     * @since 20220316
-     * @param namespace The namespace to search for.
-     * @param downloaded Whether or not the element is downloaded.
-     */
-    suspend fun getAllByDownloaded(namespace: Namespace, downloaded: Boolean = true) =
-        when (namespace) {
-            Namespace.ZONE -> getDownloadedZones(downloaded)
-            Namespace.SECTOR -> getDownloadedSectors(downloaded)
-            else -> null
-        }
-
-    /**
-     * Gets all the elements at [namespace] with id [objectId] which have the downloaded state set
-     * to [downloaded].
-     * @author Arnau Mora
-     * @since 20220316
-     */
-    suspend fun getAllByDownloadedObjectId(
-        namespace: Namespace,
-        @ObjectId objectId: String,
-        downloaded: Boolean = true
-    ) =
-        when (namespace) {
-            Namespace.ZONE -> getDownloadedZonesById(objectId, downloaded)
-            Namespace.SECTOR -> getDownloadedSectorsById(objectId, downloaded)
-            else -> null
-        }
-
-    /**
-     * Gets all the elements with id [objectId] which have the downloaded state set
-     * to [downloaded].
-     * @author Arnau Mora
-     * @since 20220316
-     */
-    suspend fun getAllByDownloadedObjectId(@ObjectId objectId: String, downloaded: Boolean = true) =
-        listOf(
-            getDownloadedZonesById(objectId, downloaded),
-            getDownloadedSectorsById(objectId, downloaded)
-        )
-            .flatten()
-
-    /**
-     * Gets all the elements that have downloaded state equal to [downloaded].
-     * @author Arnau Mora
-     * @since 20220316
-     * @param downloaded Whether or not the element is downloaded.
-     */
-    suspend fun getAllByDownloaded(downloaded: Boolean = true) =
-        listOf(getDownloadedZones(downloaded), getDownloadedSectors(downloaded)).flatten()
 
     /**
      * Updates all the elements from [items] into the database.

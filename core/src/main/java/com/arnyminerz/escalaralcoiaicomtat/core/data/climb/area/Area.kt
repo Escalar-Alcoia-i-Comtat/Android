@@ -53,7 +53,7 @@ class Area internal constructor(
         R.drawable.ic_wide_placeholder,
         R.drawable.ic_wide_placeholder,
         1,
-        downloadable = false,
+        vertical = false,
         showLocation = false,
     )
 ) {
