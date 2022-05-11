@@ -33,7 +33,7 @@ class AreaUnitTests {
 
         val displayOptions = area.displayOptions
         assertEquals(displayOptions.columns, 1)
-        assertEquals(displayOptions.downloadable, false)
+        assertEquals(displayOptions.vertical, false)
         assertEquals(displayOptions.placeholderDrawable, R.drawable.ic_wide_placeholder)
         assertEquals(displayOptions.errorPlaceholderDrawable, R.drawable.ic_wide_placeholder)
     }
