@@ -75,7 +75,7 @@ fun DataClassItem(
                 onClick,
             )
         else
-            NonDownloadableDataClassItem(
+            HorizontalDataClassItem(
                 item,
                 onClick = onClick,
             )
@@ -279,7 +279,7 @@ private fun VerticalDataClassItem(
  */
 @Composable
 @ExperimentalMaterial3Api
-private fun NonDownloadableDataClassItem(
+private fun HorizontalDataClassItem(
     item: DataClass<*, *, *>,
     isPlaceholder: Boolean = false,
     onClick: () -> Unit,
@@ -347,7 +347,7 @@ private fun NonDownloadableDataClassItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(name = "Non-downloadable DataClass Item")
 fun NonDownloadableDataClassItemPreview() {
-    NonDownloadableDataClassItem(
+    HorizontalDataClassItem(
         Area.SAMPLE,
         true,
     ) {}
