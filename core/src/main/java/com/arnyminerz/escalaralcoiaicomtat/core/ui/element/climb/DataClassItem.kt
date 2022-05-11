@@ -69,7 +69,7 @@ fun DataClassItem(
         )
 
         if (item.displayOptions.vertical)
-            DownloadableDataClassItem(
+            VerticalDataClassItem(
                 item,
                 viewModel,
                 onClick,
@@ -107,7 +107,7 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
  */
 @Composable
 @ExperimentalMaterial3Api
-private fun DownloadableDataClassItem(
+private fun VerticalDataClassItem(
     item: DataClass<*, *, *>,
     viewModel: DataClassItemViewModel,
     onClick: () -> Unit
