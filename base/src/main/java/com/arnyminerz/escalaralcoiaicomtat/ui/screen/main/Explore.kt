@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -75,7 +76,9 @@ fun MainActivity.ExploreScreen() {
             modifier = Modifier
                 .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp)
                 .fillMaxWidth(),
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
             shape = RoundedCornerShape(32.dp),
         ) {
             val focusRequester = remember { FocusRequester() }

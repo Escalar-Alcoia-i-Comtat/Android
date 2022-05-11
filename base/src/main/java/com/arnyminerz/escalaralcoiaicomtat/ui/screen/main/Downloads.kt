@@ -25,6 +25,7 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -280,7 +281,9 @@ fun MainActivity.StorageScreen() {
 
     Column(modifier = Modifier.fillMaxSize()) {
         Card(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
@@ -294,7 +297,9 @@ fun MainActivity.StorageScreen() {
         LazyColumn {
             item {
                 Card(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    ),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .fillMaxWidth()

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -79,8 +80,10 @@ fun PathItem(
         MaterialTheme.colorScheme.onSurfaceVariant
 
     Card(
-        containerColor = backgroundColor,
-        contentColor = textColor,
+        colors = CardDefaults.cardColors(
+            containerColor = backgroundColor,
+            contentColor = textColor,
+        ),
         modifier = Modifier
             .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
             .fillMaxWidth(),
@@ -193,8 +196,10 @@ fun PathItem(
                     val blockingType = blockingData?.blockingType
                     if (blockingType != null && blockingType != BlockingType.UNKNOWN)
                         Card(
-                            containerColor = MaterialTheme.colorScheme.error,
-                            contentColor = MaterialTheme.colorScheme.onError,
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError,
+                            ),
                             modifier = Modifier
                                 .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
                                 .fillMaxWidth(),
