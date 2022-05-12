@@ -17,8 +17,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_INTENT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_MD5
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_PLAY_SERVICES
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_PREFERENCE
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.IntroPageData
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.IntroWindow
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
@@ -26,6 +24,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.IntroViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.introViewModelFactory
+import com.arnyminerz.lib.app_intro.IntroPageData
+import com.arnyminerz.lib.app_intro.IntroWindow
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.launch
 
