@@ -37,7 +37,9 @@ jobs:
           echo '${{ secrets.GOOGLE_SERVICES }}' >> base/google-services.json
       - name: Run dokka 📝
         id: test
-        run: bash ./gradlew dokkaHtmlMultiModule
+        run: |
+          yes | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;32.1.0-rc1"
+          bash ./gradlew dokkaHtmlMultiModule
       - name: Add redirect 🔁
         id: redirection
         run: |
