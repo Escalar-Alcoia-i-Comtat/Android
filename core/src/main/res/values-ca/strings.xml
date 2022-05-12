@@ -167,6 +167,7 @@
     <string name="zone_title">Zona</string>
     <string name="downloads_zones_title">%d Zones</string>
     <string name="downloads_sectors_title">%d Sectors</string>
+    <string name="downloads_paths_title">%d Vies</string>
     <string name="zones_count_any">Cap Zona</string>
     <string name="image_desc_marker_image">Imatge del marcador</string>
     <string name="image_desc_downloaded_marker">Marcador de Descàrrega</string>
