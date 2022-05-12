@@ -1,6 +1,7 @@
-package com.arnyminerz.escalaralcoiaicomtat.core.ui.intro
+package com.arnyminerz.lib.app_intro
 
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
@@ -19,10 +20,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.arnyminerz.escalaralcoiaicomtat.core.R
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -111,8 +111,13 @@ fun IntroWindow(
                 }
             }
         }
-    ) {
-        HorizontalPager(count = pages.size, state = pagerState) { currentPage ->
+    ) { padding ->
+        HorizontalPager(
+            count = pages.size,
+            state = pagerState,
+            modifier = Modifier
+                .padding(padding),
+        ) { currentPage ->
             val page = pages[currentPage]
 
             IntroPage(page)
@@ -125,22 +130,21 @@ fun IntroWindow(
 @Preview(showSystemUi = true, name = "Intro Window Preview")
 @Composable
 fun IntroWindowDemo() {
-    AppTheme {
-        IntroWindow(
-            pages = listOf(
-                IntroPageData<Any?>(
-                    stringResource(R.string.intro_main_title, "Escalar Alcoià i Comtat"),
-                    stringResource(R.string.intro_main_message)
-                ),
-                IntroPageData(
-                    stringResource(R.string.intro_warning_title),
-                    stringResource(R.string.intro_warning_message)
-                )
+    IntroWindow(
+        pages = listOf(
+            IntroPageData<Any?>(
+                "Welcome to Escalar Alcoia i Comtat",
+                "We are going to walk you through a tiny configuration process. Don't worry it's fast and easy."
+            ),
+            IntroPageData(
+                "Attention",
+                "Climbing is considered a dangerous sport, even though well done can be really safe to perform. Please, inform yourself before going out, and don't use this guide as an absolute reference over what's outside. Have caution, and use the appropriate equipment, check not only yourself, but also your partner's equipment and preparation, and of course, have fun."
             )
-        ) { }
-    }
+        )
+    ) { }
 }
 
+/*
 @ExperimentalMaterial3Api
 @ExperimentalPagerApi
 @Preview(showSystemUi = true, name = "Intro Window Dark Preview")
@@ -161,3 +165,4 @@ fun IntroWindowDarkDemo() {
         ) { }
     }
 }
+*/

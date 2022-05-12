@@ -8,3 +8,4 @@ pluginManagement {
 include ':base'
 rootProject.name='Escalar Alcoia i Comtat'
 include ':core'
+include ':libs:app_intro'

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fab_desc_next">Next</string>
+    <string name="fab_desc_finish">Finish</string>
+    <string name="fab_desc_grant">Grant Permission</string>
+</resources>

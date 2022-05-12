@@ -1,6 +1,6 @@
-package com.arnyminerz.escalaralcoiaicomtat.core.ui.intro
+package com.arnyminerz.lib.app_intro
 
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroAction
+import com.arnyminerz.lib.app_intro.action.IntroAction
 
 /**
  * The data required to display an [IntroPage].

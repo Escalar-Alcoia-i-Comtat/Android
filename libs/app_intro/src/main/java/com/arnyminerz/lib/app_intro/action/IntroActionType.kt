@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action
+package com.arnyminerz.lib.app_intro.action
 
 /**
  * Stores the types of actions that are available to be used in the intro page.

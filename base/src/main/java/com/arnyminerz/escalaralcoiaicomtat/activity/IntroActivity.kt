@@ -24,10 +24,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.firebase.Param.GPS_SUPPORTED
 import com.arnyminerz.escalaralcoiaicomtat.core.firebase.Param.IS_BETA
 import com.arnyminerz.escalaralcoiaicomtat.core.firebase.Param.NEARBY_ZONES_ENABLED
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.IntroPageData
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.IntroWindow
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroAction
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroActionType
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.isLocationPermissionGranted
@@ -37,6 +33,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.IntroViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.introViewModelFactory
+import com.arnyminerz.lib.app_intro.IntroPageData
+import com.arnyminerz.lib.app_intro.IntroWindow
+import com.arnyminerz.lib.app_intro.action.IntroAction
+import com.arnyminerz.lib.app_intro.action.IntroActionType
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase

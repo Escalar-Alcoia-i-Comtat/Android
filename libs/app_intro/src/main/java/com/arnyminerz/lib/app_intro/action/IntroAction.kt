@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action
+package com.arnyminerz.lib.app_intro.action
 
 /**
  * Sets the data for an action for an intro page.

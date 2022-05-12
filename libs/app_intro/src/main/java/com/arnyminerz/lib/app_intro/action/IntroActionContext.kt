@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action
+package com.arnyminerz.lib.app_intro.action
 
 /**
  * Used in [IntroAction] for allowing to do some modifications over the action.

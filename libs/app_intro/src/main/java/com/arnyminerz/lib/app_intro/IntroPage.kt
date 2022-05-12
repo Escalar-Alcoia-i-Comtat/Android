@@ -1,4 +1,4 @@
-package com.arnyminerz.escalaralcoiaicomtat.core.ui.intro
+package com.arnyminerz.lib.app_intro
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -6,12 +6,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Switch
-import androidx.compose.material.Text
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,9 +24,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroAction
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroActionContext
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroActionType
+import com.arnyminerz.lib.app_intro.action.IntroAction
+import com.arnyminerz.lib.app_intro.action.IntroActionContext
+import com.arnyminerz.lib.app_intro.action.IntroActionType
 
 /**
  * Allows to display a page that can be used in the intro of the app to introduce the app
