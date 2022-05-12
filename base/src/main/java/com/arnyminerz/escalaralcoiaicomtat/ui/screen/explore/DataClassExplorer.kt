@@ -43,6 +43,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.firebase.logAnalyticsSelectedItem
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
@@ -151,6 +152,8 @@ fun Activity.DataClassExplorer(
             ) {
                 itemsIndexed(items) { i, item ->
                     DataClassItem(item) {
+                        logAnalyticsSelectedItem(item.namespace, item.objectId, item.displayName)
+
                         if (item is Sector)
                             launch(DataClassActivity::class.java) {
                                 putExtra(EXTRA_DATACLASS, navStack.value.last() as Parcelable)

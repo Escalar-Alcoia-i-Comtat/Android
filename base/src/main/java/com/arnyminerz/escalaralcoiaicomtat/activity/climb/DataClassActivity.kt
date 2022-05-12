@@ -37,9 +37,6 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore.SectorViewScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.android.material.badge.ExperimentalBadgeUtils
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 
 /**
@@ -125,25 +122,6 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         childrenCount = getExtraOrSavedInstanceState(EXTRA_CHILDREN_COUNT, savedInstanceState)
         // Load the nav stack
         loadNavStack(savedInstanceState)
-
-        if (sectorPageViewModel.dataClass != null)
-            Firebase.analytics.logEvent(
-                FirebaseAnalytics.Event.SELECT_CONTENT,
-                Bundle().apply {
-                    putString(
-                        FirebaseAnalytics.Param.ITEM_ID,
-                        sectorPageViewModel.dataClass!!.objectId
-                    )
-                    putString(
-                        FirebaseAnalytics.Param.ITEM_NAME,
-                        sectorPageViewModel.dataClass!!.displayName
-                    )
-                    putString(
-                        FirebaseAnalytics.Param.CONTENT_TYPE,
-                        sectorPageViewModel.dataClass!!.namespace.namespace
-                    )
-                },
-            )
 
         setContent {
             AppTheme {
