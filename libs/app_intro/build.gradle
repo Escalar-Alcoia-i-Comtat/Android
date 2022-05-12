@@ -31,6 +31,12 @@ android {
                 '-opt-in=kotlin.RequiresOptIn'
         ]
     }
+    buildFeatures { // Enables Jetpack Compose for this module
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion compose_version
+    }
 }
 
 dependencies {
