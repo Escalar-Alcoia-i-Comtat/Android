@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -15,12 +14,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.arnyminerz.escalaralcoiaicomtat.core.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.firebase.Event.FINISH_INTRO
+import com.arnyminerz.escalaralcoiaicomtat.core.firebase.Param.GPS_SUPPORTED
+import com.arnyminerz.escalaralcoiaicomtat.core.firebase.Param.IS_BETA
+import com.arnyminerz.escalaralcoiaicomtat.core.firebase.Param.NEARBY_ZONES_ENABLED
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.IntroPageData
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.IntroWindow
@@ -28,12 +30,16 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroAction
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action.IntroActionType
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.isLocationPermissionGranted
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.then
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.IntroViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.introViewModelFactory
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -49,6 +55,20 @@ class IntroActivity : ComponentActivity() {
     private val viewModel by viewModels<IntroViewModel>(factoryProducer = { PreferencesModule.introViewModelFactory })
 
     var permissionCallback: (granted: Boolean) -> Unit = { }
+
+    /**
+     * Matches the enable status of the nearby zones functionality.
+     * @author Arnau Mora
+     * @since 20220512
+     */
+    var nearbyZonesEnabled: Boolean = false
+
+    /**
+     * Stores whether the device supports gps.
+     * @author Arnau Mora
+     * @since 20220512
+     */
+    var gpsSupported: Boolean = false
 
     /**
      * The permission request for asking for location access.
@@ -114,10 +134,12 @@ class IntroActivity : ComponentActivity() {
                             { checked ->
                                 nearbyZonesSwitchEnabled = false
                                 doAsync {
+                                    nearbyZonesEnabled = checked
                                     PreferencesModule.setNearbyZonesEnabled.invoke(checked)
 
                                     permissionCallback = { permissionGranted ->
                                         if (!permissionGranted) {
+                                            nearbyZonesEnabled = false
                                             setState(false)
                                             doAsync {
                                                 PreferencesModule.setNearbyZonesEnabled(false)
@@ -126,16 +148,8 @@ class IntroActivity : ComponentActivity() {
                                         mayRequestLocationPermissions = false
                                     }
 
-                                    mayRequestLocationPermissions = if (checked)
-                                        ContextCompat.checkSelfPermission(
-                                            this@IntroActivity,
-                                            Manifest.permission.ACCESS_COARSE_LOCATION
-                                        ) == PackageManager.PERMISSION_DENIED
-                                                && ContextCompat.checkSelfPermission(
-                                            this@IntroActivity,
-                                            Manifest.permission.ACCESS_FINE_LOCATION
-                                        ) == PackageManager.PERMISSION_DENIED
-                                    else false
+                                    mayRequestLocationPermissions =
+                                        checked.then { isLocationPermissionGranted() } ?: false
 
                                     uiContext {
                                         nearbyZonesSwitchEnabled = true
@@ -150,10 +164,17 @@ class IntroActivity : ComponentActivity() {
                     // Check if GPS is available, and Nearby Zones card
                     val locationManager =
                         getSystemService(Context.LOCATION_SERVICE) as LocationManager
-                    if (locationManager.allProviders.contains(LocationManager.GPS_PROVIDER))
+                    gpsSupported =
+                        locationManager.allProviders.contains(LocationManager.GPS_PROVIDER)
+
+                    if (gpsSupported) {
+                        nearbyZonesEnabled = isLocationPermissionGranted()
                         add(locationPage)
-                    else
-                        runBlocking { PreferencesModule.setNearbyZonesEnabled(false) }
+                    } else {
+                        nearbyZonesSwitchEnabled = false
+                        nearbyZonesEnabled = false
+                        doAsync { PreferencesModule.setNearbyZonesEnabled(false) }
+                    }
 
                     if (BuildConfig.DEBUG)
                     // If debug build, warn user
@@ -176,6 +197,24 @@ class IntroActivity : ComponentActivity() {
                     requestPermissionLauncher = locationPermissionRequest,
                 ) {
                     Timber.v("Finished showing intro pages. Loading LoadingActivity")
+                    Firebase.analytics
+                        .logEvent(
+                            FINISH_INTRO,
+                            Bundle().apply {
+                                putBoolean(
+                                    IS_BETA,
+                                    BuildConfig.DEBUG,
+                                )
+                                putBoolean(
+                                    GPS_SUPPORTED,
+                                    gpsSupported,
+                                )
+                                putBoolean(
+                                    NEARBY_ZONES_ENABLED,
+                                    nearbyZonesEnabled,
+                                )
+                            }
+                        )
                     viewModel.markIntroAsShown()
                 }
             }
