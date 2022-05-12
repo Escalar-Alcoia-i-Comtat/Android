@@ -54,7 +54,7 @@ dependencies {
     implementation "androidx.compose.material:material-icons-extended:$compose_version"
 
     // Jetpack Compose - Accompanist
-    def accompanist_version = '0.24.7-alpha'
+    def accompanist_version = '0.24.8-beta'
     implementation "com.google.accompanist:accompanist-pager:$accompanist_version"
 
     // Timber
