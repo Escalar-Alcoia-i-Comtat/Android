@@ -31,7 +31,6 @@ com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.converter
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.dao
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.database
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.repository
-com.arnyminerz.escalaralcoiaicomtat.core.data.climb.downloads
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes
@@ -40,6 +39,7 @@ com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone
 com.arnyminerz.escalaralcoiaicomtat.core.exception
 com.arnyminerz.escalaralcoiaicomtat.core.exception.notification
+com.arnyminerz.escalaralcoiaicomtat.core.firebase
 com.arnyminerz.escalaralcoiaicomtat.core.maps
 com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones
 com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.ui
@@ -58,8 +58,6 @@ com.arnyminerz.escalaralcoiaicomtat.core.ui.element
 com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings
 com.arnyminerz.escalaralcoiaicomtat.core.ui.element.tooltip
-com.arnyminerz.escalaralcoiaicomtat.core.ui.intro
-com.arnyminerz.escalaralcoiaicomtat.core.ui.intro.action
 com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen
 com.arnyminerz.escalaralcoiaicomtat.core.ui.map
 com.arnyminerz.escalaralcoiaicomtat.core.ui.theme
@@ -71,4 +69,3 @@ com.arnyminerz.escalaralcoiaicomtat.core.utils.storage
 com.arnyminerz.escalaralcoiaicomtat.core.view
 com.arnyminerz.escalaralcoiaicomtat.core.web
 com.arnyminerz.escalaralcoiaicomtat.core.worker
-com.arnyminerz.escalaralcoiaicomtat.core.worker.download
