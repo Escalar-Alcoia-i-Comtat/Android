@@ -49,6 +49,8 @@ import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.SearchableActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
+import com.arnyminerz.escalaralcoiaicomtat.core.firebase.logAnalyticsSelectedItem
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.ui.NearbyZones
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
@@ -161,6 +163,8 @@ fun MainActivity.ExploreScreen() {
             items(areas) { area ->
                 Timber.d("Displaying $area...")
                 DataClassItem(area) {
+                    logAnalyticsSelectedItem(Namespace.AREA, area.objectId, area.displayName)
+
                     launch(DataClassActivity::class.java) {
                         putExtra(EXTRA_DATACLASS, area as Parcelable)
                     }
