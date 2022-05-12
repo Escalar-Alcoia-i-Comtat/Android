@@ -7,6 +7,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.FirebaseAnalytics.Param.ITEM_ID
 import com.google.firebase.analytics.FirebaseAnalytics.Param.ITEM_LIST_ID
 import com.google.firebase.analytics.FirebaseAnalytics.Param.ITEM_LIST_NAME
+import com.google.firebase.analytics.FirebaseAnalytics.Param.SEARCH_TERM
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
@@ -61,6 +62,25 @@ fun logAnalyticsViewPath(
                 putString(ITEM_LIST_ID, Namespace.PATH.namespace)
                 putString(ITEM_ID, objectId)
                 putString(ITEM_LIST_NAME, displayName)
+            },
+        )
+}
+
+/**
+ * Logs that a search has been performed in Firebase Analytics.
+ * @author Arnau Mora
+ * @since 20220512
+ * @param query The introduced search query. Will be tagged as [SEARCH_TERM].
+ */
+fun logAnalyticsSearchEvent(
+    query: String
+) {
+    Firebase
+        .analytics
+        .logEvent(
+            FirebaseAnalytics.Event.SEARCH,
+            Bundle().apply {
+                putString(SEARCH_TERM, query)
             },
         )
 }
