@@ -129,7 +129,7 @@ dependencies {
     kapt "com.github.bumptech.glide:compiler:$glide_version"
 
     // Jetpack Compose utilities - Glide
-    api 'com.github.skydoves:landscapist-glide:1.5.1'
+    api 'com.github.skydoves:landscapist-glide:1.5.2'
 
     // Jetpack Compose utilities - Charts
     implementation 'io.github.bytebeats:compose-charts:0.1.2'
