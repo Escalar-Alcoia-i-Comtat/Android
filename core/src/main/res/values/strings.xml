@@ -236,6 +236,7 @@
     <string name="status_loading_installing_data">Installing data…</string>
     <string name="status_loading_error_server">Could not connect to server.\n Please, try again later</string>
     <string name="status_loading_error_connection">You don\'t have an active Internet connection.\nPlease, try again later, when connected.</string>
+    <string name="status_loading_error_format">Could not parse response from server. Please, contact an administrator.</string>
     <string name="status_data_install_access_denied" translatable="false">Data module installation not allowed!</string>
     <string name="status_data_install_active_sessions_limit" translatable="false">Too many install requests!</string>
     <string name="status_data_install_api_not_available" translatable="false">Data installation API not available!</string>
