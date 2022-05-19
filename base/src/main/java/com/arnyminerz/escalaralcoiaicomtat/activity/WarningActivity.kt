@@ -27,6 +27,7 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.introViewModelFactory
 import com.arnyminerz.lib.app_intro.IntroPageData
 import com.arnyminerz.lib.app_intro.IntroWindow
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterial3Api
@@ -38,7 +39,7 @@ class WarningActivity : ComponentActivity() {
      */
     private val viewModel by viewModels<IntroViewModel>(factoryProducer = { PreferencesModule.introViewModelFactory })
 
-    @OptIn(ExperimentalPagerApi::class)
+    @OptIn(ExperimentalPagerApi::class, ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

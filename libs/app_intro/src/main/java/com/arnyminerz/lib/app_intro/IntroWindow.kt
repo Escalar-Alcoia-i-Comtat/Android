@@ -1,6 +1,5 @@
 package com.arnyminerz.lib.app_intro
 
-import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
@@ -14,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +26,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -34,30 +37,36 @@ import timber.log.Timber
  * @author Arnau Mora
  * @since 20211214
  * @param pages All the [IntroPageData] to display.
- * @param fabPermissions Must contain permissions to request. When not empty the current page will
- * get blocked, and a permissions request button will be shown to the user.
- * @param requestPermissionLauncher This can be null if [fabPermissions] is null, but it must be a
- * [ActivityResultLauncher] if not, which handles the permissions request.
  * @param finishListener What to run when the intro reaches its end.
  */
 @Composable
-@ExperimentalMaterial3Api
 @ExperimentalPagerApi
+@ExperimentalMaterial3Api
+@ExperimentalPermissionsApi
 fun IntroWindow(
     pages: List<IntroPageData<*>>,
-    fabPermissions: Array<String>? = null,
-    requestPermissionLauncher: ActivityResultLauncher<Array<String>>? = null,
-    finishListener: () -> Unit
+    finishListener: () -> Unit,
 ) {
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
 
     var blockPage by remember { mutableStateOf(-1) }
+    var currentPage by remember { mutableStateOf(0) }
+
+    val permissionsStatesMap = hashMapOf<Int, MultiplePermissionsState>().apply {
+        for ((index, page) in pages.withIndex()) {
+            val permissions = page.permissions
+            if (permissions != null)
+                put(index, rememberMultiplePermissionsState(permissions.toList()))
+        }
+    }
 
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }
             .collect { page ->
                 Timber.v("Current page: $page. Blocked: $blockPage")
+                currentPage = page
+
                 // Checks if page is greater than blockPage
                 if (blockPage != -1 && page > blockPage) {
                     Timber.i("Going back to page $blockPage")
@@ -72,17 +81,22 @@ fun IntroWindow(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    if (fabPermissions?.isNotEmpty() == true)
-                        requestPermissionLauncher?.launch(fabPermissions)
-                    else if (pagerState.currentPage + 1 >= pages.size) {
-                        // Reached the end, exit and enter MainActivity
+                    val permissionsState = permissionsStatesMap[currentPage]
+                    if (permissionsState?.allPermissionsGranted == false)
+                        permissionsState.launchMultiplePermissionRequest()
+                    else if (pagerState.currentPage + 1 >= pages.size)
+                    // Reached the end, exit and enter MainActivity
                         finishListener()
-                    } else scope.launch {
+                    else scope.launch {
                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
                     }
                 }
             ) {
-                if (fabPermissions?.isNotEmpty() == true) {
+                val page = pages[currentPage]
+                val currentValue = page.action.currentValue as MutableState<*>
+                val permissionsState = permissionsStatesMap[currentPage]
+
+                if (currentValue.value as? Boolean == true && permissionsState?.allPermissionsGranted != true) {
                     if (blockPage < 0) {
                         blockPage = pagerState.currentPage
                         Timber.i("Blocked current page to $blockPage")
@@ -125,10 +139,11 @@ fun IntroWindow(
     }
 }
 
-@ExperimentalMaterial3Api
-@ExperimentalPagerApi
-@Preview(showSystemUi = true, name = "Intro Window Preview")
 @Composable
+@Preview(showSystemUi = true, name = "Intro Window Preview")
+@ExperimentalPagerApi
+@ExperimentalMaterial3Api
+@ExperimentalPermissionsApi
 fun IntroWindowDemo() {
     IntroWindow(
         pages = listOf(

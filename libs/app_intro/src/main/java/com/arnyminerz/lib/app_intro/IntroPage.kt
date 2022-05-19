@@ -13,10 +13,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -88,22 +86,17 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                     }
                 }
                 IntroActionType.SWITCH -> {
-                    var checked by remember {
-                        mutableStateOf(
-                            action.currentValue as? Boolean ?: false
-                        )
-                    }
                     val context: IntroActionContext<R> =
                         object : IntroActionContext<R>() {
                             override fun setState(state: R) {
-                                (state as? Boolean)?.let { checked = it }
+                                (state as? Boolean)?.let { action.currentValue.value = it as R }
                             }
                         }
                     Switch(
-                        checked = checked,
+                        checked = action.currentValue.value as? Boolean ?: false,
                         enabled = action.enabled,
                         onCheckedChange = {
-                            checked = it
+                            action.currentValue.value = it as R
                             action.callback.invoke(context, it as R)
                         },
                     )
@@ -117,22 +110,17 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                     )
                 }
                 IntroActionType.CHECKBOX -> {
-                    var checked by remember {
-                        mutableStateOf(
-                            action.currentValue as? Boolean ?: false
-                        )
-                    }
                     val context: IntroActionContext<R> =
                         object : IntroActionContext<R>() {
                             override fun setState(state: R) {
-                                (state as? Boolean)?.let { checked = it }
+                                (state as? Boolean)?.let { action.currentValue.value = it as R }
                             }
                         }
                     Checkbox(
-                        checked = checked,
+                        checked = action.currentValue.value as? Boolean ?: false,
                         enabled = action.enabled,
                         onCheckedChange = {
-                            checked = it
+                            action.currentValue.value = it as R
                             action.callback.invoke(context, it as R)
                         }
                     )
@@ -167,21 +155,21 @@ fun IntroPagePreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 fun IntroPagePreviewSwitch() {
-    var switchStatus by remember { mutableStateOf(false) }
+    val switchStatus = remember { mutableStateOf(false) }
 
     IntroPage(
         data = IntroPageData(
             "This is title",
             "This is the content of the slide. The text can be modified for each slide.",
             action = IntroAction(
-                if (switchStatus)
+                if (switchStatus.value)
                     "This can be switched"
                 else
                     "This has been switched",
                 switchStatus,
                 IntroActionType.SWITCH,
                 callback = { switched ->
-                    switchStatus = switched
+                    switchStatus.value = switched
                 }
             )
         )
@@ -193,21 +181,21 @@ fun IntroPagePreviewSwitch() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 fun IntroPagePreviewCheckbox() {
-    var switchStatus by remember { mutableStateOf(false) }
+    val switchStatus = remember { mutableStateOf(false) }
 
     IntroPage(
         data = IntroPageData(
             "This is title",
             "This is the content of the slide. The text can be modified for each slide.",
             action = IntroAction(
-                if (switchStatus)
+                if (switchStatus.value)
                     "This can be switched"
                 else
                     "This has been switched",
                 switchStatus,
                 IntroActionType.CHECKBOX,
                 callback = { switched ->
-                    switchStatus = switched
+                    switchStatus.value = switched
                 }
             )
         )

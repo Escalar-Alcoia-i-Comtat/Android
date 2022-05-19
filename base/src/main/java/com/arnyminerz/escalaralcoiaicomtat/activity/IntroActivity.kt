@@ -6,7 +6,6 @@ import android.location.LocationManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.getValue
@@ -28,7 +27,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.isLocationPermissionGranted
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.then
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.IntroViewModel
@@ -38,6 +36,7 @@ import com.arnyminerz.lib.app_intro.IntroWindow
 import com.arnyminerz.lib.app_intro.action.IntroAction
 import com.arnyminerz.lib.app_intro.action.IntroActionType
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.first
@@ -68,32 +67,9 @@ class IntroActivity : ComponentActivity() {
      * @author Arnau Mora
      * @since 20220512
      */
-    var gpsSupported: Boolean = false
+    private var gpsSupported: Boolean = false
 
-    /**
-     * The permission request for asking for location access.
-     * @author Arnau Mora
-     * @since 20220130
-     */
-    private val locationPermissionRequest = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        when {
-            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) ->
-                // Fine location granted
-                permissionCallback(true)
-            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) ->
-                // Coarse location granted
-                permissionCallback(true)
-            else -> {
-                // The permission was not granted
-                toast(R.string.toast_error_permission)
-                permissionCallback(false)
-            }
-        }
-    }
-
-    @OptIn(ExperimentalPagerApi::class)
+    @OptIn(ExperimentalPagerApi::class, ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -109,7 +85,6 @@ class IntroActivity : ComponentActivity() {
 
         setContent {
             AppTheme {
-                var mayRequestLocationPermissions by remember { mutableStateOf(false) }
                 var nearbyZonesSwitchEnabled by remember { mutableStateOf(true) }
 
                 val introPages = mutableListOf<IntroPageData<*>>(
@@ -127,9 +102,11 @@ class IntroActivity : ComponentActivity() {
                         stringResource(R.string.intro_nearbyzones_message),
                         IntroAction(
                             stringResource(R.string.intro_nearbyzones_enable),
-                            runBlocking {
-                                PreferencesModule.getNearbyZonesEnabled.invoke().first()
-                            },
+                            mutableStateOf(
+                                runBlocking {
+                                    PreferencesModule.getNearbyZonesEnabled.invoke().first()
+                                }
+                            ),
                             IntroActionType.SWITCH,
                             { checked ->
                                 nearbyZonesSwitchEnabled = false
@@ -144,12 +121,8 @@ class IntroActivity : ComponentActivity() {
                                             doAsync {
                                                 PreferencesModule.setNearbyZonesEnabled(false)
                                             }
-                                        }
-                                        mayRequestLocationPermissions = false
+                                        } else setState(true)
                                     }
-
-                                    mayRequestLocationPermissions =
-                                        checked.then { isLocationPermissionGranted() } ?: false
 
                                     uiContext {
                                         nearbyZonesSwitchEnabled = true
@@ -158,7 +131,11 @@ class IntroActivity : ComponentActivity() {
                                 }
                             },
                             nearbyZonesSwitchEnabled
-                        )
+                        ),
+                        permissions = arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        ),
                     )
 
                     // Check if GPS is available, and Nearby Zones card
@@ -188,13 +165,6 @@ class IntroActivity : ComponentActivity() {
 
                 IntroWindow(
                     introPages.toList(),
-                    fabPermissions = if (mayRequestLocationPermissions)
-                        arrayOf(
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                        )
-                    else emptyArray(),
-                    requestPermissionLauncher = locationPermissionRequest,
                 ) {
                     Timber.v("Finished showing intro pages. Loading LoadingActivity")
                     Firebase.analytics
