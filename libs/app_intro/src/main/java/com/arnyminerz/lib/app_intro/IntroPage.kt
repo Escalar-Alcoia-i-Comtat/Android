@@ -187,3 +187,29 @@ fun IntroPagePreviewSwitch() {
         )
     )
 }
+
+@Composable
+@Preview(name = "IntroPage Preview with checkbox")
+@OptIn(ExperimentalMaterial3Api::class)
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+fun IntroPagePreviewCheckbox() {
+    var switchStatus by remember { mutableStateOf(false) }
+
+    IntroPage(
+        data = IntroPageData(
+            "This is title",
+            "This is the content of the slide. The text can be modified for each slide.",
+            action = IntroAction(
+                if (switchStatus)
+                    "This can be switched"
+                else
+                    "This has been switched",
+                switchStatus,
+                IntroActionType.CHECKBOX,
+                callback = { switched ->
+                    switchStatus = switched
+                }
+            )
+        )
+    )
+}
