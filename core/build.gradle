@@ -152,7 +152,7 @@ dependencies {
     implementation "androidx.room:room-ktx:$room_version"
 
     // Google Firebase
-    api platform('com.google.firebase:firebase-bom:30.0.1')
+    api platform('com.google.firebase:firebase-bom:30.0.2')
     api 'com.google.firebase:firebase-analytics-ktx'
     api 'com.google.firebase:firebase-crashlytics-ktx'
     api 'com.google.firebase:firebase-config-ktx'
