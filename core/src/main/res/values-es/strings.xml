@@ -209,7 +209,7 @@
     <string name="status_loading_installing_data">Instalando los datos…</string>
     <string name="status_loading_error_server">No se ha podido contactar con el servidor.\n Por favor, inténtalo de nuevo más tarde</string>
     <string name="status_loading_error_connection">No tienes una conexión a Internet activa.\nPor favor, vuélvelo a intentar más tarde, cuando estés conectado.</string>
-    <string name="status_loading_error_format">Could not parse response from server. Please, contact an administrator.</string>
+    <string name="status_loading_error_format">No se ha podido analizar la respuesta del servidor. Por favor, contacte con un administrador.</string>
     <string name="data_type_area">Área</string>
     <string name="data_type_zone">Zona</string>
     <string name="data_type_sector">Sector</string>
