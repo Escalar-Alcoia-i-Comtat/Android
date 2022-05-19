@@ -118,11 +118,11 @@ private fun decode(
  * @param jsonData The data loaded from the data module
  * @param firstIteration Used for making sure no [StackOverflowError] are thrown.
  * @return A collection of areas
- * @throws IllegalStateException When it's the second time the function is called, and no areas
+ * @throws IllegalArgumentException When it's the second time the function is called, and no areas
  * get loaded.
  */
 @WorkerThread
-@Throws(IllegalStateException::class)
+@Throws(IllegalArgumentException::class)
 suspend fun loadAreas(
     context: Context,
     jsonData: JSONObject,
@@ -154,7 +154,7 @@ suspend fun loadAreas(
                 if (firstIteration)
                     loadAreas(context, jsonData, false)
                 else
-                    throw IllegalStateException("Data from server is not valid, does not contain any Areas.")
+                    throw IllegalArgumentException("Data from server is not valid, does not contain any Areas.")
             }
         dataSingleton.areas.value = list
         return list
