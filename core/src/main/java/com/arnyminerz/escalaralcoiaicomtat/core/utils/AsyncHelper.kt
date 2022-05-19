@@ -82,3 +82,12 @@ suspend fun <T, A : Activity> A.uiContext(@UiThread block: suspend A.() -> T) =
     withContext(Dispatchers.Main) {
         block(this@uiContext)
     }
+
+/**
+ * Runs a block of code on the IO dispatcher.
+ * @author Arnau Mora
+ * @since 20220519
+ * @param block The block of code to run
+ */
+suspend fun <T> ioContext(@WorkerThread block: suspend CoroutineScope.() -> T) =
+    withContext(Dispatchers.IO, block)
