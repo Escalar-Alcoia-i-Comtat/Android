@@ -112,6 +112,8 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                         fontSize = 17.sp,
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
                     )
                 }
                 IntroActionType.CHECKBOX -> {
