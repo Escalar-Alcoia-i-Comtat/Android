@@ -6,7 +6,6 @@ import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -41,6 +40,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.ioContext
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.md5Compatible
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
@@ -58,11 +58,10 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.perf.ktx.performance
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
+import org.json.JSONException
 import timber.log.Timber
 
 class LoadingViewModel(application: Application) : AndroidViewModel(application) {
@@ -145,30 +144,30 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
 
         progressMessageResource.value = R.string.status_loading_noti_list
         messagingSubscribeTest(messaging)
-        withContext(Dispatchers.IO) {
+        ioContext {
             messagingTokenGet(messaging)
         }
 
         progressMessageResource.value = R.string.status_loading_checks
         hasGooglePlayServices = checkGooglePlayServices(app)
-        withContext(Dispatchers.IO) {
+        ioContext {
             checkMD5Support(analytics)
         }
 
         progressMessageResource.value = R.string.status_loading_workers
-        withContext(Dispatchers.IO) {
+        ioContext {
             val alreadyScheduled = BlockStatusWorker.isScheduled(context)
             if (!alreadyScheduled)
                 BlockStatusWorker.schedule(context)
         }
 
         progressMessageResource.value = R.string.status_loading_data_collection
-        withContext(Dispatchers.IO) {
+        ioContext {
             dataCollectionSetUp()
         }
 
         /*progressMessageResource.value = R.string.status_loading_data
-        withContext(Dispatchers.IO) {
+        ioContext {
             load(app, deepLinkPath) { stringResource, errorResource ->
                 stringResource?.let { progressMessageResource.value = it }
                 errorResource?.let { errorMessage.value = it }
@@ -192,7 +191,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         progressMessageResource.value = R.string.status_loading_data
 
         if (!isLoading)
-            withContext(Dispatchers.IO) {
+            ioContext {
                 load(app, deepLinkPath) { stringResource, errorResource ->
                     stringResource?.let { progressMessageResource.value = it }
                     errorResource?.let { errorMessage.value = it }
@@ -351,7 +350,6 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * @author Arnau Mora
      * @since 20211225
      */
-    @OptIn(ExperimentalMaterial3Api::class)
     @WorkerThread
     private suspend fun load(
         app: App,
@@ -363,6 +361,11 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
 
             Timber.v("Fetching areas data...")
             val jsonData = context.getJson("$REST_API_DATA_LIST/*")
+
+            // Check if the response contains a "result" field
+            if (jsonData.has("result"))
+                throw IllegalStateException("Server's JSON data does not contain a field named \"result\".")
+
             Timber.i("Data fetched from data module!")
             val areas = loadAreas(app, jsonData.getJSONObject("result"))
 
@@ -422,6 +425,12 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                     else -> progressUpdater(null, R.string.status_loading_error_server)
                 }
             }
+        } catch (e: JSONException) {
+            Timber.e(e, "Could not parse the server's response.")
+            ioContext { progressUpdater(null, R.string.status_loading_error_format) }
+        } catch (e: IllegalStateException) {
+            Timber.e("The server response does not have a \"result\" field.")
+            ioContext { progressUpdater(null, R.string.status_loading_error_format) }
         } finally {
             isLoading = false
         }

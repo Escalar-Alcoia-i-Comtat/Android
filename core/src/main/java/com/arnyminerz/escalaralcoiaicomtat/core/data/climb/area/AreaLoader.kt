@@ -111,24 +111,34 @@ private fun decode(
 /**
  * Loads all the areas available in the server.
  * Custom progress callbacks:
- * - 0/0 paths are being processed.
+ * * 0/0 paths are being processed.
  * @author Arnau Mora
  * @since 20210313
  * @param context The context used for fetching and putting data into the index.
  * @param jsonData The data loaded from the data module
+ * @param firstIteration Used for making sure no [StackOverflowError] are thrown.
  * @return A collection of areas
+ * @throws IllegalStateException When it's the second time the function is called, and no areas
+ * get loaded.
  */
 @WorkerThread
+@Throws(IllegalStateException::class)
 suspend fun loadAreas(
     context: Context,
-    jsonData: JSONObject
+    jsonData: JSONObject,
+    firstIteration: Boolean = true,
 ): List<Area> {
+    // Get the DataSingleton instance, for modifying the Room storage
     val dataSingleton = DataSingleton.getInstance(context)
 
+    // Get from the preferences module if the data has ever been indexed
     val indexedDataFlow = PreferencesModule
         .systemPreferencesRepository
         .indexedData
     val indexedSearch = indexedDataFlow.first()
+
+    // If the data has been indexed before, check if it really has been stored, this is, there
+    // are stored Areas.
     if (indexedSearch) {
         Timber.v("Search results already indexed. Fetching from application...")
         val list = dataSingleton
@@ -141,7 +151,10 @@ suspend fun loadAreas(
                 PreferencesModule
                     .systemPreferencesRepository
                     .markDataIndexed(false)
-                loadAreas(context, jsonData)
+                if (firstIteration)
+                    loadAreas(context, jsonData, false)
+                else
+                    throw IllegalStateException("Data from server is not valid, does not contain any Areas.")
             }
         dataSingleton.areas.value = list
         return list
