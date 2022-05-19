@@ -363,8 +363,8 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
             val jsonData = context.getJson("$REST_API_DATA_LIST/*")
 
             // Check if the response contains a "result" field
-            if (jsonData.has("result"))
-                throw IllegalStateException("Server's JSON data does not contain a field named \"result\".")
+            // if (jsonData.has("result"))
+            //     throw IllegalStateException("Server's JSON data does not contain a field named \"result\".")
 
             Timber.i("Data fetched from data module!")
             val areas = loadAreas(app, jsonData.getJSONObject("result"))
