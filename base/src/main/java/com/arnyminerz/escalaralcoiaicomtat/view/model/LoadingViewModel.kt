@@ -61,6 +61,7 @@ import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import org.json.JSONException
 import timber.log.Timber
 
 class LoadingViewModel(application: Application) : AndroidViewModel(application) {
@@ -360,6 +361,11 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
 
             Timber.v("Fetching areas data...")
             val jsonData = context.getJson("$REST_API_DATA_LIST/*")
+
+            // Check if the response contains a "result" field
+            if (jsonData.has("result"))
+                throw IllegalStateException("Server's JSON data does not contain a field named \"result\".")
+
             Timber.i("Data fetched from data module!")
             val areas = loadAreas(app, jsonData.getJSONObject("result"))
 
@@ -419,6 +425,12 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                     else -> progressUpdater(null, R.string.status_loading_error_server)
                 }
             }
+        } catch (e: JSONException) {
+            Timber.e(e, "Could not parse the server's response.")
+            ioContext { progressUpdater(null, R.string.status_loading_error_format) }
+        } catch (e: IllegalStateException) {
+            Timber.e("The server response does not have a \"result\" field.")
+            ioContext { progressUpdater(null, R.string.status_loading_error_format) }
         } finally {
             isLoading = false
         }
