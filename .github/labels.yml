@@ -69,6 +69,10 @@
   description: When there are updates on the user interface
   color: 57A639
 
+- name: translation
+  description: Indicates that the issue is regarding some translation.
+  color: 59F4BD
+
 - name: major
   description: Major changes. Used for release bump
   color: 16970B
