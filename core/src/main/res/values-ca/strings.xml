@@ -209,6 +209,7 @@
     <string name="status_loading_installing_data">Instal·lant les dades…</string>
     <string name="status_loading_error_server">No s\'ha pogut connectar al servidor.\n Per favor, torna-ho a intentar més tard</string>
     <string name="status_loading_error_connection">No tens una connexió a Internet activa.\nPer favor, torna-ho a intentar més tard, quan hi estigues connectat.</string>
+    <string name="status_loading_error_format">No s\'ha pogut analitzar la resposta del servidor. Per favor, contacta amb un administrador.</string>
     <string name="data_type_area">Àrea</string>
     <string name="data_type_zone">Zona</string>
     <string name="data_type_sector">Sector</string>
