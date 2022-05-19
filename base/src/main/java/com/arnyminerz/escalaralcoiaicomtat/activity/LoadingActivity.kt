@@ -12,6 +12,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -145,11 +146,12 @@ class LoadingActivity : NetworkAwareComponentActivity() {
 
                 val errorMessageResource by loadingViewModel.errorMessage
 
-                Scaffold {
+                Scaffold { padding ->
                     LoadingWindow(
+                        padding,
                         stringResource(progressMessageResource, progressMessageAttributes),
                         errorMessageResource != null,
-                        if (errorMessageResource != null) stringResource(errorMessageResource!!) else ""
+                        if (errorMessageResource != null) stringResource(errorMessageResource!!) else "",
                     )
                 }
 
@@ -176,6 +178,7 @@ class LoadingActivity : NetworkAwareComponentActivity() {
 
 @Composable
 fun LoadingWindow(
+    padding: PaddingValues,
     progressMessage: String,
     shouldShowErrorMessage: Boolean = false,
     errorMessage: String? = null
@@ -190,7 +193,9 @@ fun LoadingWindow(
     val drawable = AppCompatResources.getDrawable(LocalContext.current, R.mipmap.ic_launcher_round)
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding),
         contentAlignment = Alignment.Center,
     ) {
         Box(
