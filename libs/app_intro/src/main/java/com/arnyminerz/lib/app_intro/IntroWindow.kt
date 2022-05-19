@@ -81,8 +81,11 @@ fun IntroWindow(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
+                    val page = pages[currentPage]
+                    val currentValue = page.action.currentValue as MutableState<*>
                     val permissionsState = permissionsStatesMap[currentPage]
-                    if (permissionsState?.allPermissionsGranted == false)
+
+                    if (currentValue.value as? Boolean == true && permissionsState?.allPermissionsGranted == false)
                         permissionsState.launchMultiplePermissionRequest()
                     else if (pagerState.currentPage + 1 >= pages.size)
                     // Reached the end, exit and enter MainActivity
