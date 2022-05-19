@@ -349,7 +349,6 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * @author Arnau Mora
      * @since 20211225
      */
-    @OptIn(ExperimentalMaterial3Api::class)
     @WorkerThread
     private suspend fun load(
         app: App,

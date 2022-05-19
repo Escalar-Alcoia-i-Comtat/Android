@@ -30,7 +30,6 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.launch
 
-@ExperimentalMaterial3Api
 class WarningActivity : ComponentActivity() {
     /**
      * The view model for updating the preference.
@@ -39,7 +38,11 @@ class WarningActivity : ComponentActivity() {
      */
     private val viewModel by viewModels<IntroViewModel>(factoryProducer = { PreferencesModule.introViewModelFactory })
 
-    @OptIn(ExperimentalPagerApi::class, ExperimentalPermissionsApi::class)
+    @OptIn(
+        ExperimentalPagerApi::class,
+        ExperimentalMaterial3Api::class,
+        ExperimentalPermissionsApi::class,
+    )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
