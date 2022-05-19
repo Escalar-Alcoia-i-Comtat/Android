@@ -112,6 +112,8 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                         fontSize = 17.sp,
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
                     )
                 }
                 IntroActionType.CHECKBOX -> {
@@ -178,6 +180,32 @@ fun IntroPagePreviewSwitch() {
                     "This has been switched",
                 switchStatus,
                 IntroActionType.SWITCH,
+                callback = { switched ->
+                    switchStatus = switched
+                }
+            )
+        )
+    )
+}
+
+@Composable
+@Preview(name = "IntroPage Preview with checkbox")
+@OptIn(ExperimentalMaterial3Api::class)
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+fun IntroPagePreviewCheckbox() {
+    var switchStatus by remember { mutableStateOf(false) }
+
+    IntroPage(
+        data = IntroPageData(
+            "This is title",
+            "This is the content of the slide. The text can be modified for each slide.",
+            action = IntroAction(
+                if (switchStatus)
+                    "This can be switched"
+                else
+                    "This has been switched",
+                switchStatus,
+                IntroActionType.CHECKBOX,
                 callback = { switched ->
                     switchStatus = switched
                 }
