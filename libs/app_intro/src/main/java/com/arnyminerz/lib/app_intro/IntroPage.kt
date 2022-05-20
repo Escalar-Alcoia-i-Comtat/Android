@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -78,6 +79,7 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                         }
                     Button(
                         enabled = action.enabled,
+                        modifier = Modifier.testTag("intro_button"),
                         onClick = {
                             action.callback.invoke(context, null as R)
                         },
@@ -95,6 +97,7 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                     Switch(
                         checked = action.currentValue.value as? Boolean ?: false,
                         enabled = action.enabled,
+                        modifier = Modifier.testTag("intro_switch"),
                         onCheckedChange = {
                             action.currentValue.value = it as R
                             action.callback.invoke(context, it as R)
@@ -119,6 +122,7 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                     Checkbox(
                         checked = action.currentValue.value as? Boolean ?: false,
                         enabled = action.enabled,
+                        modifier = Modifier.testTag("intro_checkbox"),
                         onCheckedChange = {
                             action.currentValue.value = it as R
                             action.callback.invoke(context, it as R)
