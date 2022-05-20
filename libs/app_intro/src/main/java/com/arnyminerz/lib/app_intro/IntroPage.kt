@@ -1,5 +1,6 @@
 package com.arnyminerz.lib.app_intro
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -110,6 +111,11 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier
                             .padding(start = 8.dp)
+                            .clickable {
+                                action
+                                    .currentValue
+                                    .value = !(action.currentValue.value as Boolean) as R
+                            }
                     )
                 }
                 IntroActionType.CHECKBOX -> {
@@ -133,6 +139,12 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                         fontSize = 17.sp,
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier
+                            .clickable {
+                                action
+                                    .currentValue
+                                    .value = !(action.currentValue.value as Boolean) as R
+                            }
                     )
                 }
                 else -> {}
