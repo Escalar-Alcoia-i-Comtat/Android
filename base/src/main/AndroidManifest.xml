@@ -35,6 +35,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:vmSafeMode="true"
+        tools:replace="android:label,android:theme"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute,LockedOrientationActivity">
         <activity
             android:name=".activity.isolated.FeedbackActivity"

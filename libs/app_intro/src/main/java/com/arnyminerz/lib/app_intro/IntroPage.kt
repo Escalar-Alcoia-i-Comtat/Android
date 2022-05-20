@@ -1,5 +1,6 @@
 package com.arnyminerz.lib.app_intro
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -78,6 +80,7 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                         }
                     Button(
                         enabled = action.enabled,
+                        modifier = Modifier.testTag("intro_button"),
                         onClick = {
                             action.callback.invoke(context, null as R)
                         },
@@ -95,6 +98,7 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                     Switch(
                         checked = action.currentValue.value as? Boolean ?: false,
                         enabled = action.enabled,
+                        modifier = Modifier.testTag("intro_switch"),
                         onCheckedChange = {
                             action.currentValue.value = it as R
                             action.callback.invoke(context, it as R)
@@ -107,6 +111,11 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier
                             .padding(start = 8.dp)
+                            .clickable {
+                                action
+                                    .currentValue
+                                    .value = !(action.currentValue.value as Boolean) as R
+                            }
                     )
                 }
                 IntroActionType.CHECKBOX -> {
@@ -119,6 +128,7 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                     Checkbox(
                         checked = action.currentValue.value as? Boolean ?: false,
                         enabled = action.enabled,
+                        modifier = Modifier.testTag("intro_checkbox"),
                         onCheckedChange = {
                             action.currentValue.value = it as R
                             action.callback.invoke(context, it as R)
@@ -129,6 +139,12 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                         fontSize = 17.sp,
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier
+                            .clickable {
+                                action
+                                    .currentValue
+                                    .value = !(action.currentValue.value as Boolean) as R
+                            }
                     )
                 }
                 else -> {}

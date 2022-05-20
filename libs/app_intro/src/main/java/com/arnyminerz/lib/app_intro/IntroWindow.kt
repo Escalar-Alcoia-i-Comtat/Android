@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -80,6 +81,7 @@ fun IntroWindow(
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
             FloatingActionButton(
+                modifier = Modifier.testTag("intro_fab"),
                 onClick = {
                     val page = pages[currentPage]
                     val currentValue = page.action.currentValue as MutableState<*>
@@ -108,7 +110,8 @@ fun IntroWindow(
                     Icon(
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         imageVector = Icons.Rounded.Security,
-                        contentDescription = stringResource(R.string.fab_desc_grant)
+                        contentDescription = stringResource(R.string.fab_desc_grant),
+                        modifier = Modifier.testTag("intro_icon_permission"),
                     )
                 } else {
                     blockPage = -1
@@ -117,13 +120,15 @@ fun IntroWindow(
                         Icon(
                             tint = MaterialTheme.colorScheme.onPrimaryContainer,
                             imageVector = Icons.Rounded.Check,
-                            contentDescription = stringResource(R.string.fab_desc_finish)
+                            contentDescription = stringResource(R.string.fab_desc_finish),
+                            modifier = Modifier.testTag("intro_icon_finish"),
                         )
                     else
                         Icon(
                             tint = MaterialTheme.colorScheme.onPrimaryContainer,
                             imageVector = Icons.Rounded.ChevronRight,
-                            contentDescription = stringResource(R.string.fab_desc_next)
+                            contentDescription = stringResource(R.string.fab_desc_next),
+                            modifier = Modifier.testTag("intro_icon_next"),
                         )
                 }
             }

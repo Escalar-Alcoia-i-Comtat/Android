@@ -3,4 +3,6 @@
     <string name="fab_desc_next">Next</string>
     <string name="fab_desc_finish">Finish</string>
     <string name="fab_desc_grant">Grant Permission</string>
+
+    <string name="test_label">Escalar Alcoia i Comtat - Test</string>
 </resources>
