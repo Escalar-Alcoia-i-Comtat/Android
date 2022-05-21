@@ -14,6 +14,7 @@ import androidx.test.uiautomator.Until
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.LoadingActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
@@ -21,6 +22,7 @@ import com.arnyminerz.escalaralcoiaicomtat.utils.DeviceProvider
 import com.arnyminerz.escalaralcoiaicomtat.utils.classNameSelector
 import com.arnyminerz.escalaralcoiaicomtat.utils.descriptionSelector
 import com.arnyminerz.escalaralcoiaicomtat.utils.regexTextSelector
+import com.arnyminerz.escalaralcoiaicomtat.utils.textSelector
 import junit.framework.TestCase.assertNotNull
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers
@@ -40,6 +42,8 @@ class MainActivityTest : DeviceProvider() {
     private lateinit var introActivityMonitor: ActivityMonitor
 
     private lateinit var mainActivityMonitor: ActivityMonitor
+
+    private lateinit var dataClassActivityMonitor: ActivityMonitor
 
     private var activity: Activity? = null
 
@@ -131,6 +135,51 @@ class MainActivityTest : DeviceProvider() {
         val mainActivity = instrumentation.waitForMonitor(mainActivityMonitor)
         assertNotNull(mainActivity)
         activity = mainActivity
+
+        Timber.i("Intro works correctly!")
+    }
+
+    private fun sectorDisplayRoutine() {
+        val context = instrumentation.targetContext
+
+        val exploreNavMenu = descriptionSelector(context.getString(R.string.item_explore))
+        exploreNavMenu.click()
+
+        val areaItem = regexTextSelector(
+            context.getString(R.string.downloads_zones_title).replace("%d", "\\d*")
+        )
+        areaItem.clickAndWaitForNewWindow()
+
+        Timber.d("Waiting for DataClassActivity (Zones)...")
+        val dataClassActivity = instrumentation.waitForMonitor(dataClassActivityMonitor)
+        assertNotNull(dataClassActivity)
+        activity = dataClassActivity
+
+        val zoneItem = regexTextSelector(
+            context.getString(R.string.downloads_sectors_title).replace("%d", "\\d*")
+        )
+        zoneItem.clickAndWaitForNewWindow()
+
+
+        val sectorItem = regexTextSelector(
+            context.getString(R.string.downloads_paths_title).replace("%d", "\\d*")
+        )
+        sectorItem.clickAndWaitForNewWindow()
+
+
+        textSelector(context.getString(R.string.activity_summary_grades))
+    }
+
+    private fun sectorBackNavigationRoutine() {
+        val context = instrumentation.targetContext
+
+        device.pressBack()
+        device.pressBack()
+        device.pressBack()
+
+        descriptionSelector(context.getString(R.string.item_explore))
+
+        Timber.i("Sector back navigation works correctly.")
     }
 
     @Test
@@ -147,8 +196,15 @@ class MainActivityTest : DeviceProvider() {
         mainActivityMonitor = ActivityMonitor(MainActivity::class.java.name, null, false)
         instrumentation.addMonitor(mainActivityMonitor)
 
+        dataClassActivityMonitor = ActivityMonitor(DataClassActivity::class.java.name, null, false)
+        instrumentation.addMonitor(dataClassActivityMonitor)
+
+
         introRoutine()
 
+        sectorDisplayRoutine()
+
+        sectorBackNavigationRoutine()
 
 
         Timber.d("Hello :)")
