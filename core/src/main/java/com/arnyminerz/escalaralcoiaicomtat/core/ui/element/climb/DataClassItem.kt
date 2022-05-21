@@ -192,7 +192,8 @@ private fun VerticalDataClassItem(
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
                                 .padding(start = 4.dp)
-                                .fillMaxWidth(),
+                                .fillMaxWidth()
+                                .clickable(onClick = onClickListener),
                         )
                     }
                     Column(
