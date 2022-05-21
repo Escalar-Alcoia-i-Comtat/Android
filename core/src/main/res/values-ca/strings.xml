@@ -177,7 +177,7 @@
     <string name="fab_desc_finish">Finalitzar</string>
     <string name="fab_desc_grant">Donar permís</string>
     <string name="fab_desc_launch">Iniciar</string>
-    <string name="intro_main_title">Benvingut a %s</string>
+    <string name="intro_main_title">Benvingut a Escalar Alcoià i Comtat</string>
     <string name="intro_main_message">Anem a guiar-te per un procés curt de configuració. No et preocupes, és ràpid i ben senzill</string>
     <string name="intro_beta_title">Prova Beta</string>
     <string name="intro_beta_message">Hola usuari! Has triat emprar una versió de prova de l\'aplicació i això et fa genial! Moltes gràcies! Però tot s\'ha de dir, aquesta versió pot ser tinga errors, ja que encara es troba en desenvolupament, inclús pots trobar-te amb coses sense acabar, o que l\'aplicació es tanque de manera sobtada. Ens sap molt mal que pugues patir problemes, però tots els errors que et surgisquen a tu, seràn errors que no hi seràn a la versió final. Moltes gràcies!</string>
