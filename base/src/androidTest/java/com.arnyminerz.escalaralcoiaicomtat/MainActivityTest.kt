@@ -67,21 +67,7 @@ class MainActivityTest : DeviceProvider() {
         )
     }
 
-    @Test
-    @OptIn(ExperimentalMaterial3Api::class)
-    fun initActivity() {
-        instrumentation = InstrumentationRegistry.getInstrumentation()
-
-        loadingActivityMonitor = ActivityMonitor(LoadingActivity::class.java.name, null, false)
-        instrumentation.addMonitor(loadingActivityMonitor)
-
-        introActivityMonitor = ActivityMonitor(IntroActivity::class.java.name, null, false)
-        instrumentation.addMonitor(introActivityMonitor)
-
-        mainActivityMonitor = ActivityMonitor(MainActivity::class.java.name, null, false)
-        instrumentation.addMonitor(mainActivityMonitor)
-
-
+    private fun introRoutine() {
         runBlocking {
             Timber.i("Marking intro as not shown...")
             PreferencesModule.systemPreferencesRepository.markIntroAsShown(false)
@@ -145,6 +131,24 @@ class MainActivityTest : DeviceProvider() {
         val mainActivity = instrumentation.waitForMonitor(mainActivityMonitor)
         assertNotNull(mainActivity)
         activity = mainActivity
+    }
+
+    @Test
+    @OptIn(ExperimentalMaterial3Api::class)
+    fun initActivity() {
+        instrumentation = InstrumentationRegistry.getInstrumentation()
+
+        loadingActivityMonitor = ActivityMonitor(LoadingActivity::class.java.name, null, false)
+        instrumentation.addMonitor(loadingActivityMonitor)
+
+        introActivityMonitor = ActivityMonitor(IntroActivity::class.java.name, null, false)
+        instrumentation.addMonitor(introActivityMonitor)
+
+        mainActivityMonitor = ActivityMonitor(MainActivity::class.java.name, null, false)
+        instrumentation.addMonitor(mainActivityMonitor)
+
+        introRoutine()
+
 
 
         Timber.d("Hello :)")
