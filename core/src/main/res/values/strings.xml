@@ -199,7 +199,7 @@
     <string name="fab_desc_grant">Grant Permission</string>
     <string name="fab_desc_launch">Launch</string>
 
-    <string name="intro_main_title">Welcome to %s</string>
+    <string name="intro_main_title">Welcome to Escalar Alcoià i Comtat</string>
     <string name="intro_main_message">We are going to walk you through a tiny configuration process. Don\'t worry it\'s fast and easy.</string>
     <string name="intro_beta_title">Beta Testing</string>
     <string name="intro_beta_message">Hi user! You have chosen to download a testing version, and this is great! Thank you very much! But, all has to be said, this version may be buggy, since it\'s still in development, and some things may not be finished, and it\'s possible that you suffer some unexpected app crashes. We are really sorry about this, but we are working to fix this on the final release ;)</string>

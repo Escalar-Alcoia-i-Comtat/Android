@@ -89,7 +89,7 @@ class IntroActivity : ComponentActivity() {
 
                 val introPages = mutableListOf<IntroPageData<*>>(
                     IntroPageData<Any?>(
-                        stringResource(R.string.intro_main_title, "Escalar Alcoià i Comtat"),
+                        stringResource(R.string.intro_main_title),
                         stringResource(R.string.intro_main_message)
                     ),
                     IntroPageData<Any?>(
