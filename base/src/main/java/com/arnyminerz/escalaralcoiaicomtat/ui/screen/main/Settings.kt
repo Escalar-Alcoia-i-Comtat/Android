@@ -31,7 +31,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen.ApplicationIn
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.GeneralSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.MainSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.NotificationsSettingsScreen
-import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.StorageSettingsScreen
 
 /**
  * The Settings screen of the Main Activity.
@@ -85,10 +84,6 @@ fun MainActivity.SettingsScreen() {
             composable("notifications") {
                 title = stringResource(R.string.pref_noti_title)
                 NotificationsSettingsScreen(this@SettingsScreen, settingsViewModel)
-            }
-            composable("storage") {
-                title = stringResource(R.string.pref_down_title)
-                StorageSettingsScreen(settingsViewModel)
             }
             composable("info") {
                 title = stringResource(R.string.pref_info_title)

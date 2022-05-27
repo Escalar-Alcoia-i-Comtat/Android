@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -52,14 +51,6 @@ fun MainSettingsScreen(context: Context, settingsNavController: NavController) {
                 settingsNavController.navigate("notifications")
             },
             icon = Icons.Default.Notifications
-        )
-        SettingsItem(
-            title = stringResource(R.string.pref_down_title),
-            subtitle = stringResource(R.string.pref_down_sum),
-            onClick = {
-                settingsNavController.navigate("storage")
-            },
-            icon = Icons.Default.Storage
         )
         SettingsItem(
             title = stringResource(R.string.pref_info_title),
@@ -225,40 +216,5 @@ fun NotificationsSettingsScreen(context: Context, viewModel: SettingsViewModel) 
                     }
                 }
             )
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
-@Composable
-fun StorageSettingsScreen(viewModel: SettingsViewModel) {
-    Column {
-        val mobileDataDownload by viewModel.mobileDownloadsEnabled.collectAsState()
-        val roamingDownload by viewModel.roamingDownloadsEnabled.collectAsState()
-        // TODO: Add option for metered networks
-        // val meteredDownload by viewModel.nearbyZonesEnabled.collectAsState()
-
-        SettingsCategory(
-            stringResource(R.string.pref_down_cat_downloads)
-        )
-        SettingsItem(
-            title = stringResource(R.string.pref_down_mobile_title),
-            subtitle = stringResource(R.string.pref_down_mobile_sum),
-            stateBoolean = mobileDataDownload,
-            setBoolean = { value ->
-                viewModel.setMobileDownloadsEnabled(value)
-            },
-            switch = true
-        )
-        SettingsItem(
-            title = stringResource(R.string.pref_down_roaming_title),
-            subtitle = stringResource(R.string.pref_down_roaming_sum),
-            stateBoolean = roamingDownload,
-            setBoolean = { value ->
-                viewModel.setRoamingDownloadsEnabled(value)
-            },
-            switch = true
-        )
-
-        // TODO: Add actions from StorageActivity
     }
 }
