@@ -33,11 +33,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.consumeAllChanges
-import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.ui.input.pointer.positionChangeConsumed
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -197,7 +194,7 @@ fun ZoomableImage(
                                     do {
                                         val event = awaitPointerEvent()
                                         val canceled =
-                                            event.changes.fastAny { it.positionChangeConsumed() }
+                                            event.changes.fastAny { it.isConsumed }
                                         var relevant = true
                                         if (event.changes.size > 1) {
                                             if (!canceled) {
@@ -245,7 +242,7 @@ fun ZoomableImage(
                                                     }
                                                     event.changes.fastForEach {
                                                         if (it.positionChanged())
-                                                            it.consumeAllChanges()
+                                                            it.consume()
                                                     }
                                                 }
                                             }
@@ -257,10 +254,10 @@ fun ZoomableImage(
                                         awaitPointerEvent()
                                         drag =
                                             awaitTouchSlopOrCancellation(down.id) { change, over ->
-                                                change.consumePositionChange()
+                                                change.consume()
                                                 overSlop = over
                                             }
-                                    } while (drag != null && !drag.positionChangeConsumed())
+                                    } while (drag != null && !drag.isConsumed)
                                     if (drag != null) {
                                         dragOffset = Offset.Zero
                                         if (scale !in 0.92f..1.08f)
@@ -273,7 +270,7 @@ fun ZoomableImage(
                                                     offset += it.positionChange()
                                                 else
                                                     dragOffset += it.positionChange()
-                                                it.consumePositionChange()
+                                                it.consume()
                                             }
                                         ) {
                                             if (scale in 0.92f..1.08f) {
