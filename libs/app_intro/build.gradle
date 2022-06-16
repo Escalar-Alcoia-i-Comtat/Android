@@ -55,7 +55,7 @@ dependencies {
     implementation 'androidx.activity:activity-compose:1.4.0'
 
     // Jetpack Compose - Accompanist
-    def accompanist_version = '0.24.10-beta'
+    def accompanist_version = '0.24.11-rc'
     implementation "com.google.accompanist:accompanist-pager:$accompanist_version"
     implementation "com.google.accompanist:accompanist-permissions:$accompanist_version"
 
