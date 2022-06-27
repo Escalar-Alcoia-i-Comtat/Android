@@ -70,6 +70,14 @@ const val PROFILE_IMAGE_SIZE_KEY = "PROFILE_IMAGE_SIZE"
 const val PROFILE_IMAGE_SIZE_DEFAULT = 512L
 
 /**
+ * Stores the version of the server with which this app is compatible. If the given by the server
+ * and this one do not match, data will not be downloaded for enforcing compatibility.
+ * @author Arnau Mora
+ * @since 20220627
+ */
+const val EXPECTED_SERVER_VERSION = "1.0.4"
+
+/**
  * The maximum amount of days that will be allowed to the user not having updated the app
  * before forcing an update.
  */
