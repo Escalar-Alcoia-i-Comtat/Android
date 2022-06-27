@@ -335,6 +335,8 @@
     <string name="pref_down_roaming_title">Roaming</string>
     <string name="pref_down_roaming_sum">Use roaming for downloads</string>
 
+    <string name="pref_info_server_version">Server version: </string>
+
     <string name="notification_channel_downloads_group_name">Downloads</string>
     <string name="notification_channel_download_progress_name">Download Progress</string>
     <string name="notification_channel_download_progress_desc">When you are downloading something, this will be shown</string>
