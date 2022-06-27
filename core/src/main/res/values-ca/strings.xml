@@ -33,6 +33,8 @@
     <string name="action_share">Compartir</string>
     <string name="action_add_to_homescreen">Afegir a la pantalla d\'inici</string>
     <string name="action_open_sector">Obrir Sector</string>
+    <string name="action_open_store">Open App Store</string>
+    <string name="action_close_app">Close App</string>
     <string name="status_downloading">Baixant…</string>
     <string name="status_loading">Carregant…</string>
     <string name="status_downloaded">Baixat</string>
@@ -283,7 +285,7 @@
     <string name="pref_down_mobile_sum">Fes ús de les dades mòbils per a les descàrregues</string>
     <string name="pref_down_roaming_title">Roaming</string>
     <string name="pref_down_roaming_sum">Fes ús de connexions d\'ús mesurat (Roaming) per a baixar</string>
-    <string name="pref_info_server_version">Server version: </string>
+    <string name="pref_info_server_version">Versió del servidor: </string>
     <string name="notification_channel_downloads_group_name">Descàrregues</string>
     <string name="notification_channel_download_progress_name">Progrés de la Descàrrega</string>
     <string name="notification_channel_download_progress_desc">Quan estigues descarregant algun contingut, es mostrarà una notificació d\'aquest tipus</string>
