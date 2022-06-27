@@ -36,6 +36,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_DEFAULTS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_LIST
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_INFO_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
@@ -366,12 +367,15 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
             Timber.v("Fetching areas data...")
             val jsonData = context.getJson("$REST_API_DATA_LIST/*")
 
+            Timber.v("Fetching server info...")
+            val serverInfo = context.getJson(REST_API_INFO_ENDPOINT)
+
             // Check if the response contains a "result" field
             // if (jsonData.has("result"))
             //     throw IllegalStateException("Server's JSON data does not contain a field named \"result\".")
 
             Timber.i("Data fetched from data module!")
-            val areas = loadAreas(app, jsonData.getJSONObject("result"))
+            val areas = loadAreas(app, jsonData.getJSONObject("result"), serverInfo)
 
             Timber.v("Finished loading areas.")
             if (areas.isNotEmpty()) {
