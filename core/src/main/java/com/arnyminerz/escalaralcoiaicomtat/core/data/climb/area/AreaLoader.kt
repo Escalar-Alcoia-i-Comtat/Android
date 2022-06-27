@@ -116,6 +116,7 @@ private fun decode(
  * @since 20210313
  * @param context The context used for fetching and putting data into the index.
  * @param jsonData The data loaded from the data module
+ * @param infoJson The JSON given by the information endpoint on the server.
  * @param firstIteration Used for making sure no [StackOverflowError] are thrown.
  * @return A collection of areas
  * @throws IllegalArgumentException When it's the second time the function is called, and no areas
@@ -126,6 +127,7 @@ private fun decode(
 suspend fun loadAreas(
     context: Context,
     jsonData: JSONObject,
+    infoJson: JSONObject,
     firstIteration: Boolean = true,
 ): List<Area> {
     // Get the DataSingleton instance, for modifying the Room storage
@@ -152,7 +154,7 @@ suspend fun loadAreas(
                     .systemPreferencesRepository
                     .markDataIndexed(false)
                 if (firstIteration)
-                    loadAreas(context, jsonData, false)
+                    loadAreas(context, jsonData, infoJson, false)
                 else
                     throw IllegalArgumentException("Data from server is not valid, does not contain any Areas.")
             }
@@ -164,6 +166,11 @@ suspend fun loadAreas(
     val trace = performance.newTrace("loadAreasTrace")
 
     trace.start()
+
+    val serverVersion = infoJson.getString("version")
+    val serverProduction = infoJson.getBoolean("isProduction")
+
+    Timber.i("Server version: $serverVersion. Production: $serverProduction")
 
     Timber.d("Processing data...")
     try {
@@ -215,6 +222,14 @@ suspend fun loadAreas(
         PreferencesModule
             .systemPreferencesRepository
             .setDataVersion(now.time)
+
+        Timber.v("Storing server info...")
+        PreferencesModule
+            .systemPreferencesRepository
+            .setServerVersion(serverVersion)
+        PreferencesModule
+            .systemPreferencesRepository
+            .setServerIsProduction(serverProduction)
 
         trace.stop()
 
