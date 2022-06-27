@@ -106,7 +106,10 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * Requests the view model to start loading
      * @author Arnau Mora
      * @since 20211225
+     * @throws SecurityException When the version given by the server and the expected by the app
+     * do not match.
      */
+    @Throws(SecurityException::class)
     fun startLoading(
         deepLinkPath: String?,
         remoteConfig: FirebaseRemoteConfig,
@@ -123,7 +126,10 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * not null, this is, when an error occurred.
      * @author Arnau Mora
      * @since 20220322
+     * @throws SecurityException When the version given by the server and the expected by the app
+     * do not match.
      */
+    @Throws(SecurityException::class)
     fun tryLoading() {
         if (errorMessage.value != null)
             viewModelScope.launch {
@@ -133,6 +139,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
     }
 
     @UiThread
+    @Throws(SecurityException::class)
     private suspend fun loadingRoutine(
         deepLinkPath: String?,
         remoteConfig: FirebaseRemoteConfig,
@@ -185,8 +192,11 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * to "Loading data".
      * @author Arnau Mora
      * @since 20220322
+     * @throws SecurityException When the version given by the server and the expected by the app
+     * do not match.
      */
     @UiThread
+    @Throws(SecurityException::class)
     private suspend fun performLoad() {
         val app = getApplication<App>()
 
@@ -354,8 +364,11 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * Note: The data module needs to have been installed.
      * @author Arnau Mora
      * @since 20211225
+     * @throws SecurityException When the version given by the server and the expected by the app
+     * do not match.
      */
     @WorkerThread
+    @Throws(SecurityException::class)
     private suspend fun load(
         app: App,
         deepLinkPath: String?,
