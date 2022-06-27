@@ -3,11 +3,16 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.dataClassExploreActivity
@@ -19,6 +24,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.LoadingWindow
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launchStore
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.LoadingActivityViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.loadingActivityViewModel
 import com.arnyminerz.escalaralcoiaicomtat.view.model.LoadingViewModel
@@ -81,6 +87,13 @@ class LoadingActivity : NetworkAwareComponentActivity() {
      */
     private val viewModel by viewModels<LoadingActivityViewModel>(factoryProducer = { PreferencesModule.loadingActivityViewModel })
 
+    /**
+     * Stores whether or not the server is compatible with the current app's version.
+     * @author Arnau Mora
+     * @since 2020627
+     */
+    private val isServerIncompatible = mutableStateOf(false)
+
     private lateinit var loadingViewModel: LoadingViewModel
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -120,6 +133,27 @@ class LoadingActivity : NetworkAwareComponentActivity() {
 
                 val errorMessageResource by loadingViewModel.errorMessage
 
+                val serverIncompatible by isServerIncompatible
+
+                if (serverIncompatible)
+                    AlertDialog(
+                        onDismissRequest = { },
+                        confirmButton = {
+                            Button(onClick = { launchStore() }) {
+                                Text(
+                                    stringResource(R.string.action_open_store)
+                                )
+                            }
+                        },
+                        dismissButton = {
+                            Button(onClick = { finishAndRemoveTask() }) {
+                                Text(
+                                    stringResource(R.string.action_close_app)
+                                )
+                            }
+                        },
+                    )
+
                 Scaffold { padding ->
                     LoadingWindow(
                         padding,
@@ -133,12 +167,16 @@ class LoadingActivity : NetworkAwareComponentActivity() {
                 loadingViewModel.migratedFromSharedPreferences =
                     sharedPreferences.getBoolean(LegacyIndexedSearchKey, false)
 
-                loadingViewModel.startLoading(
-                    deepLinkPath,
-                    remoteConfig,
-                    messaging,
-                    analytics
-                )
+                try {
+                    loadingViewModel.startLoading(
+                        deepLinkPath,
+                        remoteConfig,
+                        messaging,
+                        analytics
+                    )
+                } catch (e: SecurityException) {
+                    isServerIncompatible.value = true
+                }
             }
         }
     }
@@ -146,7 +184,11 @@ class LoadingActivity : NetworkAwareComponentActivity() {
     override fun onStateChange(state: ConnectivityProvider.NetworkState) {
         super.onStateChange(state)
 
-        if (this::loadingViewModel.isInitialized)
-            loadingViewModel.tryLoading()
+        if (this::loadingViewModel.isInitialized && !isServerIncompatible.value)
+            try {
+                loadingViewModel.tryLoading()
+            } catch (e: SecurityException) {
+                isServerIncompatible.value = true
+            }
     }
 }
