@@ -71,6 +71,8 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
     @get:StringRes
     var errorMessage = mutableStateOf<Int?>(null)
 
+    var errorCode = mutableStateOf<Int?>(null)
+
     /**
      * Stores whether or not the user was using the app before the migration to DataStore. If so,
      * show a warning, and try to migrate.
@@ -188,13 +190,15 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
         val app = getApplication<App>()
 
         errorMessage.value = null
+        errorCode.value = null
         progressMessageResource.value = R.string.status_loading_data
 
         if (!isLoading)
             ioContext {
-                load(app, deepLinkPath) { stringResource, errorResource ->
+                load(app, deepLinkPath) { stringResource, errorResource, errorCode_ ->
                     stringResource?.let { progressMessageResource.value = it }
                     errorResource?.let { errorMessage.value = it }
+                    errorCode_?.let { errorCode.value = it }
                 }
             }
         else
@@ -354,7 +358,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
     private suspend fun load(
         app: App,
         deepLinkPath: String?,
-        @UiThread progressUpdater: (textResource: Int?, errorResource: Int?) -> Unit
+        @UiThread progressUpdater: (textResource: Int?, errorResource: Int?, errorCode: Int?) -> Unit
     ) {
         try {
             isLoading = true
@@ -373,7 +377,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
             if (areas.isNotEmpty()) {
                 val intent = deepLinkPath?.let { path ->
                     uiContext {
-                        progressUpdater(R.string.status_loading_deep_link, null)
+                        progressUpdater(R.string.status_loading_deep_link, null, null)
                     }
 
                     DataClass.getIntent(
@@ -419,18 +423,27 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                 when (e) {
                     is NoConnectionError -> progressUpdater(
                         null,
-                        R.string.status_loading_error_connection
+                        R.string.status_loading_error_connection,
+                        e.networkResponse?.statusCode,
                     )
-                    is TimeoutError -> progressUpdater(null, R.string.status_loading_error_server)
-                    else -> progressUpdater(null, R.string.status_loading_error_server)
+                    is TimeoutError -> progressUpdater(
+                        null,
+                        R.string.status_loading_error_server,
+                        e.networkResponse?.statusCode,
+                    )
+                    else -> progressUpdater(
+                        null,
+                        R.string.status_loading_error_server,
+                        e.networkResponse?.statusCode,
+                    )
                 }
             }
         } catch (e: JSONException) {
             Timber.e(e, "Could not parse the server's response.")
-            ioContext { progressUpdater(null, R.string.status_loading_error_format) }
+            ioContext { progressUpdater(null, R.string.status_loading_error_format, null) }
         } catch (e: IllegalStateException) {
             Timber.e("The server response does not have a \"result\" field.")
-            ioContext { progressUpdater(null, R.string.status_loading_error_format) }
+            ioContext { progressUpdater(null, R.string.status_loading_error_format, null) }
         } finally {
             isLoading = false
         }
