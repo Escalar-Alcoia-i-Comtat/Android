@@ -34,5 +34,5 @@ jobs:
       - name: Run tests
         id: test
         run: |
-          yes | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;32.1.0-rc1"
+          yes | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;33.0.0"
           bash ./gradlew test --stacktrace
