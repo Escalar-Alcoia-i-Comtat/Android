@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.utils
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.ContentResolver
 import android.content.Context
 import android.content.ContextWrapper
@@ -15,7 +16,7 @@ import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import java.util.*
+import java.util.Locale
 
 @UiThread
 fun Context.toast(text: String, duration: Int = Toast.LENGTH_SHORT) =
@@ -91,4 +92,21 @@ fun Context.resourceUri(resourceId: Int): Uri =
             .appendPath(getResourceTypeName(resourceId))
             .appendPath(getResourceEntryName(resourceId))
             .build()
+    }
+
+/**
+ * Launches the default market for the current package name, or the Google Play link if not available.
+ * @author Arnau Mora
+ * @since 20220627
+ */
+fun Context.launchStore() =
+    try {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")))
+    } catch (e: ActivityNotFoundException) {
+        startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+            )
+        )
     }
