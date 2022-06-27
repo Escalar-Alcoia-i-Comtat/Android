@@ -210,7 +210,7 @@
     <string name="status_loading_error_server">No s\'ha pogut connectar al servidor.\n Per favor, torna-ho a intentar més tard</string>
     <string name="status_loading_error_connection">No tens una connexió a Internet activa.\nPer favor, torna-ho a intentar més tard, quan hi estigues connectat.</string>
     <string name="status_loading_error_format">No s\'ha pogut analitzar la resposta del servidor. Per favor, contacta amb un administrador.</string>
-    <string name="status_loading_error_code">Error code: %d</string>
+    <string name="status_loading_error_code">Codi d\'error: %d</string>
     <string name="data_type_area">Àrea</string>
     <string name="data_type_zone">Zona</string>
     <string name="data_type_sector">Sector</string>
@@ -283,6 +283,7 @@
     <string name="pref_down_mobile_sum">Fes ús de les dades mòbils per a les descàrregues</string>
     <string name="pref_down_roaming_title">Roaming</string>
     <string name="pref_down_roaming_sum">Fes ús de connexions d\'ús mesurat (Roaming) per a baixar</string>
+    <string name="pref_info_server_version">Server version: </string>
     <string name="notification_channel_downloads_group_name">Descàrregues</string>
     <string name="notification_channel_download_progress_name">Progrés de la Descàrrega</string>
     <string name="notification_channel_download_progress_desc">Quan estigues descarregant algun contingut, es mostrarà una notificació d\'aquest tipus</string>
