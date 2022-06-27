@@ -19,6 +19,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UPDATE_AVAILABLE_FAIL_VERSION
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.updateAvailable
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
@@ -42,6 +43,13 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
     val sizeString = mutableStateOf(humanReadableByteCountBin(0))
 
     val updatesAvailable = UpdaterSingleton.getInstance().updateAvailableObjects
+
+    /**
+     * Stores whether or not the version of the server matches the expected by the app.
+     * @author Arnau Mora
+     * @since 20220627
+     */
+    val serverIncompatible = mutableStateOf(false)
 
     /**
      * Used for checking which elements are currently being updated.
@@ -91,6 +99,9 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
             launch(Dispatchers.IO) {
                 val updateAvailable = updateAvailable(getApplication())
                 Timber.i("Update available: $updateAvailable")
+
+                if (updateAvailable == UPDATE_AVAILABLE_FAIL_VERSION)
+                    serverIncompatible.value = true
             }
         }
     }

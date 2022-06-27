@@ -13,6 +13,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.toDataClassList
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXPECTED_SERVER_VERSION
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.ktx.Firebase
@@ -116,16 +117,20 @@ private fun decode(
  * @since 20210313
  * @param context The context used for fetching and putting data into the index.
  * @param jsonData The data loaded from the data module
+ * @param infoJson The JSON given by the information endpoint on the server.
  * @param firstIteration Used for making sure no [StackOverflowError] are thrown.
  * @return A collection of areas
  * @throws IllegalArgumentException When it's the second time the function is called, and no areas
  * get loaded.
+ * @throws SecurityException When the version given by the server and the expected by the app
+ * do not match.
  */
 @WorkerThread
-@Throws(IllegalArgumentException::class)
+@Throws(IllegalArgumentException::class, SecurityException::class)
 suspend fun loadAreas(
     context: Context,
     jsonData: JSONObject,
+    infoJson: JSONObject,
     firstIteration: Boolean = true,
 ): List<Area> {
     // Get the DataSingleton instance, for modifying the Room storage
@@ -152,7 +157,7 @@ suspend fun loadAreas(
                     .systemPreferencesRepository
                     .markDataIndexed(false)
                 if (firstIteration)
-                    loadAreas(context, jsonData, false)
+                    loadAreas(context, jsonData, infoJson, false)
                 else
                     throw IllegalArgumentException("Data from server is not valid, does not contain any Areas.")
             }
@@ -164,6 +169,18 @@ suspend fun loadAreas(
     val trace = performance.newTrace("loadAreasTrace")
 
     trace.start()
+
+    val serverVersion = infoJson.getString("version")
+    val serverProduction = infoJson.getBoolean("isProduction")
+
+    Timber.i("Server version: $serverVersion. Production: $serverProduction")
+
+    if (serverVersion != EXPECTED_SERVER_VERSION) {
+        trace.putAttribute("error", "true")
+        trace.putAttribute("error_name", "server_version_no_match")
+        trace.stop()
+        throw SecurityException("The version of the server ($serverVersion) doesn't match the one expected ($EXPECTED_SERVER_VERSION), load cannot be performed.")
+    }
 
     Timber.d("Processing data...")
     try {
@@ -215,6 +232,14 @@ suspend fun loadAreas(
         PreferencesModule
             .systemPreferencesRepository
             .setDataVersion(now.time)
+
+        Timber.v("Storing server info...")
+        PreferencesModule
+            .systemPreferencesRepository
+            .setServerVersion(serverVersion)
+        PreferencesModule
+            .systemPreferencesRepository
+            .setServerIsProduction(serverProduction)
 
         trace.stop()
 

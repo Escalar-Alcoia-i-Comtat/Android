@@ -12,6 +12,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +28,7 @@ import androidx.navigation.compose.rememberNavController
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen.ApplicationInfoWindow
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.GeneralSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.MainSettingsScreen
@@ -47,7 +49,15 @@ fun MainActivity.SettingsScreen() {
             .padding(top = 16.dp)
     ) {
         val settingsTitle = stringResource(R.string.item_settings)
+        val loadingPlaceholder = stringResource(R.string.status_loading)
         var title by remember { mutableStateOf(settingsTitle) }
+        val serverVersion by PreferencesModule.systemPreferencesRepository
+            .getServerVersion
+            .collectAsState(loadingPlaceholder)
+        val serverIsProduction: Boolean by PreferencesModule.systemPreferencesRepository
+            .getServerIsProduction
+            .collectAsState(true)
+
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -92,7 +102,9 @@ fun MainActivity.SettingsScreen() {
                     appName = stringResource(R.string.app_name),
                     appBuild = BuildConfig.VERSION_CODE,
                     appVersion = BuildConfig.VERSION_NAME,
-                    "https://github.com/Escalar-Alcoia-i-Comtat/Android"
+                    serverVersion = serverVersion,
+                    serverProduction = serverIsProduction,
+                    "https://github.com/Escalar-Alcoia-i-Comtat/Android",
                 )
             }
         }

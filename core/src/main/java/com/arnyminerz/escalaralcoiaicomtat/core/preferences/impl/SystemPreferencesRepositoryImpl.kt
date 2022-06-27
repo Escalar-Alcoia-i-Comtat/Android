@@ -245,4 +245,10 @@ class SystemPreferencesRepositoryImpl(
      */
     override val shownPreferencesWarning: Flow<Boolean> =
         getTheFlow(Keys.shownPreferencesWarning, false)
+
+    override val getServerIsProduction: Flow<Boolean>
+        get() = getTheFlow(Keys.serverIsProduction, true)
+
+    override val getServerVersion: Flow<String>
+        get() = getTheFlow(Keys.serverVersion, "0.0.0")
 }

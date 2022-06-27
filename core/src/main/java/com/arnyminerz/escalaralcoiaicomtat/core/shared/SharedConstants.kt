@@ -49,6 +49,14 @@ const val REST_API_DATA_LIST = "$REST_API_URL/api/list"
  */
 const val REST_API_DATA_FETCH = "$REST_API_URL/api/data/"
 
+/**
+ * The REST API endpoint for getting information about the server, such as if it's in production,
+ * its running version, among others.
+ * @author Arnau Mora
+ * @since 20220627
+ */
+const val REST_API_INFO_ENDPOINT = "$REST_API_URL/api/info"
+
 const val APP_UPDATE_MAX_TIME_DAYS_KEY = "APP_UPDATE_MAX_TIME_DAYS"
 const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7L
 
@@ -60,6 +68,14 @@ const val ENABLE_AUTHENTICATION_DEFAULT = false
 
 const val PROFILE_IMAGE_SIZE_KEY = "PROFILE_IMAGE_SIZE"
 const val PROFILE_IMAGE_SIZE_DEFAULT = 512L
+
+/**
+ * Stores the version of the server with which this app is compatible. If the given by the server
+ * and this one do not match, data will not be downloaded for enforcing compatibility.
+ * @author Arnau Mora
+ * @since 20220627
+ */
+const val EXPECTED_SERVER_VERSION = "1.0.4"
 
 /**
  * The maximum amount of days that will be allowed to the user not having updated the app

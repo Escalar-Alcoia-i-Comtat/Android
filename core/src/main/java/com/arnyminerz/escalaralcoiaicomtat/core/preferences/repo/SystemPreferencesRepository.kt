@@ -137,4 +137,16 @@ interface SystemPreferencesRepository {
      * @since 20220316
      */
     val shownPreferencesWarning: Flow<Boolean>
+
+    /**
+     * Should return the version of software that is installed in the server that provided the data.
+     * @author Arnau Mora
+     * @since 20220627
+     */
+    val getServerVersion: Flow<String>
+
+    /**
+     * Should return whether or not the server that provided the data is marked as production.
+     */
+    val getServerIsProduction: Flow<Boolean>
 }

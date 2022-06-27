@@ -33,6 +33,8 @@
     <string name="action_share">Share</string>
     <string name="action_add_to_homescreen">Add to Home screen</string>
     <string name="action_open_sector">Open Sector</string>
+    <string name="action_open_store">Open App Store</string>
+    <string name="action_close_app">Close App</string>
 
     <string name="status_downloading">Downloading…</string>
     <string name="status_loading">Loading…</string>

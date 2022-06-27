@@ -6,9 +6,12 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,8 +21,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.preference.PreferenceManager
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
+import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
@@ -27,6 +32,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavigationItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launchStore
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.DeveloperScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.ExploreScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.main.MapScreen
@@ -99,12 +105,32 @@ class MainActivity : LanguageComponentActivity() {
     private fun Home() {
         val pagerState = rememberPagerState()
         var userScrollEnabled by remember { mutableStateOf(true) }
+        val isServerIncompatible by storageViewModel.serverIncompatible
 
         LaunchedEffect(pagerState) {
             snapshotFlow { pagerState.currentPage }.collect { page ->
                 userScrollEnabled = page != 1
             }
         }
+
+        if (isServerIncompatible)
+            AlertDialog(
+                onDismissRequest = { },
+                confirmButton = {
+                    Button(onClick = { launchStore() }) {
+                        Text(
+                            stringResource(R.string.action_open_store)
+                        )
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { finishAndRemoveTask() }) {
+                        Text(
+                            stringResource(R.string.action_close_app)
+                        )
+                    }
+                },
+            )
 
         Scaffold(
             bottomBar = {
