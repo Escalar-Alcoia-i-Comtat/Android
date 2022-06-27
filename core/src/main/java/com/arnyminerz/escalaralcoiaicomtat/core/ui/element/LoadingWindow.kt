@@ -23,11 +23,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
@@ -141,7 +143,7 @@ fun LoadingWindow(
                 .padding(8.dp)
         ) {
             Text(
-                text = "Error code: $errorCode", // TODO: Localize
+                text = stringResource(R.string.status_loading_error_code, errorCode ?: 0),
                 style = MaterialTheme.typography.labelSmall,
             )
         }
