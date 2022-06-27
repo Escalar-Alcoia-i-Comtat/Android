@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.model.SystemPreferences
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.repo.SystemPreferencesRepository
 import kotlinx.coroutines.flow.Flow
@@ -51,6 +52,20 @@ class SystemPreferencesRepositoryImpl(
          * @since 20211229
          */
         val dataVersion = longPreferencesKey("data_version")
+
+        /**
+         * Stores the version of the software installed in the server.
+         * @author Arnau Mora
+         * @since 20220627
+         */
+        val serverVersion = stringPreferencesKey("server_version")
+
+        /**
+         * Stores whether or not the server that provided the data is marked as production.
+         * @author Arnau Mora
+         * @since 20220627
+         */
+        val serverIsProduction = booleanPreferencesKey("server_production")
 
         /**
          * Whether or not the incompatible MD5 encryption warning has been shown.
@@ -141,6 +156,18 @@ class SystemPreferencesRepositoryImpl(
     override suspend fun setDataVersion(version: Long) {
         dataStore.edit {
             it[Keys.dataVersion] = version
+        }
+    }
+
+    override suspend fun setServerVersion(version: String) {
+        dataStore.edit {
+            it[Keys.serverVersion] = version
+        }
+    }
+
+    override suspend fun setServerIsProduction(isProduction: Boolean) {
+        dataStore.edit {
+            it[Keys.serverIsProduction] = isProduction
         }
     }
 
