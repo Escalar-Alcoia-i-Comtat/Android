@@ -5,6 +5,7 @@ import android.content.Intent
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.PointData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassCompanion
@@ -35,6 +36,7 @@ class Zone internal constructor(
     override val imagePath: String,
     override val kmzPath: String?,
     val position: GeoPoint,
+    private val pointsString: String,
     val webUrl: String?,
     private val parentAreaId: String,
     private val childrenCount: Long,
@@ -77,6 +79,7 @@ class Zone internal constructor(
             data.getDouble("latitude"),
             data.getDouble("longitude")
         ),
+        data.getString("points"),
         data.getString("webURL"),
         parentAreaId = data.getString("area"),
         childrenCount = childrenCount,
@@ -87,6 +90,36 @@ class Zone internal constructor(
 
     @IgnoredOnParcel
     override val hasParents: Boolean = true
+
+    @IgnoredOnParcel
+    val points = pointsString
+        .takeIf { it.isNotEmpty() && it.isNotBlank() }
+        ?.apply { replace("\r", "") }
+        ?.split("\n")
+        ?.mapNotNull { line ->
+            val colonPos1 = line.indexOf(';')
+            val colonPos2 = line.indexOf(';', colonPos1 + 1)
+            val lat = colonPos1
+                .takeIf { it > 0 }
+                ?.let { line.substring(0, it) }
+                ?.toDoubleOrNull()
+                ?: return@mapNotNull null
+            val lon = colonPos2
+                .takeIf { it > 0 }
+                ?.let { line.substring(colonPos1 + 1, it) }
+                ?.toDoubleOrNull()
+                ?: return@mapNotNull null
+            val label = line
+                .indexOf(';', colonPos2 + 1)
+                .takeIf { it > 0 }
+                ?.let { line.substring(colonPos2 + 1, it) }
+                ?: return@mapNotNull null
+            PointData(
+                GeoPoint(lat, lon),
+                label,
+            )
+        }
+        ?: emptyList()
 
     /**
      * Fetches the [Intent] that launches [dataClassExploreActivity] with [EXTRA_DATACLASS] as
@@ -107,6 +140,7 @@ class Zone internal constructor(
         kmzPath,
         position.latitude,
         position.longitude,
+        pointsString,
         metadata.webURL ?: "",
         parentAreaId,
         childrenCount,
@@ -169,6 +203,7 @@ class Zone internal constructor(
             imagePath = "gs://escalaralcoiaicomtat.appspot.com/images/BarranquetDeFerriAPP.jpg",
             kmzPath = "gs://escalaralcoiaicomtat.appspot.com/kmz/Barranquet de Ferri.kmz",
             position = GeoPoint(38.705581, -0.498946),
+            pointsString = "", // TODO: Put some sample points
             webUrl = "https://escalaralcoiaicomtat.centrexcursionistalcoi.org/barranquet-de-ferri.html",
             parentAreaId = "WWQME983XhriXVhtVxFu",
             0L,
