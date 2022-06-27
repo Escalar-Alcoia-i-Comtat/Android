@@ -33,6 +33,8 @@
     <string name="action_share">Share</string>
     <string name="action_add_to_homescreen">Add to Home screen</string>
     <string name="action_open_sector">Open Sector</string>
+    <string name="action_open_store">Open App Store</string>
+    <string name="action_close_app">Close App</string>
     <string name="status_downloading">Downloading…</string>
     <string name="status_loading">Loading…</string>
     <string name="status_downloaded">Downloaded</string>
@@ -283,6 +285,7 @@
     <string name="pref_down_mobile_sum">Use mobile data for downloads</string>
     <string name="pref_down_roaming_title">Roaming</string>
     <string name="pref_down_roaming_sum">Use roaming for downloads</string>
+    <string name="pref_info_server_version">Server version: </string>
     <string name="notification_channel_downloads_group_name">Downloads</string>
     <string name="notification_channel_download_progress_name">Download Progress</string>
     <string name="notification_channel_download_progress_desc">When you are downloading something, this will be shown</string>
