@@ -49,6 +49,14 @@ const val REST_API_DATA_LIST = "$REST_API_URL/api/list"
  */
 const val REST_API_DATA_FETCH = "$REST_API_URL/api/data/"
 
+/**
+ * The REST API endpoint for getting information about the server, such as if it's in production,
+ * its running version, among others.
+ * @author Arnau Mora
+ * @since 20220627
+ */
+const val REST_API_INFO_ENDPOINT = "$REST_API_URL/api/info"
+
 const val APP_UPDATE_MAX_TIME_DAYS_KEY = "APP_UPDATE_MAX_TIME_DAYS"
 const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7L
 
