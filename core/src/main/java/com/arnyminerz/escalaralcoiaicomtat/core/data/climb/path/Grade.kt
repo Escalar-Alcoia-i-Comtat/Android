@@ -231,7 +231,8 @@ fun Iterable<Grade>?.string(): String {
 fun Iterable<Grade>.getAnnotatedString(): AnnotatedString {
     // This is the full grade as a String
     val str = string()
-        .replace("\n", "") // Remove all line jumps
+        .trimEnd { ch -> ch == '\n' }
+    // .replace("\n", "") // Remove all line jumps
     Timber.v("Spanning grade text: $str")
     // Sample str 1: 6b+(A1e)L1 6b+ (A1e)L2 6a+ (A1e)
     // Sample str 2: 6b+
