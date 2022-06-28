@@ -10,10 +10,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -53,6 +58,7 @@ import com.google.accompanist.placeholder.fade
 import com.google.accompanist.placeholder.placeholder
 
 @Composable
+@ExperimentalMaterialApi
 @ExperimentalMaterial3Api
 fun DataClassItem(
     item: DataClassImpl,
@@ -105,6 +111,7 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
  * @param item The DataClass to display.
  */
 @Composable
+@ExperimentalMaterialApi
 @ExperimentalMaterial3Api
 private fun VerticalDataClassItem(
     item: DataClass<*, *, *>,
@@ -114,6 +121,46 @@ private fun VerticalDataClassItem(
     val context = LocalContext.current
 
     var loadingImage by remember { mutableStateOf(true) }
+    var showingPointsDialog by remember { mutableStateOf(false) }
+
+    if (showingPointsDialog)
+        AlertDialog(
+            onDismissRequest = { showingPointsDialog = false },
+            confirmButton = { },
+            title = {
+                Text(text = stringResource(R.string.dialog_zone_points_title))
+            },
+            text = {
+                LazyColumn {
+                    val itemLocation = item.location
+                    if (itemLocation != null)
+                        item {
+                            ListItem(
+                                modifier = Modifier
+                                    .clickable {
+                                        context.launch(
+                                            itemLocation.mapsIntent(markerTitle = item.displayName)
+                                        )
+                                    }
+                            ) {
+                                Text(text = item.displayName)
+                            }
+                        }
+                    items((item as? Zone)?.points ?: emptyList()) { pointData ->
+                        ListItem(
+                            modifier = Modifier
+                                .clickable {
+                                    context.launch(
+                                        pointData.position.mapsIntent(markerTitle = item.displayName)
+                                    )
+                                }
+                        ) {
+                            Text(text = pointData.label)
+                        }
+                    }
+                }
+            }
+        )
 
     Card(
         colors = CardDefaults.cardColors(
@@ -213,11 +260,14 @@ private fun VerticalDataClassItem(
                         if (location != null)
                             OutlinedButton(
                                 onClick = {
-                                    context.launch(location.mapsIntent(markerTitle = item.displayName))
+                                    if (item is Zone && item.points.isNotEmpty())
+                                        showingPointsDialog = true
+                                    else
+                                        context.launch(location.mapsIntent(markerTitle = item.displayName))
                                 },
                             ) {
                                 Icon(
-                                    Icons.Default.Map,
+                                    Icons.Default.Place,
                                     stringResource(R.string.action_view),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -313,7 +363,7 @@ fun HorizontalDataClassItemPreview() {
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Preview(name = "Vertical DataClass Item")
 fun VerticalDataClassItemPreview() {
     VerticalDataClassItem(
