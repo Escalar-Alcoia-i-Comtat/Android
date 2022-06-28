@@ -69,9 +69,11 @@ fun DataClassItem(
         if (item.displayOptions.vertical)
             VerticalDataClassItem(
                 item,
-                viewModel,
-                onClick,
-            )
+            ) {
+                if (item !is Sector)
+                    viewModel.loadChildren(item) { if (it is Sector) it.weight else it.displayName }
+                onClick()
+            }
         else
             HorizontalDataClassItem(
                 item,
@@ -101,24 +103,17 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
  * @author Arnau Mora
  * @since 20211229
  * @param item The DataClass to display.
- * @param viewModel The View Model for doing async tasks.
  */
 @Composable
 @ExperimentalMaterial3Api
 private fun VerticalDataClassItem(
     item: DataClass<*, *, *>,
-    viewModel: DataClassItemViewModel,
+    isPlaceholder: Boolean = false,
     onClick: () -> Unit
 ) {
     val context = LocalContext.current
 
     var loadingImage by remember { mutableStateOf(true) }
-
-    val onClickListener: () -> Unit = {
-        if (item !is Sector)
-            viewModel.loadChildren(item) { if (it is Sector) it.weight else it.displayName }
-        onClick()
-    }
 
     Card(
         colors = CardDefaults.cardColors(
@@ -141,7 +136,7 @@ private fun VerticalDataClassItem(
                     .clickable(
                         enabled = true,
                         role = Role.Image,
-                        onClick = onClickListener
+                        onClick = onClick
                     )
                     .placeholder(
                         loadingImage,
@@ -151,6 +146,7 @@ private fun VerticalDataClassItem(
                                 .copy(alpha = .8f),
                         ),
                     ),
+                isPlaceholder = isPlaceholder,
                 imageLoadParameters = ImageLoadParameters()
                     .withSize(120.dp, 160.dp)
             ) { loadingImage = false }
@@ -178,7 +174,7 @@ private fun VerticalDataClassItem(
                             modifier = Modifier
                                 .padding(start = 4.dp, top = 4.dp)
                                 .fillMaxWidth()
-                                .clickable(onClick = onClickListener),
+                                .clickable(onClick = onClick),
                         )
                         Text(
                             text = item.metadata.childrenCount.let {
@@ -193,7 +189,7 @@ private fun VerticalDataClassItem(
                             modifier = Modifier
                                 .padding(start = 4.dp)
                                 .fillMaxWidth()
-                                .clickable(onClick = onClickListener),
+                                .clickable(onClick = onClick),
                         )
                     }
                     Column(
@@ -204,7 +200,7 @@ private fun VerticalDataClassItem(
                             colors = ButtonDefaults.elevatedButtonColors(
                                 containerColor = MaterialTheme.colorScheme.tertiary
                             ),
-                            onClick = onClickListener,
+                            onClick = onClick,
                         ) {
                             Icon(
                                 Icons.Default.ChevronRight,
@@ -308,10 +304,20 @@ private fun HorizontalDataClassItem(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(name = "Non-downloadable DataClass Item")
-fun NonDownloadableDataClassItemPreview() {
+@Preview(name = "Horizontal DataClass Item")
+fun HorizontalDataClassItemPreview() {
     HorizontalDataClassItem(
         Area.SAMPLE,
+        true,
+    ) {}
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(name = "Vertical DataClass Item")
+fun VerticalDataClassItemPreview() {
+    VerticalDataClassItem(
+        Zone.SAMPLE,
         true,
     ) {}
 }
