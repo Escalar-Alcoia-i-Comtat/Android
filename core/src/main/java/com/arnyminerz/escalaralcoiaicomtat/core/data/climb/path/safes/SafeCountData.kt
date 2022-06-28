@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes
 
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
+import androidx.annotation.LongDef
 import androidx.annotation.StringRes
 import kotlinx.parcelize.Parcelize
 
@@ -10,13 +11,17 @@ import kotlinx.parcelize.Parcelize
  * @author Arnau Mora
  * @since 20210916
  * @param count The amount of safes counted.
- * @param displayName The string resource that matches the string to use as display for the count.
+ * @param countableLabelRes The string resource that matches the string to use as display for the
+ * count.
+ * @param uncountableLabelRes The string resource that matches the string to use when no count is
+ * available.
  * @param image The drawable resource that matches the icon that represents the count.
  */
 @Parcelize
 data class SafeCountData(
-    val count: Long,
-    @StringRes val displayName: Int,
+    @SafeRequirement val count: Long,
+    @StringRes val countableLabelRes: Int,
+    @StringRes val uncountableLabelRes: Int,
     @DrawableRes val image: Int
 ) : Parcelable {
     /**
@@ -24,14 +29,26 @@ data class SafeCountData(
      * @author Arnau Mora
      * @since 20210916
      * @param required Whether or not the safe is marked as required, usually used in required safes.
-     * @param displayName The string resource that matches the string to use as display for the count.
+     * @param countableLabelRes The string resource that matches the string to use as display for the
+     * count.
+     * @param uncountableLabelRes The string resource that matches the string to use when no count is
+     * available.
      * @param image The drawable resource that matches the icon that represents the count.
      */
     constructor(
         required: Boolean,
-        @StringRes displayName: Int,
+        @StringRes countableLabelRes: Int,
+        @StringRes uncountableLabelRes: Int,
         @DrawableRes image: Int
-    ) : this(if (required) REQUIRED else NOT_REQUIRED, displayName, image)
+    ) : this(
+        if (required) REQUIRED else NOT_REQUIRED,
+        countableLabelRes,
+        uncountableLabelRes,
+        image
+    )
+
+    @LongDef(REQUIRED, NOT_REQUIRED)
+    internal annotation class SafeRequirement
 
     companion object {
         /**

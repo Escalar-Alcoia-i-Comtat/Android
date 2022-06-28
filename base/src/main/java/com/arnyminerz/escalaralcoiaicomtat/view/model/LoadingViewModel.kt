@@ -457,10 +457,13 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
             }
         } catch (e: JSONException) {
             Timber.e(e, "Could not parse the server's response.")
-            ioContext { progressUpdater(null, R.string.status_loading_error_format, null) }
+            ioContext { progressUpdater(null, R.string.status_loading_error_format, 1000) }
         } catch (e: IllegalStateException) {
             Timber.e("The server response does not have a \"result\" field.")
-            ioContext { progressUpdater(null, R.string.status_loading_error_format, null) }
+            ioContext { progressUpdater(null, R.string.status_loading_error_format, 1001) }
+        } catch (e: ExceptionInInitializerError) {
+            Timber.e(e, "Could not initialize a field.")
+            ioContext { progressUpdater(null, R.string.status_loading_error_internal, 1002) }
         } finally {
             isLoading = false
         }

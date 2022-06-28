@@ -149,7 +149,7 @@ suspend fun updateAvailable(
 
         // Add all the updatable areas
         val updatablePaths = findUpdatableObjects(paths, jsonPaths, { 0L })
-        { json, objectId, childrenCount -> Path(json, objectId) }
+        { json, objectId, _ -> Path(json, objectId) }
         val updatableSectors = findUpdatableObjects(
             sectors,
             jsonSectors,
