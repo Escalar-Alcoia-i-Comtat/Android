@@ -4,12 +4,14 @@ import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
@@ -328,6 +330,7 @@ fun BadgesRow(path: Path) {
 
     Row(
         modifier = Modifier
+            .horizontalScroll(rememberScrollState())
             .fillMaxWidth(),
     ) {
         if (path.generalEnding != null)
@@ -364,6 +367,18 @@ fun BadgesRow(path: Path) {
             )
 
         val fixedSafesData = path.fixedSafesData
+
+        if (fixedSafesData.stringCount > 0) {
+            val toastText =
+                stringResource(R.string.toast_material_strings)
+                    .format(fixedSafesData.stringCount)
+            SimpleChip(
+                text = stringResource(R.string.safe_strings, fixedSafesData.stringCount),
+                icon = R.drawable.ic_icona_express,
+                onClick = { context.toast(toastText) }
+            )
+        }
+
         for (chip in fixedSafesData.list())
             if (chip.count > 0)
                 SimpleChip(
