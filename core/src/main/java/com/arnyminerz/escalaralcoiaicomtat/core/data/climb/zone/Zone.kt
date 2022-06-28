@@ -6,6 +6,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.PointData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.PointType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassCompanion
@@ -98,14 +99,16 @@ class Zone internal constructor(
         ?.split("\n")
         ?.mapNotNull { line ->
             val pieces = line.split(";")
-            if (pieces.size != 3)
+            if (pieces.size < 3)
                 return@mapNotNull null
             val lat = pieces[0].toDoubleOrNull() ?: return@mapNotNull null
             val lon = pieces[1].toDoubleOrNull() ?: return@mapNotNull null
+            val type = pieces.takeIf { it.size > 3 }?.get(3)?.let { PointType.fromString(it) }
 
             PointData(
                 GeoPoint(lat, lon),
                 pieces[2],
+                type ?: PointType.DEFAULT,
             )
         }
         ?: emptyList()
