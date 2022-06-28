@@ -12,6 +12,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.PitchEndin
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.delLn
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -191,19 +192,21 @@ class Path internal constructor(
      * Processes the value of [rawText] to be added into pitches and its general term if applicable.
      * @author Arnau Mora
      * @since 200220316
-     * @param rawText The text to parse.
+     * @param rawValue The text to parse.
      * @param conversion Used for converting the found values into [T].
      * @param setGeneral Should update the value of the general term into the passed one.
      * @param setter Should update the specific value of [_pitches] at the passed index.
      */
     private fun <T> processPitch(
-        rawText: String,
+        rawValue: String,
         conversion: (value: String) -> T?,
         setGeneral: ((value: T) -> Unit)?,
         setter: (index: Int, value: T) -> Unit
     ) {
-        if (rawText == "NULL")
+        if (rawValue == "NULL")
             return
+
+        val rawText = rawValue.replace("\r", "")
 
         // Example for rawText:
         // >6b+
@@ -213,7 +216,7 @@ class Path internal constructor(
 
         var position = rawText.indexOf('>')
         if (position < 0 && setGeneral != null)
-            conversion(rawText)?.let { setGeneral(it) }
+            conversion(rawText.delLn())?.let { setGeneral(it) }
         else while (position >= 0) {
             // Obtain the text between the current '>' and the line jump. If there's no line jump,
             // take until the end of the string. It means that it's the last line of the value.
@@ -231,7 +234,7 @@ class Path internal constructor(
             // If it has been determined that the item is the general row, and setGeneral is not
             // null, run it with the current line except the starting '>'.
             if (isGeneral && setGeneral != null)
-                conversion(item.substring(1))?.let { setGeneral(it) }
+                conversion(item.substring(1).delLn())?.let { setGeneral(it) }
             else {
                 Timber.d("Converting item \"$item\" of $objectId")
                 // Get the number that has the current row as prefix
@@ -453,9 +456,16 @@ class Path internal constructor(
 
         const val SAMPLE_PATH_OBJECT_ID = "04BXQMNxFV4cjLILJk3p"
 
+        const val SAMPLE_MULTIPITCH_PATH_OBJECT_ID = "b17a1385776c863a657e"
+
         val SAMPLE_PATH = Path(
             JSONObject("{\"created\":\"2021-04-11T15:03:26.000Z\",\"last_edit\":\"2022-02-17T16:42:14.000Z\",\"displayName\":\"Regall Impenetrable\",\"sketchId\":52,\"grade\":\"7c+\",\"height\":\"\",\"builtBy\":\"NULL\",\"rebuilders\":\"\",\"description\":\"NULL\",\"showDescription\":false,\"stringCount\":0,\"paraboltCount\":1,\"burilCount\":0,\"pitonCount\":0,\"spitCount\":0,\"tensorCount\":0,\"crackerRequired\":false,\"friendRequired\":false,\"lanyardRequired\":false,\"nailRequired\":false,\"pitonRequired\":false,\"stripsRequired\":false,\"ending\":\"chain_carabiner\",\"pitch_info\":\"NULL\",\"sector\":\"B9zNqbw6REYVxGZxlYwh\"}"),
             SAMPLE_PATH_OBJECT_ID
+        )
+
+        val SAMPLE_PATH_MULTIPITCH = Path(
+            JSONObject("{\"created\":\"2022-06-14T21:59:17.000Z\",\"last_edit\":\"2022-06-27T18:36:56.000Z\",\"displayName\":\"Eternitat\",\"sketchId\":1,\"grade\":\">6c+\r\n1>7a+(6a A1)\r\n2>5º\r\n3>6c+(5+ A1)\r\n4>5+\r\n5>6b+/c\",\"height\":\">165\r\n1>35\r\n2>15\r\n3>35\r\n4>25\r\n5>45\",\"builtBy\":\"Àlex Mora; 2022\",\"rebuilders\":null,\"description\":null,\"showDescription\":false,\"stringCount\":22,\"paraboltCount\":999,\"burilCount\":0,\"pitonCount\":999,\"spitCount\":0,\"tensorCount\":0,\"crackerRequired\":false,\"friendRequired\":false,\"lanyardRequired\":false,\"nailRequired\":false,\"pitonRequired\":false,\"stripsRequired\":false,\"ending\":\"plate_ring\",\"pitch_info\":null,\"sector\":\"787d42fe7f6f949fddf5\"}"),
+            SAMPLE_MULTIPITCH_PATH_OBJECT_ID
         )
     }
 }
