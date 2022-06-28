@@ -86,28 +86,27 @@ private fun <R : DataClassImpl, D : DataRoot<R>> findUpdatableObjects(
     json: JSONObject,
     childrenCount: (objectId: String) -> Long,
     constructor: (json: JSONObject, objectId: String, childrenCount: Long) -> R
-) = mutableListOf<UpdaterSingleton.Item>().apply {
-    json.keys()
-        .forEach { objectId ->
-            val jsonData = json.getJSONObject(objectId)
-            val serverData = constructor(jsonData, objectId, childrenCount(objectId))
-            val localData = dataList
-                .map { it.data() }
-                .find { it.objectId == objectId }
-            if (localData == null || localData.hashCode() != serverData.hashCode())
-                add(
-                    UpdaterSingleton.Item(
-                        serverData.namespace,
-                        serverData.objectId,
-                        serverData.hashCode(),
-                        localData.hashCode(),
-                        serverData.displayName,
-                        serverData.displayMap(),
-                        localData?.displayMap() ?: emptyMap()
-                    )
-                )
-        }
-}
+) = json.keys()
+    .asSequence()
+    .mapNotNull { objectId ->
+        val jsonData = json.getJSONObject(objectId)
+        val serverData = constructor(jsonData, objectId, childrenCount(objectId))
+        val localData = dataList
+            .map { it.data() }
+            .find { it.objectId == objectId }
+        if (localData == null || localData.hashCode() != serverData.hashCode())
+            UpdaterSingleton.Item(
+                serverData.namespace,
+                serverData.objectId,
+                serverData.hashCode(),
+                localData.hashCode(),
+                serverData.displayName,
+                serverData.displayMap(),
+                localData?.displayMap() ?: emptyMap()
+            )
+        else null
+    }
+    .toList()
 
 @AddTrace(name = "CheckForUpdates")
 @WorkerThread
