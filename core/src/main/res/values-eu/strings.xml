@@ -131,6 +131,7 @@
     <string name="toast_message_sent">Message sent!</string>
     <string name="toast_confirmation_sent">Confirmation sent!</string>
     <string name="toast_deleted">Data deleted from device</string>
+    <string name="toast_material_strings">To climb this path it is recommended that you bring at least %d strings.</string>
     <string name="toast_material_fixed">This material is already installed on the path</string>
     <string name="toast_material_required">This material is required to climb the path</string>
     <string name="toast_ending_info">This is the ending type of the path</string>
