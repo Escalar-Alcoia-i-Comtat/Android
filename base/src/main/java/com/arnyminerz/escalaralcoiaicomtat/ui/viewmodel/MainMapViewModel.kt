@@ -58,7 +58,10 @@ class MainMapViewModel(
                     val kmzFile = area.kmzFile(context, false)
                     Timber.d("Parsing KMZ file of $area...")
                     val kmzDocument = KmlDocument()
-                    kmzDocument.parseKMZFile(kmzFile)
+                    if (!kmzDocument.parseKMZFile(kmzFile)) {
+                        Timber.e("Could not parse kmz file at $kmzFile.")
+                        return@launch
+                    }
 
                     Timber.d("Building KMZ map overlay of $area...")
                     val kmzOverlay =
