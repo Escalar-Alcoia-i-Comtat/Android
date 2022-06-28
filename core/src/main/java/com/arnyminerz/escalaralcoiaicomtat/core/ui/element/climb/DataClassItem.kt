@@ -17,7 +17,8 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.rounded.AddLocation
+import androidx.compose.material.icons.rounded.Place
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -56,6 +57,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.fade
 import com.google.accompanist.placeholder.placeholder
+import org.osmdroid.util.GeoPoint
 
 @Composable
 @ExperimentalMaterialApi
@@ -131,32 +133,34 @@ private fun VerticalDataClassItem(
                 Text(text = stringResource(R.string.dialog_zone_points_title))
             },
             text = {
+                @Composable
+                fun Item(location: GeoPoint, label: String) {
+                    ListItem(
+                        modifier = Modifier
+                            .clickable {
+                                context.launch(
+                                    location.mapsIntent(markerTitle = item.displayName)
+                                )
+                            },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Rounded.Place,
+                                contentDescription = stringResource(R.string.image_desc_location)
+                            )
+                        }
+                    ) {
+                        Text(text = label)
+                    }
+                }
+
                 LazyColumn {
                     val itemLocation = item.location
                     if (itemLocation != null)
                         item {
-                            ListItem(
-                                modifier = Modifier
-                                    .clickable {
-                                        context.launch(
-                                            itemLocation.mapsIntent(markerTitle = item.displayName)
-                                        )
-                                    }
-                            ) {
-                                Text(text = item.displayName)
-                            }
+                            Item(itemLocation, item.displayName)
                         }
                     items((item as? Zone)?.points ?: emptyList()) { pointData ->
-                        ListItem(
-                            modifier = Modifier
-                                .clickable {
-                                    context.launch(
-                                        pointData.position.mapsIntent(markerTitle = item.displayName)
-                                    )
-                                }
-                        ) {
-                            Text(text = pointData.label)
-                        }
+                        Item(pointData.position, pointData.label)
                     }
                 }
             }
@@ -257,17 +261,21 @@ private fun VerticalDataClassItem(
                         }
 
                         val location = item.location
+                        val hasPoints = item is Zone && item.points.isNotEmpty()
                         if (location != null)
                             OutlinedButton(
                                 onClick = {
-                                    if (item is Zone && item.points.isNotEmpty())
+                                    if (hasPoints)
                                         showingPointsDialog = true
                                     else
                                         context.launch(location.mapsIntent(markerTitle = item.displayName))
                                 },
                             ) {
                                 Icon(
-                                    Icons.Default.Place,
+                                    if (hasPoints)
+                                        Icons.Rounded.AddLocation
+                                    else
+                                        Icons.Rounded.Place,
                                     stringResource(R.string.action_view),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
