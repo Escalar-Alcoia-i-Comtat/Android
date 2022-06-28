@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.CloudOff
@@ -57,9 +58,10 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
 import com.google.android.material.badge.ExperimentalBadgeUtils
 
 @Composable
-@ExperimentalFoundationApi
-@ExperimentalMaterial3Api
 @ExperimentalBadgeUtils
+@ExperimentalMaterialApi
+@ExperimentalMaterial3Api
+@ExperimentalFoundationApi
 fun Activity.DataClassExplorer(
     exploreViewModel: ExploreViewModel,
     hasInternetLiveData: MutableLiveData<Boolean>,

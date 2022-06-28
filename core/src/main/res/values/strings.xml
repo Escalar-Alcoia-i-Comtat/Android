@@ -275,6 +275,7 @@
     <string name="dialog_description_reference">Reference: <br />%s</string>
     <string name="dialog_md5_incompatible_title">MD5 hashing not supported</string>
     <string name="dialog_md5_incompatible_message">Your device does not support MD5 hashing. You will have issues while receiveing data updates.</string>
+    <string name="dialog_zone_points_title">Choose a point</string>
 
     <string name="mark_completed_title">Mark Path</string>
     <string name="mark_completed_name">Path Name</string>
@@ -426,6 +427,7 @@
     <string name="image_desc_comments">Comments</string>
     <string name="image_desc_walking_time">Walking time from parking</string>
     <string name="image_desc_send_feedback_fab">Send feedback button</string>
+    <string name="image_desc_location">Location</string>
 
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>

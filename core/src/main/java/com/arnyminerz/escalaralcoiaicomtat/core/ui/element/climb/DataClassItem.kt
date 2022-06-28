@@ -10,10 +10,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.rounded.AddLocation
+import androidx.compose.material.icons.rounded.Place
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -29,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -51,8 +58,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.view.ImageLoadParameters
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.fade
 import com.google.accompanist.placeholder.placeholder
+import org.osmdroid.util.GeoPoint
 
 @Composable
+@ExperimentalMaterialApi
 @ExperimentalMaterial3Api
 fun DataClassItem(
     item: DataClassImpl,
@@ -69,9 +78,11 @@ fun DataClassItem(
         if (item.displayOptions.vertical)
             VerticalDataClassItem(
                 item,
-                viewModel,
-                onClick,
-            )
+            ) {
+                if (item !is Sector)
+                    viewModel.loadChildren(item) { if (it is Sector) it.weight else it.displayName }
+                onClick()
+            }
         else
             HorizontalDataClassItem(
                 item,
@@ -101,24 +112,60 @@ fun PathDataClassItem(dataClassImpl: DataClassImpl) {
  * @author Arnau Mora
  * @since 20211229
  * @param item The DataClass to display.
- * @param viewModel The View Model for doing async tasks.
  */
 @Composable
+@ExperimentalMaterialApi
 @ExperimentalMaterial3Api
 private fun VerticalDataClassItem(
     item: DataClass<*, *, *>,
-    viewModel: DataClassItemViewModel,
+    isPlaceholder: Boolean = false,
     onClick: () -> Unit
 ) {
     val context = LocalContext.current
 
     var loadingImage by remember { mutableStateOf(true) }
+    var showingPointsDialog by remember { mutableStateOf(false) }
 
-    val onClickListener: () -> Unit = {
-        if (item !is Sector)
-            viewModel.loadChildren(item) { if (it is Sector) it.weight else it.displayName }
-        onClick()
-    }
+    if (showingPointsDialog)
+        AlertDialog(
+            onDismissRequest = { showingPointsDialog = false },
+            confirmButton = { },
+            title = {
+                Text(text = stringResource(R.string.dialog_zone_points_title))
+            },
+            text = {
+                @Composable
+                fun Item(location: GeoPoint, label: String, icon: ImageVector) {
+                    ListItem(
+                        modifier = Modifier
+                            .clickable {
+                                context.launch(
+                                    location.mapsIntent(markerTitle = item.displayName)
+                                )
+                            },
+                        icon = {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = stringResource(R.string.image_desc_location)
+                            )
+                        }
+                    ) {
+                        Text(text = label)
+                    }
+                }
+
+                LazyColumn {
+                    val itemLocation = item.location
+                    if (itemLocation != null)
+                        item {
+                            Item(itemLocation, item.displayName, Icons.Rounded.Place)
+                        }
+                    items((item as? Zone)?.points ?: emptyList()) { pointData ->
+                        Item(pointData.position, pointData.label, pointData.type.icon)
+                    }
+                }
+            }
+        )
 
     Card(
         colors = CardDefaults.cardColors(
@@ -141,7 +188,7 @@ private fun VerticalDataClassItem(
                     .clickable(
                         enabled = true,
                         role = Role.Image,
-                        onClick = onClickListener
+                        onClick = onClick
                     )
                     .placeholder(
                         loadingImage,
@@ -151,6 +198,7 @@ private fun VerticalDataClassItem(
                                 .copy(alpha = .8f),
                         ),
                     ),
+                isPlaceholder = isPlaceholder,
                 imageLoadParameters = ImageLoadParameters()
                     .withSize(120.dp, 160.dp)
             ) { loadingImage = false }
@@ -178,7 +226,7 @@ private fun VerticalDataClassItem(
                             modifier = Modifier
                                 .padding(start = 4.dp, top = 4.dp)
                                 .fillMaxWidth()
-                                .clickable(onClick = onClickListener),
+                                .clickable(onClick = onClick),
                         )
                         Text(
                             text = item.metadata.childrenCount.let {
@@ -193,7 +241,7 @@ private fun VerticalDataClassItem(
                             modifier = Modifier
                                 .padding(start = 4.dp)
                                 .fillMaxWidth()
-                                .clickable(onClick = onClickListener),
+                                .clickable(onClick = onClick),
                         )
                     }
                     Column(
@@ -204,7 +252,7 @@ private fun VerticalDataClassItem(
                             colors = ButtonDefaults.elevatedButtonColors(
                                 containerColor = MaterialTheme.colorScheme.tertiary
                             ),
-                            onClick = onClickListener,
+                            onClick = onClick,
                         ) {
                             Icon(
                                 Icons.Default.ChevronRight,
@@ -214,14 +262,21 @@ private fun VerticalDataClassItem(
                         }
 
                         val location = item.location
+                        val hasPoints = item is Zone && item.points.isNotEmpty()
                         if (location != null)
                             OutlinedButton(
                                 onClick = {
-                                    context.launch(location.mapsIntent(markerTitle = item.displayName))
+                                    if (hasPoints)
+                                        showingPointsDialog = true
+                                    else
+                                        context.launch(location.mapsIntent(markerTitle = item.displayName))
                                 },
                             ) {
                                 Icon(
-                                    Icons.Default.Map,
+                                    if (hasPoints)
+                                        Icons.Rounded.AddLocation
+                                    else
+                                        Icons.Rounded.Place,
                                     stringResource(R.string.action_view),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -308,10 +363,20 @@ private fun HorizontalDataClassItem(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(name = "Non-downloadable DataClass Item")
-fun NonDownloadableDataClassItemPreview() {
+@Preview(name = "Horizontal DataClass Item")
+fun HorizontalDataClassItemPreview() {
     HorizontalDataClassItem(
         Area.SAMPLE,
+        true,
+    ) {}
+}
+
+@Composable
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@Preview(name = "Vertical DataClass Item")
+fun VerticalDataClassItemPreview() {
+    VerticalDataClassItem(
+        Zone.SAMPLE,
         true,
     ) {}
 }
