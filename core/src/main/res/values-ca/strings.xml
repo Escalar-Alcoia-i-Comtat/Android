@@ -231,6 +231,7 @@
     <string name="dialog_description_reference">Referència: <br/>%s</string>
     <string name="dialog_md5_incompatible_title">Decodificació MD5 no suportada</string>
     <string name="dialog_md5_incompatible_message">El teu dispositiu no té suport per a la decodificació MD5. Tindràs problemes al rebre actualitzacions de les dades.</string>
+    <string name="dialog_zone_points_title">Choose a point</string>
     <string name="mark_completed_title">Marcar Via</string>
     <string name="mark_completed_name">Nom de la via</string>
     <string name="mark_completed_project">Projecte</string>
@@ -366,6 +367,7 @@
     <string name="image_desc_comments">Comentaris</string>
     <string name="image_desc_walking_time">Temps caminant des de l\'aparcament</string>
     <string name="image_desc_send_feedback_fab">Botó d\'enviar sugeriments</string>
+    <string name="image_desc_location">Location</string>
     <string name="login_email">Correu electrònic</string>
     <string name="login_password">Contrassenya</string>
     <string name="login_condition">Al fer clic a Iniciar sessió estàs acceptant els nostres <a href="https://escalaralcoiaicomtat.centrexcursionistalcoi.org">Termes d\'ús i condicions</a>.</string>
