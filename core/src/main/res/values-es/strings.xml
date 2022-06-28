@@ -231,6 +231,7 @@
     <string name="dialog_description_reference">Referencia: <br/>%s</string>
     <string name="dialog_md5_incompatible_title">Decodificación MD5 no soportada</string>
     <string name="dialog_md5_incompatible_message">Tu dispositivo no es compatible con la decodificación MD5. Tendrás problemas para recibir actualizaciones de datos.</string>
+    <string name="dialog_zone_points_title">Choose a point</string>
     <string name="mark_completed_title">Marcar Vía</string>
     <string name="mark_completed_name">Nombre de la vía</string>
     <string name="mark_completed_project">Proyecto</string>
@@ -367,6 +368,7 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="image_desc_comments">Comentarios</string>
     <string name="image_desc_walking_time">Tiempo andando desde el parking</string>
     <string name="image_desc_send_feedback_fab">Botón de enviar sugerencias</string>
+    <string name="image_desc_location">Location</string>
     <string name="login_email">Correo electrónico</string>
     <string name="login_password">Contraseña</string>
     <string name="login_condition">Al tocar en Iniciar sessión estás aceptando nuestros <a href="https://escalaralcoiaicomtat.centrexcursionistalcoi.org">Términos y condiciones de uso</a>.</string>
