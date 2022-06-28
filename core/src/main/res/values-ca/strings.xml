@@ -78,6 +78,11 @@
     <string name="safe_required_strips">Strips</string>
     <!-- NC is for No Count -->
     <string name="safe_strings_plural">Express</string>
+    <string name="safe_parabolt_plural">Parabolts</string>
+    <string name="safe_spits_plural">Spits</string>
+    <string name="safe_tensors_plural">Tensors</string>
+    <string name="safe_pitons_plural">Pitons</string>
+    <string name="safe_burils_plural">Burils</string>
     <string name="path_stats_chart_title">Graus</string>
     <string name="nearby_zones_title">Zones Properes</string>
     <string name="nearby_zones_permission">És necessari que proporciones accés a la teva ubicació perquè funcioni aquesta funció. Prem per a sol·licitar.</string>
@@ -212,6 +217,7 @@
     <string name="status_loading_error_server">No s\'ha pogut connectar al servidor.\n Per favor, torna-ho a intentar més tard</string>
     <string name="status_loading_error_connection">No tens una connexió a Internet activa.\nPer favor, torna-ho a intentar més tard, quan hi estigues connectat.</string>
     <string name="status_loading_error_format">No s\'ha pogut analitzar la resposta del servidor. Per favor, contacta amb un administrador.</string>
+    <string name="status_loading_error_internal">There has been an internal initialization error. Please, try again later, or contact an administrator.</string>
     <string name="status_loading_error_code">Codi d\'error: %d</string>
     <string name="data_type_area">Àrea</string>
     <string name="data_type_zone">Zona</string>
