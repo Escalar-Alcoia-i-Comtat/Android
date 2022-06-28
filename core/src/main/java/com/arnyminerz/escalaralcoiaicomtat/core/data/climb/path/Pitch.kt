@@ -9,3 +9,6 @@ data class Pitch(
     @EndingType var ending: String? = null,
     var endingData: PitchEndingData? = null,
 )
+
+fun Array<Pitch>.grades(): List<Grade> =
+    this.mapNotNull { it.grade?.let { gr -> Grade(gr) } }
