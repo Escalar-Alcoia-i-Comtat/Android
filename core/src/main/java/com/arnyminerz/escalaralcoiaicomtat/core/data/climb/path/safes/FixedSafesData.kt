@@ -34,26 +34,31 @@ data class FixedSafesData(
             SafeCountData(
                 paraboltCount,
                 R.string.safe_parabolt,
+                R.string.safe_parabolt_plural,
                 R.drawable.ic_parabolt
             ),
             SafeCountData(
                 spitCount,
                 R.string.safe_spit,
+                R.string.safe_spits_plural,
                 R.drawable.ic_spit
             ),
             SafeCountData(
                 tensorCount,
                 R.string.safe_tensor,
+                R.string.safe_tensors_plural,
                 R.drawable.ic_tensor
             ),
             SafeCountData(
                 pitonCount,
                 R.string.safe_piton,
+                R.string.safe_pitons_plural,
                 R.drawable.ic_reunio_clau
             ),
             SafeCountData(
                 burilCount,
                 R.string.safe_buril,
+                R.string.safe_burils_plural,
                 R.drawable.ic_buril
             )
         )
