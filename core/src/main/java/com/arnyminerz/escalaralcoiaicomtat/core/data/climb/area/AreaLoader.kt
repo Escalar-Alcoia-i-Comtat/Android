@@ -95,7 +95,7 @@ private fun decode(
     jsonData: JSONObject
 ): List<PathData> {
     val index = arrayListOf<PathData>()
-    val jsonObject = jsonData.getJSONObject("${Path.NAMESPACE}s")
+    val jsonObject = jsonData.getJSONObject(Path.NAMESPACE.tableName)
     val keys = jsonObject.keys()
     for (id in keys) {
         val json = jsonObject.getJSONObject(id)
@@ -246,6 +246,13 @@ suspend fun loadAreas(
         return decodedAreas
             .toDataClassList()
             .also { dataSingleton.areas.value = it }
+    } catch (e: ExceptionInInitializerError) {
+        Timber.e(e, "Could not load areas.")
+        trace.putAttribute("error", "true")
+        trace.stop()
+        throw ExceptionInInitializerError(
+            "Exception: $e. JSON: $jsonData",
+        )
     } catch (e: Exception) {
         Timber.e(e, "Could not load areas.")
         trace.putAttribute("error", "true")
