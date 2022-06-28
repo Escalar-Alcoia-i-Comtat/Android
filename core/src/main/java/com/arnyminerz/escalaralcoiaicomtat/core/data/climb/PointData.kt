@@ -15,4 +15,7 @@ import org.osmdroid.util.GeoPoint
 data class PointData(
     val position: GeoPoint,
     val label: String,
-) : Parcelable
+) : Parcelable {
+    override fun toString(): String =
+        "$label (${position.latitude}, ${position.longitude})"
+}
