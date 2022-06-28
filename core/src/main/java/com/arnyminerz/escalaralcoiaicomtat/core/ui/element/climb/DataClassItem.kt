@@ -35,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -134,7 +135,7 @@ private fun VerticalDataClassItem(
             },
             text = {
                 @Composable
-                fun Item(location: GeoPoint, label: String) {
+                fun Item(location: GeoPoint, label: String, icon: ImageVector) {
                     ListItem(
                         modifier = Modifier
                             .clickable {
@@ -144,7 +145,7 @@ private fun VerticalDataClassItem(
                             },
                         icon = {
                             Icon(
-                                imageVector = Icons.Rounded.Place,
+                                imageVector = icon,
                                 contentDescription = stringResource(R.string.image_desc_location)
                             )
                         }
@@ -157,10 +158,10 @@ private fun VerticalDataClassItem(
                     val itemLocation = item.location
                     if (itemLocation != null)
                         item {
-                            Item(itemLocation, item.displayName)
+                            Item(itemLocation, item.displayName, Icons.Rounded.Place)
                         }
                     items((item as? Zone)?.points ?: emptyList()) { pointData ->
-                        Item(pointData.position, pointData.label)
+                        Item(pointData.position, pointData.label, pointData.type.icon)
                     }
                 }
             }
