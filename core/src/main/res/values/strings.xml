@@ -85,6 +85,11 @@
 
     <!-- NC is for No Count -->
     <string name="safe_strings_plural">Strings</string>
+    <string name="safe_parabolt_plural">Parabolts</string>
+    <string name="safe_spits_plural">Spits</string>
+    <string name="safe_tensors_plural">Tensors</string>
+    <string name="safe_pitons_plural">Pitons</string>
+    <string name="safe_burils_plural">Burils</string>
 
     <string name="path_stats_chart_title">Grades</string>
 
@@ -239,6 +244,7 @@
     <string name="status_loading_error_server">Could not connect to server.\n Please, try again later</string>
     <string name="status_loading_error_connection">You don\'t have an active Internet connection.\nPlease, try again later, when connected.</string>
     <string name="status_loading_error_format">Could not parse response from server. Please, contact an administrator.</string>
+    <string name="status_loading_error_internal">There has been an internal initialization error. Please, try again later, or contact an administrator.</string>
     <string name="status_loading_error_code">Error code: %d</string>
     <string name="status_data_install_access_denied" translatable="false">Data module installation not allowed!</string>
     <string name="status_data_install_active_sessions_limit" translatable="false">Too many install requests!</string>
