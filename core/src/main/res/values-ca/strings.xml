@@ -33,8 +33,8 @@
     <string name="action_share">Compartir</string>
     <string name="action_add_to_homescreen">Afegir a la pantalla d\'inici</string>
     <string name="action_open_sector">Obrir Sector</string>
-    <string name="action_open_store">Open App Store</string>
-    <string name="action_close_app">Close App</string>
+    <string name="action_open_store">Obrir l\'App Store</string>
+    <string name="action_close_app">Tanca l\'aplicació</string>
     <string name="status_downloading">Baixant…</string>
     <string name="status_loading">Carregant…</string>
     <string name="status_downloaded">Baixat</string>
@@ -78,6 +78,11 @@
     <string name="safe_required_strips">Strips</string>
     <!-- NC is for No Count -->
     <string name="safe_strings_plural">Express</string>
+    <string name="safe_parabolt_plural">Parabolts</string>
+    <string name="safe_spits_plural">Spits</string>
+    <string name="safe_tensors_plural">Tensors</string>
+    <string name="safe_pitons_plural">Claus</string>
+    <string name="safe_burils_plural">Burils</string>
     <string name="path_stats_chart_title">Graus</string>
     <string name="nearby_zones_title">Zones Properes</string>
     <string name="nearby_zones_permission">És necessari que proporciones accés a la teva ubicació perquè funcioni aquesta funció. Prem per a sol·licitar.</string>
@@ -126,6 +131,7 @@
     <string name="toast_message_sent">Missatge enviat!</string>
     <string name="toast_confirmation_sent">Confirmació enviada!</string>
     <string name="toast_deleted">Dades eliminades del dispositiu</string>
+    <string name="toast_material_strings">Per a escalar aquesta via es recomana dur com a mínim %d cintes express.</string>
     <string name="toast_material_fixed">Aquest material ja està instal·lat a la via</string>
     <string name="toast_material_required">Cal aquest material per a escalar la via</string>
     <string name="toast_ending_info">Aquest és el tipus de reunió que té la via</string>
@@ -212,6 +218,7 @@
     <string name="status_loading_error_server">No s\'ha pogut connectar al servidor.\n Per favor, torna-ho a intentar més tard</string>
     <string name="status_loading_error_connection">No tens una connexió a Internet activa.\nPer favor, torna-ho a intentar més tard, quan hi estigues connectat.</string>
     <string name="status_loading_error_format">No s\'ha pogut analitzar la resposta del servidor. Per favor, contacta amb un administrador.</string>
+    <string name="status_loading_error_internal">Hi ha hagut un error d\'inicialització intern. Per favor, tornar-ho a provar més tard o contacta amb un administrador.</string>
     <string name="status_loading_error_code">Codi d\'error: %d</string>
     <string name="data_type_area">Àrea</string>
     <string name="data_type_zone">Zona</string>
@@ -225,6 +232,7 @@
     <string name="dialog_description_reference">Referència: <br/>%s</string>
     <string name="dialog_md5_incompatible_title">Decodificació MD5 no suportada</string>
     <string name="dialog_md5_incompatible_message">El teu dispositiu no té suport per a la decodificació MD5. Tindràs problemes al rebre actualitzacions de les dades.</string>
+    <string name="dialog_zone_points_title">Tria un punt</string>
     <string name="mark_completed_title">Marcar Via</string>
     <string name="mark_completed_name">Nom de la via</string>
     <string name="mark_completed_project">Projecte</string>
@@ -360,6 +368,7 @@
     <string name="image_desc_comments">Comentaris</string>
     <string name="image_desc_walking_time">Temps caminant des de l\'aparcament</string>
     <string name="image_desc_send_feedback_fab">Botó d\'enviar sugeriments</string>
+    <string name="image_desc_location">Ubicació</string>
     <string name="login_email">Correu electrònic</string>
     <string name="login_password">Contrassenya</string>
     <string name="login_condition">Al fer clic a Iniciar sessió estàs acceptant els nostres <a href="https://escalaralcoiaicomtat.centrexcursionistalcoi.org">Termes d\'ús i condicions</a>.</string>
