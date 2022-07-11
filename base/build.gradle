@@ -80,7 +80,7 @@ android {
                 // Allow experimental
                 '-opt-in=kotlin.RequiresOptIn'
         ]
-        useIR = true
+        // useIR = true
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
