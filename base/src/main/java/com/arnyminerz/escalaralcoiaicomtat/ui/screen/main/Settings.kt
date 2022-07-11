@@ -89,7 +89,7 @@ fun MainActivity.SettingsScreen() {
             }
             composable("general") {
                 title = stringResource(R.string.pref_main_title)
-                GeneralSettingsScreen(this@SettingsScreen, settingsViewModel)
+                GeneralSettingsScreen(settingsViewModel)
             }
             composable("notifications") {
                 title = stringResource(R.string.pref_noti_title)
