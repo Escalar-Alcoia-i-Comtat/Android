@@ -35,6 +35,8 @@
     <string name="action_open_sector">Open Sector</string>
     <string name="action_open_store">Open App Store</string>
     <string name="action_close_app">Close App</string>
+    <string name="action_skip">Skip</string>
+    <string name="action_im_in">I\'m In</string>
 
     <string name="status_downloading">Downloading…</string>
     <string name="status_loading">Loading…</string>
@@ -137,6 +139,8 @@
     <string name="toast_error_delete_post">Could not delete post</string>
     <string name="toast_error_google_play">Escalar Alcoià i Comtat requires Google Play Services</string>
     <string name="toast_error_permission">The permission is required</string>
+    <string name="toast_error_permission_grant">Please, grant the permission</string>
+    <string name="toast_error_notifications_permission">Notifications won\'t be shown</string>
     <string name="toast_error_update">Could not update</string>
     <string name="toast_profile_image_updated">Updated profile image successfully</string>
     <string name="toast_clear_ok">Cleared correctly</string>
@@ -277,6 +281,9 @@
     <string name="dialog_md5_incompatible_title">MD5 hashing not supported</string>
     <string name="dialog_md5_incompatible_message">Your device does not support MD5 hashing. You will have issues while receiveing data updates.</string>
     <string name="dialog_zone_points_title">Choose a point</string>
+
+    <string name="permission_popup_notification_title">Get Notified!</string>
+    <string name="permission_popup_notification_message">Since Android 13 all apps require you to give permission to show notifications. We use them to show you warnings about the climbing zones, do you want to enable them?</string>
 
     <string name="mark_completed_title">Mark Path</string>
     <string name="mark_completed_name">Path Name</string>

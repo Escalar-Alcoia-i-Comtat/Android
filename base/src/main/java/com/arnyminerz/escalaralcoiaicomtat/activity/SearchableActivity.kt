@@ -5,9 +5,9 @@ import android.app.SearchManager
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.WorkerThread
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -93,7 +93,7 @@ import timber.log.Timber
  */
 @ExperimentalBadgeUtils
 @ExperimentalMaterial3Api
-class SearchableActivity : ComponentActivity() {
+class SearchableActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {

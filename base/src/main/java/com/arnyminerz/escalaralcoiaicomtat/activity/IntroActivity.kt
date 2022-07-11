@@ -4,9 +4,9 @@ import android.Manifest
 import android.content.Context
 import android.location.LocationManager
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,7 +45,7 @@ import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 @ExperimentalMaterial3Api
-class IntroActivity : ComponentActivity() {
+class IntroActivity : AppCompatActivity() {
     /**
      * The view model for updating the preference.
      * @author Arnau Mora
