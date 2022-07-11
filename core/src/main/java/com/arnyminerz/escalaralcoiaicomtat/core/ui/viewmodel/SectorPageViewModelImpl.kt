@@ -80,16 +80,20 @@ class SectorPageViewModelImpl(application: Application) : AndroidViewModel(appli
                 var grades5Count = 0 // ¿?
                 Timber.d("Got ${paths.size} paths. Getting grades...")
                 for (path in paths)
-                    path.generalGrade.let {
-                        Timber.v("- Grade: $it")
-                        when {
-                            it.matches("^[3-5].*".toRegex()) -> grades1Count++
-                            it.matches("^6.*".toRegex()) -> grades2Count++
-                            it.matches("^7.*".toRegex()) -> grades3Count++
-                            it.matches("^8.*".toRegex()) -> grades4Count++
-                            else -> grades5Count++
+                    (path.pitches
+                        .takeIf { it.isNotEmpty() }
+                        ?.mapNotNull { it.grade?.replace("L\\d ".toRegex(), "") }
+                        ?: listOf(path.generalGrade))
+                        .forEach {
+                            Timber.v("- Grade: $it")
+                            when {
+                                it.matches("^[3-5].*".toRegex()) -> grades1Count++
+                                it.matches("^6.*".toRegex()) -> grades2Count++
+                                it.matches("^7.*".toRegex()) -> grades3Count++
+                                it.matches("^8.*".toRegex()) -> grades4Count++
+                                else -> grades5Count++
+                            }
                         }
-                    }
 
                 Timber.d("Grades processed: $grades1Count, $grades2Count, $grades3Count, $grades4Count, $grades5Count.")
                 arrayListOf<BarChartData.Bar>().apply {
