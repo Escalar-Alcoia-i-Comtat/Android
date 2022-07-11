@@ -13,7 +13,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,24 +26,29 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arnyminerz.escalaralcoiaicomtat.core.R
+import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXPECTED_SERVER_VERSION
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.launchStore
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.brands.Github
 
 @Composable
+@ExperimentalMaterial3Api
 fun ApplicationInfoWindow(
     @DrawableRes appIconResource: Int,
     appName: String,
     appBuild: Int,
     appVersion: String,
-    serverVersion: String,
+    serverVersion: SemVer,
     serverProduction: Boolean,
     githubLink: String,
 ) {
@@ -51,7 +60,7 @@ fun ApplicationInfoWindow(
             contentDescription = "",
             modifier = Modifier
                 .size(128.dp)
-                .padding(top = 128.dp)
+                .padding(top = 64.dp, bottom = 8.dp)
                 .align(Alignment.CenterHorizontally)
         )
         Text(
@@ -80,12 +89,20 @@ fun ApplicationInfoWindow(
                 style = MaterialTheme.typography.labelMedium,
             )
             Text(
-                serverVersion,
+                serverVersion.toString(),
                 modifier = Modifier
                     .padding(start = 4.dp),
                 fontStyle = if (serverProduction) FontStyle.Normal else FontStyle.Italic,
                 style = MaterialTheme.typography.labelMedium,
             )
+            if (!serverProduction)
+                Text(
+                    stringResource(R.string.pref_info_server_version_non_production),
+                    modifier = Modifier
+                        .padding(start = 2.dp),
+                    fontStyle = FontStyle.Italic,
+                    style = MaterialTheme.typography.labelMedium,
+                )
         }
         Button(
             onClick = {
@@ -116,18 +133,58 @@ fun ApplicationInfoWindow(
                 )
             }
         }
+
+        if (serverVersion != EXPECTED_SERVER_VERSION)
+            Card(
+                colors = CardDefaults.cardColors(
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(vertical = 16.dp, horizontal = 16.dp),
+            ) {
+                Text(
+                    stringResource(R.string.pref_info_server_version_warning_title),
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                )
+                Text(
+                    stringResource(R.string.pref_info_server_version_warning_message)
+                        .format(
+                            EXPECTED_SERVER_VERSION.toString(),
+                            serverVersion.toString(),
+                        ),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                )
+                OutlinedButton(
+                    onClick = { context.launchStore() },
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .align(Alignment.End),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    )
+                ) {
+                    Text(stringResource(R.string.action_open_store))
+                }
+            }
     }
 }
 
 @Preview(showSystemUi = true)
 @Composable
+@ExperimentalMaterial3Api
 fun ApplicationInfoWindowPreview() {
     ApplicationInfoWindow(
         R.drawable.round_close_24,
         "Escalar Alcoià i Comtat",
         1,
         "1.0.0",
-        "1.0.4",
+        SemVer(1, 0, 4),
         false,
         "",
     )

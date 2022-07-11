@@ -1,5 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.shared
 
+import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer
+
 const val APPLICATION_ID = "com.arnyminerz.escalaralcoiaicomtat"
 
 /**
@@ -75,7 +77,7 @@ const val PROFILE_IMAGE_SIZE_DEFAULT = 512L
  * @author Arnau Mora
  * @since 20220627
  */
-const val EXPECTED_SERVER_VERSION = "1.0.4"
+val EXPECTED_SERVER_VERSION = SemVer(1, 0, 5)
 
 /**
  * The maximum amount of days that will be allowed to the user not having updated the app

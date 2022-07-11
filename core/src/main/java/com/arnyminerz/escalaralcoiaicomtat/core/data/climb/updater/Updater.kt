@@ -8,6 +8,8 @@ import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
+import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer
+import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer.Companion.DIFF_PATCH
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
@@ -116,8 +118,14 @@ suspend fun updateAvailable(
     try {
         // First get the server version, and check if compatible
         val serverInfoJson = context.getJson(REST_API_INFO_ENDPOINT)
-        val serverVersion = serverInfoJson.getString("version")
-        if (serverVersion != EXPECTED_SERVER_VERSION)
+        val serverVersion = try {
+            SemVer.fromString(serverInfoJson.getString("version"))
+        } catch (e: IllegalStateException) {
+            null
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+        if (serverVersion != null && serverVersion.compare(EXPECTED_SERVER_VERSION) > DIFF_PATCH)
             return UPDATE_AVAILABLE_FAIL_VERSION
 
         // Fetch from server the list of data, and continue only if result has "result"

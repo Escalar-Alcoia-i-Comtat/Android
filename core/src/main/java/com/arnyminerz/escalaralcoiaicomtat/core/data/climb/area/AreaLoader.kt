@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
+import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer
+import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer.Companion.DIFF_PATCH
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
@@ -170,12 +172,18 @@ suspend fun loadAreas(
 
     trace.start()
 
-    val serverVersion = infoJson.getString("version")
+    val serverVersion = try {
+        SemVer.fromString(infoJson.getString("version"))
+    } catch (e: IllegalStateException) {
+        null
+    } catch (e: IllegalArgumentException) {
+        null
+    }
     val serverProduction = infoJson.getBoolean("isProduction")
 
     Timber.i("Server version: $serverVersion. Production: $serverProduction")
 
-    if (serverVersion != EXPECTED_SERVER_VERSION) {
+    if (serverVersion != null && serverVersion.compare(EXPECTED_SERVER_VERSION) > DIFF_PATCH) {
         trace.putAttribute("error", "true")
         trace.putAttribute("error_name", "server_version_no_match")
         trace.stop()
@@ -236,7 +244,7 @@ suspend fun loadAreas(
         Timber.v("Storing server info...")
         PreferencesModule
             .systemPreferencesRepository
-            .setServerVersion(serverVersion)
+            .setServerVersion(serverVersion.toString())
         PreferencesModule
             .systemPreferencesRepository
             .setServerIsProduction(serverProduction)
