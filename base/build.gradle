@@ -14,7 +14,6 @@ android {
     // Android Build Settings
     compileSdk 33
     buildToolsVersion "33.0.0"
-    ndkVersion "25.0.8528842"
     defaultConfig {
         applicationId "com.arnyminerz.escalaralcoiaicomtat"
         minSdk 24
