@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen.ApplicationInfoWindow
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.GeneralSettingsScreen
@@ -41,6 +43,7 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.NotificationsSetti
  */
 @Preview(name = "Settings screen")
 @Composable
+@ExperimentalMaterial3Api
 fun MainActivity.SettingsScreen() {
     val settingsNavController = rememberNavController()
     Column(
@@ -102,7 +105,7 @@ fun MainActivity.SettingsScreen() {
                     appName = stringResource(R.string.app_name),
                     appBuild = BuildConfig.VERSION_CODE,
                     appVersion = BuildConfig.VERSION_NAME,
-                    serverVersion = serverVersion,
+                    serverVersion = SemVer.fromString(serverVersion),
                     serverProduction = serverIsProduction,
                     "https://github.com/Escalar-Alcoia-i-Comtat/Android",
                 )
