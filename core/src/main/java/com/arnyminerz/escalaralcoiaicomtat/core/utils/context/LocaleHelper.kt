@@ -1,19 +1,17 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.utils.context
 
-import android.annotation.TargetApi
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.os.Build
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import java.util.*
-
+import java.util.Locale
 
 /**
  * Manages setting of the app's locale.
  */
+@Deprecated("Use Android 13's Per-App Language Preferences: https://developer.android.com/about/versions/13/features/app-languages")
 object LocaleHelper {
     fun onAttach(context: Context): Context {
         val locale = getPersistedLocale()
@@ -41,7 +39,6 @@ object LocaleHelper {
         return updateResources(context, locale)
     }
 
-    @TargetApi(Build.VERSION_CODES.N)
     private fun updateResources(context: Context, locale: Locale): Context {
         val configuration: Configuration = context.resources.configuration
         configuration.setLocale(locale)
