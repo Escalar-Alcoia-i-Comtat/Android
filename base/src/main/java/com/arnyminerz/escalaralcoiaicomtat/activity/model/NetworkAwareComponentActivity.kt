@@ -1,8 +1,8 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.model
 
-import androidx.activity.ComponentActivity
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
+import androidx.appcompat.app.AppCompatActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.appNetworkProvider
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.asyncCoroutineScope
@@ -14,7 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
  * @author Arnau Mora
  * @since 20220102
  */
-abstract class NetworkAwareComponentActivity : ComponentActivity(),
+abstract class NetworkAwareComponentActivity : AppCompatActivity(),
     ConnectivityProvider.ConnectivityStateListener {
 
     override fun onResume() {

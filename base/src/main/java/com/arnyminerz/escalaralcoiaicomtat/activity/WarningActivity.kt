@@ -3,9 +3,9 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
@@ -30,7 +30,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.launch
 
-class WarningActivity : ComponentActivity() {
+class WarningActivity : AppCompatActivity() {
     /**
      * The view model for updating the preference.
      * @author Arnau Mora

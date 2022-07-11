@@ -1,9 +1,9 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
@@ -51,7 +51,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import org.osmdroid.config.Configuration
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     internal val exploreViewModel by viewModels<ExploreViewModel>(factoryProducer = {
         ExploreViewModel.Factory(application)
     })
