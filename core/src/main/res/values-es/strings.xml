@@ -35,8 +35,8 @@
     <string name="action_open_sector">Abrir Sector</string>
     <string name="action_open_store">Abrir App Store</string>
     <string name="action_close_app">Cerrar app</string>
-    <string name="action_skip">Skip</string>
-    <string name="action_im_in">I\'m In</string>
+    <string name="action_skip">Omitir</string>
+    <string name="action_im_in">¡Me apunto!</string>
     <string name="status_downloading">Descargando…</string>
     <string name="status_loading">Cargando…</string>
     <string name="status_downloaded">Descargado</string>
@@ -126,8 +126,8 @@
     <string name="toast_error_delete_post">No se ha podido eliminar el post</string>
     <string name="toast_error_google_play">Escalar Alcoià i Comtat necesita los servicios de Google Play</string>
     <string name="toast_error_permission">El permiso es necesario</string>
-    <string name="toast_error_permission_grant">Please, grant the permission</string>
-    <string name="toast_error_notifications_permission">Notifications won\'t be shown</string>
+    <string name="toast_error_permission_grant">Por favor, conceda el permiso</string>
+    <string name="toast_error_notifications_permission">No se mostrará ninguna notificación</string>
     <string name="toast_error_update">No se pudo actualizar</string>
     <string name="toast_profile_image_updated">Imagen de perfil actualizada!</string>
     <string name="toast_clear_ok">Limpiado correctamente</string>
@@ -237,8 +237,8 @@
     <string name="dialog_md5_incompatible_title">Decodificación MD5 no soportada</string>
     <string name="dialog_md5_incompatible_message">Tu dispositivo no es compatible con la decodificación MD5. Tendrás problemas para recibir actualizaciones de datos.</string>
     <string name="dialog_zone_points_title">Elije un punto</string>
-    <string name="permission_popup_notification_title">Get Notified!</string>
-    <string name="permission_popup_notification_message">Since Android 13 all apps require you to give permission to show notifications. We use them to show you warnings about the climbing zones, do you want to enable them?</string>
+    <string name="permission_popup_notification_title">¡Manténgase informado!</string>
+    <string name="permission_popup_notification_message">Desde Android 13 todas las aplicaciones requieren permiso para mostrar notificaciones. Las usamos para mostrarte advertencias sobre las zonas de escalada, ¿quieres activarlas?</string>
     <string name="mark_completed_title">Marcar Vía</string>
     <string name="mark_completed_name">Nombre de la vía</string>
     <string name="mark_completed_project">Proyecto</string>
