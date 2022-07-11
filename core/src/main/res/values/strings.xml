@@ -189,6 +189,8 @@
     <string name="dialog_downloaded_partially_msg">Some children have been downloaded, but not "%s" completely. Do you want to download it complete?</string>
     <string name="dialog_uses_storage_msg">Uses: %s</string>
     <string name="dialog_share_title">Share</string>
+    <string name="dialog_server_version_title">Server Incompatible</string>
+    <string name="dialog_server_version_message">The server has been updated, and the version of the app you are using is not compatible. Please, get the latest one from the App Store.</string>
 
     <string name="downloads_sector_dialog_title">Sectors</string>
     <string name="downloads_delete_dialog_title">Are you sure?</string>
@@ -353,6 +355,9 @@
     <string name="pref_down_roaming_sum">Use roaming for downloads</string>
 
     <string name="pref_info_server_version">Server version: </string>
+    <string name="pref_info_server_version_non_production">(Non-production)</string>
+    <string name="pref_info_server_version_warning_title">Using Incompatible Version</string>
+    <string name="pref_info_server_version_warning_message">The version of the app you are using expects a server with version %s, but it\'s using %s. It should work correctly, but problems may occur, it\'s advised that you update the app to the latest version as soon as possible.</string>
 
     <string name="notification_channel_downloads_group_name">Downloads</string>
     <string name="notification_channel_download_progress_name">Download Progress</string>
