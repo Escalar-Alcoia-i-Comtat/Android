@@ -5,6 +5,8 @@ import android.content.Intent
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.PointData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.PointType
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassCompanion
@@ -35,6 +37,7 @@ class Zone internal constructor(
     override val imagePath: String,
     override val kmzPath: String?,
     val position: GeoPoint,
+    private val pointsString: String,
     val webUrl: String?,
     private val parentAreaId: String,
     private val childrenCount: Long,
@@ -77,6 +80,7 @@ class Zone internal constructor(
             data.getDouble("latitude"),
             data.getDouble("longitude")
         ),
+        data.getString("points"),
         data.getString("webURL"),
         parentAreaId = data.getString("area"),
         childrenCount = childrenCount,
@@ -87,6 +91,27 @@ class Zone internal constructor(
 
     @IgnoredOnParcel
     override val hasParents: Boolean = true
+
+    @IgnoredOnParcel
+    val points = pointsString
+        .takeIf { it.isNotEmpty() && it.isNotBlank() }
+        ?.apply { replace("\r", "") }
+        ?.split("\n")
+        ?.mapNotNull { line ->
+            val pieces = line.split(";")
+            if (pieces.size < 3)
+                return@mapNotNull null
+            val lat = pieces[0].toDoubleOrNull() ?: return@mapNotNull null
+            val lon = pieces[1].toDoubleOrNull() ?: return@mapNotNull null
+            val type = pieces.takeIf { it.size > 3 }?.get(3)?.let { PointType.fromString(it) }
+
+            PointData(
+                GeoPoint(lat, lon),
+                pieces[2],
+                type ?: PointType.DEFAULT,
+            )
+        }
+        ?: emptyList()
 
     /**
      * Fetches the [Intent] that launches [dataClassExploreActivity] with [EXTRA_DATACLASS] as
@@ -107,6 +132,7 @@ class Zone internal constructor(
         kmzPath,
         position.latitude,
         position.longitude,
+        pointsString,
         metadata.webURL ?: "",
         parentAreaId,
         childrenCount,
@@ -119,6 +145,7 @@ class Zone internal constructor(
         "imagePath" to imagePath,
         "kmzPath" to kmzPath,
         "position" to position,
+        "points" to "[" + points.joinToString(", ") + "]",
         "webUrl" to webUrl,
         "parentAreaId" to parentAreaId,
     )
@@ -127,6 +154,7 @@ class Zone internal constructor(
         var result = super.hashCode()
         result = 31 * result + webUrl.hashCode()
         result = 31 * result + position.hashCode()
+        result = 31 * result + pointsString.hashCode()
         result = 31 * result + parentAreaId.hashCode()
         return result
     }
@@ -144,6 +172,7 @@ class Zone internal constructor(
         if (imagePath != other.imagePath) return false
         if (kmzPath != other.kmzPath) return false
         if (position != other.position) return false
+        if (pointsString != other.pointsString) return false
         if (webUrl != other.webUrl) return false
         if (parentAreaId != other.parentAreaId) return false
         if (imageQuality != other.imageQuality) return false
@@ -169,6 +198,7 @@ class Zone internal constructor(
             imagePath = "gs://escalaralcoiaicomtat.appspot.com/images/BarranquetDeFerriAPP.jpg",
             kmzPath = "gs://escalaralcoiaicomtat.appspot.com/kmz/Barranquet de Ferri.kmz",
             position = GeoPoint(38.705581, -0.498946),
+            pointsString = "38.705581;-0.498946;Example Point\n38.706039;-0.498811;Cova",
             webUrl = "https://escalaralcoiaicomtat.centrexcursionistalcoi.org/barranquet-de-ferri.html",
             parentAreaId = "WWQME983XhriXVhtVxFu",
             0L,

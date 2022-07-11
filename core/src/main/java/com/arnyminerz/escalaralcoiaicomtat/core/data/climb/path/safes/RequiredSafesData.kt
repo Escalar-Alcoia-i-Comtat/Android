@@ -28,47 +28,51 @@ data class RequiredSafesData(
     @IgnoredOnParcel
     override val color: Int = R.color.dialog_blue
 
-    override fun toJSONString(): String {
-        return "{" +
-                "\"lanyard_required\":\"$lanyardRequired\"," +
-                "\"cracker_required\":\"$crackerRequired\"," +
-                "\"friend_required\":\"$friendRequired\"," +
-                "\"strips_required\":\"$stripsRequired\"," +
-                "\"piton_required\":\"$pitonRequired\"," +
-                "\"nail_required\":\"$nailRequired\"" +
-                "}"
-    }
+    override fun toJSONString(): String = "{" +
+            "\"lanyard_required\":\"$lanyardRequired\"," +
+            "\"cracker_required\":\"$crackerRequired\"," +
+            "\"friend_required\":\"$friendRequired\"," +
+            "\"strips_required\":\"$stripsRequired\"," +
+            "\"piton_required\":\"$pitonRequired\"," +
+            "\"nail_required\":\"$nailRequired\"" +
+            "}"
 
     override fun list(): List<SafeCountData> =
         listOf(
             SafeCountData(
                 lanyardRequired,
                 R.string.safe_lanyard,
+                -1,
                 R.drawable.ic_lanyard
             ),
             SafeCountData(
                 crackerRequired,
                 R.string.safe_cracker,
+                -1,
                 R.drawable.ic_cracker
             ),
             SafeCountData(
                 friendRequired,
                 R.string.safe_friend,
+                -1,
                 R.drawable.ic_friend
             ),
             SafeCountData(
                 stripsRequired,
                 R.string.safe_strips,
+                -1,
                 R.drawable.ic_strips
             ),
             SafeCountData(
                 pitonRequired,
-                R.string.safe_piton,
+                R.string.safe_required_piton,
+                -1,
                 R.drawable.ic_buril
             ),
             SafeCountData(
                 nailRequired,
                 R.string.safe_nail,
+                -1,
                 R.drawable.ic_ungla
             )
         )

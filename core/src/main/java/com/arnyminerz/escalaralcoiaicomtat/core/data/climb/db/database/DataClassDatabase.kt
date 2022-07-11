@@ -20,13 +20,17 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 
 @Database(
     entities = [AreaData::class, ZoneData::class, SectorData::class, PathData::class],
-    version = 2,
+    version = 3,
     autoMigrations = [
         AutoMigration(
             from = 1,
             to = 2,
             spec = DataClassDatabase.AutoMigration1To2::class
-        )
+        ),
+        AutoMigration(
+            from = 2,
+            to = 3,
+        ),
     ]
 )
 @TypeConverters(DateConverter::class)

@@ -24,13 +24,16 @@ fun JSONObject.getDate(key: String, defaultValue: Date? = null): Date? =
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
         format.parse(date) ?: defaultValue
     } catch (e: JSONException) {
+        Timber.e(e, "Could not parse JSON date. JSON: $this")
         defaultValue
     } catch (e: InvalidDataTypeException) {
+        Timber.e(e, "Could not parse JSON date. JSON: $this")
         defaultValue
     } catch (e: InvalidObjectTypeException) {
+        Timber.e(e, "Could not parse JSON date. JSON: $this")
         defaultValue
     } catch (e: ParseException) {
-        Timber.e(e, "Could not parse data.")
+        Timber.e(e, "Could not parse JSON date. JSON: $this")
         defaultValue
     }
 

@@ -116,6 +116,8 @@ fun SectorPage(
                 .fillMaxHeight(heightFraction)
         ) {
             ZoomableImage(
+                minScale = 1f,
+                maxScale = 5f,
                 imageModel = imageFile?.takeIf { it.exists() }
                     ?: "$REST_API_DOWNLOAD_ENDPOINT${sector.imagePath}",
                 contentDescription = stringResource(R.string.image_desc_sector_image),

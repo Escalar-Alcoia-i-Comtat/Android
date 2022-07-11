@@ -33,6 +33,8 @@
     <string name="action_share">Share</string>
     <string name="action_add_to_homescreen">Add to Home screen</string>
     <string name="action_open_sector">Open Sector</string>
+    <string name="action_open_store">Open App Store</string>
+    <string name="action_close_app">Close App</string>
     <string name="status_downloading">Downloading…</string>
     <string name="status_loading">Loading…</string>
     <string name="status_downloaded">Downloaded</string>
@@ -76,6 +78,11 @@
     <string name="safe_required_strips">Strips</string>
     <!-- NC is for No Count -->
     <string name="safe_strings_plural">Strings</string>
+    <string name="safe_parabolt_plural">Parabolts</string>
+    <string name="safe_spits_plural">Spits</string>
+    <string name="safe_tensors_plural">Tensors</string>
+    <string name="safe_pitons_plural">Pitons</string>
+    <string name="safe_burils_plural">Burils</string>
     <string name="path_stats_chart_title">Grades</string>
     <string name="nearby_zones_title">Nearby Zones</string>
     <string name="nearby_zones_permission">The location permission is required and not granted. Tap to request.</string>
@@ -124,6 +131,7 @@
     <string name="toast_message_sent">Message sent!</string>
     <string name="toast_confirmation_sent">Confirmation sent!</string>
     <string name="toast_deleted">Data deleted from device</string>
+    <string name="toast_material_strings">To climb this path it is recommended that you bring at least %d strings.</string>
     <string name="toast_material_fixed">This material is already installed on the path</string>
     <string name="toast_material_required">This material is required to climb the path</string>
     <string name="toast_ending_info">This is the ending type of the path</string>
@@ -210,6 +218,8 @@
     <string name="status_loading_error_server">Could not connect to server.\n Please, try again later</string>
     <string name="status_loading_error_connection">You don\'t have an active Internet connection.\nPlease, try again later, when connected.</string>
     <string name="status_loading_error_format">Could not parse response from server. Please, contact an administrator.</string>
+    <string name="status_loading_error_internal">There has been an internal initialization error. Please, try again later, or contact an administrator.</string>
+    <string name="status_loading_error_code">Error code: %d</string>
     <string name="data_type_area">Area</string>
     <string name="data_type_zone">Zone</string>
     <string name="data_type_sector">Sector</string>
@@ -222,6 +232,7 @@
     <string name="dialog_description_reference">Reference: <br/>%s</string>
     <string name="dialog_md5_incompatible_title">MD5 hashing not supported</string>
     <string name="dialog_md5_incompatible_message">Your device does not support MD5 hashing. You will have issues while receiveing data updates.</string>
+    <string name="dialog_zone_points_title">Choose a point</string>
     <string name="mark_completed_title">Mark Path</string>
     <string name="mark_completed_name">Path Name</string>
     <string name="mark_completed_project">Project</string>
@@ -282,6 +293,7 @@
     <string name="pref_down_mobile_sum">Use mobile data for downloads</string>
     <string name="pref_down_roaming_title">Roaming</string>
     <string name="pref_down_roaming_sum">Use roaming for downloads</string>
+    <string name="pref_info_server_version">Server version: </string>
     <string name="notification_channel_downloads_group_name">Downloads</string>
     <string name="notification_channel_download_progress_name">Download Progress</string>
     <string name="notification_channel_download_progress_desc">When you are downloading something, this will be shown</string>
@@ -356,6 +368,7 @@
     <string name="image_desc_comments">Comments</string>
     <string name="image_desc_walking_time">Walking time from parking</string>
     <string name="image_desc_send_feedback_fab">Send feedback button</string>
+    <string name="image_desc_location">Location</string>
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>
     <string name="login_condition">When clicking \"Login\" you are accepting our <a href="https://escalaralcoiaicomtat.centrexcursionistalcoi.org">Terms of use and service</a>.</string>

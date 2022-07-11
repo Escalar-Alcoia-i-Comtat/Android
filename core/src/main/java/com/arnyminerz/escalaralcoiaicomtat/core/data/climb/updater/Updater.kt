@@ -16,8 +16,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassIm
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXPECTED_SERVER_VERSION
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_FETCH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_LIST
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_INFO_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
@@ -72,33 +74,39 @@ const val UPDATE_AVAILABLE_FAIL_CLIENT = 3
  */
 const val UPDATE_AVAILABLE_FAIL_FIELDS = 4
 
+/**
+ * When the version in the server does not match the expected by the app.
+ * @author Arnau Mora
+ * @since 20220627
+ */
+const val UPDATE_AVAILABLE_FAIL_VERSION = 5
+
 private fun <R : DataClassImpl, D : DataRoot<R>> findUpdatableObjects(
     dataList: List<D>,
     json: JSONObject,
     childrenCount: (objectId: String) -> Long,
     constructor: (json: JSONObject, objectId: String, childrenCount: Long) -> R
-) = mutableListOf<UpdaterSingleton.Item>().apply {
-    json.keys()
-        .forEach { objectId ->
-            val jsonData = json.getJSONObject(objectId)
-            val serverData = constructor(jsonData, objectId, childrenCount(objectId))
-            val localData = dataList
-                .map { it.data() }
-                .find { it.objectId == objectId }
-            if (localData == null || localData.hashCode() != serverData.hashCode())
-                add(
-                    UpdaterSingleton.Item(
-                        serverData.namespace,
-                        serverData.objectId,
-                        serverData.hashCode(),
-                        localData.hashCode(),
-                        serverData.displayName,
-                        serverData.displayMap(),
-                        localData?.displayMap() ?: emptyMap()
-                    )
-                )
-        }
-}
+) = json.keys()
+    .asSequence()
+    .mapNotNull { objectId ->
+        val jsonData = json.getJSONObject(objectId)
+        val serverData = constructor(jsonData, objectId, childrenCount(objectId))
+        val localData = dataList
+            .map { it.data() }
+            .find { it.objectId == objectId }
+        if (localData == null || localData.hashCode() != serverData.hashCode())
+            UpdaterSingleton.Item(
+                serverData.namespace,
+                serverData.objectId,
+                serverData.hashCode(),
+                localData.hashCode(),
+                serverData.displayName,
+                serverData.displayMap(),
+                localData?.displayMap() ?: emptyMap()
+            )
+        else null
+    }
+    .toList()
 
 @AddTrace(name = "CheckForUpdates")
 @WorkerThread
@@ -106,6 +114,12 @@ suspend fun updateAvailable(
     context: Context
 ): @UpdateAvailableResult Int {
     try {
+        // First get the server version, and check if compatible
+        val serverInfoJson = context.getJson(REST_API_INFO_ENDPOINT)
+        val serverVersion = serverInfoJson.getString("version")
+        if (serverVersion != EXPECTED_SERVER_VERSION)
+            return UPDATE_AVAILABLE_FAIL_VERSION
+
         // Fetch from server the list of data, and continue only if result has "result"
         val jsonData = context.getJson("$REST_API_DATA_LIST/*")
             .takeIf { it.has("result") }
@@ -134,7 +148,7 @@ suspend fun updateAvailable(
 
         // Add all the updatable areas
         val updatablePaths = findUpdatableObjects(paths, jsonPaths, { 0L })
-        { json, objectId, childrenCount -> Path(json, objectId) }
+        { json, objectId, _ -> Path(json, objectId) }
         val updatableSectors = findUpdatableObjects(
             sectors,
             jsonSectors,

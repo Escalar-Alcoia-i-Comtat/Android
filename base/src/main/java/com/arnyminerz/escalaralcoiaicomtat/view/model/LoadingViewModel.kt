@@ -36,6 +36,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_DEFAULTS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_LIST
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_INFO_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
@@ -105,7 +106,10 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * Requests the view model to start loading
      * @author Arnau Mora
      * @since 20211225
+     * @throws SecurityException When the version given by the server and the expected by the app
+     * do not match.
      */
+    @Throws(SecurityException::class)
     fun startLoading(
         deepLinkPath: String?,
         remoteConfig: FirebaseRemoteConfig,
@@ -122,7 +126,10 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * not null, this is, when an error occurred.
      * @author Arnau Mora
      * @since 20220322
+     * @throws SecurityException When the version given by the server and the expected by the app
+     * do not match.
      */
+    @Throws(SecurityException::class)
     fun tryLoading() {
         if (errorMessage.value != null)
             viewModelScope.launch {
@@ -132,6 +139,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
     }
 
     @UiThread
+    @Throws(SecurityException::class)
     private suspend fun loadingRoutine(
         deepLinkPath: String?,
         remoteConfig: FirebaseRemoteConfig,
@@ -184,8 +192,11 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * to "Loading data".
      * @author Arnau Mora
      * @since 20220322
+     * @throws SecurityException When the version given by the server and the expected by the app
+     * do not match.
      */
     @UiThread
+    @Throws(SecurityException::class)
     private suspend fun performLoad() {
         val app = getApplication<App>()
 
@@ -353,8 +364,11 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      * Note: The data module needs to have been installed.
      * @author Arnau Mora
      * @since 20211225
+     * @throws SecurityException When the version given by the server and the expected by the app
+     * do not match.
      */
     @WorkerThread
+    @Throws(SecurityException::class)
     private suspend fun load(
         app: App,
         deepLinkPath: String?,
@@ -366,12 +380,15 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
             Timber.v("Fetching areas data...")
             val jsonData = context.getJson("$REST_API_DATA_LIST/*")
 
+            Timber.v("Fetching server info...")
+            val serverInfo = context.getJson(REST_API_INFO_ENDPOINT)
+
             // Check if the response contains a "result" field
             // if (jsonData.has("result"))
             //     throw IllegalStateException("Server's JSON data does not contain a field named \"result\".")
 
             Timber.i("Data fetched from data module!")
-            val areas = loadAreas(app, jsonData.getJSONObject("result"))
+            val areas = loadAreas(app, jsonData.getJSONObject("result"), serverInfo)
 
             Timber.v("Finished loading areas.")
             if (areas.isNotEmpty()) {
@@ -440,10 +457,13 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
             }
         } catch (e: JSONException) {
             Timber.e(e, "Could not parse the server's response.")
-            ioContext { progressUpdater(null, R.string.status_loading_error_format, null) }
+            ioContext { progressUpdater(null, R.string.status_loading_error_format, 1000) }
         } catch (e: IllegalStateException) {
             Timber.e("The server response does not have a \"result\" field.")
-            ioContext { progressUpdater(null, R.string.status_loading_error_format, null) }
+            ioContext { progressUpdater(null, R.string.status_loading_error_format, 1001) }
+        } catch (e: ExceptionInInitializerError) {
+            Timber.e(e, "Could not initialize a field.")
+            ioContext { progressUpdater(null, R.string.status_loading_error_internal, 1002) }
         } finally {
             isLoading = false
         }

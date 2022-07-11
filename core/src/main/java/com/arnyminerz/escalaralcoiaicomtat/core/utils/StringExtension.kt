@@ -13,3 +13,10 @@ operator fun Char.times(times: Int): String {
 
 fun String.isEmail(): Boolean =
     !isEmpty() && Patterns.EMAIL_ADDRESS.matcher(this).matches()
+
+/**
+ * Removes all line jumps (\n) from the string.
+ * @author Arnau Mora
+ * @since 20220628
+ */
+fun String.delLn(): String = replace("\n", "")
