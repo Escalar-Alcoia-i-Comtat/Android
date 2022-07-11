@@ -22,23 +22,17 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.APP_UPDATE_MAX_TIME_DAYS_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENABLE_AUTHENTICATION_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_INTENT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_MD5
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_PLAY_SERVICES
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_PREFERENCE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.PROFILE_IMAGE_SIZE_KEY
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.IMAGE_MAX_ZOOM_KEY
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.IMAGE_MAX_ZOOM_LEVEL
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_DEFAULTS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REMOTE_CONFIG_MIN_FETCH_INTERVAL
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DATA_LIST
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_INFO_ENDPOINT
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.SHOW_NON_DOWNLOADED_KEY
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.ioContext
@@ -245,18 +239,9 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
 
             if (remoteConfigFetched) {
                 Timber.i("Got remote config values!")
-                APP_UPDATE_MAX_TIME_DAYS =
-                    remoteConfig.getLong(APP_UPDATE_MAX_TIME_DAYS_KEY)
-                SHOW_NON_DOWNLOADED =
-                    remoteConfig.getBoolean(SHOW_NON_DOWNLOADED_KEY)
-                ENABLE_AUTHENTICATION =
-                    remoteConfig.getBoolean(ENABLE_AUTHENTICATION_KEY)
-                PROFILE_IMAGE_SIZE = remoteConfig.getLong(PROFILE_IMAGE_SIZE_KEY)
+                IMAGE_MAX_ZOOM_LEVEL = remoteConfig.getDouble(IMAGE_MAX_ZOOM_KEY)
 
-                Timber.v("APP_UPDATE_MAX_TIME_DAYS: $APP_UPDATE_MAX_TIME_DAYS")
-                Timber.v("SHOW_NON_DOWNLOADED: $SHOW_NON_DOWNLOADED")
-                Timber.v("ENABLE_AUTHENTICATION: $ENABLE_AUTHENTICATION")
-                Timber.v("PROFILE_IMAGE_SIZE: $PROFILE_IMAGE_SIZE")
+                Timber.v("IMAGE_MAX_ZOOM_LEVEL: $IMAGE_MAX_ZOOM_LEVEL")
             } else
                 Timber.w("Could not fetch default remote config.")
         } catch (e: FirebaseException) {
