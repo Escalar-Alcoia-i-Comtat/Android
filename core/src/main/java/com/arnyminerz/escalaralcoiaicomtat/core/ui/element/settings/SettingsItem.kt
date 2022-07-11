@@ -50,10 +50,13 @@ import androidx.compose.ui.unit.dp
  * @since 20211229
  * @param items The items to display in the dialog.
  * @param dismissOnSelect If the dialog should be dismissed when selecting an option.
+ * @param showSelectedItem If true, a radio button (small circle) will be shown to indicate the
+ * currently selected item.
  */
 data class ListDialogOptions(
     val items: Map<String, String>,
-    val dismissOnSelect: Boolean = true
+    val dismissOnSelect: Boolean = true,
+    val showSelectedItem: Boolean = true,
 )
 
 /**
@@ -249,15 +252,19 @@ fun SettingsItem(
                         Column {
                             items.forEach { item ->
                                 ListItem(
-                                    icon = {
-                                        Icon(
-                                            if (stateString == item.key)
-                                                Icons.Default.RadioButtonChecked
-                                            else
-                                                Icons.Default.RadioButtonUnchecked,
-                                            contentDescription = item.value
-                                        )
-                                    },
+                                    icon = if (dialog.list.showSelectedItem) {
+                                        val block: @Composable () -> Unit = {
+                                            if (dialog.list.showSelectedItem)
+                                                Icon(
+                                                    if (stateString == item.key)
+                                                        Icons.Default.RadioButtonChecked
+                                                    else
+                                                        Icons.Default.RadioButtonUnchecked,
+                                                    contentDescription = item.value
+                                                )
+                                        }
+                                        block
+                                    } else null,
                                     modifier = Modifier
                                         .clickable {
                                             setString?.let { it(item.key) }
