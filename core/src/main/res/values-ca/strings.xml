@@ -172,8 +172,8 @@
     <string name="dialog_downloaded_partially_msg">Alguns elements s\'han baixat, però no %s sencera. Vols descarregar-la sencera?</string>
     <string name="dialog_uses_storage_msg">Ocupa: %s</string>
     <string name="dialog_share_title">Compartir</string>
-    <string name="dialog_server_version_title">Server Incompatible</string>
-    <string name="dialog_server_version_message">The server has been updated, and the version of the app you are using is not compatible. Please, get the latest one from the App Store.</string>
+    <string name="dialog_server_version_title">Servidor Incompatible</string>
+    <string name="dialog_server_version_message">El servidor ha sigut actualitzat, i la versió de l\'aplicació que estàs utilitzant ja no és compatible. Per favor, actualitza-la des de la tenda d\'aplicacions.</string>
     <string name="downloads_sector_dialog_title">Sectors</string>
     <string name="downloads_delete_dialog_title">N\'estàs segur?</string>
     <string name="downloads_delete_dialog_msg">Açò eliminarà %s del teu dispositiu PERMANENTMENT. Ho hauràs de tornar a descarregar si ho desitges.</string>
@@ -191,7 +191,7 @@
     <string name="fab_desc_finish">Finalitzar</string>
     <string name="fab_desc_grant">Donar permís</string>
     <string name="fab_desc_launch">Iniciar</string>
-    <string name="fab_desc_view_main_screen">View Main Screen</string>
+    <string name="fab_desc_view_main_screen">Veure la pantalla principal</string>
     <string name="intro_main_title">Benvingut a Escalar Alcoià i Comtat</string>
     <string name="intro_main_message">Anem a guiar-te per un procés curt de configuració. No et preocupes, és ràpid i ben senzill</string>
     <string name="intro_beta_title">Prova Beta</string>
@@ -303,9 +303,9 @@
     <string name="pref_down_roaming_title">Roaming</string>
     <string name="pref_down_roaming_sum">Fes ús de connexions d\'ús mesurat (Roaming) per a baixar</string>
     <string name="pref_info_server_version">Versió del servidor: </string>
-    <string name="pref_info_server_version_non_production">(Non-production)</string>
-    <string name="pref_info_server_version_warning_title">Using Incompatible Version</string>
-    <string name="pref_info_server_version_warning_message">The version of the app you are using expects a server with version %s, but it\'s using %s. It should work correctly, but problems may occur, it\'s advised that you update the app to the latest version as soon as possible.</string>
+    <string name="pref_info_server_version_non_production">(No en Producció)</string>
+    <string name="pref_info_server_version_warning_title">Versió incompatible</string>
+    <string name="pref_info_server_version_warning_message">The versió de l\'aplicació que estàs fent servint espera que el servidor tinga la versió %s, però ara mateix utilitza la %s. No deuria haver cap problema, però qualsevol cosa podria passar. Et recomanem que actualitzis l\'aplicació el més prompte possible.</string>
     <string name="notification_channel_downloads_group_name">Descàrregues</string>
     <string name="notification_channel_download_progress_name">Progrés de la Descàrrega</string>
     <string name="notification_channel_download_progress_desc">Quan estigues descarregant algun contingut, es mostrarà una notificació d\'aquest tipus</string>
