@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
@@ -24,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -299,17 +299,17 @@ fun PathItem(
 }
 
 @Composable
-@ExperimentalMaterialApi
+@ExperimentalMaterial3Api
 private fun SimpleChip(
     text: String,
     @DrawableRes icon: Int,
     onClick: () -> Unit,
 ) {
-    Chip(
-        content = {
+    SuggestionChip(
+        label = {
             Text(text)
         },
-        leadingIcon = {
+        icon = {
             Image(
                 painter = painterResource(icon),
                 contentDescription = text,
@@ -324,10 +324,66 @@ private fun SimpleChip(
 }
 
 @Composable
-@ExperimentalMaterialApi
+@ExperimentalMaterial3Api
 fun BadgesRow(path: Path) {
     val context = LocalContext.current
 
+    val fixedSafesData = path.fixedSafesData
+    val requiredSafesData = path.requiredSafesData
+
+    Row(
+        modifier = Modifier
+            .horizontalScroll(rememberScrollState())
+            .fillMaxWidth(),
+    ) {
+        if (fixedSafesData.stringCount > 0) {
+            val toastText =
+                stringResource(R.string.toast_material_strings)
+                    .format(fixedSafesData.stringCount)
+            SimpleChip(
+                text = stringResource(R.string.safe_strings, fixedSafesData.stringCount),
+                icon = R.drawable.ic_icona_express,
+                onClick = { context.toast(toastText) }
+            )
+        }
+
+        if (requiredSafesData.crackerRequired)
+            SimpleChip(
+                text = stringResource(R.string.safe_required_cracker),
+                icon = R.drawable.ic_cracker,
+                onClick = { context.toast(R.string.toast_material_required) },
+            )
+        if (requiredSafesData.friendRequired)
+            SimpleChip(
+                text = stringResource(R.string.safe_required_friend),
+                icon = R.drawable.ic_friend,
+                onClick = { context.toast(R.string.toast_material_required) },
+            )
+        if (requiredSafesData.lanyardRequired)
+            SimpleChip(
+                text = stringResource(R.string.safe_required_lanyard),
+                icon = R.drawable.ic_lanyard,
+                onClick = { context.toast(R.string.toast_material_required) },
+            )
+        if (requiredSafesData.nailRequired)
+            SimpleChip(
+                text = stringResource(R.string.safe_required_nail),
+                icon = R.drawable.ic_reunio_clau,
+                onClick = { context.toast(R.string.toast_material_required) },
+            )
+        if (requiredSafesData.pitonRequired)
+            SimpleChip(
+                text = stringResource(R.string.safe_required_piton),
+                icon = R.drawable.ic_reunio_clau,
+                onClick = { context.toast(R.string.toast_material_required) },
+            )
+        if (requiredSafesData.stripsRequired)
+            SimpleChip(
+                text = stringResource(R.string.safe_required_strips),
+                icon = R.drawable.ic_strips,
+                onClick = { context.toast(R.string.toast_material_required) },
+            )
+    }
     Row(
         modifier = Modifier
             .horizontalScroll(rememberScrollState())
@@ -366,19 +422,6 @@ fun BadgesRow(path: Path) {
                 onClick = { context.toast(R.string.toast_ending_info) },
             )
 
-        val fixedSafesData = path.fixedSafesData
-
-        if (fixedSafesData.stringCount > 0) {
-            val toastText =
-                stringResource(R.string.toast_material_strings)
-                    .format(fixedSafesData.stringCount)
-            SimpleChip(
-                text = stringResource(R.string.safe_strings, fixedSafesData.stringCount),
-                icon = R.drawable.ic_icona_express,
-                onClick = { context.toast(toastText) }
-            )
-        }
-
         for (chip in fixedSafesData.list())
             if (chip.count > 0)
                 SimpleChip(
@@ -389,44 +432,6 @@ fun BadgesRow(path: Path) {
                     icon = chip.image,
                     onClick = { context.toast(R.string.toast_material_fixed) }
                 )
-
-        val requiredSafesData = path.requiredSafesData
-        if (requiredSafesData.crackerRequired)
-            SimpleChip(
-                text = stringResource(R.string.safe_required_cracker),
-                icon = R.drawable.ic_cracker,
-                onClick = { context.toast(R.string.toast_material_required) },
-            )
-        if (requiredSafesData.friendRequired)
-            SimpleChip(
-                text = stringResource(R.string.safe_required_friend),
-                icon = R.drawable.ic_friend,
-                onClick = { context.toast(R.string.toast_material_required) },
-            )
-        if (requiredSafesData.lanyardRequired)
-            SimpleChip(
-                text = stringResource(R.string.safe_required_lanyard),
-                icon = R.drawable.ic_lanyard,
-                onClick = { context.toast(R.string.toast_material_required) },
-            )
-        if (requiredSafesData.nailRequired)
-            SimpleChip(
-                text = stringResource(R.string.safe_required_nail),
-                icon = R.drawable.ic_reunio_clau,
-                onClick = { context.toast(R.string.toast_material_required) },
-            )
-        if (requiredSafesData.pitonRequired)
-            SimpleChip(
-                text = stringResource(R.string.safe_required_piton),
-                icon = R.drawable.ic_reunio_clau,
-                onClick = { context.toast(R.string.toast_material_required) },
-            )
-        if (requiredSafesData.stripsRequired)
-            SimpleChip(
-                text = stringResource(R.string.safe_required_strips),
-                icon = R.drawable.ic_strips,
-                onClick = { context.toast(R.string.toast_material_required) },
-            )
     }
 }
 
