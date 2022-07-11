@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
@@ -17,20 +18,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
+import androidx.core.os.LocaleListCompat
 import androidx.navigation.NavController
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.FeedbackActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.ListDialogOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsCategory
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsDataDialog
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsItem
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.context.LocaleHelper
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.SettingsViewModel
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -92,9 +93,8 @@ fun MainSettingsScreen(context: Context, settingsNavController: NavController) {
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: SettingsViewModel) {
+fun GeneralSettingsScreen(viewModel: SettingsViewModel) {
     Column {
-        val language by viewModel.language.collectAsState()
         val nearbyZonesEnabled by viewModel.nearbyZonesEnabled.collectAsState()
         val nearbyZonesDistance by viewModel.nearbyZonesDistance.collectAsState()
         val markerClickCenteringEnabled by viewModel.markerCentering.collectAsState()
@@ -104,11 +104,10 @@ fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: Settin
         SettingsItem(
             title = stringResource(R.string.pref_gene_language_title),
             subtitle = stringResource(R.string.pref_gene_language_sum),
-            stateString = language,
             setString = { lang ->
-                viewModel.setLanguage(lang)
-                LocaleHelper.setLocale(activity, lang)
-                activity.recreate()
+                Timber.i("Setting app locale to $lang...")
+                val appLocale = LocaleListCompat.forLanguageTags(lang)
+                AppCompatDelegate.setApplicationLocales(appLocale)
             },
             dialog = SettingsDataDialog(
                 title = stringResource(R.string.pref_gene_language_title),
@@ -117,7 +116,8 @@ fun GeneralSettingsScreen(activity: LanguageComponentActivity, viewModel: Settin
                         "en" to "English",
                         "ca" to "Català",
                         "es" to "Castellano"
-                    )
+                    ),
+                    showSelectedItem = false,
                 )
             )
         )
