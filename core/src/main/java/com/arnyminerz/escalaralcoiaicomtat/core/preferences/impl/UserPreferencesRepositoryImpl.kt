@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.model.UserPreferences
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.repo.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +13,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import java.io.IOException
-import java.util.*
 
 /**
  * The default value of the distance to consider as nearby for nearby zones.
@@ -40,7 +38,6 @@ class UserPreferencesRepositoryImpl(
         val dataCollection = booleanPreferencesKey("data_collection")
         val errorCollection = booleanPreferencesKey("error_collection")
         val showAlerts = booleanPreferencesKey("alerts_enabled")
-        val language = stringPreferencesKey("language")
         val centerMarkerOnClick = booleanPreferencesKey("center_marker")
         val mobileDownload = booleanPreferencesKey("mobile_download")
         val meteredDownload = booleanPreferencesKey("metered_download")
@@ -63,9 +60,6 @@ class UserPreferencesRepositoryImpl(
 
     private inline val Preferences.showAlerts
         get() = this[Keys.showAlerts] ?: true
-
-    private inline val Preferences.language
-        get() = this[Keys.language] ?: Locale.getDefault().language
 
     private inline val Preferences.centerMarkerOnClick
         get() = this[Keys.centerMarkerOnClick] ?: true
@@ -95,7 +89,6 @@ class UserPreferencesRepositoryImpl(
                 preferences.dataCollection,
                 preferences.errorCollection,
                 preferences.showAlerts,
-                preferences.language,
                 preferences.centerMarkerOnClick,
                 preferences.mobileDownload,
                 preferences.meteredDownload,
@@ -135,12 +128,6 @@ class UserPreferencesRepositoryImpl(
         }
     }
 
-    override suspend fun setLanguage(language: String) {
-        dataStore.edit {
-            it[Keys.language] = language
-        }
-    }
-
     override suspend fun setMarkerClickCenteringEnabled(enabled: Boolean) {
         dataStore.edit {
             it[Keys.centerMarkerOnClick] = enabled
@@ -176,24 +163,6 @@ class UserPreferencesRepositoryImpl(
             it[Keys.enableDeveloperTab] = enabled
         }
     }
-
-    /**
-     * Returns the current user's language preference.
-     * @author Arnau Mora
-     * @since 20211229
-     */
-    override val language: Flow<String> = dataStore.data
-        .catch {
-            if (it is IOException) {
-                emit(emptyPreferences())
-            } else {
-                throw it
-            }
-        }
-        .map {
-            it[Keys.language] ?: Locale.getDefault().language
-        }
-        .distinctUntilChanged()
 
     /**
      * Returns whether or not the nearby zones module is enabled.

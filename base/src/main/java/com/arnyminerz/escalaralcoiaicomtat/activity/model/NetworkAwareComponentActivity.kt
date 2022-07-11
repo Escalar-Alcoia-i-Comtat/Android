@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.model
 
+import androidx.activity.ComponentActivity
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
@@ -13,7 +14,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
  * @author Arnau Mora
  * @since 20220102
  */
-abstract class NetworkAwareComponentActivity : LanguageComponentActivity(),
+abstract class NetworkAwareComponentActivity : ComponentActivity(),
     ConnectivityProvider.ConnectivityStateListener {
 
     override fun onResume() {

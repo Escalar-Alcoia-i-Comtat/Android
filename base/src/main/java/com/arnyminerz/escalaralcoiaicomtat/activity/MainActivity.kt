@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -25,7 +26,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.preference.PreferenceManager
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.LanguageComponentActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItem
@@ -51,7 +51,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import org.osmdroid.config.Configuration
 
-class MainActivity : LanguageComponentActivity() {
+class MainActivity : ComponentActivity() {
     internal val exploreViewModel by viewModels<ExploreViewModel>(factoryProducer = {
         ExploreViewModel.Factory(application)
     })

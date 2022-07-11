@@ -9,7 +9,6 @@ package com.arnyminerz.escalaralcoiaicomtat.core.preferences.model
  * @param dataCollection If analytics data should be collected.
  * @param errorCollection If error reporting data should be collected.
  * @param showAlerts If notification alerts should be displayed.
- * @param language The language key the user has chosen.
  * @param centerMarkerOnClick If when clicked a marker on the map it should be centered.
  * @param mobileDownload If downloads should be ran when using mobile data connections.
  * @param meteredDownload If downloads should be ran when using metered connections.
@@ -22,7 +21,6 @@ data class UserPreferences(
     val dataCollection: Boolean,
     val errorCollection: Boolean,
     val showAlerts: Boolean,
-    val language: String,
     val centerMarkerOnClick: Boolean,
     val mobileDownload: Boolean,
     val meteredDownload: Boolean,
