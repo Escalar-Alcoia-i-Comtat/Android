@@ -154,6 +154,12 @@ class MainActivity : AppCompatActivity() {
                         )
                     }
                 },
+                title = {
+                    Text(stringResource(R.string.dialog_server_version_title))
+                },
+                text = {
+                    Text(stringResource(R.string.dialog_server_version_message))
+                }
             )
 
         Scaffold(
