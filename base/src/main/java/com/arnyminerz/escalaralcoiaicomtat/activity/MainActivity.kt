@@ -196,7 +196,7 @@ class MainActivity : AppCompatActivity() {
                     0 -> ExploreScreen()
                     1 -> MapScreen()
                     2 -> StorageScreen()
-                    3 -> SettingsScreen()
+                    3 -> SettingsScreen(pagerState)
                     4 -> if (BuildConfig.DEBUG) DeveloperScreen()
                 }
             }
