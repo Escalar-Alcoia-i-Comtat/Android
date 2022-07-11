@@ -172,6 +172,8 @@
     <string name="dialog_downloaded_partially_msg">Algunos elementos se han descargado, pero no %s completamente. Quieres descargarla entera?</string>
     <string name="dialog_uses_storage_msg">Ocupa: %s</string>
     <string name="dialog_share_title">Compartir</string>
+    <string name="dialog_server_version_title">Server Incompatible</string>
+    <string name="dialog_server_version_message">The server has been updated, and the version of the app you are using is not compatible. Please, get the latest one from the App Store.</string>
     <string name="downloads_sector_dialog_title">Sectores</string>
     <string name="downloads_delete_dialog_title">¿Estás seguro?</string>
     <string name="downloads_delete_dialog_msg">Esto borrará %s de tu dispositivo PARA SIEMPRE. Tendrás que volver a descargarlo.</string>
@@ -189,6 +191,7 @@
     <string name="fab_desc_finish">Finalizar</string>
     <string name="fab_desc_grant">Dar permiso</string>
     <string name="fab_desc_launch">Iniciar</string>
+    <string name="fab_desc_view_main_screen">View Main Screen</string>
     <string name="intro_main_title">Bienvenido a Escalar Alcoià i Comtat</string>
     <string name="intro_main_message">Te vamos a guiar por un proceso de configuración breve. No te preocupes, es rápido y sencillo.</string>
     <string name="intro_beta_title">Prueba Beta</string>
@@ -300,6 +303,9 @@
     <string name="pref_down_roaming_title">Roaming</string>
     <string name="pref_down_roaming_sum">Usar conexiones de uso medido para las descargas</string>
     <string name="pref_info_server_version">Versión del servidor: </string>
+    <string name="pref_info_server_version_non_production">(Non-production)</string>
+    <string name="pref_info_server_version_warning_title">Using Incompatible Version</string>
+    <string name="pref_info_server_version_warning_message">The version of the app you are using expects a server with version %s, but it\'s using %s. It should work correctly, but problems may occur, it\'s advised that you update the app to the latest version as soon as possible.</string>
     <string name="notification_channel_downloads_group_name">Descargas</string>
     <string name="notification_channel_download_progress_name">Progreso de descarga</string>
     <string name="notification_channel_download_progress_desc">Cuando estés descargando algo aparecerá esto </string>
