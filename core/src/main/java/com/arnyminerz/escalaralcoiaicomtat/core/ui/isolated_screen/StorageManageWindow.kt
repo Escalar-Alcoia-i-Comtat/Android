@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -156,11 +157,16 @@ private fun ClearSearchSessionButton(
  * of the app's contents.
  * @author Arnau Mora
  * @since 20211214
+ * @param paddingValues The Padding values provided by the Scaffold that contains the window.
  * @param launchApp When the user requests to launch the app, this will get called.
  * @param sendFeedback When the user selects the option to send feedback.
  */
 @Composable
-fun StorageManagerWindow(launchApp: () -> Unit, sendFeedback: () -> Unit) {
+fun StorageManagerWindow(
+    paddingValues: PaddingValues,
+    launchApp: () -> Unit,
+    sendFeedback: () -> Unit,
+) {
     val context = LocalContext.current
     val cacheDir = context.cacheDir
     val storageDir = cacheDir.parentFile
@@ -168,6 +174,7 @@ fun StorageManagerWindow(launchApp: () -> Unit, sendFeedback: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth(1f)
+            .padding(paddingValues)
             .padding(8.dp)
     ) {
         Row(
