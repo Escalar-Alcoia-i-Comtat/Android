@@ -35,6 +35,8 @@
     <string name="action_open_sector">Obrir Sector</string>
     <string name="action_open_store">Obrir l\'App Store</string>
     <string name="action_close_app">Tanca l\'aplicació</string>
+    <string name="action_skip">Skip</string>
+    <string name="action_im_in">I\'m In</string>
     <string name="status_downloading">Baixant…</string>
     <string name="status_loading">Carregant…</string>
     <string name="status_downloaded">Baixat</string>
@@ -124,6 +126,8 @@
     <string name="toast_error_delete_post">No s\'ha pogut eliminar la publicació</string>
     <string name="toast_error_google_play">Escalar Alcoià i Comtat necessita els serveis de Google Play</string>
     <string name="toast_error_permission">El permís és necessari</string>
+    <string name="toast_error_permission_grant">Please, grant the permission</string>
+    <string name="toast_error_notifications_permission">Notifications won\'t be shown</string>
     <string name="toast_error_update">No s\'ha pogut actualitzar</string>
     <string name="toast_profile_image_updated">Imatge de perfil actualitzada!</string>
     <string name="toast_clear_ok">Buidat correctament</string>
@@ -233,6 +237,8 @@
     <string name="dialog_md5_incompatible_title">Decodificació MD5 no suportada</string>
     <string name="dialog_md5_incompatible_message">El teu dispositiu no té suport per a la decodificació MD5. Tindràs problemes al rebre actualitzacions de les dades.</string>
     <string name="dialog_zone_points_title">Tria un punt</string>
+    <string name="permission_popup_notification_title">Get Notified!</string>
+    <string name="permission_popup_notification_message">Since Android 13 all apps require you to give permission to show notifications. We use them to show you warnings about the climbing zones, do you want to enable them?</string>
     <string name="mark_completed_title">Marcar Via</string>
     <string name="mark_completed_name">Nom de la via</string>
     <string name="mark_completed_project">Projecte</string>
