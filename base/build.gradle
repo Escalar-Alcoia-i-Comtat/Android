@@ -149,7 +149,7 @@ static def getDate() {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.21'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     // AndroidX dependencies
     implementation 'androidx.appcompat:appcompat:1.6.0-alpha05'
@@ -175,5 +175,5 @@ dependencies {
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
 
     // Kotlin reflect for using methods from Feature Modules
-    implementation "org.jetbrains.kotlin:kotlin-reflect:1.6.21"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 }
