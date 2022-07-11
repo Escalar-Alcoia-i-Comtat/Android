@@ -11,7 +11,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system.GetSh
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetAlertNotificationsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetDataCollection
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetErrorCollection
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetLanguage
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetMarkerCentering
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetMeteredDownloadsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetMobileDownloadsEnabled
@@ -21,7 +20,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetRoam
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetAlertNotificationsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetDataCollection
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetErrorCollection
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetLanguage
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetMarkerCentering
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetMeteredDownloadsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetMobileDownloadsEnabled
@@ -102,13 +100,6 @@ object PreferencesModule {
     val shownMd5Warning get() = GetShownMd5Warning(systemPreferencesRepository)
 
     /**
-     * Returns the language preference.
-     * @author Arnau Mora
-     * @since 20211229
-     */
-    val getLanguage get() = GetLanguage(userPreferencesRepository)
-
-    /**
      * Returns the nearby zones enabled preference.
      * @author Arnau Mora
      * @since 20211229
@@ -170,13 +161,6 @@ object PreferencesModule {
      * @since 20211229
      */
     val getRoamingDownloadsEnabled get() = GetRoamingDownloadsEnabled(userPreferencesRepository)
-
-    /**
-     * Used for updating the user's language preference.
-     * @author Arnau Mora
-     * @since 20211229
-     */
-    val setLanguage get() = SetLanguage(userPreferencesRepository)
 
     /**
      * Used for updating the nearby zones enabled preference.

@@ -2,8 +2,8 @@ package com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
-import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -55,7 +55,7 @@ import dev.burnoo.compose.rememberpreference.rememberBooleanPreference
 @ExperimentalMaterial3Api
 @ExperimentalPermissionsApi
 @Composable
-fun ComponentActivity.NearbyZones() {
+fun AppCompatActivity.NearbyZones() {
     val model: NearbyZonesViewModel by viewModels()
     val locationPermissionState = rememberMultiplePermissionsState(
         listOf(

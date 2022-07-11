@@ -57,14 +57,6 @@ interface UserPreferencesRepository {
     suspend fun setDisplayAlertsEnabled(enabled: Boolean)
 
     /**
-     * Sets the language to use in the app.
-     * @author Arnau Mora
-     * @since 20211229
-     * @param language The language in ISO format to use in the app.
-     */
-    suspend fun setLanguage(language: String)
-
-    /**
      * Enables or disables centering the map when clicked a marker.
      * @author Arnau Mora
      * @since 20211229
@@ -111,13 +103,6 @@ interface UserPreferencesRepository {
      * @param enabled Whether or not to enable the tab.
      */
     suspend fun setDeveloperTabEnabled(enabled: Boolean)
-
-    /**
-     * Should return the value of the language preference of the user.
-     * @author Arnau Mora
-     * @since 20211229
-     */
-    val language: Flow<String>
 
     /**
      * Should return the value of the nearby zones enabled preference.

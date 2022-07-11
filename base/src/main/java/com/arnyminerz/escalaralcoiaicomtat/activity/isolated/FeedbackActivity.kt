@@ -1,8 +1,8 @@
 package com.arnyminerz.escalaralcoiaicomtat.activity.isolated
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -51,7 +51,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
  * @author Arnau Mora
  * @since 20220126
  */
-class FeedbackActivity : ComponentActivity() {
+class FeedbackActivity : AppCompatActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,9 +119,11 @@ fun FeedbackWindow() {
             )
         },
         floatingActionButtonPosition = FabPosition.End,
-    ) {
+    ) { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
         ) {
             val emailFocusRequester = remember { FocusRequester() }
             val messageFocusRequester = remember { FocusRequester() }

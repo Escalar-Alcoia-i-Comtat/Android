@@ -8,7 +8,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl.NEARBY_DISTANCE
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetAlertNotificationsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetDataCollection
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetErrorCollection
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetLanguage
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetMarkerCentering
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetMeteredDownloadsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetMobileDownloadsEnabled
@@ -18,7 +17,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetRoam
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetAlertNotificationsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetDataCollection
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetErrorCollection
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetLanguage
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetMarkerCentering
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetMeteredDownloadsEnabled
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.SetMobileDownloadsEnabled
@@ -30,10 +28,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.*
 
 class SettingsViewModel(
-    language: GetLanguage,
     nearbyZonesEnabled: GetNearbyZonesEnabled,
     nearbyZonesDistance: GetNearbyZonesDistance,
     markerCentering: GetMarkerCentering,
@@ -43,7 +39,6 @@ class SettingsViewModel(
     mobileDownloadsEnabled: GetMobileDownloadsEnabled,
     meteredDownloadsEnabled: GetMeteredDownloadsEnabled,
     roamingDownloadsEnabled: GetRoamingDownloadsEnabled,
-    private val _setLanguage: SetLanguage,
     private val _setNearbyZonesEnabled: SetNearbyZonesEnabled,
     private val _setNearbyZonesDistance: SetNearbyZonesDistance,
     private val _setMarkerCentering: SetMarkerCentering,
@@ -62,12 +57,6 @@ class SettingsViewModel(
         super.onCleared()
         Timber.d("$this::onCleared")
     }
-
-    val language: StateFlow<String> = language().stateIn(
-        viewModelScope,
-        SharingStarted.Eagerly,
-        Locale.getDefault().language
-    )
 
     val nearbyZonesEnabled: StateFlow<Boolean> = nearbyZonesEnabled().stateIn(
         viewModelScope,
@@ -123,10 +112,6 @@ class SettingsViewModel(
         true
     )
 
-    fun setLanguage(language: String) {
-        viewModelScope.launch { _setLanguage(language) }
-    }
-
     fun setNearbyZonesEnabled(enabled: Boolean) {
         viewModelScope.launch { _setNearbyZonesEnabled(enabled) }
     }
@@ -164,7 +149,6 @@ class SettingsViewModel(
     }
 
     class Factory(
-        private val getLanguage: GetLanguage,
         private val getNearbyZonesEnabled: GetNearbyZonesEnabled,
         private val getNearbyZonesDistance: GetNearbyZonesDistance,
         private val getMarkerCentering: GetMarkerCentering,
@@ -174,7 +158,6 @@ class SettingsViewModel(
         private val getMobileDownloadsEnabled: GetMobileDownloadsEnabled,
         private val getMeteredDownloadsEnabled: GetMeteredDownloadsEnabled,
         private val getRoamingDownloadsEnabled: GetRoamingDownloadsEnabled,
-        private val setLanguage: SetLanguage,
         private val setNearbyZonesEnabled: SetNearbyZonesEnabled,
         private val setNearbyZonesDistance: SetNearbyZonesDistance,
         private val setMarkerCentering: SetMarkerCentering,
@@ -189,7 +172,6 @@ class SettingsViewModel(
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(SettingsViewModel::class.java))
                 return SettingsViewModel(
-                    getLanguage,
                     getNearbyZonesEnabled,
                     getNearbyZonesDistance,
                     getMarkerCentering,
@@ -199,7 +181,6 @@ class SettingsViewModel(
                     getMobileDownloadsEnabled,
                     getMeteredDownloadsEnabled,
                     getRoamingDownloadsEnabled,
-                    setLanguage,
                     setNearbyZonesEnabled,
                     setNearbyZonesDistance,
                     setMarkerCentering,
@@ -222,7 +203,6 @@ class SettingsViewModel(
  */
 val PreferencesModule.settingsViewModel
     get() = SettingsViewModel.Factory(
-        getLanguage,
         getNearbyZonesEnabled,
         getNearbyZonesDistance,
         getMarkerCentering,
@@ -232,7 +212,6 @@ val PreferencesModule.settingsViewModel
         getMobileDownloadsEnabled,
         getMeteredDownloadsEnabled,
         getRoamingDownloadsEnabled,
-        setLanguage,
         setNearbyZonesEnabled,
         setNearbyZonesDistance,
         setMarkerCentering,
