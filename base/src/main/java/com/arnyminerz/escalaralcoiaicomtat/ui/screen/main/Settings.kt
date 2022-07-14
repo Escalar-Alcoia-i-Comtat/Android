@@ -124,6 +124,7 @@ fun MainActivity.SettingsScreen(mainPager: PagerState) {
                     serverVersion = SemVer.fromString(serverVersion),
                     serverProduction = serverIsProduction,
                     "https://github.com/Escalar-Alcoia-i-Comtat/Android",
+                    "https://escalaralcoiaicomtat.org/",
                 )
             }
         }
