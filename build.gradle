@@ -26,6 +26,9 @@ buildscript {
 
         // Dokka documentation generator
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$kotlin_version"
+
+        // Kotlin Symbol Processor
+        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$kotlin_version-1.0.6"
     }
 }
 
