@@ -1,5 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.shared
 
+import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer
+
 const val APPLICATION_ID = "com.arnyminerz.escalaralcoiaicomtat"
 
 /**
@@ -57,17 +59,8 @@ const val REST_API_DATA_FETCH = "$REST_API_URL/api/data/"
  */
 const val REST_API_INFO_ENDPOINT = "$REST_API_URL/api/info"
 
-const val APP_UPDATE_MAX_TIME_DAYS_KEY = "APP_UPDATE_MAX_TIME_DAYS"
-const val APP_UPDATE_MAX_TIME_DAYS_DEFAULT = 7L
-
-const val SHOW_NON_DOWNLOADED_KEY = "SHOW_NON_DOWNLOADED"
-const val SHOW_NON_DOWNLOADED_DEFAULT = false
-
-const val ENABLE_AUTHENTICATION_KEY = "ENABLE_AUTHENTICATION"
-const val ENABLE_AUTHENTICATION_DEFAULT = false
-
-const val PROFILE_IMAGE_SIZE_KEY = "PROFILE_IMAGE_SIZE"
-const val PROFILE_IMAGE_SIZE_DEFAULT = 512L
+const val IMAGE_MAX_ZOOM_KEY = "IMAGE_MAX_ZOOM"
+const val IMAGE_MAX_ZOOM_DEFAULT = 7.0
 
 /**
  * Stores the version of the server with which this app is compatible. If the given by the server
@@ -75,39 +68,15 @@ const val PROFILE_IMAGE_SIZE_DEFAULT = 512L
  * @author Arnau Mora
  * @since 20220627
  */
-const val EXPECTED_SERVER_VERSION = "1.0.4"
+val EXPECTED_SERVER_VERSION = SemVer(1, 0, 5)
 
-/**
- * The maximum amount of days that will be allowed to the user not having updated the app
- * before forcing an update.
- */
-var APP_UPDATE_MAX_TIME_DAYS = APP_UPDATE_MAX_TIME_DAYS_DEFAULT
-
-/**
- * Sets if the non-downloaded items should show in the downloads page.
- */
-var SHOW_NON_DOWNLOADED = SHOW_NON_DOWNLOADED_DEFAULT
-
-/**
- * Sets if the authentication features should be enabled.
- * @since 20210422
- */
-var ENABLE_AUTHENTICATION = ENABLE_AUTHENTICATION_DEFAULT
-
-/**
- * Sets the width and height that the profile images should be resized to.
- * @since 20210430
- */
-var PROFILE_IMAGE_SIZE = PROFILE_IMAGE_SIZE_DEFAULT
+var IMAGE_MAX_ZOOM_LEVEL = IMAGE_MAX_ZOOM_DEFAULT
 
 /**
  * Sets the default values for Remote Config
  */
 val REMOTE_CONFIG_DEFAULTS = mapOf(
-    APP_UPDATE_MAX_TIME_DAYS_KEY to APP_UPDATE_MAX_TIME_DAYS_DEFAULT,
-    SHOW_NON_DOWNLOADED_KEY to SHOW_NON_DOWNLOADED_DEFAULT,
-    ENABLE_AUTHENTICATION_KEY to ENABLE_AUTHENTICATION_DEFAULT,
-    PROFILE_IMAGE_SIZE_KEY to PROFILE_IMAGE_SIZE_DEFAULT,
+    IMAGE_MAX_ZOOM_KEY to IMAGE_MAX_ZOOM_DEFAULT,
 )
 const val REMOTE_CONFIG_MIN_FETCH_INTERVAL = 43200L // 12 hours
 

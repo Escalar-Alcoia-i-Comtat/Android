@@ -154,6 +154,12 @@ class MainActivity : AppCompatActivity() {
                         )
                     }
                 },
+                title = {
+                    Text(stringResource(R.string.dialog_server_version_title))
+                },
+                text = {
+                    Text(stringResource(R.string.dialog_server_version_message))
+                }
             )
 
         Scaffold(
@@ -190,7 +196,7 @@ class MainActivity : AppCompatActivity() {
                     0 -> ExploreScreen()
                     1 -> MapScreen()
                     2 -> StorageScreen()
-                    3 -> SettingsScreen()
+                    3 -> SettingsScreen(pagerState)
                     4 -> if (BuildConfig.DEBUG) DeveloperScreen()
                 }
             }
