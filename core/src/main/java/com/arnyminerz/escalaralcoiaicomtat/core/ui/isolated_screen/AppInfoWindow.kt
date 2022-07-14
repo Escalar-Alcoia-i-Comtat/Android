@@ -11,7 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -22,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXPECTED_SERVER_VERSION
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.IconButtonWithText
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launchStore
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
@@ -51,6 +52,7 @@ fun ApplicationInfoWindow(
     serverVersion: SemVer,
     serverProduction: Boolean,
     githubLink: String,
+    websiteLink: String,
 ) {
     val context = LocalContext.current
     val drawable = AppCompatResources.getDrawable(context, appIconResource)
@@ -104,34 +106,29 @@ fun ApplicationInfoWindow(
                     style = MaterialTheme.typography.labelMedium,
                 )
         }
-        Button(
-            onClick = {
-                context.launch(Intent(Intent.ACTION_VIEW)) {
-                    data = Uri.parse(githubLink)
-                }
-            },
+        Row(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 12.dp),
-            colors = ButtonDefaults.textButtonColors()
         ) {
-            Column {
-                Image(
-                    FontAwesomeIcons.Brands.Github,
-                    contentDescription = "Github",
-                    modifier = Modifier
-                        .size(42.dp)
-                        .align(Alignment.CenterHorizontally),
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
-                )
-                Text(
-                    text = "GitHub",
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
+            IconButtonWithText(
+                onClick = {
+                    context.launch(Intent(Intent.ACTION_VIEW)) {
+                        data = Uri.parse(githubLink)
+                    }
+                },
+                icon = FontAwesomeIcons.Brands.Github,
+                text = "Github",
+            )
+            IconButtonWithText(
+                onClick = {
+                    context.launch(Intent(Intent.ACTION_VIEW)) {
+                        data = Uri.parse(websiteLink)
+                    }
+                },
+                icon = Icons.Rounded.Public,
+                text = stringResource(R.string.pref_info_website),
+            )
         }
 
         if (serverVersion != EXPECTED_SERVER_VERSION)
@@ -186,6 +183,7 @@ fun ApplicationInfoWindowPreview() {
         "1.0.0",
         SemVer(1, 0, 4),
         false,
+        "",
         "",
     )
 }
