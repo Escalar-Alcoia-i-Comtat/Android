@@ -128,7 +128,7 @@ dependencies {
     ksp "com.github.bumptech.glide:compiler:$glide_version"
 
     // Jetpack Compose utilities - Glide
-    api 'com.github.skydoves:landscapist-glide:1.5.3'
+    api 'com.github.skydoves:landscapist-glide:1.6.0'
 
     // Jetpack Compose utilities - Charts
     implementation 'io.github.bytebeats:compose-charts:0.1.2'
