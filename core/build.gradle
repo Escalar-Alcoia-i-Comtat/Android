@@ -161,7 +161,7 @@ dependencies {
     api 'com.google.firebase:firebase-messaging-directboot:23.0.7'
 
     // Gson for JSON parsing
-    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'com.google.code.gson:gson:2.9.1'
 
     // Maps SDK
     api 'org.osmdroid:osmdroid-android:6.1.13'
