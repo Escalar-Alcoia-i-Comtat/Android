@@ -105,10 +105,10 @@ dependencies {
     androidTestApi "androidx.compose.ui:ui-test-junit4:$compose_version"
 
     // Jetpack Compose utilities - Remember preferences
-    implementation 'dev.burnoo:compose-remember-preference:0.3.4'
+    implementation 'dev.burnoo:compose-remember-preference:0.3.5'
 
     // Jetpack Compose utilities - Accompanist libraries
-    def accompanist_version = '0.24.13-rc'
+    def accompanist_version = '0.26.0-alpha'
     api 'com.google.accompanist:accompanist-appcompat-theme:0.25.1'
     api "com.google.accompanist:accompanist-pager:$accompanist_version"
     api "com.google.accompanist:accompanist-drawablepainter:$accompanist_version"
@@ -151,20 +151,20 @@ dependencies {
     implementation "androidx.room:room-ktx:$room_version"
 
     // Google Firebase
-    api platform('com.google.firebase:firebase-bom:30.3.1')
+    api platform('com.google.firebase:firebase-bom:30.3.2')
     api 'com.google.firebase:firebase-analytics-ktx'
     api 'com.google.firebase:firebase-crashlytics-ktx'
     api 'com.google.firebase:firebase-config-ktx'
     api 'com.google.firebase:firebase-perf-ktx'
     api 'com.google.firebase:firebase-dynamic-links-ktx'
     api 'com.google.firebase:firebase-messaging-ktx'
-    api 'com.google.firebase:firebase-messaging-directboot:23.0.6'
+    api 'com.google.firebase:firebase-messaging-directboot:23.0.7'
 
     // Gson for JSON parsing
-    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'com.google.code.gson:gson:2.9.1'
 
     // Maps SDK
-    api 'org.osmdroid:osmdroid-android:6.1.13'
+    api 'org.osmdroid:osmdroid-android:6.1.14'
     api 'com.github.MKergall:osmbonuspack:6.9.0'
 
     // AndroidX preferences
