@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -23,11 +24,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import androidx.preference.PreferenceManager
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
@@ -54,9 +58,12 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.StorageViewModel
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.settingsViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.material.badge.ExperimentalBadgeUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 
 class MainActivity : AppCompatActivity() {
@@ -81,6 +88,13 @@ class MainActivity : AppCompatActivity() {
             if (!isGranted)
                 toast(R.string.toast_error_notifications_permission)
         }
+
+    @ExperimentalPagerApi
+    private lateinit var pagerState: PagerState
+
+    private lateinit var settingsNavController: NavHostController
+
+    private lateinit var scope: CoroutineScope
 
     @ExperimentalBadgeUtils
     @OptIn(
@@ -127,7 +141,9 @@ class MainActivity : AppCompatActivity() {
     @ExperimentalFoundationApi
     @ExperimentalPermissionsApi
     private fun Home() {
-        val pagerState = rememberPagerState()
+        pagerState = rememberPagerState()
+        settingsNavController = rememberNavController()
+        scope = rememberCoroutineScope()
         var userScrollEnabled by remember { mutableStateOf(true) }
         val isServerIncompatible by storageViewModel.serverIncompatible
 
@@ -136,6 +152,8 @@ class MainActivity : AppCompatActivity() {
                 userScrollEnabled = page != 1
             }
         }
+
+        BackHandler(onBack = ::backHandler)
 
         if (isServerIncompatible)
             AlertDialog(
@@ -196,12 +214,27 @@ class MainActivity : AppCompatActivity() {
                     0 -> ExploreScreen()
                     1 -> MapScreen()
                     2 -> StorageScreen()
-                    3 -> SettingsScreen(pagerState)
+                    3 -> SettingsScreen(settingsNavController)
                     4 -> if (BuildConfig.DEBUG) DeveloperScreen()
                 }
             }
         }
 
         storageViewModel.checkForUpdates()
+    }
+
+    /**
+     * Handles what happens when the back button is pressed.
+     * @author Arnau Mora
+     * @since 20220828
+     */
+    @ExperimentalPagerApi
+    fun backHandler() {
+        if (pagerState.currentPage == 3)
+            if (settingsNavController.currentDestination?.navigatorName != "default")
+                settingsNavController.navigate("default")
+            else scope.launch {
+                pagerState.animateScrollToPage(0)
+            }
     }
 }

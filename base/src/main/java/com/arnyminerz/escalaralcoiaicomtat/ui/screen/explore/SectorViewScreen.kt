@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore
 
-import android.app.Activity
 import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -72,7 +71,7 @@ import timber.log.Timber
 @ExperimentalMaterialApi
 @ExperimentalMaterial3Api
 @ExperimentalPagerApi
-fun Activity.SectorViewScreen(
+fun DataClassActivity.SectorViewScreen(
     sectorPageViewModel: SectorPageViewModel,
     zone: Zone,
     childrenCount: Int,
@@ -108,7 +107,7 @@ fun Activity.SectorViewScreen(
             CenterAlignedTopAppBar(
                 navigationIcon = {
                     IconButton(
-                        onClick = { onBackPressed() },
+                        onClick = ::backHandler,
                     ) {
                         Icon(
                             Icons.Rounded.ChevronLeft,
