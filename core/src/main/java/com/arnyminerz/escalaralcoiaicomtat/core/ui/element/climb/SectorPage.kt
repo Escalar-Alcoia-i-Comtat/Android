@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Chip
@@ -40,11 +41,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -95,6 +98,7 @@ fun SectorPage(
     sector: Sector,
     dataClassIntent: (sector: Sector) -> Intent,
     maximized: MutableState<Boolean>,
+    scrollEnabled: (enabled: Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     viewModel.loadPaths(sector)
@@ -149,8 +153,17 @@ fun SectorPage(
             }
         }
 
+        val listState = rememberLazyListState()
+
+        LaunchedEffect(listState) {
+            snapshotFlow { listState.isScrollInProgress }
+                .collect { scrollEnabled(!it) }
+        }
+
         if (!imageMaximized)
-            LazyColumn {
+            LazyColumn(
+                state = listState,
+            ) {
                 item {
                     Column(
                         modifier = Modifier.fillMaxWidth()
