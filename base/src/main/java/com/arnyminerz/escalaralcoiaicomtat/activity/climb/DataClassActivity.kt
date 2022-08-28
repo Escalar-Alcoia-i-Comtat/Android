@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.os.Bundle
 import android.os.Parcelable
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -124,6 +125,9 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         loadNavStack(savedInstanceState)
 
         setContent {
+            // Add back pressed callback
+            BackHandler(onBack = ::backHandler)
+
             AppTheme {
                 val dataClass = sectorPageViewModel.dataClass
                 if (dataClass != null) {
@@ -181,13 +185,18 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         hasInternet.postValue(state.hasInternet)
     }
 
-    override fun onBackPressed() {
+    /**
+     * Handles what the app should do when pressing the back button.
+     * @author Arnau Mora
+     * @since 20220714
+     */
+    fun backHandler() {
         if (navStack.value.size > 1)
             navStack.value = navStack.value.dropLast(1)
         else if (isMaximized.value)
             isMaximized.value = false
         else
-            super.onBackPressed()
+            finish()
     }
 
     /**
