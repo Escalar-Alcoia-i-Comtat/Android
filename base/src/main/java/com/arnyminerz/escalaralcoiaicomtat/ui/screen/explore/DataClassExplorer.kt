@@ -1,6 +1,5 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore
 
-import android.app.Activity
 import android.os.Parcelable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -62,7 +61,7 @@ import com.google.android.material.badge.ExperimentalBadgeUtils
 @ExperimentalMaterialApi
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi
-fun Activity.DataClassExplorer(
+fun DataClassActivity.DataClassExplorer(
     exploreViewModel: ExploreViewModel,
     hasInternetLiveData: MutableLiveData<Boolean>,
     navStack: MutableState<List<DataClassImpl>>,
@@ -78,7 +77,7 @@ fun Activity.DataClassExplorer(
             CenterAlignedTopAppBar(
                 navigationIcon = {
                     IconButton(
-                        onClick = { onBackPressed() }
+                        onClick = ::backHandler
                     ) {
                         Image(
                             Icons.Rounded.ChevronLeft,

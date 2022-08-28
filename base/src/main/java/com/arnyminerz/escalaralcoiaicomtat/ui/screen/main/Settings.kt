@@ -17,15 +17,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
@@ -36,8 +35,6 @@ import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.GeneralSettingsScr
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.MainSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.NotificationsSettingsScreen
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
-import kotlinx.coroutines.launch
 
 /**
  * The Settings screen of the Main Activity.
@@ -47,10 +44,7 @@ import kotlinx.coroutines.launch
 @Composable
 @ExperimentalPagerApi
 @ExperimentalMaterial3Api
-fun MainActivity.SettingsScreen(mainPager: PagerState) {
-    val scope = rememberCoroutineScope()
-    val settingsNavController = rememberNavController()
-
+fun MainActivity.SettingsScreen(settingsNavController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -72,14 +66,7 @@ fun MainActivity.SettingsScreen(mainPager: PagerState) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             FloatingActionButton(
-                onClick = {
-                    // TODO: Stop using deprecated on back pressed method
-                    if (title != settingsTitle)
-                        onBackPressed()
-                    else scope.launch {
-                        mainPager.scrollToPage(0)
-                    }
-                },
+                onClick = ::backHandler,
                 modifier = Modifier.padding(start = 8.dp),
             ) {
                 Icon(
