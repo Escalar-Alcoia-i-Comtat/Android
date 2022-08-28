@@ -180,12 +180,13 @@ fun DataClassActivity.SectorViewScreen(
                 },
             )
 
+        var scrollEnabled by remember { mutableStateOf(true) }
         if (currentSector != null)
             HorizontalPager(
                 count = childrenCount,
                 state = pagerState,
                 modifier = Modifier.padding(padding),
-                userScrollEnabled = !maximized.value,
+                userScrollEnabled = !maximized.value && scrollEnabled,
             ) { index ->
                 Timber.d("Rendering Sector...")
                 SectorPage(
@@ -200,7 +201,7 @@ fun DataClassActivity.SectorViewScreen(
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                     },
                     maximized,
-                )
+                ) { scrollEnabled = it }
             }
         else
             Box(modifier = Modifier.fillMaxSize()) {
