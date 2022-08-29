@@ -81,8 +81,10 @@ class MainMapViewModel(
                     boundingBox?.let { mapView.zoomToBoundingBox(it, false) }
                     finishListener()
                 }
-            }catch (e: VolleyError) {
+            } catch (e: VolleyError) {
                 Timber.e(e, "Could not download KMZ file.")
+            } catch (e: NullPointerException) {
+                Timber.e(e, "Could not load OSMDroid map.")
             }
         }
     }

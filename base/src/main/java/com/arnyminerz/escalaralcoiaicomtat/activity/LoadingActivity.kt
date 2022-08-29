@@ -14,9 +14,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareComponentActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.dataClassExploreActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.core.network.ConnectivityStateListener
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
@@ -42,7 +42,7 @@ import timber.log.Timber
  * @author Arnau Mora
  * @since 20211225
  */
-class LoadingActivity : NetworkAwareComponentActivity() {
+class LoadingActivity : NetworkAwareActivity() {
     companion object {
         /**
          * The key used in shared preferences for checking if data has been indexed before v83.
@@ -181,7 +181,7 @@ class LoadingActivity : NetworkAwareComponentActivity() {
         }
     }
 
-    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
+    override fun onStateChange(state: ConnectivityStateListener.NetworkState) {
         super.onStateChange(state)
 
         if (this::loadingViewModel.isInitialized && !isServerIncompatible.value)
