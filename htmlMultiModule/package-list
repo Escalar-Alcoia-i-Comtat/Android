@@ -45,11 +45,6 @@ com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.ui
 com.arnyminerz.escalaralcoiaicomtat.core.network
 com.arnyminerz.escalaralcoiaicomtat.core.notification
 com.arnyminerz.escalaralcoiaicomtat.core.preferences
-com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl
-com.arnyminerz.escalaralcoiaicomtat.core.preferences.model
-com.arnyminerz.escalaralcoiaicomtat.core.preferences.repo
-com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.system
-com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user
 com.arnyminerz.escalaralcoiaicomtat.core.shared
 com.arnyminerz.escalaralcoiaicomtat.core.ui
 com.arnyminerz.escalaralcoiaicomtat.core.ui.element
