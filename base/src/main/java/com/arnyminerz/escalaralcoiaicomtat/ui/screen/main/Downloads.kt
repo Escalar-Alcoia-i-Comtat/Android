@@ -73,6 +73,7 @@ fun RowScope.TableCell(
  * @since 20220315
  * @param viewModel The [StorageViewModel] instance for loading data.
  */
+@ExperimentalMaterial3Api
 @Composable
 @ExperimentalMaterialApi
 private fun UpdatesCard(viewModel: StorageViewModel) {
