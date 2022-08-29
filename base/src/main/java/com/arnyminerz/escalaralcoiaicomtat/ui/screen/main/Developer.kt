@@ -22,10 +22,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import com.arnyminerz.escalaralcoiaicomtat.activity.IntroActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.setAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.vibrate
 
 @Composable
@@ -58,13 +57,10 @@ fun MainActivity.DeveloperScreen() {
             }
             Button(
                 onClick = {
-                    doAsync {
-                        PreferencesModule.systemPreferencesRepository
-                            .markIntroAsShown(false)
-                        uiContext {
+                    setAsync(Keys.shownIntro, false)
+                        .invokeOnCompletion {
                             launch(IntroActivity::class.java)
                         }
-                    }
                 }
             ) {
                 Text(text = "Show Intro")

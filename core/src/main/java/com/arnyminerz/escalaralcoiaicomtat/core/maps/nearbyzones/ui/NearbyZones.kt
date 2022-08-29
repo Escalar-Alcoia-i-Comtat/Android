@@ -43,8 +43,8 @@ import androidx.compose.ui.unit.sp
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.NearbyZonesViewModel
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.nearbyZonesMarkers
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.setAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.vibrate
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -186,9 +186,7 @@ fun AppCompatActivity.NearbyZones() {
                                     },
                                     onLongPress = {
                                         vibrate(50)
-                                        doAsync {
-                                            PreferencesModule.setNearbyZonesEnabled.invoke(false)
-                                        }
+                                        setAsync(Keys.nearbyZonesEnabled, false)
                                     }
                                 )
                             }

@@ -84,7 +84,7 @@ fun IntroWindow(
                 modifier = Modifier.testTag("intro_fab"),
                 onClick = {
                     val page = pages[currentPage]
-                    val currentValue = page.action.currentValue as MutableState<*>
+                    val currentValue = page.action.value as MutableState<*>
                     val permissionsState = permissionsStatesMap[currentPage]
 
                     if (currentValue.value as? Boolean == true && permissionsState?.allPermissionsGranted == false)
@@ -98,7 +98,7 @@ fun IntroWindow(
                 }
             ) {
                 val page = pages[currentPage]
-                val currentValue = page.action.currentValue as MutableState<*>
+                val currentValue = page.action.value as MutableState<*>
                 val permissionsState = permissionsStatesMap[currentPage]
 
                 if (currentValue.value as? Boolean == true && permissionsState?.allPermissionsGranted != true) {

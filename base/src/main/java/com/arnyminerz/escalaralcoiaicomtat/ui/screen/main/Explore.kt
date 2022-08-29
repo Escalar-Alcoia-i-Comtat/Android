@@ -8,7 +8,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,7 +31,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,7 +51,8 @@ import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.firebase.logAnalyticsSearchEvent
 import com.arnyminerz.escalaralcoiaicomtat.core.firebase.logAnalyticsSelectedItem
 import com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.ui.NearbyZones
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.collectAsState
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb.DataClassItem
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
@@ -140,15 +139,14 @@ fun MainActivity.ExploreScreen() {
         }
 
         // Nearby Zones
-        val nearbyZonesEnabled by PreferencesModule
-            .getNearbyZonesEnabled()
-            .collectAsState(initial = false)
+        val nearbyZonesEnabled by collectAsState(Keys.nearbyZonesEnabled, true)
         if (nearbyZonesEnabled)
             NearbyZones()
 
         // Areas list
         LazyColumn(
-            modifier = Modifier.fillMaxHeight()
+            modifier = Modifier
+                .fillMaxSize(),
         ) {
             item {
                 Row(

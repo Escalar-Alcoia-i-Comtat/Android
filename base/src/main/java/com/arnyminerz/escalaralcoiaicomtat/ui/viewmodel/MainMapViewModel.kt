@@ -8,13 +8,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.usecase.user.GetMarkerCentering
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.livedata.MutableListLiveData
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.osmdroid.bonuspack.kml.KmlDocument
 import org.osmdroid.util.BoundingBox
@@ -24,7 +20,6 @@ import timber.log.Timber
 
 class MainMapViewModel(
     application: Application,
-    markerCentering: GetMarkerCentering
 ) : AndroidViewModel(application) {
     init {
         Timber.d("$this::init")
@@ -38,12 +33,6 @@ class MainMapViewModel(
     val locations: MutableListLiveData<GeoPoint> = MutableListLiveData<GeoPoint>().apply {
         postValue(mutableListOf())
     }
-
-    val centerMarkerOnClick: StateFlow<Boolean> = markerCentering().stateIn(
-        viewModelScope,
-        SharingStarted.Eagerly,
-        true
-    )
 
     fun loadAreasIntoMap(
         mapView: MapView,
@@ -91,12 +80,11 @@ class MainMapViewModel(
 
     class Factory(
         private val application: Application,
-        private val centerMarkerOnClick: GetMarkerCentering
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             @Suppress("UNCHECKED_CAST")
             if (modelClass.isAssignableFrom(MainMapViewModel::class.java))
-                return MainMapViewModel(application, centerMarkerOnClick) as T
+                return MainMapViewModel(application) as T
             error("Unknown view model class: $modelClass")
         }
     }

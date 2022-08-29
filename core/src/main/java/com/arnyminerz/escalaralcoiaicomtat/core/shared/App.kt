@@ -12,7 +12,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
@@ -32,8 +31,6 @@ class App : Application() {
         super.onCreate()
 
         dataSingleton = DataSingleton.getInstance(this)
-
-        PreferencesModule.initWith(this)
 
         // TODO: Shared preferences will be removed
         @Suppress("DEPRECATION")

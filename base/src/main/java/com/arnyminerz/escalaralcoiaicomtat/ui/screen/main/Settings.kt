@@ -13,7 +13,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,7 +28,8 @@ import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.collectAsState
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen.ApplicationInfoWindow
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.GeneralSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.MainSettingsScreen
@@ -53,12 +53,8 @@ fun MainActivity.SettingsScreen(settingsNavController: NavHostController) {
         val settingsTitle = stringResource(R.string.item_settings)
         val loadingPlaceholder = stringResource(R.string.status_loading)
         var title by remember { mutableStateOf(settingsTitle) }
-        val serverVersion by PreferencesModule.systemPreferencesRepository
-            .getServerVersion
-            .collectAsState(loadingPlaceholder)
-        val serverIsProduction: Boolean by PreferencesModule.systemPreferencesRepository
-            .getServerIsProduction
-            .collectAsState(true)
+        val serverVersion by collectAsState(Keys.serverVersion, loadingPlaceholder)
+        val serverIsProduction: Boolean by collectAsState(Keys.serverIsProduction, true)
 
         Row(
             modifier = Modifier
@@ -95,11 +91,11 @@ fun MainActivity.SettingsScreen(settingsNavController: NavHostController) {
             }
             composable("general") {
                 title = stringResource(R.string.pref_main_title)
-                GeneralSettingsScreen(settingsViewModel)
+                GeneralSettingsScreen()
             }
             composable("notifications") {
                 title = stringResource(R.string.pref_noti_title)
-                NotificationsSettingsScreen(this@SettingsScreen, settingsViewModel)
+                NotificationsSettingsScreen()
             }
             composable("info") {
                 title = stringResource(R.string.pref_info_title)
