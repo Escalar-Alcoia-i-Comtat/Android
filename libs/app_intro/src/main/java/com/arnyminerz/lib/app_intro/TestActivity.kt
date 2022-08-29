@@ -5,7 +5,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import com.arnyminerz.lib.app_intro.action.IntroAction
 import com.arnyminerz.lib.app_intro.action.IntroActionType
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -25,8 +28,6 @@ class TestActivity : ComponentActivity() {
         const val INTRO_PAGE_4_TITLE = "Final Page"
     }
 
-    private val switch1State = mutableStateOf(false)
-
     private val pages = listOf(
         IntroPageData(
             title = INTRO_PAGE_1_TITLE,
@@ -41,9 +42,18 @@ class TestActivity : ComponentActivity() {
             content = "This page will request some permissions from the user",
             IntroAction(
                 text = INTRO_PAGE_3_SWITCH,
-                switch1State,
+                object : Value<Boolean> {
+                    private val state = mutableStateOf(false)
+
+                    override val value: State<Boolean>
+                        @Composable
+                        get() = remember { state }
+
+                    override suspend fun setValue(value: Boolean) {
+                        state.value = value
+                    }
+                },
                 IntroActionType.SWITCH,
-                { },
             ),
             permissions = arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,

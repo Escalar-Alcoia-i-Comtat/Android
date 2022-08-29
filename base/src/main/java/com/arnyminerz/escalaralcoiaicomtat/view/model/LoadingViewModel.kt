@@ -21,7 +21,8 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.WarningActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.get
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_INTENT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_MD5
@@ -53,7 +54,6 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.perf.ktx.performance
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import org.json.JSONException
@@ -312,10 +312,8 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
      */
     @WorkerThread
     private suspend fun dataCollectionSetUp() {
-        val getDataCollection = PreferencesModule.getDataCollection
-        val getErrorCollection = PreferencesModule.getErrorCollection
-        val dataCollection = getDataCollection().first()
-        val errorCollection = getErrorCollection().first()
+        val dataCollection = get(Keys.dataCollection, true)
+        val errorCollection = get(Keys.errorCollection, true)
 
         Firebase.crashlytics.setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG && errorCollection)
         Timber.v("Set Crashlytics collection enabled to $errorCollection")
@@ -389,10 +387,9 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                     )
                 }
 
-                val systemPreferencesRepository = PreferencesModule.systemPreferencesRepository
-                val shownPSWarning = systemPreferencesRepository.shownPlayServicesWarning.first()
-                val shownPrefWarning = systemPreferencesRepository.shownPreferencesWarning.first()
-                val shownMd5Warning = systemPreferencesRepository.shownMd5Warning.first()
+                val shownPSWarning = get(Keys.shownPlayServicesWarning, false)
+                val shownPrefWarning = get(Keys.shownPreferencesWarning, false)
+                val shownMd5Warning = get(Keys.shownMd5Warning, false)
 
                 uiContext {
                     if ((migratedFromSharedPreferences && !shownPrefWarning) ||

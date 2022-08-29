@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.collectAsState
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.MapBottomDialog
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.MapView
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.computeCentroid
@@ -38,6 +39,7 @@ fun MainActivity.MapScreen() {
     var mapView: MapView? = null
 
     val density = LocalDensity.current
+    val centerMarkerOnClick by collectAsState(Keys.centerMarkerOnClick, true)
 
     Box(modifier = Modifier.fillMaxSize()) {
         var bottomDialogVisible by remember { mutableStateOf(false) }
@@ -46,8 +48,7 @@ fun MainActivity.MapScreen() {
 
         MapView(
             modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
+                .fillMaxSize(),
         ) { map ->
             mapView = map
 
@@ -69,8 +70,7 @@ fun MainActivity.MapScreen() {
                                 is FolderOverlay -> explodeFolder(overlayItem)
                                 is Marker -> overlayItem.setOnMarkerClickListener { marker, mapView ->
                                     // Center marker only if enabled
-                                    val markerCenteringEnabled = mapViewModel.centerMarkerOnClick
-                                    if (markerCenteringEnabled.value)
+                                    if (centerMarkerOnClick)
                                         mapView.zoomToBoundingBox(marker.bounds, true)
 
                                     // Show dialog
@@ -137,5 +137,6 @@ fun MainActivity.MapScreen() {
             Timber.e("No markers were loaded.")
         }
     }
-    exploreViewModel.loadAreas()
+    if (exploreViewModel.areas.isEmpty())
+        exploreViewModel.loadAreas()
 }

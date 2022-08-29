@@ -2,7 +2,6 @@ package com.arnyminerz.escalaralcoiaicomtat.activity
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,16 +16,17 @@ import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.dataClassExploreActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.network.ConnectivityStateListener
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.get
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_LINK_PATH
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.sharedPreferences
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.LoadingWindow
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launchStore
-import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.LoadingActivityViewModel
-import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.loadingActivityViewModel
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.view.model.LoadingViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
@@ -81,13 +81,6 @@ class LoadingActivity : NetworkAwareActivity() {
     private var deepLinkPath: String? = null
 
     /**
-     * The loading activity view model. Used for fetching preferences.
-     * @author Arnau Mora
-     * @since 20211229
-     */
-    private val viewModel by viewModels<LoadingActivityViewModel>(factoryProducer = { PreferencesModule.loadingActivityViewModel })
-
-    /**
      * Stores whether or not the server is compatible with the current app's version.
      * @author Arnau Mora
      * @since 2020627
@@ -105,14 +98,16 @@ class LoadingActivity : NetworkAwareActivity() {
         // TODO: Detect if there's a sharedPreference for intro shown set to true. This means the
         // user has already been using the app, and it should be informed that the behaviour has
         // been changed, and that it should download everything again. Or create a migration dialog.
-        val shownIntro = viewModel.introShown.value
-        if (!shownIntro) {
-            Timber.w("Showing intro!")
-            finish()
-            launch(IntroActivity::class.java)
-            return
-        } else
-            Timber.v("Won't show intro.")
+        doAsync {
+            val shownIntro = get(Keys.shownIntro, false)
+
+            if (!shownIntro) uiContext {
+                Timber.w("Showing intro!")
+                finish()
+                launch(IntroActivity::class.java)
+            } else
+                Timber.v("Won't show intro.")
+        }
 
         Timber.i("Getting deep link...")
         deepLinkPath = getExtra(EXTRA_LINK_PATH)

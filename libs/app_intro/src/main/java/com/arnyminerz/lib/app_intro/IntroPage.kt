@@ -7,13 +7,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -25,8 +26,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arnyminerz.lib.app_intro.action.IntroAction
-import com.arnyminerz.lib.app_intro.action.IntroActionContext
 import com.arnyminerz.lib.app_intro.action.IntroActionType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Allows to display a page that can be used in the intro of the app to introduce the app
@@ -65,6 +68,8 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
         )
 
         val action = data.action
+        val state by action.value.value
+
         @Suppress("UNCHECKED_CAST")
         Row(
             modifier = Modifier
@@ -73,36 +78,16 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             when (action.type) {
-                IntroActionType.BUTTON -> {
-                    val context: IntroActionContext<R> =
-                        object : IntroActionContext<R>() {
-                            override fun setState(state: R) {}
-                        }
-                    Button(
-                        enabled = action.enabled,
-                        modifier = Modifier.testTag("intro_button"),
-                        onClick = {
-                            action.callback.invoke(context, null as R)
-                        },
-                    ) {
-                        Text(text = action.text)
-                    }
-                }
                 IntroActionType.SWITCH -> {
-                    val context: IntroActionContext<R> =
-                        object : IntroActionContext<R>() {
-                            override fun setState(state: R) {
-                                (state as? Boolean)?.let { action.currentValue.value = it as R }
-                            }
-                        }
+                    fun setValue(value: Boolean) = CoroutineScope(Dispatchers.IO).launch {
+                        action.value.setValue(value as R)
+                    }
+
                     Switch(
-                        checked = action.currentValue.value as? Boolean ?: false,
+                        checked = state as Boolean,
                         enabled = action.enabled,
                         modifier = Modifier.testTag("intro_switch"),
-                        onCheckedChange = {
-                            action.currentValue.value = it as R
-                            action.callback.invoke(context, it as R)
-                        },
+                        onCheckedChange = { setValue(it) },
                     )
                     Text(
                         text = action.text,
@@ -111,28 +96,19 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier
                             .padding(start = 8.dp)
-                            .clickable {
-                                action
-                                    .currentValue
-                                    .value = !(action.currentValue.value as Boolean) as R
-                            }
+                            .clickable { setValue(!(state as Boolean)) },
                     )
                 }
                 IntroActionType.CHECKBOX -> {
-                    val context: IntroActionContext<R> =
-                        object : IntroActionContext<R>() {
-                            override fun setState(state: R) {
-                                (state as? Boolean)?.let { action.currentValue.value = it as R }
-                            }
-                        }
+                    fun setValue(value: Boolean) = CoroutineScope(Dispatchers.IO).launch {
+                        action.value.setValue(value as R)
+                    }
+
                     Checkbox(
-                        checked = action.currentValue.value as? Boolean ?: false,
+                        checked = state as Boolean,
                         enabled = action.enabled,
                         modifier = Modifier.testTag("intro_checkbox"),
-                        onCheckedChange = {
-                            action.currentValue.value = it as R
-                            action.callback.invoke(context, it as R)
-                        }
+                        onCheckedChange = { setValue(it) }
                     )
                     Text(
                         text = action.text,
@@ -140,11 +116,7 @@ fun <R : Any?> IntroPage(data: IntroPageData<R>) {
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier
-                            .clickable {
-                                action
-                                    .currentValue
-                                    .value = !(action.currentValue.value as Boolean) as R
-                            }
+                            .clickable { setValue(!(state as Boolean)) },
                     )
                 }
                 else -> {}
@@ -171,22 +143,27 @@ fun IntroPagePreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 fun IntroPagePreviewSwitch() {
-    val switchStatus = remember { mutableStateOf(false) }
+    val mutableState = remember { mutableStateOf(false) }
 
     IntroPage(
         data = IntroPageData(
             "This is title",
             "This is the content of the slide. The text can be modified for each slide.",
             action = IntroAction(
-                if (switchStatus.value)
+                if (mutableState.value)
                     "This can be switched"
                 else
                     "This has been switched",
-                switchStatus,
+                object : Value<Boolean> {
+                    override val value: State<Boolean>
+                        @Composable
+                        get() = mutableState
+
+                    override suspend fun setValue(value: Boolean) {
+                        mutableState.value = value
+                    }
+                },
                 IntroActionType.SWITCH,
-                callback = { switched ->
-                    switchStatus.value = switched
-                }
             )
         )
     )
@@ -197,22 +174,29 @@ fun IntroPagePreviewSwitch() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 fun IntroPagePreviewCheckbox() {
-    val switchStatus = remember { mutableStateOf(false) }
+    val value = object : Value<Boolean> {
+        val mutableState = remember { mutableStateOf(false) }
+
+        override val value: State<Boolean>
+            @Composable
+            get() = mutableState
+
+        override suspend fun setValue(value: Boolean) {
+            mutableState.value = value
+        }
+    }
 
     IntroPage(
         data = IntroPageData(
             "This is title",
             "This is the content of the slide. The text can be modified for each slide.",
             action = IntroAction(
-                if (switchStatus.value)
+                if (value.value.value)
                     "This can be switched"
                 else
                     "This has been switched",
-                switchStatus,
+                value,
                 IntroActionType.CHECKBOX,
-                callback = { switched ->
-                    switchStatus.value = switched
-                }
             )
         )
     )
