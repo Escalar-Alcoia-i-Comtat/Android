@@ -8,8 +8,6 @@ com.arnyminerz.escalaralcoiaicomtat.activity.climb
 com.arnyminerz.escalaralcoiaicomtat.activity.isolated
 com.arnyminerz.escalaralcoiaicomtat.activity.model
 com.arnyminerz.escalaralcoiaicomtat.activity.popup
-com.arnyminerz.escalaralcoiaicomtat.fragment.dialog
-com.arnyminerz.escalaralcoiaicomtat.fragment.model
 com.arnyminerz.escalaralcoiaicomtat.list.completions.holder
 com.arnyminerz.escalaralcoiaicomtat.list.holder
 com.arnyminerz.escalaralcoiaicomtat.service
@@ -45,7 +43,6 @@ com.arnyminerz.escalaralcoiaicomtat.core.maps
 com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones
 com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.ui
 com.arnyminerz.escalaralcoiaicomtat.core.network
-com.arnyminerz.escalaralcoiaicomtat.core.network.base
 com.arnyminerz.escalaralcoiaicomtat.core.notification
 com.arnyminerz.escalaralcoiaicomtat.core.preferences
 com.arnyminerz.escalaralcoiaicomtat.core.preferences.impl
