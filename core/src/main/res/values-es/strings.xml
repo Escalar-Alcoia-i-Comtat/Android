@@ -306,6 +306,7 @@
     <string name="pref_info_server_version_non_production">(No de producción)</string>
     <string name="pref_info_server_version_warning_title">Versión incompatible</string>
     <string name="pref_info_server_version_warning_message">La versión de la aplicación que estás utilizando espera un servidor con la versión %s, pero ahora mismo el servidor usa %s. No debería haber ningún problema, pero cualquier cosa puede ocurrir. Se recomienda que actualice la aplicación a la última versión lo antes posible.</string>
+    <string name="pref_info_website">Sitio Web</string>
     <string name="notification_channel_downloads_group_name">Descargas</string>
     <string name="notification_channel_download_progress_name">Progreso de descarga</string>
     <string name="notification_channel_download_progress_desc">Cuando estés descargando algo aparecerá esto </string>
