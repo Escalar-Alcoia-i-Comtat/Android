@@ -12,17 +12,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 
-class App : Application(), ConnectivityProvider.ConnectivityStateListener {
-    private val provider: ConnectivityProvider
-        get() = appNetworkProvider
-
+class App : Application() {
     /**
      * The [FirebaseAnalytics] instance reference for analyzing the user actions.
      * @author Arnau Mora
@@ -37,8 +32,6 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
 
         dataSingleton = DataSingleton.getInstance(this)
 
-        PreferencesModule.initWith(this)
-
         // TODO: Shared preferences will be removed
         @Suppress("DEPRECATION")
         sharedPreferences =
@@ -46,32 +39,16 @@ class App : Application(), ConnectivityProvider.ConnectivityStateListener {
 
         Timber.v("Getting Analytics instance...")
         analytics = Firebase.analytics
-
-        Timber.v("Initializing network provider...")
-        appNetworkProvider = ConnectivityProvider.createProvider(this)
-        Timber.v("Adding network listener...")
-        provider.addListener(this)
     }
 
     override fun onTerminate() {
         Timber.i("Terminating app...")
-
-        Timber.v("Removing network listener...")
-        provider.removeListener(this)
 
         Timber.v("Closing database connection...")
         dataSingleton.close()
 
         super.onTerminate()
     }
-
-    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
-        Timber.v("Network state updated: $state")
-
-        appNetworkState = state
-    }
-
-    override suspend fun onStateChangeAsync(state: ConnectivityProvider.NetworkState) {}
 
     /**
      * Gets all the [Area]s available.

@@ -25,14 +25,6 @@ sealed class IntroActionType<R> {
     object SWITCH : IntroActionType<Boolean>()
 
     /**
-     * Displays a button that can be pressed. When it's tapped, a callback with no type will be
-     * sent.
-     * @author Arnau Mora
-     * @since 20220130
-     */
-    object BUTTON : IntroActionType<Any?>()
-
-    /**
      * When no action is wanted to be displayed.
      * @author Arnau Mora
      * @since 20220130

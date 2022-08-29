@@ -8,14 +8,15 @@ import androidx.annotation.WorkerThread
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
 import com.arnyminerz.escalaralcoiaicomtat.core.R
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.NEARBY_DISTANCE_DEFAULT
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.get
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.append
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.distanceTo
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getBoundingBox
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toGeoPoint
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
-import kotlinx.coroutines.flow.collectLatest
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import timber.log.Timber
@@ -87,59 +88,57 @@ internal suspend fun locationCallback(
         mapView.overlays.remove(marker)
 
     val newMarkersList = arrayListOf<Marker>()
+    val nearbyZonesDistance = context
+        .get(Keys.nearbyZonesDistance, NEARBY_DISTANCE_DEFAULT)
 
-    PreferencesModule
-        .getNearbyZonesDistance()
-        .collectLatest { nearbyZonesDistance ->
-            model.zones.forEach { zone ->
-                zone.location
-                    ?.takeIf { it.distanceTo(location.toGeoPoint()) <= nearbyZonesDistance }
-                    ?.let { markerPosition ->
-                        Marker(mapView)
-                            .apply {
-                                val intent = zone.intent(context)
+    model.zones.forEach { zone ->
+        zone.location
+            ?.takeIf { it.distanceTo(location.toGeoPoint()) <= nearbyZonesDistance }
+            ?.let { markerPosition ->
+                Marker(mapView)
+                    .apply {
+                        val intent = zone.intent(context)
 
-                                position = markerPosition
-                                title = zone.displayName
-                                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                                icon = ContextCompat.getDrawable(
-                                    context,
-                                    R.drawable.ic_waypoint_escalador_blanc
-                                )
-                                infoWindow
-                                    .view
-                                    .findViewById<TextView>(R.id.bubble_title)
-                                    .setOnClickListener { context.launch(intent) }
+                        position = markerPosition
+                        title = zone.displayName
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                        icon = ContextCompat.getDrawable(
+                            context,
+                            R.drawable.ic_waypoint_escalador_blanc
+                        )
+                        infoWindow
+                            .view
+                            .findViewById<TextView>(R.id.bubble_title)
+                            .setOnClickListener { context.launch(intent) }
 
-                                newMarkersList.add(this)
-                            }
+                        newMarkersList.add(this)
                     }
             }
+    }
 
-            Timber.v("Found ${newMarkersList.size} markers: $newMarkersList")
+    Timber.v("Found ${newMarkersList.size} markers: $newMarkersList")
 
-            uiContext {
-                // Check if there are new items on the markers list
-                val newItems = nearbyZonesMarkers.value
-                    .map { it.title }
-                    .toSet() != newMarkersList
-                    .map { it.title }
-                    .toSet()
+    uiContext {
+        // Check if there are new items on the markers list
+        val newItems = nearbyZonesMarkers.value
+            .map { it.title }
+            .toSet() != newMarkersList
+            .map { it.title }
+            .toSet()
 
-                if (newItems) {
-                    Timber.v("Updating nearbyZonesMarkers...")
-                    nearbyZonesMarkers.value = newMarkersList
+        if (newItems) {
+            Timber.v("Updating nearbyZonesMarkers...")
+            nearbyZonesMarkers.value = newMarkersList
 
-                    Timber.v("Processing nearby zones markers on map...")
-                    processNearbyZonesMarkers(mapView, location, true)
+            Timber.v("Processing nearby zones markers on map...")
+            processNearbyZonesMarkers(mapView, location, true)
 
-                    Timber.v("Calling onLoadedPoints with new list...")
-                    onLoadedPoints(newMarkersList.size)
-                } else {
-                    Timber.d("Old markers: ${nearbyZonesMarkers.value}")
-                    Timber.v("Calling onLoadedPoints with old markers...")
-                    onLoadedPoints(nearbyZonesMarkers.value.size)
-                }
-            }
+            Timber.v("Calling onLoadedPoints with new list...")
+            onLoadedPoints(newMarkersList.size)
+        } else {
+            Timber.d("Old markers: ${nearbyZonesMarkers.value}")
+            Timber.v("Calling onLoadedPoints with old markers...")
+            onLoadedPoints(nearbyZonesMarkers.value.size)
         }
+    }
 }

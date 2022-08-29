@@ -13,31 +13,28 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.collectAsState
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.isolated_screen.ApplicationInfoWindow
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.GeneralSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.MainSettingsScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings.NotificationsSettingsScreen
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
-import kotlinx.coroutines.launch
 
 /**
  * The Settings screen of the Main Activity.
@@ -47,10 +44,7 @@ import kotlinx.coroutines.launch
 @Composable
 @ExperimentalPagerApi
 @ExperimentalMaterial3Api
-fun MainActivity.SettingsScreen(mainPager: PagerState) {
-    val scope = rememberCoroutineScope()
-    val settingsNavController = rememberNavController()
-
+fun MainActivity.SettingsScreen(settingsNavController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -59,12 +53,8 @@ fun MainActivity.SettingsScreen(mainPager: PagerState) {
         val settingsTitle = stringResource(R.string.item_settings)
         val loadingPlaceholder = stringResource(R.string.status_loading)
         var title by remember { mutableStateOf(settingsTitle) }
-        val serverVersion by PreferencesModule.systemPreferencesRepository
-            .getServerVersion
-            .collectAsState(loadingPlaceholder)
-        val serverIsProduction: Boolean by PreferencesModule.systemPreferencesRepository
-            .getServerIsProduction
-            .collectAsState(true)
+        val serverVersion by collectAsState(Keys.serverVersion, loadingPlaceholder)
+        val serverIsProduction: Boolean by collectAsState(Keys.serverIsProduction, true)
 
         Row(
             modifier = Modifier
@@ -72,14 +62,7 @@ fun MainActivity.SettingsScreen(mainPager: PagerState) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             FloatingActionButton(
-                onClick = {
-                    // TODO: Stop using deprecated on back pressed method
-                    if (title != settingsTitle)
-                        onBackPressed()
-                    else scope.launch {
-                        mainPager.scrollToPage(0)
-                    }
-                },
+                onClick = ::backHandler,
                 modifier = Modifier.padding(start = 8.dp),
             ) {
                 Icon(
@@ -108,11 +91,11 @@ fun MainActivity.SettingsScreen(mainPager: PagerState) {
             }
             composable("general") {
                 title = stringResource(R.string.pref_main_title)
-                GeneralSettingsScreen(settingsViewModel)
+                GeneralSettingsScreen()
             }
             composable("notifications") {
                 title = stringResource(R.string.pref_noti_title)
-                NotificationsSettingsScreen(this@SettingsScreen, settingsViewModel)
+                NotificationsSettingsScreen()
             }
             composable("info") {
                 title = stringResource(R.string.pref_info_title)

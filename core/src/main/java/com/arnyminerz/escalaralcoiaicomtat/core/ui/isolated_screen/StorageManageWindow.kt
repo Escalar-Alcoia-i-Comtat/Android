@@ -20,7 +20,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.set
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.deleteDir
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
@@ -110,11 +112,12 @@ private fun ClearSettingsButton(
     @StringRes buttonText: Int,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     ClearButton(
         buttonText,
         valueLoad = { true },
-        deleteAction = { PreferencesModule.clear() },
-        modifier = modifier
+        deleteAction = { PreferencesModule.clear(context) },
+        modifier = modifier,
     )
 }
 
@@ -143,10 +146,7 @@ private fun ClearSearchSessionButton(
                     clearSectors()
                     clearPaths()
                 }
-
-            PreferencesModule
-                .systemPreferencesRepository
-                .voidData()
+            context.set(Keys.indexedData, false)
         },
         modifier = modifier
     )

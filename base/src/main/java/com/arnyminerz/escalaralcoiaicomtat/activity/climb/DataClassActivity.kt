@@ -2,6 +2,7 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 
 import android.os.Bundle
 import android.os.Parcelable
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -14,11 +15,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.MutableLiveData
-import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareComponentActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.model.NetworkAwareActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.network.base.ConnectivityProvider
+import com.arnyminerz.escalaralcoiaicomtat.core.network.ConnectivityStateListener
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS_ID
@@ -27,6 +28,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_NAV_STACK
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModelImpl
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtraOrSavedInstanceState
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.put
@@ -45,7 +47,7 @@ import timber.log.Timber
  * @author Arnau Mora
  * @since 20220105
  */
-class DataClassActivity : NetworkAwareComponentActivity() {
+class DataClassActivity : NetworkAwareActivity() {
     /**
      * The View Model for doing async tasks in DataClassExplorer.
      * @author Arnau Mora
@@ -124,6 +126,9 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         loadNavStack(savedInstanceState)
 
         setContent {
+            // Add back pressed callback
+            BackHandler(onBack = ::backHandler)
+
             AppTheme {
                 val dataClass = sectorPageViewModel.dataClass
                 if (dataClass != null) {
@@ -175,19 +180,27 @@ class DataClassActivity : NetworkAwareComponentActivity() {
         super.onSaveInstanceState(outState)
     }
 
-    override fun onStateChange(state: ConnectivityProvider.NetworkState) {
+    override fun onStateChange(state: ConnectivityStateListener.NetworkState) {
         super.onStateChange(state)
-        Timber.i("Updated network state. Internet: ${state.hasInternet}")
-        hasInternet.postValue(state.hasInternet)
+        doAsync {
+            val internetAvailable = state.isInternetAvailable
+            Timber.i("Updated network state. Internet: $internetAvailable")
+            hasInternet.postValue(internetAvailable)
+        }
     }
 
-    override fun onBackPressed() {
+    /**
+     * Handles what the app should do when pressing the back button.
+     * @author Arnau Mora
+     * @since 20220714
+     */
+    fun backHandler() {
         if (navStack.value.size > 1)
             navStack.value = navStack.value.dropLast(1)
         else if (isMaximized.value)
             isMaximized.value = false
         else
-            super.onBackPressed()
+            finish()
     }
 
     /**

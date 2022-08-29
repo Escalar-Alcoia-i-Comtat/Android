@@ -15,22 +15,23 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.os.LocaleListCompat
 import androidx.navigation.NavController
 import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.isolated.FeedbackActivity
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferencesModule
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.NEARBY_DISTANCE_DEFAULT
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.collectAsState
+import com.arnyminerz.escalaralcoiaicomtat.core.preferences.setAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.ListDialogOptions
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsCategory
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsDataDialog
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.settings.SettingsItem
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
-import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.SettingsViewModel
 import timber.log.Timber
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -70,21 +71,14 @@ fun MainSettingsScreen(context: Context, settingsNavController: NavController) {
             icon = Icons.Default.BugReport
         )
         if (BuildConfig.DEBUG) {
-            val showDeveloperTab by PreferencesModule
-                .userPreferencesRepository
-                .developerTabEnabled
-                .collectAsState(true)
+            val showDeveloperTab by collectAsState(Keys.enableDeveloperTab, true)
             SettingsItem(
                 title = stringResource(R.string.pref_main_show_developer_tab_title),
                 subtitle = stringResource(R.string.pref_main_show_developer_tab_sum),
                 stateBoolean = showDeveloperTab,
                 switch = true,
                 setBoolean = {
-                    doAsync {
-                        PreferencesModule
-                            .userPreferencesRepository
-                            .setDeveloperTabEnabled(!showDeveloperTab)
-                    }
+                    context.setAsync(Keys.enableDeveloperTab, !showDeveloperTab)
                 }
             )
         }
@@ -93,13 +87,15 @@ fun MainSettingsScreen(context: Context, settingsNavController: NavController) {
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun GeneralSettingsScreen(viewModel: SettingsViewModel) {
+fun GeneralSettingsScreen() {
+    val context = LocalContext.current
+
     Column {
-        val nearbyZonesEnabled by viewModel.nearbyZonesEnabled.collectAsState()
-        val nearbyZonesDistance by viewModel.nearbyZonesDistance.collectAsState()
-        val markerClickCenteringEnabled by viewModel.markerCentering.collectAsState()
-        val errorCollectionEnabled by viewModel.errorCollection.collectAsState()
-        val dataCollectionEnabled by viewModel.dataCollection.collectAsState()
+        val nearbyZonesEnabled by collectAsState(Keys.nearbyZonesEnabled, true)
+        val nearbyZonesDistance by collectAsState(Keys.nearbyZonesDistance, NEARBY_DISTANCE_DEFAULT)
+        val markerClickCenteringEnabled by collectAsState(Keys.centerMarkerOnClick, true)
+        val errorCollectionEnabled by collectAsState(Keys.errorCollection, true)
+        val dataCollectionEnabled by collectAsState(Keys.dataCollection, true)
 
         SettingsItem(
             title = stringResource(R.string.pref_gene_language_title),
@@ -131,7 +127,7 @@ fun GeneralSettingsScreen(viewModel: SettingsViewModel) {
             subtitle = stringResource(R.string.pref_gene_nearby_sum),
             stateBoolean = nearbyZonesEnabled,
             setBoolean = { value ->
-                viewModel.setNearbyZonesEnabled(value)
+                context.setAsync(Keys.nearbyZonesEnabled, value)
             },
             switch = true
         )
@@ -141,7 +137,7 @@ fun GeneralSettingsScreen(viewModel: SettingsViewModel) {
             enabled = nearbyZonesEnabled,
             stateInt = nearbyZonesDistance,
             setInt = { value ->
-                viewModel.setNearbyZonesDistance(value)
+                context.setAsync(Keys.nearbyZonesDistance, value)
             },
             dialog = SettingsDataDialog(
                 title = stringResource(R.string.pref_gene_nearby_distance_dialog_title),
@@ -158,7 +154,7 @@ fun GeneralSettingsScreen(viewModel: SettingsViewModel) {
             subtitle = stringResource(R.string.pref_gene_map_move_marker_sum),
             stateBoolean = markerClickCenteringEnabled,
             setBoolean = { value ->
-                viewModel.setMarkerCentering(value)
+                context.setAsync(Keys.centerMarkerOnClick, value)
             },
             switch = true
         )
@@ -170,7 +166,7 @@ fun GeneralSettingsScreen(viewModel: SettingsViewModel) {
             subtitle = stringResource(R.string.pref_gene_error_reporting_sum),
             stateBoolean = errorCollectionEnabled,
             setBoolean = { value ->
-                viewModel.setErrorCollection(value)
+                context.setAsync(Keys.errorCollection, value)
             },
             switch = true
         )
@@ -179,7 +175,7 @@ fun GeneralSettingsScreen(viewModel: SettingsViewModel) {
             subtitle = stringResource(R.string.pref_gene_data_collection_sum),
             stateBoolean = dataCollectionEnabled,
             setBoolean = { value ->
-                viewModel.setDataCollection(value)
+                context.setAsync(Keys.dataCollection, value)
             },
             switch = true
         )
@@ -188,16 +184,18 @@ fun GeneralSettingsScreen(viewModel: SettingsViewModel) {
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationsSettingsScreen(context: Context, viewModel: SettingsViewModel) {
+fun NotificationsSettingsScreen() {
+    val context = LocalContext.current
+
     Column {
-        val alertsEnabled by viewModel.alertNotificationsEnabled.collectAsState()
+        val alertsEnabled by collectAsState(Keys.showAlerts, true)
 
         SettingsItem(
             title = stringResource(R.string.pref_noti_alert_title),
             subtitle = stringResource(R.string.pref_noti_alert_sum),
             stateBoolean = alertsEnabled,
             setBoolean = { value ->
-                viewModel.setAlertNotificationsEnabled(value)
+                context.setAsync(Keys.showAlerts, value)
             },
             switch = true
         )
