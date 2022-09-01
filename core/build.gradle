@@ -158,7 +158,7 @@ dependencies {
     api 'com.google.firebase:firebase-perf-ktx'
     api 'com.google.firebase:firebase-dynamic-links-ktx'
     api 'com.google.firebase:firebase-messaging-ktx'
-    api 'com.google.firebase:firebase-messaging-directboot:23.0.7'
+    api 'com.google.firebase:firebase-messaging-directboot:23.0.8'
 
     // Gson for JSON parsing
     implementation 'com.google.code.gson:gson:2.9.1'
