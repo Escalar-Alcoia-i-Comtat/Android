@@ -13,7 +13,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,6 +75,10 @@ fun IntroWindow(
             }
     }
 
+    @Suppress("UNCHECKED_CAST")
+    val page = pages[currentPage] as IntroPageData<Any?>
+    val value: Any? by page.action.value.value
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
         floatingActionButtonPosition = FabPosition.Center,
@@ -83,11 +86,9 @@ fun IntroWindow(
             FloatingActionButton(
                 modifier = Modifier.testTag("intro_fab"),
                 onClick = {
-                    val page = pages[currentPage]
-                    val currentValue = page.action.value as MutableState<*>
                     val permissionsState = permissionsStatesMap[currentPage]
 
-                    if (currentValue.value as? Boolean == true && permissionsState?.allPermissionsGranted == false)
+                    if (value as? Boolean == true && permissionsState?.allPermissionsGranted == false)
                         permissionsState.launchMultiplePermissionRequest()
                     else if (pagerState.currentPage + 1 >= pages.size)
                     // Reached the end, exit and enter MainActivity
@@ -97,11 +98,9 @@ fun IntroWindow(
                     }
                 }
             ) {
-                val page = pages[currentPage]
-                val currentValue = page.action.value as MutableState<*>
                 val permissionsState = permissionsStatesMap[currentPage]
 
-                if (currentValue.value as? Boolean == true && permissionsState?.allPermissionsGranted != true) {
+                if (value as? Boolean == true && permissionsState?.allPermissionsGranted != true) {
                     if (blockPage < 0) {
                         blockPage = pagerState.currentPage
                         Timber.i("Blocked current page to $blockPage")
@@ -139,11 +138,7 @@ fun IntroWindow(
             state = pagerState,
             modifier = Modifier
                 .padding(padding),
-        ) { currentPage ->
-            val page = pages[currentPage]
-
-            IntroPage(page)
-        }
+        ) { IntroPage(pages[currentPage]) }
     }
 }
 
