@@ -51,6 +51,7 @@ import com.bumptech.glide.request.target.Target
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.fade
 import com.google.accompanist.placeholder.placeholder
+import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.launch
 import kotlin.math.PI
@@ -289,8 +290,10 @@ fun ZoomableImage(
     ) {
         GlideImage(
             imageModel = imageModel,
-            contentDescription = contentDescription,
-            contentScale = contentScale,
+            imageOptions = ImageOptions(
+                contentDescription = contentDescription,
+                contentScale = contentScale,
+            ),
             requestOptions = {
                 RequestOptions
                     .placeholderOf(placeholderDrawable)
