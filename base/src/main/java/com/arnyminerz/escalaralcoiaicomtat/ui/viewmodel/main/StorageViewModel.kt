@@ -24,6 +24,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingle
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.updateAvailable
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
 import kotlinx.coroutines.Dispatchers
@@ -124,6 +125,11 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
             currentlyUpdatingItems = currentlyUpdatingItems
                 .toMutableMap()
                 .filterKeys { it.first != data.namespace && it.second != data.objectId }
+
+            if (currentlyUpdatingItems.isEmpty()) {
+                Timber.i("Finished updating, loading Areas again...")
+                DataSingleton.getInstance(context).areas.value = app.getAreas()
+            }
         }
     }
 
