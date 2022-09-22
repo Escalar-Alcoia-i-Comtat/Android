@@ -36,6 +36,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiLet
 import com.bumptech.glide.request.RequestOptions
+import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 import timber.log.Timber
 
@@ -61,7 +62,9 @@ fun MapBottomDialog(
                         .placeholderOf(R.drawable.ic_wide_placeholder)
                         .error(R.drawable.ic_wide_placeholder)
                 },
-                contentDescription = bottomDialogTitle,
+                imageOptions = ImageOptions(
+                    contentDescription = bottomDialogTitle,
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(180.dp)
