@@ -94,6 +94,19 @@ data class NavItem(
     val visible: State<Boolean> = mutableStateOf(true)
 )
 
+@Composable
+@ExperimentalPagerApi
+@ExperimentalMaterial3Api
+fun RowScope.Screens(
+    pagerState: PagerState,
+    screens: Collection<NavItem>,
+    startingIndex: Int = 0,
+) {
+    var c = startingIndex
+    for (screen in screens)
+        NavigationItem(pagerState, screen, c++)
+}
+
 @ExperimentalMaterial3Api
 @Composable
 @ExperimentalPagerApi

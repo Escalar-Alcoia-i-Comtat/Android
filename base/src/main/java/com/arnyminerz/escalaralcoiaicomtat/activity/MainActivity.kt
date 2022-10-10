@@ -36,11 +36,13 @@ import com.arnyminerz.escalaralcoiaicomtat.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.popup.NotificationPermissionPopup
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingleton
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.updateAvailable
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.collectAsState
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.NavigationItem
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screen
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.Screens
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launchStore
@@ -90,6 +92,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var settingsNavController: NavHostController
 
     private lateinit var scope: CoroutineScope
+
+    private val updatesAvailable = UpdaterSingleton.getInstance().updateAvailableObjects
+
+    private val screens = listOf(
+        NavItem(Screen.Explore),
+        NavItem(Screen.Storage, updatesAvailable),
+        NavItem(Screen.Settings),
+    )
 
     @ExperimentalBadgeUtils
     @OptIn(
@@ -175,16 +185,15 @@ class MainActivity : AppCompatActivity() {
                 }
             )
 
+        val developerTabEnabled = collectAsState(Keys.enableDeveloperTab, true)
+
         Scaffold(
             bottomBar = {
                 NavigationBar {
-                    val updatesAvailable = UpdaterSingleton.getInstance().updateAvailableObjects
-                    val developerTabEnabled = collectAsState(Keys.enableDeveloperTab, true)
-
-                    NavigationItem(pagerState, NavItem(Screen.Explore), 0)
-                    NavigationItem(pagerState, NavItem(Screen.Map), 1)
-                    NavigationItem(pagerState, NavItem(Screen.Storage, updatesAvailable), 2)
-                    NavigationItem(pagerState, NavItem(Screen.Settings), 3)
+                    Screens(
+                        pagerState = pagerState,
+                        screens = screens,
+                    )
                     if (BuildConfig.DEBUG)
                         NavigationItem(
                             pagerState,
@@ -192,23 +201,24 @@ class MainActivity : AppCompatActivity() {
                                 Screen.Developer,
                                 visible = developerTabEnabled,
                             ),
-                            4
+                            3,
                         )
                 }
             }
         ) { innerPadding ->
+            val isDeveloperTabEnabled by developerTabEnabled
             HorizontalPager(
-                count = 5,
+                count = screens.size + (if (BuildConfig.DEBUG && isDeveloperTabEnabled) 1 else 0),
                 state = pagerState,
                 modifier = Modifier.padding(innerPadding),
                 userScrollEnabled = userScrollEnabled,
             ) { index ->
-                when (index) {
-                    0 -> ExploreScreen()
-                    1 -> MapScreen()
-                    2 -> StorageScreen()
-                    3 -> SettingsScreen(settingsNavController)
-                    4 -> if (BuildConfig.DEBUG) DeveloperScreen()
+                val screen = screens.getOrNull(index)?.screen
+                when (screen?.route) {
+                    Screen.Explore.route -> ExploreScreen()
+                    Screen.Storage.route -> StorageScreen()
+                    Screen.Settings.route -> SettingsScreen(settingsNavController)
+                    Screen.Developer.route -> DeveloperScreen()
                 }
             }
         }
