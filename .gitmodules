@@ -1,0 +1,3 @@
+[submodule "libs/app_intro"]
+	path = libs/app_intro
+	url = https://github.com/ArnyminerZ/AppIntro.git
