@@ -2,13 +2,8 @@ package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main
 
 import android.app.Application
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
@@ -33,14 +28,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
      */
     private val dataSingleton = DataSingleton.getInstance(application)
 
-    /**
-     * Serves as a cache of the loaded areas so the map screen can access them.
-     * @author Arnau Mora
-     * @since 20220105
-     */
-    var lastAreas = listOf<Area>()
-        private set
-
     val children by DataSingleton.getInstance(application).children
 
     val areas by DataSingleton.getInstance(application).areas
@@ -55,7 +42,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             val areasList = app.getAreas()
                 .sortedBy { it.displayName }
             dataSingleton.areas.value = areasList
-            lastAreas = areasList
         }
     }
 
