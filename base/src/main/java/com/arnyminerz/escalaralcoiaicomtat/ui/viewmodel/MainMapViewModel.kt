@@ -42,6 +42,10 @@ class MainMapViewModel(
         Timber.i("Loading KMZ of ${areas.size} areas...")
         viewModelScope.launch {
             try {
+                Timber.d("Removing all the old overlays from map.")
+                mapView.overlays.clear()
+
+                var boundingBox: BoundingBox? = null
                 for (area in areas) {
                     Timber.d("Loading KMZ file of $area...")
                     val kmzFile = area.kmzFile(context, false)
@@ -53,21 +57,20 @@ class MainMapViewModel(
                     }
 
                     Timber.d("Building KMZ map overlay of $area...")
-                    val kmzOverlay =
-                        kmzDocument.mKmlRoot.buildOverlay(mapView, null, null, kmzDocument)
+                    val kmzOverlay = kmzDocument.mKmlRoot.buildOverlay(mapView, null, null, kmzDocument)
 
                     Timber.d("Adding KMZ overlay to the map...")
+                    boundingBox = boundingBox?.concat(kmzOverlay.bounds) ?: kmzOverlay.bounds
                     mapView.overlays.add(kmzOverlay)
                 }
 
                 uiContext {
                     Timber.d("Invalidating map...")
                     mapView.invalidate()
-                    Timber.d("Centering into map overlays...")
-                    var boundingBox: BoundingBox? = null
-                    for (overlay in mapView.overlays)
-                        boundingBox = boundingBox?.concat(overlay.bounds) ?: overlay.bounds
-                    boundingBox?.let { mapView.zoomToBoundingBox(it, false) }
+                    mapView.post {
+                        Timber.d("Centering into map overlays...")
+                        boundingBox?.let { mapView.zoomToBoundingBox(it, true) }
+                    }
                     finishListener()
                 }
             } catch (e: VolleyError) {

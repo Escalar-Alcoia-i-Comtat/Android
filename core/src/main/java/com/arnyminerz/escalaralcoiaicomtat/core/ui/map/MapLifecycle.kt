@@ -16,6 +16,7 @@ fun rememberMapViewWithLifecycle(onCreate: (mapView: MapView) -> Unit): MapView 
     val mapView = remember {
         MapView(context).apply {
             id = R.id.map
+            clipToOutline = true
         }
     }
 

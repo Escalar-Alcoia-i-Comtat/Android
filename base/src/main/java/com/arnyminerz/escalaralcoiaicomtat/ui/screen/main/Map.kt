@@ -11,23 +11,25 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.distinctUntilChanged
 import com.arnyminerz.escalaralcoiaicomtat.activity.MainActivity
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.collectAsState
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.MapBottomDialog
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.map.MapView
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.computeCentroid
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.FolderOverlay
 import org.osmdroid.views.overlay.Marker
@@ -39,13 +41,71 @@ fun MainActivity.MapScreen() {
     var mapView: MapView? = null
 
     val density = LocalDensity.current
+    val context = LocalContext.current
+
     val centerMarkerOnClick by collectAsState(Keys.centerMarkerOnClick, true)
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        var bottomDialogVisible by remember { mutableStateOf(false) }
-        var bottomDialogTitle by remember { mutableStateOf("") }
-        var bottomDialogImage by remember { mutableStateOf<Uri?>(null) }
+    var bottomDialogVisible by remember { mutableStateOf(false) }
+    var bottomDialogTitle by remember { mutableStateOf("") }
+    var bottomDialogImage by remember { mutableStateOf<Uri?>(null) }
 
+    LaunchedEffect(mapView) {
+        snapshotFlow { DataSingleton.getInstance(context).areas.value }
+            .distinctUntilChanged()
+            .collect { areas ->
+                Timber.i("Got new areas: ${areas.map { it.objectId }}")
+                if (areas.isNotEmpty())
+                    mapView?.also { map ->
+                        mapViewModel.loadAreasIntoMap(map, areas) {
+                            fun explodeFolder(folderOverlay: FolderOverlay) {
+                                folderOverlay.items.forEach { overlayItem ->
+                                    // Keep exploding until a non-folder is obtained
+                                    when (overlayItem) {
+                                        is FolderOverlay -> explodeFolder(overlayItem)
+                                        is Marker -> overlayItem.setOnMarkerClickListener { marker, mapView ->
+                                            // Center marker only if enabled
+                                            if (centerMarkerOnClick)
+                                                mapView.zoomToBoundingBox(marker.bounds, true)
+
+                                            // Show dialog
+                                            val markerTitle = marker.title
+                                            if (markerTitle != null) {
+                                                bottomDialogTitle = markerTitle
+                                                bottomDialogVisible = true
+                                                val loadedImageUrl = marker.snippet?.let { snippet ->
+                                                    val srcPos = snippet.indexOf("src=\"")
+                                                        .takeIf { it >= 0 } ?: return@let false
+                                                    val cutUrl = snippet.substring(srcPos + 5)
+                                                    val endPos = cutUrl.indexOf('"')
+                                                        .takeIf { it >= 0 } ?: return@let false
+                                                    val imageUrl = cutUrl.substring(0, endPos)
+                                                    bottomDialogImage = Uri.parse(imageUrl)
+                                                    true
+                                                } ?: false
+                                                if (!loadedImageUrl)
+                                                    bottomDialogImage = null
+
+                                                Timber.i("Marker snippet: ${marker.snippet}")
+                                            }
+
+                                            false
+                                        }
+                                        else -> Timber.i("Overlay item type: ${overlayItem.javaClass.name}")
+                                    }
+                                }
+                            }
+
+                            map.overlays.forEach { overlay ->
+                                // Explode the folder overlay
+                                (overlay as? FolderOverlay)?.let { explodeFolder(it) }
+                            }
+                        }
+                    }
+                else Timber.w("Won't load KMZs since lastAreas (%d items) is not loaded or MapView not initialized (%s)", areas.size, (mapView != null).toString())
+            }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
         MapView(
             modifier = Modifier
                 .fillMaxSize(),
@@ -60,53 +120,6 @@ fun MainActivity.MapScreen() {
                 bottomDialogVisible = false
                 false
             }
-
-            if (exploreViewModel.lastAreas.isNotEmpty())
-                mapViewModel.loadAreasIntoMap(map, exploreViewModel.lastAreas) {
-                    fun explodeFolder(folderOverlay: FolderOverlay) {
-                        folderOverlay.items.forEach { overlayItem ->
-                            // Keep exploding until a non-folder is obtained
-                            when (overlayItem) {
-                                is FolderOverlay -> explodeFolder(overlayItem)
-                                is Marker -> overlayItem.setOnMarkerClickListener { marker, mapView ->
-                                    // Center marker only if enabled
-                                    if (centerMarkerOnClick)
-                                        mapView.zoomToBoundingBox(marker.bounds, true)
-
-                                    // Show dialog
-                                    val markerTitle = marker.title
-                                    if (markerTitle != null) {
-                                        bottomDialogTitle = markerTitle
-                                        bottomDialogVisible = true
-                                        val loadedImageUrl = marker.snippet?.let { snippet ->
-                                            val srcPos = snippet.indexOf("src=\"")
-                                                .takeIf { it >= 0 } ?: return@let false
-                                            val cutUrl = snippet.substring(srcPos + 5)
-                                            val endPos = cutUrl.indexOf('"')
-                                                .takeIf { it >= 0 } ?: return@let false
-                                            val imageUrl = cutUrl.substring(0, endPos)
-                                            bottomDialogImage = Uri.parse(imageUrl)
-                                            true
-                                        } ?: false
-                                        if (!loadedImageUrl)
-                                            bottomDialogImage = null
-
-                                        Timber.i("Marker snippet: ${marker.snippet}")
-                                    }
-
-                                    false
-                                }
-                                else -> Timber.i("Overlay item type: ${overlayItem.javaClass.name}")
-                            }
-                        }
-                    }
-
-                    map.overlays.forEach { overlay ->
-                        // Explode the folder overlay
-                        (overlay as? FolderOverlay)?.let { explodeFolder(it) }
-                    }
-                }
-            else Timber.w("Won't load KMZs since lastAreas is not loaded")
         }
 
         AnimatedVisibility(

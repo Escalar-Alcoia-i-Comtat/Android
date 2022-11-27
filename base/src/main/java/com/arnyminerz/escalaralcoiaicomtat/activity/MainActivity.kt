@@ -97,6 +97,7 @@ class MainActivity : AppCompatActivity() {
 
     private val screens = listOf(
         NavItem(Screen.Explore),
+        NavItem(Screen.Map),
         NavItem(Screen.Storage, updatesAvailable),
         NavItem(Screen.Settings),
     )
@@ -201,7 +202,7 @@ class MainActivity : AppCompatActivity() {
                                 Screen.Developer,
                                 visible = developerTabEnabled,
                             ),
-                            3,
+                            4,
                         )
                 }
             }
@@ -217,6 +218,7 @@ class MainActivity : AppCompatActivity() {
                 when (screen?.route) {
                     Screen.Explore.route -> ExploreScreen()
                     Screen.Storage.route -> StorageScreen()
+                    Screen.Map.route -> MapScreen()
                     Screen.Settings.route -> SettingsScreen(settingsNavController)
                     Screen.Developer.route -> DeveloperScreen()
                 }
