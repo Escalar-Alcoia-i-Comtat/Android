@@ -42,6 +42,9 @@ class MainMapViewModel(
         Timber.i("Loading KMZ of ${areas.size} areas...")
         viewModelScope.launch {
             try {
+                Timber.d("Removing all the old overlays from map.")
+                mapView.overlays.clear()
+
                 for (area in areas) {
                     Timber.d("Loading KMZ file of $area...")
                     val kmzFile = area.kmzFile(context, false)
