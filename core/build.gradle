@@ -68,7 +68,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.0-rc01'
-    implementation 'com.google.android.material:material:1.8.0-alpha03'
+    implementation 'com.google.android.material:material:1.8.0-beta01'
     implementation 'androidx.preference:preference-ktx:1.2.0'
 
     // Testing
@@ -97,7 +97,7 @@ dependencies {
     api "androidx.compose.ui:ui-util:$compose_version"
     api "androidx.compose.foundation:foundation:$compose_version"
     api "androidx.compose.material:material:$compose_version"
-    api "androidx.compose.material3:material3:1.1.0-alpha02" // Using Material Compose 3
+    api "androidx.compose.material3:material3:1.1.0-alpha03" // Using Material Compose 3
     api "androidx.compose.material:material-icons-core:$compose_version"
     api "androidx.compose.material:material-icons-extended:$compose_version"
     api "androidx.compose.runtime:runtime-livedata:$compose_version"
@@ -110,8 +110,8 @@ dependencies {
     implementation 'dev.burnoo:compose-remember-preference:1.0.0'
 
     // Jetpack Compose utilities - Accompanist libraries
-    def accompanist_version = '0.27.1'
-    api 'com.google.accompanist:accompanist-appcompat-theme:0.27.1'
+    def accompanist_version = '0.28.0'
+    api "com.google.accompanist:accompanist-appcompat-theme:$accompanist_version"
     api "com.google.accompanist:accompanist-pager:$accompanist_version"
     api "com.google.accompanist:accompanist-drawablepainter:$accompanist_version"
     api "com.google.accompanist:accompanist-permissions:$accompanist_version"
@@ -154,14 +154,14 @@ dependencies {
     implementation "androidx.room:room-ktx:$room_version"
 
     // Google Firebase
-    api platform('com.google.firebase:firebase-bom:31.1.0')
+    api platform('com.google.firebase:firebase-bom:31.1.1')
     api 'com.google.firebase:firebase-analytics-ktx'
     api 'com.google.firebase:firebase-crashlytics-ktx'
     api 'com.google.firebase:firebase-config-ktx'
     api 'com.google.firebase:firebase-perf-ktx'
     api 'com.google.firebase:firebase-dynamic-links-ktx'
     api 'com.google.firebase:firebase-messaging-ktx'
-    api 'com.google.firebase:firebase-messaging-directboot:23.1.0'
+    api 'com.google.firebase:firebase-messaging-directboot:23.1.1'
 
     // Gson for JSON parsing
     implementation 'com.google.code.gson:gson:2.10'
