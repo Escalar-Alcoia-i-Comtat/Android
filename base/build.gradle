@@ -171,7 +171,7 @@ dependencies {
     androidTestImplementation 'org.mockito:mockito-core:4.11.0'
     androidTestImplementation 'org.mockito.kotlin:mockito-kotlin:4.1.0'
     androidTestImplementation 'androidx.test:rules:1.5.0'
-    androidTestImplementation 'androidx.test:runner:1.5.1'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
