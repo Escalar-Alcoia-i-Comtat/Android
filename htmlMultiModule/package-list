@@ -12,6 +12,7 @@ com.arnyminerz.escalaralcoiaicomtat.list.completions.holder
 com.arnyminerz.escalaralcoiaicomtat.list.holder
 com.arnyminerz.escalaralcoiaicomtat.service
 com.arnyminerz.escalaralcoiaicomtat.shared
+com.arnyminerz.escalaralcoiaicomtat.ui.screen.details
 com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore
 com.arnyminerz.escalaralcoiaicomtat.ui.screen.main
 com.arnyminerz.escalaralcoiaicomtat.ui.screen.settings
