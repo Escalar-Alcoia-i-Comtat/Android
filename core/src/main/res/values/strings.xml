@@ -66,7 +66,7 @@
     <string name="path_ending_pitch_rappeleable">Rappelable</string>
     <string name="path_ending_pitch_clean">no equipment</string>
 
-    <string name="safe_strings">%1$s Strings</string>
+    <string name="safe_strings">%1$s Quickdraws</string>
     <string name="safe_parabolt">%1$s Parabolts</string>
     <string name="safe_spit">%1$s Spits</string>
     <string name="safe_tensor">%1$s Tensors</string>
@@ -86,7 +86,7 @@
     <string name="safe_required_strips">Strips</string>
 
     <!-- NC is for No Count -->
-    <string name="safe_strings_plural">Strings</string>
+    <string name="safe_strings_plural">Quickdraws</string>
     <string name="safe_parabolt_plural">Parabolts</string>
     <string name="safe_spits_plural">Spits</string>
     <string name="safe_tensors_plural">Tensors</string>
@@ -152,7 +152,7 @@
     <string name="toast_message_sent">Message sent!</string>
     <string name="toast_confirmation_sent">Confirmation sent!</string>
     <string name="toast_deleted">Data deleted from device</string>
-    <string name="toast_material_strings">To climb this path it is recommended that you bring at least %d strings.</string>
+    <string name="toast_material_strings">To climb this path it is recommended that you bring at least %d quickdraws.</string>
     <string name="toast_material_fixed">This material is already installed on the path</string>
     <string name="toast_material_required">This material is required to climb the path</string>
     <string name="toast_ending_info">This is the ending type of the path</string>
