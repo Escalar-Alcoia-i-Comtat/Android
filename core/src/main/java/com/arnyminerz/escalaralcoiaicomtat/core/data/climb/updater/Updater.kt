@@ -25,7 +25,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_INFO_ENDPOINT
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getJson
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
-import com.google.firebase.perf.metrics.AddTrace
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.Serializable
@@ -110,7 +109,6 @@ private fun <R : DataClassImpl, D : DataRoot<R>> findUpdatableObjects(
     }
     .toList()
 
-@AddTrace(name = "CheckForUpdates")
 @WorkerThread
 suspend fun updateAvailable(
     context: Context

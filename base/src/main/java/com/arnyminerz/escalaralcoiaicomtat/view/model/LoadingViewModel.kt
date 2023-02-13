@@ -46,12 +46,8 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.FirebaseException
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.perf.ktx.performance
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import kotlinx.coroutines.launch
@@ -163,11 +159,6 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
             val alreadyScheduled = BlockStatusWorker.isScheduled(context)
             if (!alreadyScheduled)
                 BlockStatusWorker.schedule(context)
-        }
-
-        progressMessageResource.value = R.string.status_loading_data_collection
-        ioContext {
-            dataCollectionSetUp()
         }
 
         /*progressMessageResource.value = R.string.status_loading_data
@@ -302,27 +293,6 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
             Timber.w("MD5 hashing is not compatible")
             analytics.logEvent("MD5NotSupported") { }
         }
-    }
-
-    /**
-     * Initializes the user-set data collection policy.
-     * If debugging, data collection will always be disabled.
-     * @author Arnau Mora
-     * @since 20210617
-     */
-    @WorkerThread
-    private suspend fun dataCollectionSetUp() {
-        val dataCollection = get(Keys.dataCollection, true)
-        val errorCollection = get(Keys.errorCollection, true)
-
-        Firebase.crashlytics.setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG && errorCollection)
-        Timber.v("Set Crashlytics collection enabled to $errorCollection")
-
-        Firebase.analytics.setAnalyticsCollectionEnabled(!BuildConfig.DEBUG && dataCollection)
-        Timber.v("Set Analytics collection enabled to $dataCollection")
-
-        Firebase.performance.isPerformanceCollectionEnabled = dataCollection
-        Timber.v("Set Performance collection enabled to $dataCollection")
     }
 
     /**
