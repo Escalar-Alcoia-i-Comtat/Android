@@ -336,12 +336,12 @@ fun BadgesRow(path: Path) {
             .horizontalScroll(rememberScrollState())
             .fillMaxWidth(),
     ) {
-        if (fixedSafesData.stringCount > 0) {
+        if (fixedSafesData.quickdrawCount > 0) {
             val toastText =
                 stringResource(R.string.toast_material_strings)
-                    .format(fixedSafesData.stringCount)
+                    .format(fixedSafesData.quickdrawCount)
             SimpleChip(
-                text = stringResource(R.string.safe_strings, fixedSafesData.stringCount),
+                text = stringResource(R.string.safe_strings, fixedSafesData.quickdrawCount),
                 icon = R.drawable.ic_icona_express,
                 onClick = { context.toast(toastText) }
             )
@@ -425,7 +425,7 @@ fun BadgesRow(path: Path) {
         for (chip in fixedSafesData.list())
             if (chip.count > 0)
                 SimpleChip(
-                    text = if (chip.count >= 999)
+                    text = if (chip.count >= 999 || chip.countableLabelRes == null)
                         stringResource(chip.uncountableLabelRes)
                     else
                         stringResource(chip.countableLabelRes, chip.count),
