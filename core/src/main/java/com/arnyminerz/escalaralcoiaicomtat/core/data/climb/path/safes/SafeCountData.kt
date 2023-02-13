@@ -20,7 +20,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class SafeCountData(
     @SafeRequirement val count: Long,
-    @StringRes val countableLabelRes: Int,
+    @StringRes val countableLabelRes: Int?,
     @StringRes val uncountableLabelRes: Int,
     @DrawableRes val image: Int
 ) : Parcelable {
@@ -37,7 +37,7 @@ data class SafeCountData(
      */
     constructor(
         required: Boolean,
-        @StringRes countableLabelRes: Int,
+        @StringRes countableLabelRes: Int?,
         @StringRes uncountableLabelRes: Int,
         @DrawableRes image: Int
     ) : this(
