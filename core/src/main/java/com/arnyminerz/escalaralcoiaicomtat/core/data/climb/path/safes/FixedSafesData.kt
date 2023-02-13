@@ -9,7 +9,7 @@ import kotlinx.parcelize.Parcelize
  * Stores the data for the installed safes in a [Path].
  * @author Arnau Mora
  * @since 20210916
- * @param stringCount The amount of strings that are required in the [Path]. This is usually the
+ * @param quickdrawCount The amount of strings that are required in the [Path]. This is usually the
  * sum of the rest of the attributes.
  * @param paraboltCount The amount of safes that are parabolts on the [Path].
  * @param spitCount The amount of safes that are spits on the [Path].
@@ -19,7 +19,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class FixedSafesData(
-    val stringCount: Long,
+    val quickdrawCount: Long,
     val paraboltCount: Long,
     val spitCount: Long,
     val tensorCount: Long,
@@ -35,37 +35,42 @@ data class FixedSafesData(
                 paraboltCount,
                 R.string.safe_parabolt,
                 R.string.safe_parabolt_plural,
-                R.drawable.ic_parabolt
+                R.drawable.ic_parabolt,
+                R.string.placeholder_safe_description,
             ),
             SafeCountData(
                 spitCount,
                 R.string.safe_spit,
                 R.string.safe_spits_plural,
-                R.drawable.ic_spit
+                R.drawable.ic_spit,
+                R.string.placeholder_safe_description,
             ),
             SafeCountData(
                 tensorCount,
                 R.string.safe_tensor,
                 R.string.safe_tensors_plural,
-                R.drawable.ic_tensor
+                R.drawable.ic_tensor,
+                R.string.placeholder_safe_description,
             ),
             SafeCountData(
                 pitonCount,
                 R.string.safe_piton,
                 R.string.safe_pitons_plural,
-                R.drawable.ic_reunio_clau
+                R.drawable.ic_reunio_clau,
+                R.string.placeholder_safe_description,
             ),
             SafeCountData(
                 burilCount,
                 R.string.safe_buril,
                 R.string.safe_burils_plural,
-                R.drawable.ic_buril
+                R.drawable.ic_buril,
+                R.string.placeholder_safe_description,
             )
         )
 
     override fun toJSONString(): String {
         return "{" +
-                "\"string_count\":\"$stringCount\"," +
+                "\"string_count\":\"$quickdrawCount\"," +
                 "\"parabolt_count\":\"$paraboltCount\"," +
                 "\"spit_count\":\"$spitCount\"," +
                 "\"tensor_count\":\"$tensorCount\"," +

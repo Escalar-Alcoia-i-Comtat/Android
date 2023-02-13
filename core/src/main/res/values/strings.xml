@@ -93,6 +93,10 @@
     <string name="safe_pitons_plural">Pitons</string>
     <string name="safe_burils_plural">Burils</string>
 
+    <!-- Explanations for all the safe types -->
+    <!-- TODO: Complete all descriptions -->
+    <string name="placeholder_safe_description" translatable="false">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent a enim nisi. Morbi vitae nunc pretium, laoreet nunc vel, lobortis nulla. Donec ac nibh enim.</string>
+
     <string name="path_stats_chart_title">Grades</string>
 
     <string name="nearby_zones_title">Nearby Zones</string>
