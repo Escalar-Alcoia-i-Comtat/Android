@@ -121,6 +121,9 @@ dependencies {
     api 'br.com.devsrsouza.compose.icons.android:font-awesome:1.0.0'
     api 'br.com.devsrsouza.compose.icons.android:erikflowers-weather-icons:1.0.0'
 
+    // Jetpack Compose utilities - MarkdownText
+    api 'com.arnyminerz.markdowntext:markdowntext:1.3.1'
+
     // Local Libraries
     api project(":libs:app_intro")
 
