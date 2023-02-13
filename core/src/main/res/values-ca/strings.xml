@@ -292,11 +292,6 @@
     <string name="pref_gene_map_move_marker_sum">Si el marcador es deuria centrar en la pantalla al fer clic.</string>
     <string name="pref_gene_section_nearby">Zones Properes</string>
     <string name="pref_gene_section_map">Mapa</string>
-    <string name="pref_gene_section_advanced">Avançat</string>
-    <string name="pref_gene_error_reporting_title">Habilitar reports d\'error</string>
-    <string name="pref_gene_error_reporting_sum">Si està habilitat, cada vegada que l\'app es tanque de manera sobtada, o hi haja algun error, s\'enviarà un report anònim als desenvolupadors per a que l\'arreglen el més prompte possible. Et demanem que mantingues aquesta opció activada, però eres lliure de deshabilitar-la si vols.</string>
-    <string name="pref_gene_data_collection_title">Habilitar recol·lecció de dades</string>
-    <string name="pref_gene_data_collection_sum">El dispositiu enviarà dades d\'ús i de rendiment anònimes al servidor, per a que les diferents funcions puguen ser millorades, i es supervisarà la navegació a través de l\'app per a tenir un registre dels sectors més visitats.</string>
     <string name="pref_down_cat_downloads">Baixades</string>
     <string name="pref_down_mobile_title">Dades Mòbils</string>
     <string name="pref_down_mobile_sum">Fes ús de les dades mòbils per a les descàrregues</string>

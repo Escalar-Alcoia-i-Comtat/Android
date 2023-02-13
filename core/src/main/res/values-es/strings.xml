@@ -292,11 +292,6 @@
     <string name="pref_gene_map_move_marker_sum">Si el marcador debería centrarse en la pantalla al hacer click sobre él.</string>
     <string name="pref_gene_section_nearby">Zonas Cercanas</string>
     <string name="pref_gene_section_map">Mapa</string>
-    <string name="pref_gene_section_advanced">Avanzado</string>
-    <string name="pref_gene_error_reporting_title">Habilitar reportes de error</string>
-    <string name="pref_gene_error_reporting_sum">Si está activado, cada vez que la app se cierre inesperadamente o haya un error, se mandará un reporte anónimo a los desarrolladores para que pueda ser reparado lo más pronto posible. Por favor, te pedimos que mantengas esta opción activada, aunque eres libre que desactivarla si lo deseas.</string>
-    <string name="pref_gene_data_collection_title">Habilitar recolección de datos</string>
-    <string name="pref_gene_data_collection_sum">El dispositivo enviará datos de uso y de rendimiento anónimos al servidor, de modo que las diferentes funciones puedan mejorarse, y la navegación se monitoreará a través de la aplicación para tener un registro de los sectores más visitados.</string>
     <string name="pref_down_cat_downloads">Descargas</string>
     <string name="pref_down_mobile_title">Datos móbiles</string>
     <string name="pref_down_mobile_sum">Usar los datos móbiles para las descargas</string>
