@@ -61,6 +61,7 @@ import androidx.core.graphics.drawable.toBitmap
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.textResource
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.vector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.IMAGE_MAX_ZOOM_LEVEL
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.REST_API_DOWNLOAD_ENDPOINT
@@ -97,6 +98,7 @@ fun SectorPage(
     viewModel: SectorPageViewModel,
     sector: Sector,
     dataClassIntent: (sector: Sector) -> Intent,
+    informationIntent: (path: Path) -> Intent,
     maximized: MutableState<Boolean>,
     scrollEnabled: (enabled: Boolean) -> Unit,
 ) {
@@ -316,6 +318,7 @@ fun SectorPage(
                 items(viewModel.paths) { item ->
                     PathItem(
                         item,
+                        informationIntent,
                         viewModel.blockStatusList.find { it.pathId == item.objectId }
                     )
                 }

@@ -1,5 +1,6 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.ui.element.climb
 
+import android.content.Intent
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateValueAsState
@@ -15,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Card
@@ -33,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -107,6 +110,7 @@ class PathItemSampleProvider :
 @ExperimentalMaterial3Api
 fun PathItem(
     path: Path,
+    informationIntent: (path: Path) -> Intent,
     blockingData: BlockingData? = null,
     expanded: Boolean = false,
 ) {
@@ -291,7 +295,7 @@ fun PathItem(
                             }
                         }
 
-                    BadgesRow(path)
+                    BadgesRow(path, informationIntent)
                 }
             }
         }
@@ -325,7 +329,31 @@ private fun SimpleChip(
 
 @Composable
 @ExperimentalMaterial3Api
-fun BadgesRow(path: Path) {
+private fun SimpleChip(
+    text: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+) {
+    SuggestionChip(
+        label = {
+            Text(text)
+        },
+        icon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = text,
+                modifier = Modifier.size(20.dp)
+            )
+        },
+        modifier = Modifier
+            .padding(horizontal = 4.dp),
+        onClick = onClick,
+    )
+}
+
+@Composable
+@ExperimentalMaterial3Api
+fun BadgesRow(path: Path, informationIntent: (path: Path) -> Intent,) {
     val context = LocalContext.current
 
     val fixedSafesData = path.fixedSafesData
@@ -346,6 +374,11 @@ fun BadgesRow(path: Path) {
                 onClick = { context.toast(toastText) }
             )
         }
+        SimpleChip(
+            text = stringResource(R.string.path_chip_info),
+            icon = Icons.Outlined.Info,
+            onClick = { context.startActivity(informationIntent(path)) }
+        )
 
         if (requiredSafesData.crackerRequired)
             SimpleChip(
@@ -443,6 +476,7 @@ fun PathItemPreview(
 ) {
     PathItem(
         path = previewData.path,
+        informationIntent = { Intent() },
         blockingData = previewData.blockingData,
         expanded = previewData.expanded,
     )

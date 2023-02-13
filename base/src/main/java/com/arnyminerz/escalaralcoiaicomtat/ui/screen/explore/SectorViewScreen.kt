@@ -40,9 +40,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.activity.climb.DataClassActivity
+import com.arnyminerz.escalaralcoiaicomtat.activity.climb.PathInformationActivity
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
@@ -199,6 +201,10 @@ fun DataClassActivity.SectorViewScreen(
                             .putExtra(EXTRA_CHILDREN_COUNT, childrenCount)
                             .putExtra(EXTRA_INDEX, index)
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    },
+                    { path ->
+                        Intent(this@SectorViewScreen, PathInformationActivity::class.java)
+                            .putExtra(EXTRA_DATACLASS, path)
                     },
                     maximized,
                 ) { scrollEnabled = it }
