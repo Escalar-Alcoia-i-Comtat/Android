@@ -492,5 +492,21 @@
 
     <string name="title_data">Data Module</string>
 
+    <!-- InformationScreen strings -->
+    <string name="info_builder_title">Builder</string>
+    <string name="info_builder">Built by %s</string>
+    <string name="info_rebuilders">Rebuilt by:</string>
+    <string name="info_general_title">General Information</string>
+    <string name="info_general_grade">The general grade of the path is %s. %s</string>
+    <string name="info_general_grade_more">There\'s more information about each pitch below.</string>
+    <string name="info_general_height">The path is %dm tall.</string>
+    <string name="info_quickdraws_title">Quickdraws</string>
+    <string name="info_quickdraws">To climb this path it\'s recommended that you bring at least %d extres</string>
+    <string name="info_required_title">Required Material</string>
+    <string name="info_required">This path requires that you bring some extra material, including the already installed at the path, and the quickdraws.</string>
+    <string name="info_fixed_title">Fixed Material</string>
+    <string name="info_fixed">This material is held to the wall, and can\'t be removed. It\'s ready to be used when you reach the path.</string>
+    <string name="info_description">Description</string>
+
     <string name="attr_gpx">This GPX has been providen by Escalar Alcoià i Comtat. Download the app from https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
 </resources>
