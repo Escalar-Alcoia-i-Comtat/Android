@@ -400,7 +400,7 @@ class Path internal constructor(
             rawHeights,
             rawEndings,
             rawPitches,
-            fixedSafesData.stringCount,
+            fixedSafesData.quickdrawCount,
             fixedSafesData.paraboltCount,
             fixedSafesData.spitCount,
             fixedSafesData.tensorCount,
@@ -459,7 +459,7 @@ class Path internal constructor(
         const val SAMPLE_MULTIPITCH_PATH_OBJECT_ID = "b17a1385776c863a657e"
 
         val SAMPLE_PATH = Path(
-            JSONObject("{\"created\":\"2021-04-11T15:03:26.000Z\",\"last_edit\":\"2022-02-17T16:42:14.000Z\",\"displayName\":\"Regall Impenetrable\",\"sketchId\":52,\"grade\":\"7c+\",\"height\":\"\",\"builtBy\":\"NULL\",\"rebuilders\":\"\",\"description\":\"NULL\",\"showDescription\":false,\"stringCount\":0,\"paraboltCount\":1,\"burilCount\":0,\"pitonCount\":0,\"spitCount\":0,\"tensorCount\":0,\"crackerRequired\":false,\"friendRequired\":false,\"lanyardRequired\":false,\"nailRequired\":false,\"pitonRequired\":false,\"stripsRequired\":false,\"ending\":\"chain_carabiner\",\"pitch_info\":\"NULL\",\"sector\":\"B9zNqbw6REYVxGZxlYwh\"}"),
+            JSONObject("{\"created\":\"2021-04-11T15:03:26.000Z\",\"last_edit\":\"2022-02-17T16:42:14.000Z\",\"displayName\":\"Regall Impenetrable\",\"sketchId\":52,\"grade\":\"7c+\",\"height\":\"\",\"builtBy\":\"NULL\",\"rebuilders\":\"\",\"description\":\"This is a testing description for the path. **Markdown** annotations should be working.\",\"showDescription\":false,\"stringCount\":0,\"paraboltCount\":1,\"burilCount\":0,\"pitonCount\":0,\"spitCount\":0,\"tensorCount\":0,\"crackerRequired\":false,\"friendRequired\":false,\"lanyardRequired\":false,\"nailRequired\":false,\"pitonRequired\":false,\"stripsRequired\":false,\"ending\":\"chain_carabiner\",\"pitch_info\":\"NULL\",\"sector\":\"B9zNqbw6REYVxGZxlYwh\"}"),
             SAMPLE_PATH_OBJECT_ID
         )
 

@@ -50,7 +50,7 @@ abstract class SafesData : Parcelable, Iterable<SafeCountData> {
      */
     fun hasSafeCount(): Boolean {
         for ((_, value) in this)
-            if (value > 1)
+            if (value != null && value > 1)
                 return true
 
         return false

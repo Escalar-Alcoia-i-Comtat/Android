@@ -16,13 +16,15 @@ import kotlinx.parcelize.Parcelize
  * @param uncountableLabelRes The string resource that matches the string to use when no count is
  * available.
  * @param image The drawable resource that matches the icon that represents the count.
+ * @param description A long description of the safe type.
  */
 @Parcelize
 data class SafeCountData(
     @SafeRequirement val count: Long,
-    @StringRes val countableLabelRes: Int,
+    @StringRes val countableLabelRes: Int?,
     @StringRes val uncountableLabelRes: Int,
-    @DrawableRes val image: Int
+    @DrawableRes val image: Int,
+    @StringRes val description: Int,
 ) : Parcelable {
     /**
      * Builds the class using a boolean value instead of the count.
@@ -37,14 +39,16 @@ data class SafeCountData(
      */
     constructor(
         required: Boolean,
-        @StringRes countableLabelRes: Int,
+        @StringRes countableLabelRes: Int?,
         @StringRes uncountableLabelRes: Int,
-        @DrawableRes image: Int
+        @DrawableRes image: Int,
+        @StringRes description: Int,
     ) : this(
         if (required) REQUIRED else NOT_REQUIRED,
         countableLabelRes,
         uncountableLabelRes,
-        image
+        image,
+        description,
     )
 
     @LongDef(REQUIRED, NOT_REQUIRED)

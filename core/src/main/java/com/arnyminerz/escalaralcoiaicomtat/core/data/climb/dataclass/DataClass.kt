@@ -515,7 +515,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
             }
 
             GlideImage(
-                imageModel = image,
+                imageModel = { image },
                 requestOptions = {
                     RequestOptions
                         .placeholderOf(displayOptions.placeholderDrawable)
@@ -532,23 +532,25 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
                         }
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                 },
-                requestListener = object : RequestListener<Drawable> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Drawable>?,
-                        isFirstResource: Boolean
-                    ): Boolean = false
+                requestListener = {
+                    object : RequestListener<Any> {
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Any>?,
+                            isFirstResource: Boolean
+                        ): Boolean = false
 
-                    override fun onResourceReady(
-                        resource: Drawable?,
-                        model: Any?,
-                        target: Target<Drawable>?,
-                        dataSource: DataSource?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        onFinishLoading()
-                        return false
+                        override fun onResourceReady(
+                            resource: Any?,
+                            model: Any?,
+                            target: Target<Any>?,
+                            dataSource: DataSource?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            onFinishLoading()
+                            return false
+                        }
                     }
                 },
                 imageOptions = ImageOptions(

@@ -41,39 +41,45 @@ data class RequiredSafesData(
         listOf(
             SafeCountData(
                 lanyardRequired,
+                null,
                 R.string.safe_lanyard,
-                -1,
-                R.drawable.ic_lanyard
+                R.drawable.ic_lanyard,
+                R.string.placeholder_safe_description,
             ),
             SafeCountData(
                 crackerRequired,
+                null,
                 R.string.safe_cracker,
-                -1,
-                R.drawable.ic_cracker
+                R.drawable.ic_cracker,
+                R.string.placeholder_safe_description,
             ),
             SafeCountData(
                 friendRequired,
+                null,
                 R.string.safe_friend,
-                -1,
-                R.drawable.ic_friend
+                R.drawable.ic_friend,
+                R.string.placeholder_safe_description,
             ),
             SafeCountData(
                 stripsRequired,
+                null,
                 R.string.safe_strips,
-                -1,
-                R.drawable.ic_strips
+                R.drawable.ic_strips,
+                R.string.placeholder_safe_description,
             ),
             SafeCountData(
                 pitonRequired,
+                null,
                 R.string.safe_required_piton,
-                -1,
-                R.drawable.ic_buril
+                R.drawable.ic_buril,
+                R.string.placeholder_safe_description,
             ),
             SafeCountData(
                 nailRequired,
+                null,
                 R.string.safe_nail,
-                -1,
-                R.drawable.ic_ungla
+                R.drawable.ic_ungla,
+                R.string.placeholder_safe_description,
             )
         )
 

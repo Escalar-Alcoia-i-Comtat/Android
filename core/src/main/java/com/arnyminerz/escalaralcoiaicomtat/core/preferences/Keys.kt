@@ -15,8 +15,6 @@ const val NEARBY_DISTANCE_DEFAULT = 1000
 object Keys {
     val nearbyZonesEnabled = booleanPreferencesKey("nearby_enabled")
     val nearbyZonesDistance = intPreferencesKey("nearby_distance")
-    val dataCollection = booleanPreferencesKey("data_collection")
-    val errorCollection = booleanPreferencesKey("error_collection")
     val showAlerts = booleanPreferencesKey("alerts_enabled")
     val centerMarkerOnClick = booleanPreferencesKey("center_marker")
     val mobileDownload = booleanPreferencesKey("mobile_download")

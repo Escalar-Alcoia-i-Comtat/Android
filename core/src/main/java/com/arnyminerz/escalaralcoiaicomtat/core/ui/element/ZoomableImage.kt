@@ -289,7 +289,7 @@ fun ZoomableImage(
             }
     ) {
         GlideImage(
-            imageModel = imageModel,
+            imageModel = { imageModel },
             imageOptions = ImageOptions(
                 contentDescription = contentDescription,
                 contentScale = contentScale,
@@ -302,26 +302,28 @@ fun ZoomableImage(
                     .encodeQuality(encodeQuality)
                     .sizeMultiplier(sizeMultiplier)
             },
-            requestListener = object : RequestListener<Drawable> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    loadingImage = false
-                    return false
-                }
+            requestListener = {
+                object : RequestListener<Any> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Any>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        loadingImage = false
+                        return false
+                    }
 
-                override fun onResourceReady(
-                    resource: Drawable?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    dataSource: DataSource?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    loadingImage = false
-                    return false
+                    override fun onResourceReady(
+                        resource: Any?,
+                        model: Any?,
+                        target: Target<Any>?,
+                        dataSource: DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        loadingImage = false
+                        return false
+                    }
                 }
             },
             modifier = Modifier

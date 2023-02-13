@@ -66,7 +66,7 @@
     <string name="path_ending_pitch_rappeleable">Rappelable</string>
     <string name="path_ending_pitch_clean">no equipment</string>
 
-    <string name="safe_strings">%1$s Strings</string>
+    <string name="safe_strings">%1$s Quickdraws</string>
     <string name="safe_parabolt">%1$s Parabolts</string>
     <string name="safe_spit">%1$s Spits</string>
     <string name="safe_tensor">%1$s Tensors</string>
@@ -86,12 +86,16 @@
     <string name="safe_required_strips">Strips</string>
 
     <!-- NC is for No Count -->
-    <string name="safe_strings_plural">Strings</string>
+    <string name="safe_strings_plural">Quickdraws</string>
     <string name="safe_parabolt_plural">Parabolts</string>
     <string name="safe_spits_plural">Spits</string>
     <string name="safe_tensors_plural">Tensors</string>
     <string name="safe_pitons_plural">Pitons</string>
     <string name="safe_burils_plural">Burils</string>
+
+    <!-- Explanations for all the safe types -->
+    <!-- TODO: Complete all descriptions -->
+    <string name="placeholder_safe_description" translatable="false">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent a enim nisi. Morbi vitae nunc pretium, laoreet nunc vel, lobortis nulla. Donec ac nibh enim.</string>
 
     <string name="path_stats_chart_title">Grades</string>
 
@@ -148,7 +152,7 @@
     <string name="toast_message_sent">Message sent!</string>
     <string name="toast_confirmation_sent">Confirmation sent!</string>
     <string name="toast_deleted">Data deleted from device</string>
-    <string name="toast_material_strings">To climb this path it is recommended that you bring at least %d strings.</string>
+    <string name="toast_material_strings">To climb this path it is recommended that you bring at least %d quickdraws.</string>
     <string name="toast_material_fixed">This material is already installed on the path</string>
     <string name="toast_material_required">This material is required to climb the path</string>
     <string name="toast_ending_info">This is the ending type of the path</string>
@@ -343,11 +347,6 @@
     <string name="pref_gene_map_move_marker_sum">If a marker should me centered in the screen when clicked on it</string>
     <string name="pref_gene_section_nearby">Nearby Zones</string>
     <string name="pref_gene_section_map">Map</string>
-    <string name="pref_gene_section_advanced">Advanced</string>
-    <string name="pref_gene_error_reporting_title">Enable error reporting</string>
-    <string name="pref_gene_error_reporting_sum">This will send an anonymous error report to the developers when the app crashes or there\'s an error, so it can be fixed as soon as possible. Please, we kindly ask you to keep this enabled, but you are free to disable it.</string>
-    <string name="pref_gene_data_collection_title">Enable data collection</string>
-    <string name="pref_gene_data_collection_sum">This will send anonymous usage and performance data, so functionalities of the app can be further improved, and user navigation can be supervised, and take into account the amount of users use which sectors more often.</string>
 
     <string name="pref_down_cat_downloads">Downloads</string>
     <string name="pref_down_mobile_title">Mobile Data</string>
@@ -487,6 +486,22 @@
     <string name="activity_summary_grades">Grades</string>
 
     <string name="title_data">Data Module</string>
+
+    <!-- InformationScreen strings -->
+    <string name="info_builder_title">Builder</string>
+    <string name="info_builder">Built by %s</string>
+    <string name="info_rebuilders">Rebuilt by:</string>
+    <string name="info_general_title">General Information</string>
+    <string name="info_general_grade">The general grade of the path is %s. %s</string>
+    <string name="info_general_grade_more">There\'s more information about each pitch below.</string>
+    <string name="info_general_height">The path is %dm tall.</string>
+    <string name="info_quickdraws_title">Quickdraws</string>
+    <string name="info_quickdraws">To climb this path it\'s recommended that you bring at least %d extres</string>
+    <string name="info_required_title">Required Material</string>
+    <string name="info_required">This path requires that you bring some extra material, including the already installed at the path, and the quickdraws.</string>
+    <string name="info_fixed_title">Fixed Material</string>
+    <string name="info_fixed">This material is held to the wall, and can\'t be removed. It\'s ready to be used when you reach the path.</string>
+    <string name="info_description">Description</string>
 
     <string name="attr_gpx">This GPX has been providen by Escalar Alcoià i Comtat. Download the app from https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
 </resources>

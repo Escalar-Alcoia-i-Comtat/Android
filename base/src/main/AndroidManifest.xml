@@ -112,6 +112,9 @@
         <activity
             android:name=".activity.popup.NotificationPermissionPopup"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.climb.PathInformationActivity"
+            android:screenOrientation="portrait" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

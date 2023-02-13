@@ -56,7 +56,7 @@ fun MapBottomDialog(
     ) {
         Column {
             GlideImage(
-                imageModel = bottomDialogImage,
+                imageModel = { bottomDialogImage },
                 requestOptions = {
                     RequestOptions
                         .placeholderOf(R.drawable.ic_wide_placeholder)

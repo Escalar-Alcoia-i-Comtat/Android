@@ -94,8 +94,6 @@ fun GeneralSettingsScreen() {
         val nearbyZonesEnabled by collectAsState(Keys.nearbyZonesEnabled, true)
         val nearbyZonesDistance by collectAsState(Keys.nearbyZonesDistance, NEARBY_DISTANCE_DEFAULT)
         val markerClickCenteringEnabled by collectAsState(Keys.centerMarkerOnClick, true)
-        val errorCollectionEnabled by collectAsState(Keys.errorCollection, true)
-        val dataCollectionEnabled by collectAsState(Keys.dataCollection, true)
 
         SettingsItem(
             title = stringResource(R.string.pref_gene_language_title),
@@ -155,27 +153,6 @@ fun GeneralSettingsScreen() {
             stateBoolean = markerClickCenteringEnabled,
             setBoolean = { value ->
                 context.setAsync(Keys.centerMarkerOnClick, value)
-            },
-            switch = true
-        )
-
-        Divider()
-        SettingsCategory(stringResource(R.string.pref_gene_section_advanced))
-        SettingsItem(
-            title = stringResource(R.string.pref_gene_error_reporting_title),
-            subtitle = stringResource(R.string.pref_gene_error_reporting_sum),
-            stateBoolean = errorCollectionEnabled,
-            setBoolean = { value ->
-                context.setAsync(Keys.errorCollection, value)
-            },
-            switch = true
-        )
-        SettingsItem(
-            title = stringResource(R.string.pref_gene_data_collection_title),
-            subtitle = stringResource(R.string.pref_gene_data_collection_sum),
-            stateBoolean = dataCollectionEnabled,
-            setBoolean = { value ->
-                context.setAsync(Keys.dataCollection, value)
             },
             switch = true
         )

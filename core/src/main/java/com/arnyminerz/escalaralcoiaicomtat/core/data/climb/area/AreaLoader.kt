@@ -21,7 +21,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXPECTED_SERVER_VERSION
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.perf.ktx.performance
 import org.json.JSONObject
 import timber.log.Timber
 import java.text.SimpleDateFormat
@@ -163,11 +162,6 @@ suspend fun loadAreas(
         return list
     }
 
-    val performance = Firebase.performance
-    val trace = performance.newTrace("loadAreasTrace")
-
-    trace.start()
-
     val serverVersion = try {
         SemVer.fromString(infoJson.getString("version"))
     } catch (e: IllegalStateException) {
@@ -180,9 +174,6 @@ suspend fun loadAreas(
     Timber.i("Server version: $serverVersion. Production: $serverProduction")
 
     if (serverVersion != null && serverVersion.compare(EXPECTED_SERVER_VERSION) > DIFF_PATCH) {
-        trace.putAttribute("error", "true")
-        trace.putAttribute("error_name", "server_version_no_match")
-        trace.stop()
         throw SecurityException("The version of the server ($serverVersion) doesn't match the one expected ($EXPECTED_SERVER_VERSION), load cannot be performed.")
     }
 
@@ -208,11 +199,6 @@ suspend fun loadAreas(
             Area.CONSTRUCTOR
         ) { it.displayName }
 
-        trace.putMetric("areasCount", decodedAreas.size.toLong())
-        trace.putMetric("zonesCount", decodedZones.size.toLong())
-        trace.putMetric("sectorsCount", decodedSectors.size.toLong())
-        trace.putMetric("pathsCount", decodedPaths.size.toLong())
-
         Timber.v("Search > Adding documents...")
         dataSingleton.repository
             .addAll(decodedAreas)
@@ -237,22 +223,16 @@ suspend fun loadAreas(
         context.set(Keys.serverVersion, serverVersion.toString())
         context.set(Keys.serverIsProduction, serverProduction)
 
-        trace.stop()
-
         return decodedAreas
             .toDataClassList()
             .also { dataSingleton.areas.value = it }
     } catch (e: ExceptionInInitializerError) {
         Timber.e(e, "Could not load areas.")
-        trace.putAttribute("error", "true")
-        trace.stop()
         throw ExceptionInInitializerError(
             "Exception: $e. JSON: $jsonData",
         )
     } catch (e: Exception) {
         Timber.e(e, "Could not load areas.")
-        trace.putAttribute("error", "true")
-        trace.stop()
         uiContext { toast(context, R.string.toast_error_load_areas) }
         return emptyList()
     }
