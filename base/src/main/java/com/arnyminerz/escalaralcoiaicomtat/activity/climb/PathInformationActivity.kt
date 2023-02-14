@@ -25,7 +25,7 @@ class PathInformationActivity: AppCompatActivity() {
 
         setContent {
             AppTheme {
-                InformationScreen(path = path)
+                InformationScreen(path = path) { finish() }
             }
         }
     }

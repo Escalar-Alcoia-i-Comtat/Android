@@ -27,8 +27,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
@@ -38,13 +36,16 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.CardWithIconAndText
 
 @Composable
 @ExperimentalMaterial3Api
-fun InformationScreen(@PreviewParameter(InformationScreenPreviewProvider::class) path: Path) {
+fun InformationScreen(
+    path: Path,
+    onCloseRequested: () -> Unit,
+) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(path.displayName) },
                 navigationIcon = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = onCloseRequested) {
                         Icon(Icons.Rounded.Close, stringResource(R.string.action_close))
                     }
                 },
@@ -225,12 +226,5 @@ fun InformationScreen(@PreviewParameter(InformationScreenPreviewProvider::class)
 @Composable
 @ExperimentalMaterial3Api
 fun InformationScreenPreview() {
-    InformationScreen(path = Path.SAMPLE_PATH)
-}
-
-class InformationScreenPreviewProvider : PreviewParameterProvider<Path> {
-    override val values: Sequence<Path> = sequenceOf(
-        Path.SAMPLE_PATH,
-        Path.SAMPLE_PATH_MULTIPITCH,
-    )
+    InformationScreen(path = Path.SAMPLE_PATH) {}
 }
