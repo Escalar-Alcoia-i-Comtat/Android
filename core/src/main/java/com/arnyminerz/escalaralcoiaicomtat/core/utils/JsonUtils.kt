@@ -64,7 +64,16 @@ fun <T : Any?> JSONObject.getValue(key: String, defaultValue: T): T =
  */
 fun JSONObject.hasValid(key: String): Boolean =
     try {
-        has(key) && getString(key).uppercase() != "NULL"
+        has(key) && getString(key).trim().uppercase() != "NULL"
     } catch (e: JSONException) {
         false
     }
+
+/**
+ * Gets the value at the given key as a [String] or returns false if no value, or if null.
+ */
+fun JSONObject.getStringOrNull(key: String): String? =
+    if (hasValid(key))
+        getString(key)
+    else
+        null

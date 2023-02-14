@@ -71,7 +71,7 @@ fun InformationScreen(
                     title = stringResource(R.string.info_builder_title),
                     text = buildAnnotatedString {
                         path.buildPatch?.let { patch ->
-                            appendLine(
+                            append(
                                 stringResource(
                                     R.string.info_builder,
                                     (patch.name ?: "¿?") + (patch.date?.let { ", $it" } ?: ""),
@@ -81,6 +81,8 @@ fun InformationScreen(
                         path.patches
                             // Only append if there are patches
                             .takeIf { it.isNotEmpty() }
+                            // Break the previous line
+                            .also { appendLine() }
                             // If a patch has been found, add the first line
                             ?.also { append(stringResource(R.string.info_rebuilders)) }
                             // Now add all the enumerating lines
@@ -145,7 +147,7 @@ fun InformationScreen(
                     title = stringResource(R.string.info_required_title),
                     content = {
                         Text(stringResource(R.string.info_required))
-                        for (safeCountData in path.requiredSafesData.list())
+                        for (safeCountData in path.requiredSafesData.list().filter { it.count > 0 })
                             Row(
                                 Modifier
                                     .fillMaxWidth()
@@ -153,14 +155,14 @@ fun InformationScreen(
                             ) {
                                 Image(
                                     painter = painterResource(safeCountData.image),
-                                    contentDescription = stringResource(safeCountData.uncountableLabelRes),
+                                    contentDescription = safeCountData.stringResource(),
                                     modifier = Modifier
                                         .size(32.dp)
                                         .padding(end = 4.dp),
                                 )
                                 Column(Modifier.weight(1f)) {
                                     Text(
-                                        stringResource(safeCountData.uncountableLabelRes),
+                                        safeCountData.stringResource(),
                                         style = MaterialTheme.typography.titleMedium,
                                     )
                                     Text(
@@ -182,7 +184,7 @@ fun InformationScreen(
                     title = stringResource(R.string.info_fixed_title),
                     content = {
                         Text(stringResource(R.string.info_fixed))
-                        for (safeCountData in path.fixedSafesData.list())
+                        for (safeCountData in path.fixedSafesData.list().filter { it.count > 0 })
                             Row(
                                 Modifier
                                     .fillMaxWidth()
@@ -190,14 +192,14 @@ fun InformationScreen(
                             ) {
                                 Image(
                                     painter = painterResource(safeCountData.image),
-                                    contentDescription = stringResource(safeCountData.uncountableLabelRes),
+                                    contentDescription = safeCountData.stringResource(),
                                     modifier = Modifier
                                         .size(32.dp)
                                         .padding(end = 4.dp),
                                 )
                                 Column(Modifier.weight(1f)) {
                                     Text(
-                                        stringResource(safeCountData.uncountableLabelRes),
+                                        safeCountData.stringResource(),
                                         style = MaterialTheme.typography.titleMedium,
                                     )
                                     Text(

@@ -49,8 +49,8 @@ abstract class SafesData : Parcelable, Iterable<SafeCountData> {
      * @return If there's a safes count.
      */
     fun hasSafeCount(): Boolean {
-        for ((_, value) in this)
-            if (value != null && value > 1)
+        for (safeCountData in this)
+            if (safeCountData.count > 0)
                 return true
 
         return false

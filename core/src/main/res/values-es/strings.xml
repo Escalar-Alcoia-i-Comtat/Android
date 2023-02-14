@@ -61,24 +61,6 @@
     <string name="path_ending_pitch_inclined">Inclinado</string>
     <string name="path_ending_pitch_rappeleable">Rapelable</string>
     <string name="path_ending_pitch_clean">, sin equipamiento</string>
-    <string name="safe_strings">%1$s Express</string>
-    <string name="safe_parabolt">%1$s Parabolts</string>
-    <string name="safe_spit">%1$s Spits</string>
-    <string name="safe_tensor">%1$s Tensores</string>
-    <string name="safe_piton">%1$s Clavo</string>
-    <string name="safe_buril">%1$s Burils</string>
-    <string name="safe_lanyard">Cordino</string>
-    <string name="safe_cracker">Empotrador</string>
-    <string name="safe_friend">Friend</string>
-    <string name="safe_strips">Strips</string>
-    <string name="safe_nail">Uñas</string>
-    <string name="safe_required_cracker">Empotrador</string>
-    <string name="safe_required_friend">Friend</string>
-    <string name="safe_required_lanyard">Cordino</string>
-    <string name="safe_required_nail">Clavo</string>
-    <string name="safe_required_piton">Piton</string>
-    <string name="safe_required_strips">Strips</string>
-    <!-- NC is for No Count -->
     <string name="safe_strings_plural">Express</string>
     <string name="safe_parabolt_plural">Parabolts</string>
     <string name="safe_spits_plural">Spits</string>
@@ -203,8 +185,6 @@
     <string name="intro_nearbyzones_enable">Habilitar Zonas Cercanas</string>
     <string name="warning_preferences_title">¡Atención!</string>
     <string name="warning_preferences_message">En la nueva actualización hemos cambiado el modo en el cual las preferencias son guardadas. Intentaremos migrar tu configuración tan pronto como abandones esta pantalla. Aun así, por desgracia es posible que algunos valores se pierdan.</string>
-    <string name="warning_play_services_title">¡Atención!</string>
-    <string name="warning_play_services_message">Hemos detectado que tu dispositivo no es compatible con los Servicios de Google Play. Esto puede causar problemas en algunas funciones de la aplicación. Te hemos advertido.</string>
     <string name="warning_md5_title">¡Atención!</string>
     <string name="warning_md5_message">Hemos detectado que su sistema no es compatible con el hashing MD5. Esto significa que tendrá problemas para buscar nuevas actualizaciones de datos. No se volverá a avisar.</string>
     <string name="sector_walking_time">%1$smin</string>
@@ -215,9 +195,6 @@
     <string name="status_no_internet">Sin conexión a Internet</string>
     <string name="status_loading_deep_link">Procesando enlace…</string>
     <string name="status_loading_checks">Ejecutando comprobaciones del sistema…</string>
-    <string name="status_loading_config">Cargando configuración…</string>
-    <string name="status_loading_noti_list">Añadiendo detectores de notificaciones…</string>
-    <string name="status_loading_data_collection">Configurando la recolección de datos…</string>
     <string name="status_loading_workers">Programando trabajos…</string>
     <string name="status_loading_auth">Cargando el sistema de autentificación…</string>
     <string name="status_loading_data">Cargando los datos…</string>
@@ -307,8 +284,6 @@
     <string name="notification_channel_download_progress_desc">Cuando estés descargando algo aparecerá esto </string>
     <string name="notification_channel_download_complete_name">Descarga finalizada</string>
     <string name="notification_channel_download_complete_desc">Cuando una descarga haya finalizado aparecerá esto</string>
-    <string name="notification_channel_alert_name">Alertas</string>
-    <string name="notification_channel_alert_desc">Esto te alertará sobre incidencias en las rutas de escalada, sectores o demás. También se incluyen rutas que estén siendo reequipadas o reparadas.</string>
     <string name="notification_channel_people_group_name">Gente</string>
     <string name="notification_channel_tasks_group_name">Tareas</string>
     <string name="notification_channel_task_completed_name">Tarea completada</string>

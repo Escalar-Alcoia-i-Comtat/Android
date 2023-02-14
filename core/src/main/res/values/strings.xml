@@ -67,6 +67,7 @@
     <string name="path_ending_pitch_clean">no equipment</string>
 
     <plurals name="safe_quickdraws">
+        <item quantity="zero">Quickdraws</item>
         <item quantity="one">%1$s Quickdraw</item>
         <item quantity="other">%1$s Quickdraws</item>
     </plurals>
@@ -75,37 +76,49 @@
         <item quantity="other">%1$s quickdraws</item>
     </plurals>
     <plurals name="safe_parabolt">
+        <item quantity="zero">Parabolts</item>
         <item quantity="one">%1$s Parabolt</item>
         <item quantity="other">%1$s Parabolts</item>
     </plurals>
     <plurals name="safe_spit">
+        <item quantity="zero">Spits</item>
         <item quantity="one">%1$s Spit</item>
         <item quantity="other">%1$s Spits</item>
     </plurals>
     <plurals name="safe_tensor">
+        <item quantity="zero">Tensors</item>
         <item quantity="one">%1$s Tensor</item>
         <item quantity="other">%1$s Tensors</item>
     </plurals>
     <plurals name="safe_piton">
+        <item quantity="zero">Pitons</item>
         <item quantity="one">%1$s Piton</item>
         <item quantity="other">%1$s Pitons</item>
     </plurals>
     <plurals name="safe_buril">
+        <item quantity="zero">Burils</item>
         <item quantity="one">%1$s Buril</item>
         <item quantity="other">%1$s Burils</item>
     </plurals>
-    <string name="safe_lanyard">Lanyard</string>
-    <string name="safe_cracker">Cracker</string>
-    <string name="safe_friend">Friend</string>
-    <string name="safe_strips">Strips</string>
-    <string name="safe_nail">Nails</string>
 
-    <string name="safe_required_cracker">Cracker</string>
-    <string name="safe_required_friend">Friend</string>
-    <string name="safe_required_lanyard">Lanyard</string>
-    <string name="safe_required_nail">Nail</string>
-    <string name="safe_required_piton">Piton</string>
-    <string name="safe_required_strips">Strips</string>
+    <plurals name="safe_required_cracker">
+        <item quantity="other">Cracker</item>
+    </plurals>
+    <plurals name="safe_required_friend">
+        <item quantity="other">Friend</item>
+    </plurals>
+    <plurals name="safe_required_lanyard">
+        <item quantity="other">Lanyard</item>
+    </plurals>
+    <plurals name="safe_required_nail">
+        <item quantity="other">Nail</item>
+    </plurals>
+    <plurals name="safe_required_piton">
+        <item quantity="other">Piton</item>
+    </plurals>
+    <plurals name="safe_required_strips">
+        <item quantity="other">Strips</item>
+    </plurals>
 
     <!-- NC is for No Count -->
     <string name="safe_strings_plural">Quickdraws</string>

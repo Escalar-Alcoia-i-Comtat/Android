@@ -379,37 +379,37 @@ fun BadgesRow(path: Path, informationIntent: (path: Path) -> Intent) {
 
         if (requiredSafesData.crackerRequired)
             SimpleChip(
-                text = stringResource(R.string.safe_required_cracker),
+                text = pluralStringResource(R.plurals.safe_required_cracker, 0),
                 icon = R.drawable.ic_cracker,
                 onClick = { context.toast(R.string.toast_material_required) },
             )
         if (requiredSafesData.friendRequired)
             SimpleChip(
-                text = stringResource(R.string.safe_required_friend),
+                text = pluralStringResource(R.plurals.safe_required_friend, 0),
                 icon = R.drawable.ic_friend,
                 onClick = { context.toast(R.string.toast_material_required) },
             )
         if (requiredSafesData.lanyardRequired)
             SimpleChip(
-                text = stringResource(R.string.safe_required_lanyard),
+                text = pluralStringResource(R.plurals.safe_required_lanyard, 0),
                 icon = R.drawable.ic_lanyard,
                 onClick = { context.toast(R.string.toast_material_required) },
             )
         if (requiredSafesData.nailRequired)
             SimpleChip(
-                text = stringResource(R.string.safe_required_nail),
+                text = pluralStringResource(R.plurals.safe_required_nail, 0),
                 icon = R.drawable.ic_reunio_clau,
                 onClick = { context.toast(R.string.toast_material_required) },
             )
         if (requiredSafesData.pitonRequired)
             SimpleChip(
-                text = stringResource(R.string.safe_required_piton),
+                text = pluralStringResource(R.plurals.safe_required_piton, 0),
                 icon = R.drawable.ic_reunio_clau,
                 onClick = { context.toast(R.string.toast_material_required) },
             )
         if (requiredSafesData.stripsRequired)
             SimpleChip(
-                text = stringResource(R.string.safe_required_strips),
+                text = pluralStringResource(R.plurals.safe_required_strips, 0),
                 icon = R.drawable.ic_strips,
                 onClick = { context.toast(R.string.toast_material_required) },
             )
@@ -455,14 +455,11 @@ fun BadgesRow(path: Path, informationIntent: (path: Path) -> Intent) {
         for (chip in fixedSafesData.list())
             if (chip.count > 0)
                 SimpleChip(
-                    text = if (chip.count >= 999 || chip.countableLabelRes == null)
-                        stringResource(chip.uncountableLabelRes)
-                    else
-                        pluralStringResource(
-                            chip.countableLabelRes,
-                            chip.count.toInt(),
-                            chip.count
-                        ),
+                    text = pluralStringResource(
+                        chip.label,
+                        chip.count.toInt(),
+                        chip.count
+                    ),
                     icon = chip.image,
                     onClick = { context.toast(R.string.toast_material_fixed) }
                 )
