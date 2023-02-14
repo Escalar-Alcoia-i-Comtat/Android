@@ -28,13 +28,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.launchStore
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import com.arnyminerz.escalaralcoiaicomtat.view.model.LoadingViewModel
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.messaging.ktx.messaging
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfig
 import timber.log.Timber
 
 /**
@@ -51,27 +44,6 @@ class LoadingActivity : NetworkAwareActivity() {
          */
         private const val LegacyIndexedSearchKey = "SearchIndexed"
     }
-
-    /**
-     * The Firebase Messaging instance to use.
-     * @author Arnau Mora
-     * @since 20211225
-     */
-    private lateinit var messaging: FirebaseMessaging
-
-    /**
-     * The Firebase Analytics instance to use.
-     * @author Arnau Mora
-     * @since 20211225
-     */
-    private lateinit var analytics: FirebaseAnalytics
-
-    /**
-     * The Firebase Remote Config instance to use.
-     * @author Arnau Mora
-     * @since 20211225
-     */
-    private lateinit var remoteConfig: FirebaseRemoteConfig
 
     /**
      * Used for storing the path if launched from a deep link.
@@ -111,14 +83,6 @@ class LoadingActivity : NetworkAwareActivity() {
 
         Timber.i("Getting deep link...")
         deepLinkPath = getExtra(EXTRA_LINK_PATH)
-
-        Timber.i("Initializing Firebase instances...")
-        Timber.v("Getting Firebase Messaging instance...")
-        messaging = Firebase.messaging
-        Timber.v("Getting Firebase Analytics instance...")
-        analytics = Firebase.analytics
-        Timber.v("Getting Firebase Remote Config instance...")
-        remoteConfig = Firebase.remoteConfig
 
         setContent {
             AppTheme {
@@ -163,12 +127,7 @@ class LoadingActivity : NetworkAwareActivity() {
                     sharedPreferences.getBoolean(LegacyIndexedSearchKey, false)
 
                 try {
-                    loadingViewModel.startLoading(
-                        deepLinkPath,
-                        remoteConfig,
-                        messaging,
-                        analytics
-                    )
+                    loadingViewModel.startLoading(deepLinkPath)
                 } catch (e: SecurityException) {
                     isServerIncompatible.value = true
                 }

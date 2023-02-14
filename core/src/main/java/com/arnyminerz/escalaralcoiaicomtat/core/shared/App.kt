@@ -12,19 +12,9 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 
 class App : Application() {
-    /**
-     * The [FirebaseAnalytics] instance reference for analyzing the user actions.
-     * @author Arnau Mora
-     * @since 20210826
-     */
-    private lateinit var analytics: FirebaseAnalytics
-
     private lateinit var dataSingleton: DataSingleton
 
     override fun onCreate() {
@@ -36,9 +26,6 @@ class App : Application() {
         @Suppress("DEPRECATION")
         sharedPreferences =
             applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-
-        Timber.v("Getting Analytics instance...")
-        analytics = Firebase.analytics
     }
 
     override fun onTerminate() {
@@ -122,7 +109,7 @@ val Activity.app: App
  * @since 20210818
  */
 val AndroidViewModel.app: App
-    get() = getApplication<App>()
+    get() = getApplication()
 
 /**
  * Returns the application's context attached to the view model.

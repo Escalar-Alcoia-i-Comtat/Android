@@ -19,10 +19,6 @@ buildscript {
         classpath 'com.android.tools.build:gradle:7.3.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
-        // Google Services
-        classpath 'com.google.gms:google-services:4.3.15'
-        classpath 'com.google.firebase:perf-plugin:1.4.2'
-
         // Dokka documentation generator
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$kotlin_version"
 

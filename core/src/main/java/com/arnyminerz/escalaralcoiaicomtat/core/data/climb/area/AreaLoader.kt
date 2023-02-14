@@ -20,7 +20,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.preferences.set
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXPECTED_SERVER_VERSION
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.toast
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
-import com.google.firebase.ktx.Firebase
 import org.json.JSONObject
 import timber.log.Timber
 import java.text.SimpleDateFormat

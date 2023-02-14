@@ -11,9 +11,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.res.stringResource
 import com.arnyminerz.escalaralcoiaicomtat.core.BuildConfig
 import com.arnyminerz.escalaralcoiaicomtat.core.R
-import com.arnyminerz.escalaralcoiaicomtat.core.firebase.Event.FINISH_INTRO
-import com.arnyminerz.escalaralcoiaicomtat.core.firebase.Param.GPS_SUPPORTED
-import com.arnyminerz.escalaralcoiaicomtat.core.firebase.Param.IS_BETA
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.PreferenceValue
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.observe
@@ -29,8 +26,6 @@ import com.arnyminerz.lib.app_intro.action.IntroAction
 import com.arnyminerz.lib.app_intro.action.IntroActionType
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 
 @ExperimentalMaterial3Api
@@ -114,20 +109,6 @@ class IntroActivity : AppCompatActivity() {
                     introPages.toList(),
                 ) {
                     Timber.v("Finished showing intro pages. Loading LoadingActivity")
-                    Firebase.analytics
-                        .logEvent(
-                            FINISH_INTRO,
-                            Bundle().apply {
-                                putBoolean(
-                                    IS_BETA,
-                                    BuildConfig.DEBUG,
-                                )
-                                putBoolean(
-                                    GPS_SUPPORTED,
-                                    gpsSupported,
-                                )
-                            }
-                        )
                     viewModel.markIntroAsShown()
                 }
             }

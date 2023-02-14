@@ -230,8 +230,6 @@
 
     <string name="warning_preferences_title">Attention!</string>
     <string name="warning_preferences_message">Since our last update we have changed the way your preferences are stored. We will try to migrate your old options as soon as you leave this screen.</string>
-    <string name="warning_play_services_title">Attention!</string>
-    <string name="warning_play_services_message">We have detected that your device is not compatible with Google Play Services. This may cause some issues with some parts of the app. You have been warned.</string>
     <string name="warning_md5_title">Attention!</string>
     <string name="warning_md5_message">We have detected that your device is not compatible with MD5 hashing. This means that there will be problems on searching for updates. You have been warned.</string>
 
@@ -246,9 +244,6 @@
     <string name="status_no_internet">No Internet Connection</string>
     <string name="status_loading_deep_link">Processing link…</string>
     <string name="status_loading_checks">Running system checks…</string>
-    <string name="status_loading_config">Loading configuration…</string>
-    <string name="status_loading_noti_list">Adding notification listeners…</string>
-    <string name="status_loading_data_collection">Configuring data collection…</string>
     <string name="status_loading_workers">Scheduling workers…</string>
     <string name="status_loading_auth">Loading authentication system…</string>
     <string name="status_loading_data">Loading data…</string>
@@ -365,8 +360,6 @@
     <string name="notification_channel_download_progress_desc">When you are downloading something, this will be shown</string>
     <string name="notification_channel_download_complete_name">Download Complete</string>
     <string name="notification_channel_download_complete_desc">When something downloading has finished, this will be shown</string>
-    <string name="notification_channel_alert_name">Alerts</string>
-    <string name="notification_channel_alert_desc">This will warn you about incidences that were detected in climbing paths, sectors or others. This also includes paths re-equipment or repairing processes.</string>
     <string name="notification_channel_people_group_name">People</string>
     <string name="notification_channel_tasks_group_name">Tasks</string>
     <string name="notification_channel_task_completed_name">Task completed</string>

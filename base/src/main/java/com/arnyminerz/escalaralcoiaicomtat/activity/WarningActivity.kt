@@ -13,7 +13,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.preferences.observe
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.set
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_INTENT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_MD5
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_PLAY_SERVICES
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_PREFERENCE
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
@@ -24,6 +23,7 @@ import com.arnyminerz.lib.app_intro.IntroPageData
 import com.arnyminerz.lib.app_intro.IntroWindow
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import timber.log.Timber
 
 class WarningActivity : AppCompatActivity() {
     @OptIn(
@@ -35,10 +35,12 @@ class WarningActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // Listen for changes on introShown
-        observe(Keys.shownIntro, false) { shownIntro ->
-            if (shownIntro)
+        /*observe(Keys.shownIntro, false) { shownIntro ->
+            if (shownIntro) {
+                Timber.i("Marked shownIntro as true, launching LoadingActivity")
                 uiContext { launch(LoadingActivity::class.java) }
-        }
+            }
+        }*/
 
         setContent {
             AppTheme {
@@ -49,13 +51,6 @@ class WarningActivity : AppCompatActivity() {
                                 IntroPageData<Any?>(
                                     stringResource(R.string.warning_preferences_title),
                                     stringResource(R.string.warning_preferences_message)
-                                )
-                            )
-                        if (intent.getExtra(EXTRA_WARNING_PLAY_SERVICES, false))
-                            add(
-                                IntroPageData<Any?>(
-                                    stringResource(R.string.warning_play_services_title),
-                                    stringResource(R.string.warning_play_services_message)
                                 )
                             )
                         if (intent.getExtra(EXTRA_WARNING_MD5, false))
