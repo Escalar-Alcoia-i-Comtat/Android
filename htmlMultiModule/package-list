@@ -10,7 +10,6 @@ com.arnyminerz.escalaralcoiaicomtat.activity.model
 com.arnyminerz.escalaralcoiaicomtat.activity.popup
 com.arnyminerz.escalaralcoiaicomtat.list.completions.holder
 com.arnyminerz.escalaralcoiaicomtat.list.holder
-com.arnyminerz.escalaralcoiaicomtat.service
 com.arnyminerz.escalaralcoiaicomtat.shared
 com.arnyminerz.escalaralcoiaicomtat.ui.screen.details
 com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore
@@ -39,7 +38,6 @@ com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater
 com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone
 com.arnyminerz.escalaralcoiaicomtat.core.exception
 com.arnyminerz.escalaralcoiaicomtat.core.exception.notification
-com.arnyminerz.escalaralcoiaicomtat.core.firebase
 com.arnyminerz.escalaralcoiaicomtat.core.maps
 com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones
 com.arnyminerz.escalaralcoiaicomtat.core.maps.nearbyzones.ui
