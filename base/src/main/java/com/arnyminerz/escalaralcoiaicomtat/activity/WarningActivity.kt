@@ -9,7 +9,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.res.stringResource
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.observe
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.set
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_INTENT
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_WARNING_MD5
@@ -23,7 +22,6 @@ import com.arnyminerz.lib.app_intro.IntroPageData
 import com.arnyminerz.lib.app_intro.IntroWindow
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import timber.log.Timber
 
 class WarningActivity : AppCompatActivity() {
     @OptIn(
@@ -66,7 +64,6 @@ class WarningActivity : AppCompatActivity() {
                     introPages.toList(),
                 ) {
                     doAsync {
-                        set(Keys.shownPlayServicesWarning, true)
                         set(Keys.shownPreferencesWarning, true)
                         set(Keys.shownMd5Warning, true)
 

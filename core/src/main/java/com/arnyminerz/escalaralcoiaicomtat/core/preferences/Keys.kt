@@ -74,13 +74,6 @@ object Keys {
     val shownMd5Warning = booleanPreferencesKey("md5_warning")
 
     /**
-     * Whether or not the Play Services not present warning has been shown.
-     * @author Arnau Mora
-     * @since 20220316
-     */
-    val shownPlayServicesWarning = booleanPreferencesKey("play_warning")
-
-    /**
      * Whether or not the SharedPreferences migration warning has been shown.
      * @author Arnau Mora
      * @since 20220316

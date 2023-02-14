@@ -21,7 +21,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.loadAreas
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.get
-import com.arnyminerz.escalaralcoiaicomtat.core.preferences.set
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.core.worker.BlockStatusWorker
@@ -210,14 +209,12 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                     )
                 }
 
-                val shownPSWarning = get(Keys.shownPlayServicesWarning, false)
                 val shownPrefWarning = get(Keys.shownPreferencesWarning, false)
                 val shownMd5Warning = get(Keys.shownMd5Warning, false)
 
                 Timber.v("Launching activity (intent==null? ${intent == null})...")
                 uiContext {
                     if ((migratedFromSharedPreferences && !shownPrefWarning) ||
-                        (!shownPSWarning) ||
                         (!md5Compatible) && !shownMd5Warning
                     ) {
                         Timber.i("Displaying warnings...")
