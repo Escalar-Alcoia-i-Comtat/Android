@@ -93,7 +93,7 @@ jobs:
 
       - name: Upload to Play Store
         id: upload_play_store
-        uses: r0adkll/upload-google-play@v1.0.19
+        uses: r0adkll/upload-google-play@v1.1.1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_GOOGLE_CLOUD_JSON }}
           packageName: com.arnyminerz.escalaralcoiaicomtat
