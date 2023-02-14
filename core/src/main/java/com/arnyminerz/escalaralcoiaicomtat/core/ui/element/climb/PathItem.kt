@@ -55,7 +55,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Grade
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.getAnnotatedString
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.grades
-import com.arnyminerz.escalaralcoiaicomtat.core.firebase.logAnalyticsViewPath
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_CHAIN_CARABINER
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_CHAIN_RING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_LANYARD
@@ -227,14 +226,7 @@ fun PathItem(
                 // View button
                 Column {
                     IconButton(
-                        onClick = {
-                            if (!infoVisible)
-                                logAnalyticsViewPath(
-                                    path.objectId,
-                                    path.displayName
-                                )
-                            infoVisible = !infoVisible
-                        },
+                        onClick = { infoVisible = !infoVisible },
                         modifier = Modifier
                             .size(48.dp)
                             .padding(8.dp)

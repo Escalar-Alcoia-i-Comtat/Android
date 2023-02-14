@@ -1,10 +1,8 @@
 plugins {
-    id('com.android.application')
-    id('kotlin-android')
-    id('com.google.gms.google-services')
-    id('com.google.firebase.firebase-perf')
-    id('org.jetbrains.dokka')
-    id('com.google.android.secrets-gradle-plugin') version '1.1.0'
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'org.jetbrains.dokka'
+    id 'com.google.android.secrets-gradle-plugin' version '1.1.0'
 }
 
 apply from: './version.gradle'
@@ -153,7 +151,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     // AndroidX dependencies
-    implementation 'androidx.appcompat:appcompat:1.6.0-rc01'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.preference:preference-ktx:1.2.0'

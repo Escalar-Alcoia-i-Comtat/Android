@@ -6,7 +6,6 @@ import android.app.NotificationChannelGroup
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import com.arnyminerz.escalaralcoiaicomtat.core.notification.ALERT_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOADS_NOTIFICATION_CHANNEL_GROUP
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_COMPLETE_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.DOWNLOAD_PROGRESS_CHANNEL_ID
@@ -16,18 +15,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_COMPLETED_CHAN
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_FAILED_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_IN_PROGRESS_CHANNEL_ID
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.UPDATE_AVAILABLE_CHANNEL_ID
-
-@TargetApi(Build.VERSION_CODES.O)
-private fun Context.createAlertsChannel(): NotificationChannel {
-    val name = getString(R.string.notification_channel_alert_name)
-    val description = getString(R.string.notification_channel_alert_desc)
-    val importance = NotificationManager.IMPORTANCE_HIGH
-
-    val channel = NotificationChannel(ALERT_CHANNEL_ID, name, importance)
-    channel.description = description
-
-    return channel
-}
 
 @TargetApi(Build.VERSION_CODES.O)
 private fun Context.createTaskCompletedChannel(): NotificationChannel {
@@ -145,7 +132,6 @@ fun Context.createNotificationChannels() {
         listOf(
             createDownloadProgressChannel(),
             createDownloadCompleteChannel(),
-            createAlertsChannel(),
             createTaskInProgressChannel(),
             createTaskFailedChannel(),
             createTaskCompletedChannel(),

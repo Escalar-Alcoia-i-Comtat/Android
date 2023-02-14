@@ -68,7 +68,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone.Companion.SAMPLE
-import com.arnyminerz.escalaralcoiaicomtat.core.firebase.logAnalyticsSearchEvent
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
@@ -119,7 +118,6 @@ class SearchableActivity : AppCompatActivity() {
                         Timber.v("Search query: $searchQuery")
                         SearchBar(searchQuery ?: "") { query ->
                             Timber.v("New search query: $query")
-                            logAnalyticsSearchEvent(query)
                             searchViewModel.search(query)
                         }
                         Timber.v("Search results: $list")

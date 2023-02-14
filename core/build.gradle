@@ -67,7 +67,7 @@ tasks.named("dokkaHtmlPartial") {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.appcompat:appcompat:1.6.0-rc01'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.8.0-rc01'
     implementation 'androidx.preference:preference-ktx:1.2.0'
 
@@ -155,14 +155,6 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     ksp "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
-
-    // Google Firebase
-    api platform('com.google.firebase:firebase-bom:31.2.1')
-    api 'com.google.firebase:firebase-analytics-ktx'
-    api 'com.google.firebase:firebase-config-ktx'
-    api 'com.google.firebase:firebase-dynamic-links-ktx'
-    api 'com.google.firebase:firebase-messaging-ktx'
-    api 'com.google.firebase:firebase-messaging-directboot:23.1.1'
 
     // Gson for JSON parsing
     implementation 'com.google.code.gson:gson:2.10.1'
