@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -345,7 +346,7 @@ private fun SimpleChip(
 
 @Composable
 @ExperimentalMaterial3Api
-fun BadgesRow(path: Path, informationIntent: (path: Path) -> Intent,) {
+fun BadgesRow(path: Path, informationIntent: (path: Path) -> Intent) {
     val context = LocalContext.current
 
     val fixedSafesData = path.fixedSafesData
@@ -361,7 +362,11 @@ fun BadgesRow(path: Path, informationIntent: (path: Path) -> Intent,) {
                 stringResource(R.string.toast_material_strings)
                     .format(fixedSafesData.quickdrawCount)
             SimpleChip(
-                text = stringResource(R.string.safe_strings, fixedSafesData.quickdrawCount),
+                text = pluralStringResource(
+                    R.plurals.safe_quickdraws,
+                    count = fixedSafesData.quickdrawCount.toInt(),
+                    fixedSafesData.quickdrawCount,
+                ),
                 icon = R.drawable.ic_icona_express,
                 onClick = { context.toast(toastText) }
             )
@@ -453,7 +458,11 @@ fun BadgesRow(path: Path, informationIntent: (path: Path) -> Intent,) {
                     text = if (chip.count >= 999 || chip.countableLabelRes == null)
                         stringResource(chip.uncountableLabelRes)
                     else
-                        stringResource(chip.countableLabelRes, chip.count),
+                        pluralStringResource(
+                            chip.countableLabelRes,
+                            chip.count.toInt(),
+                            chip.count
+                        ),
                     icon = chip.image,
                     onClick = { context.toast(R.string.toast_material_fixed) }
                 )

@@ -3,6 +3,7 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.LongDef
+import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import kotlinx.parcelize.Parcelize
 
@@ -21,7 +22,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class SafeCountData(
     @SafeRequirement val count: Long,
-    @StringRes val countableLabelRes: Int?,
+    @PluralsRes val countableLabelRes: Int?,
     @StringRes val uncountableLabelRes: Int,
     @DrawableRes val image: Int,
     @StringRes val description: Int,
@@ -39,7 +40,7 @@ data class SafeCountData(
      */
     constructor(
         required: Boolean,
-        @StringRes countableLabelRes: Int?,
+        @PluralsRes countableLabelRes: Int?,
         @StringRes uncountableLabelRes: Int,
         @DrawableRes image: Int,
         @StringRes description: Int,
