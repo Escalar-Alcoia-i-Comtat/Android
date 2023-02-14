@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
@@ -112,21 +113,27 @@ fun InformationScreen(
             )
 
             // Express count
-            CardWithIconAndText(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                icon = Icons.Outlined.Numbers,
-                title = stringResource(R.string.info_quickdraws_title),
-                text = buildAnnotatedString {
-                    append(
-                        stringResource(
-                            R.string.info_quickdraws,
-                            path.fixedSafesData.quickdrawCount,
+            path.fixedSafesData.quickdrawCount.takeIf { it > 0 }?.let { quickdrawCount ->
+                CardWithIconAndText(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    icon = Icons.Outlined.Numbers,
+                    title = stringResource(R.string.info_quickdraws_title),
+                    text = buildAnnotatedString {
+                        append(
+                            stringResource(
+                                R.string.info_quickdraws,
+                                pluralStringResource(
+                                    R.plurals.safe_quickdraws_lower,
+                                    count = quickdrawCount.toInt(),
+                                    quickdrawCount,
+                                ),
+                            )
                         )
-                    )
-                },
-            )
+                    },
+                )
+            }
 
             // Requires material
             if (path.requiredSafesData.hasSafeCount())
