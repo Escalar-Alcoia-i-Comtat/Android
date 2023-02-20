@@ -379,7 +379,7 @@ fun BadgesRow(path: Path, informationIntent: (path: Path) -> Intent) {
 
         if (requiredSafesData.crackerRequired)
             SimpleChip(
-                text = pluralStringResource(R.plurals.safe_required_cracker, 0),
+                text = pluralStringResource(R.plurals.safe_required_nut, 0),
                 icon = R.drawable.ic_cracker,
                 onClick = { context.toast(R.string.toast_material_required) },
             )
@@ -397,7 +397,7 @@ fun BadgesRow(path: Path, informationIntent: (path: Path) -> Intent) {
             )
         if (requiredSafesData.nailRequired)
             SimpleChip(
-                text = pluralStringResource(R.plurals.safe_required_nail, 0),
+                text = pluralStringResource(R.plurals.safe_required_nut, 0),
                 icon = R.drawable.ic_reunio_clau,
                 onClick = { context.toast(R.string.toast_material_required) },
             )

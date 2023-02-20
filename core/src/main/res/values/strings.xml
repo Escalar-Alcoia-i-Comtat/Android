@@ -101,8 +101,8 @@
         <item quantity="other">%1$s Burils</item>
     </plurals>
 
-    <plurals name="safe_required_cracker">
-        <item quantity="other">Cracker</item>
+    <plurals name="safe_required_nut">
+        <item quantity="other">Nut</item>
     </plurals>
     <plurals name="safe_required_friend">
         <item quantity="other">Friend</item>
@@ -110,8 +110,8 @@
     <plurals name="safe_required_lanyard">
         <item quantity="other">Lanyard</item>
     </plurals>
-    <plurals name="safe_required_nail">
-        <item quantity="other">Nail</item>
+    <plurals name="safe_required_hook">
+        <item quantity="other">Hook</item>
     </plurals>
     <plurals name="safe_required_piton">
         <item quantity="other">Piton</item>
@@ -120,17 +120,19 @@
         <item quantity="other">Strips</item>
     </plurals>
 
-    <!-- NC is for No Count -->
-    <string name="safe_strings_plural">Quickdraws</string>
-    <string name="safe_parabolt_plural">Parabolts</string>
-    <string name="safe_spits_plural">Spits</string>
-    <string name="safe_tensors_plural">Tensors</string>
-    <string name="safe_pitons_plural">Pitons</string>
-    <string name="safe_burils_plural">Burils</string>
-
     <!-- Explanations for all the safe types -->
-    <!-- TODO: Complete all descriptions -->
-    <string name="placeholder_safe_description" translatable="false">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent a enim nisi. Morbi vitae nunc pretium, laoreet nunc vel, lobortis nulla. Donec ac nibh enim.</string>
+    <string name="safe_parabolt_description">Parabolt is as we call the expansives that we use more commonly for anchoring in the rock. Except reequipments with chemical anchors on very seated roads. The Parabolt expand when they trace of them to self-cut on the wall, once set, it is difficult to take them out, not to say that impossible, correct location etc.</string>
+    <string name="safe_espit_description">It is an anchor with a self -expansion screw of about 3 cm that is placed in the rock with a buckler. This type of anchor is not recommended on sports roads but they are still seen in some way. Compared to what was previously put in the rock this type of anchor was a great advance but now, with the appearance of drills with battery other types of anchors are used.</string>
+    <string name="safe_tensor_description">The safest of anchors, since its length is 12cm for intermediate anchors and 14 cm for meetings and decoupling. The placement is also done with a drill but since the system does not expand inside the rock, it suffers less but it must be placed in a much more precise way.</string>
+    <string name="safe_piton_description">A piton in climbing is a metal spike (usually steel) that is driven into a crack or seam in the climbing surface using a climbing hammer, and which acts as an anchor for protecting the climber against the consequences of falling or to assist progress in aid climbing. Pitons are equipped with an eye hole or a ring to which a carabiner is attached; the carabiner can then be directly or indirectly connected to a climbing rope.</string>
+    <string name="safe_buril_description">Screw stuffed in holes by diameter, sometimes one or two smaller millimeters that penetrates the rock scarce centimeters and that do not have an expansion system.</string>
+
+    <string name="safe_required_nut_description">In rock climbing, a nut (or chock or chockstone) is a metal wedge threaded on a wire that climbers use for protection by wedging it into a crack in the rock. Quickdraws are clipped to the nut wire by the ascending climber and the rope threads through the quickdraw. Nuts come in a variety of sizes and styles, and several different brands are made by competing manufacturers. Most nuts are made of aluminum. Larger nuts may be threaded on Dyneema cord instead of wire, but this has become unusual.</string>
+    <string name="safe_required_friend_description">A spring-loaded camming device (also SLCD, cam or friend) is a piece of rock climbing or mountaineering protection equipment. It consists of two, three, or four cams mounted on a common axle or two adjacent axles, so that pulling on the axle forces the cams to spread farther apart.</string>
+    <string name="safe_required_lanyard_description">Lanyards have a section of heavy-duty nylon strapping attached to a metal ring or carabiner which tightens around an attachment point. The strap may be a fixed length or adjustable, and will attach to the wearer to support them against a fixed object or pole.</string>
+    <string name="safe_required_hook_description">For moving or positioning while aid climbing, the hooks can be suspended in various rock structures or drilled holes to give added protection. Hooks are usually made from steel.</string>
+    <string name="safe_required_piton_description" translatable="false">@string/safe_piton_description</string>
+    <string name="safe_required_strips_description" translatable="false"></string>
 
     <string name="path_stats_chart_title">Grades</string>
 

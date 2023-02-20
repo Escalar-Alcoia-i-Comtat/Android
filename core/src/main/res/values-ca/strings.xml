@@ -61,9 +61,21 @@
     <string name="path_ending_pitch_inclined">Inclinat</string>
     <string name="path_ending_pitch_rappeleable">Rapelable</string>
     <string name="path_ending_pitch_clean">, sense equipament</string>
+    <string name="safe_strings">%1$s Express</string>
+    <string name="safe_parabolt">%1$s Parabolts</string>
+    <string name="safe_tensor">%1$s Tensors</string>
+    <string name="safe_piton">%1$s Pitons</string>
+    <string name="safe_buril">%1$s Burils</string>
+    <string name="safe_lanyard">Cordí</string>
+    <string name="safe_friend">Friend</string>
+    <string name="safe_strips">Strips</string>
+    <string name="safe_required_friend">Friend</string>
+    <string name="safe_required_lanyard">Cordí</string>
+    <string name="safe_required_piton">Piton</string>
+    <string name="safe_required_strips">Strips</string>
+    <!-- NC is for No Count -->
     <string name="safe_strings_plural">Express</string>
     <string name="safe_parabolt_plural">Parabolts</string>
-    <string name="safe_spits_plural">Spits</string>
     <string name="safe_tensors_plural">Tensors</string>
     <string name="safe_pitons_plural">Claus</string>
     <string name="safe_burils_plural">Burils</string>
