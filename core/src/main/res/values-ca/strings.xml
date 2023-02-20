@@ -61,24 +61,6 @@
     <string name="path_ending_pitch_inclined">Inclinat</string>
     <string name="path_ending_pitch_rappeleable">Rapelable</string>
     <string name="path_ending_pitch_clean">, sense equipament</string>
-    <string name="safe_strings">%1$s Express</string>
-    <string name="safe_parabolt">%1$s Parabolts</string>
-    <string name="safe_spit">%1$s Spits</string>
-    <string name="safe_tensor">%1$s Tensors</string>
-    <string name="safe_piton">%1$s Pitons</string>
-    <string name="safe_buril">%1$s Burils</string>
-    <string name="safe_lanyard">Cordí</string>
-    <string name="safe_cracker">Empotrador</string>
-    <string name="safe_friend">Friend</string>
-    <string name="safe_strips">Strips</string>
-    <string name="safe_nail">Ungla</string>
-    <string name="safe_required_cracker">Empotrador</string>
-    <string name="safe_required_friend">Friend</string>
-    <string name="safe_required_lanyard">Cordí</string>
-    <string name="safe_required_nail">Clau</string>
-    <string name="safe_required_piton">Piton</string>
-    <string name="safe_required_strips">Strips</string>
-    <!-- NC is for No Count -->
     <string name="safe_strings_plural">Express</string>
     <string name="safe_parabolt_plural">Parabolts</string>
     <string name="safe_spits_plural">Spits</string>
@@ -203,8 +185,6 @@
     <string name="intro_nearbyzones_enable">Habilitar Zones Properes</string>
     <string name="warning_preferences_title">Atenció!</string>
     <string name="warning_preferences_message">En l\'última actualització hem canviat la manera amb la qual desem les teves preferències. Intentarem migrar les teves preferències en el moment abandones aquesta pantalla, no obstant això, pot ser alguns valors es perguen.</string>
-    <string name="warning_play_services_title">Atenció!</string>
-    <string name="warning_play_services_message">Hem detectat que el teu dispositiu no és compatible amb els Serveis de Google Play. Açò pot causar alguns problemes en algunes parts de l\'aplicació. T\'hem advertit.</string>
     <string name="warning_md5_title">Atenció!</string>
     <string name="warning_md5_message">Hem detectat que el teu dispositiu no és compatible amb el hashing MD5. Açò significa que el dispositiu tindrà problemes per a buscar actualitzacions, i és molt possible que no funcionin. No et tornarem a notificar.</string>
     <string name="sector_walking_time">%1$smin</string>
@@ -215,9 +195,6 @@
     <string name="status_no_internet">Sense Connexió a Internet</string>
     <string name="status_loading_deep_link">Processant enllaç…</string>
     <string name="status_loading_checks">Executant comprovacions del sistema…</string>
-    <string name="status_loading_config">Carregant configuració…</string>
-    <string name="status_loading_noti_list">Afegint detectors de notificacions…</string>
-    <string name="status_loading_data_collection">Configurant la recol·lecció de dades…</string>
     <string name="status_loading_workers">Programant treballs…</string>
     <string name="status_loading_auth">Carregant el sistema d\'autentificació…</string>
     <string name="status_loading_data">Carregant les dades…</string>
@@ -307,8 +284,6 @@
     <string name="notification_channel_download_progress_desc">Quan estigues descarregant algun contingut, es mostrarà una notificació d\'aquest tipus</string>
     <string name="notification_channel_download_complete_name">Descàrrega completa</string>
     <string name="notification_channel_download_complete_desc">Quan s\'haja completat alguna descàrrega, es mostrarà una notificació d\'aquest tipus</string>
-    <string name="notification_channel_alert_name">Alertes</string>
-    <string name="notification_channel_alert_desc">Açò t\'advertirà d\'incidències que es troben a les vies, sectors o alguna altra cosa. Açò també inclou el reequipament de vies o processos de reparació.</string>
     <string name="notification_channel_people_group_name">Social</string>
     <string name="notification_channel_tasks_group_name">Tasques</string>
     <string name="notification_channel_task_completed_name">Tasca completada</string>

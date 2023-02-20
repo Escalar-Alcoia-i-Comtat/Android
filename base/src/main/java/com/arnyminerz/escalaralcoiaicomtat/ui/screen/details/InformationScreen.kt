@@ -24,11 +24,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
@@ -38,13 +37,16 @@ import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.CardWithIconAndText
 
 @Composable
 @ExperimentalMaterial3Api
-fun InformationScreen(@PreviewParameter(InformationScreenPreviewProvider::class) path: Path) {
+fun InformationScreen(
+    path: Path,
+    onCloseRequested: () -> Unit,
+) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(path.displayName) },
                 navigationIcon = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = onCloseRequested) {
                         Icon(Icons.Rounded.Close, stringResource(R.string.action_close))
                     }
                 },
@@ -69,7 +71,7 @@ fun InformationScreen(@PreviewParameter(InformationScreenPreviewProvider::class)
                     title = stringResource(R.string.info_builder_title),
                     text = buildAnnotatedString {
                         path.buildPatch?.let { patch ->
-                            appendLine(
+                            append(
                                 stringResource(
                                     R.string.info_builder,
                                     (patch.name ?: "¿?") + (patch.date?.let { ", $it" } ?: ""),
@@ -79,6 +81,8 @@ fun InformationScreen(@PreviewParameter(InformationScreenPreviewProvider::class)
                         path.patches
                             // Only append if there are patches
                             .takeIf { it.isNotEmpty() }
+                            // Break the previous line
+                            .also { appendLine() }
                             // If a patch has been found, add the first line
                             ?.also { append(stringResource(R.string.info_rebuilders)) }
                             // Now add all the enumerating lines
@@ -111,21 +115,27 @@ fun InformationScreen(@PreviewParameter(InformationScreenPreviewProvider::class)
             )
 
             // Express count
-            CardWithIconAndText(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                icon = Icons.Outlined.Numbers,
-                title = stringResource(R.string.info_quickdraws_title),
-                text = buildAnnotatedString {
-                    append(
-                        stringResource(
-                            R.string.info_quickdraws,
-                            path.fixedSafesData.quickdrawCount,
+            path.fixedSafesData.quickdrawCount.takeIf { it > 0 }?.let { quickdrawCount ->
+                CardWithIconAndText(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    icon = Icons.Outlined.Numbers,
+                    title = stringResource(R.string.info_quickdraws_title),
+                    text = buildAnnotatedString {
+                        append(
+                            stringResource(
+                                R.string.info_quickdraws,
+                                pluralStringResource(
+                                    R.plurals.safe_quickdraws_lower,
+                                    count = quickdrawCount.toInt(),
+                                    quickdrawCount,
+                                ),
+                            )
                         )
-                    )
-                },
-            )
+                    },
+                )
+            }
 
             // Requires material
             if (path.requiredSafesData.hasSafeCount())
@@ -137,7 +147,7 @@ fun InformationScreen(@PreviewParameter(InformationScreenPreviewProvider::class)
                     title = stringResource(R.string.info_required_title),
                     content = {
                         Text(stringResource(R.string.info_required))
-                        for (safeCountData in path.requiredSafesData.list())
+                        for (safeCountData in path.requiredSafesData.list().filter { it.count > 0 })
                             Row(
                                 Modifier
                                     .fillMaxWidth()
@@ -145,14 +155,14 @@ fun InformationScreen(@PreviewParameter(InformationScreenPreviewProvider::class)
                             ) {
                                 Image(
                                     painter = painterResource(safeCountData.image),
-                                    contentDescription = stringResource(safeCountData.uncountableLabelRes),
+                                    contentDescription = safeCountData.stringResource(),
                                     modifier = Modifier
                                         .size(32.dp)
                                         .padding(end = 4.dp),
                                 )
                                 Column(Modifier.weight(1f)) {
                                     Text(
-                                        stringResource(safeCountData.uncountableLabelRes),
+                                        safeCountData.stringResource(),
                                         style = MaterialTheme.typography.titleMedium,
                                     )
                                     Text(
@@ -174,7 +184,7 @@ fun InformationScreen(@PreviewParameter(InformationScreenPreviewProvider::class)
                     title = stringResource(R.string.info_fixed_title),
                     content = {
                         Text(stringResource(R.string.info_fixed))
-                        for (safeCountData in path.fixedSafesData.list())
+                        for (safeCountData in path.fixedSafesData.list().filter { it.count > 0 })
                             Row(
                                 Modifier
                                     .fillMaxWidth()
@@ -182,14 +192,14 @@ fun InformationScreen(@PreviewParameter(InformationScreenPreviewProvider::class)
                             ) {
                                 Image(
                                     painter = painterResource(safeCountData.image),
-                                    contentDescription = stringResource(safeCountData.uncountableLabelRes),
+                                    contentDescription = safeCountData.stringResource(),
                                     modifier = Modifier
                                         .size(32.dp)
                                         .padding(end = 4.dp),
                                 )
                                 Column(Modifier.weight(1f)) {
                                     Text(
-                                        stringResource(safeCountData.uncountableLabelRes),
+                                        safeCountData.stringResource(),
                                         style = MaterialTheme.typography.titleMedium,
                                     )
                                     Text(
@@ -225,12 +235,5 @@ fun InformationScreen(@PreviewParameter(InformationScreenPreviewProvider::class)
 @Composable
 @ExperimentalMaterial3Api
 fun InformationScreenPreview() {
-    InformationScreen(path = Path.SAMPLE_PATH)
-}
-
-class InformationScreenPreviewProvider : PreviewParameterProvider<Path> {
-    override val values: Sequence<Path> = sequenceOf(
-        Path.SAMPLE_PATH,
-        Path.SAMPLE_PATH_MULTIPITCH,
-    )
+    InformationScreen(path = Path.SAMPLE_PATH) {}
 }

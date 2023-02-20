@@ -14,10 +14,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.delLn
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getStringOrNull
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
-import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 
@@ -61,11 +61,7 @@ class Path internal constructor(
         data.getString("grade"),
         data.getString("height"),
         data.getString("ending"),
-        try {
-            data.getString("pitch_info")
-        } catch (e: JSONException) {
-            ""
-        },
+        data.getStringOrNull("pitch_info") ?: "",
         FixedSafesData(
             data.getLong("stringCount"),
             data.getLong("paraboltCount"),
@@ -82,21 +78,9 @@ class Path internal constructor(
             data.getBoolean("pitonRequired"),
             data.getBoolean("nailRequired"),
         ),
-        try {
-            data.getString("description")
-        } catch (e: JSONException) {
-            null
-        },
-        try {
-            data.getString("builtBy")
-        } catch (e: JSONException) {
-            null
-        },
-        try {
-            data.getString("rebuilders")
-        } catch (e: JSONException) {
-            null
-        },
+        data.getStringOrNull("description"),
+        data.getStringOrNull("builtBy"),
+        data.getStringOrNull("rebuilders"),
         parentSectorId = data.getString("sector")
     )
 

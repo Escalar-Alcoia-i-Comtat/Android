@@ -61,7 +61,7 @@ data class PathData(
                 pitonRequired,
                 nailRequired
             ),
-            description,
+            description?.takeIf { it.trim().uppercase() != "NULL" },
             builtBy.ifEmpty { null },
             rebuiltBy.ifEmpty { null },
             downloaded,

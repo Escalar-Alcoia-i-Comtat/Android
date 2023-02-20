@@ -33,36 +33,31 @@ data class FixedSafesData(
         listOf(
             SafeCountData(
                 paraboltCount,
-                R.string.safe_parabolt,
-                R.string.safe_parabolt_plural,
+                R.plurals.safe_parabolt,
                 R.drawable.ic_parabolt,
                 R.string.placeholder_safe_description,
             ),
             SafeCountData(
                 spitCount,
-                R.string.safe_spit,
-                R.string.safe_spits_plural,
+                R.plurals.safe_spit,
                 R.drawable.ic_spit,
                 R.string.placeholder_safe_description,
             ),
             SafeCountData(
                 tensorCount,
-                R.string.safe_tensor,
-                R.string.safe_tensors_plural,
+                R.plurals.safe_tensor,
                 R.drawable.ic_tensor,
                 R.string.placeholder_safe_description,
             ),
             SafeCountData(
                 pitonCount,
-                R.string.safe_piton,
-                R.string.safe_pitons_plural,
+                R.plurals.safe_piton,
                 R.drawable.ic_reunio_clau,
                 R.string.placeholder_safe_description,
             ),
             SafeCountData(
                 burilCount,
-                R.string.safe_buril,
-                R.string.safe_burils_plural,
+                R.plurals.safe_buril,
                 R.drawable.ic_buril,
                 R.string.placeholder_safe_description,
             )
