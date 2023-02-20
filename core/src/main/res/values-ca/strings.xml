@@ -61,24 +61,68 @@
     <string name="path_ending_pitch_inclined">Inclinat</string>
     <string name="path_ending_pitch_rappeleable">Rapelable</string>
     <string name="path_ending_pitch_clean">, sense equipament</string>
-    <string name="safe_strings">%1$s Express</string>
-    <string name="safe_parabolt">%1$s Parabolts</string>
-    <string name="safe_tensor">%1$s Tensors</string>
-    <string name="safe_piton">%1$s Pitons</string>
-    <string name="safe_buril">%1$s Burils</string>
-    <string name="safe_lanyard">Cordí</string>
-    <string name="safe_friend">Friend</string>
-    <string name="safe_strips">Strips</string>
-    <string name="safe_required_friend">Friend</string>
-    <string name="safe_required_lanyard">Cordí</string>
-    <string name="safe_required_piton">Piton</string>
-    <string name="safe_required_strips">Strips</string>
-    <!-- NC is for No Count -->
-    <string name="safe_strings_plural">Express</string>
-    <string name="safe_parabolt_plural">Parabolts</string>
-    <string name="safe_tensors_plural">Tensors</string>
-    <string name="safe_pitons_plural">Claus</string>
-    <string name="safe_burils_plural">Burils</string>
+    <plurals name="safe_quickdraws">
+        <item quantity="one">%1$s Express</item>
+        <item quantity="other">%1$s Express</item>
+    </plurals>
+    <plurals name="safe_quickdraws_lower">
+        <item quantity="one">%1$s express</item>
+        <item quantity="other">%1$s express</item>
+    </plurals>
+    <plurals name="safe_parabolt">
+        <item quantity="one">%1$s Parabolt</item>
+        <item quantity="other">%1$s Parabolts</item>
+    </plurals>
+    <plurals name="safe_spit">
+        <item quantity="one">%1$s Espit</item>
+        <item quantity="other">%1$s Espits</item>
+    </plurals>
+    <plurals name="safe_tensor">
+        <item quantity="one">%1$s Tensor</item>
+        <item quantity="other">%1$s Tensors</item>
+    </plurals>
+    <plurals name="safe_piton">
+        <item quantity="one">%1$s Clau</item>
+        <item quantity="other">%1$s Claus</item>
+    </plurals>
+    <plurals name="safe_buril">
+        <item quantity="one">%1$s Buril</item>
+        <item quantity="other">%1$s Buril</item>
+    </plurals>
+    <plurals name="safe_required_nut">
+        <item quantity="one">Empotrador</item>
+        <item quantity="other">Empotradors</item>
+    </plurals>
+    <plurals name="safe_required_friend">
+        <item quantity="one">Friend</item>
+        <item quantity="other">Friends</item>
+    </plurals>
+    <plurals name="safe_required_lanyard">
+        <item quantity="one">Cordí</item>
+        <item quantity="other">Cordins</item>
+    </plurals>
+    <plurals name="safe_required_hook">
+        <item quantity="one">Ungla</item>
+        <item quantity="other">Ungles</item>
+    </plurals>
+    <plurals name="safe_required_piton">
+        <item quantity="one">Clau</item>
+        <item quantity="other">Claus</item>
+    </plurals>
+    <plurals name="safe_required_strips">
+        <item quantity="one">Estrip</item>
+        <item quantity="other">Estrips</item>
+    </plurals>
+    <!-- Explanations for all the safe types -->
+    <string name="safe_parabolt_description">Parabolt és com anomenem els expansius que fem servir més habitualment per ancorar-se a la roca. Excepte als reequipaments amb ancoratges químics en vies molt assegudes. Els Parabolt s\'expandeixen quan s\'estira d\'ells, per tant, un cop posats, és difícil treure\'ls, per no dir impossible.</string>
+    <string name="safe_espit_description">Es tracta d\'un ancoratge amb un cargol d\'autoexpansió d\'uns 3 cm que es col·loca a la roca amb un pavelló. Aquest tipus d\'ancoratge no es recomana a les carreteres esportives però encara hi han a alguns llocs.</string>
+    <string name="safe_tensor_description">El més segur dels ancoratges, ja que la seva longitud és de 12 cm per a ancoratges intermedis i 14 cm per a reunions i desacoblaments. La col·locació es fa amb un trepant però com que el sistema no s\'expandeix a l\'interior de la roca, pateix menys; no obstant s\'ha de col·locar d\'una manera molt més precisa.</string>
+    <string name="safe_piton_description">Un clau d\'escalada és una punta metàl·lica (generalment d\'acer) que s\'introdueix en una esquerda o una costura de la superfície d\'escalada amb un martell, i que actua com a ancoratge per protegir l\'escalador de les conseqüències de la caiguda o per ajudar a progressar. Els claus estan equipats amb un forat o un anell al qual es penja un mosquetó, el qual es pot connectar directament o indirectament a una corda d\'escalada.</string>
+    <string name="safe_buril_description">Cargol embotit en forats per diàmetre, de vegades un o dos mil·límetres més petits que la roca. Penetra pocs centímetres i no té un sistema d\'expansió.</string>
+    <string name="safe_required_nut_description">Un empotrador és una falca metàl·lica roscada a un filferro que els escaladors utilitzen per protegir-se encaixant-la en una escletxa de la roca. L\'escalador ascendent s\'enganxa al filferro de la femella i la corda s\'enfila a través de la cinta express. Els empotradors tenen una gran varietat de mides i estils. La majoria d\'empotradors estan fets d\'alumini. Els més grans es poden fer servir cable de Dyneema en comptes de filferro, però això s\'ha tornat inusual.</string>
+    <string name="safe_required_friend_description">Un dispositiu de camming (també SLCD, cam o friend) és una peça d\'equip de protecció d\'escalada o d\'alpinisme. Consisteix en dues, tres o quatre lleves muntades en un eix comú o dos eixos adjacents, de manera que tirar de l\'eix obliga les lleves a separar-se.</string>
+    <string name="safe_required_lanyard_description">Els cordins tenen una secció de corretges de niló resistents, connectades a un anell metàl·lic o un mosquetó que s\'estreny al voltant d\'un punt de fixació. La corretja pot ser de longitud fixa o ajustable, i s\'utilitza per assegurar a l\'usuari contra un objecte o pal fix.</string>
+    <string name="safe_required_hook_description">Per moure\'s o col·locar-se mentre s\'escala, les ungles es poden suspendre en diverses estructures de roca o forats perforats per oferir una protecció addicional. Solen estar fetes d\'acer.</string>
     <string name="path_stats_chart_title">Graus</string>
     <string name="nearby_zones_title">Zones Properes</string>
     <string name="nearby_zones_permission">És necessari que proporciones accés a la teva ubicació perquè funcioni aquesta funció. Prem per a sol·licitar.</string>
@@ -396,5 +440,20 @@
     <string name="activity_summary_completions">%d vies completades.</string>
     <string name="activity_summary_grades">Graus</string>
     <string name="title_data">Mòdul de Dades</string>
+    <!-- InformationScreen strings -->
+    <string name="info_builder_title">Equipador</string>
+    <string name="info_builder">Equipada per %s</string>
+    <string name="info_rebuilders">Reequipada per:</string>
+    <string name="info_general_title">Informació general</string>
+    <string name="info_general_grade">El grau general de la via és %s. %s</string>
+    <string name="info_general_grade_more">Hi ha més informació sobre cada llarg a sota.</string>
+    <string name="info_general_height">La via té %dm d\'alçada.</string>
+    <string name="info_quickdraws_title">Express</string>
+    <string name="info_quickdraws">Per a escalar aquesta via es recomana dur com a mínim %s</string>
+    <string name="info_required_title">Material Necessari</string>
+    <string name="info_required">Per a escalar aquesta via cal que dugues material addicional al que ja està instal·lat, i les cintes express.</string>
+    <string name="info_fixed_title">Material Fixe</string>
+    <string name="info_fixed">Aquest material està fixat a la roca i no es pot llevar. Està llest per a ser utilitzat quan arribes a la via.</string>
+    <string name="info_description">Descripció</string>
     <string name="attr_gpx">Este GPX ha sigut oferit per Escalar Alcoià i Comtat. Baixa l\'app des de https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
 </resources>

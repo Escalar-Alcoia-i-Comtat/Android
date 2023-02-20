@@ -61,30 +61,68 @@
     <string name="path_ending_pitch_inclined">Inclinado</string>
     <string name="path_ending_pitch_rappeleable">Rapelable</string>
     <string name="path_ending_pitch_clean">, sin equipamiento</string>
-    <string name="safe_strings">%1$s Express</string>
-    <string name="safe_parabolt">%1$s Parabolts</string>
-    <string name="safe_espit">%1$s Spits</string>
-    <string name="safe_tensor">%1$s Tensores</string>
-    <string name="safe_piton">%1$s Clavo</string>
-    <string name="safe_buril">%1$s Burils</string>
-    <string name="safe_lanyard">Cordino</string>
-    <string name="safe_nut">Empotrador</string>
-    <string name="safe_friend">Friend</string>
-    <string name="safe_strips">Strips</string>
-    <string name="safe_hook">Uñas</string>
-    <string name="safe_required_nut">Empotrador</string>
-    <string name="safe_required_friend">Friend</string>
-    <string name="safe_required_lanyard">Cordino</string>
-    <string name="safe_required_hook">Clavo</string>
-    <string name="safe_required_piton">Piton</string>
-    <string name="safe_required_strips">Estribos</string>
-    <!-- NC is for No Count -->
-    <string name="safe_strings_plural">Express</string>
-    <string name="safe_parabolt_plural">Parabolts</string>
-    <string name="safe_espits_plural">Spits</string>
-    <string name="safe_tensors_plural">Tensores</string>
-    <string name="safe_pitons_plural">Clavos</string>
-    <string name="safe_burils_plural">Buriles</string>
+    <plurals name="safe_quickdraws">
+        <item quantity="one">%1$s Express</item>
+        <item quantity="other">%1$s Express</item>
+    </plurals>
+    <plurals name="safe_quickdraws_lower">
+        <item quantity="one">%1$s express</item>
+        <item quantity="other">%1$s express</item>
+    </plurals>
+    <plurals name="safe_parabolt">
+        <item quantity="one">%1$s Parabolt</item>
+        <item quantity="other">%1$s Parabolts</item>
+    </plurals>
+    <plurals name="safe_spit">
+        <item quantity="one">%1$s Espit</item>
+        <item quantity="other">%1$s Espits</item>
+    </plurals>
+    <plurals name="safe_tensor">
+        <item quantity="one">%1$s Tensor</item>
+        <item quantity="other">%1$s Tensores</item>
+    </plurals>
+    <plurals name="safe_piton">
+        <item quantity="one">%1$s Clavo</item>
+        <item quantity="other">%1$s Clavos</item>
+    </plurals>
+    <plurals name="safe_buril">
+        <item quantity="one">%1$s Buril</item>
+        <item quantity="other">%1$s Burils</item>
+    </plurals>
+    <plurals name="safe_required_nut">
+        <item quantity="one">Empotrador</item>
+        <item quantity="other">Empotradores</item>
+    </plurals>
+    <plurals name="safe_required_friend">
+        <item quantity="one">Friend</item>
+        <item quantity="other">Friends</item>
+    </plurals>
+    <plurals name="safe_required_lanyard">
+        <item quantity="one">Cordino</item>
+        <item quantity="other">Cordinos</item>
+    </plurals>
+    <plurals name="safe_required_hook">
+        <item quantity="one">Uña</item>
+        <item quantity="other">Uñas</item>
+    </plurals>
+    <plurals name="safe_required_piton">
+        <item quantity="one">Clavo</item>
+        <item quantity="other">Clavos</item>
+    </plurals>
+    <plurals name="safe_required_strips">
+        <item quantity="one">Estribo</item>
+        <item quantity="other">Estribos</item>
+    </plurals>
+    <!-- Explanations for all the safe types -->
+    <string name="safe_parabolt_description">Parabolt es como llamamos los expansivos que utilizamos más comúnmente para anclarnos en la roca. Exceptuando reequipamientos con anclajes químicos en vías muy transitadas. El Parabolt se expande cuando se tira de él. Una vez instalado, es difícil extraerlo, por no decir que es imposible.</string>
+    <string name="safe_espit_description">Es un anclaje con un tornillo autoexpandido de unos 3 cm. Este tipo de anclaje no se recomienda en las vías deportivas, pero todavía se ven en algunos sitios. En comparación con lo que se puso anteriormente en la roca, este tipo de anclaje fue un gran avance, pero ahora, con la apariencia de taladros con batería se utilizan otros tipos.</string>
+    <string name="safe_tensor_description">El más seguro de los anclajes, ya que su longitud es de 12 cm para anclajes intermedios y 14 cm para reuniones. La colocación se realiza con un taladro pero dado que el sistema no se expande, la piedra, sufre menos. Eso sí, debe situarse de una manera mucho más precisa.</string>
+    <string name="safe_piton_description">Un clavo es una punta de metal (generalmente acero) que es empujada a una grieta o costura en la superficie de escalada usando un martillo, y que actúa como ancla para proteger al escalador contra las consecuencias de la caída o para ayudar a progresar en la escalada. Los clavos están equipados con un agujero o un anillo al que se engancha un mosquetón; el mosquetón puede entonces estar conectado directa o indirectamente a una cuerda de escalada.</string>
+    <string name="safe_buril_description">Es un tornillo que se sujeta a agujeros por su diámetro, a veces uno o dos milímetros más pequeños. Penetra muy pocos centímetros en la roca y no tiene un sistema de expansión.</string>
+    <string name="safe_required_nut_description">Un empotrador es una cuña de metal hilada en un alambre que los escaladores utilizan para protegerse metíendolo en ranuras y grietas de la roca. Los empotradores vienen en una variedad de tamaños y estilos, aunque la mayoría son de aluminio.</string>
+    <string name="safe_required_friend_description">Un dispositivo de camming (también SLCD, cam o friend) es una tipo de dispositivo de protección para la escalada. Consiste en dos, tres o cuatro levas montadas en un eje común o dos ejes adyacentes, para que al tirar de él el eje obligue a las levas a separarse más.</string>
+    <string name="safe_required_lanyard_description">Los cordinos tienen una sección de nylon unida a un anillo de metal o mosquetón que se ata alrededor de un punto de fijación. La correa puede ser de longitud fija o ajustable, y se usa para asegurar al usuario contra un objeto o poste fijo.</string>
+    <string name="safe_required_hook_description">Para desplazarse o posicionarse mientras se escala, las uñas pueden ser suspendidas en diversas estructuras rocosas o agujeros perforados para dar una mayor protección. Son generalmente hechos de acero.</string>
     <string name="path_stats_chart_title">Grados</string>
     <string name="nearby_zones_title">Zonas Cercanas</string>
     <string name="nearby_zones_permission">El acceso a la ubicación es necesario y no está dado. Pulsa para solicitar.</string>
@@ -403,5 +441,20 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="activity_summary_completions">%d vías completadas.</string>
     <string name="activity_summary_grades">Grados</string>
     <string name="title_data">Módulo de Datos</string>
+    <!-- InformationScreen strings -->
+    <string name="info_builder_title">Equipador</string>
+    <string name="info_builder">Equipada por %s</string>
+    <string name="info_rebuilders">Reequipada por:</string>
+    <string name="info_general_title">Información general</string>
+    <string name="info_general_grade">El grado general de la vía es %s. %s</string>
+    <string name="info_general_grade_more">Hay más información sobre cada largo a continuación.</string>
+    <string name="info_general_height">La ruta vía tiene una altura de %dm.</string>
+    <string name="info_quickdraws_title">Express</string>
+    <string name="info_quickdraws">Para escalar esta vía se recomienda que lleves al menos %s</string>
+    <string name="info_required_title">Material necesario</string>
+    <string name="info_required">Esta ruta requiere que lleves algo de material adicional, incluyendo el ya instalado, y las express.</string>
+    <string name="info_fixed_title">Material fijo</string>
+    <string name="info_fixed">Este material está fijo en la pared y no puede ser removido. Está listo para ser usado cuando llegues a la vía.</string>
+    <string name="info_description">Descripción</string>
     <string name="attr_gpx">Este GPX ha sido ofrecido por Escalar Alcoià i Comtat. Descarga la app desde https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
 </resources>
