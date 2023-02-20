@@ -3,8 +3,8 @@
 buildscript {
     ext {
         compose_version = '1.4.0-beta01'
-        compose_compiler_version = '1.3.2'
-        kotlin_version = '1.7.20'
+        compose_compiler_version = '1.4.2'
+        kotlin_version = '1.8.10'
     }
     repositories {
         google()
@@ -16,18 +16,19 @@ buildscript {
     }
     dependencies {
         // Build tools
-        classpath 'com.android.tools.build:gradle:7.3.1'
+        classpath 'com.android.tools.build:gradle:7.4.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         // Dokka documentation generator
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$kotlin_version"
+        // FIXME Update Dokka to KT 1.8 when available
+        // classpath "org.jetbrains.dokka:dokka-gradle-plugin:$kotlin_version"
 
         // Kotlin Symbol Processor
-        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$kotlin_version-1.0.6"
+        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$kotlin_version-1.0.9"
     }
 }
 
-apply plugin: "org.jetbrains.dokka"
+// FIXME: apply plugin: "org.jetbrains.dokka"
 
 allprojects {
     repositories {

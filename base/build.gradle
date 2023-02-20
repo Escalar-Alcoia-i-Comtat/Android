@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'org.jetbrains.dokka'
+    // FIXME: id 'org.jetbrains.dokka'
     id 'com.google.android.secrets-gradle-plugin' version '1.1.0'
 }
 
@@ -12,7 +12,7 @@ android {
 
     // Android Build Settings
     compileSdk 33
-    buildToolsVersion "33.0.0"
+    buildToolsVersion "33.0.2"
     defaultConfig {
         applicationId "com.arnyminerz.escalaralcoiaicomtat"
         minSdk 24
@@ -102,13 +102,13 @@ android {
     }
 }
 
-tasks.named("dokkaHtmlPartial") {
+/* fixme tasks.named("dokkaHtmlPartial") {
     dokkaSourceSets {
         configureEach {
             noAndroidSdkLink.set(false)
         }
     }
-}
+}*/
 
 android.applicationVariants.all { variant ->
     if (variant.buildType.name == "release") {

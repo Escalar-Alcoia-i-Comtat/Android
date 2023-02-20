@@ -2,7 +2,7 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'kotlin-parcelize'
-    id 'org.jetbrains.dokka'
+    // FIXME: id 'org.jetbrains.dokka'
     id 'com.google.devtools.ksp'
 }
 
@@ -10,7 +10,7 @@ android {
     namespace 'com.arnyminerz.escalaralcoiaicomtat.core'
 
     compileSdk 33
-    buildToolsVersion "33.0.0"
+    buildToolsVersion "33.0.2"
 
     defaultConfig {
         minSdk 24
@@ -56,13 +56,14 @@ android {
     }
 }
 
-tasks.named("dokkaHtmlPartial") {
+// FIXME
+/*tasks.named("dokkaHtmlPartial") {
     dokkaSourceSets {
         configureEach {
             noAndroidSdkLink.set(false)
         }
     }
-}
+}*/
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
