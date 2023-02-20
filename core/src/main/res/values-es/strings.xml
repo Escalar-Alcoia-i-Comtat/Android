@@ -61,30 +61,68 @@
     <string name="path_ending_pitch_inclined">Inclinado</string>
     <string name="path_ending_pitch_rappeleable">Rapelable</string>
     <string name="path_ending_pitch_clean">, sin equipamiento</string>
-    <string name="safe_strings">%1$s Express</string>
-    <string name="safe_parabolt">%1$s Parabolts</string>
-    <string name="safe_espit">%1$s Spits</string>
-    <string name="safe_tensor">%1$s Tensores</string>
-    <string name="safe_piton">%1$s Clavo</string>
-    <string name="safe_buril">%1$s Burils</string>
-    <string name="safe_lanyard">Cordino</string>
-    <string name="safe_nut">Empotrador</string>
-    <string name="safe_friend">Friend</string>
-    <string name="safe_strips">Strips</string>
-    <string name="safe_hook">Uñas</string>
-    <string name="safe_required_nut">Empotrador</string>
-    <string name="safe_required_friend">Friend</string>
-    <string name="safe_required_lanyard">Cordino</string>
-    <string name="safe_required_hook">Clavo</string>
-    <string name="safe_required_piton">Piton</string>
-    <string name="safe_required_strips">Estribos</string>
-    <!-- NC is for No Count -->
-    <string name="safe_strings_plural">Express</string>
-    <string name="safe_parabolt_plural">Parabolts</string>
-    <string name="safe_espits_plural">Spits</string>
-    <string name="safe_tensors_plural">Tensores</string>
-    <string name="safe_pitons_plural">Clavos</string>
-    <string name="safe_burils_plural">Buriles</string>
+    <plurals name="safe_quickdraws">
+        <item quantity="one">%1$s Quickdraw</item>
+        <item quantity="other">%1$s Quickdraws</item>
+    </plurals>
+    <plurals name="safe_quickdraws_lower">
+        <item quantity="one">%1$s quickdraw</item>
+        <item quantity="other">%1$s quickdraws</item>
+    </plurals>
+    <plurals name="safe_parabolt">
+        <item quantity="one">%1$s Parabolt</item>
+        <item quantity="other">%1$s Parabolts</item>
+    </plurals>
+    <plurals name="safe_spit">
+        <item quantity="one">%1$s Spit</item>
+        <item quantity="other">%1$s Spits</item>
+    </plurals>
+    <plurals name="safe_tensor">
+        <item quantity="one">%1$s Tensor</item>
+        <item quantity="other">%1$s Tensors</item>
+    </plurals>
+    <plurals name="safe_piton">
+        <item quantity="one">%1$s Piton</item>
+        <item quantity="other">%1$s Pitons</item>
+    </plurals>
+    <plurals name="safe_buril">
+        <item quantity="one">%1$s Buril</item>
+        <item quantity="other">%1$s Burils</item>
+    </plurals>
+    <plurals name="safe_required_nut">
+        <item quantity="one">Nut</item>
+        <item quantity="other">Nut</item>
+    </plurals>
+    <plurals name="safe_required_friend">
+        <item quantity="one">Friend</item>
+        <item quantity="other">Friend</item>
+    </plurals>
+    <plurals name="safe_required_lanyard">
+        <item quantity="one">Lanyard</item>
+        <item quantity="other">Lanyard</item>
+    </plurals>
+    <plurals name="safe_required_hook">
+        <item quantity="one">Hook</item>
+        <item quantity="other">Hook</item>
+    </plurals>
+    <plurals name="safe_required_piton">
+        <item quantity="one">Piton</item>
+        <item quantity="other">Piton</item>
+    </plurals>
+    <plurals name="safe_required_strips">
+        <item quantity="one">Strips</item>
+        <item quantity="other">Strips</item>
+    </plurals>
+    <!-- Explanations for all the safe types -->
+    <string name="safe_parabolt_description">Parabolt is as we call the expansives that we use more commonly for anchoring in the rock. Except reequipments with chemical anchors on very seated roads. The Parabolt expand when they trace of them to self-cut on the wall, once set, it is difficult to take them out, not to say that impossible, correct location etc.</string>
+    <string name="safe_espit_description">It is an anchor with a self -expansion screw of about 3 cm that is placed in the rock with a buckler. This type of anchor is not recommended on sports roads but they are still seen in some way. Compared to what was previously put in the rock this type of anchor was a great advance but now, with the appearance of drills with battery other types of anchors are used.</string>
+    <string name="safe_tensor_description">The safest of anchors, since its length is 12cm for intermediate anchors and 14 cm for meetings and decoupling. The placement is also done with a drill but since the system does not expand inside the rock, it suffers less but it must be placed in a much more precise way.</string>
+    <string name="safe_piton_description">A piton in climbing is a metal spike (usually steel) that is driven into a crack or seam in the climbing surface using a climbing hammer, and which acts as an anchor for protecting the climber against the consequences of falling or to assist progress in aid climbing. Pitons are equipped with an eye hole or a ring to which a carabiner is attached; the carabiner can then be directly or indirectly connected to a climbing rope.</string>
+    <string name="safe_buril_description">Screw stuffed in holes by diameter, sometimes one or two smaller millimeters that penetrates the rock scarce centimeters and that do not have an expansion system.</string>
+    <string name="safe_required_nut_description">In rock climbing, a nut (or chock or chockstone) is a metal wedge threaded on a wire that climbers use for protection by wedging it into a crack in the rock. Quickdraws are clipped to the nut wire by the ascending climber and the rope threads through the quickdraw. Nuts come in a variety of sizes and styles, and several different brands are made by competing manufacturers. Most nuts are made of aluminum. Larger nuts may be threaded on Dyneema cord instead of wire, but this has become unusual.</string>
+    <string name="safe_required_friend_description">A spring-loaded camming device (also SLCD, cam or friend) is a piece of rock climbing or mountaineering protection equipment. It consists of two, three, or four cams mounted on a common axle or two adjacent axles, so that pulling on the axle forces the cams to spread farther apart.</string>
+    <string name="safe_required_lanyard_description">Lanyards have a section of heavy-duty nylon strapping attached to a metal ring or carabiner which tightens around an attachment point. The strap may be a fixed length or adjustable, and will attach to the wearer to support them against a fixed object or pole.</string>
+    <string name="safe_required_hook_description">For moving or positioning while aid climbing, the hooks can be suspended in various rock structures or drilled holes to give added protection. Hooks are usually made from steel.</string>
     <string name="path_stats_chart_title">Grados</string>
     <string name="nearby_zones_title">Zonas Cercanas</string>
     <string name="nearby_zones_permission">El acceso a la ubicación es necesario y no está dado. Pulsa para solicitar.</string>
@@ -135,7 +173,7 @@
     <string name="toast_message_sent">Mensaje enviado!</string>
     <string name="toast_confirmation_sent">Confirmación enviada!</string>
     <string name="toast_deleted">Datos eliminados del dispositivo</string>
-    <string name="toast_material_strings">Para escalar esta vía se recomienda llevar al menos %d cintas express.</string>
+    <string name="toast_material_strings">To climb this path it is recommended that you bring at least %d quickdraws.</string>
     <string name="toast_material_fixed">Este material ya está instalado en la vía</string>
     <string name="toast_material_required">Este material es necesario para escalar la vía</string>
     <string name="toast_ending_info">Este es el tipo de reunión que tiene la vía</string>
@@ -403,5 +441,20 @@ Seguramente duré toda la época de anidación, así que no volverá a estar dis
     <string name="activity_summary_completions">%d vías completadas.</string>
     <string name="activity_summary_grades">Grados</string>
     <string name="title_data">Módulo de Datos</string>
+    <!-- InformationScreen strings -->
+    <string name="info_builder_title">Builder</string>
+    <string name="info_builder">Built by %s</string>
+    <string name="info_rebuilders">Rebuilt by:</string>
+    <string name="info_general_title">General Information</string>
+    <string name="info_general_grade">The general grade of the path is %s. %s</string>
+    <string name="info_general_grade_more">There\'s more information about each pitch below.</string>
+    <string name="info_general_height">The path is %dm tall.</string>
+    <string name="info_quickdraws_title">Quickdraws</string>
+    <string name="info_quickdraws">To climb this path it\'s recommended that you bring at least %s</string>
+    <string name="info_required_title">Required Material</string>
+    <string name="info_required">This path requires that you bring some extra material, including the already installed at the path, and the quickdraws.</string>
+    <string name="info_fixed_title">Fixed Material</string>
+    <string name="info_fixed">This material is held to the wall, and can\'t be removed. It\'s ready to be used when you reach the path.</string>
+    <string name="info_description">Description</string>
     <string name="attr_gpx">Este GPX ha sido ofrecido por Escalar Alcoià i Comtat. Descarga la app desde https://escalaralcoiaicomtat.centrexcursionistalcoi.org/app</string>
 </resources>
