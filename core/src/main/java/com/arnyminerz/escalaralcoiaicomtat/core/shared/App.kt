@@ -43,7 +43,7 @@ class App : Application() {
      * @since 20210818
      */
     @WorkerThread
-    suspend fun getAreas(): List<Area> = dataSingleton.repository.getAreas().map { it.data() }
+    suspend fun getAreas(): List<Area> = dataSingleton.repository.getAreas()
 
     /**
      * Searches for the specified [Zone].
@@ -52,7 +52,7 @@ class App : Application() {
      */
     @WorkerThread
     suspend fun getArea(@ObjectId areaId: String): Area? =
-        dataSingleton.repository.getArea(areaId)?.data()
+        dataSingleton.repository.getArea(areaId)
 
     /**
      * Searches for the specified [Zone].
@@ -61,7 +61,7 @@ class App : Application() {
      */
     @WorkerThread
     suspend fun getZone(@ObjectId zoneId: String): Zone? =
-        dataSingleton.repository.getZone(zoneId)?.data()
+        dataSingleton.repository.getZone(zoneId)
 
     /**
      * Searches for the specified [Sector].
@@ -70,7 +70,7 @@ class App : Application() {
      */
     @WorkerThread
     suspend fun getSector(@ObjectId sectorId: String): Sector? =
-        dataSingleton.repository.getSector(sectorId)?.data()
+        dataSingleton.repository.getSector(sectorId)
 
     /**
      * Searches for the specified [Path].
@@ -79,7 +79,7 @@ class App : Application() {
      */
     @WorkerThread
     suspend fun getPath(@ObjectId pathId: String): Path? =
-        dataSingleton.repository.getPath(pathId)?.data()
+        dataSingleton.repository.getPath(pathId)
 
     /**
      * Searches for the specified [Path]s.
@@ -91,7 +91,7 @@ class App : Application() {
         dataSingleton
             .repository
             .getChildren(Namespace.PATH, zoneId)
-            ?.map { it.data() as Path }
+            ?.map { it as Path }
             ?: emptyList()
 }
 

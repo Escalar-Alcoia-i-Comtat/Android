@@ -10,20 +10,15 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UPDATE_AVAILABLE_FAIL_VERSION
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.UpdaterSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.updater.updateAvailable
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.humanReadableByteCountBin
@@ -61,12 +56,13 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
     mutableStateOf(emptyMap<Pair<Namespace, @ObjectId String>, UpdaterSingleton.Item>())
         private set
 
-    private suspend inline fun <D : DataClassImpl, reified R : DataRoot<D>> performSearch(
+    @Suppress("UNCHECKED_CAST")
+    private suspend inline fun <D : DataClassImpl> performSearch(
         namespace: Namespace,
         @ObjectId objectId: String,
     ) = DataSingleton.getInstance(context)
         .repository
-        .get(namespace, objectId)
+        .get(namespace, objectId) as D
 
     @Suppress("UNCHECKED_CAST")
     fun <D : DataClassImpl> getDataClass(
@@ -78,10 +74,10 @@ class StorageViewModel(application: Application) : AndroidViewModel(application)
                 Timber.d("Loading %s: %s", namespace, objectId)
 
                 val dataClass = when (namespace) {
-                    Area.NAMESPACE -> performSearch<Area, AreaData>(namespace, objectId)
-                    Zone.NAMESPACE -> performSearch<Zone, ZoneData>(namespace, objectId)
-                    Sector.NAMESPACE -> performSearch<Sector, SectorData>(namespace, objectId)
-                    Path.NAMESPACE -> performSearch<Path, PathData>(namespace, objectId)
+                    Area.NAMESPACE -> performSearch<Area>(namespace, objectId)
+                    Zone.NAMESPACE -> performSearch<Zone>(namespace, objectId)
+                    Sector.NAMESPACE -> performSearch<Sector>(namespace, objectId)
+                    Path.NAMESPACE -> performSearch<Path>(namespace, objectId)
                     else -> {
                         Timber.e(
                             "Could not load data of %s:%s since the namespace is not valid",

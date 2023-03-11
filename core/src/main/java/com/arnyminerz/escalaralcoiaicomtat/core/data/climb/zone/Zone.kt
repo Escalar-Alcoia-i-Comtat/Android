@@ -2,6 +2,10 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone
 
 import android.content.Context
 import android.content.Intent
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
@@ -22,7 +26,6 @@ import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
 import java.io.Serializable
-import java.util.Date
 
 /**
  * Creates a new [Zone] instance.
@@ -30,18 +33,19 @@ import java.util.Date
  * @since 20210724
  */
 @Parcelize
-class Zone internal constructor(
-    override val objectId: String,
-    override val displayName: String,
-    override val timestampMillis: Long,
-    override val imagePath: String,
-    override val kmzPath: String?,
-    val position: GeoPoint,
-    private val pointsString: String,
-    val webUrl: String?,
-    private val parentAreaId: String,
-    private val childrenCount: Long,
-) : DataClass<Sector, Area, ZoneData>(
+@Entity(tableName = "Zones")
+class Zone(
+    @PrimaryKey override val objectId: String,
+    @ColumnInfo(name = "displayName") override val displayName: String,
+    @ColumnInfo(name = "last_edit") override val timestampMillis: Long,
+    @ColumnInfo(name = "image") override val imagePath: String,
+    @ColumnInfo(name = "kmz") override val kmzPath: String?,
+    @Ignore val position: GeoPoint,
+    @ColumnInfo(name = "points", defaultValue = "") val pointsString: String,
+    @ColumnInfo(name = "webURL") val webUrl: String?,
+    @ColumnInfo(name = "area") val parentAreaId: String,
+    @ColumnInfo(name = "childrenCount") val childrenCount: Long,
+) : DataClass<Sector, Area>(
     displayName,
     timestampMillis,
     imagePath,
@@ -86,12 +90,40 @@ class Zone internal constructor(
         childrenCount = childrenCount,
     )
 
+    constructor(
+        objectId: String,
+        displayName: String,
+        timestampMillis: Long,
+        imagePath: String,
+        kmzPath: String?,
+        latitude: Double,
+        longitude: Double,
+        pointsString: String,
+        webUrl: String?,
+        parentAreaId: String,
+        childrenCount: Long,
+    ): this(
+        objectId,
+        displayName,
+        timestampMillis,
+        imagePath,
+        kmzPath,
+        GeoPoint(latitude, longitude),
+        pointsString,
+        webUrl,
+        parentAreaId,
+        childrenCount,
+    )
+
+    @Ignore
     @IgnoredOnParcel
     override val imageQuality: Int = IMAGE_QUALITY
 
+    @Ignore
     @IgnoredOnParcel
     override val hasParents: Boolean = true
 
+    @Ignore
     @IgnoredOnParcel
     val points = pointsString
         .takeIf { it.isNotEmpty() && it.isNotBlank() }
@@ -113,6 +145,14 @@ class Zone internal constructor(
         }
         ?: emptyList()
 
+    @IgnoredOnParcel
+    @ColumnInfo(name = "latitude")
+    val latitude: Double = position.latitude
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "longitude")
+    val longitude: Double = position.longitude
+
     /**
      * Fetches the [Intent] that launches [dataClassExploreActivity] with [EXTRA_DATACLASS] as
      * `this`.
@@ -123,20 +163,6 @@ class Zone internal constructor(
     fun intent(context: Context) =
         Intent(context, dataClassExploreActivity)
             .putExtra(EXTRA_DATACLASS, this)
-
-    override fun data() = ZoneData(
-        objectId,
-        Date(timestampMillis),
-        displayName,
-        imagePath,
-        kmzPath,
-        position.latitude,
-        position.longitude,
-        pointsString,
-        metadata.webURL ?: "",
-        parentAreaId,
-        childrenCount,
-    )
 
     override fun displayMap(): Map<String, Serializable?> = mapOf(
         "objectId" to objectId,

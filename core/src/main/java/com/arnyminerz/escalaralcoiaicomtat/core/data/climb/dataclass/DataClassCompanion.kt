@@ -4,7 +4,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import org.json.JSONObject
 
 @Suppress("PropertyName")
-abstract class DataClassCompanion<D : DataClass<*, *, *>> {
+abstract class DataClassCompanion<D : DataClass<*, *>> {
     abstract val NAMESPACE: Namespace
 
     abstract val IMAGE_QUALITY: Int

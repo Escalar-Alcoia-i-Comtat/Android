@@ -3,7 +3,6 @@ package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import androidx.annotation.WorkerThread
 import androidx.compose.runtime.Composable
@@ -12,11 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.room.Ignore
 import com.android.volley.Request
 import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
@@ -63,24 +62,27 @@ import kotlin.coroutines.suspendCoroutine
  * @param metadata Some metadata of the [DataClass].
  * @param displayOptions Options for displaying in the UI.
  */
-abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
+abstract class DataClass<A : DataClassImpl, B : DataClassImpl>(
     /**
      * The name that will be displayed to the user.
      * @author Arnau Mora
      * @since 20210830
      */
+    @Ignore
     override val displayName: String,
     /**
      * The creation date of the [DataClass] in milliseconds.
      * @author Arnau Mora
      * @since 20210830
      */
+    @Ignore
     override val timestampMillis: Long,
     /**
      * The path of the DataClass' image on the server.
      * @author Arnau Mora
      * @since 20220221
      */
+    @Ignore
     open val imagePath: String,
     /**
      * The path of the DataClass' KMZ file on the server.
@@ -88,24 +90,28 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @author Arnau Mora
      * @since 20210830
      */
+    @Ignore
     open val kmzPath: String?,
     /**
      * The coordinates of the [DataClass] to show in a map.
      * @author Arnau Mora
      * @since 20210830
      */
+    @Ignore
     open val location: GeoPoint?,
     /**
      * Some metadata of the [DataClass].
      * @author Arnau Mora
      * @since 20210830
      */
+    @Ignore
     open val metadata: DataClassMetadata,
     /**
      * Options for displaying in the UI.
      * @author Arnau Mora
      * @since 20210830
      */
+    @Ignore
     open val displayOptions: DataClassDisplayOptions,
 ) : DataClassImpl(
     metadata.objectId,
@@ -167,7 +173,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
             .find(query)
             .takeIf { it.isNotEmpty() }
             ?.let { resultList ->
-                val dataClass = resultList[0].data()
+                val dataClass = resultList[0]
                 Intent(context, activity)
                     .putExtra(EXTRA_DATACLASS, dataClass)
                     .apply {
@@ -194,7 +200,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
          * @param objectId The [DataClass.objectId] to search for.
          * @return An [Intent] if the [DataClass] was found, or null.
          */
-        suspend inline fun <A : DataClass<*, *, *>, reified B : DataRoot<A>> getIntent(
+        suspend inline fun <A : DataClass<*, *>, reified B : DataClassImpl> getIntent(
             context: Context,
             activity: Class<*>,
             namespace: Namespace,
@@ -203,8 +209,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
             .getInstance(context)
             .repository
             .find(namespace, objectId)
-            ?.let { data ->
-                val dataClass = data.data()
+            ?.let { dataClass ->
                 Intent(context, activity)
                     .putExtra(EXTRA_DATACLASS, dataClass)
                     .apply {
@@ -226,6 +231,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @author Arnau Mora
      * @since 20210724
      */
+    @get:Ignore
     @IgnoredOnParcel
     protected abstract val imageQuality: Int
 
@@ -235,6 +241,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @author Arnau Mora
      * @since 20220106
      */
+    @get:Ignore
     @IgnoredOnParcel
     abstract val hasParents: Boolean
 
@@ -243,6 +250,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @author Arnau Mora
      * @since 20210721
      */
+    @Ignore
     var downloadUrl: Uri? = null
 
     /**
@@ -250,6 +258,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @author Arnau Mora
      * @since 20210724
      */
+    @get:Ignore
     val pin: String
         get() = generatePin(namespace, objectId)
 
@@ -260,7 +269,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @param D The parent type of the DataClass.
      * @param context The context used for initializing the index if not ready.
      */
-    suspend fun <D : DataClass<*, *, *>> getParent(context: Context): D? {
+    suspend fun <D : DataClass<*, *>> getParent(context: Context): D? {
         // If the DataClass is root, return null
         if (!hasParents)
             return null
@@ -297,7 +306,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
     ): List<A> = DataSingleton.getInstance(context)
         .repository
         .getChildren(namespace, objectId)
-        ?.map { it.data() as A }
+        ?.map { it as A }
         ?.sortedBy(sortBy)
         ?: emptyList()
 
@@ -376,7 +385,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
      * @since 20210724
      */
     override fun equals(other: Any?): Boolean {
-        if (other !is DataClass<*, *, *>)
+        if (other !is DataClass<*, *>)
             return super.equals(other)
         return pin == other.pin
     }
@@ -452,13 +461,6 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
 
         return kmzFile
     }
-
-    /**
-     * Converts the DataClass into a Search Data class.
-     * @author Arnau Mora
-     * @since 20220219
-     */
-    abstract fun data(): D
 
     /**
      * Returns a map used to display the stored data to the user. Keys should be the parameter name,
@@ -582,7 +584,7 @@ abstract class DataClass<A : DataClassImpl, B : DataClassImpl, D : DataRoot<*>>(
  * @param objectId The id of the object to search for.
  * @return The object you are searching for, or null if not found.
  */
-operator fun <D : DataClass<*, *, *>> Iterable<D>.get(objectId: String): D? {
+operator fun <D : DataClass<*, *>> Iterable<D>.get(objectId: String): D? {
     for (item in this)
         if (item.objectId == objectId)
             return item
@@ -596,7 +598,7 @@ operator fun <D : DataClass<*, *, *>> Iterable<D>.get(objectId: String): D? {
  * @param objectId The id of the object to search for.
  * @return The object you are searching for, or null if not found.
  */
-fun <D : DataClass<*, *, *>> Iterable<D>.has(objectId: String): Boolean {
+fun <D : DataClass<*, *>> Iterable<D>.has(objectId: String): Boolean {
     for (item in this)
         if (item.objectId == objectId)
             return true
@@ -621,5 +623,5 @@ String.getChildren(
     .getInstance(context)
     .repository
     .getChildren(namespace, this)
-    ?.map { it.data() as A }
+    ?.map { it as A }
     ?.sortedBy(sortBy)

@@ -1,14 +1,8 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
+import androidx.lifecycle.*
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
 import kotlinx.coroutines.launch
@@ -24,7 +18,7 @@ class DeveloperViewModel(application: Application) : AndroidViewModel(applicatio
         Timber.d("$this::onCleared")
     }
 
-    val indexedDownloads: MutableLiveData<List<DataRoot<out DataClass<out DataClassImpl, *, out DataRoot<*>>>>> =
+    val indexedDownloads: MutableLiveData<List<DataClass<*, *>>> =
         MutableLiveData()
     val indexTree: MutableLiveData<String> = MutableLiveData()
 

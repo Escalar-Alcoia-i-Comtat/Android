@@ -7,14 +7,7 @@ import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -24,30 +17,10 @@ import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AddToHomeScreen
-import androidx.compose.material.icons.rounded.ChevronLeft
-import androidx.compose.material.icons.rounded.ChildCare
-import androidx.compose.material.icons.rounded.DirectionsWalk
-import androidx.compose.material.icons.rounded.FlipToBack
-import androidx.compose.material.icons.rounded.FlipToFront
-import androidx.compose.material.icons.rounded.Launch
-import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallFloatingActionButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -77,7 +50,7 @@ import me.bytebeats.views.charts.bar.render.label.SimpleLabelDrawer
 import me.bytebeats.views.charts.bar.render.xaxis.SimpleXAxisDrawer
 import me.bytebeats.views.charts.bar.render.yaxis.SimpleYAxisDrawer
 import me.bytebeats.views.charts.simpleChartAnimation
-import java.util.UUID
+import java.util.*
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -161,6 +134,9 @@ fun SectorPage(
             snapshotFlow { listState.isScrollInProgress }
                 .collect { scrollEnabled(!it) }
         }
+
+        val paths by viewModel.paths.observeAsState()
+        val blockStatusList by viewModel.blockStatusList.observeAsState()
 
         if (!imageMaximized)
             LazyColumn(
@@ -287,9 +263,10 @@ fun SectorPage(
                                 }
                                 // Chart
                                 AnimatedVisibility(visible = chartVisible) {
+                                    val barChartData by viewModel.barChartData.observeAsState()
                                     // Text(text = "Hello, this doesn't work, but hey, here's a pig 🐷")
                                     BarChart(
-                                        barChartData = viewModel.barChartData,
+                                        barChartData = barChartData!!,
                                         modifier = Modifier
                                             .height(120.dp)
                                             .fillMaxWidth()
@@ -315,12 +292,14 @@ fun SectorPage(
                         }
                     }
                 }
-                items(viewModel.paths) { item ->
-                    PathItem(
-                        item,
-                        informationIntent,
-                        viewModel.blockStatusList.find { it.pathId == item.objectId }
-                    )
+                paths?.let { pathsList ->
+                    items(pathsList) { item ->
+                        PathItem(
+                            item,
+                            informationIntent,
+                            blockStatusList?.find { it.pathId == item.objectId }
+                        )
+                    }
                 }
             }
     }

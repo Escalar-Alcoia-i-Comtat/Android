@@ -1,18 +1,23 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass
 
 import android.os.Parcelable
+import androidx.room.Ignore
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
-import java.util.Date
+import java.util.*
 
 @Parcelize
 open class DataClassImpl(
     @ObjectId
+    @Ignore
     open val objectId: String,
+    @Ignore
     val namespace: Namespace,
+    @Ignore
     open val timestampMillis: Long,
+    @Ignore
     open val displayName: String,
 ) : Parcelable {
     companion object {
@@ -24,6 +29,7 @@ open class DataClassImpl(
         }
     }
 
+    @get:Ignore
     val timestamp: Date
         get() = Date(timestampMillis)
 

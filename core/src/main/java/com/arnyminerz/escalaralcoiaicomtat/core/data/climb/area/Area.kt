@@ -1,19 +1,18 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassCompanion
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassDisplayOptions
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassMetadata
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.*
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.io.Serializable
-import java.util.Date
 
 /**
  * Creates a new Area instance.
@@ -27,16 +26,17 @@ import java.util.Date
  * May be null if not applicable or non-existing.
  * @param webUrl The url for the Area on the website
  */
+@Entity(tableName = "Areas")
 @Parcelize
-class Area internal constructor(
-    override val objectId: String,
-    override val displayName: String,
-    override val timestampMillis: Long,
-    override val imagePath: String,
-    override val kmzPath: String?,
-    val webUrl: String?,
-    private val childrenCount: Long,
-) : DataClass<Zone, DataClassImpl, AreaData>(
+class Area(
+    @PrimaryKey override val objectId: String,
+    @ColumnInfo(name = "displayName") override val displayName: String,
+    @ColumnInfo(name = "last_edit") override val timestampMillis: Long,
+    @ColumnInfo(name = "image") override val imagePath: String,
+    @ColumnInfo(name = "kmz") override val kmzPath: String?,
+    @ColumnInfo(name = "webURL") val webUrl: String?,
+    @ColumnInfo(name = "childrenCount") val childrenCount: Long,
+) : DataClass<Zone, DataClassImpl>(
     displayName,
     timestampMillis,
     imagePath,
@@ -74,21 +74,13 @@ class Area internal constructor(
         childrenCount
     )
 
+    @Ignore
     @IgnoredOnParcel
     override val imageQuality: Int = IMAGE_QUALITY
 
+    @Ignore
     @IgnoredOnParcel
     override val hasParents: Boolean = false
-
-    override fun data(): AreaData = AreaData(
-        objectId,
-        Date(timestampMillis),
-        displayName,
-        imagePath,
-        kmzPath,
-        metadata.webURL,
-        childrenCount,
-    )
 
     override fun displayMap(): Map<String, Serializable?> = mapOf(
         "objectId" to objectId,

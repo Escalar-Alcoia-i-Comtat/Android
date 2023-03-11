@@ -4,7 +4,6 @@ import android.app.Application
 import android.app.SearchManager
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcelable
 import androidx.activity.compose.setContent
 import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
@@ -22,25 +21,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -68,16 +57,12 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone.Companion.SAMPLE
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.app
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.context
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.CabinFamily
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.SearchItemTypeColor
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.LoadingIndicator
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.launch
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.putExtra
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -103,11 +88,12 @@ class SearchableActivity : AppCompatActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colorScheme.background) {
                     val searchQuery = if (intent.action == Intent.ACTION_SEARCH)
-                        intent.getStringExtra(SearchManager.QUERY)
-                    else null
+                        intent.getStringExtra(SearchManager.QUERY)?.trim()
+                    else
+                        null
 
                     val searchViewModel = SearchViewModel(application)
-                    val list by searchViewModel.itemList.observeAsState(emptyList())
+                    val list by searchViewModel.itemList.observeAsState()
 
                     if (searchQuery != null && searchQuery.isNotBlank())
                         searchViewModel.search(searchQuery)
@@ -121,7 +107,7 @@ class SearchableActivity : AppCompatActivity() {
                             searchViewModel.search(query)
                         }
                         Timber.v("Search results: $list")
-                        if (list.isEmpty())
+                        if (list?.isEmpty() == true)
                             Text(
                                 stringResource(R.string.search_no_results),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -225,6 +211,8 @@ class SearchableActivity : AppCompatActivity() {
      */
     @Composable
     fun SearchResult(dataClassImpl: DataClassImpl) {
+        val context = LocalContext.current
+
         Timber.v("Displaying a SearchResult...")
         Card(
             modifier = Modifier
@@ -285,10 +273,33 @@ class SearchableActivity : AppCompatActivity() {
                 )
                 IconButton(
                     modifier = Modifier.align(Alignment.End),
-                    onClick = {
-                        launch(DataClassActivity::class.java) {
-                            putExtra(EXTRA_DATACLASS, dataClassImpl as Parcelable)
+                    onClick = async {
+                        val intent = Intent(context, DataClassActivity::class.java)
+                        var dataClass = if (dataClassImpl is Path)
+                            dataClassImpl.getParent(app)
+                        else
+                            dataClassImpl
+
+                        if (dataClass is Sector) {
+                            val children = dataClass.getChildren(context) { it.displayName }
+                            children
+                                .indexOfFirst { it.objectId == dataClassImpl.objectId }
+                                .takeIf { it >= 0 }
+                                ?.let { intent.putExtra(EXTRA_INDEX, it) }
+                            intent.putExtra(EXTRA_CHILDREN_COUNT, children.size)
+
+                            dataClass = dataClass.getParent(context)
                         }
+
+                        if (dataClass == null) {
+                            Timber.e("Could not find a valid DataClass to launch")
+                            uiContext { toast(R.string.toast_error_internal) }
+                            return@async
+                        }
+
+                        intent.putExtra(EXTRA_DATACLASS, dataClass)
+
+                        uiContext { launch(intent) }
                     }
                 ) {
                     Icon(
@@ -331,17 +342,12 @@ class SearchableActivity : AppCompatActivity() {
          */
         @WorkerThread
         private suspend fun performSearch(query: String): List<DataClassImpl> {
-            val searchItems = arrayListOf<DataClassImpl>()
-
             val searchResults = DataSingleton.getInstance(context)
                 .repository
                 .find(query)
 
             Timber.v("Got ${searchResults.size} results.")
-            for (searchResult in searchResults)
-                searchItems.add(searchResult.data())
-
-            return searchItems
+            return searchResults
         }
 
         /**

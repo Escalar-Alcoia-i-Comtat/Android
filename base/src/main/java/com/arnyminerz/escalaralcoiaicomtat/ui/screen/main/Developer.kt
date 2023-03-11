@@ -1,15 +1,11 @@
 package com.arnyminerz.escalaralcoiaicomtat.ui.screen.main
 
 import android.content.Intent
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material3.Button
@@ -69,7 +65,7 @@ fun MainActivity.DeveloperScreen() {
         LazyColumn {
             items(indexedDownloads ?: emptyList()) { item ->
                 ListItem {
-                    Text(text = item.data().displayName)
+                    Text(text = item.displayName)
                 }
                 Divider()
             }
