@@ -1,26 +1,21 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.database
 
 import android.content.Context
-import androidx.room.AutoMigration
-import androidx.room.Database
-import androidx.room.DeleteColumn
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
+import androidx.room.*
 import androidx.room.migration.AutoMigrationSpec
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.converter.DateConverter
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.dao.AreasDatabaseDao
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.dao.PathsDatabaseDao
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.dao.SectorsDatabaseDao
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.dao.ZonesDatabaseDao
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 
 @Database(
-    entities = [AreaData::class, ZoneData::class, SectorData::class, PathData::class],
-    version = 3,
+    entities = [Area::class, Zone::class, Sector::class, Path::class],
+    version = 4,
     autoMigrations = [
         AutoMigration(
             from = 1,
@@ -30,6 +25,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
         AutoMigration(
             from = 2,
             to = 3,
+        ),
+        AutoMigration(
+            from = 3,
+            to = 4,
         ),
     ]
 )

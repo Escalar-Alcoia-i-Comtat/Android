@@ -51,7 +51,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
      * @since 20220102
      * @param dataClass The DataClass to load the children from.
      */
-    fun <A : DataClassImpl, T : DataClass<A, *, *>, R : Comparable<R>> childrenLoader(
+    fun <A : DataClassImpl, T : DataClass<A, *>, R : Comparable<R>> childrenLoader(
         dataClass: T,
         sortBy: (A) -> R?,
     ) {

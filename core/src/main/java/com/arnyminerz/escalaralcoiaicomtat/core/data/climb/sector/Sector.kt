@@ -1,5 +1,9 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
@@ -18,7 +22,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
 import java.io.Serializable
-import java.util.Date
 
 /**
  * Creates a new [Sector] instance.
@@ -26,20 +29,21 @@ import java.util.Date
  * @since 20210724
  */
 @Parcelize
-class Sector internal constructor(
-    override val objectId: String,
-    override val displayName: String,
-    override val timestampMillis: Long,
-    @SunTime val sunTime: String,
-    val kidsApt: Boolean,
-    val walkingTime: Long,
-    override val location: GeoPoint?,
-    val weight: String,
-    override val imagePath: String,
-    val webUrl: String?,
-    private val parentZoneId: String,
-    private val childrenCount: Long,
-) : DataClass<Path, Zone, SectorData>(
+@Entity(tableName = "Sectors")
+class Sector(
+    @PrimaryKey override val objectId: String,
+    @ColumnInfo(name = "displayName") override val displayName: String,
+    @ColumnInfo(name = "last_edit") override val timestampMillis: Long,
+    @ColumnInfo(name = "sunTime") @SunTime val sunTime: String,
+    @ColumnInfo(name = "kidsApt") val kidsApt: Boolean,
+    @ColumnInfo(name = "walkingTime") val walkingTime: Long,
+    @Ignore override val location: GeoPoint?,
+    @ColumnInfo(name = "weight") val weight: String,
+    @ColumnInfo(name = "image") override val imagePath: String,
+    @ColumnInfo(name = "webURL") val webUrl: String?,
+    @ColumnInfo(name = "zone") val parentZoneId: String,
+    @ColumnInfo(name = "childrenCount") val childrenCount: Long,
+) : DataClass<Path, Zone>(
     displayName,
     timestampMillis,
     imagePath,
@@ -91,9 +95,48 @@ class Sector internal constructor(
         childrenCount = childrenCount,
     )
 
+    constructor(
+        objectId: String,
+        displayName: String,
+        timestampMillis: Long,
+        sunTime: String,
+        kidsApt: Boolean,
+        walkingTime: Long,
+        latitude: Double?,
+        longitude: Double?,
+        weight: String,
+        imagePath: String,
+        webUrl: String?,
+        parentZoneId: String,
+        childrenCount: Long,
+    ) : this(
+        objectId,
+        displayName,
+        timestampMillis,
+        sunTime,
+        kidsApt,
+        walkingTime,
+        if (latitude != null && longitude != null) GeoPoint(latitude, longitude) else null,
+        weight,
+        imagePath,
+        webUrl,
+        parentZoneId,
+        childrenCount
+    )
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "latitude")
+    val latitude: Double? = location?.latitude
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "longitude")
+    val longitude: Double? = location?.longitude
+
+    @Ignore
     @IgnoredOnParcel
     override val imageQuality: Int = IMAGE_QUALITY
 
+    @Ignore
     @IgnoredOnParcel
     override val hasParents: Boolean = true
 
@@ -105,23 +148,6 @@ class Sector internal constructor(
         result = 31 * result + weight.hashCode()
         result = 31 * result + webUrl.hashCode()
         return result
-    }
-
-    override fun data(): SectorData {
-        return SectorData(
-            objectId,
-            Date(timestampMillis),
-            displayName,
-            imagePath,
-            kidsApt,
-            location?.latitude,
-            location?.longitude,
-            sunTime,
-            walkingTime,
-            weight,
-            parentZoneId,
-            childrenCount,
-        )
     }
 
     override fun displayMap(): Map<String, Serializable?> = mapOf(

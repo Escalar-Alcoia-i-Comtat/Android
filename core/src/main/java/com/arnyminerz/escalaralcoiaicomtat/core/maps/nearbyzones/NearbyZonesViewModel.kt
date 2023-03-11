@@ -37,7 +37,6 @@ class NearbyZonesViewModel(application: Application) : AndroidViewModel(applicat
                     .getInstance(getApplication())
                     .repository
                     .getZones()
-                    .map { it.data() }
                 zones.clear()
                 zones.addAll(foundZones)
             }

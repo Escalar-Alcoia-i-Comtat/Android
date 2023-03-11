@@ -1,41 +1,37 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.dao
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
+import androidx.room.*
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 
 @Dao
 interface ZonesDatabaseDao {
     @Query("SELECT * FROM Zones")
-    fun getAll(): LiveData<List<ZoneData>>
+    fun getAll(): LiveData<List<Zone>>
 
     @Query("SELECT * FROM Zones WHERE objectId=:objectId LIMIT 1")
-    suspend fun get(objectId: String): ZoneData?
+    suspend fun get(objectId: String): Zone?
 
     @Query("SELECT * FROM Zones WHERE objectId=:objectId LIMIT 1")
-    fun getLiveData(objectId: String): LiveData<ZoneData?>
+    fun getLiveData(objectId: String): LiveData<Zone?>
 
     @Query("SELECT * FROM Zones WHERE objectId=:objectId LIMIT 1")
-    suspend fun getByObjectId(objectId: String): ZoneData?
+    suspend fun getByObjectId(objectId: String): Zone?
 
     @Query("SELECT * FROM Zones WHERE area=:objectId")
-    suspend fun getByParentId(objectId: String): List<ZoneData>
+    suspend fun getByParentId(objectId: String): List<Zone>
 
     @Query("SELECT * FROM Zones")
-    suspend fun all(): List<ZoneData>
+    suspend fun all(): List<Zone>
 
     @Insert
-    suspend fun insert(item: ZoneData)
+    suspend fun insert(item: Zone)
 
     @Update
-    suspend fun update(item: ZoneData)
+    suspend fun update(item: Zone)
 
     @Delete
-    suspend fun delete(item: ZoneData)
+    suspend fun delete(item: Zone)
 
     @Query("DELETE FROM Zones WHERE objectId IN(:ids)")
     suspend fun deleteAll(ids: List<String>)

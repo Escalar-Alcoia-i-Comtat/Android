@@ -1,18 +1,19 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.BlockingTypeParceler
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.parceler.PitchParceler
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.FixedSafesData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.PitchEndingData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.PitchEndingOrientation
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.PitchEndingRappel
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.RequiredSafesData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.*
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.App
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.delLn
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.getBooleanOrNull
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getDate
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.getStringOrNull
 import kotlinx.parcelize.IgnoredOnParcel
@@ -27,24 +28,26 @@ import timber.log.Timber
  * @since 20210724
  */
 @Parcelize
+@Entity(tableName = "Paths")
 @TypeParceler<Pitch, PitchParceler>
 @TypeParceler<BlockingType, BlockingTypeParceler>
-class Path internal constructor(
-    override val objectId: String,
-    override val timestampMillis: Long,
-    val sketchId: Long,
-    override val displayName: String,
-    private val rawGrades: String,
-    private val rawHeights: String,
-    private val rawEndings: String,
-    private val rawPitches: String,
-    val fixedSafesData: FixedSafesData,
-    val requiredSafesData: RequiredSafesData,
-    val description: String?,
-    private val rawBuilt: String?,
-    private val rawReBuilt: String?,
-    val downloaded: Boolean = false,
-    val parentSectorId: String,
+class Path(
+    @PrimaryKey override val objectId: String,
+    @ColumnInfo(name = "last_edit") override val timestampMillis: Long,
+    @ColumnInfo(name = "sketchId") val sketchId: Long,
+    @ColumnInfo(name = "displayName") override val displayName: String,
+    @ColumnInfo(name = "grade") val rawGrades: String,
+    @ColumnInfo(name = "height") val rawHeights: String,
+    @ColumnInfo(name = "ending") val rawEndings: String,
+    @ColumnInfo(name = "pitch_info") val rawPitches: String,
+    @Ignore val fixedSafesData: FixedSafesData,
+    @Ignore val requiredSafesData: RequiredSafesData,
+    @ColumnInfo(name = "show_description", defaultValue = "false") val showDescription: Boolean,
+    @ColumnInfo(name = "description") val description: String?,
+    @ColumnInfo(name = "builtBy") val rawBuilt: String?,
+    @ColumnInfo(name = "rebuilders") val rawReBuilt: String?,
+    @ColumnInfo(name = "downloaded") val downloaded: Boolean = false,
+    @ColumnInfo(name = "sector") val parentSectorId: String,
 ) : DataClassImpl(objectId, NAMESPACE, timestampMillis, displayName), Comparable<Path> {
     /**
      * Initializes the Path from the values gotten from the Data module.
@@ -78,10 +81,71 @@ class Path internal constructor(
             data.getBoolean("pitonRequired"),
             data.getBoolean("nailRequired"),
         ),
+        data.getBooleanOrNull("show_description") ?: false,
         data.getStringOrNull("description"),
         data.getStringOrNull("builtBy"),
         data.getStringOrNull("rebuilders"),
         parentSectorId = data.getString("sector")
+    )
+
+    constructor(
+        objectId: String,
+        timestampMillis: Long,
+        sketchId: Long,
+        displayName: String,
+        rawGrades: String,
+        rawHeights: String,
+        rawEndings: String,
+        rawPitches: String,
+        quickdrawCount: Long,
+        paraboltCount: Long,
+        spitCount: Long,
+        tensorCount: Long,
+        pitonCount: Long,
+        burilCount: Long,
+        lanyardRequired: Boolean,
+        crackerRequired: Boolean,
+        friendRequired: Boolean,
+        stripsRequired: Boolean,
+        pitonRequired: Boolean,
+        nailRequired: Boolean,
+        showDescription: Boolean,
+        description: String?,
+        rawBuilt: String?,
+        rawReBuilt: String?,
+        downloaded: Boolean,
+        parentSectorId: String,
+    ) : this(
+        objectId,
+        timestampMillis,
+        sketchId,
+        displayName,
+        rawGrades,
+        rawHeights,
+        rawEndings,
+        rawPitches,
+        FixedSafesData(
+            quickdrawCount,
+            paraboltCount,
+            spitCount,
+            tensorCount,
+            pitonCount,
+            burilCount
+        ),
+        RequiredSafesData(
+            lanyardRequired,
+            crackerRequired,
+            friendRequired,
+            stripsRequired,
+            pitonRequired,
+            nailRequired
+        ),
+        showDescription,
+        description,
+        rawBuilt,
+        rawReBuilt,
+        downloaded,
+        parentSectorId
     )
 
     /**
@@ -89,6 +153,7 @@ class Path internal constructor(
      * @author Arnau Mora
      * @since 20220316
      */
+    @Ignore
     @IgnoredOnParcel
     private var _generalHeight: Long? = null
 
@@ -97,6 +162,7 @@ class Path internal constructor(
      * @author Arnau Mora
      * @since 20220223
      */
+    @get:Ignore
     @IgnoredOnParcel
     val generalHeight: Long?
         get() = _generalHeight ?: run { processPitches(); _generalHeight }
@@ -106,6 +172,7 @@ class Path internal constructor(
      * @author Arnau Mora
      * @since 20220316
      */
+    @Ignore
     @IgnoredOnParcel
     private var _generalGrade: String? = null
 
@@ -114,6 +181,7 @@ class Path internal constructor(
      * @author Arnau Mora
      * @since 20220223
      */
+    @get:Ignore
     @IgnoredOnParcel
     val generalGrade: String
         get() = _generalGrade ?: run {
@@ -126,6 +194,7 @@ class Path internal constructor(
      * @author Arnau Mora
      * @since 20220316
      */
+    @Ignore
     @IgnoredOnParcel
     private var _generalEnding: String? = null
 
@@ -134,6 +203,7 @@ class Path internal constructor(
      * @author Arnau Mora
      * @since 20220223
      */
+    @get:Ignore
     @IgnoredOnParcel
     val generalEnding: String?
         get() = _generalEnding ?: run { processPitches(); _generalEnding }
@@ -143,6 +213,7 @@ class Path internal constructor(
      * @author Arnau Mora
      * @since 20220316
      */
+    @Ignore
     @IgnoredOnParcel
     private var _pitches: Array<Pitch> = emptyArray()
 
@@ -151,6 +222,7 @@ class Path internal constructor(
      * @author Arnau Mora
      * @since 20220223
      */
+    @get:Ignore
     @IgnoredOnParcel
     val pitches: Array<Pitch>
         get() = _pitches.takeIf { it.isNotEmpty() } ?: run { processPitches(); _pitches }
@@ -160,6 +232,7 @@ class Path internal constructor(
      * @author Arnau Mora
      * @since 20220323
      */
+    @Ignore
     @IgnoredOnParcel
     var buildPatch: Patch? = null
 
@@ -168,9 +241,58 @@ class Path internal constructor(
      * @author Arnau Mora
      * @since 20220223
      */
+    @Ignore
     @IgnoredOnParcel
     var patches: List<Patch> = emptyList()
         private set
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "stringCount")
+    val quickdrawCount: Long = fixedSafesData.quickdrawCount
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "paraboltCount")
+    val paraboltCount: Long = fixedSafesData.paraboltCount
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "spitCount")
+    val spitCount: Long = fixedSafesData.spitCount
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "tensorCount")
+    val tensorCount: Long = fixedSafesData.tensorCount
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "pitonCount")
+    val pitonCount: Long = fixedSafesData.pitonCount
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "burilCount")
+    val burilCount: Long = fixedSafesData.burilCount
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "lanyardRequired")
+    val lanyardRequired: Boolean = requiredSafesData.lanyardRequired
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "crackerRequired")
+    val crackerRequired: Boolean = requiredSafesData.crackerRequired
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "friendRequired")
+    val friendRequired: Boolean = requiredSafesData.friendRequired
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "stripsRequired")
+    val stripsRequired: Boolean = requiredSafesData.stripsRequired
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "pitonRequired")
+    val pitonRequired: Boolean = requiredSafesData.pitonRequired
+
+    @IgnoredOnParcel
+    @ColumnInfo(name = "nailRequired")
+    val nailRequired: Boolean = requiredSafesData.nailRequired
 
     /**
      * Processes the value of [rawText] to be added into pitches and its general term if applicable.
@@ -372,36 +494,6 @@ class Path internal constructor(
         result = 31 * result + downloaded.hashCode()
         result = 31 * result + parentSectorId.hashCode()
         return result
-    }
-
-    fun data(): PathData {
-        return PathData(
-            objectId,
-            timestampMillis,
-            sketchId,
-            displayName,
-            rawGrades,
-            rawHeights,
-            rawEndings,
-            rawPitches,
-            fixedSafesData.quickdrawCount,
-            fixedSafesData.paraboltCount,
-            fixedSafesData.spitCount,
-            fixedSafesData.tensorCount,
-            fixedSafesData.pitonCount,
-            fixedSafesData.burilCount,
-            requiredSafesData.lanyardRequired,
-            requiredSafesData.crackerRequired,
-            requiredSafesData.friendRequired,
-            requiredSafesData.stripsRequired,
-            requiredSafesData.pitonRequired,
-            requiredSafesData.nailRequired,
-            description ?: "",
-            rawBuilt ?: "",
-            rawReBuilt ?: "",
-            downloaded,
-            parentSectorId,
-        )
     }
 
     override fun equals(other: Any?): Boolean {

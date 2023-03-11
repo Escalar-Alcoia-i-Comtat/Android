@@ -7,8 +7,7 @@ import org.json.JSONObject
 import timber.log.Timber
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 
 /**
@@ -77,4 +76,14 @@ fun JSONObject.hasValid(key: String): Boolean =
 fun JSONObject.getStringOrNull(key: String): String? =
     if (hasValid(key))
         getString(key).takeIf { it.isNotBlank() }
+    else null
+
+/**
+ * Gets the Boolean stored at [key] if it's not null, and valid.
+ * @param key The key to get.
+ * @return The value stored at [key] or null if invalid or null.
+ */
+fun JSONObject.getBooleanOrNull(key: String): Boolean? =
+    if (hasValid(key))
+        getBoolean(key)
     else null

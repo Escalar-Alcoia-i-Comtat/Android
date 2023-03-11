@@ -10,7 +10,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
 import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer
 import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer.Companion.DIFF_PATCH
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
@@ -82,18 +81,17 @@ const val UPDATE_AVAILABLE_FAIL_FIELDS = 4
  */
 const val UPDATE_AVAILABLE_FAIL_VERSION = 5
 
-private fun <R : DataClassImpl, D : DataRoot<R>> findUpdatableObjects(
+private fun <D : DataClassImpl> findUpdatableObjects(
     dataList: List<D>,
     json: JSONObject,
     childrenCount: (objectId: String) -> Long,
-    constructor: (json: JSONObject, objectId: String, childrenCount: Long) -> R
+    constructor: (json: JSONObject, objectId: String, childrenCount: Long) -> D
 ) = json.keys()
     .asSequence()
     .mapNotNull { objectId ->
         val jsonData = json.getJSONObject(objectId)
         val serverData = constructor(jsonData, objectId, childrenCount(objectId))
         val localData = dataList
-            .map { it.data() }
             .find { it.objectId == objectId }
         if (localData == null || localData.hashCode() != serverData.hashCode())
             UpdaterSingleton.Item(
@@ -277,10 +275,10 @@ class UpdaterSingleton {
                 }
             }
             Timber.d("Getting document... $namespace/$objectId")
-            val doc = if (data is DataClass<*, *, *>)
-                data.data()
+            val doc = if (data is DataClass<*, *>)
+                data
             else
-                (data as Path).data()
+                (data as Path)
             Timber.d("Putting document into db... $namespace/$objectId")
             DataSingleton.getInstance(context)
                 .repository

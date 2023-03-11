@@ -6,13 +6,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer
 import com.arnyminerz.escalaralcoiaicomtat.core.data.SemVer.Companion.DIFF_PATCH
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataSingleton
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.toDataClassList
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.Keys
 import com.arnyminerz.escalaralcoiaicomtat.core.preferences.get
@@ -23,8 +20,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.uiContext
 import org.json.JSONObject
 import timber.log.Timber
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
 
 /**
  * Decodes the data from a json object retrieved from the server.
@@ -39,12 +35,12 @@ import java.util.Locale
  * @return A pair of lists. The first is the objects in [jsonData], the second one is for indexing
  * search.
  */
-private fun <D : DataClass<*, *, I>, I : DataRoot<D>> decode(
+private fun <D : DataClass<*, *>> decode(
     jsonData: JSONObject,
     childrenCount: (objectId: String) -> Long,
     namespace: Namespace,
     constructor: (data: JSONObject, id: String, childrenCount: Long) -> D,
-) = decode<D, I, Int>(jsonData, childrenCount, namespace, constructor, null)
+) = decode<D, Int>(jsonData, childrenCount, namespace, constructor, null)
 
 /**
  * Decodes the data from a json object retrieved from the server.
@@ -61,14 +57,14 @@ private fun <D : DataClass<*, *, I>, I : DataRoot<D>> decode(
  * @return A pair of lists. The first is the objects in [jsonData], the second one is for indexing
  * search.
  */
-private fun <D : DataClass<*, *, I>, I : DataRoot<D>, R : Comparable<R>> decode(
+private fun <D : DataClass<*, *>, R : Comparable<R>> decode(
     jsonData: JSONObject,
     childrenCount: (objectId: String) -> Long,
     namespace: Namespace,
     constructor: (data: JSONObject, id: String, childrenCount: Long) -> D,
-    sortBy: ((I) -> R?)? = null,
-): List<I> {
-    val index = arrayListOf<I>()
+    sortBy: ((D) -> R?)? = null,
+): List<D> {
+    val index = arrayListOf<D>()
     val jsonObject = jsonData.getJSONObject(namespace.tableName)
     val keys = jsonObject.keys()
     for (id in keys) {
@@ -78,7 +74,7 @@ private fun <D : DataClass<*, *, I>, I : DataRoot<D>, R : Comparable<R>> decode(
         val dataClass = constructor(json, id, childrenCount(id))
 
         // Add the DataClass to the list
-        index.add(dataClass.data())
+        index.add(dataClass)
     }
     sortBy?.let { index.sortBy(it) }
     return index
@@ -94,8 +90,8 @@ private fun <D : DataClass<*, *, I>, I : DataRoot<D>, R : Comparable<R>> decode(
  */
 private fun decode(
     jsonData: JSONObject
-): List<PathData> {
-    val index = arrayListOf<PathData>()
+): List<Path> {
+    val index = arrayListOf<Path>()
     val jsonObject = jsonData.getJSONObject(Path.NAMESPACE.tableName)
     val keys = jsonObject.keys()
     for (id in keys) {
@@ -105,7 +101,7 @@ private fun decode(
         val path = Path(json, id)
 
         // Add the path to the list
-        index.add(path.data())
+        index.add(path)
     }
     return index
 }
@@ -147,7 +143,6 @@ suspend fun loadAreas(
         val list = dataSingleton
             .repository
             .getAreas() // If not empty, return areas
-            .map { it.data() }
             .ifEmpty {
                 // If empty, reset the preference, and launch loadAreas again
                 Timber.w("Areas is empty, resetting search indexed pref and launching again.")
@@ -181,19 +176,19 @@ suspend fun loadAreas(
         val decodedPaths = decode(jsonData)
         val decodedSectors = decode(
             jsonData,
-            { id -> decodedPaths.filter { it.sector == id }.size.toLong() },
+            { id -> decodedPaths.filter { it.parentSectorId == id }.size.toLong() },
             Sector.NAMESPACE,
             Sector.CONSTRUCTOR,
         )
         val decodedZones = decode(
             jsonData,
-            { id -> decodedSectors.filter { it.zone == id }.size.toLong() },
+            { id -> decodedSectors.filter { it.parentZoneId == id }.size.toLong() },
             Zone.NAMESPACE,
             Zone.CONSTRUCTOR,
         )
         val decodedAreas = decode(
             jsonData,
-            { id -> decodedZones.filter { it.area == id }.size.toLong() },
+            { id -> decodedZones.filter { it.parentAreaId == id }.size.toLong() },
             Area.NAMESPACE,
             Area.CONSTRUCTOR
         ) { it.displayName }
@@ -223,7 +218,6 @@ suspend fun loadAreas(
         context.set(Keys.serverIsProduction, serverProduction)
 
         return decodedAreas
-            .toDataClassList()
             .also { dataSingleton.areas.value = it }
     } catch (e: ExceptionInInitializerError) {
         Timber.e(e, "Could not load areas.")

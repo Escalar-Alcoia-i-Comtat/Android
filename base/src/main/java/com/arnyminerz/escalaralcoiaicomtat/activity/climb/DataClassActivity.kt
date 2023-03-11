@@ -3,7 +3,6 @@ package com.arnyminerz.escalaralcoiaicomtat.activity.climb
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
@@ -11,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,20 +21,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClass
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 import com.arnyminerz.escalaralcoiaicomtat.core.network.ConnectivityStateListener
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_CHILDREN_COUNT
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_DATACLASS_ID
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_INDEX
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.EXTRA_NAV_STACK
-import com.arnyminerz.escalaralcoiaicomtat.core.shared.REQUEST_CODE_ERROR_NO_DATACLASS
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.AppTheme
-import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModelImpl
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.doAsync
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtra
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.getExtraOrSavedInstanceState
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.put
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.sizeInBytes
-import com.arnyminerz.escalaralcoiaicomtat.core.utils.toMap
+import com.arnyminerz.escalaralcoiaicomtat.core.shared.*
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.theme.setContentThemed
+import com.arnyminerz.escalaralcoiaicomtat.core.ui.viewmodel.SectorPageViewModel
+import com.arnyminerz.escalaralcoiaicomtat.core.utils.*
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore.DataClassExplorer
 import com.arnyminerz.escalaralcoiaicomtat.ui.screen.explore.SectorViewScreen
 import com.arnyminerz.escalaralcoiaicomtat.ui.viewmodel.main.ExploreViewModel
@@ -62,8 +53,8 @@ class DataClassActivity : NetworkAwareActivity() {
      * @author Arnau Mora
      * @since 20220105
      */
-    private val sectorPageViewModel by viewModels<SectorPageViewModelImpl>(
-        factoryProducer = { SectorPageViewModelImpl.Factory(application) }
+    private val sectorPageViewModel by viewModels<SectorPageViewModel>(
+        factoryProducer = { SectorPageViewModel.Factory(application) }
     )
 
     /**
@@ -125,54 +116,51 @@ class DataClassActivity : NetworkAwareActivity() {
         // Load the nav stack
         loadNavStack(savedInstanceState)
 
-        setContent {
+        setContentThemed {
             // Add back pressed callback
             BackHandler(onBack = ::backHandler)
 
-            AppTheme {
-                val dataClass = sectorPageViewModel.dataClass
-                if (dataClass != null) {
-                    Timber.d("DataClass namespace: ${dataClass.namespace}. Index=$index. Children Count=$childrenCount")
-                    if (dataClass.namespace == Zone.NAMESPACE && index != null && childrenCount != null) {
-                        val zone = dataClass as Zone
-                        SectorViewScreen(
-                            sectorPageViewModel,
-                            zone,
-                            childrenCount!!,
-                            isMaximized,
-                            index,
-                        ) { index = it }
-                    } else {
-                        Timber.d("Rendering Area/Zone...")
-                        // If not, load the DataClassExplorer
-                        DataClassExplorer(
-                            exploreViewModel,
-                            hasInternet,
-                            navStack
-                        ) { adding, item ->
-                            navStack.value = navStack.value
-                                .toMutableList()
-                                .let { list ->
-                                    if (adding) {
-                                        list.add(item)
-                                        list
-                                    } else
-                                        list.filter { it != item }
-                                }
-                        }
+            val data by sectorPageViewModel.dataClass.observeAsState()
+            data?.let { dataClass ->
+                Timber.d("DataClass namespace: ${dataClass.namespace}. Index=$index. Children Count=$childrenCount")
+                if (dataClass.namespace == Zone.NAMESPACE && index != null && childrenCount != null) {
+                    val zone = dataClass as Zone
+                    SectorViewScreen(
+                        sectorPageViewModel,
+                        zone,
+                        childrenCount!!,
+                        isMaximized,
+                        index,
+                    ) { index = it }
+                } else {
+                    Timber.d("Rendering Area/Zone...")
+                    // If not, load the DataClassExplorer
+                    DataClassExplorer(
+                        exploreViewModel,
+                        hasInternet,
+                        navStack
+                    ) { adding, item ->
+                        navStack.value = navStack.value
+                            .toMutableList()
+                            .let { list ->
+                                if (adding) {
+                                    list.add(item)
+                                    list
+                                } else
+                                    list.filter { it != item }
+                            }
                     }
-                } else
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) { CircularProgressIndicator() }
-            }
+                }
+            } ?: Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) { CircularProgressIndicator() }
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         dataClassId?.let { outState.put(EXTRA_DATACLASS_ID, it) }
-        sectorPageViewModel.dataClass?.let { outState.put(EXTRA_DATACLASS, it) }
+        sectorPageViewModel.dataClass.value?.let { outState.put(EXTRA_DATACLASS, it) }
         outState.put(EXTRA_INDEX, index)
         childrenCount?.let { outState.put(EXTRA_CHILDREN_COUNT, it) }
         outState.put(EXTRA_NAV_STACK, ArrayList(navStack.value))
@@ -217,12 +205,16 @@ class DataClassActivity : NetworkAwareActivity() {
         val dataClassExtra: Parcelable? =
             extras?.getExtra(EXTRA_DATACLASS) ?: savedInstanceState?.getExtra(EXTRA_DATACLASS)
 
-        Timber.v("EXTRA_DATACLASS is present in intent extras. Type: ${dataClassExtra?.let { it::class.java }}")
+        Timber.v("EXTRA_DATACLASS is present in intent extras. Type: ${dataClassExtra?.let { it::class.java.simpleName }}")
 
-        val castDataClass = dataClassExtra as DataClass<*, *, *>?
-        sectorPageViewModel.dataClass = castDataClass
+        @Suppress("UNCHECKED_CAST")
+        val castDataClass = dataClassExtra as DataClass<DataClassImpl, *>?
+        sectorPageViewModel.dataClass.postValue(castDataClass)
         val dataClassId =
             extras?.getExtra(EXTRA_DATACLASS_ID) ?: savedInstanceState?.getExtra(EXTRA_DATACLASS_ID)
+
+        if (castDataClass != null && exploreViewModel.children.isEmpty())
+            exploreViewModel.childrenLoader(castDataClass) { it.displayName }
 
         if (dataClassId != null)
             sectorPageViewModel.loadZone(dataClassId)

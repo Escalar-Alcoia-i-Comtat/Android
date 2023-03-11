@@ -4,15 +4,15 @@ import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.Namespace
 import com.arnyminerz.escalaralcoiaicomtat.core.annotations.ObjectId
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.DataRoot
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.dataclass.DataClassImpl
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.dao.AreasDatabaseDao
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.dao.PathsDatabaseDao
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.dao.SectorsDatabaseDao
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.dao.ZonesDatabaseDao
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.PathData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.SectorData
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.ZoneData
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.sector.Sector
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.zone.Zone
 
 class DataClassRepository(
     private val areasDatabaseDao: AreasDatabaseDao,
@@ -20,57 +20,57 @@ class DataClassRepository(
     private val sectorsDatabaseDao: SectorsDatabaseDao,
     private val pathsDatabaseDao: PathsDatabaseDao,
 ) {
-    var readAllAreas: LiveData<List<AreaData>> = areasDatabaseDao.getAll()
-    var readAllZones: LiveData<List<ZoneData>> = zonesDatabaseDao.getAll()
-    var readAllSectors: LiveData<List<SectorData>> = sectorsDatabaseDao.getAll()
-    var readAllPaths: LiveData<List<PathData>> = pathsDatabaseDao.getAll()
+    var readAllAreas: LiveData<List<Area>> = areasDatabaseDao.getAll()
+    var readAllZones: LiveData<List<Zone>> = zonesDatabaseDao.getAll()
+    var readAllSectors: LiveData<List<Sector>> = sectorsDatabaseDao.getAll()
+    var readAllPaths: LiveData<List<Path>> = pathsDatabaseDao.getAll()
 
-    suspend fun add(area: AreaData) = areasDatabaseDao.insert(area)
+    suspend fun add(area: Area) = areasDatabaseDao.insert(area)
 
     suspend fun getArea(@ObjectId objectId: String) = areasDatabaseDao.get(objectId)
 
-    suspend fun update(area: AreaData) = areasDatabaseDao.update(area)
+    suspend fun update(area: Area) = areasDatabaseDao.update(area)
 
-    suspend fun delete(area: AreaData) = areasDatabaseDao.delete(area)
+    suspend fun delete(area: Area) = areasDatabaseDao.delete(area)
 
     suspend fun getAreas() = areasDatabaseDao.all()
 
     suspend fun clearAreas() = areasDatabaseDao.deleteAll()
 
 
-    suspend fun add(zone: ZoneData) = zonesDatabaseDao.insert(zone)
+    suspend fun add(zone: Zone) = zonesDatabaseDao.insert(zone)
 
     suspend fun getZone(@ObjectId objectId: String) = zonesDatabaseDao.get(objectId)
 
-    suspend fun update(zone: ZoneData) = zonesDatabaseDao.update(zone)
+    suspend fun update(zone: Zone) = zonesDatabaseDao.update(zone)
 
-    suspend fun delete(zone: ZoneData) = zonesDatabaseDao.delete(zone)
+    suspend fun delete(zone: Zone) = zonesDatabaseDao.delete(zone)
 
     suspend fun getZones() = zonesDatabaseDao.all()
 
     suspend fun clearZones() = zonesDatabaseDao.deleteAll()
 
 
-    suspend fun add(sector: SectorData) = sectorsDatabaseDao.insert(sector)
+    suspend fun add(sector: Sector) = sectorsDatabaseDao.insert(sector)
 
     suspend fun getSector(@ObjectId objectId: String) = sectorsDatabaseDao.get(objectId)
 
-    suspend fun update(sector: SectorData) = sectorsDatabaseDao.update(sector)
+    suspend fun update(sector: Sector) = sectorsDatabaseDao.update(sector)
 
-    suspend fun delete(sector: SectorData) = sectorsDatabaseDao.delete(sector)
+    suspend fun delete(sector: Sector) = sectorsDatabaseDao.delete(sector)
 
     suspend fun getSectors() = sectorsDatabaseDao.all()
 
     suspend fun clearSectors() = sectorsDatabaseDao.deleteAll()
 
 
-    suspend fun add(path: PathData) = pathsDatabaseDao.insert(path)
+    suspend fun add(path: Path) = pathsDatabaseDao.insert(path)
 
     suspend fun getPath(@ObjectId objectId: String) = pathsDatabaseDao.get(objectId)
 
-    suspend fun update(path: PathData) = pathsDatabaseDao.update(path)
+    suspend fun update(path: Path) = pathsDatabaseDao.update(path)
 
-    suspend fun delete(path: PathData) = pathsDatabaseDao.delete(path)
+    suspend fun delete(path: Path) = pathsDatabaseDao.delete(path)
 
     suspend fun getPaths() = pathsDatabaseDao.all()
 
@@ -108,13 +108,13 @@ class DataClassRepository(
      * @author Arnau Mora
      * @since 20220316
      */
-    suspend fun updateAll(items: List<DataRoot<*>>) {
+    suspend fun updateAll(items: List<DataClassImpl>) {
         for (item in items)
             when (item) {
-                is AreaData -> update(item)
-                is ZoneData -> update(item)
-                is SectorData -> update(item)
-                is PathData -> update(item)
+                is Area -> update(item)
+                is Zone -> update(item)
+                is Sector -> update(item)
+                is Path -> update(item)
             }
     }
 
@@ -126,7 +126,7 @@ class DataClassRepository(
      * @since 20220316
      */
     @WorkerThread
-    suspend fun find(query: String): List<DataRoot<*>> {
+    suspend fun find(query: String): List<DataClassImpl> {
         val areas = areasDatabaseDao.all()
             .filter { data ->
                 data.displayName.contains(
@@ -175,12 +175,12 @@ class DataClassRepository(
      * @since 20220316
      * @param item The object to add.
      */
-    suspend fun <D : DataRoot<*>> add(item: D) = also {
+    suspend fun <D : DataClassImpl> add(item: D) = also {
         when (item) {
-            is AreaData -> areasDatabaseDao.insert(item)
-            is ZoneData -> zonesDatabaseDao.insert(item)
-            is SectorData -> sectorsDatabaseDao.insert(item)
-            is PathData -> pathsDatabaseDao.insert(item)
+            is Area -> areasDatabaseDao.insert(item)
+            is Zone -> zonesDatabaseDao.insert(item)
+            is Sector -> sectorsDatabaseDao.insert(item)
+            is Path -> pathsDatabaseDao.insert(item)
         }
     }
 
@@ -190,12 +190,12 @@ class DataClassRepository(
      * @since 20220316
      * @param item The item to update.
      */
-    suspend fun <D : DataRoot<*>> update(item: D) = also {
+    suspend fun <D : DataClassImpl> update(item: D) = also {
         when (item) {
-            is AreaData -> areasDatabaseDao.update(item)
-            is ZoneData -> zonesDatabaseDao.update(item)
-            is SectorData -> sectorsDatabaseDao.update(item)
-            is PathData -> pathsDatabaseDao.update(item)
+            is Area -> areasDatabaseDao.update(item)
+            is Zone -> zonesDatabaseDao.update(item)
+            is Sector -> sectorsDatabaseDao.update(item)
+            is Path -> pathsDatabaseDao.update(item)
         }
     }
 
@@ -205,7 +205,7 @@ class DataClassRepository(
      * @since 20220316
      * @param items The items to add.
      */
-    suspend fun <D : DataRoot<*>> addAll(items: Iterable<D>) = also { items.forEach { add(it) } }
+    suspend fun <D : DataClassImpl> addAll(items: Iterable<D>) = also { items.forEach { add(it) } }
 
     /**
      * Gets the children elements of the element in [namespace] with id [objectId].

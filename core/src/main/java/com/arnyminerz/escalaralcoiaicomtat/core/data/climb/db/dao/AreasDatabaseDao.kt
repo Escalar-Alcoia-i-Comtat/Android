@@ -1,38 +1,34 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.dao
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.AreaData
+import androidx.room.*
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.area.Area
 
 @Dao
 interface AreasDatabaseDao {
     @Query("SELECT * FROM Areas")
-    fun getAll(): LiveData<List<AreaData>>
+    fun getAll(): LiveData<List<Area>>
 
     @Query("SELECT * FROM Areas WHERE objectId=:objectId LIMIT 1")
-    suspend fun get(objectId: String): AreaData?
+    suspend fun get(objectId: String): Area?
 
     @Query("SELECT * FROM Areas WHERE objectId=:objectId LIMIT 1")
-    fun getLiveData(objectId: String): LiveData<AreaData?>
+    fun getLiveData(objectId: String): LiveData<Area?>
 
     @Query("SELECT * FROM Areas")
-    suspend fun all(): List<AreaData>
+    suspend fun all(): List<Area>
 
     @Query("SELECT * FROM Areas WHERE objectId=:objectId LIMIT 1")
-    suspend fun getByObjectId(objectId: String): AreaData?
+    suspend fun getByObjectId(objectId: String): Area?
 
     @Insert
-    suspend fun insert(item: AreaData)
+    suspend fun insert(item: Area)
 
     @Update
-    suspend fun update(item: AreaData)
+    suspend fun update(item: Area)
 
     @Delete
-    suspend fun delete(item: AreaData)
+    suspend fun delete(item: Area)
 
     @Query("DELETE FROM Areas WHERE objectId IN(:ids)")
     suspend fun deleteAll(ids: List<String>)

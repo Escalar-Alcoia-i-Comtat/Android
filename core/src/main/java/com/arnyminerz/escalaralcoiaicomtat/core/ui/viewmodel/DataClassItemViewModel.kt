@@ -17,7 +17,7 @@ class DataClassItemViewModel(
 ) : AndroidViewModel(application) {
     val children by DataSingleton.getInstance(application).children
 
-    fun <T : DataClass<*, *, *>, R : Comparable<R>> loadChildren(
+    fun <T : DataClass<*, *>, R : Comparable<R>> loadChildren(
         dataClass: T,
         sortBy: (DataClassImpl) -> R
     ) {
