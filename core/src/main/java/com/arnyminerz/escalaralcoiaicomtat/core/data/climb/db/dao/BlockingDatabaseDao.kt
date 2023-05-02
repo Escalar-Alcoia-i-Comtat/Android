@@ -17,7 +17,7 @@ interface BlockingDatabaseDao {
     suspend fun getAllOnce(): List<BlockingData>
 
     @Query("SELECT * FROM Blocking WHERE id=:id LIMIT 1")
-    fun getById(id: String): BlockingData?
+    fun getById(id: Long): BlockingData?
 
     @Query("SELECT * FROM Blocking WHERE path=:objectId LIMIT 1")
     fun getByPathId(objectId: String): BlockingData?

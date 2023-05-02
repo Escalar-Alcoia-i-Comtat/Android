@@ -8,7 +8,7 @@ import java.util.Date
 
 @Entity(tableName = "Blocking")
 data class BlockingData(
-    @PrimaryKey var id: String,
+    @PrimaryKey var id: Long,
     @ColumnInfo(name = "path") val pathId: String,
     @ColumnInfo(name = "type") val rawBlockingType: String,
     @ColumnInfo(name = "end_date") val endDate: Date?,

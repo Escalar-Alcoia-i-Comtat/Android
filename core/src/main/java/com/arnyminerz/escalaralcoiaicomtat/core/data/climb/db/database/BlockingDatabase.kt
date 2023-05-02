@@ -9,7 +9,10 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.converter.DateConv
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.dao.BlockingDatabaseDao
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
 
-@Database(entities = [BlockingData::class], version = 1)
+@Database(
+    entities = [BlockingData::class],
+    version = 2
+)
 @TypeConverters(DateConverter::class)
 abstract class BlockingDatabase : RoomDatabase() {
     abstract fun blockingDao(): BlockingDatabaseDao
