@@ -49,7 +49,7 @@ class BlockingDatabaseTest : TestCase() {
     fun insertAndGet() = runBlocking {
         Timber.i("Running tests...")
         Timber.d("Initializing BlockingData...")
-        val sampleBlockageId = "1234abc"
+        val sampleBlockageId: Long = 1234
         val sampleBlockagePathId = "testingPath1"
         val sampleBlockage = BlockingData(
             sampleBlockageId,
@@ -67,7 +67,8 @@ class BlockingDatabaseTest : TestCase() {
         val byPathIdData = blockingDao.getByPathId(sampleBlockagePathId)
         Timber.d("Asserting results...")
         assert(byIdData == byPathIdData)
-        assert(byIdData?.pathId == sampleBlockageId)
+        assert(byIdData?.id == sampleBlockageId)
+        assert(byIdData?.pathId == sampleBlockagePathId)
 
         Timber.d("Deleting all DAO blockages...")
         blockingDao.deleteAll()
