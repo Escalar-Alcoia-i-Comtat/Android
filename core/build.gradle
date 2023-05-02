@@ -178,4 +178,9 @@ dependencies {
 
     // Timber
     api 'com.jakewharton.timber:timber:5.0.1'
+
+    // Mockk for mocking in tests
+    def mockk_version = '1.13.5'
+    androidTestImplementation "io.mockk:mockk-android:${mockk_version}"
+    androidTestImplementation "io.mockk:mockk-agent:${mockk_version}"
 }
