@@ -290,6 +290,7 @@
     <string name="status_loading_error_format">Could not parse response from server. Please, contact an administrator.</string>
     <string name="status_loading_error_internal">There has been an internal initialization error. Please, try again later, or contact an administrator.</string>
     <string name="status_loading_error_code">Error code: %d</string>
+    <string name="status_loading_blocking">Fetching blocking data…</string>
     <string name="status_data_install_access_denied" translatable="false">Data module installation not allowed!</string>
     <string name="status_data_install_active_sessions_limit" translatable="false">Too many install requests!</string>
     <string name="status_data_install_api_not_available" translatable="false">Data installation API not available!</string>
