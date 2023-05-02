@@ -21,7 +21,8 @@ abstract class BlockingDatabase : RoomDatabase() {
     abstract fun blockingDao(): BlockingDatabaseDao
 
     companion object {
-        private var INSTANCE: BlockingDatabase? = null
+        @VisibleForTesting(VisibleForTesting.PRIVATE)
+        var INSTANCE: BlockingDatabase? = null
 
         @VisibleForTesting(VisibleForTesting.PRIVATE)
         object Migration1To2 : Migration(1, 2) {
