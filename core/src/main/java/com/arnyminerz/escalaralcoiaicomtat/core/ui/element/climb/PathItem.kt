@@ -79,12 +79,12 @@ class PathItemSampleProvider :
     override val values: Sequence<PathItemPreviewData> = sequenceOf(
         PathItemPreviewData(
             Path.SAMPLE_PATH,
-            BlockingData("1234", Path.SAMPLE_PATH_OBJECT_ID, BlockingType.UNKNOWN.idName, null),
+            BlockingData(1234, Path.SAMPLE_PATH_OBJECT_ID, BlockingType.UNKNOWN.idName, null),
             false,
         ),
         PathItemPreviewData(
             Path.SAMPLE_PATH,
-            BlockingData("1234", Path.SAMPLE_PATH_OBJECT_ID, BlockingType.BIRD.idName, null),
+            BlockingData(1234, Path.SAMPLE_PATH_OBJECT_ID, BlockingType.BIRD.idName, null),
             false,
         ),
         PathItemPreviewData(
