@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.worker
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -165,13 +166,25 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
 
         /**
          * Runs [Context.getJson] for fetching all the blockages on the server endpoint.
+         *
+         * The response is a JSON object with "result" as key, and the contents of this key is an
+         * object with the id of the paths blocked as id, and three properties called "blocked",
+         * "type" and "endDate", which mean:
+         * - `blocked`: Whether the path is blocked or not.
+         * - `type`: The type of blocking.
+         * - `endDate`: May be null, if the end date of the blockage is established.
          * @author Arnau Mora
          * @since 20220330
          * @param context The context to fetch from.
          */
-        private suspend fun fetchAllBlockagesFromServer(context: Context): JSONObject =
+        @VisibleForTesting(VisibleForTesting.PRIVATE)
+        suspend fun fetchAllBlockagesFromServer(context: Context): JSONObject =
             context.getJson("$REST_API_BLOCKING_ENDPOINT/*")
 
+        /**
+         * Starts fetching the Block status of all the paths available, and updates the local
+         * database for the blocking statuses.
+         */
         @WorkerThread
         suspend fun blockStatusFetchRoutine(applicationContext: Context): Result {
             Timber.d("Opening blockages database...")
@@ -213,7 +226,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     // Otherwise, add item to blockingStatuses
                     val blockingData = try {
                         BlockingData(
-                            UUID.randomUUID().toString(),
+                            blockStatus.getLong("id"),
                             objectId,
                             blockStatus.getString("type"),
                             blockStatus.hasValid("endDate").then { blockStatus.getDate("endDate") },
@@ -266,6 +279,8 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
             } catch (e: TimeoutError) {
                 Result.failure()
             } catch (e: VolleyError) {
+                Result.failure()
+            } catch (e: IllegalArgumentException) {
                 Result.failure()
             } finally {
                 if (!notification.destroyed) {
