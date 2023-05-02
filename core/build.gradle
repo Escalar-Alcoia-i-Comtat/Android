@@ -50,6 +50,9 @@ android {
         viewBinding true
         compose true
     }
+    packagingOptions {
+        exclude("META-INF/*.md")
+    }
 
     sourceSets {
         // Adds exported schema location as test app assets.
