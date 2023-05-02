@@ -109,6 +109,11 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                 BlockStatusWorker.schedule(context)
         }
 
+        progressMessageResource.value = R.string.status_loading_blocking
+        ioContext {
+            BlockStatusWorker.blockStatusFetchRoutine(getApplication())
+        }
+
         /*progressMessageResource.value = R.string.status_loading_data
         ioContext {
             load(app, deepLinkPath) { stringResource, errorResource ->
