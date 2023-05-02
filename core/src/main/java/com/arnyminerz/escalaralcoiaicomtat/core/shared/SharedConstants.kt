@@ -24,7 +24,7 @@ const val REST_API_URL = "https://server.escalaralcoiaicomtat.org"
  * @author Arnau Mora
  * @since 20220221
  */
-const val REST_API_BLOCKING_ENDPOINT = "$REST_API_URL/api/info/blocking"
+const val REST_API_BLOCKING_ENDPOINT = "$REST_API_URL/api/v2/info/blocking"
 
 /**
  * The REST API endpoint for downloading files from the server. At the end, the path of the file to
