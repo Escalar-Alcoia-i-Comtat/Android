@@ -134,6 +134,7 @@
     <string name="safe_required_piton_description" translatable="false">@string/safe_piton_description</string>
     <string name="safe_required_strips_description" translatable="false"></string>
 
+    <string name="path_blocking_end_date">Ends: %s</string>
     <string name="path_stats_chart_title">Grades</string>
 
     <string name="nearby_zones_title">Nearby Zones</string>
