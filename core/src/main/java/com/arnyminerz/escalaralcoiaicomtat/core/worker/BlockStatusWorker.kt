@@ -16,7 +16,6 @@ import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.database.BlockingDatabase
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.repository.BlockingRepository
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_FAILED_CHANNEL_ID
@@ -28,7 +27,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.hasValid
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.then
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 class BlockStatusWorker(context: Context, params: WorkerParameters) :
@@ -189,7 +187,7 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
         suspend fun blockStatusFetchRoutine(applicationContext: Context): Result {
             Timber.d("Opening blockages database...")
             val blockingDatabase = BlockingDatabase.getInstance(applicationContext)
-            val blockingRepository = BlockingRepository(blockingDatabase.blockingDao())
+            val blockingDao = blockingDatabase.blockingDao()
 
             var notification = Notification.Builder(applicationContext)
                 .withChannelId(TASK_IN_PROGRESS_CHANNEL_ID)
@@ -245,18 +243,18 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
 
                 try {
                     Timber.v("Clearing old blocking statuses...")
-                    blockingRepository.clear()
+                    blockingDao.deleteAll()
 
                     Timber.v("Putting elements...")
                     for (block in blockingStatuses)
-                        blockingRepository.add(block)
+                        blockingDao.insert(block)
 
                     Timber.v("Synchronizing deletions...")
-                    val existingBlocks = blockingRepository.getAll()
+                    val existingBlocks = blockingDao.getAllOnce()
                     for (block in existingBlocks)
                         if (blockingStatuses.find { it.id == block.id } == null) {
                             Timber.d("Removing blocking status with id ${block.id}")
-                            blockingRepository.delete(block)
+                            blockingDao.delete(block)
                         }
 
                     // Timber.v("Closing database...")
