@@ -124,7 +124,7 @@
     <string name="safe_required_lanyard_description">Els cordins tenen una secció de corretges de niló resistents, connectades a un anell metàl·lic o un mosquetó que s\'estreny al voltant d\'un punt de fixació. La corretja pot ser de longitud fixa o ajustable, i s\'utilitza per assegurar a l\'usuari contra un objecte o pal fix.</string>
     <string name="safe_required_hook_description">Per moure\'s o col·locar-se mentre s\'escala, les ungles es poden suspendre en diverses estructures de roca o forats perforats per oferir una protecció addicional. Solen estar fetes d\'acer.</string>
     <string name="safe_required_strips_description" translatable="false"></string>
-    <string name="path_blocking_end_date">Ends: %s</string>
+    <string name="path_blocking_end_date">Acaba el: %s</string>
     <string name="path_stats_chart_title">Graus</string>
     <string name="nearby_zones_title">Zones Properes</string>
     <string name="nearby_zones_permission">És necessari que proporciones accés a la teva ubicació perquè funcioni aquesta funció. Prem per a sol·licitar.</string>
@@ -262,7 +262,7 @@
     <string name="status_loading_error_format">No s\'ha pogut analitzar la resposta del servidor. Per favor, contacta amb un administrador.</string>
     <string name="status_loading_error_internal">Hi ha hagut un error d\'inicialització intern. Per favor, tornar-ho a provar més tard o contacta amb un administrador.</string>
     <string name="status_loading_error_code">Codi d\'error: %d</string>
-    <string name="status_loading_blocking">Fetching blocking data…</string>
+    <string name="status_loading_blocking">Obtenint les dades de bloquejos…</string>
     <string name="data_type_area">Àrea</string>
     <string name="data_type_zone">Zona</string>
     <string name="data_type_sector">Sector</string>
