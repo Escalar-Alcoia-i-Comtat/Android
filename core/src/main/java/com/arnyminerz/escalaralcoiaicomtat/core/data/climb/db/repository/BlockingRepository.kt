@@ -9,6 +9,8 @@ class BlockingRepository(
 ) {
     var all: LiveData<List<BlockingData>> = blockingDatabaseDao.getAll()
 
+    suspend fun getAll() = blockingDatabaseDao.getAllOnce()
+
     suspend fun add(blocking: BlockingData) = blockingDatabaseDao.insert(blocking)
 
     suspend fun addAll(blockages: List<BlockingData>) = blockages.forEach { add(it) }
