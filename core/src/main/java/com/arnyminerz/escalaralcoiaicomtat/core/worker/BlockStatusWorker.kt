@@ -248,7 +248,16 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     blockingRepository.clear()
 
                     Timber.v("Putting elements...")
-                    blockingRepository.addAll(blockingStatuses)
+                    for (block in blockingStatuses)
+                        blockingRepository.add(block)
+
+                    Timber.v("Synchronizing deletions...")
+                    val existingBlocks = blockingRepository.getAll()
+                    for (block in existingBlocks)
+                        if (blockingStatuses.find { it.id == block.id } == null) {
+                            Timber.d("Removing blocking status with id ${block.id}")
+                            blockingRepository.delete(block)
+                        }
 
                     // Timber.v("Closing database...")
                     // blockingDatabase.close()
@@ -277,10 +286,13 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     notification.destroy()
                 }
             } catch (e: TimeoutError) {
+                Timber.e(e)
                 Result.failure()
             } catch (e: VolleyError) {
+                Timber.e(e)
                 Result.failure()
             } catch (e: IllegalArgumentException) {
+                Timber.e(e)
                 Result.failure()
             } finally {
                 if (!notification.destroyed) {
