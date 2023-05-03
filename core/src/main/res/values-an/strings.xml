@@ -123,6 +123,8 @@
     <string name="safe_required_friend_description">A spring-loaded camming device (also SLCD, cam or friend) is a piece of rock climbing or mountaineering protection equipment. It consists of two, three, or four cams mounted on a common axle or two adjacent axles, so that pulling on the axle forces the cams to spread farther apart.</string>
     <string name="safe_required_lanyard_description">Lanyards have a section of heavy-duty nylon strapping attached to a metal ring or carabiner which tightens around an attachment point. The strap may be a fixed length or adjustable, and will attach to the wearer to support them against a fixed object or pole.</string>
     <string name="safe_required_hook_description">For moving or positioning while aid climbing, the hooks can be suspended in various rock structures or drilled holes to give added protection. Hooks are usually made from steel.</string>
+    <string name="safe_required_strips_description" translatable="false"></string>
+    <string name="path_blocking_end_date">Ends: %s</string>
     <string name="path_stats_chart_title">Grades</string>
     <string name="nearby_zones_title">Nearby Zones</string>
     <string name="nearby_zones_permission">The location permission is required and not granted. Tap to request.</string>
@@ -260,6 +262,7 @@
     <string name="status_loading_error_format">Could not parse response from server. Please, contact an administrator.</string>
     <string name="status_loading_error_internal">There has been an internal initialization error. Please, try again later, or contact an administrator.</string>
     <string name="status_loading_error_code">Error code: %d</string>
+    <string name="status_loading_blocking">Fetching blocking data…</string>
     <string name="data_type_area">Area</string>
     <string name="data_type_zone">Zone</string>
     <string name="data_type_sector">Sector</string>
