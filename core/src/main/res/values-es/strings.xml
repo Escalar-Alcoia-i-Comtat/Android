@@ -124,7 +124,7 @@
     <string name="safe_required_lanyard_description">Los cordinos tienen una sección de nylon unida a un anillo de metal o mosquetón que se ata alrededor de un punto de fijación. La correa puede ser de longitud fija o ajustable, y se usa para asegurar al usuario contra un objeto o poste fijo.</string>
     <string name="safe_required_hook_description">Para desplazarse o posicionarse mientras se escala, las uñas pueden ser suspendidas en diversas estructuras rocosas o agujeros perforados para dar una mayor protección. Son generalmente hechos de acero.</string>
     <string name="safe_required_strips_description" translatable="false"></string>
-    <string name="path_blocking_end_date">Ends: %s</string>
+    <string name="path_blocking_end_date">Acaba el: %s</string>
     <string name="path_stats_chart_title">Grados</string>
     <string name="nearby_zones_title">Zonas Cercanas</string>
     <string name="nearby_zones_permission">El acceso a la ubicación es necesario y no está dado. Pulsa para solicitar.</string>
@@ -262,7 +262,7 @@
     <string name="status_loading_error_format">No se ha podido analizar la respuesta del servidor. Por favor, contacte con un administrador.</string>
     <string name="status_loading_error_internal">Ha habido un error interno de inicialización. Por favor, inténtelo de nuevo más tarde o póngase en contacto con un administrador.</string>
     <string name="status_loading_error_code">Código de error: %d</string>
-    <string name="status_loading_blocking">Fetching blocking data…</string>
+    <string name="status_loading_blocking">Obteniendo los datos de bloqueo…</string>
     <string name="data_type_area">Área</string>
     <string name="data_type_zone">Zona</string>
     <string name="data_type_sector">Sector</string>
