@@ -16,11 +16,11 @@ interface BlockingDatabaseDao {
     @Query("SELECT * FROM Blocking")
     suspend fun getAllOnce(): List<BlockingData>
 
-    @Query("SELECT * FROM Blocking WHERE id=:id LIMIT 1")
-    fun getById(id: String): BlockingData?
+    @Query("SELECT * FROM Blocking WHERE id=:id")
+    suspend fun getById(id: Long): BlockingData?
 
-    @Query("SELECT * FROM Blocking WHERE path=:objectId LIMIT 1")
-    fun getByPathId(objectId: String): BlockingData?
+    @Query("SELECT * FROM Blocking WHERE path=:objectId")
+    suspend fun getByPathId(objectId: String): List<BlockingData>
 
     @Insert
     suspend fun insert(item: BlockingData)
@@ -32,5 +32,5 @@ interface BlockingDatabaseDao {
     suspend fun delete(item: BlockingData)
 
     @Query("DELETE FROM Blocking")
-    fun deleteAll()
+    suspend fun deleteAll()
 }

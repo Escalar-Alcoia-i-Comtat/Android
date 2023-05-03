@@ -1,6 +1,7 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.worker
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -15,7 +16,6 @@ import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
 import com.arnyminerz.escalaralcoiaicomtat.core.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.database.BlockingDatabase
-import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.db.repository.BlockingRepository
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.BlockingData
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.Notification
 import com.arnyminerz.escalaralcoiaicomtat.core.notification.TASK_FAILED_CHANNEL_ID
@@ -27,7 +27,6 @@ import com.arnyminerz.escalaralcoiaicomtat.core.utils.hasValid
 import com.arnyminerz.escalaralcoiaicomtat.core.utils.then
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 class BlockStatusWorker(context: Context, params: WorkerParameters) :
@@ -165,18 +164,30 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
 
         /**
          * Runs [Context.getJson] for fetching all the blockages on the server endpoint.
+         *
+         * The response is a JSON object with "result" as key, and the contents of this key is an
+         * object with the id of the paths blocked as id, and three properties called "blocked",
+         * "type" and "endDate", which mean:
+         * - `blocked`: Whether the path is blocked or not.
+         * - `type`: The type of blocking.
+         * - `endDate`: May be null, if the end date of the blockage is established.
          * @author Arnau Mora
          * @since 20220330
          * @param context The context to fetch from.
          */
-        private suspend fun fetchAllBlockagesFromServer(context: Context): JSONObject =
+        @VisibleForTesting(VisibleForTesting.PRIVATE)
+        suspend fun fetchAllBlockagesFromServer(context: Context): JSONObject =
             context.getJson("$REST_API_BLOCKING_ENDPOINT/*")
 
+        /**
+         * Starts fetching the Block status of all the paths available, and updates the local
+         * database for the blocking statuses.
+         */
         @WorkerThread
         suspend fun blockStatusFetchRoutine(applicationContext: Context): Result {
             Timber.d("Opening blockages database...")
             val blockingDatabase = BlockingDatabase.getInstance(applicationContext)
-            val blockingRepository = BlockingRepository(blockingDatabase.blockingDao())
+            val blockingDao = blockingDatabase.blockingDao()
 
             var notification = Notification.Builder(applicationContext)
                 .withChannelId(TASK_IN_PROGRESS_CHANNEL_ID)
@@ -205,23 +216,29 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
 
                 for (objectId in pathIds) {
                     // Get the JSON object at current iteration position
-                    val blockStatus = blockStatusResult.getJSONObject(objectId)
+                    val blockStatuses = blockStatusResult.getJSONArray(objectId)
 
-                    // If blocked is false, continue
-                    if (!blockStatus.getBoolean("blocked")) continue
+                    for (index in 0 until blockStatuses.length()) {
+                        val blockStatus = blockStatuses.getJSONObject(index)
 
-                    // Otherwise, add item to blockingStatuses
-                    val blockingData = try {
-                        BlockingData(
-                            UUID.randomUUID().toString(),
-                            objectId,
-                            blockStatus.getString("type"),
-                            blockStatus.hasValid("endDate").then { blockStatus.getDate("endDate") },
-                        )
-                    } catch (e: Exception) {
-                        continue
+                        // If blocked is false, continue
+                        if (!blockStatus.getBoolean("blocked")) continue
+
+                        // Otherwise, add item to blockingStatuses
+                        val blockingData = try {
+                            BlockingData(
+                                blockStatus.getLong("id"),
+                                objectId,
+                                blockStatus.getString("type"),
+                                blockStatus.hasValid("endDate").then {
+                                    blockStatus.getDate("endDate")
+                                },
+                            )
+                        } catch (e: Exception) {
+                            continue
+                        }
+                        blockingStatuses.add(blockingData)
                     }
-                    blockingStatuses.add(blockingData)
                 }
 
                 Timber.v("Building storing notification...")
@@ -232,10 +249,19 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
 
                 try {
                     Timber.v("Clearing old blocking statuses...")
-                    blockingRepository.clear()
+                    blockingDao.deleteAll()
 
                     Timber.v("Putting elements...")
-                    blockingRepository.addAll(blockingStatuses)
+                    for (block in blockingStatuses)
+                        blockingDao.insert(block)
+
+                    Timber.v("Synchronizing deletions...")
+                    val existingBlocks = blockingDao.getAllOnce()
+                    for (block in existingBlocks)
+                        if (blockingStatuses.find { it.id == block.id } == null) {
+                            Timber.d("Removing blocking status with id ${block.id}")
+                            blockingDao.delete(block)
+                        }
 
                     // Timber.v("Closing database...")
                     // blockingDatabase.close()
@@ -264,8 +290,13 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
                     notification.destroy()
                 }
             } catch (e: TimeoutError) {
+                Timber.e(e)
                 Result.failure()
             } catch (e: VolleyError) {
+                Timber.e(e)
+                Result.failure()
+            } catch (e: IllegalArgumentException) {
+                Timber.e(e)
                 Result.failure()
             } finally {
                 if (!notification.destroyed) {

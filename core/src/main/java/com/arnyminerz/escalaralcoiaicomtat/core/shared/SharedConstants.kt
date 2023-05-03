@@ -24,7 +24,7 @@ const val REST_API_URL = "https://server.escalaralcoiaicomtat.org"
  * @author Arnau Mora
  * @since 20220221
  */
-const val REST_API_BLOCKING_ENDPOINT = "$REST_API_URL/api/info/blocking"
+const val REST_API_BLOCKING_ENDPOINT = "$REST_API_URL/v2/blocking"
 
 /**
  * The REST API endpoint for downloading files from the server. At the end, the path of the file to
@@ -32,7 +32,7 @@ const val REST_API_BLOCKING_ENDPOINT = "$REST_API_URL/api/info/blocking"
  * @author Arnau Mora
  * @since 20220221
  */
-const val REST_API_DOWNLOAD_ENDPOINT = "$REST_API_URL/api/files/download?path="
+const val REST_API_DOWNLOAD_ENDPOINT = "$REST_API_URL/v1/files/download?path="
 
 /**
  * The REST API endpoint for fetching data from the server. At the end, the type of data should be
@@ -41,7 +41,7 @@ const val REST_API_DOWNLOAD_ENDPOINT = "$REST_API_URL/api/files/download?path="
  * @author Arnau Mora
  * @since 20220222
  */
-const val REST_API_DATA_LIST = "$REST_API_URL/api/list"
+const val REST_API_DATA_LIST = "$REST_API_URL/v1/list"
 
 /**
  * The REST API endpoint for fetching data of a select object from server. At the end, the type of
@@ -49,7 +49,7 @@ const val REST_API_DATA_LIST = "$REST_API_URL/api/list"
  * @author Arnau Mora
  * @since 20220222
  */
-const val REST_API_DATA_FETCH = "$REST_API_URL/api/data/"
+const val REST_API_DATA_FETCH = "$REST_API_URL/v1/data/"
 
 /**
  * The REST API endpoint for getting information about the server, such as if it's in production,
@@ -57,7 +57,7 @@ const val REST_API_DATA_FETCH = "$REST_API_URL/api/data/"
  * @author Arnau Mora
  * @since 20220627
  */
-const val REST_API_INFO_ENDPOINT = "$REST_API_URL/api/info"
+const val REST_API_INFO_ENDPOINT = "$REST_API_URL/v1/info"
 
 const val IMAGE_MAX_ZOOM_KEY = "IMAGE_MAX_ZOOM"
 const val IMAGE_MAX_ZOOM_DEFAULT = 7.0
@@ -68,7 +68,7 @@ const val IMAGE_MAX_ZOOM_DEFAULT = 7.0
  * @author Arnau Mora
  * @since 20220627
  */
-val EXPECTED_SERVER_VERSION = SemVer(1, 0, 5)
+val EXPECTED_SERVER_VERSION = SemVer(1, 0, 7)
 
 var IMAGE_MAX_ZOOM_LEVEL = IMAGE_MAX_ZOOM_DEFAULT
 

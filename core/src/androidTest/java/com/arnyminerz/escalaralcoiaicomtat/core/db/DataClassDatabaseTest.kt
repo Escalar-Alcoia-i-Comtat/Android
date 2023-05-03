@@ -50,11 +50,10 @@ class DataClassDatabaseTest {
     @Test
     fun insertAndGetArea() = runBlocking {
         val area = Area.SAMPLE
-        val areaData = area.data()
-        areasDao.insert(areaData)
+        areasDao.insert(area)
 
         var dbData = areasDao.getByObjectId(Area.SAMPLE_AREA_OBJECT_ID)
-        assert(dbData == areaData)
+        assert(dbData == area)
 
         areasDao.deleteAll()
 
@@ -65,11 +64,10 @@ class DataClassDatabaseTest {
     @Test
     fun insertAndGetZone() = runBlocking {
         val zone = Zone.SAMPLE
-        val zoneData = zone.data()
-        zonesDao.insert(zoneData)
+        zonesDao.insert(zone)
 
         var dbData = zonesDao.getByObjectId(Zone.SAMPLE_OBJECT_ID)
-        assert(dbData == zoneData)
+        assert(dbData == zone)
 
         zonesDao.deleteAll()
 
@@ -80,11 +78,10 @@ class DataClassDatabaseTest {
     @Test
     fun insertAndGetSector() = runBlocking {
         val sector = Sector.SAMPLE
-        val sectorData = sector.data()
-        sectorsDao.insert(sectorData)
+        sectorsDao.insert(sector)
 
         var dbData = sectorsDao.getByObjectId(Sector.SAMPLE_OBJECT_ID)
-        assert(dbData == sectorData)
+        assert(dbData == sector)
 
         sectorsDao.deleteAll()
 
@@ -95,11 +92,10 @@ class DataClassDatabaseTest {
     @Test
     fun insertAndGetPath() = runBlocking {
         val path = Path.SAMPLE_PATH
-        val pathData = path.data()
-        pathsDao.insert(pathData)
+        pathsDao.insert(path)
 
         var dbData = pathsDao.getByObjectId(Path.SAMPLE_PATH_OBJECT_ID)
-        assert(dbData == pathData)
+        assert(dbData == path)
 
         pathsDao.deleteAll()
 

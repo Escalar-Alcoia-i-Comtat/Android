@@ -167,14 +167,11 @@ class SectorPageViewModel(application: Application) : AndroidViewModel(applicati
                 sector.getChildren(context) { it.sketchId }
             }
             val blockingStatus = withContext(Dispatchers.IO) {
-                val database = BlockingDatabase.getInstance(context)
-                val dao = database.blockingDao()
-                dao.getAllOnce().takeIf { it.isNotEmpty() } ?: run {
-                    Timber.v("No block status have been loaded. Fetching all now.")
-                    BlockStatusWorker.blockStatusFetchRoutine(context)
-
-                    dao.getAllOnce()
-                }
+                BlockingDatabase.getInstance(context)
+                    // Get access to the DAO
+                    .blockingDao()
+                    // Get all the blocking data
+                    .getAllOnce()
             }
 
             Timber.v("Blocking status: $blockingStatus")

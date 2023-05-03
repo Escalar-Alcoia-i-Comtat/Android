@@ -79,12 +79,12 @@ class PathItemSampleProvider :
     override val values: Sequence<PathItemPreviewData> = sequenceOf(
         PathItemPreviewData(
             Path.SAMPLE_PATH,
-            BlockingData("1234", Path.SAMPLE_PATH_OBJECT_ID, BlockingType.UNKNOWN.idName, null),
+            BlockingData(1234, Path.SAMPLE_PATH_OBJECT_ID, BlockingType.UNKNOWN.idName, null),
             false,
         ),
         PathItemPreviewData(
             Path.SAMPLE_PATH,
-            BlockingData("1234", Path.SAMPLE_PATH_OBJECT_ID, BlockingType.BIRD.idName, null),
+            BlockingData(1234, Path.SAMPLE_PATH_OBJECT_ID, BlockingType.BIRD.idName, null),
             false,
         ),
         PathItemPreviewData(
@@ -111,15 +111,15 @@ class PathItemSampleProvider :
 fun PathItem(
     path: Path,
     informationIntent: (path: Path) -> Intent,
-    blockingData: BlockingData? = null,
+    blockingDataList: List<BlockingData>? = null,
     expanded: Boolean = false,
 ) {
-    val backgroundColor = if (blockingData != null)
+    val backgroundColor = if (blockingDataList?.isNotEmpty() == true)
         MaterialTheme.colorScheme.errorContainer
     else
         MaterialTheme.colorScheme.surfaceVariant
 
-    val textColor = if (blockingData != null)
+    val textColor = if (blockingDataList?.isNotEmpty() == true)
         MaterialTheme.colorScheme.onErrorContainer
     else
         MaterialTheme.colorScheme.onSurfaceVariant
@@ -244,49 +244,7 @@ fun PathItem(
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    val blockingType = blockingData?.blockingType
-                    if (blockingType != null && blockingType != BlockingType.UNKNOWN)
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError,
-                            ),
-                            modifier = Modifier
-                                .padding(
-                                    horizontal = 8.dp,
-                                    vertical = 4.dp,
-                                )
-                                .fillMaxWidth(),
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Column {
-                                    Icon(
-                                        Icons.Rounded.Warning,
-                                        contentDescription = stringResource(blockingType.contentDescription),
-                                        modifier = Modifier
-                                            .size(36.dp)
-                                            .padding(start = 4.dp, top = 4.dp),
-                                        tint = MaterialTheme.colorScheme.onError,
-                                    )
-                                }
-                                Column(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(
-                                            horizontal = 4.dp,
-                                            vertical = 8.dp,
-                                        )
-                                ) {
-                                    Text(
-                                        text = stringResource(blockingType.explanation),
-                                        color = MaterialTheme.colorScheme.onError,
-                                        fontSize = 13.sp,
-                                    )
-                                }
-                            }
-                        }
+                    blockingDataList?.forEach { BlockingCard(it) }
 
                     BadgesRow(path, informationIntent)
                 }
@@ -475,7 +433,7 @@ fun PathItemPreview(
     PathItem(
         path = previewData.path,
         informationIntent = { Intent() },
-        blockingData = previewData.blockingData,
+        blockingDataList = previewData.blockingData?.let { listOf(it) },
         expanded = previewData.expanded,
     )
 }
