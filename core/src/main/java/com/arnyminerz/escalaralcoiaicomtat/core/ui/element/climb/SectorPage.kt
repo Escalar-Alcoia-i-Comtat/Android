@@ -297,7 +297,7 @@ fun SectorPage(
                         PathItem(
                             item,
                             informationIntent,
-                            blockStatusList?.find { it.pathId == item.objectId }
+                            blockStatusList?.filter { it.pathId == item.objectId }
                         )
                     }
                 }

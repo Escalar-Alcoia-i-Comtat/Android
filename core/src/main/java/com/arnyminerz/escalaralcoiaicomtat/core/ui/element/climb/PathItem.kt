@@ -111,15 +111,15 @@ class PathItemSampleProvider :
 fun PathItem(
     path: Path,
     informationIntent: (path: Path) -> Intent,
-    blockingData: BlockingData? = null,
+    blockingDataList: List<BlockingData>? = null,
     expanded: Boolean = false,
 ) {
-    val backgroundColor = if (blockingData != null)
+    val backgroundColor = if (blockingDataList?.isNotEmpty() == true)
         MaterialTheme.colorScheme.errorContainer
     else
         MaterialTheme.colorScheme.surfaceVariant
 
-    val textColor = if (blockingData != null)
+    val textColor = if (blockingDataList?.isNotEmpty() == true)
         MaterialTheme.colorScheme.onErrorContainer
     else
         MaterialTheme.colorScheme.onSurfaceVariant
@@ -244,24 +244,24 @@ fun PathItem(
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    val blockingType = blockingData?.blockingType
-                    if (blockingType != null && blockingType != BlockingType.UNKNOWN)
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError,
-                            ),
-                            modifier = Modifier
-                                .padding(
-                                    horizontal = 8.dp,
-                                    vertical = 4.dp,
-                                )
-                                .fillMaxWidth(),
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth()
+                    blockingDataList?.forEach { blockingData ->
+                        val blockingType = blockingData.blockingType
+                        if (blockingType != BlockingType.UNKNOWN)
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.error,
+                                    contentColor = MaterialTheme.colorScheme.onError,
+                                ),
+                                modifier = Modifier
+                                    .padding(
+                                        horizontal = 8.dp,
+                                        vertical = 4.dp,
+                                    )
+                                    .fillMaxWidth(),
                             ) {
-                                Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
                                     Icon(
                                         Icons.Rounded.Warning,
                                         contentDescription = stringResource(blockingType.contentDescription),
@@ -270,23 +270,20 @@ fun PathItem(
                                             .padding(start = 4.dp, top = 4.dp),
                                         tint = MaterialTheme.colorScheme.onError,
                                     )
-                                }
-                                Column(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(
-                                            horizontal = 4.dp,
-                                            vertical = 8.dp,
-                                        )
-                                ) {
                                     Text(
                                         text = stringResource(blockingType.explanation),
                                         color = MaterialTheme.colorScheme.onError,
                                         fontSize = 13.sp,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(
+                                                horizontal = 4.dp,
+                                                vertical = 8.dp,
+                                            )
                                     )
                                 }
                             }
-                        }
+                    }
 
                     BadgesRow(path, informationIntent)
                 }
@@ -475,7 +472,7 @@ fun PathItemPreview(
     PathItem(
         path = previewData.path,
         informationIntent = { Intent() },
-        blockingData = previewData.blockingData,
+        blockingDataList = previewData.blockingData?.let { listOf(it) },
         expanded = previewData.expanded,
     )
 }

@@ -64,11 +64,12 @@ class BlockingDatabaseTest : TestCase() {
         Timber.d("Getting data by id...")
         val byIdData = blockingDao.getById(sampleBlockageId)
         Timber.d("Getting data by path id...")
-        val byPathIdData = blockingDao.getByPathId(sampleBlockagePathId)
+        val byPathIdDatas = blockingDao.getByPathId(sampleBlockagePathId)
         Timber.d("Asserting results...")
-        assert(byIdData == byPathIdData)
-        assert(byIdData?.id == sampleBlockageId)
-        assert(byIdData?.pathId == sampleBlockagePathId)
+        assertEquals(1, byPathIdDatas.size)
+        assertEquals(byIdData, byPathIdDatas[0])
+        assertEquals(byIdData?.id, sampleBlockageId)
+        assertEquals(byIdData?.pathId, sampleBlockagePathId)
 
         Timber.d("Deleting all DAO blockages...")
         blockingDao.deleteAll()
@@ -76,6 +77,6 @@ class BlockingDatabaseTest : TestCase() {
         Timber.d("Getting blocking by id, should be null.")
         val nullObject = blockingDao.getById(sampleBlockageId)
         Timber.d("Asserting blockage...")
-        assert(nullObject == null)
+        assertNull(nullObject)
     }
 }

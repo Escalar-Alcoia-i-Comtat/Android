@@ -216,23 +216,29 @@ class BlockStatusWorker(context: Context, params: WorkerParameters) :
 
                 for (objectId in pathIds) {
                     // Get the JSON object at current iteration position
-                    val blockStatus = blockStatusResult.getJSONObject(objectId)
+                    val blockStatuses = blockStatusResult.getJSONArray(objectId)
 
-                    // If blocked is false, continue
-                    if (!blockStatus.getBoolean("blocked")) continue
+                    for (index in 0 until blockStatuses.length()) {
+                        val blockStatus = blockStatuses.getJSONObject(index)
 
-                    // Otherwise, add item to blockingStatuses
-                    val blockingData = try {
-                        BlockingData(
-                            blockStatus.getLong("id"),
-                            objectId,
-                            blockStatus.getString("type"),
-                            blockStatus.hasValid("endDate").then { blockStatus.getDate("endDate") },
-                        )
-                    } catch (e: Exception) {
-                        continue
+                        // If blocked is false, continue
+                        if (!blockStatus.getBoolean("blocked")) continue
+
+                        // Otherwise, add item to blockingStatuses
+                        val blockingData = try {
+                            BlockingData(
+                                blockStatus.getLong("id"),
+                                objectId,
+                                blockStatus.getString("type"),
+                                blockStatus.hasValid("endDate").then {
+                                    blockStatus.getDate("endDate")
+                                },
+                            )
+                        } catch (e: Exception) {
+                            continue
+                        }
+                        blockingStatuses.add(blockingData)
                     }
-                    blockingStatuses.add(blockingData)
                 }
 
                 Timber.v("Building storing notification...")
