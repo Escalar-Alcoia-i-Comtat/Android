@@ -244,46 +244,7 @@ fun PathItem(
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    blockingDataList?.forEach { blockingData ->
-                        val blockingType = blockingData.blockingType
-                        if (blockingType != BlockingType.UNKNOWN)
-                            Card(
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.error,
-                                    contentColor = MaterialTheme.colorScheme.onError,
-                                ),
-                                modifier = Modifier
-                                    .padding(
-                                        horizontal = 8.dp,
-                                        vertical = 4.dp,
-                                    )
-                                    .fillMaxWidth(),
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Icon(
-                                        Icons.Rounded.Warning,
-                                        contentDescription = stringResource(blockingType.contentDescription),
-                                        modifier = Modifier
-                                            .size(36.dp)
-                                            .padding(start = 4.dp, top = 4.dp),
-                                        tint = MaterialTheme.colorScheme.onError,
-                                    )
-                                    Text(
-                                        text = stringResource(blockingType.explanation),
-                                        color = MaterialTheme.colorScheme.onError,
-                                        fontSize = 13.sp,
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .padding(
-                                                horizontal = 4.dp,
-                                                vertical = 8.dp,
-                                            )
-                                    )
-                                }
-                            }
-                    }
+                    blockingDataList?.forEach { BlockingCard(it) }
 
                     BadgesRow(path, informationIntent)
                 }
