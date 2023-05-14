@@ -5,6 +5,7 @@ import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.LongDef
 import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import kotlinx.parcelize.Parcelize
@@ -64,10 +65,17 @@ data class SafeCountData(
          */
         const val NOT_REQUIRED = 0L
 
+        /**
+         * Formats the string [label] provided in [MessageFormat].
+         */
+        @VisibleForTesting(VisibleForTesting.PRIVATE)
+        fun formatCountLabel(label: String, count: Long): String =
+            MessageFormat.format(label, count.takeIf { it in 0 until 999 } ?: 0)
+
         @Composable
         fun stringResource(@StringRes label: Int, count: Long): String {
             val fmt: String = stringResource(label)
-            return MessageFormat.format(fmt, count.takeIf { it in 0 until 999 } ?: 0)
+            return formatCountLabel(fmt, count)
         }
     }
 
