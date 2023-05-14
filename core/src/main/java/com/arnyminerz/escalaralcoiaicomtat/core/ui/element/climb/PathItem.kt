@@ -18,7 +18,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.ChevronLeft
-import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -56,6 +55,7 @@ import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Grade
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.getAnnotatedString
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.grades
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.SafeCountData
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_CHAIN_CARABINER
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_CHAIN_RING
 import com.arnyminerz.escalaralcoiaicomtat.core.shared.ENDING_TYPE_LANYARD
@@ -80,12 +80,12 @@ class PathItemSampleProvider :
         PathItemPreviewData(
             Path.SAMPLE_PATH,
             BlockingData(1234, Path.SAMPLE_PATH_OBJECT_ID, BlockingType.UNKNOWN.idName, null),
-            false,
+            true,
         ),
         PathItemPreviewData(
             Path.SAMPLE_PATH,
             BlockingData(1234, Path.SAMPLE_PATH_OBJECT_ID, BlockingType.BIRD.idName, null),
-            false,
+            true,
         ),
         PathItemPreviewData(
             Path.SAMPLE_PATH,
@@ -320,10 +320,9 @@ fun BadgesRow(path: Path, informationIntent: (path: Path) -> Intent) {
                 stringResource(R.string.toast_material_strings)
                     .format(fixedSafesData.quickdrawCount)
             SimpleChip(
-                text = pluralStringResource(
-                    R.plurals.safe_quickdraws,
-                    count = fixedSafesData.quickdrawCount.toInt(),
-                    fixedSafesData.quickdrawCount,
+                text = SafeCountData.stringResource(
+                    label = R.string.safe_quickdraws,
+                    count = fixedSafesData.quickdrawCount
                 ),
                 icon = R.drawable.ic_icona_express,
                 onClick = { context.toast(toastText) }
@@ -413,11 +412,7 @@ fun BadgesRow(path: Path, informationIntent: (path: Path) -> Intent) {
         for (chip in fixedSafesData.list())
             if (chip.count > 0)
                 SimpleChip(
-                    text = pluralStringResource(
-                        chip.label,
-                        chip.count.toInt(),
-                        chip.count
-                    ),
+                    text = chip.stringResource(),
                     icon = chip.image,
                     onClick = { context.toast(R.string.toast_material_fixed) }
                 )

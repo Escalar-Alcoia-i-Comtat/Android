@@ -1,13 +1,14 @@
 package com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes
 
+import android.icu.text.MessageFormat
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.LongDef
-import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import kotlinx.parcelize.Parcelize
+
 
 /**
  * Used as a data class for passing display data to the UI renderer.
@@ -21,7 +22,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class SafeCountData(
     @SafeRequirement val count: Long,
-    @PluralsRes val label: Int,
+    @StringRes val label: Int,
     @DrawableRes val image: Int,
     @StringRes val description: Int,
 ) : Parcelable {
@@ -35,7 +36,7 @@ data class SafeCountData(
      */
     constructor(
         required: Boolean,
-        @PluralsRes label: Int,
+        @StringRes label: Int,
         @DrawableRes image: Int,
         @StringRes description: Int,
     ) : this(
@@ -62,8 +63,14 @@ data class SafeCountData(
          * @since 20210916
          */
         const val NOT_REQUIRED = 0L
+
+        @Composable
+        fun stringResource(@StringRes label: Int, count: Long): String {
+            val fmt: String = stringResource(label)
+            return MessageFormat.format(fmt, count.takeIf { it in 0 until 999 } ?: 0)
+        }
     }
 
     @Composable
-    fun stringResource() = pluralStringResource(id = label, count = count.toInt(), count)
+    fun stringResource(): String = stringResource(label, count)
 }
