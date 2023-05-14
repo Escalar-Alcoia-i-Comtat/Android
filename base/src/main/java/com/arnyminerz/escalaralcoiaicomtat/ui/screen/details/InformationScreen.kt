@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arnyminerz.escalaralcoiaicomtat.R
 import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.Path
+import com.arnyminerz.escalaralcoiaicomtat.core.data.climb.path.safes.SafeCountData
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.CardWithIcon
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.CardWithIconAndMarkdown
 import com.arnyminerz.escalaralcoiaicomtat.core.ui.element.CardWithIconAndText
@@ -126,11 +127,10 @@ fun InformationScreen(
                         append(
                             stringResource(
                                 R.string.info_quickdraws,
-                                pluralStringResource(
-                                    R.plurals.safe_quickdraws_lower,
-                                    count = quickdrawCount.toInt(),
-                                    quickdrawCount,
-                                ),
+                                SafeCountData.stringResource(
+                                    label = R.string.safe_quickdraws_lower,
+                                    count = quickdrawCount
+                                )
                             )
                         )
                     },
